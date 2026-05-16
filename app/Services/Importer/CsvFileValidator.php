@@ -11,6 +11,7 @@ use Illuminate\Http\UploadedFile;
  */
 class CsvFileValidator
 {
+    public const EMPTY_FILE_SIZE = 0;
     public const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
     public const MAX_DATA_ROWS  = 5000;
 
@@ -37,12 +38,16 @@ class CsvFileValidator
         // 1. Extension (case-insensitive .csv)
         $clientExt = strtolower((string) $file->getClientOriginalExtension());
         if ($clientExt !== 'csv') {
-            $errors[] = new FileError('ext_unsupported');
+            return ValidationResult::fail([new FileError('ext_unsupported')]);
+            // $errors[] = new FileError('ext_unsupported');
         }
 
         // 2. Size
         if ($file->getSize() > self::MAX_SIZE_BYTES) {
             $errors[] = new FileError('too_large');
+        }
+        elseif ($file->getSize() <= self::EMPTY_FILE_SIZE) {
+            return ValidationResult::fail([new FileError('empty_file')]);
         }
 
         // 3. MIME (permissive, since Excel/Finder lie)
