@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Broadcasting\WhatsAppChannel;
@@ -109,6 +110,8 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        App::setLocale($notifiable->language ?? 'en');
+
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
         
@@ -132,6 +135,8 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
+        App::setLocale($notifiable->language ?? 'en');
+
         return [
             // 'task_id' => $this->data['task']->id,
             // 'title' => $this->data['task']->title,
@@ -154,6 +159,8 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
+        App::setLocale($notifiable->language ?? 'en');
+
         return new BroadcastMessage([
             'subject' => $this->getSubject(),
             'message' => __('notifications.task.broadcast', ['message' => $this->data['message'] ?? '']),
@@ -168,6 +175,8 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toDatabase(object $notifiable): array
     {
+        App::setLocale($notifiable->language ?? 'en');
+
         $mentorName = $this->data['mentor']->name ?? null;
         $taskTitle  = $this->data['task']->title;
         $isAr       = app()->getLocale() === 'ar';

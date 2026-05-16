@@ -41,7 +41,12 @@ class TaskAssignedMail extends Mailable implements ShouldQueue
         $org = $this->assignedUser->organization ?? null;
         $orgData = $this->buildEmailOrganizationData($org);
 
-        return $this->subject('تم تعيين مهمة جديدة لك')
+        app()->setLocale($this->assignedUser->language ?? 'en');
+        $subject = app()->getLocale() === 'ar'
+            ? 'تم تعيين مهمة جديدة لك'
+            : 'You have been assigned a new task';
+
+        return $this->subject($subject)
                     ->view('emails.task_assigned', array_merge(['task' => $this->task, 'assignedUser' => $this->assignedUser], $orgData));
     }
 
