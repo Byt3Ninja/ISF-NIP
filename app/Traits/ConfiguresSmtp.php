@@ -55,8 +55,8 @@ trait ConfiguresSmtp
                 'password' => $setting->Mailpassword,
                 'timeout' => 30,
                 'auth_mode' => null,
-                'from_name' => $setting->mail_from_name,
-                'from_address' => $setting->mail_from_address,
+                'from_name' => $setting->mail_from_name ?? $setting->Platform_Name ?? config('app.name'),
+                'from_address' => $setting->mail_from_address ?? $setting->Mail,
             ];
             MailConfig::set($mailConfig);
         }
@@ -192,7 +192,7 @@ trait ConfiguresSmtp
         $fromName = $setting ? ( $setting->mail_from_name ?? ( $setting->Platform_Name ?? $app_name ) ) : $app_name;
         
         // Default values from config
-        $fromAddress = $setting ? ( $setting->mail_from_address ?? $app_address ) : $app_address;
+        $fromAddress = $setting ? ( $setting->mail_from_address ?? $setting->Mail ?? $app_address ) : $app_address;
         
 
         // If we have valid settings, use them
