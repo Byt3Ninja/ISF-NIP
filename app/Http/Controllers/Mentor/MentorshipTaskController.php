@@ -146,7 +146,7 @@ class MentorshipTaskController extends Controller
 
 		$rawTasks = $tasksQuery->get();
 
-		$tasks = $rawTasks->map(function ($task) use ($lang) {
+		$tasks = $rawTasks->map(function ($task) use ($lang, $user) {
 			$creator  = $task->creator;
 			$company  = $task->assignees->first(); // kept for reference
 			$attachments = collect($task->attachments ?? []);
@@ -157,7 +157,9 @@ class MentorshipTaskController extends Controller
 				'description' => $task->description,
 				'due_date'    => $task->due_date?->format('Y-m-d'),
 				'priority'    => $task->priority ?? 'Medium',
-				'status'      => $task->status,
+				'status'      => $user->hasRole('registered')
+					? ($task->assignees->firstWhere('id', $user->company_id)?->pivot->status ?? $task->status)
+					: $task->status,
 				'created_at'  => $task->created_at,
 				'updated_at'  => $task->updated_at,
 
