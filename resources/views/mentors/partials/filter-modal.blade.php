@@ -58,7 +58,7 @@
                   $organization = $organization_q
                       ->whereIn('id', $_user->organizations_ids)
                       ->get();
-              } elseif ($_user->hasRole('organizationManager')) {
+              } elseif ($_user->hasRole('organizationmanager')) {
                   $organization = $organization_q
                       ->where('id', $_user->organization_id)
                       ->get();
