@@ -33,9 +33,22 @@ class CompanyRepository
         if ($user && !$user->hasRole('admin')) {
             $orgIds = $user->organizations_ids;
             if (!empty($orgIds)) {
-                $query->whereHas('cycleRelation.organization', function ($q) use ($orgIds) {
-                    $q->whereIn('id', $orgIds);
-                });
+                $isAlumni = !empty($filters['status']) && $filters['status'] === 'alumni';
+                if ($isAlumni) {
+                    $query->whereIn('id', function ($q) use ($orgIds) {
+                        $q->select('company_id')
+                            ->from('alumni')
+                            ->whereNotNull('company_id')
+                            ->whereIn('cycle_id', function ($q2) use ($orgIds) {
+                                $q2->select('id')->from('cycles')
+                                    ->whereIn('organization_id', $orgIds);
+                            });
+                    });
+                } else {
+                    $query->whereHas('cycleRelation.organization', function ($q) use ($orgIds) {
+                        $q->whereIn('id', $orgIds);
+                    });
+                }
             }
         }
 
@@ -122,7 +135,11 @@ class CompanyRepository
                 $query->whereNotNull('cycle')->whereHas('stepdata', function ($q) {
                     $q->where('stype', '!=', 1);
                 });
-            } 
+            } elseif($filters['status'] == 'applied') {
+                $query->whereNotNull('cycle')->whereHas('stepdata', function ($q) {
+                    $q->where('stype', 1);
+                });
+            }
 
         }
 
