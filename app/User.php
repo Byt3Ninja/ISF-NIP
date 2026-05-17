@@ -19,6 +19,7 @@ use Namu\WireChat\Enums\ConversationType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Namu\WireChat\Models\Message as WireChatMessage;
@@ -26,7 +27,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, HasLocalePreference
 {
     // use Auditable;
     use HasFactory, Notifiable, HasRoles, HasApiTokens, Chatable;
@@ -219,6 +220,11 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public function mentorExpertises(){
         return $this->belongsToMany(Expertise::class, 'mentor_expertise', 'mentor_id', 'expertise_id');
+    }
+
+    public function preferredLocale(): string
+    {
+        return $this->language ?? 'en';
     }
 
     // ===============>  Organization Manager Relations < =========================
