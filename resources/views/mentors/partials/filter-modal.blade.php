@@ -61,7 +61,7 @@
                       ->get();
               } elseif ($_user->hasRole('organizationmanager')) {
                   $organization = $organization_q
-                      ->where('id', $_user->organization_id)
+                      ->where('id', $organization_id)
                       ->get();
               } elseif ($_user->hasRole('registered')) {
                   $registeredOrgIds = $_user->organizations_ids;
@@ -91,7 +91,7 @@
               </div>
             @endforeach
           </div>
-          @dd($_user->organization_id, $organ = App\Organization::where('id', 58)->first())
+          {{-- @dd($_user->organization_id, $organ = App\Organization::where('id', 58)->first()) --}}
           <!-- Organization Filter -->
            <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
             <label for="organization-select" class="form-label">{{ __('admin.Organization') }}</label>
