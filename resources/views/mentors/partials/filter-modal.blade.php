@@ -33,7 +33,7 @@
               //['key' => 'organization', 'label' => __('admin.list_of_organizations'), 'hint' => __('admin.organization_scope_hint')],
             ];
           @endphp
-
+  
           <div class="form-group mb-4">
             <label for="scopeFilter" class="form-label">{{ __('admin.Mentor_Association') }}</label>
             <select
@@ -51,6 +51,7 @@
               @php
               
               $organization_q = App\Organization::where('is_draft', 0);
+              
               //$organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get();
               if ($_user->hasRole('admin')) {
                   $organization = $organization_q->get();
@@ -89,7 +90,7 @@
                 {{ $option['hint'] }}
               </div>
             @endforeach
-            
+            @dd($organization_q->get());
           </div>
           
           <!-- Organization Filter -->
