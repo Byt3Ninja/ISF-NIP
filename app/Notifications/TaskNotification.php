@@ -111,6 +111,8 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        App::setLocale($notifiable->language ?? 'en');
+
         $org          = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
