@@ -90,7 +90,6 @@
                 {{ $option['hint'] }}
               </div>
             @endforeach
-            @dd($organization_q->get());
           </div>
           
           <!-- Organization Filter -->
