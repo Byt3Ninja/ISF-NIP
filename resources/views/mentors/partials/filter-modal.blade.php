@@ -91,7 +91,7 @@
               </div>
             @endforeach
           </div>
-          @dd($organization_id, $organ = App\Organization::all()->toArray())
+          @dd($organization_id, $organ = App\Organization::where('id', 65)->first())
           <!-- Organization Filter -->
            <div id="org-filter-container" class="form-group mb-4" style="display: {{ request('scopeFilter') == 'organization' ? 'block' : 'none' }}">
             <label for="organization-select" class="form-label">{{ __('admin.Organization') }}</label>
