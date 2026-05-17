@@ -631,14 +631,26 @@ class ClientProfileController extends Controller
                         $cycleIds = Cycle::whereIn('organization_id', $orgIds)->pluck('id')->toArray();
                         $cycleMentorIds = CyclesMentors::whereIn('cycle_id', $cycleIds)->pluck('user_id')->toArray();
 
-                        $mentors = $mentors->where(function ($q) use ($cycleMentorIds) {
+                        $mentors = $mentors->where(function ($q) use ($cycleMentorIds, $orgIds) {
+                            // 1. Assigned to this org's cycles
                             $q->whereIn('id', $cycleMentorIds)
-                              ->orWhere(function ($q2) {
-                                  $q2->whereDoesntHave('inviteMentors')
-                                    ->orWhereHas('inviteMentors', function ($q3) {
-                                        $q3->where('scope', 'Public')->where('status', 'accepted');
-                                    });
-                              });
+                            // 2. No invitations at all (truly public)
+                            ->orWhereDoesntHave('inviteMentors')
+                            // 3. Has an accepted Public-scope invitation
+                            ->orWhereHas('inviteMentors', function ($q2) {
+                                $q2->where('scope', 'Public')->where('status', 'accepted');
+                            })
+                            // 4. Has an accepted Organization-scope invitation for THIS org
+                            ->orWhere(function ($q2) use ($orgIds) {
+                                $q2->whereHas('inviteMentors', function ($q3) use ($orgIds) {
+                                    $q3->where('scope', 'Organization')->where('status', 'accepted')
+                                       ->where(function ($q4) use ($orgIds) {
+                                           foreach ($orgIds as $orgId) {
+                                               $q4->orWhereJsonContains('organization_ids', (string) $orgId);
+                                           }
+                                       });
+                                });
+                            });
                         });
                     }
                     // Admin: no restriction — show all mentors
