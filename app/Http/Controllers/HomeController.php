@@ -304,16 +304,23 @@ class HomeController extends Controller
                 $companies_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $companies = collect(DB::select($companies_q));
+            $registeredUserFilter = function ($q) {
+                $q->whereHas('roles', function ($rq) {
+                    $rq->where('default_for', 'registered');
+                })->whereDoesntHave('roles', function ($rq) {
+                    $rq->whereIn('default_for', ['admin', 'organizationmanager', 'subadmin']);
+                });
+            };
             if ($organizations_ids != null) {
                 $incubators_company = Company::whereHas('cycle', function ($q) use ($organizations_ids) {
                     $q->whereIn('organization_id', $organizations_ids);
                 })->whereHas('stepdata', function ($q) {
                     $q->where('stype', '!=', 1);
-                })->get();
+                })->whereHas('user', $registeredUserFilter)->get();
             } else {
                 $incubators_company = Company::whereNotNull('cycle')->whereHas('stepdata', function ($q) {
                     $q->where('stype', '!=', 1);
-                })->get();
+                })->whereHas('user', $registeredUserFilter)->get();
             }
 
             if ($organizations_ids != null || $user->hasRole('admin')) {
@@ -2118,7 +2125,7 @@ class HomeController extends Controller
         ];
         $data['countCards'][] = [
             'color' => 'info',
-            'href' => '/dashboard/companies',
+            'href' => '/dashboard/companies?status=applied',
             'icon' => 'ti-building',
             'text' => 'Applied_Startups',
             'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
