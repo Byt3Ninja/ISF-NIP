@@ -58,11 +58,11 @@
                   $organization = $organization_q
                       ->whereIn('id', $_user->organizations_ids)
                       ->get();
-              } elseif ($_user->hasRole('OrganizationManager')) {
+              } elseif ($_user->hasRole('organizationManager')) {
                   $organization = $organization_q
                       ->where('id', $_user->organization_id)
                       ->get();
-              } elseif ($_user->hasRole('Registered')) {
+              } elseif ($_user->hasRole('registered')) {
                   $registeredOrgIds = $_user->organizations_ids;
                   $organization = !empty($registeredOrgIds)
                       ? $organization_q->whereIn('id', $registeredOrgIds)->get()
