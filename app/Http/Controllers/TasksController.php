@@ -625,7 +625,6 @@ class TasksController extends Controller
                 $oldStatus === 'archived' && $newStatus !== 'archived' => 'reopen',
                 default                                            => 'update',
             };
-
             $updateNotifData = [
                 'task'         => $task,
                 'message'      => "Task Updated: " . $task->title,
@@ -636,7 +635,8 @@ class TasksController extends Controller
             ];
             $updateNotifiedIds = [];
             foreach ($updateAssignees as $startup) {
-                \Illuminate\Support\Facades\Notification::send([$startup], new \App\Notifications\TaskNotification($updateNotifData));
+                \Illuminate\Support\Facades\Notification::send([$startup],
+                new \App\Notifications\TaskNotification($updateNotifData));
                 $updateNotifiedIds[] = $startup->id;
             }
             // if ($updateMentor && !in_array($updateMentor->id, $updateNotifiedIds)) {

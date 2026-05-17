@@ -57,18 +57,19 @@ class TaskNotification extends Notification implements ShouldQueue
         $taskId = $this->data['task']->id ?? null;
         $action = $this->data['action'] ?? 'add';
         if ($taskId && $action !== 'feedback') {
-            $dedupKey = "task_notif_{$taskId}_{$action}_{$notifiable->id}";
-            if (!Cache::add($dedupKey, 1, now()->addHour())) {
-                return [];
+            try {
+                $dedupKey = "task_notif_{$taskId}_{$action}_{$notifiable->id}";
+                if (!Cache::add($dedupKey, 1, now()->addHour())) {
+                    return [];
+                }
+            } catch (\Throwable $e) {
+                Log::warning('TaskNotification dedup cache failed', ['error' => $e->getMessage()]);
             }
         }
 
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
-        
-        // Configure SMTP if settings exist
-        $this->configureSmtp($smtpSettings);
-        
+
         // Organization channel toggles (default to true when not configured)
         $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
         $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
@@ -110,21 +111,21 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        App::setLocale($notifiable->language ?? 'en');
-
-        $org = $notifiable->organization;
+        $org          = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
-        
-        // Get from address and name
-        $from = $this->getFromAddress($smtpSettings);
+
+        $this->configureSmtp($smtpSettings);
+
+        $from    = $this->getFromAddress($smtpSettings);
         $orgData = $this->buildEmailOrganizationData($org);
 
         return (new MailMessage)
+            ->from($from['address'], $from['name'])
             ->subject($this->getSubject())
             ->markdown('emails.mentor-task', array_merge([
-                'data' => $this->data,
+                'data'       => $this->data,
                 'notifiable' => $notifiable,
-                'action' => $this->data['action']
+                'action'     => $this->data['action'],
             ], $orgData));
     }
 
