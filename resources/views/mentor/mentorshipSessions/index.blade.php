@@ -37,7 +37,7 @@
       <tbody>
         @foreach($cycles as $cycle)
           @php
-            $total      = ($cycle['pending'] ?? 0) + ($cycle['in_progress'] ?? 0) + ($cycle['in_review'] ?? 0) + ($cycle['completed'] ?? 0);
+            $total      = ($cycle['pending'] ?? 0) + ($cycle['in_progress'] ?? 0) + ($cycle['in_review'] ?? 0) + ($cycle['completed'] ?? 0) + ($cycle['archived'] ?? 0);
           @endphp
           <tr>
             <td><strong>{{ $cycle['title'] }}</strong></td>
