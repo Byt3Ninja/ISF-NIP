@@ -10,9 +10,9 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <style>
 
-  /* .daterangepicker {
-    margin-top: 1rem !important;
-  } */
+  .daterangepicker {
+    margin-top: 2rem !important;
+  }
 
   #mob {
     display: flex;
