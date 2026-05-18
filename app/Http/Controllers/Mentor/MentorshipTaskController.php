@@ -141,7 +141,12 @@ class MentorshipTaskController extends Controller
 			]);
 
 		if ($user->hasRole('registered')) {
-			$tasksQuery->whereHas('assignees', fn($q) => $q->where('companies.id', $user->company_id));
+			$tasksQuery->whereHas('assignees', fn($q) => $q
+				->where('companies.id', $user->company_id)
+				->where('program_task_assignees.status', '!=', 'archived')
+			);
+		} else {
+			$tasksQuery->where('status', '!=', 'archived');
 		}
 
 		$rawTasks = $tasksQuery->get();
@@ -440,25 +445,34 @@ class MentorshipTaskController extends Controller
 			],
 		];
 
-		$archivedQuery = ProgramTask::with('program')
-			->where('program_id', $cycleId)
-			->where('status', 'archived');
+		$archivedQuery = ProgramTask::with(['program', 'assignees'])
+			->where('program_id', $cycleId);
 
 		if ($user->hasRole('registered')) {
-			$archivedQuery->whereHas('assignees', fn($q) => $q->where('companies.id', $user->company_id));
+			$archivedQuery->whereHas('assignees', fn($q) => $q
+				->where('companies.id', $user->company_id)
+				->where('program_task_assignees.status', 'archived')
+			);
+		} else {
+			$archivedQuery->where('status', 'archived');
 		}
 
 		$archivedTasks = $archivedQuery
 			->orderBy('updated_at', 'desc')
 			->get()
-			->map(fn($task) => [
-				'id'          => $task->id,
-				'title'       => $task->title,
-				'description' => $task->description,
-				'program'     => $task->program->title ?? null,
-				'status'      => 'archived',
-				'archived_at' => $task->updated_at,
-			])->values()->toArray();
+			->map(function($task) use ($user) {
+				$archivedAt = $user->hasRole('registered')
+					? ($task->assignees->firstWhere('id', $user->company_id)?->pivot->last_updated ?? $task->updated_at)
+					: $task->updated_at;
+				return [
+					'id'          => $task->id,
+					'title'       => $task->title,
+					'description' => $task->description,
+					'program'     => $task->program->title ?? null,
+					'status'      => 'archived',
+					'archived_at' => $archivedAt,
+				];
+			})->values()->toArray();
 
 		return view('kanban.index', compact('cycle', 'tasks', 'boards', 'priorityConfig', 'jsPriorityMap', 'jsStatusMap', 'offcanvasTabs', 'archivedTasks', 'startups'));
 	}

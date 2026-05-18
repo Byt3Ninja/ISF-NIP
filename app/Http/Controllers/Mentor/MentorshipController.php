@@ -10,6 +10,7 @@ use App\ProgramTask;
 use App\SurveyResponses;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Traits\HasRoles;
 
 class MentorshipController extends Controller
@@ -36,6 +37,7 @@ class MentorshipController extends Controller
                 $sessions = collect(); // Empty collection if no company
             }
         }
+        
         if(auth()->user() && auth()->user()->hasRole('Admin')) {
             $company_id = Company::all();
             $usersCompany = User::whereIn('company_id', $company_id->pluck('id'))->get();
@@ -59,16 +61,30 @@ class MentorshipController extends Controller
         $userCompanyId = $isRegistered ? $user->company_id : null;
 
         $cycles = $cycles->map(function ($cycle) use ($user, $isRegistered, $userCompanyId) {
-            $baseQuery = fn() => ProgramTask::where('program_id', $cycle->id)
-                ->when($isRegistered,
-                    fn($q) => $q->whereHas('assignees', fn($q2) => $q2->where('companies.id', $userCompanyId))
-                );
+            if ($isRegistered) {
+                $taskIds = ProgramTask::where('program_id', $cycle->id)
+                    ->whereHas('assignees', fn($q) => $q->where('companies.id', $userCompanyId))
+                    ->pluck('id');
 
-            $pending    = (clone $baseQuery())->where('status', 'pending')->count();
-            $inProgress = (clone $baseQuery())->where('status', 'progress')->count();
-            $inReview   = (clone $baseQuery())->where('status', 'review')->count();
-            $completed  = (clone $baseQuery())->where('status', 'completed')->count();
-            $archived   = (clone $baseQuery())->where('status', 'archived')->count();
+                $countByStatus = fn($status) => DB::table('program_task_assignees')
+                    ->whereIn('program_task_id', $taskIds)
+                    ->where('company_id', $userCompanyId)
+                    ->where('status', $status)
+                    ->count();
+
+                $pending    = $countByStatus('pending');
+                $inProgress = $countByStatus('progress');
+                $inReview   = $countByStatus('review');
+                $completed  = $countByStatus('completed');
+                $archived   = $countByStatus('archived');
+            } else {
+                $baseQuery  = fn() => ProgramTask::where('program_id', $cycle->id);
+                $pending    = (clone $baseQuery())->where('status', 'pending')->count();
+                $inProgress = (clone $baseQuery())->where('status', 'progress')->count();
+                $inReview   = (clone $baseQuery())->where('status', 'review')->count();
+                $completed  = (clone $baseQuery())->where('status', 'completed')->count();
+                $archived   = (clone $baseQuery())->where('status', 'archived')->count();
+            }
 
             return [
                 'id'          => $cycle->id,
@@ -174,14 +190,14 @@ class MentorshipController extends Controller
 
         // Calculate real stats
         $stats = [
-            'total_tasks' => $tasks->count(),
-            'pending'     => $tasks->where('overallStatus', 'pending')->count(),
+            'total_tasks' => $cycles->sum(fn($c) => ($c['pending'] ?? 0) + ($c['in_progress'] ?? 0) + ($c['in_review'] ?? 0) + ($c['completed'] ?? 0) + ($c['archived'] ?? 0)),
+            'pending'     => $cycles->sum('pending'),
             'active'      => [
-                'in_progress_count' => $tasks->where('overallStatus', 'progress')->count(),
-                'in_review_count'   => $tasks->filter(fn($t) => ($t['in_review_count'] ?? 0) > 0)->count(),
+                'in_progress_count' => $cycles->sum('in_progress'),
+                'in_review_count'   => $cycles->sum('in_review'),
             ],
-            'completed' => $tasks->where('overallStatus', 'completed')->count(),
-            'archived'  => $tasks->where('overallStatus', 'archived')->count(),
+            'completed' => $cycles->sum('completed'),
+            'archived'  => $cycles->sum('archived'),
         ];
 
         if (auth()->user() && auth()->user()->hasRole('Mentor')) {
