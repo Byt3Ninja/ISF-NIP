@@ -10,9 +10,17 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <style>
 
-  /* .daterangepicker {
-    margin-top: 1rem !important;
-  } */
+  .daterangepicker {
+    margin-top: 2rem !important;
+  }
+
+  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
+     stays fully visible no matter where in the list the row sits. */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
+  }
 
   #mob {
     display: flex;
@@ -1028,15 +1036,17 @@ if (editStepForm) {
               $('#mdescription').val(response.description);
               $('#mcount_team_number').val(response.count_team_number);
               
-              $('#step-range-picker').daterangepicker({
+              const $stepRangeInput = $('#step-range-picker');
+              $stepRangeInput.daterangepicker({
                 opens: isRtl ? 'left' : 'right',
-                drops: 'up',
                 startDate: response?.from ? moment(response?.from) : null,
                 endDate: response?.to ? moment(response?.to) : null,
               }).on('apply.daterangepicker', function(ev, picker) {
                 $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
                 $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
               });
+
+              positionStepRangePicker($stepRangeInput);
 
               // $('#mfromDate').val(response.from);
               // $('#mtoDate').val(response.to);
@@ -1084,6 +1094,51 @@ if (editStepForm) {
         });
       }
     }
+    function positionStepRangePicker($input) {
+      const drp = $input.data('daterangepicker');
+      if (!drp) return;
+      const $picker = drp.container;
+      $picker.addClass('drp-viewport-fixed');
+
+      const reposition = function () {
+        if (!drp.isShowing) return;
+        const inputRect = $input[0].getBoundingClientRect();
+        const pickerHeight = $picker.outerHeight();
+        const pickerWidth = $picker.outerWidth();
+        const viewportH = window.innerHeight;
+        const viewportW = window.innerWidth;
+        const gap = 4;
+
+        let top = inputRect.bottom + gap;
+        if (top + pickerHeight > viewportH - gap) {
+          const above = inputRect.top - pickerHeight - gap;
+          top = above >= gap ? above : Math.max(gap, viewportH - pickerHeight - gap);
+        }
+
+        let left;
+        if (drp.opens === 'left') {
+          left = inputRect.right - pickerWidth;
+        } else if (drp.opens === 'center') {
+          left = inputRect.left + inputRect.width / 2 - pickerWidth / 2;
+        } else {
+          left = inputRect.left;
+        }
+        left = Math.max(gap, Math.min(left, viewportW - pickerWidth - gap));
+
+        $picker.css({ top: top + 'px', left: left + 'px', right: 'auto', bottom: 'auto' });
+      };
+
+      $input.off('show.daterangepicker.viewport').on('show.daterangepicker.viewport', function () {
+        setTimeout(reposition, 0);
+      });
+      const $modal = $('#ModifyStepForm');
+      $modal.off('scroll.drpViewport').on('scroll.drpViewport', reposition);
+      $modal.find('.modal-body, .modal-dialog').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
+      $(window).off('scroll.drpViewport resize.drpViewport').on('scroll.drpViewport resize.drpViewport', reposition);
+
+      if (drp.isShowing) reposition();
+    }
+
     $(document).on('change', '#is_public', function() {
       let _public = $(this).val();
       if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
