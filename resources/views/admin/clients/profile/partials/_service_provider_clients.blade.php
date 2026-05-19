@@ -475,7 +475,7 @@
   window.confirmDeleteClient = function (id, name) {
     releaseWarningAlert({
       title:        `${@json(__('admin.delete_client'))}?`,
-      message:      `${@json(__('admin.you_are_about_to_delete'))} "<strong>${name}</strong>"`,
+      html:      `${@json(__('admin.you_are_about_to_delete'))} "<strong>${name}</strong>"`,
       confirmText:  @json(__('admin.DYes')),
       confirmColor: 'danger',
       onConfirm() {
