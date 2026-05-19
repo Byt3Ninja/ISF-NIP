@@ -6,7 +6,7 @@
 
 @section('content')
 
-@include('admin.tasks.partials.tasks-count-cards')
+{{-- @include('admin.tasks.partials.tasks-count-cards') --}}
 
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center border-bottom">
