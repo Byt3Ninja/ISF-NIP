@@ -182,6 +182,7 @@ return function () {
         ['title' => 'invitations', 'route' => 'invitations.index', 'menuOnly' => false],
         ['title' => 'services_providers', 'route' => 'services_providers.index', 'menuOnly' => true],
         ['title' => 'services_providers_requests', 'route' => 'services_providers.requests', 'group' => 'services_providers', 'menuOnly' => false],
+        ['title' => 'view_profile', 'route' => 'service_provider.profile', 'menuOnly' => false],
       ],
     ],
   

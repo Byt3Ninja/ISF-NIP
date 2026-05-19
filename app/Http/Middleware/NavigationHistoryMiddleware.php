@@ -99,8 +99,15 @@ class NavigationHistoryMiddleware
             return;
         }
 
+        // Routes that always reset the trail to Dashboard > current page only
+        $resetRoutes = ['service_provider.profile', 'service_provider.reviews'];
+
         // Check if navigation is from menu (has ?nav=menu parameter)
-        $isFromMenu = $request->query('nav') === 'menu';
+        $isFromMenu = $request->query('nav') === 'menu' || in_array($routeName, $resetRoutes);
+
+        if (in_array($routeName, $resetRoutes)) {
+            session(['_previous_url' => $dashboardUrl]);
+        }
 
         // Get current trail
         $trail = session('_breadcrumb_trail', []);
