@@ -408,6 +408,8 @@
         if (slot.Address) {
           $('#detailAddressWrap').show();
           $('#detailAddress').text(`${slot.Address ?? ''}`);
+        } else {
+          $('#detailAddressWrap').hide();
         }
       }
 
