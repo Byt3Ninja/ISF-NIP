@@ -169,5 +169,6 @@ return [
     'edit_profile' => 'تعديل الملف الشخصي',
     'Edit Profile' => 'تعديل الملف الشخصي',
     'profile_view_user' => 'عرض الملف الشخصي',
+    'view_profile' => 'عرض الملف الشخصي',
     'profile_service_provider' => 'ملف مقدم الخدمة',
 ];

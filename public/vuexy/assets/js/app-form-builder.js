@@ -1089,6 +1089,10 @@ function updateFormSelect() {
     : FB_CONFIG.allForms.filter(f => String(f.organization_id) === String(selectedOrg));
 
   const $fs = $('#formFilter');
+  const hasSelect2 = $fs.data('select2') !== undefined;
+
+  if (hasSelect2) $fs.select2('destroy');
+
   $fs.find('option:not(:first)').remove();
 
   filteredForms.forEach(form => {
@@ -1103,7 +1107,12 @@ function updateFormSelect() {
     $fs.append(`<option value="${form.id}"${selected}>${text}</option>`);
   });
 
-  if ($fs.hasClass('select2-hidden-accessible')) $fs.trigger('change');
+  if (hasSelect2) {
+    $fs.select2({
+      placeholder: document.documentElement.lang === 'en' ? 'Select' : 'اختر',
+      dropdownParent: $fs.parent()
+    });
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

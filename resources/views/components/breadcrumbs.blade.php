@@ -12,8 +12,8 @@
   <ol class="breadcrumb align-items-center bg-card rounded p-2 shadow-xs">
     @if(isset($backUrl) && $backUrl)
     {{-- Back Button --}}
-    <li class="breadcrumb-item active">
-      <a 
+    <li class="breadcrumb-item">
+      <a
         id="back-button"
         href="{{ $backUrl }}"
         class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect waves-light mb-0"
