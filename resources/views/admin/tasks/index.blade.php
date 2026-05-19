@@ -58,7 +58,7 @@ $offcanvasTabs = [
 
 @section('content')
 <div>
-  @include('admin.tasks.partials.tasks-count-cards')
+  {{-- @include('admin.tasks.partials.tasks-count-cards') --}}
   @include('admin.tasks.partials.tasks-table')
   @include('admin.tasks.partials.add-task-offcanvas')
   @include('admin.tasks.partials.view-task-offcanvas')
