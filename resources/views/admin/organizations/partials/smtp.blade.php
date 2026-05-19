@@ -1,4 +1,4 @@
-@php($smtp = $organization->organizationSettings)
+@php($smtp = $organization?->organizationSettings)
 @php($hasCustomConfig = $smtp && ($smtp->email_provider || $smtp->smtp_host))
 
 {{-- Info alert when no custom provider is configured --}}
