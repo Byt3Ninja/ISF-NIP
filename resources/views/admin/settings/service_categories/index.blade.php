@@ -92,11 +92,17 @@
 
               <td class="text-center">
                 @if($category->organization_id)
-                  <a href="{{ url('dashboard/organizations/'.$category->organization_id.'/edit') }}">
+                  @if( $_user->ableTo('organizations.edit') ) <a href="{{ url('dashboard/organizations/'.$category->organization_id.'/edit') }}"> @endif
                     {{ optional($category->organization)->{'name_'.$l} ?? '-' }}
-                  </a>
+                  @if( $_user->ableTo('organizations.edit') ) </a> @endif
                 @else
-                  <span class="badge bg-label-primary">{{ __('admin.All_Organizations') }}</span>
+                  @if( $_user->hasRole('organizationManager') )
+                    @if( $_user->ableTo('organizations.edit') ) <a href="{{ url('dashboard/organizations/'.$category->organization_id.'/edit') }}"> @endif
+                      {{ $_user->organizations?->first()?->name ?? '-' }}
+                    @if( $_user->ableTo('organizations.edit') ) </a> @endif
+                  @else
+                    <span class="badge bg-label-primary">{{ __('admin.All_Organizations') }}</span>
+                  @endif
                 @endif
               </td>
 
