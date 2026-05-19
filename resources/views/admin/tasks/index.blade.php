@@ -1146,6 +1146,9 @@ $(function () {
     $(form).removeData('edit-row');
     $('#existing-attachments-list').empty();
     $('#existing-attachments').hide();
+    $('#fileError').hide().html('');
+    $('#fileName').hide().html('');
+    $('#task-upload').val('');
     $('#addTaskModalLabel').text('{{ __('admin.add_new_task') }}');
     $('.data-submit').text('{{ __('admin.Submit') }}');
   };
