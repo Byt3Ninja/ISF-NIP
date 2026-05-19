@@ -100,7 +100,7 @@ class surveysController extends Controller
 						
 					return (object) [
 						'id' => $survey->id,
-						'title' => $survey->survey->title . ' Survey',
+						'title' => $survey->survey->title ?? '',
 						'created_at' => $survey->created_at->format('Y-m-d H:i'),
 						// 'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
 						'status' => $completedQuestions === 0
