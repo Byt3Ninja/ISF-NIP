@@ -171,10 +171,11 @@
     
     fv.on('core.validator.validated', (data) => {
       const isPartner = $(data.element).hasClass('logo-input');
-      if (!data.result.valid && data.validator === 'file') {
+      const isArticleImg = $(data.element).closest('.repeater-item').find('.article-image-preview').length > 0;
+      if (!data.result.valid && (data.validator === 'file' || (data.validator === 'callback' && isArticleImg))) {
         data.element.value = '';
         if (!isPartner) $(data.element).closest('.repeater-item').find('.article-image-preview').empty();
-      } else if (data.result.valid && data.validator === 'file') {
+      } else if (data.result.valid && (data.validator === 'file' || (data.validator === 'callback' && isArticleImg))) {
         handleFileChange(data.element, isPartner ? 'partner' : 'article');
       }
     });
@@ -216,7 +217,25 @@
       fieldConfig[`${prefix}[${index}][title]`] = { validators: { notEmpty: { message: T.required } } };
       fieldConfig[`${prefix}[${index}][link]`] = { validators: { notEmpty: { message: T.required }, uri: { message: T.invalidUrl } } };
       fieldConfig[`${prefix}[${index}][summary]`] = { validators: { notEmpty: { message: T.required }, stringLength: { max: 1000 } } };
-      fieldConfig[`${prefix}[${index}][image]`] = { validators: { file: { extension: 'jpg,jpeg,png', type: 'image/jpeg,image/png', maxSize: 5*1024*1024, message: T.articleImageBadType } } };
+      fieldConfig[`${prefix}[${index}][image]`] = {
+        validators: {
+          callback: {
+            callback: (input) => {
+              if (!input.value) return { valid: true };
+              const file = input.element.files[0];
+              if (!file) return { valid: true };
+              const allowed = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'];
+              if (!allowed.includes(file.type)) {
+                return { valid: false, message: T.articleImageBadType };
+              }
+              if (file.size > 5 * 1024 * 1024) {
+                return { valid: false, message: T.articleImageTooLarge };
+              }
+              return { valid: true };
+            }
+          }
+        }
+      };
     }
 
     if (type === 'partner') {
