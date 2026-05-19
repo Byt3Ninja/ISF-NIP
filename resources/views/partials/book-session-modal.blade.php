@@ -405,8 +405,12 @@
       $('#detailDuration').text(`${duration} @lang('admin.min')`);
 
       if (slot.session_type !== 'Online') {
-        $('#detailAddressWrap').show();
-        $('#detailAddress').text(`${slot.Address ?? 'N/A'}`);
+        if (slot.Address) {
+          $('#detailAddressWrap').show();
+          $('#detailAddress').text(`${slot.Address ?? ''}`);
+        } else {
+          $('#detailAddressWrap').hide();
+        }
       }
 
       // ── Location in details (same row as duration) ──
