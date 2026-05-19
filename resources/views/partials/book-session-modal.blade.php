@@ -306,6 +306,8 @@
         if (state.slots.some(s => s.weekly && s.weekday === dayName)) dates.add(dateStr);
       }
 
+      dates.add(getToday());
+
       return Array.from(dates).sort();
     };
 
@@ -447,7 +449,6 @@
         inline: true,
         locale: '{{ $l }}',
         minDate: 'today',
-        defaultDate: today,
         dateFormat: 'Y-m-d',
         enable: dates,
         onChange: ([date], dateStr) => {
@@ -464,12 +465,16 @@
           const isAvailable = dates.includes(dateStr);
           const isFuture    = dayElem.dateObj >= new Date().setHours(0, 0, 0, 0);
           $(dayElem).addClass(isAvailable ? 'available' : (isFuture ? 'unavailable' : ''));
+        },
+        onReady: (selectedDates, dateStr, instance) => {
+          let targetDate = today;
+          if (!getSlotsForDate(today).length) {
+            const nextDate = dates.find(d => getSlotsForDate(d).length > 0);
+            if (nextDate) targetDate = nextDate;
+          }
+          instance.setDate(targetDate, true);
         }
       });
-
-      state.selectedDate = today;
-      $('#slotsDate').text(formatDate(today));
-      renderSlots(today);
     };
 
     const resetCalendar = () => {
