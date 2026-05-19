@@ -9,7 +9,7 @@
     <div class="col-6">
         <div class="form-group mb-3">
             <label class="form-label" for="name_en">{{__('admin.Organization')}}</label>
-            <input id="name_en" type="text" class="form-control" name="organization_name" value="{{ old('organization_name', $organization->name_en) }}" required>
+            <input id="name_en" type="text" class="form-control" name="organization_name" value="{{ old('organization_name', $organization?->name_en) }}" required>
         </div>
     </div>
 
