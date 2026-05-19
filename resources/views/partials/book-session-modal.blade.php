@@ -371,10 +371,13 @@
                       ${icon} ${sessionType}
                     </span>
                     ${showMap ? `
-                      <a href="https://www.google.com/maps/search/${encodeURIComponent(location)}"
-                         target="_blank"
-                         class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2 text-decoration-none"
-                         title="${location}">
+                      <a href="${/^https?:\/\/.+/i.test(location)
+                                  ? location
+                                  : `https://www.google.com/maps/search/${encodeURIComponent(location)}`
+                                }"
+                        target="_blank"
+                        class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2 text-decoration-none"
+                        title="${location}">
                         <i class="ti ti-map-pin ti-16px"></i>
                         <span>${location.length > 20 ? location.slice(0, 20) + '…' : location}</span>
                       </a>` : ''}
@@ -420,9 +423,14 @@
       const locText = loc.length > 30 ? loc.slice(0, 30) + '…' : loc;
       const showLoc = loc && (slot.session_type === 'Offline' || slot.session_type === 'Both');
       if (showLoc) {
+       const href = /^https?:\/\/.+/i.test(loc)
+          ? loc
+          : `https://www.google.com/maps/search/${encodeURIComponent(loc)}`;
+
         $('#detailLocation')
-          .attr('href', `https://www.google.com/maps/search/${encodeURIComponent(loc)}`)
+          .attr('href', href)
           .text(locText);
+
         $('#detailLocationWrap').show();
       } else {
         $('#detailLocationWrap').hide();
