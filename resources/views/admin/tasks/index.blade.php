@@ -923,7 +923,7 @@ $(function () {
     const validFiles = files.slice(0, remaining).filter(file => {
       const ext = file.name.split('.').pop().toLowerCase();
       if (!allowedTypes.includes(ext)) {
-        errors.push(`{{ __("admin.unsupported_task_file_type") }}`);
+        errors.push(`{{ __("admin.unsupported_file_type") }}`);
         return false;
       }
       if (file.size > maxSize) {
@@ -1286,11 +1286,11 @@ $(function () {
     const validFiles  = files.filter(file => {
       const ext = file.name.split('.').pop().toLowerCase();
       if (!allowedExts.includes(ext)) {
-        errors.push(`{{ __('admin.unsupported_file_type') }} (${file.name})`);
+        errors.push(`{{ __('admin.unsupported_task_file_type') }}`);
         return false;
       }
       if (file.size > maxSize) {
-        errors.push(`{{ __('admin.file_exceeds_10_limit') }} (${file.name})`);
+        errors.push(`{{ __('admin.file_exceeds_10_limit') }}`);
         return false;
       }
       return true;
