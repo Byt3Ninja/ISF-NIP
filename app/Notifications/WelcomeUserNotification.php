@@ -14,7 +14,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class WelcomeUserNotification extends Notification implements ShouldQueue
 {
     use Queueable, ConfiguresSmtp;
-
+ 
     public $user;
     public $password;
 
@@ -105,15 +105,27 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
      */
     public function toBroadcast(object $notifiable) 
     {
-     return new BroadcastMessage([
-        'subject' => __('emails.welcome_email.subject'),
-        'dear'    => __('emails.welcome_email.dear') . ' ' . $notifiable->name,
-        'm1'      => __('emails.welcome_email.m1'),
-        'm2'      => __('emails.welcome_email.m2') . ' ' . $notifiable->email,
-        'm3'      => __('emails.welcome_email.m3'),
-        'best'    => __('emails.welcome_email.best_regards'),
-        'time'    => now()->toDateTimeString(),
-    ]);
+        return new BroadcastMessage([
+            'subject' => __('emails.welcome_email.subject'),
+            'dear'    => __('emails.welcome_email.dear') . ' ' . $notifiable->name,
+            'm1'      => __('emails.welcome_email.m1'),
+            'm2'      => __('emails.welcome_email.m2') . ' ' . $notifiable->email,
+            'm3'      => __('emails.welcome_email.m3'),
+            'best'    => __('emails.welcome_email.best_regards'),
+            'time'    => now()->toDateTimeString(),
+        ]);
     }
-    
+
+    /**
+     * Get the array representation of the notification.
+     * This is used for the 'database' channel to store the notification data in the database.
+     * @param object $notifiable
+     * @return array<string, mixed>
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        return [
+            'message' => __('notifications.welcome.database')
+        ];
+    }
 }

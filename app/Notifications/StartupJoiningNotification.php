@@ -104,8 +104,9 @@ class StartupJoiningNotification extends Notification implements ShouldQueue
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
         $orgData = $this->buildEmailOrganizationData($org);
-
+        $this->configureSmtp($smtpSettings);
         return (new MailMessage)
+            ->from(config('mail.from.address'), config('mail.from.name'))
             ->subject(__('admin.Startup_Joined_New_Program_subject'))
             ->markdown('emails.startup_join', array_merge(['data' => $this->data], $orgData));
     }
