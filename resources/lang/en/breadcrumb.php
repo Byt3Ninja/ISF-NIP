@@ -169,5 +169,6 @@ return [
     'edit_profile' => 'Edit Profile',
     'Edit Profile' => 'Edit Profile',
     'profile_view_user' => 'View Profile',
+    'view_profile' => 'View Profile',
     'profile_service_provider' => 'Service Provider Profile',
 ];
