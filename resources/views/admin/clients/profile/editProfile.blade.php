@@ -58,8 +58,12 @@ if (auth()->user()->hasRole('Mentor')) {
 array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
 }
 
-$tabsList = collect($tabs)->map(function ($tab) {
-return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2]];
+$is_security_tab_forced = session('must_change_password') || (auth()->check() && auth()->user()->must_change_password) ? true : false;
+$tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) {
+  $is_active = false;
+  if( $tab[0] == 'account' && !$is_security_tab_forced ) { $is_active = true; }
+  if( $tab[0] == 'security' && $is_security_tab_forced ) { $is_active = true; }
+  return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2], 'active' => $is_active];
 })->toArray();
 
 // Debug: Log the tabs structure
@@ -79,7 +83,7 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
             @foreach ($tabsList as $key => $tab)
             <li class="nav-item">
               <a href="#{{ $tab['target'] }}" 
-                class="nav-link {{$key == 0 ? 'active' : ''}}" 
+                class="nav-link {{ $tab['active'] ? 'active' : ''}}" 
                 data-bs-toggle="tab"
                 role="tab" 
                 aria-controls="{{ $tab['target'] }}" 
@@ -118,13 +122,13 @@ return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2
         <!-- Tab Content -->
         <div class="tab-content card rounded mb-6">
           <!-- Account section -->
-          <div class="tab-pane fade show active" id="accountSection">
+          <div class="tab-pane fade {{ !$is_security_tab_forced ? 'show active' : '' }}" id="accountSection">
             @include('admin.clients.profile.partials._account_info_form')
           </div>
           <!-- /Account section -->
 
           <!-- Security section -->
-          <div class="tab-pane fade" id="securitySection">
+          <div class="tab-pane fade {{ $is_security_tab_forced ? 'show active' : '' }}" id="securitySection">
             @include('admin.clients.profile.partials._security_form')
           </div>
           <!-- /Security section -->

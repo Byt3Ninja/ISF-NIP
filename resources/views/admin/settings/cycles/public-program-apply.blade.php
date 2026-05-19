@@ -843,18 +843,44 @@ $endDateForCountdown = trim($month . ' ' . $endDatePart);
 				},
 				error: function(xhr, status, error) {
 					console.log(error);
-					Swal.fire({ 
-						title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
-						text: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
-						icon: 'error',
-						showCancelButton: false,
-						showConfirmButton: true,
-						confirmButtonText: "{{ __('admin.OK') }}",
-						customClass: {
-							confirmButton: 'btn btn-primary',
-						},
-						buttonsStyling: false,
-					});
+					if( xhr.status == 422 )
+					{
+						var response = xhr.responseJSON;
+						$.each(response.errors, function(field, messages) {
+							var fieldName = field.replace(/\./g, '_');
+							var $input = $(`#${fieldName}`);
+							$input.addClass('is-invalid');
+							$input.next('.invalid-feedback').html(messages[0]);
+						});
+
+						swal.fire({ 
+							title: '{{ $l == "ar" ? "خطأ في التحقق من البيانات" : "Validation Error" }}',
+							text: '{{ $l == "ar" ? "يرجى تصحيح الأخطاء في النموذج." : "Please correct the errors in the form." }}',
+							icon: 'warning',
+							showCancelButton: false,
+							showConfirmButton: true,
+							confirmButtonText: "{{ __('admin.OK') }}",
+							customClass: {
+								confirmButton: 'btn btn-primary',
+							},
+							buttonsStyling: false,
+						});
+					}
+					else
+					{
+						Swal.fire({ 
+							title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+							text: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
+							icon: 'error',
+							showCancelButton: false,
+							showConfirmButton: true,
+							confirmButtonText: "{{ __('admin.OK') }}",
+							customClass: {
+								confirmButton: 'btn btn-primary',
+							},
+							buttonsStyling: false,
+						});
+					}
 				}
 			});
 		});
