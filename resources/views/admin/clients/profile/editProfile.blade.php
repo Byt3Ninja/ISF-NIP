@@ -132,7 +132,11 @@
         <div class="tab-content card rounded mb-6 {{ $_user->hasRole('serviceProvider') ? 'p-0 shadow-none' : '' }}">
           <!-- Account section -->
           <div class="tab-pane fade {{ !$is_security_tab_forced ? 'show active' : '' }}" id="accountSection">
-            @include('admin.clients.profile.partials._account_info_form')
+            @if ($_user->hasRole('serviceProvider'))
+              @include('admin.clients.profile.partials._service_provider_wizard')
+            @else
+              @include('admin.clients.profile.partials._account_info_form')
+            @endif
           </div>
           <!-- /Account section -->
 
