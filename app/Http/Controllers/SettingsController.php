@@ -897,7 +897,12 @@ class SettingsController extends Controller
 			$formattedOffset = ($offset >= 0 ? 'GMT+' : 'GMT') . $offset;
 			return [$timezone => $timezone . ' (' . $formattedOffset . ')'];
     	})->sort();
+		if($organization->id != null){
 		$invitations = Invitation::where('organization_id', $organization->id)->get();
+		}
+		 else {
+			$invitations = collect([]);
+		}
 		$role = Role::where('name', 'organizationManager')->first();
 
 		
