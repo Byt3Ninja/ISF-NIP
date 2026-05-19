@@ -3844,4 +3844,5 @@ return [
   'exceeds_size_limit' => 'حجم الملف يتجاوز الحد الأقصى 10 ميجابايت.',
   'please_add_files' => 'يرجى إضافة ملف واحد على الأقل.',
   'failed' => 'فشل',
+  'unsupported_task_file_type' => 'نوع الملف غير مدعوم. الملفات المسموح بها: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
 ];

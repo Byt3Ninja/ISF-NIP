@@ -3788,4 +3788,5 @@ return [
   'exceeds_size_limit' => 'File exceeds 10MB size limit.',
   'please_add_files' => 'Please add at least one file.',
   'failed' => 'Failed',
+  'unsupported_task_file_type' => 'Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
 ];

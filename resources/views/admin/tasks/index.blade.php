@@ -923,11 +923,11 @@ $(function () {
     const validFiles = files.slice(0, remaining).filter(file => {
       const ext = file.name.split('.').pop().toLowerCase();
       if (!allowedTypes.includes(ext)) {
-        errors.push(`{{ __("admin.unsupported_file_type") }} (${file.name})`);
+        errors.push(`{{ __("admin.unsupported_file_type") }}`);
         return false;
       }
       if (file.size > maxSize) {
-        errors.push(`{{ __("admin.file_exceeds_10_limit") }} (${file.name})`);
+        errors.push(`{{ __("admin.file_exceeds_10_limit") }}`);
         return false;
       }
       return true;
@@ -1146,6 +1146,9 @@ $(function () {
     $(form).removeData('edit-row');
     $('#existing-attachments-list').empty();
     $('#existing-attachments').hide();
+    $('#fileError').hide().html('');
+    $('#fileName').hide().html('');
+    $('#task-upload').val('');
     $('#addTaskModalLabel').text('{{ __('admin.add_new_task') }}');
     $('.data-submit').text('{{ __('admin.Submit') }}');
   };
@@ -1286,11 +1289,11 @@ $(function () {
     const validFiles  = files.filter(file => {
       const ext = file.name.split('.').pop().toLowerCase();
       if (!allowedExts.includes(ext)) {
-        errors.push(`{{ __('admin.unsupported_file_type') }} (${file.name})`);
+        errors.push(`{{ __('admin.unsupported_task_file_type') }}`);
         return false;
       }
       if (file.size > maxSize) {
-        errors.push(`{{ __('admin.file_exceeds_10_limit') }} (${file.name})`);
+        errors.push(`{{ __('admin.file_exceeds_10_limit') }}`);
         return false;
       }
       return true;
