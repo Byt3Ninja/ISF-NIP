@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\StartupJoiningNotification;
+use App\Notifications\WelcomeUserNotification;
 use URL, Str, stdClass, Hash;
 
 class ExternalCyclesController extends Controller
@@ -199,7 +200,7 @@ class ExternalCyclesController extends Controller
 				$request->validate([
 					'register-email' => 'required|email:dns',
 					'register-first-name' => 'required',
-					'register-last-name' => 'required',
+					'register-last-name' => 'nullable|sometimes',
 				]);
 				DB::beginTransaction();
 				try {
@@ -210,8 +211,8 @@ class ExternalCyclesController extends Controller
 						'email' => $request->input('register-email'),
 						'first_name_en' => $request->input('register-first-name'),
 						'first_name_ar' => $request->input('register-first-name'),
-						'last_name_en' => $request->input('register-last-name'),
-						'last_name_ar' => $request->input('register-last-name'),
+						'last_name_en' => $request->input('register-last-name', '') ?? '',
+						'last_name_ar' => $request->input('register-last-name', '') ?? '',
 						'guardian' => null,
 						'phone' => null,
 						'age' => null,
@@ -224,9 +225,13 @@ class ExternalCyclesController extends Controller
 						'password' => Hash::make( $password ),
 						'api_token' => $request_token
 					]);
+					$user->email_verified_at = now();
+					$user->must_change_password = true;
+					$user->accept_email = true;
 					$user->save();
 					$user->allotRole('registered');
-					$user->sendEmailVerificationNotification();
+					// $user->sendEmailVerificationNotification();
+					$user->notify(new WelcomeUserNotification($user, $password));
 					$company = new Company();
 
                 	$company->name_en = $user->first_name_en . " " . $user->last_name_en;

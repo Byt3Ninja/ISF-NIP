@@ -23,6 +23,7 @@ class MagicLoginController extends Controller
 
         $user->magic_login_token = null;
         $user->must_change_password = true;
+        $user->email_verified_at = now();
         $user->save();
 
         Auth::login($user);
