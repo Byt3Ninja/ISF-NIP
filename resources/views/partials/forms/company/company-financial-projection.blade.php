@@ -299,11 +299,12 @@ $(document).ready(function() {
 	// ═══════════════════════════════════════════════════════════════════════
 	// CONFIG
 	// ═══════════════════════════════════════════════════════════════════════
+	@php $fpCompanyId = (isset($client) && $client->company) ? $client->company->id : auth()->user()->company_id; @endphp
 	const CONFIG = {
-		COMPANY_ID: {{ isset($client) && $client->company ? $client->company->id : auth()->user()->company_id }},
+		COMPANY_ID: {{ $fpCompanyId ?? 'null' }},
 		IS_CURRENCY_DISABLED: "{{ $is_currency_disabled }}",
-		REALTIME_URL: "{{ route('company.financial_projection.realtime', isset($client) && $client->company ? $client->company->id : auth()->user()->company_id) }}",
-		AUTOSAVE_URL: "{{ route('company.financial_projection.save', isset($client) && $client->company ? $client->company->id : auth()->user()->company_id) }}",
+		REALTIME_URL: "{{ $fpCompanyId ? route('company.financial_projection.realtime', $fpCompanyId) : '' }}",
+		AUTOSAVE_URL: "{{ $fpCompanyId ? route('company.financial_projection.save', $fpCompanyId) : '' }}",
 		CSRF_TOKEN: "{{ csrf_token() }}",
 		EDITABLE_FIELDS: ['rev','cogs','sal','opex','da','int','tax','rec','inv','pay','capex','debt']
 	};
