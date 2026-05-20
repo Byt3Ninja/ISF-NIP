@@ -179,9 +179,9 @@
   // Plugins
   const addDescQ   = new Quill('#add-desc-editor',   { theme: 'snow', modules: { toolbar: '#add-desc-toolbar' } });
   const etDescQ    = new Quill('#et-desc-editor',    { theme: 'snow', modules: { toolbar: '#et-desc-toolbar' } });
-  // const vtCommentQ = document.getElementById('vt-comment-editor')
-  //   ? new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } })
-  //   : null;
+  const vtCommentQ = document.getElementById('vt-comment-editor')
+    ? new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } })
+    : null;
 
   $('#add-due-date, #et-due-date').flatpickr({ dateFormat: 'Y-m-d' });
   $('#add-priority, #add-status').select2({ dropdownParent: $('#addTaskOffcanvas') });
