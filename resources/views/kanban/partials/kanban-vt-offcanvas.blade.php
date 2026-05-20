@@ -280,7 +280,7 @@
 
           <div class="p-3">
             <div class="mb-3" id="vt-submission-note-wrapper">
-              <label class="form-label small fw-medium" for="vt-submission-note">{{ __('admin.submission_note') }}</label>
+              <label class="form-label small fw-medium" for="vt-submission-note">{{ __('admin.submission_note_label') }}</label>
               <textarea id="vt-submission-note" class="form-control form-control-sm" rows="3"
                 placeholder="{{ __('admin.submission_note_placeholder') }}"></textarea>
             </div>

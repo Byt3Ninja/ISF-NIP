@@ -3714,8 +3714,10 @@ return [
 	'no_recent_activities' => 'No recent activities',
 	'no_feedback' => 'No feedback yet',
 	'feedback' => 'Feedback',
+  'submission' => 'Submission',
 	'your_submission' => 'Your submission',
-	'submission_note' => 'Submission Note (optional)',
+	'submission_note' => 'Submission Note',
+  'submission_note_label' => 'Submission Note (optional)',
 	'submission_note_placeholder' => 'Add a note to your submission…',
 	'send_submission' => 'Send Submission',
 	'pass_task' => 'Pass Task',
@@ -3789,4 +3791,5 @@ return [
   'please_add_files' => 'Please add at least one file.',
   'failed' => 'Failed',
   'unsupported_task_file_type' => 'Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
+  'submittedFiles' => 'Submitted Files',
 ];

@@ -188,53 +188,146 @@ function renderFeedbackList(feedbacks, containerSelector) {
 // ─── Submissions ──────────────────────────────────────────────────────────────
 
 function renderSubmissionsList(submissions, containerSelector) {
-  const $c  = $(containerSelector);
+  const $c = $(containerSelector);
   const lbl = window.KanbanConfig.labels;
+
   if (!submissions || !submissions.length) {
-    $c.html(`<p class="text-muted text-center py-4 mb-0">${lbl.noSubmissions}</p>`);
+    $c.html(`
+      <div class="text-center py-5">
+        <i class="ti ti-inbox ti-lg text-muted mb-2"></i>
+        <p class="text-muted mb-0">${lbl.noSubmissions}</p>
+      </div>
+    `);
     return;
   }
 
   const STATUS_BADGE = {
-    pending_review: `<span class="badge bg-label-warning ms-1">${lbl.pendingReview}</span>`,
-    approved:       `<span class="badge bg-label-success ms-1">${lbl.approved}</span>`,
-    rejected:       `<span class="badge bg-label-danger ms-1">${lbl.rejected}</span>`,
+    pending_review: `<span class="badge bg-label-warning">${lbl.pendingReview}</span>`,
+    approved: `<span class="badge bg-label-success">${lbl.approved}</span>`,
+    rejected: `<span class="badge bg-label-danger">${lbl.rejected}</span>`,
   };
 
-  $c.html(submissions.map(sub => {
-    const hasUser = !!(sub.user || sub.user_id);
-    const statusBadge = hasUser ? (STATUS_BADGE[sub.status] || '') : '';
-    const filesHtml = (sub.files || []).length
-      ? sub.files.map(f => {
-          const sz = f.size_bytes ? formatFileSize(f.size_bytes) : '';
-          return `
-            <a href="${f.url}" download="${f.name}"
-               class="d-flex align-items-center gap-2 border rounded p-2 bg-body text-body text-decoration-none mb-1">
-              <i class="ti ${fileIcon(f.name)} ti-sm flex-shrink-0"></i>
-              <span class="text-truncate small flex-grow-1">${f.name}</span>
-              ${sz ? `<span class="text-muted flex-shrink-0" style="font-size:.7rem;">${sz}</span>` : ''}
-              <i class="ti ti-download ti-xs ms-1 text-muted flex-shrink-0"></i>
-            </a>`;
-        }).join('')
-      : `<span class="text-muted small">${lbl.noAttachments}</span>`;
+  $c.html(
+    submissions
+      .map((sub) => {
+        const hasUser = !!(sub.user || sub.user_id);
+        const statusBadge = hasUser ? STATUS_BADGE[sub.status] || "" : "";
 
-    const avatarHtml = hasUser
-      ? buildAvatar(sub.user, sub.img_url, sub.user_id)
-      : `<span class="d-inline-flex rounded-circle bg-label-secondary" style="width:32px;height:32px;"><span class="d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;"><i class="ti ti-file-text ti-xs"></i></span></span>`;
+        const filesHtml = (sub.files || []).length
+          ? `
+          <div class="mt-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="ti ti-paperclip text-muted"></i>
+              <span class="fw-semibold small text-uppercase text-muted">
+                ${lbl.submittedFiles || "Submitted Files"}
+              </span>
+            </div>
 
-    return `
-      <div class="mb-4 pb-3 border-bottom">
-        ${hasUser ? `
-        <div class="d-flex align-items-center gap-2 mb-2">
-          ${avatarHtml}
-          <div>
-            <span class="fw-semibold text-dark d-block">${sub.user || ''}${statusBadge}</span>
+            <div class="d-flex flex-column gap-2">
+              ${sub.files
+                .map((f) => {
+                  const sz = f.size_bytes ? formatFileSize(f.size_bytes) : "";
+
+                  return `
+                  <a href="${f.url}"
+                     download="${f.name}"
+                     class="d-flex align-items-center gap-3 p-2 rounded border bg-body text-body text-decoration-none hover-shadow-sm">
+
+                    <div class="rounded bg-label-secondary d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:38px;height:38px;">
+                      <i class="ti ${fileIcon(f.name)}"></i>
+                    </div>
+
+                    <div class="flex-grow-1 overflow-hidden">
+                      <div class="small fw-medium text-truncate">${f.name}</div>
+                      ${sz ? `<small class="text-muted">${sz}</small>` : ""}
+                    </div>
+
+                    <i class="ti ti-download text-muted flex-shrink-0"></i>
+                  </a>
+                `;
+                })
+                .join("")}
+            </div>
+          </div>
+        `
+          : `
+          <div class="mt-3 small text-muted">
+            <i class="ti ti-paperclip-off me-1"></i>
+            ${lbl.noAttachments}
+          </div>
+        `;
+
+        const avatarHtml = hasUser
+          ? buildAvatar(sub.user, sub.img_url, sub.user_id)
+          : `
+          <span class="d-inline-flex rounded-circle bg-label-secondary"
+                style="width:40px;height:40px;">
+            <span class="d-flex align-items-center justify-content-center w-100 h-100">
+              <i class="ti ti-file-text"></i>
+            </span>
+          </span>
+        `;
+
+        return `
+        <div class="card shadow-none border mb-3">
+          <div class="card-body">
+
+            <div class="d-flex align-items-start justify-content-between gap-3">
+              
+              <div class="d-flex align-items-center gap-2">
+                ${avatarHtml}
+
+                <div>
+                  ${
+                    hasUser
+                      ? `
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                          <span class="fw-semibold text-dark">
+                            ${sub.user || ""}
+                          </span>
+                          ${statusBadge}
+                        </div>
+                      `
+                      : `
+                        <span class="fw-semibold text-dark">
+                          ${lbl.submission || "Submission"}
+                        </span>
+                      `
+                  }
+
+                  ${
+                    sub.time
+                      ? `<small class="text-muted d-block">${sub.time}</small>`
+                      : ""
+                  }
+                </div>
+              </div>
+
+            </div>
+
+            ${
+              sub.note
+                ? `
+                  <div class="mt-3">
+                    <div class="small fw-semibold text-uppercase text-muted mb-1">
+                      ${lbl.submissionNote || "Submission Note"}
+                    </div>
+
+                    <div class="bg-light-subtle rounded p-3 small text-body">
+                      ${sub.note}
+                    </div>
+                  </div>
+                `
+                : ""
+            }
+
+            ${filesHtml}
+
           </div>
         </div>
-        ` : ''}
-        ${sub.time ? `<small class="text-muted d-block mb-1">${sub.time}</small>` : ''}
-        ${sub.note ? `<p class="small text-muted mb-2">${sub.note}</p>` : ''}
-        <div>${filesHtml}</div>
-      </div>`;
-  }).join(''));
+      `;
+      })
+      .join(""),
+  );
 }

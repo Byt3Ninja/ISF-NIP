@@ -113,6 +113,9 @@ window.KanbanConfig = {
     failed:                 '{{ __("admin.failed") }}',
     attachmentUploadedSuccess: '{{ __("admin.attachment_uploaded_success") }}',
     sendSubmission:         '{{ __("admin.send_submission") }}',
+    submittedFiles: '{{ __("admin.submittedFiles") }}',
+    submissionNote: '{{ __("admin.submission_note") }}',
+    submission: '{{ __("admin.submission") }}'
   },
   priorityMap: {
     Low:    { cls: 'bg-label-info',    dot: 'bg-info',    label: '{{ __("admin.priorityLow") }}'    },

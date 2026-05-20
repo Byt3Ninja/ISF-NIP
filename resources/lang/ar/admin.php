@@ -3770,8 +3770,10 @@ return [
 	'no_recent_activities' => 'لا توجد أنشطة الأخيرة',
 	'no_feedback' => 'لا توجد تقيمات بعد',
 	'feedback' => 'سجل تقيمات',
+	'submission' => 'تقديم',
 	'your_submission' => 'تقديمك',
-	'submission_note' => 'ملاحظة التقديم (اختياري)',
+	'submission_note' => 'ملاحظة التقديم',
+	'submission_note_label' => 'ملاحظة التقديم (اختياري)',
 	'submission_note_placeholder' => 'أضف ملاحظة لتقديمك…',
 	'send_submission' => 'إرسال التقديم',
 	'pass_task' => 'تمرير المهمة',
@@ -3845,4 +3847,5 @@ return [
   'please_add_files' => 'يرجى إضافة ملف واحد على الأقل.',
   'failed' => 'فشل',
   'unsupported_task_file_type' => 'نوع الملف غير مدعوم. الملفات المسموح بها: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
+  'submittedFiles' => 'الملفات المقدمة',
 ];
