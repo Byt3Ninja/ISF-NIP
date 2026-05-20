@@ -664,6 +664,8 @@ $(function () {
         const displayedStatus = companyId
             ? (td.assignees?.find(a => String(a.id) === String(companyId))?.status ?? td.status)
             : td.status;
+            
+            console.log('displayedStatus', displayedStatus)
         const sObj = statusObj[displayedStatus] ?? { class: 'bg-label-secondary', title: displayedStatus };
 
         $('#vt-title').text(td.title);
@@ -740,6 +742,8 @@ $(function () {
         $('#vt-activity-count').text(td.activities?.length ?? 0);
 
         const isInReview = displayedStatus === 'review';
+        
+        console.log('isInReview', isInReview)
         $('#vt-feedback-form-wrapper').toggle(isInReview);
         $('#vt-feedback-status-message').toggle(!isInReview);
 
