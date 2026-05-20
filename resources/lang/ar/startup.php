@@ -145,7 +145,7 @@ return [
   // نظرة عامة على ملف الشركة
   'overview_description' => 'منصة تقنية مالية حديثة لحلول دفع سلسة',
   'badge_saas' => 'خدمة برمجيات',
-  'est_date' => 'تاريخ التأسيس',
+  'complition_date' => 'تاريخ التأسيس',
   'business_type' => 'نوع العمل',
   'industry' => 'الصناعة',
   'sector' => 'القطاع',

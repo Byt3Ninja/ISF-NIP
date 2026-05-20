@@ -144,7 +144,7 @@ return [
   // Startup Profile Overview
   'overview_description' => 'Modern fintech platform for seamless payment solutions',
   'badge_saas' => 'SaaS',
-  'est_date' => 'Est. Date',
+  'complition_date' => 'Completion Date',
   'business_type' => 'Business Type',
   'industry' => 'Industry',
   'sector' => 'Sector',
