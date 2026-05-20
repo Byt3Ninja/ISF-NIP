@@ -1320,21 +1320,27 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   </tr>
                 </thead>
                 <tbody>
-                  @foreach ($mentorshipData as $key => $session)
-                  <tr class="border-top">
-                    <td class="fw-medium">{{ $session['mentor'] }}</td>
-                    <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $session['id'] }}</span></td>
-                    <td>{{ $session['step_name'] }}</td>
-                    <td>{{ $session['step_id'] }}</td>
-                    <td>{{ $session['date'] }}</td>
-                    <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
-                        $session['duration'] }}</span></td>
-                    <td class="fw-medium">{{ $session['founder_attended'] }}</td>
-                    <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
-                        $session['rating'] }}</span></td>
-                    <td class="small">{{ $session['comments'] }}</td>
-                  </tr>
-                  @endforeach
+                  @if(count($mentorshipData) > 0 && !empty($mentorshipData[0]['mentor']))
+                    @foreach ($mentorshipData as $key => $session)
+                    <tr class="border-top">
+                      <td class="fw-medium">{{ $session['mentor'] }}</td>
+                      <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $session['id'] }}</span></td>
+                      <td>{{ $session['step_name'] }}</td>
+                      <td>{{ $session['step_id'] }}</td>
+                      <td>{{ $session['date'] }}</td>
+                      <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
+                          $session['duration'] }}</span></td>
+                      <td class="fw-medium">{{ $session['founder_attended'] }}</td>
+                      <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
+                          $session['rating'] }}</span></td>
+                      <td class="small">{{ $session['comments'] }}</td>
+                    </tr>
+                    @endforeach
+                  @else
+                    <tr>
+                      <td colspan="9" class="text-center text-muted py-3">{{ __('startup.no_mentorship_sessions') }}</td>
+                    </tr>
+                  @endif
                 </tbody>
               </table>
             </div>

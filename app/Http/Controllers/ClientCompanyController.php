@@ -3330,9 +3330,44 @@ class ClientCompanyController extends Controller
         $screening   = $this->decodeAlumniJson($almuni?->screening);
         $finalScreen = $this->decodeAlumniJson($almuni?->final_screening);
         $training    = $this->decodeAlumniJson($almuni?->training);
-        $mentorships  = $this->decodeAlumniJson($almuni?->mentorship);
         $milestones  = $this->decodeAlumniJson($almuni?->milestones);
-        $tasks       = $this->decodeAlumniJson($almuni?->tasks);
+
+        // Read live data for mentorship and tasks to avoid stale snapshot
+        $liveCompany = Company::find($id);
+        $liveUserId  = $liveCompany?->user?->id;
+
+        $liveMentorshipRequests = MentorshipRequest::where('cycle_id', $cycle_id)
+            ->where('user_id', $liveUserId)
+            ->get();
+        $mentorships = $liveMentorshipRequests->map(function ($m) {
+            return [
+                'mentor_name' => ($m->mentor?->first_name_en . ' ' . $m->mentor?->last_name_en) ?? '',
+                'mentor_ID'   => $m->mentor?->id ?? '',
+                'date'        => $m->zoom_date?->format('Y-m-d H:i') ?? '',
+                'duration'    => $m->period,
+                'attended'    => $m->done == '1' ? 'Attended' : 'Not Attended',
+                'founder_name' => ($m->user?->first_name_en . ' ' . $m->user?->last_name_en) ?? '',
+                'rating'      => $m->rating,
+                'comments'    => $m->rate_comment,
+            ];
+        })->values()->toArray();
+
+        $liveTasks = MentorshipTask::whereHas('mentorshipRequest', function ($q) use ($cycle_id) {
+            $q->where('cycle_id', $cycle_id);
+        })->where('company_id', $id)->get();
+        $tasks = $liveTasks->map(function ($t) {
+            return [
+                'Task_ID'        => $t->id ?? '',
+                'Task_title'     => $t->title ?? '',
+                'Session_ID'     => $t->mentorshipRequest?->id ?? '',
+                'Description'    => $t->description ?? '',
+                'Due_date'       => $t->due_date ?? '',
+                'Status'         => $t->status ?? '',
+                'Completion_date' => $t->status == 'completed' ? $t->date : '',
+                'Assigned_mentor' => ($t->mentor?->first_name_en . ' ' . $t->mentor?->last_name_en) ?? '',
+                'Who_created_task' => ($t->mentor?->first_name_en . ' ' . $t->mentor?->last_name_en) ?? '',
+            ];
+        })->values()->toArray();
         $quizzes     = $this->decodeAlumniJson($almuni?->quizzes);
         $surveys     = $this->decodeAlumniJson($almuni?->surveys);
         $services    = $this->decodeAlumniJson($almuni?->services);
@@ -3495,8 +3530,8 @@ class ClientCompanyController extends Controller
             
             return [
                 'title' => $task['Task_title'] ?? null,
-                'task_id' => 'TSK-'. $task['Task_ID'] ?? null,
-                'session_id' => 'TR-' . $task['Session_ID'] ?? null,
+                'task_id' => 'TSK-' . ($task['Task_ID'] ?? ''),
+                'session_id' => 'TR-' . ($task['Session_ID'] ?? ''),
                 'session_title' => 'Will be Deleted',
                 'description' => $task['Description'] ?? null,
                 'due_date' => $task['Due_date'] ?? null,
@@ -4440,7 +4475,6 @@ class ClientCompanyController extends Controller
                 $almuni->training = json_encode($trainings);
 
                 $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycle)
-                ->where('approved', 'Yes')
                 ->where('user_id', $company?->user?->id)
                 ->get();
 
@@ -4502,19 +4536,21 @@ class ClientCompanyController extends Controller
 
 
                 // Mentor Tasks
-                $startup_MentorTasks = MentorshipTask::where('company_id', $company->id)->get();
+                $startup_MentorTasks = MentorshipTask::whereHas('mentorshipRequest', function ($q) use ($company) {
+                    $q->where('cycle_id', $company->cycle);
+                })->where('company_id', $company->id)->get();
                 $MentorTasks = [];
                 foreach ($startup_MentorTasks as $MentorTask) {
                     $MentorTasks[] = [
                         'Task_ID' => $MentorTask->id ?? '',
                         'Task_title' => $MentorTask->title ?? '',
-                        'Session_ID' => $MentorTask->mentorshipRequest->id ?? '',
+                        'Session_ID' => $MentorTask->mentorshipRequest?->id ?? '',
                         'Description' => $MentorTask->description ?? '',
                         'Due_date' => $MentorTask->due_date ?? '',
                         'Status' => $MentorTask->status ?? '',
                         'Completion_date' => $MentorTask->status == 'completed' ? $MentorTask->date : '',
-                        'Assigned_mentor' => $MentorTask->mentor->first_name_en ." ". $MentorTask->mentor->last_name_en ?? '',
-                        'Who_created_task' => $MentorTask->mentor->first_name_en ." ". $MentorTask->mentor->last_name_en ?? '',
+                        'Assigned_mentor' => ($MentorTask->mentor?->first_name_en . ' ' . $MentorTask->mentor?->last_name_en) ?? '',
+                        'Who_created_task' => ($MentorTask->mentor?->first_name_en . ' ' . $MentorTask->mentor?->last_name_en) ?? '',
                     ];
                 }
                 if(empty($MentorTasks)) {
