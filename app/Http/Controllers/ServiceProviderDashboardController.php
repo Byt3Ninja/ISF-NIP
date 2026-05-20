@@ -137,6 +137,7 @@ class ServiceProviderDashboardController extends Controller
         $query = DB::table('services_requests as sr')
             ->join('services as s', 'sr.service_id', '=', 's.id')
             ->join('users as u', 'sr.user_id', '=', 'u.id')
+            ->join('companies as co', 'co.id', '=', 'u.company_id')
             ->whereIn('sr.service_id', $serviceIds)
             ->whereNull('sr.deleted_at')
             ->select([
@@ -148,6 +149,8 @@ class ServiceProviderDashboardController extends Controller
                 "s.name_{$l} as service_name",
                 's.id as service_id',
                 DB::raw("CONCAT(COALESCE(u.first_name_{$l}, ''), ' ', COALESCE(u.last_name_{$l}, '')) as startup_name"),
+                "co.id as startup_id",
+                "co.name_{$l} as startup_company_name",
             ]);
 
         // Status filter
@@ -198,14 +201,21 @@ class ServiceProviderDashboardController extends Controller
                 $statusLabel = 'Rejected';
             }
 
+            $response_time = '—';
+            $response_time = $row->decided_at ? sprintf('%02d:%02d', intdiv((int) Carbon::parse($row->created_at)->diffInMinutes(Carbon::parse($row->decided_at)), 60), ((int) Carbon::parse($row->created_at)->diffInMinutes(Carbon::parse($row->decided_at))) % 60) : '—';
             return [
                 'id' => $row->id,
                 'startup_name' => trim($row->startup_name),
+                'startup_company' => trim( $row->startup_company_name ),
+                'startup_url' => route('company.profile_view', ['id' => $row->startup_id]),
+                'response_time' => $response_time,
                 'comment' => $row->comment ?? '',
                 'service_name' => $row->service_name,
                 'service_id' => $row->service_id,
                 'submitted' => Carbon::parse($row->created_at)->diffForHumans(),
                 'submitted_raw' => $row->created_at,
+                'decided' => Carbon::parse($row->decided_at)->diffForHumans(),
+                'decided_raw' => $row->decided_at,
                 'status' => $statusLabel,
                 'is_pending' => is_null($row->approved),
             ];

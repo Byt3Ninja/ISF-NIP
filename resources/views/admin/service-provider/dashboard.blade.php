@@ -266,6 +266,7 @@
                             <th>{{ __('dashboard.sp_service_name') }}</th>
                             <th>{{ __('dashboard.sp_submitted') }}</th>
                             <th>{{ __('dashboard.sp_status') }}</th>
+                            <th>{{ __('dashboard.sp_response_time') }}</th>
                             @if($canQuickAction)
                             <th>{{ __('dashboard.sp_actions') }}</th>
                             @endif
@@ -399,11 +400,16 @@
             $body.append(
                 '<tr data-id="'+row.id+'">' +
                     checkbox +
-                    '<td>'+escapeHtml(row.startup_name)+'</td>' +
+                    '<td>' + 
+                        '<a href="'+escapeHtml(row.startup_url)+'" target="_blank" class="text-decoration-none">' +
+                        escapeHtml(row.startup_company)
+                        + '</a>'
+                    + '</td>' +
                     '<td><small class="text-muted">'+escapeHtml(row.comment)+'</small></td>' +
                     '<td>'+escapeHtml(row.service_name)+'</td>' +
                     '<td><small>'+escapeHtml(row.submitted)+'</small></td>' +
                     '<td>'+statusBadge+'</td>' +
+                    '<td>'+escapeHtml(row.response_time)+'</td>' +
                     actionCell +
                 '</tr>'
             );
