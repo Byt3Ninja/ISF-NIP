@@ -383,9 +383,6 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
             message: translations[lang].company_description.max
           },
         },
-        'Sustainable_development[]': {
-          validators: { notEmpty: { message: translations[lang].required_field } }
-        }
       },
       plugins: buildFVPlugins('.mb-4')
     });
@@ -400,9 +397,6 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
       });
     });
 
-    $('#sustainable-mutiple-select').on('select2:select select2:unselect', () => {
-      setTimeout(() => editDescFV?.revalidateField('Sustainable_development[]'), 100);
-    });
   }
 
   /* ====================== MVP FORM ====================== */
