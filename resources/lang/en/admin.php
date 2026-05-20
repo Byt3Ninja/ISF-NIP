@@ -3763,6 +3763,7 @@ return [
 	'founder_email_label' => 'Founder Email',
 	'founder_phone_label' => 'Founder Phone Number',
 	'founder_linkedin_label' => 'LinkedIn Profile',
+	'founder_linkedin_feedback' => 'Enter a valid LinkedIn URL.',
 	'founder_join_date_label' => 'Join Date',
 	'founder_type_label' => 'Founder Type',
 	'founder_commitment_label' => 'Working Commitment',
@@ -3793,4 +3794,5 @@ return [
   'unsupported_task_file_type' => 'Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
   'submittedFiles' => 'Submitted Files',
   'feedback_note_required' => 'Feedback note required',
+  'Closed' => 'Closed',
 ];

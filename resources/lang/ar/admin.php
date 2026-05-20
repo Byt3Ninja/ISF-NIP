@@ -3819,6 +3819,7 @@ return [
 	'founder_email_label' => 'البريد الإلكتروني',
 	'founder_phone_label' => 'رقم الهاتف',
 	'founder_linkedin_label' => 'رابط LinkedIn',
+	'founder_linkedin_feedback' => 'يرجى إدخال رابط LinkedIn صحيح.',
 	'founder_join_date_label' => 'تاريخ الانضمام',
 	'founder_type_label' => 'نوع المؤسس',
 	'founder_commitment_label' => 'نوع الالتزام',
@@ -3849,4 +3850,5 @@ return [
   'unsupported_task_file_type' => 'نوع الملف غير مدعوم. الملفات المسموح بها: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
   'submittedFiles' => 'الملفات المقدمة',
   'feedback_note_required' => 'ملاحظة التقييم مطلوبة',
+  'Closed' => 'مغلق',
 ];
