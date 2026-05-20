@@ -46,11 +46,16 @@ class UpdateServiceProviderStep4Request extends FormRequest
             'portfolio.*.description' => [
                 'nullable',
                 'string',
-                'max:100',
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1];
                     $item = $this->input("portfolio.{$index}");
                     if (($item['delete'] ?? 'false') === 'true') return;
+
+                    $normalized = str_replace(["\r\n", "\r"], "\n", (string) $value);
+                    if (mb_strlen($normalized) > 100) {
+                        $fail(__('validation.max.string', ['attribute' => __('validation.attributes.description') ?: 'description', 'max' => 100]));
+                        return;
+                    }
 
                     $hasMedia = !empty($item['id']) || $this->hasFile("portfolio.{$index}.media");
                     $hasTitle = !empty($item['title']);
@@ -121,8 +126,18 @@ class UpdateServiceProviderStep4Request extends FormRequest
 
     protected function prepareForValidation()
     {
+        $portfolio = $this->input('portfolio');
+        if (is_array($portfolio)) {
+            foreach ($portfolio as $i => $item) {
+                if (isset($item['description']) && is_string($item['description'])) {
+                    $portfolio[$i]['description'] = str_replace(["\r\n", "\r"], "\n", $item['description']);
+                }
+            }
+        }
+
         $this->merge([
             'portfolio_visibility' => $this->portfolio_visibility ?? 'off',
+            'portfolio' => $portfolio,
         ]);
     }
 }
