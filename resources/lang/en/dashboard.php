@@ -201,6 +201,7 @@ return [
     'sp_service_name' => 'Service',
     'sp_submitted' => 'Submitted',
     'sp_status' => 'Status',
+    'sp_response_time' => 'Response Time',
     'sp_actions' => 'Actions',
     'sp_period' => 'Period',
     'sp_filter_all' => 'All',

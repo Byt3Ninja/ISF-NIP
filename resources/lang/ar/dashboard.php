@@ -201,6 +201,7 @@ return [
     'sp_service_name' => 'الخدمة',
     'sp_submitted' => 'تاريخ التقديم',
     'sp_status' => 'الحالة',
+    'sp_response_time' => 'وقت الاستجابة',
     'sp_actions' => 'الإجراءات',
     'sp_period' => 'الفترة',
     'sp_filter_all' => 'الكل',
