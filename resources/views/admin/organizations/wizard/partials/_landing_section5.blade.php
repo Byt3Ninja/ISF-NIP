@@ -35,7 +35,7 @@
               id="programs_enabled"
               name="programs_enabled"
               value="1"
-              {{ old('programs_enabled', $landingPage->programs_enabled ?? false) ? 'checked' : '' }}
+              {{ old('programs_enabled', $landingPage->programs_enabled ?? true) ? 'checked' : '' }}
               data-section="programs"
             />
             <label class="form-check-label" for="programs_enabled">
