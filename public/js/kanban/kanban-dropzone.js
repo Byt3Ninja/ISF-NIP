@@ -18,7 +18,7 @@ const DZ_ACCEPT_TYPES = [
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/zip','application/x-zip-compressed',
-  'text/plain','text/csv',
+  'text/plain',
 ];
 
 let dzQueue = []; // { file, id }

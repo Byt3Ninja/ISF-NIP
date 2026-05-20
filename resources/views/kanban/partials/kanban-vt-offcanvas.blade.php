@@ -292,7 +292,7 @@
                  style="cursor:pointer;transition:border-color .2s,background .2s;">
               <input type="file" id="vt-dropzone-input"
                 class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
-                accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain,text/csv"
+                accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain"
                 multiple />
               <i class="ti ti-cloud-upload ti-md text-primary mb-1 d-block"></i>
               <p class="mb-1 small fw-medium">{{ __('admin.dropzone') }}</p>
