@@ -238,6 +238,28 @@ class ClientCompanyController extends Controller
 
         $cycle = Cycle::find($company->cycle);
         if ($cycle) {
+            $currentScreeningScore = null;
+            $screenSteps = Step::where('cycle_id', $cycle->id)->where('stype', 2)->pluck('id');
+            if ($screenSteps->isNotEmpty()) {
+                $screenEvals = ScreeningEvaluation::whereIn('step_id', $screenSteps)->pluck('id');
+                if ($screenEvals->isNotEmpty()) {
+                    $screenResults = ScreeningEvaluationResults::whereIn('evaluation_id', $screenEvals)
+                        ->where('company_id', $company->id)->get();
+                    $currentScreeningScore = $screenResults->isNotEmpty() ? round($screenResults->avg('score'), 2) : null;
+                }
+            }
+
+            $currentFinalScoreForProgram = null;
+            $finalStepsForProgram = Step::where('cycle_id', $cycle->id)->where('stype', 5)->pluck('id');
+            if ($finalStepsForProgram->isNotEmpty()) {
+                $finalEvalsForProgram = ScreeningEvaluation::whereIn('step_id', $finalStepsForProgram)->pluck('id');
+                if ($finalEvalsForProgram->isNotEmpty()) {
+                    $finalResultsForProgram = ScreeningEvaluationResults::whereIn('evaluation_id', $finalEvalsForProgram)
+                        ->where('company_id', $company->id)->get();
+                    $currentFinalScoreForProgram = $finalResultsForProgram->isNotEmpty() ? round($finalResultsForProgram->avg('score'), 2) : null;
+                }
+            }
+
             $programs->push((object)[
                 'id' => $cycle->id,
                 'name' => $cycle->title,
@@ -249,9 +271,9 @@ class ClientCompanyController extends Controller
                 'cohort' => (object)[ 'name' => $cycle->cohort ?? null ],
                 'start_date' => Carbon::parse($cycle->start),
                 'completion_date' => Carbon::parse($cycle->end),
-                'screening_score' => null,
+                'screening_score' => $currentScreeningScore,
                 'rank' => null,
-                'final_screening_score' => null,
+                'final_screening_score' => $currentFinalScoreForProgram,
                 'status' => 'upcoming',
             ]);
         }
@@ -283,6 +305,20 @@ class ClientCompanyController extends Controller
             if ($almuni->cycle_id) {
                 $almuniCycle = Cycle::with('organization')->find($almuni->cycle_id);
                 if ($almuniCycle) {
+                    $almuniScreeningScore = null;
+                    if (!empty($almuni->screening)) {
+                        $screenArr = is_array($almuni->screening) ? $almuni->screening : json_decode($almuni->screening, true);
+                        $sScores = collect($screenArr ?? [])->pluck('overall_score')->filter();
+                        $almuniScreeningScore = $sScores->isNotEmpty() ? round($sScores->avg(), 2) : null;
+                    }
+
+                    $alumniFinalScore = null;
+                    if (!empty($almuni->final_screening)) {
+                        $fsArr = is_array($almuni->final_screening) ? $almuni->final_screening : json_decode($almuni->final_screening, true);
+                        $fsScores = collect($fsArr ?? [])->pluck('overall_score')->filter();
+                        $alumniFinalScore = $fsScores->isNotEmpty() ? round($fsScores->avg(), 2) : null;
+                    }
+
                     $programs->push((object)[
                         'id'                    => $almuniCycle->id,
                         'name'                  => $almuniCycle->title,
@@ -292,9 +328,9 @@ class ClientCompanyController extends Controller
                         'cohort'                => (object)['name' => $almuniCycle->cohort ?? null],
                         'start_date'            => $almuniCycle->start ? Carbon::parse($almuniCycle->start) : null,
                         'completion_date'       => $almuniCycle->end ? Carbon::parse($almuniCycle->end) : null,
-                        'screening_score'       => null,
+                        'screening_score'       => $almuniScreeningScore,
                         'rank'                  => null,
-                        'final_screening_score' => null,
+                        'final_screening_score' => $alumniFinalScore,
                         'status'                => 'completed',
                     ]);
                     continue;

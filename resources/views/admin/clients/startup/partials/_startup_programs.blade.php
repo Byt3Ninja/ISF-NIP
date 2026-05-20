@@ -120,9 +120,9 @@ $cycles = [
                   <div class="bg-light d-flex align-items-center justify-content-center rounded-3 border" 
                        style="width: 58px; height: 58px; overflow: hidden; flex-shrink: 0;">
                     @if(isset($program->img_url) && $program->img_url)
-                      <img src="{{ $program->img_url }}" 
-                           alt="{{ $program->name }}" 
-                           class="img-fluid p-1" 
+                      <img src="{{ asset($program->img_url) }}"
+                           alt="{{ $program->name }}"
+                           class="img-fluid p-1"
                            style="object-fit: contain; max-height: 100%;">
                     @else
                       <i class="ti ti-rocket fs-2 text-secondary"></i>
