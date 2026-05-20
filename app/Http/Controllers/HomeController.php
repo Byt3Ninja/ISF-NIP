@@ -338,6 +338,20 @@ class HomeController extends Controller
                         comp.deleted_at IS NULL
                         AND comp.cycle IS NOT NULL
                         AND s.id IS NOT NULL
+                        AND EXISTS (
+                            SELECT 1 FROM users u
+                            JOIN model_has_roles mhr ON mhr.model_id = u.id
+                            JOIN roles r ON r.id = mhr.role_id
+                            WHERE u.company_id = comp.id
+                            AND r.default_for = 'registered'
+                        )
+                        AND NOT EXISTS (
+                            SELECT 1 FROM users u
+                            JOIN model_has_roles mhr ON mhr.model_id = u.id
+                            JOIN roles r ON r.id = mhr.role_id
+                            WHERE u.company_id = comp.id
+                            AND r.default_for IN ('admin', 'organizationmanager', 'subadmin')
+                        )
                 ";
                 if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                     $applied_companies_by_cycle_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
