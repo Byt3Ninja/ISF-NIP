@@ -406,6 +406,7 @@ class ClientCompanyController extends Controller
                 if ($evaluations->isNotEmpty()) {
                     $currentResults = ScreeningEvaluationResults::whereIn('evaluation_id', $evaluations)
                         ->where('company_id', $company->id)
+                        ->where('status', 1)
                         ->get();
 
                     if ($currentResults->isNotEmpty()) {
@@ -461,14 +462,12 @@ class ClientCompanyController extends Controller
             }
         }
 
-        // Calculate attendance rate
-        $currentAttended = $currentMentorships->where('done', 1)->count();
+        // Calculate attendance rate based on sessions that have been rated
+        $currentAttended = $currentMentorships->whereNotNull('rating')->count();
         $currentTotal = $currentMentorships->count();
 
-        // Alumni data may have 'status' or 'done' field
         $alumniAttended = $alumniMentorships->filter(function ($session) {
-            return (isset($session['status']) && $session['status'] === 'Attended') ||
-                   (isset($session['done']) && $session['done'] == 1);
+            return isset($session['rating']) && $session['rating'] !== null && $session['rating'] !== '';
         })->count();
         $alumniTotal = $alumniMentorships->count();
 
