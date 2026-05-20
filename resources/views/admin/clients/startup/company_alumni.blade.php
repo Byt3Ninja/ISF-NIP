@@ -803,11 +803,11 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     <div class="col-12 text-center text-muted">{{ __('startup.no_founders') }}</div>
                   @else
                   <div class="table-responsive">
-                      <table class="table table-sm mb-0 align-middle">
+                      <table class="table table-sm mb-0">
                         <thead class="table-light">
                           <tr>
-                            <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
-                            <th class="text-center text-nowrap"><i class="ti ti-mail me-1"></i>{{ __('startup.email') }}</th>
+                            <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
+                            <th class="text-nowrap"><i class="ti ti-mail me-1"></i>{{ __('startup.email') }}</th>
                             <th class="text-end"><i class="ti ti-link me-1"></i>{{ __('startup.linkedin') }}</th>
                           </tr>
                         </thead>
