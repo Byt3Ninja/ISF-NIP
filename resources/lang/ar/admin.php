@@ -3848,4 +3848,5 @@ return [
   'failed' => 'فشل',
   'unsupported_task_file_type' => 'نوع الملف غير مدعوم. الملفات المسموح بها: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
   'submittedFiles' => 'الملفات المقدمة',
+  'feedback_note_required' => 'ملاحظة التقييم مطلوبة',
 ];
