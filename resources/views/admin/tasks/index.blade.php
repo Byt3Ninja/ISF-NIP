@@ -641,7 +641,7 @@ $(function () {
     $('#viewTaskOffcanavas').data('taskId', data.id).offcanvas('show');
   });
 
-  const vtCommentQ = new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } });
+  // const vtCommentQ = new Quill('#vt-comment-editor', { theme: 'snow', modules: { toolbar: '#vt-comment-toolbar' } });
 
   // ─── Review Task (open kanban-vt-offcanvas) ───────────────────────────────
   $(document).on('click', '.task-review-btn', function () {

@@ -170,12 +170,12 @@ function submitFormWithFetch({ form, submitBtnId, btnTextId, btnSpinnerId, succe
     .then(res => res.ok ? res.json().catch(() => ({})) : Promise.reject())
     .then(() => {
       toastr.success(successMessage);
-      setTimeout(() => {
-        if (!location.href.includes('myCompany')) {
-          return;
-        }
-        location.href = location.href.replace('myCompany', 'companyProfile')
-      } , 500);
+      // setTimeout(() => {
+      //   if (!location.href.includes('myCompany')) {
+      //     return;
+      //   }
+      //   location.href = location.href.replace('myCompany', 'companyProfile')
+      // } , 500);
     })
     .catch(() => form.submit())
     .finally(() => {
