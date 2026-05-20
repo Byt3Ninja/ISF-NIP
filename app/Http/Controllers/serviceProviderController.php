@@ -590,7 +590,7 @@ class serviceProviderController extends Controller
 
 		$request->validate([
 			'client_name' => 'required|string|max:100',
-			'client_url' => 'nullable|url|max:500',
+			'client_url' => ['nullable', 'url:http,https', 'max:500', 'regex:/^https?:\/\/([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/.*)?$/'],
 			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
 		]);
 
@@ -615,7 +615,7 @@ class serviceProviderController extends Controller
 
 		$request->validate([
 			'client_name' => 'required|string|max:100',
-			'client_url' => 'nullable|url|max:500',
+			'client_url' => ['nullable', 'url:http,https', 'max:500', 'regex:/^https?:\/\/([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/.*)?$/'],
 			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
 		]);
 
