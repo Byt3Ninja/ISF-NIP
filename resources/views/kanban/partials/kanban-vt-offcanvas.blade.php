@@ -216,9 +216,10 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }}</label>
+                <label class="form-label small" for="vt-fb-note">{{ __('admin.feedback_note') }} *</label>
                 <textarea id="vt-fb-note" class="form-control" rows="3"
-                  placeholder="{{ __('admin.feedback_note_placeholder') }}"></textarea>
+                  placeholder="{{ __('admin.feedback_note_placeholder') }}" maxlength="1000" required></textarea>
+                <div class="invalid-feedback">{{ __('admin.feedback_note_required') ?? 'Feedback note is required.' }}</div>
               </div>
 
               {{-- Upload attachments --}}

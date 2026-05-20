@@ -584,7 +584,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
   // Clear feedback note validation on input
   $(document).on('input', '#vt-fb-note', function () {
     if ($(this).val().trim()) {
-      $(this).removeClass('is-invalid').siblings('.invalid-feedback').remove();
+      $(this).removeClass('is-invalid');
     }
   });
 }

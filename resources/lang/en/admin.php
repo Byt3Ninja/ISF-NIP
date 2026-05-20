@@ -3792,4 +3792,5 @@ return [
   'failed' => 'Failed',
   'unsupported_task_file_type' => 'Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX',
   'submittedFiles' => 'Submitted Files',
+  'feedback_note_required' => 'Feedback note required',
 ];

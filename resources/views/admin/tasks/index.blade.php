@@ -600,6 +600,12 @@ $(function () {
               <span class="small fw-semibold text-uppercase">${data.creator ? (roleObj[data.creator.role] || data.creator.role) : '—'}</span>
             </div>
           @endif
+          <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+            <span class="small text-muted d-flex align-items-center gap-2">
+              <i class="ti ti-calendar-time text-info"></i>{{ __('admin.Created_At') }}
+            </span>
+            <span class="small fw-semibold">${data.createdAt ? moment.unix(data.createdAt).format('YYYY-MM-DD hh:mm A') : '—'}</span>
+          </div>
           <div class="d-flex align-items-center justify-content-between px-4 py-3">
             <span class="small text-muted d-flex align-items-center gap-2">
               <i class="ti ti-rocket text-success"></i>{{ __('admin.Program') }}
@@ -959,9 +965,10 @@ $(function () {
     const note      = $('#vt-fb-note').val().trim();
 
     if (!note) {
-      toastr.error('{{ __("admin.feedback_note_required") ?? "Feedback note is required." }}');
+      $('#vt-fb-note').addClass('is-invalid');
       return;
     }
+    $('#vt-fb-note').removeClass('is-invalid');
 
     const formData = new FormData();
     formData.append('decision', decision);
@@ -1022,6 +1029,13 @@ $(function () {
       },
       error: (xhr) => toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}')
     });
+  });
+
+  // Clear feedback note validation on input
+  $(document).on('input', '#vt-fb-note', function () {
+    if ($(this).val().trim()) {
+      $(this).removeClass('is-invalid');
+    }
   });
 
   // ─── Render Feedback Attachments List ─────────────────────────────────────
