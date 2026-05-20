@@ -810,7 +810,10 @@
 
   function showFieldError(type, eid, fname, msg = null) {
     const $err = $(`#error-${eid}`);
-    if (msg) $err.text(msg);
+    if ($err.data("defaultMsg") === undefined) {
+      $err.data("defaultMsg", $.trim($err.text()));
+    }
+    $err.text(msg || $err.data("defaultMsg"));
     $err.show();
     $(`#form-${type} [name="${fname}"]`).addClass("is-invalid");
   }

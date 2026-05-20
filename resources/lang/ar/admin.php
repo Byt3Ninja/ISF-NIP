@@ -3819,6 +3819,7 @@ return [
 	'founder_email_label' => 'البريد الإلكتروني',
 	'founder_phone_label' => 'رقم الهاتف',
 	'founder_linkedin_label' => 'رابط LinkedIn',
+	'founder_linkedin_feedback' => 'يرجى إدخال رابط LinkedIn صحيح.',
 	'founder_join_date_label' => 'تاريخ الانضمام',
 	'founder_type_label' => 'نوع المؤسس',
 	'founder_commitment_label' => 'نوع الالتزام',

@@ -158,7 +158,7 @@ $foundersCount = count($foundersPayload);
         <div class="col-12">
           <label class="form-label">{{ __('admin.founder_linkedin_label') }}</label>
           <input type="url" name="linkedin" class="form-control" maxlength="500" placeholder="https://linkedin.com/in/..." />
-          <div class="invalid-feedback" id="error-linkedin"></div>
+          <div class="invalid-feedback" id="error-linkedin">{{ __('admin.founder_linkedin_feedback') }}</div>
         </div>
         <!-- Join Date -->
         <div class="col-12">
