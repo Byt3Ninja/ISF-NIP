@@ -179,11 +179,13 @@
       <div class="tab-pane fade p-4" id="vt-add-feedback" role="tabpanel">
         <div class="p-4">
           @if ($_user->ableTo('tasks.add_feedback', $permissions))
-            <div id="vt-feedback-status-message" class="alert alert-warning d-flex align-items-center gap-2 mb-0" role="alert" style="display:none;">
-              <i class="ti ti-alert-triangle ti-xs flex-shrink-0"></i>
-              <span>{{ __('admin.add_feedback_message') }}</span>
+            <div id="vt-feedback-status-message" class="alert alert-warning mb-0" role="alert" style="display:none;">
+              <div class="d-flex align-items-center gap-2">
+                <i class="ti ti-alert-triangle ti-xs flex-shrink-0"></i>
+                <span>{{ __('admin.add_feedback_message') }}</span>
+              </div>
             </div>
-            <div id="vt-feedback-form-wrapper">
+            <div id="vt-feedback-form-wrapper" style="display:none;">
               <h6 class="fw-semibold mb-3 d-flex align-items-center gap-2">
                 <i class="ti ti-message-report ti-sm text-primary"></i>
                 {{ __('admin.add_feedback') }}

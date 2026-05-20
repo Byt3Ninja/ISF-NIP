@@ -171,7 +171,7 @@
     [
       'id'      => 'tab-achievements',
       'title'   => __('startup.achievements'),
-      'heading' => __('startup.achievements_and_progress'),
+      'heading' => __('startup.badges.achievements_and_progress'),
       'value'   => $co->achievements,
       'icon'    => 'ti-award',
       'color'   => 'warning',
