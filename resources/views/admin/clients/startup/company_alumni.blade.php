@@ -1297,13 +1297,13 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                             {{ $q['title'] }}
                           @endif
                         </td>
-                        <td>{{ $q['date_completed'] ?? '—' }}</td>
-                        <td>{{ $q['founder'] ?? '—' }}</td>
+                        <td>{{ $q['date_completed'] ?? 'N/A' }}</td>
+                        <td>{{ $q['founder'] ?? 'N/A' }}</td>
                         <td class="text-center">
-                          @if($q['score'] !== '' && $q['score'] !== null)
+                          @if($q['score'] !== null)
                             <span class="badge bg-label-info">{{ $q['score'] }}</span>
                           @else
-                            <span class="text-muted">—</span>
+                            <span class="text-muted small">N/A</span>
                           @endif
                         </td>
                         <td class="text-center">
