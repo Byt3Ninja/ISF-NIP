@@ -34,8 +34,8 @@
 // ];
 
 $startupStatValues = [
-  'screening_score'        => ['current' => $screeningScore,      'total' => 10],
-  'final_screening_score'  => ['current' => $finalScreeningScore, 'total' => 10],
+  'screening_score'        => $screeningScore,
+  'final_screening_score'  => $finalScreeningScore,
   'training_hours'         => $trainingHours,
   'mentorship_hours'       => $mentorshipHours,
   'attendance_rate'        => $attendanceRate,
@@ -372,13 +372,13 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
     @php
       $startupStatsConfig = [
         'screening_score' => [
-            'format' => 'fraction',
+            'format' => 'number',
             'label'  => __('startup.screening_score'),
             'icon'   => 'search',
             'color'  => 'primary',
         ],
         'final_screening_score' => [
-            'format' => 'fraction',
+            'format' => 'number',
             'label'  => __('startup.final_screening_score'),
             'icon'   => 'award',
             'color'  => 'success',
@@ -1011,8 +1011,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                         <small class="text-muted d-block fw-semibold mb-1">
                           <i class="ti ti-star me-1"></i>{{ __('startup.overall_score') }}
                         </small>
-                        <h4 class="mb-0 text-{{ $scoreClass }} fw-bold">{{ $phaseData['overall_score'] }} <small
-                            class="text-muted fw-normal">/ 5</small></h4>
+                        <h4 class="mb-0 text-{{ $scoreClass }} fw-bold">{{ $phaseData['overall_score'] }}</h4>
                       </div>
                     </div>
                     <div class="col">
@@ -1055,12 +1054,12 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <h6 class="mt-4 mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
+                  @if(count($phaseData['judges']) > 0)
                   <div class="table-responsive">
                     <table class="table table-sm mb-0">
                       <thead class="table-light">
                         <tr>
                           <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
-                          <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
                           <th class="text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
                           <th class="text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                         </tr>
@@ -1068,19 +1067,23 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                       <tbody>
                         @foreach ($phaseData['judges'] as $j)
                         <tr class="border-top">
-                          <td class="fw-medium">{{ $j['name'] }}</td>
-                          <td>{{ $j['id'] }}</td>
-                          <td>
-                            <span class="badge bg-label-{{ $badgeClass }}">
-                              {{ $j['score'] }}
-                            </span>
-                            </td>
-                          <td class="small">{{ $j['comments'] }}</td>
+                          <td class="fw-medium">
+                            @if(!empty($j['link']))
+                              <a href="{{ $j['link'] }}" target="_blank" class="text-primary fw-medium">{{ $j['name'] }}</a>
+                            @else
+                              {{ $j['name'] }}
+                            @endif
+                          </td>
+                          <td><span class="badge bg-label-{{ $badgeClass }}">{{ $j['score'] }}</span></td>
+                          <td class="small">{{ $j['comments'] ?: '—' }}</td>
                         </tr>
                         @endforeach
                       </tbody>
                     </table>
                   </div>
+                  @else
+                    <p class="text-muted small">{{ __('startup.no_judges') }}</p>
+                  @endif
                 </div>
               </div>
               @endforeach

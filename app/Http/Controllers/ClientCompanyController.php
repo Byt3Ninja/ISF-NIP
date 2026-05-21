@@ -3375,9 +3375,9 @@ class ClientCompanyController extends Controller
             ])->toArray();
             $judges = collect($first['judges'] ?? [])->map(fn($j) => [
                 'name'     => $j['judge_name'] ?? '',
-                'id'       => 'J-' . ($j['judge_id'] ?? ''),
+                'link'     => $j['judge_link'] ?? null,
                 'score'    => $j['individual_score'] ?? 0,
-                'comments' => implode(' ', (array) ($j['comments'] ?? [])),
+                'comments' => implode(' · ', array_filter((array) ($j['comments'] ?? []))),
             ])->toArray();
             return [
                 'step_id'       => 'STP-' . ($first['step_id'] ?? ''),
