@@ -503,7 +503,7 @@ class ClientProfileController extends Controller
             ));
 
         } else {
-            return redirect()->route('user.profile_view');
+            return redirect()->route('clients.profile_view', $id);
         }
     }
 
