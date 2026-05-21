@@ -562,11 +562,20 @@ $config = [
           <form id="formHistoryReply" novalidate>
             <input type="hidden" name="request_id" id="histReplyRequestId">
             <div class="mb-2">
-              <textarea class="form-control" id="histReplyBody" name="reply" rows="3"
+              <textarea class="form-control" id="histReplyBody" name="message" rows="3"
                 placeholder="{{ __('admin.reply_placeholder') }}" maxlength="500"></textarea>
+                <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
+            </div>
+            <div class="mb-3">
+              <label for="histReplyAttachment" class="form-label fw-semibold">
+                {{ __('admin.Attachments') }}
+                <span class="text-muted fw-normal small">({{ __('admin.optional') }})</span>
+              </label>
+              <input type="file" class="form-control" id="histReplyAttachment" name="attachments[]" multiple
+                accept=".png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar">
+              <div id="histReplyAttachmentError" class="invalid-feedback"></div>
             </div>
             <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
               <button type="submit" class="btn btn-sm btn-primary">
                 <i class="ti ti-send me-1"></i>{{ __('admin.reply') }}
               </button>
@@ -1116,43 +1125,87 @@ if (ocRespond) {
   const formHistoryReply = $('#formHistoryReply');
   const fvHistoryReply = FV.formValidation(formHistoryReply, {
     fields: {
-      reply: {
+      message: {
         validators: {
           notEmpty:     { message: 'Reply cannot be empty.' },
           stringLength: { min: 2, max: 500, message: 'Reply must be 2–500 characters.' },
         },
       },
+      'attachments[]': {
+        validators: {
+          callback: {
+            message: '{{ app()->getLocale() == "ar" ? "نوع الملف غير مدعوم. الملفات المسموحة: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR" : "Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR" }}',
+            callback: function(input) {
+              const files = input.element.files;
+              if (!files || files.length === 0) return true;
+
+              const allowed = ['png','jpg','jpeg','webp','doc','docx','xls','xlsx','ppt','pptx','zip','rar'];
+
+              if (files.length > 5) {
+                return {
+                  valid: false,
+                  message: '{{ app()->getLocale() == "ar" ? "يمكنك رفع حتى 5 ملفات فقط." : "You can upload up to 5 files only." }}'
+                };
+              }
+
+              for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const ext = file.name.split('.').pop().toLowerCase();
+
+                if (!allowed.includes(ext)) return false;
+
+                if (file.size > 10 * 1024 * 1024) {
+                  return {
+                    valid: false,
+                    message: '{{ app()->getLocale() == "ar" ? "يجب ألا يزيد حجم الملف عن 10 ميجابايت." : "File size must be 10MB or less." }}'
+                  };
+                }
+              }
+
+              return true;
+            },
+          },
+        },
+      },
     },
     plugins: {
-      trigger:      new FV.plugins.Trigger(),
-      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-2' }),
+      trigger:      new FV.plugins.Trigger({
+        event: {
+          'attachments[]': 'change',
+        },
+      }),
+      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-2, .mb-3' }),
       autoFocus:    new FV.plugins.AutoFocus(),
       submitButton: new FV.plugins.SubmitButton(),
     },
   }).on('core.form.valid', () => {
     const submitBtn = formHistoryReply.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> {{ __("admin.reply") }}';
+
+    const formData = new FormData(formHistoryReply);
 
     fetch('{{ route("service_requests.send_message") }}', {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        request_id: $('#histReplyRequestId').value,
-        message: $('#histReplyBody').value,
-      }),
+      body: formData,
     })
     .then(res => res.json())
     .then(data => {
       submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i>{{ __("admin.reply") }}';
       if (data.status) {
         const d = data.data;
         const wrapper = document.createElement('div');
         let attachHtml = '';
-        if (d.attachment_url) {
+        if (d.attachments && d.attachments.length) {
+          attachHtml = d.attachments.map(a =>
+            `<div class="mt-1"><a href="${esc(a.url)}" target="_blank" class="text-white text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(a.name)}</a></div>`
+          ).join('');
+        } else if (d.attachment_url) {
           attachHtml = `<div class="mt-1"><a href="${esc(d.attachment_url)}" target="_blank" class="text-white text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(d.attachment_name)}</a></div>`;
         }
         wrapper.innerHTML = `
@@ -1169,6 +1222,7 @@ if (ocRespond) {
         thread.scrollTop = thread.scrollHeight;
         formHistoryReply.reset();
         $('#histReplyCount').textContent = '0';
+        document.getElementById('histReplyAttachment').value = '';
         fvHistoryReply.resetForm(true);
         showToast({ type: 'success', message: '{{ __("admin.message_sent_successfully") }}' });
       } else {
@@ -1177,6 +1231,7 @@ if (ocRespond) {
     })
     .catch(() => {
       submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i>{{ __("admin.reply") }}';
       showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
     });
   });

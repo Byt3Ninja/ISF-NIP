@@ -209,7 +209,7 @@ function renderSubmissionsList(submissions, containerSelector) {
 
   $c.html(
     submissions
-      .map((sub) => {
+      .map((sub, index) => {
         const hasUser = !!(sub.user || sub.user_id);
         const statusBadge = hasUser ? STATUS_BADGE[sub.status] || "" : "";
 
@@ -291,7 +291,7 @@ function renderSubmissionsList(submissions, containerSelector) {
                       `
                       : `
                         <span class="fw-semibold text-dark">
-                          ${lbl.submission || "Submission"}
+                          ${lbl.submission || "Submission"} ${index + 1}
                         </span>
                       `
                   }
