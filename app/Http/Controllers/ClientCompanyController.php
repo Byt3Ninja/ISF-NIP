@@ -3588,15 +3588,18 @@ class ClientCompanyController extends Controller
             ];
         })->values()->toArray();
 
-        $surveys = collect($surveys)->map(function ($survey) {
-            
+        $surveys = collect($surveys)->map(function ($survey, $index) {
+            $rawAnswers = $survey['Survey_answers'] ?? null;
+            $answers = is_array($rawAnswers) ? array_filter($rawAnswers, fn($a) => !empty($a['question'])) : [];
+            $isAnswered = !empty($survey['Date_completed']);
             return [
-                'survey_id' => 'SV-'. $survey['Survey_ID'] ?? null,
-                'title' => $survey['Survey_title'] ?? null,
-                'program_step' => $survey['program_step'] ?? null,
+                'survey_id'      => 'SV-' . ($survey['Survey_ID'] ?? ''),
+                'title'          => $survey['Survey_title'] ?? null,
+                'program_step'   => $survey['program_step'] ?? null,
                 'date_completed' => $survey['Date_completed'] ?? null,
-                'answers_link' => '#', // هنا مش رابط هنا هيكون فى كل سؤال واجابته لوحدها 
-                'badge_class' => $survey['Survey_answers'] != null ? 'primary' : 'warning',
+                'is_answered'    => $isAnswered,
+                'answers'        => array_values($answers),
+                'modal_id'       => 'surveyModal' . $index,
             ];
         })->values()->toArray();
 

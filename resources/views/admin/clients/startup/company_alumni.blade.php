@@ -1342,33 +1342,78 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     <thead class="table-light">
                       <tr>
                         <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.survey_id') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}
-                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}</th>
                         <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
-                        </th>
+                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
+                        <th class="text-center text-nowrap"><i class="ti ti-circle-check me-1"></i>{{ __('startup.status') }}</th>
                         <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.answers') }}</th>
                       </tr>
                     </thead>
                     <tbody>
                       @foreach ($surveys as $key => $s)
-                      <tr class="border-top">
+                      <tr class="border-top {{ $s['is_answered'] ? '' : 'table-warning bg-opacity-25' }}">
                         <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $s['survey_id'] }}</span></td>
                         <td class="fw-medium">{{ $s['title'] }}</td>
                         <td>{{ $s['program_step'] }}</td>
-                        <td>{{ $s['date_completed'] }}</td>
+                        <td>{{ $s['date_completed'] ?? '—' }}</td>
                         <td class="text-center">
-                          @php
-                            $surveyId = str_replace('SV-', '', $s['survey_id']);    
-                          @endphp
-                          <a href="/dashboard/surveys/start/{{ $surveyId }}" class="btn btn-sm btn-primary">
-                            <i class="ti ti-eye me-1"></i>{{ __('admin.View') }}
-                          </a>
+                          @if($s['is_answered'])
+                            <span class="badge bg-label-success"><i class="ti ti-check me-1"></i>{{ __('startup.answered') }}</span>
+                          @else
+                            <span class="badge bg-label-warning"><i class="ti ti-clock me-1"></i>{{ __('startup.not_answered') }}</span>
+                          @endif
+                        </td>
+                        <td class="text-center">
+                          @if($s['is_answered'] && count($s['answers']) > 0)
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#{{ $s['modal_id'] }}">
+                              <i class="ti ti-eye me-1"></i>{{ __('admin.View') }}
+                            </button>
+                          @else
+                            <span class="text-muted small">—</span>
+                          @endif
                         </td>
                       </tr>
                       @endforeach
                     </tbody>
                   </table>
+
+                  {{-- Survey Answer Modals --}}
+                  @foreach ($surveys as $s)
+                    @if($s['is_answered'] && count($s['answers']) > 0)
+                    <div class="modal fade" id="{{ $s['modal_id'] }}" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title fw-bold">
+                              <i class="ti ti-mood-smile me-2 text-warning"></i>{{ $s['title'] }}
+                              <small class="text-muted fw-normal ms-2">{{ $s['survey_id'] }}</small>
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p class="text-muted small mb-3"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}: {{ $s['date_completed'] }}</p>
+                            <div class="list-group list-group-flush">
+                              @foreach ($s['answers'] as $i => $qa)
+                              <div class="list-group-item px-0 py-3">
+                                <div class="d-flex gap-2 align-items-start">
+                                  <span class="badge bg-label-primary mt-1">{{ $i + 1 }}</span>
+                                  <div>
+                                    <p class="mb-1 fw-semibold text-dark">{{ $qa['question'] }}</p>
+                                    <p class="mb-0 text-muted">{{ $qa['answer'] ?? '—' }}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              @endforeach
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('startup.close') }}</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    @endif
+                  @endforeach
                 </div>
               @endif
             @endif
