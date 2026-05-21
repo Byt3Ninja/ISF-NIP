@@ -27,7 +27,7 @@
     articleImageBadType: isAr ? 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط' : 'Invalid file format. Please upload PNG or JPG files only.',
     articleImageTooLarge: isAr ? 'الملف اكبر من الحد المسموح. الحد الأقصى المسموح به هو 5 ميجابايت' : 'File too large. Maximum size allowed is 5MB.',
     logoImageBadType: isAr ? 'نوع الملف غير صالح (PNG, JPG, SVG)' : 'Invalid format (PNG, JPG, SVG).',
-    logoImageTooLarge: isAr ? 'الحد الأقصى 2 ميجابايت' : 'Max size 2MB.',
+    logoImageTooLarge: isAr ? 'الملف أكبر من الحد المسموح به. الحد الأقصى المسموح به هو 2 ميجابايت' : 'File too large. Maximum size allowed is 2 MB.',
     invalidUrl: isAr ? 'يرجى إدخال رابط صالح' : 'Please enter a valid URL.',
     maxLimitReached: isAr ? 'لقد وصلت إلى الحد الأقصى المسموح به' : 'You have reached the maximum limit.',
     required: CFG.requiredMsg || (isAr ? 'هذا الحقل مطلوب' : 'This field is required'),
@@ -245,12 +245,24 @@
           callback: {
             message: T.required,
             callback: (input) => {
-              const hasFile = input.value !== '';
-              const hasExisting = $(input.element).closest('.repeater-item').find('.logo-preview img').length > 0;
-              return hasFile || hasExisting;
+              if (!input.value) {
+                const hasExisting = $(input.element).closest('.repeater-item').find('.logo-preview img').length > 0;
+                return hasExisting;
+              }
+              const file = input.element.files[0];
+              if (!file) return { valid: false, message: T.required };
+              const allowedTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+              const allowedExts = ['jpg', 'jpeg', 'png', 'svg'];
+              const ext = file.name.split('.').pop().toLowerCase();
+              if (!allowedTypes.includes(file.type) || !allowedExts.includes(ext)) {
+                return { valid: false, message: T.logoImageBadType };
+              }
+              if (file.size > 2 * 1024 * 1024) {
+                return { valid: false, message: T.logoImageTooLarge };
+              }
+              return { valid: true };
             }
-          },
-          file: { extension: 'jpg,jpeg,png,svg', type: 'image/jpeg,image/png,image/svg+xml', maxSize: 2*1024*1024, message: T.logoImageBadType }
+          }
         }
       };
     }
