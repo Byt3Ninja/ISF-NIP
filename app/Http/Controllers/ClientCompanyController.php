@@ -3528,16 +3528,17 @@ class ClientCompanyController extends Controller
             $formattedDuration = $minutes < 60
                 ? $minutes . ' m'
                 : floor($minutes / 60) . ' h';
+            $attended = $mentorship['attended'] ?? null;
             return [
-                'mentor' => $mentorship['mentor_name'] ?? null,
-                'id' => 'M-' . $mentorship['mentor_ID'] ?? null,
-                'step_name' => 'Growth mentoring',
-                'step_id' => 'STP-M-03',
-                'date' => $mentorship['date'] ?? null,
-                'duration' => $formattedDuration,
+                'mentor'         => $mentorship['mentor_name'] ?? null,
+                'step_name'      => 'Growth mentoring',
+                'date'           => $mentorship['date'] ?? null,
+                'duration'       => $formattedDuration,
                 'founder_attended' => $mentorship['founder_name'] ?? null,
-                'rating' => $mentorship['rating'] ?? null,
-                'comments' => $mentorship['comments'] ?? null,
+                'attended'       => $attended,
+                'attended_badge' => $attended === 'Attended' ? 'success' : 'danger',
+                'rating'         => $mentorship['rating'] ?? null,
+                'comments'       => $mentorship['comments'] ?? null,
             ];
         })->values()->toArray();
     
@@ -3601,15 +3602,18 @@ class ClientCompanyController extends Controller
             ];
         })->values()->toArray();
 
-        $surveys = collect($surveys)->map(function ($survey) {
-            
+        $surveys = collect($surveys)->map(function ($survey, $index) {
+            $rawAnswers = $survey['Survey_answers'] ?? null;
+            $answers = is_array($rawAnswers) ? array_filter($rawAnswers, fn($a) => !empty($a['question'])) : [];
+            $isAnswered = !empty($survey['Date_completed']);
             return [
-                'survey_id' => 'SV-'. $survey['Survey_ID'] ?? null,
-                'title' => $survey['Survey_title'] ?? null,
-                'program_step' => $survey['program_step'] ?? null,
+                'survey_id'      => 'SV-' . ($survey['Survey_ID'] ?? ''),
+                'title'          => $survey['Survey_title'] ?? null,
+                'program_step'   => $survey['program_step'] ?? null,
                 'date_completed' => $survey['Date_completed'] ?? null,
-                'answers_link' => '#', // هنا مش رابط هنا هيكون فى كل سؤال واجابته لوحدها 
-                'badge_class' => $survey['Survey_answers'] != null ? 'primary' : 'warning',
+                'is_answered'    => $isAnswered,
+                'answers'        => array_values($answers),
+                'modal_id'       => 'surveyModal' . $index,
             ];
         })->values()->toArray();
 
