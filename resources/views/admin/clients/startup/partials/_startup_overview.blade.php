@@ -94,9 +94,9 @@
 
   $whyThisStartup = $co->why_this_startup ?? $co->why_startup ?? null;
 
-  $totalEmployees  = 30;
-  $maleEmployees   = 20;
-  $femaleEmployees = 10;
+  $totalEmployees  = $co->total_employees !== null ? $co->total_employees : __('admin.N/A');
+  $maleEmployees   = $co->male_employees !== null ? $co->male_employees : __('admin.N/A');
+  $femaleEmployees = $co->female_employees !== null ? $co->female_employees : __('admin.N/A');
 
   $businessModelBadge = $co->business_model
     ? (__('admin.' . $co->business_model) ?: ($co->other_business_model ?? ''))
