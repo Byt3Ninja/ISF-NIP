@@ -661,17 +661,22 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             </h6>
            
             <div class="row">
-              @if(empty($startup['sdgs']))
-                <span class="badge p-3 bg-light-subtle text-dark border">{{ __('startup.no_sdg') }}</span>
-              @else
-                <div class="d-flex align-items-center gap-4">
-                
-                  @foreach($startup['sdgs'] as $sdg)
-                    <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
-                  @endforeach
+              <div class="col-12">
+                <div class="row">
+                  <div class="col-10">
+                    @if(empty($startup['sdgs']))
+                      <span class="badge p-3 bg-light-subtle text-dark border">{{ __('startup.no_sdg') }}</span>
+                    @else
+                      <div class="d-flex align-items-center gap-4">
+                        @foreach($startup['sdgs'] as $sdg)
+                          <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
+                        @endforeach
+                      </div>
+                    @endif
+                  </div>
                 </div>
-              @endif
-              {{-- @dd($legal_information) --}}
+              </div>
+              
               <hr class="my-4" />
               <div class="col-12 col-md-6">
                 <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
@@ -837,15 +842,11 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     <table class="table table-sm mb-0">
                       <thead class="table-light">
                         <tr>
-                          <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.full_name') }}</th>
-                          <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.job_title') }}
-                          </th>
-                          <th class="text-center text-nowrap"><i class="ti ti-gender-male me-1"></i>{{ __('startup.gender') }}
-                          </th>
-                          <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.employment_type') }}
-                          </th>
-                          <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.start_date_label')
-                            }}</th>
+                          <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.full_name') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.job_title') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-gender-male me-1"></i>{{ __('startup.gender') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.employment_type') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.start_date_label') }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -901,12 +902,11 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                       <div class="col-12 text-center text-muted">{{ __('startup.no_shareholders') }}</div>
                     @else
                       <div class="table-responsive">
-                        <table class="table table-sm mb-0 align-middle">
+                        <table class="table table-sm mb-0">
                           <thead class="table-light">
                             <tr>
-                              <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
-                              <th class="text-center text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.role') }}
-                              </th>
+                              <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.name') }}</th>
+                              <th class="text-nowrap"><i class="ti ti-briefcase me-1"></i>{{ __('startup.role') }}</th>
                               <th class="text-end"><i class="ti ti-percent me-1"></i>{{ __('startup.ownership') }}</th>
                             </tr>
                           </thead>
@@ -939,10 +939,10 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                       <div class="col-12 text-center text-muted">{{ __('startup.no_investors') }}</div>
                     @else
                       <div class="table-responsive">
-                        <table class="table table-sm mb-0 align-middle">
+                        <table class="table table-sm mb-0">
                           <thead class="table-light">
                             <tr>
-                              <th class="text-center text-nowrap"><i class="ti ti-building me-1"></i>{{ __('startup.name') }}</th>
+                              <th class="text-nowrap"><i class="ti ti-building me-1"></i>{{ __('startup.name') }}</th>
                               <th class="text-end"><i class="ti ti-tag me-1"></i>{{ __('startup.type') }}</th>
                             </tr>
                           </thead>
@@ -1031,12 +1031,11 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     <i class="ti ti-checklist text-success"></i>{{ __('startup.criteria') }}
                   </h6>
                   <div class="table-responsive">
-                    <table class="table table-sm mb-0 align-middle">
+                    <table class="table table-sm mb-0">
                       <thead class="table-light">
                         <tr>
-                          <th class="text-center text-nowrap"><i class="ti ti-ruler-measure me-1"></i>{{
-                            __('startup.criterion') }}</th>
-                          <th class="text-center text-nowrap"><i class="ti ti-weight me-1"></i>{{ __('startup.weight') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-ruler-measure me-1"></i>{{__('startup.criterion') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-weight me-1"></i>{{ __('startup.weight') }}</th>
                           <th class="text-end"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
                         </tr>
                       </thead>
@@ -1058,14 +1057,13 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     <i class="ti ti-user-check text-warning"></i>{{ __('startup.judges_evaluations') }}
                   </h6>
                   <div class="table-responsive">
-                    <table class="table table-sm mb-0 align-middle">
+                    <table class="table table-sm mb-0">
                       <thead class="table-light">
                         <tr>
-                          <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
-                          <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
-                          <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
-                          <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}
-                          </th>
+                          <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.judge') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.id') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.score') }}</th>
+                          <th class="text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1100,20 +1098,18 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
           </div>
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-sm mb-0 align-middle">
+              <table class="table table-sm mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor_name') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.mentor_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.step_name') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}
-                    </th>
-                    <th class="text-center text-nowrap"><i class="ti ti-user-check me-1"></i>{{ __('startup.founder_attended')
-                      }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.rating') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor_name') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.mentor_id') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.step_name') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-user-check me-1"></i>{{ __('startup.founder_attended')}}</th>
+                    <th class="text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.rating') }}</th>
+                    <th class="text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1135,7 +1131,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     @endforeach
                   @else
                     <tr>
-                      <td colspan="9" class="text-center text-muted py-3">{{ __('startup.no_mentorship_sessions') }}</td>
+                      <td colspan="9" class="text-center text-muted py-3">{{ __('admin.no_mentorship_sessions') }}</td>
                     </tr>
                   @endif
                 </tbody>
@@ -1159,18 +1155,14 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             
             @if (count($milestones) > 0)
               <div class="table-responsive">
-                <table class="table table-sm mb-0 align-middle">
+                <table class="table table-sm mb-0">
                   <thead class="table-light">
                     <tr>
-                      <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.milestone_title_label')
-                        }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date') }}
-                      </th>
-                      <th class="text-center text-nowrap"><i class="ti ti-progress me-1"></i>{{ __('startup.completion') }}</th>
-                      <th class="text-center text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.deliverables') }}
-                      </th>
+                      <th class="text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.milestone_title_label') }}</th>
+                      <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
+                      <th class="text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date') }}</th>
+                      <th class="text-nowrap"><i class="ti ti-progress me-1"></i>{{ __('startup.completion') }}</th>
+                      <th class="text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.deliverables') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1209,7 +1201,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 </table>
               </div>
             @else
-              <div class="col-12 text-center text-muted">{{ __('startup.no_milestones') }}</div>
+              <div class="col-12 text-center text-muted">{{ __('admin.no_milestones') }}</div>
             @endif
           </div>
         </div>
@@ -1231,22 +1223,17 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <div class="col-12 text-center text-muted">{{ __('startup.no_tasks') }}</div>
               @else
                 <div class="table-responsive">
-                  <table class="table table-sm mb-0 align-middle">
+                  <table class="table table-sm mb-0">
                     <thead class="table-light">
                       <tr>
-                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.task_title') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.task_id') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date_label')
-                          }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-calendar-check me-1"></i>{{
-                          __('startup.completion_date_label') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.task_title') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.task_id') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-calendar-due me-1"></i>{{ __('startup.due_date_label') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-calendar-check me-1"></i>{{ __('startup.completion_date_label') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1291,17 +1278,15 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <div class="col-12 text-center text-muted">{{ __('startup.no_quizzes') }}</div>
               @else
                 <div class="table-responsive">
-                  <table class="table table-sm mb-0 align-middle">
+                  <table class="table table-sm mb-0">
                     <thead class="table-light">
                       <tr>
-                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.quiz_id') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.founder') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-percent me-1"></i>{{ __('startup.score') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.quiz_id') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.founder') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-percent me-1"></i>{{ __('startup.score') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1344,16 +1329,14 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <div class="col-12 text-center text-muted">{{ __('startup.no_surveys') }}</div>
               @else
                 <div class="table-responsive">
-                  <table class="table table-sm mb-0 align-middle">
+                  <table class="table table-sm mb-0">
                     <thead class="table-light">
                       <tr>
-                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.survey_id') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.answers') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.survey_id') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.survey_title') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.program_step') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.answers') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1398,12 +1381,12 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <div class="col-12 text-center text-muted">{{ __('startup.no_services') }}</div>
               @else
                 <div class="table-responsive">
-                  <table class="table table-sm mb-0 align-middle">
+                  <table class="table table-sm mb-0">
                     <thead class="table-light">
                       <tr>
-                        <th class="text-center text-nowrap"><i class="ti ti-gift me-1"></i>{{ __('startup.service_name') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.service_id') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
+                        <th class="text-nowrap"><i class="ti ti-gift me-1"></i>{{ __('startup.service_name') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.service_id') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
                         </th>
                       </tr>
                     </thead>
@@ -1442,18 +1425,15 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <div class="col-12 text-center text-muted">{{ __('startup.no_forms') }}</div>
               @else
                 <div class="table-responsive">
-                  <table class="table table-sm mb-0 align-middle">
+                  <table class="table table-sm mb-0">
                     <thead class="table-light">
                       <tr>
-                        <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.form_id') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
-                        <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}
-                        </th>
-                        <th class="text-center text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.details') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.form_id') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.details') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1503,13 +1483,13 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
       </div>
       <div class="modal-body">
         <div class="table-responsive">
-          <table class="table table-hover align-middle">
+          <table class="table table-hover">
             <thead class="table-light">
               <tr>
-                <th class="text-center text-nowrap"><i class="ti ti-field me-1"></i>{{ __('startup.field_name') }}</th>
-                <th class="text-center text-nowrap"><i class="ti ti-database me-1"></i>{{ __('startup.field_type') }}</th>
-                <th class="text-center text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.submitted_value') }}</th>
-                <th class="text-center text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.attachment') }}</th>
+                <th class="text-nowrap"><i class="ti ti-field me-1"></i>{{ __('startup.field_name') }}</th>
+                <th class="text-nowrap"><i class="ti ti-database me-1"></i>{{ __('startup.field_type') }}</th>
+                <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.submitted_value') }}</th>
+                <th class="text-nowrap"><i class="ti ti-paperclip me-1"></i>{{ __('startup.attachment') }}</th>
               </tr>
             </thead>
             <tbody>
