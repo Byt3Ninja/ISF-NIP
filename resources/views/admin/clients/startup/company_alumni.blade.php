@@ -251,7 +251,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
         <button id="export-pdf-button" class="btn btn-primary btn-sm">
           <i class="ti ti-file-type-pdf me-1"></i>{{ __('startup.export_pdf') }}
         </button>
-        <a id="export-csv" class="btn btn-outline-secondary btn-sm">
+        <a id="export-csv" class="btn btn-outline-secondary btn-sm" style="cursor:pointer;">
           <i class="ti ti-file-type-csv me-1"></i>{{ __('startup.export_csv') }}
         </a>
       </div>
@@ -1672,5 +1672,233 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
     // Initialize
     return $(selector).DataTable(finalOptions);
   }
+
+  // Export CSV
+  document.getElementById('export-csv').addEventListener('click', function () {
+    const startup      = @json($startup);
+    const teamData     = @json($teamData);
+    const ownershipData= @json($ownershipData);
+    const legalInfo    = @json($legal_information);
+    const trainingData = @json($training);
+    const mentorshipData = @json($mentorshipData);
+    const milestonesData = @json($milestones);
+    const tasksData    = @json($tasks);
+    const quizzesData  = @json($quizzes);
+    const surveysData  = @json($surveys);
+    const servicesData = @json($services);
+    const formsData    = @json($forms);
+    const screeningData= @json($screeningData);
+
+    const csvSections = [];
+
+    function esc(val) {
+      if (val === null || val === undefined || val === false) return '';
+      const str = String(val);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }
+
+    function addSection(title, headers, rows) {
+      csvSections.push(esc(title));
+      csvSections.push(headers.map(esc).join(','));
+      rows.forEach(row => csvSections.push(row.map(esc).join(',')));
+      csvSections.push('');
+    }
+
+    // ── 1. Startup Info ─────────────────────────────────────────────────────
+    csvSections.push('{{ __("startup.startup_info_tab") }}');
+    csvSections.push('{{ __("startup.startup_name") }},' + esc(startup.name));
+    csvSections.push('{{ __("startup.location") }},' + esc(startup.location));
+    csvSections.push('{{ __("startup.completion_date") }},' + esc(startup.established_at));
+    csvSections.push('{{ __("startup.business_type") }},' + esc(startup.business_type));
+    csvSections.push('{{ __("startup.industry") }},' + esc(startup.industry));
+    csvSections.push('{{ __("startup.sector") }},' + esc(startup.sector));
+    csvSections.push('{{ __("startup.technology") }},' + esc(startup.technologies));
+    csvSections.push('{{ __("startup.development_stage") }},' + esc(startup.development_stage));
+    csvSections.push('{{ __("startup.funding_stage") }},' + esc(startup.funding_stage));
+    csvSections.push('{{ __("startup.team_size") }},' + esc(startup.team_size));
+    csvSections.push('{{ __("startup.program_name") }},' + esc(startup.program ? startup.program.name : ''));
+    csvSections.push('{{ __("startup.cohort") }},' + esc(startup.program ? startup.program.cohort : ''));
+    csvSections.push('{{ __("startup.start_date_label") }},' + esc(startup.program ? startup.program.start : ''));
+    csvSections.push('{{ __("startup.completion_date") }} (End),' + esc(startup.program ? startup.program.end : ''));
+    csvSections.push('Website,' + esc(startup.links ? startup.links.website : ''));
+    csvSections.push('LinkedIn,' + esc(startup.links ? startup.links.linkedin : ''));
+    csvSections.push('');
+
+    // ── 2. Legal ─────────────────────────────────────────────────────────────
+    if (Array.isArray(legalInfo) && legalInfo.length && legalInfo[0].Registered) {
+      const l = legalInfo[0];
+      csvSections.push('{{ __("startup.legal_status") }}');
+      csvSections.push('{{ __("startup.registered") }},' + esc(l.Registered));
+      csvSections.push('{{ __("startup.commercial_register") }},' + esc(l.Commercial_Register));
+      csvSections.push('{{ __("startup.tax_card") }},' + esc(l.Tax_Card));
+      csvSections.push('');
+    }
+
+    // ── 3. Team — Leader ─────────────────────────────────────────────────────
+    if (teamData.leader && teamData.leader.name) {
+      csvSections.push('{{ __("startup.startup_leader") }}');
+      csvSections.push('{{ __("startup.full_name") }},' + esc(teamData.leader.name));
+      csvSections.push('{{ __("startup.email") }},' + esc(teamData.leader.email));
+      csvSections.push('{{ __("startup.phone") }},' + esc(teamData.leader.phone));
+      csvSections.push('{{ __("startup.country") }},' + esc(teamData.leader.country));
+      csvSections.push('');
+    }
+
+    // ── 4. Founders ──────────────────────────────────────────────────────────
+    const founders = (teamData.founders || []).filter(f => f.name);
+    if (founders.length) {
+      addSection(
+        '{{ __("startup.founders") }}',
+        ['{{ __("startup.full_name") }}', '{{ __("startup.email") }}', 'LinkedIn'],
+        founders.map(f => [f.name, f.email, f.linkedin])
+      );
+    }
+
+    // ── 5. Employees ─────────────────────────────────────────────────────────
+    const employees = (teamData.employees || []).filter(e => e.name);
+    if (employees.length) {
+      addSection(
+        '{{ __("startup.team_tab") }}',
+        ['{{ __("startup.full_name") }}', '{{ __("startup.job_title") }}', '{{ __("startup.gender") }}', '{{ __("startup.employment_type") }}', '{{ __("startup.start_date_label") }}'],
+        employees.map(e => [e.name, e.job, e.gender, e.employment, e.start_date])
+      );
+    }
+
+    // ── 6. Shareholders ──────────────────────────────────────────────────────
+    const shareholders = (ownershipData.shareholders || []).filter(s => s.name);
+    if (shareholders.length) {
+      addSection(
+        '{{ __("startup.shareholders") }}',
+        ['{{ __("startup.full_name") }}', '{{ __("startup.email") }}', '{{ __("startup.founder_role") }}', '%'],
+        shareholders.map(s => [s.name, s.Email, s.role, s.ownership])
+      );
+    }
+
+    // ── 7. Investors ─────────────────────────────────────────────────────────
+    const investors = (ownershipData.investors || []).filter(i => i.name);
+    if (investors.length) {
+      addSection(
+        '{{ __("startup.investors") }}',
+        ['{{ __("startup.full_name") }}', '{{ __("startup.type") }}'],
+        investors.map(i => [i.name, i.type])
+      );
+    }
+
+    // ── 8. Screening ─────────────────────────────────────────────────────────
+    ['initial', 'final'].forEach(phase => {
+      const ph = screeningData[phase];
+      if (!ph || !ph.step_name) return;
+      const label = phase === 'initial' ? '{{ __("startup.initial_screening") }}' : '{{ __("startup.final_screening") }}';
+      addSection(
+        label + ' — ' + ph.step_name + ' ({{ __("startup.score") }}: ' + ph.overall_score + ')',
+        ['{{ __("startup.criterion") }}', '{{ __("startup.weight") }}', '{{ __("startup.score") }}'],
+        (ph.criteria || []).map(c => [c.name, c.weight, c.score])
+      );
+      addSection(
+        label + ' — {{ __("startup.judges_evaluations") }}',
+        ['{{ __("startup.judge") }}', '{{ __("startup.score") }}', '{{ __("startup.comments") }}'],
+        (ph.judges || []).map(j => [j.name, j.score, j.comments])
+      );
+    });
+
+    // ── 9. Training ──────────────────────────────────────────────────────────
+    const trainingSessions = (trainingData || []).filter(t => t.title);
+    if (trainingSessions.length) {
+      addSection(
+        '{{ __("startup.training_tab") }}',
+        ['{{ __("startup.title") }}', '{{ __("startup.session_title") }}', '{{ __("startup.date") }}', '{{ __("startup.duration_hours") }}', '{{ __("startup.step") }}', '{{ __("startup.attendance") }}'],
+        trainingSessions.map(t => [t.title, t.trainer_course_name, t.date, t.duration, t.step, t.attendance])
+      );
+    }
+
+    // ── 10. Mentorship ───────────────────────────────────────────────────────
+    const mentorSessions = (mentorshipData || []).filter(m => m.mentor);
+    if (mentorSessions.length) {
+      addSection(
+        '{{ __("startup.mentorship_tab") }}',
+        ['{{ __("startup.mentor_name") }}', '{{ __("startup.date") }}', '{{ __("startup.duration_hours") }}', '{{ __("startup.founder_attended") }}', '{{ __("startup.attendance") }}', '{{ __("startup.rating") }}', '{{ __("startup.comments") }}'],
+        mentorSessions.map(m => [m.mentor, m.date, m.duration, m.founder_attended, m.attended, m.rating, m.comments])
+      );
+    }
+
+    // ── 11. Milestones ───────────────────────────────────────────────────────
+    const milestoneRows = (milestonesData || []).filter(m => m.title);
+    if (milestoneRows.length) {
+      addSection(
+        '{{ __("startup.milestones_tab") }}',
+        ['{{ __("startup.milestone_title_label") }}', '{{ __("startup.description") }}', '{{ __("startup.due_date") }}', '{{ __("startup.completion") }}'],
+        milestoneRows.map(m => [m.title, m.description, m.due_date, m.completion])
+      );
+    }
+
+    // ── 12. Tasks ────────────────────────────────────────────────────────────
+    const taskRows = (tasksData || []).filter(t => t.title);
+    if (taskRows.length) {
+      addSection(
+        '{{ __("startup.tasks_tab") }}',
+        ['{{ __("startup.task_title") }}', '{{ __("startup.description") }}', '{{ __("startup.mentor") }}', '{{ __("startup.due_date") }}', '{{ __("startup.completion_date") }}', '{{ __("startup.status") }}'],
+        taskRows.map(t => [t.title, t.description, t.mentor, t.due_date, t.completion_date, t.status])
+      );
+    }
+
+    // ── 13. Quizzes ──────────────────────────────────────────────────────────
+    if (Array.isArray(quizzesData) && quizzesData.length) {
+      addSection(
+        '{{ __("startup.quizzes_tab") }}',
+        ['{{ __("startup.quiz_title") }}', '{{ __("startup.date_completed") }}', '{{ __("startup.founder") }}', '{{ __("startup.score") }}', '{{ __("startup.status") }}'],
+        quizzesData.map(q => [q.title, q.date_completed, q.founder, q.score, q.status_label])
+      );
+    }
+
+    // ── 14. Surveys ──────────────────────────────────────────────────────────
+    if (Array.isArray(surveysData) && surveysData.length) {
+      addSection(
+        '{{ __("startup.surveys_tab") }}',
+        ['{{ __("startup.survey_title") }}', '{{ __("startup.program_step") }}', '{{ __("startup.date_completed") }}', '{{ __("startup.status") }}'],
+        surveysData.map(s => [s.title, s.program_step, s.date_completed, s.is_answered ? '{{ __("startup.answered") }}' : '{{ __("startup.not_answered") }}'])
+      );
+    }
+
+    // ── 15. Services ─────────────────────────────────────────────────────────
+    const serviceRows = (servicesData || []).filter(s => s.name);
+    if (serviceRows.length) {
+      addSection(
+        '{{ __("startup.services_tab") }}',
+        ['{{ __("startup.service_name") }}', '{{ __("startup.description") }}'],
+        serviceRows.map(s => [s.name, s.description])
+      );
+    }
+
+    // ── 16. Forms ─────────────────────────────────────────────────────────────
+    if (Array.isArray(formsData) && formsData.length) {
+      const formRows = [];
+      formsData.forEach(f => {
+        (f.fields || []).forEach(field => {
+          formRows.push([f.title, f.step_name, f.submission_date, field.name, field.type, field.value, field.attachment]);
+        });
+      });
+      if (formRows.length) {
+        addSection(
+          '{{ __("startup.forms_tab") }}',
+          ['{{ __("startup.form_title") }}', '{{ __("startup.step") }}', '{{ __("startup.submission_date") }}', '{{ __("startup.field_name") }}', '{{ __("startup.field_type") }}', '{{ __("startup.financial.value") }}', '{{ __("startup.attachment") }}'],
+          formRows
+        );
+      }
+    }
+
+    const csvContent = csvSections.join('\n');
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', esc(startup.name || 'alumni') + '-alumni.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  });
 </script>
 @stop
