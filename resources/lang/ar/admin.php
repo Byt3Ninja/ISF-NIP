@@ -168,6 +168,7 @@ return [
 	'Users`s List' => 'بيانات المستخدمين',
 	'Address' => 'العنوان',
 	'Name' => 'الاسم',
+	'Name_AR' => 'الاسم (بالعربية)',
 	'Contact Info' => 'معلومات الاتصال',
 	'Social Links' => 'روابط السوشيال ميديا',
 	'Contact Person Info' => 'بيانات مسئول التواصل',

@@ -199,7 +199,7 @@
             <option value="">{{ __('admin.Select Currency') }}</option>
             @foreach ($Currencies as $Currency)
               <option value="{{ $Currency->currency_code }}" {{ ($client->currency ?? optional($client->company)->Currency) == $Currency->currency_code ? 'selected' : '' }}>
-                {{ $Currency->currency_name }}
+                {{ $Currency->name }}
               </option>
             @endforeach
           </select>

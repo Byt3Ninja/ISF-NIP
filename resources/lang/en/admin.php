@@ -1604,6 +1604,7 @@ return [
 	'ID' => 'ID',
 	'Key' => 'Key',
 	'Name' => 'Name',
+	'Name_AR' => 'Name (Arabic)',
 	'Expiry' => 'Expiry',
 	'Max Machines' => 'Max Machines',
 	'Uses Left' => 'Uses Left',
