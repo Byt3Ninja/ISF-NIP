@@ -3333,47 +3333,8 @@ class ClientCompanyController extends Controller
         $training    = $this->decodeAlumniJson($almuni?->training);
         $milestones  = $this->decodeAlumniJson($almuni?->milestones);
 
-        // Read live data for mentorship and tasks to avoid stale snapshot
-        $liveCompany = Company::find($id);
-        $liveUserId  = $liveCompany?->user?->id;
-
-        $liveMentorshipRequests = MentorshipRequest::where('cycle_id', $cycle_id)
-            ->where('user_id', $liveUserId)
-            ->get();
-        $mentorships = $liveMentorshipRequests->map(function ($m) {
-            return [
-                'mentor_name' => ($m->mentor?->first_name_en . ' ' . $m->mentor?->last_name_en) ?? '',
-                'mentor_ID'   => $m->mentor?->id ?? '',
-                'date'        => $m->zoom_date?->format('Y-m-d H:i') ?? '',
-                'duration'    => $m->period,
-                'attended'    => $m->done == '1' ? 'Attended' : 'Not Attended',
-                'founder_name' => ($m->user?->first_name_en . ' ' . $m->user?->last_name_en) ?? '',
-                'rating'      => $m->rating,
-                'comments'    => $m->rate_comment,
-            ];
-        })->values()->toArray();
-
-        $liveProgramTasks = ProgramTask::where('program_id', $cycle_id)
-            ->whereHas('assignees', function ($q) use ($id) {
-                $q->where('company_id', $id);
-            })->with(['assignees' => function ($q) use ($id) {
-                $q->where('company_id', $id);
-            }, 'creator'])->get();
-        $tasks = $liveProgramTasks->map(function ($t) use ($id) {
-            $pivot = $t->assignees->first()?->pivot;
-            $isCompleted = ($pivot?->status === 'completed');
-            return [
-                'Task_ID'         => $t->id ?? '',
-                'Task_title'      => $t->title ?? '',
-                'Session_ID'      => '',
-                'Description'     => $t->description ?? '',
-                'Due_date'        => $t->due_date?->format('Y-m-d') ?? '',
-                'Status'          => $pivot?->status ?? $t->status ?? '',
-                'Completion_date' => $isCompleted ? ($pivot?->last_updated ?? '') : '',
-                'Assigned_mentor' => '',
-                'Who_created_task' => ($t->creator?->first_name_en . ' ' . $t->creator?->last_name_en) ?? '',
-            ];
-        })->values()->toArray();
+        $mentorships = $this->decodeAlumniJson($almuni?->mentorship);
+        $tasks       = $this->decodeAlumniJson($almuni?->tasks);
         $quizzes     = $this->decodeAlumniJson($almuni?->quizzes);
         $surveys     = $this->decodeAlumniJson($almuni?->surveys);
         $services    = $this->decodeAlumniJson($almuni?->services);
@@ -3409,12 +3370,12 @@ class ClientCompanyController extends Controller
             'sdgs' => json_decode($almuni->sustainability_goals, true),
 
             'links' => [
-                'website'   => $basicInfo['Website'] ?? '#',
-                'linkedin'  => $basicInfo['LinkedIn'] ?? '#',
-                'twitter'   => $basicInfo['Twitter'] ?? '#',
-                'facebook'  => $basicInfo['Facebook'] ?? '#',
-                'instagram' => $basicInfo['Instagram'] ?? '#',
-                'youtube'   => $basicInfo['Youtube'] ?? '#',
+                'website'   => $basicInfo['Website_Link'] ?? null,
+                'linkedin'  => $basicInfo['Social Media Links']['Linkedin'] ?? null,
+                'twitter'   => $basicInfo['Social Media Links']['Twitter'] ?? null,
+                'facebook'  => $basicInfo['Social Media Links']['Facebook'] ?? null,
+                'instagram' => $basicInfo['Social Media Links']['Instagram'] ?? null,
+                'youtube'   => $basicInfo['Social Media Links']['Youtube'] ?? null,
             ],
         ];
         $leader = collect($leaderInfo)->first();
@@ -3431,7 +3392,7 @@ class ClientCompanyController extends Controller
             return [
                 'name'     => $founder['Full_Name'] ?? null,
                 'email'    => $founder['Email'] ?? null,
-                'linkedin' => '#', // مش موجودة عندك
+                'linkedin' => $founder['LinkedIn_Profile'] ?? null,
             ];
         })->values()->toArray();
 
@@ -4163,54 +4124,43 @@ class ClientCompanyController extends Controller
                 
                 foreach ($getfounders as $founder) {
                     $founders[] = [
-                        'ID' => $founder->id ?? '',
-                        'Full_Name' => $founder->Name ?? '',
-                        // 'Country' => $company->country->name_en ?? '',
-                        'Email' => $founder->Email ?? '',
-                        // 'Phone_Number' => $founder->Phone,
-                        // 'LinkedIn_Profile' => $founder->LinkedIn
+                        'ID'               => $founder->id ?? '',
+                        'Full_Name'        => $founder->Name ?? '',
+                        'Email'            => $founder->Email ?? '',
+                        'LinkedIn_Profile' => $founder->LinkedIn ?? '',
                     ];
                 }
                 if(empty($founders)){
                     $founders[] = [
-                        'ID' => null,
-                        'Full_Name' => null,
-                        // 'Country' => null,
-                        'Email' => null,
-                        // 'Phone_Number' => null,
-                        // 'LinkedIn_Profile' => null
+                        'ID'               => null,
+                        'Full_Name'        => null,
+                        'Email'            => null,
+                        'LinkedIn_Profile' => null,
                     ];
                 }
                 $almuni->founders = json_encode($founders);
                 
-                $getemployees = $team_leaders->where('TeamMember', 'Employee')->values();
+                $getemployees = \App\Employee::where('company_id', $company->id)->get();
                 $employees = [];
-              
+
                 foreach ($getemployees as $employee) {
                     $employees[] = [
-                        'ID' => $employee->id ?? '',
-                        'Full_Name' => $employee->Name ?? '',
-                        // 'Country' => $company->country->name_en ?? '',
-                        'Email' => $employee->Email ?? '',
-                        // 'Phone_Number' => $employee->Phone,
-                        'Job_Title' => $employee->RoleShereholder ?? '',
-                        'Gender' => $employee->gender ?? '',
+                        'ID'              => $employee->id ?? '',
+                        'Full_Name'       => $employee->full_name ?? '',
+                        'Job_Title'       => $employee->job_title ?? '',
+                        'Gender'          => $employee->gender ?? '',
                         'Employment_Type' => $employee->employment_type ?? '',
-                        'Start Date' => $employee->hiring_date ?? ''
-
+                        'Start Date'      => $employee->hiring_date?->format('Y-m-d') ?? '',
                     ];
                 }
                 if(empty($employees)){
                     $employees[] = [
-                        'ID' => null,
-                        'Full_Name' => null,
-                        // 'Country' => null,
-                        'Email' => null,
-                        // 'Phone_Number' => null,
-                        'Job_Title' => null,
-                        'Gender' => null,
+                        'ID'              => null,
+                        'Full_Name'       => null,
+                        'Job_Title'       => null,
+                        'Gender'          => null,
                         'Employment_Type' => null,
-                        'Start Date' => null
+                        'Start Date'      => null,
                     ];
                 }
                 $almuni->employees = json_encode($employees);
@@ -4514,9 +4464,7 @@ class ClientCompanyController extends Controller
                 $almuni->mentorship = json_encode($mentorships);
 
 
-                $startup_milestones = Milestone::where('company_id', $company->id)
-                    ->public()
-                    ->get();
+                $startup_milestones = Milestone::where('company_id', $company->id)->get();
 
                 $milestones = [];
                 foreach ($startup_milestones as $milestone) {

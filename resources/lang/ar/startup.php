@@ -631,4 +631,7 @@ return [
   'products_services_description'            => 'وصف المنتجات / الخدمات',
   'general_program'                          => 'برنامج عام',
   'Hackathon'                                => ' هاكاثون',
+  'total'  => 'الإجمالي',
+  'male'   => 'ذكر',
+  'female' => 'أنثى',
 ];
