@@ -189,7 +189,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     renderActivitiesList(taskData.activities, '#vt-activities-list');
     renderCommentsList(taskData.comments, '#vt-comments-list');
     renderFeedbackList(taskData.feedbacks || [], '#vt-feedback-list');
-    renderSubmissionsList(taskData.submissions || [], '#vt-submissions-list');
+    renderSubmissionsList(taskData.submissions || [], '#vt-submissions-list', taskData.assignees);
 
     $('#vt-comment-count').text(taskData.comments_count ?? (taskData.comments ? taskData.comments.length : 0));
     $('#vt-feedback-count').text(taskData.feedbacks_count ?? (taskData.feedbacks ? taskData.feedbacks.length : 0));
