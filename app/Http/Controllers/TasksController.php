@@ -113,13 +113,14 @@ class TasksController extends Controller
                 ] : null,
                 'feedbacks' => $task->feedbacks->map(function($fb) {
                     return [
-                        'id'       => $fb->id,
-                        'user'     => $fb->user->name ?? 'N/A',
-                        'user_id'  => $fb->user_id,
-                        'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
-                        'decision' => $fb->decision,
-                        'text'     => $fb->note,
-                        'time'     => $fb->created_at->diffForHumans(),
+                        'id'         => $fb->id,
+                        'user'       => $fb->user->name ?? 'N/A',
+                        'user_id'    => $fb->user_id,
+                        'company_id' => $fb->company_id,
+                        'img_url'    => $fb->user ? User::image_handler($fb->user->img_url) : null,
+                        'decision'   => $fb->decision,
+                        'text'       => $fb->note,
+                        'time'       => $fb->created_at->diffForHumans(),
                     ];
                 })->toArray(),
                 'activities' => $task->activities->sortByDesc('created_at')->map(function($act) {
@@ -437,12 +438,14 @@ class TasksController extends Controller
         ]);
 
         $feedbacks = $task->feedbacks->sortByDesc('created_at')->values()->map(fn($fb) => [
-            'user'     => $fb->user->name ?? 'N/A',
-            'user_id'  => $fb->user_id,
-            'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
-            'decision' => $fb->decision,
-            'text'     => $fb->note,
-            'time'     => $fb->created_at->diffForHumans(),
+            'id'         => $fb->id,
+            'user'       => $fb->user->name ?? 'N/A',
+            'user_id'    => $fb->user_id,
+            'company_id' => $fb->company_id,
+            'img_url'    => $fb->user ? User::image_handler($fb->user->img_url) : null,
+            'decision'   => $fb->decision,
+            'text'       => $fb->note,
+            'time'       => $fb->created_at->diffForHumans(),
         ]);
 
         $activities = $task->activities->sortByDesc('created_at')->map(function ($act) {
@@ -1153,9 +1156,10 @@ class TasksController extends Controller
             }
 
             $feedback = $task->feedbacks()->create([
-                'user_id'  => auth()->id(),
-                'decision' => $request->input('decision'),
-                'note'     => $request->input('note'),
+                'user_id'    => auth()->id(),
+                'company_id' => $companyIdForCheck ?: null,
+                'decision'   => $request->input('decision'),
+                'note'       => $request->input('note'),
             ]);
             $uploadedAttachments = [];
             if ($request->hasFile('attachments')) {
@@ -1238,13 +1242,14 @@ class TasksController extends Controller
                 'success'     => true,
                 'message'     => __('admin.feedback_added_success'),
                 'feedback'    => [
-                    'id'       => $feedback->id,
-                    'user'     => $user->name,
-                    'user_id'  => $user->id,
-                    'img_url'  => User::image_handler($user->img_url),
-                    'decision' => $feedback->decision,
-                    'text'     => $feedback->note,
-                    'time'     => $feedback->created_at->diffForHumans(),
+                    'id'         => $feedback->id,
+                    'user'       => $user->name,
+                    'user_id'    => $user->id,
+                    'company_id' => $feedback->company_id,
+                    'img_url'    => User::image_handler($user->img_url),
+                    'decision'   => $feedback->decision,
+                    'text'       => $feedback->note,
+                    'time'       => $feedback->created_at->diffForHumans(),
                 ],
                 'attachments' => $uploadedAttachments,
             ]);

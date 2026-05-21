@@ -739,11 +739,14 @@ $(function () {
         $('#vt-attachments-count').text(td.attachments.length ?? 0);
         renderActivitiesList(td.activities,            '#vt-activities-list');
         renderCommentsList(td.comments,                '#vt-comments-list');
-        renderFeedbackList(td.feedbacks,               '#vt-feedback-list');
+        const filteredFeedbacks = companyId
+            ? (td.feedbacks || []).filter(fb => String(fb.company_id) === String(companyId))
+            : (td.feedbacks || []);
+        renderFeedbackList(filteredFeedbacks,          '#vt-feedback-list');
         renderSubmissionsList(td.submissions,           '#vt-submissions-list');
 
         $('#vt-comment-count').text(td.comments?.length ?? 0);
-        $('#vt-feedback-count').text(td.feedbacks?.length ?? 0);
+        $('#vt-feedback-count').text(filteredFeedbacks.length ?? 0);
         $('#vt-submissions-count').text(td.submissions?.length ?? 0);
         $('#vt-activity-count').text(td.activities?.length ?? 0);
 
