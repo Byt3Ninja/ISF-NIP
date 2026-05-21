@@ -45,7 +45,7 @@ class RowValidator
             'gender_enum',
             'working_commitment_enum',
             'educational_status_enum',
-            'products_services_enum'   => in_array($value, $opts['allowed_values'] ?? [], true) ? null : $err,
+            'products_services_enum'   => $this->matchEnumCaseInsensitive($value, $opts['allowed_values'] ?? []) !== null ? null : $err,
 
             default                    => null,
         };
@@ -285,6 +285,44 @@ class RowValidator
         }
 
         return $errors;
+    }
+
+    /**
+     * Returns the canonical-cased allowed value matching $value (case-insensitive),
+     * or null if no match. Used by enum validators and by canonicaliseRow().
+     */
+    public function matchEnumCaseInsensitive(string $value, array $allowed): ?string
+    {
+        $needle = mb_strtolower(trim($value), 'UTF-8');
+        if ($needle === '') return null;
+        foreach ($allowed as $allowedValue) {
+            if (mb_strtolower($allowedValue, 'UTF-8') === $needle) {
+                return $allowedValue;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Replaces enum-field values in $resolvedRow with their canonical-cased
+     * counterparts (e.g. 'student' → 'Student'). Non-enum fields and
+     * non-matching values are left untouched. Empty values pass through.
+     */
+    public function canonicaliseRow(array $resolvedRow): array
+    {
+        foreach ($resolvedRow as $fieldKey => $value) {
+            $field = ImporterFieldSchema::find($fieldKey);
+            if (!$field) continue;
+            $allowed = $field['allowed_values'] ?? null;
+            if (!is_array($allowed) || empty($allowed)) continue;
+            $v = trim((string) $value);
+            if ($v === '') continue;
+            $canonical = $this->matchEnumCaseInsensitive($v, $allowed);
+            if ($canonical !== null) {
+                $resolvedRow[$fieldKey] = $canonical;
+            }
+        }
+        return $resolvedRow;
     }
 
     private function parseMdy(string $value): ?Carbon
