@@ -3335,9 +3335,43 @@ class ClientCompanyController extends Controller
 
         $mentorships = $this->decodeAlumniJson($almuni?->mentorship);
         $tasks       = $this->decodeAlumniJson($almuni?->tasks);
+
         $quizzes     = $this->decodeAlumniJson($almuni?->quizzes);
         $surveys     = $this->decodeAlumniJson($almuni?->surveys);
         $services    = $this->decodeAlumniJson($almuni?->services);
+
+        // ── Stats calculations ──────────────────────────────────────────
+        $trainingTotalMin   = collect($training)->sum(fn($t) => (int) ($t['duration'] ?? 0));
+        $mentorshipTotalMin = collect($mentorships)->sum(fn($m) => (int) ($m['duration'] ?? 0));
+        $trainingHours      = ['hours' => (int) floor($trainingTotalMin / 60),  'minutes' => $trainingTotalMin % 60];
+        $mentorshipHours    = ['hours' => (int) floor($mentorshipTotalMin / 60), 'minutes' => $mentorshipTotalMin % 60];
+
+        $screeningScore      = collect($screening)->avg('overall_score') ?? 0;
+        $finalScreeningScore = collect($finalScreen)->avg('overall_score') ?? 0;
+
+        $trainingCollection = collect($training)->filter(fn($t) => !empty($t['title']));
+        $attendedCount      = $trainingCollection->filter(fn($t) => ($t['attendance'] ?? '') === 'Attended')->count();
+        $attendanceRate     = $trainingCollection->count() > 0
+            ? round(($attendedCount / $trainingCollection->count()) * 100)
+            : 0;
+
+        $milestonesCollection = collect($milestones)->filter(fn($m) => !empty($m['Milestone_title']));
+        $milestonesCompleted  = $milestonesCollection->filter(fn($m) => (int)($m['Completion_percentage'] ?? 0) >= 100)->count();
+
+        $quizzesCollection  = collect($quizzes)->filter(fn($q) => !empty($q['Quiz_title']));
+        $quizzesPassed      = $quizzesCollection->filter(fn($q) => ($q['Status'] ?? '') == 1)->count();
+        $avgQuizScore       = $quizzesCollection->count() > 0
+            ? round($quizzesCollection->avg(fn($q) => (float) ($q['Score'] ?? 0)), 1)
+            : 0;
+
+        $surveysCollection  = collect($surveys)->filter(fn($s) => !empty($s['Survey_title']));
+        $surveysCompleted   = $surveysCollection->filter(fn($s) => !empty($s['Date_completed']))->count();
+
+        $inKindServices = collect($services)->filter(fn($s) => !empty($s['Service_name']))->count();
+
+        $tasksCollection  = collect($tasks)->filter(fn($t) => !empty($t['Task_title']));
+        $tasksCompleted   = $tasksCollection->filter(fn($t) => ($t['Status'] ?? '') === 'completed')->count();
+        // ────────────────────────────────────────────────────────────────
         $forms       = $this->decodeAlumniJson($almuni?->submitted_forms);
         $technologies = $this->decodeAlumniJson($basicInfo['Technologies']);
         $sectors     = $this->decodeAlumniJson($basicInfo['Sectors']);
@@ -3593,7 +3627,22 @@ class ClientCompanyController extends Controller
         'services', 
         'forms',
         'legal_information',
-        'pitch_deck'));
+        'pitch_deck',
+        'trainingHours',
+        'mentorshipHours',
+        'screeningScore',
+        'finalScreeningScore',
+        'attendanceRate',
+        'milestonesCompleted',
+        'milestonesCollection',
+        'quizzesPassed',
+        'quizzesCollection',
+        'avgQuizScore',
+        'surveysCompleted',
+        'surveysCollection',
+        'inKindServices',
+        'tasksCompleted',
+        'tasksCollection'));
     }
 
     function decodeAlumniJson($value)

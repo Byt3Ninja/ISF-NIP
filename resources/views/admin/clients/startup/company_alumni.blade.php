@@ -34,17 +34,17 @@
 // ];
 
 $startupStatValues = [
-  'screening_score'        => ['current' => 4.3, 'total' => 5],
-  'final_screening_score'  => ['current' => 4.6, 'total' => 5],
-  'training_hours'         => ['hours' => 32, 'minutes' => 15],
-  'mentorship_hours'       => ['hours' => 24, 'minutes' => 30],
-  'attendance_rate'        => 94,
-  'milestones_completed'   => ['current' => 7, 'total' => 8],
-  'quizzes_completed'      => ['current' => 12, 'total' => 12],
-  'avg_quiz_score'         => 87,
-  'in_kind_services'       => 8,
-  'surveys_completed'      => ['current' => 5, 'total' => 5],
-  'tasks_completed'        => ['current' => 24, 'total' => 26],
+  'screening_score'        => ['current' => $screeningScore,      'total' => 10],
+  'final_screening_score'  => ['current' => $finalScreeningScore, 'total' => 10],
+  'training_hours'         => $trainingHours,
+  'mentorship_hours'       => $mentorshipHours,
+  'attendance_rate'        => $attendanceRate,
+  'milestones_completed'   => ['current' => $milestonesCompleted, 'total' => $milestonesCollection->count()],
+  'quizzes_completed'      => ['current' => $quizzesPassed,       'total' => $quizzesCollection->count()],
+  'avg_quiz_score'         => $avgQuizScore,
+  'in_kind_services'       => $inKindServices,
+  'surveys_completed'      => ['current' => $surveysCompleted,    'total' => $surveysCollection->count()],
+  'tasks_completed'        => ['current' => $tasksCompleted,      'total' => $tasksCollection->count()],
 ];
 
 // Team configuration and data
@@ -760,10 +760,10 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
               </h5>
               <small class="text-muted">{{ __('startup.team_section_subtitle') }}</small>
             </div>
-            <span class="badge bg-label-info">
+            {{-- <span class="badge bg-label-info">
               <i class="ti ti-users me-1"></i>{{ __('startup.team_size_badge', ['count' => count($teamData['employees']) +
               count($teamData['founders']) + 1]) }}
-            </span>
+            </span> --}}
           </div>
       
           <div class="card-body">
