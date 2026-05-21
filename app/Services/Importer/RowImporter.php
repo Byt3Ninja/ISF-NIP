@@ -50,6 +50,14 @@ class RowImporter
      */
     public function import(array $row, int $rowNumber, Cycle $cycle, Organization $org, array $warnings, bool $acceptedWarnings = false): array
     {
+        // In-upload duplicates can't be "accepted": the same founder cannot be
+        // imported twice in one upload — the user/company linkage would be
+        // silently overwritten. These are always skipped.
+        $forcedSkip = $this->forcedSkipFromWarnings($rowNumber, $warnings);
+        if ($forcedSkip !== null) {
+            return ['imported' => false, 'reason' => $forcedSkip];
+        }
+
         if (!$acceptedWarnings) {
             $skipReason = $this->skipReasonFromWarnings($rowNumber, $warnings);
             if ($skipReason !== null) {
@@ -208,6 +216,19 @@ class RowImporter
                 'founder_phone_already_enrolled',
                 'founder_email_exists_different_name',
                 'founder_phone_exists_different_name',
+            ], true)) {
+                return $w['type'];
+            }
+        }
+        return null;
+    }
+
+    private function forcedSkipFromWarnings(int $rowNumber, array $warnings): ?string
+    {
+        foreach ($warnings as $w) {
+            if (($w['row'] ?? 0) === $rowNumber && in_array($w['type'] ?? '', [
+                'founder_email_duplicate_in_upload',
+                'founder_phone_duplicate_in_upload',
             ], true)) {
                 return $w['type'];
             }

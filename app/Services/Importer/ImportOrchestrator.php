@@ -178,7 +178,9 @@ class ImportOrchestrator
             if ($idx === null) continue;
             $out[$k] = $row[$idx] ?? '';
         }
-        return $out;
+        // Normalise enum-field casing ('student' → 'Student') so RowImporter and
+        // downstream services always see the canonical value.
+        return $this->validator->canonicaliseRow($out);
     }
 
     private function mdyToYmd(?string $s): ?string

@@ -210,13 +210,36 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
         // No exact match → create new cycle in the fallback (dropdown-selected) org.
         // Different-dates matches in other orgs are treated as different cohorts,
         // not as anchors for org resolution (they're a different program family).
-        return Cycle::create([
+        $cycle = Cycle::create([
             'title'           => $title,
             'type'            => $type,
             'start'           => $start,
             'end'             => $end,
             'organization_id' => $fallbackOrgId,
         ]);
+
+        // Hackathon enrollment (HackathonEnrollmentService::resolveStepId) requires
+        // a step on the cycle. The UI cycle-builder asks the admin to create a
+        // Team Formation step (stype=6) before founders can join; the importer
+        // can't pause for that, so seed a minimal one here.
+        if ($type === 'Hackathon') {
+            $now = Carbon::now();
+            DB::table('steps')->insert([
+                'cycle_id'          => $cycle->id,
+                'title'             => 'Team Formation',
+                'description'       => 'Team Formation',
+                'stype'             => 6,
+                'data'              => null,
+                'arr'               => 1,
+                'from'              => $start,
+                'to'                => $end,
+                'count_team_number' => 100,
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ]);
+        }
+
+        return $cycle;
     }
 
 }
