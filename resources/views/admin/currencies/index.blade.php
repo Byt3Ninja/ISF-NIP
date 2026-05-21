@@ -64,7 +64,7 @@
                         <tr>
                           <td class="text-center">{{ $loop->iteration }}</td>
                           <td class="text-center">{{ $currency->currency_code }}</td>
-                          <td class="text-center">{{ $currency->currency_name }}</td>
+                          <td class="text-center">{{ $currency->name }}</td>
                           <td class="text-center">{{ $currency->currency_symbol }}</td>
                           <td class="text-center">{{ $currency->exchange_rate_to_usd }}</td>
                           <td class="text-center">

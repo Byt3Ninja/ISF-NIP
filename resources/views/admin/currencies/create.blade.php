@@ -28,6 +28,13 @@
                         @enderror
                       </div>
                       <div class="col-md-6">
+                        <label for="currency_name_ar" class="form-label fw-semibold mb-1 fs-6">{{ __('admin.Name_AR') }}</label>
+                        <input type="text" name="currency_name_ar" class="form-control" id="currency_name_ar" required>
+                        @error('currency_name_ar')
+                          <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                      </div>
+                      <div class="col-md-6">
                         <label for="currency_code" class="form-label fw-semibold mb-1 fs-6">{{ __('admin.Code') }}</label>
                         <input type="text" name="currency_code" class="form-control" id="currency_code" required>
                         @error('currency_code')
