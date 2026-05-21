@@ -949,7 +949,7 @@ $(function () {
     if (errors.length) {
       $('#vt-fb-upload-error').html(errors.join('<br>')).show();
     } else {
-      $('#vt-fb-upload-error').hide();
+      $('#vt-fb-upload-error').hide().text('');
     }
 
     validFiles.forEach(f => vtFeedbackFiles.push(f));
@@ -959,6 +959,7 @@ $(function () {
 
   // ─── Submit Feedback (kanban-vt-offcanvas) ────────────────────────────────
   $(document).on('click', '#vt-submit-feedback-btn', function () {
+    const $btn     = $(this);
     const taskId    = $('#vt-upload-btn-task-id').val();
     const companyId = $('#vt-fb-company-id').val();
     const decision  = $('input[name="vt_feedback_decision"]:checked').val();
@@ -975,6 +976,9 @@ $(function () {
     formData.append('note', note);
     formData.append('company_id', companyId ?? '');
     vtFeedbackFiles.forEach(f => formData.append('attachments[]', f));
+
+    const originalHtml = $btn.html();
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status"></span> {{ __("admin.submitting") }}');
 
     $.ajax({
       url: `/dashboard/tasks/${taskId}/add-feedback`,
@@ -1027,7 +1031,12 @@ $(function () {
         const $historyTab = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-feedback-history"]');
         if ($historyTab.length) bootstrap.Tab.getOrCreateInstance($historyTab[0]).show();
       },
-      error: (xhr) => toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}')
+      error: (xhr) => {
+        toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}');
+      },
+      complete: () => {
+        $btn.prop('disabled', false).html(originalHtml);
+      }
     });
   });
 
