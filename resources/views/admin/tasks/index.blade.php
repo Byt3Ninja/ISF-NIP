@@ -115,7 +115,13 @@ window.KanbanConfig = {
     sendSubmission:         '{{ __("admin.send_submission") }}',
     submittedFiles: '{{ __("admin.submittedFiles") }}',
     submissionNote: '{{ __("admin.submission_note") }}',
-    submission: '{{ __("admin.submission") }}'
+    submission: '{{ __("admin.submission") }}',
+    assignee: '{{ __("admin.Assignee") }}',
+    pending: '{{ __("admin.boardTitlePending") }}',
+    progress: '{{ __("admin.boardTitleProgress") }}',
+    review: '{{ __("admin.boardTitleReview") }}',
+    completed: '{{ __("admin.boardTitleCompleted") }}',
+    archived: '{{ __("admin.archived") }}'
   },
   priorityMap: {
     Low:    { cls: 'bg-label-info',    dot: 'bg-info',    label: '{{ __("admin.priorityLow") }}'    },
@@ -743,7 +749,10 @@ $(function () {
             ? (td.feedbacks || []).filter(fb => String(fb.company_id) === String(companyId))
             : (td.feedbacks || []);
         renderFeedbackList(filteredFeedbacks,          '#vt-feedback-list');
-        renderSubmissionsList(td.submissions,           '#vt-submissions-list');
+        const filteredAssignees = companyId
+            ? (td.assignees || []).filter(a => String(a.id) === String(companyId))
+            : (td.assignees || []);
+        renderSubmissionsList(td.submissions,           '#vt-submissions-list', filteredAssignees);
 
         $('#vt-comment-count').text(td.comments?.length ?? 0);
         $('#vt-feedback-count').text(filteredFeedbacks.length ?? 0);

@@ -409,7 +409,7 @@ class TasksController extends Controller
             return [
                 'id'          => $company->id,
                 'name'        => $company->name ?? $company->name_en,
-                'logo'        => $company->logo ? asset('storage/' . $company->logo) : null,
+                'logo'        => $company->logo ? (str_starts_with($company->logo, 'http') ? $company->logo : asset('storage/' . $company->logo)) : null,
                 'profile_url' => url('/dashboard/companyProfile/' . $company->id),
                 'status'      => $company->pivot->status,
                 'founder'     => $founder ? [
