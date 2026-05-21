@@ -3514,16 +3514,17 @@ class ClientCompanyController extends Controller
             $formattedDuration = $minutes < 60
                 ? $minutes . ' m'
                 : floor($minutes / 60) . ' h';
+            $attended = $mentorship['attended'] ?? null;
             return [
-                'mentor' => $mentorship['mentor_name'] ?? null,
-                'id' => 'M-' . $mentorship['mentor_ID'] ?? null,
-                'step_name' => 'Growth mentoring',
-                'step_id' => 'STP-M-03',
-                'date' => $mentorship['date'] ?? null,
-                'duration' => $formattedDuration,
+                'mentor'         => $mentorship['mentor_name'] ?? null,
+                'step_name'      => 'Growth mentoring',
+                'date'           => $mentorship['date'] ?? null,
+                'duration'       => $formattedDuration,
                 'founder_attended' => $mentorship['founder_name'] ?? null,
-                'rating' => $mentorship['rating'] ?? null,
-                'comments' => $mentorship['comments'] ?? null,
+                'attended'       => $attended,
+                'attended_badge' => $attended === 'Attended' ? 'success' : 'danger',
+                'rating'         => $mentorship['rating'] ?? null,
+                'comments'       => $mentorship['comments'] ?? null,
             ];
         })->values()->toArray();
     

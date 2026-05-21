@@ -1002,7 +1002,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                       <small class="text-muted">{{ $phaseSubtitle }}</small>
                     </div>
                     <span class="badge bg-label-{{ $badgeClass }}">
-                      <i class="ti ti-tag me-1"></i>{{ __('startup.step_with_id', ['id' => $phaseData['step_id']]) }}
+                      <i class="ti ti-tag me-1"></i>{{ $phaseData['step_name'] ?? $phaseData['step_id'] }}
                     </span>
                   </div>
       
@@ -1104,14 +1104,11 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <thead class="table-light">
                   <tr>
                     <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor_name') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.mentor_id') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.step_name') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date') }}</th>
-                    <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}
-                    </th>
-                    <th class="text-center text-nowrap"><i class="ti ti-user-check me-1"></i>{{ __('startup.founder_attended')
-                      }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-clock me-1"></i>{{ __('startup.duration_hours') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.step_name') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.founder_attended') }}</th>
+                    <th class="text-center text-nowrap"><i class="ti ti-user-check me-1"></i>{{ __('startup.attendance') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-star me-1"></i>{{ __('startup.rating') }}</th>
                     <th class="text-center text-nowrap"><i class="ti ti-message me-1"></i>{{ __('startup.comments') }}</th>
                   </tr>
@@ -1121,21 +1118,18 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     @foreach ($mentorshipData as $key => $session)
                     <tr class="border-top">
                       <td class="fw-medium">{{ $session['mentor'] }}</td>
-                      <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $session['id'] }}</span></td>
-                      <td>{{ $session['step_name'] }}</td>
-                      <td>{{ $session['step_id'] }}</td>
                       <td>{{ $session['date'] }}</td>
-                      <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
-                          $session['duration'] }}</span></td>
+                      <td class="text-center"><span class="badge bg-label-secondary">{{ $session['duration'] }}</span></td>
+                      <td>{{ $session['step_name'] }}</td>
                       <td class="fw-medium">{{ $session['founder_attended'] }}</td>
-                      <td class="text-center"><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{
-                          $session['rating'] }}</span></td>
+                      <td class="text-center"><span class="badge bg-label-{{ $session['attended_badge'] }}">{{ $session['attended'] }}</span></td>
+                      <td class="text-center"><span class="badge bg-label-secondary">{{ $session['rating'] }}</span></td>
                       <td class="small">{{ $session['comments'] }}</td>
                     </tr>
                     @endforeach
                   @else
                     <tr>
-                      <td colspan="9" class="text-center text-muted py-3">{{ __('startup.no_mentorship_sessions') }}</td>
+                      <td colspan="8" class="text-center text-muted py-3">{{ __('startup.no_mentorship_sessions') }}</td>
                     </tr>
                   @endif
                 </tbody>
