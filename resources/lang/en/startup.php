@@ -624,6 +624,7 @@ return [
   
   'mark_alumni_confirmation_bulk' => 'This action is irreversible. The selected startups will be graduated, and a snapshot of their information and participation records will be saved permanently.',
   'not_on_final_screening_tooltip' => 'Only startups on the "Final Screening" step can be graduated to alumni.',
+  'not_passed_final_screening_tooltip' => 'The selected startup has not passed the final screening.',
 
   // Registration & Offering Details (GV-2063)
   'registration_offering_details_title'      => 'Registration & Offering Details',
