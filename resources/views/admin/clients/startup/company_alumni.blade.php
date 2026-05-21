@@ -1433,16 +1433,13 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     <thead class="table-light">
                       <tr>
                         <th class="text-nowrap"><i class="ti ti-gift me-1"></i>{{ __('startup.service_name') }}</th>
-                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.service_id') }}</th>
-                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}
-                        </th>
+                        <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.description') }}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach ($services as $key => $s)
+                      @foreach ($services as $s)
                       <tr class="border-top">
                         <td class="fw-medium">{{ $s['name'] }}</td>
-                        <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $s['service_id'] }}</span></td>
                         <td class="small">{{ $s['description'] }}</td>
                       </tr>
                       @endforeach
@@ -1477,24 +1474,20 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                     <thead class="table-light">
                       <tr>
                         <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.form_title') }}</th>
-                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.form_id') }}</th>
                         <th class="text-nowrap"><i class="ti ti-flag me-1"></i>{{ __('startup.custom_form_step') }}</th>
-                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.step_id') }}</th>
                         <th class="text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.submission_date') }}</th>
-                        <th class="text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.details') }}</th>
+                        <th class="text-nowrap"><i class="ti ti-file me-1"></i>{{ __('startup.form_inputs') }}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach ($forms as $key => $f)
+                      @foreach ($forms as $f)
                       <tr class="border-top">
                         <td class="fw-medium">{{ $f['title'] }}</td>
-                        <td><span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">{{ $f['form_id'] }}</span></td>
                         <td>{{ $f['step_name'] }}</td>
-                        <td>{{ $f['step_id'] }}</td>
-                        <td>{{ $f['submission_date'] }}</td>
+                        <td>{{ $f['submission_date'] ?? '—' }}</td>
                         <td class="text-center">
                           <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#formDetailsModal-{{ $f['modal_id'] }}">
+                            data-bs-target="#{{ $f['modal_id'] }}">
                             <i class="ti ti-eye me-1"></i>{{ __('startup.view_inputs') }}
                           </button>
                         </td>
@@ -1520,7 +1513,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
 
 @foreach ($forms as $f)
 <!-- Form Details Modal -->
-<div class="modal fade" id="formDetailsModal-{{ $f['modal_id'] }}" tabindex="-1" aria-labelledby="formDetailsModalLabel" aria-hidden="true">
+<div class="modal fade" id="{{ $f['modal_id'] }}" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
