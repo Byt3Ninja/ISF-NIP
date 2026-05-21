@@ -206,7 +206,7 @@ return [
   'pitch_video' => 'Pitch video',
 
   // Team Section
-  'team_section_subtitle' => 'Leader, founders, employees',
+  'team_section_subtitle' => 'Founders, Employees',
   'team_size_badge' => 'Team size: :count',
   'startup_leader' => 'Startup leader',
   'id' => 'ID',
@@ -630,4 +630,7 @@ return [
   'products_services_description'            => 'Products / Services Description',
   'Hackathon' => 'Hackathon',
   'general_program' => 'General Program',
+  'total'  => 'Total',
+  'male'   => 'Male',
+  'female' => 'Female',
 ];

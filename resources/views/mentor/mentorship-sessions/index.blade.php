@@ -137,6 +137,7 @@
       processing: true,
       pageLength: 10,
       order: [[0, 'desc']],
+      order: [[0, 'desc']],
       dom: '<"row"' +
         '<"col-12 col-lg-10 d-flex flex-wrap align-items-center ps-0 ps-lg-3"l>' +
         '<"col-12 col-lg-2 dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 pe-0 pe-lg-2"f>' +
