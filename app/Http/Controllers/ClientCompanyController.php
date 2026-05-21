@@ -3349,6 +3349,37 @@ class ClientCompanyController extends Controller
         $screeningScore      = collect($screening)->avg('overall_score') ?? 0;
         $finalScreeningScore = collect($finalScreen)->avg('overall_score') ?? 0;
 
+        $buildScreeningPhase = function (array $phaseArray) {
+            $first = collect($phaseArray)->filter(fn($e) => !empty($e['step_id']))->first();
+            if (!$first) {
+                return ['step_id' => '—', 'step_name' => '', 'overall_score' => 0, 'date' => '—', 'criteria' => [], 'judges' => []];
+            }
+            $criteria = collect($first['criteria_breakdown'] ?? [])->map(fn($c) => [
+                'name'  => $c['criterion'] ?? '',
+                'weight' => ($c['weight'] ?? 0) . '%',
+                'score' => $c['score'] ?? 0,
+            ])->toArray();
+            $judges = collect($first['judges'] ?? [])->map(fn($j) => [
+                'name'     => $j['judge_name'] ?? '',
+                'id'       => 'J-' . ($j['judge_id'] ?? ''),
+                'score'    => $j['individual_score'] ?? 0,
+                'comments' => implode(' ', (array) ($j['comments'] ?? [])),
+            ])->toArray();
+            return [
+                'step_id'       => 'STP-' . ($first['step_id'] ?? ''),
+                'step_name'     => $first['step_name'] ?? '',
+                'overall_score' => $first['overall_score'] ?? 0,
+                'date'          => $first['date'] ?? '—',
+                'criteria'      => $criteria,
+                'judges'        => $judges,
+            ];
+        };
+
+        $screeningData = [
+            'initial' => $buildScreeningPhase($screening),
+            'final'   => $buildScreeningPhase($finalScreen),
+        ];
+
         $mentorshipCollection = collect($mentorships)->filter(fn($m) => !empty($m['mentor_name']));
         $attendedCount        = $mentorshipCollection->filter(fn($m) => ($m['attended'] ?? '') === 'Attended')->count();
         $attendanceRate       = $mentorshipCollection->count() > 0
@@ -3616,18 +3647,19 @@ class ClientCompanyController extends Controller
                 })->values()->toArray();
     
 
-        return view('admin.clients.startup.company_alumni', compact('startup', 
-        'teamData', 
-        'ownershipData', 
-        'mentorshipData', 
-        'milestones', 
-        'tasks', 
-        'quizzes', 
-        'surveys', 
-        'services', 
+        return view('admin.clients.startup.company_alumni', compact('startup',
+        'teamData',
+        'ownershipData',
+        'mentorshipData',
+        'milestones',
+        'tasks',
+        'quizzes',
+        'surveys',
+        'services',
         'forms',
         'legal_information',
         'pitch_deck',
+        'screeningData',
         'trainingHours',
         'mentorshipHours',
         'screeningScore',
@@ -4355,37 +4387,43 @@ class ClientCompanyController extends Controller
                     $screeningsEvaluations->pluck('id')
                 )->where('company_id', $company_id)->get();
                
-            $stepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult, $getCriteria) {
+            $stepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult) {
                 $evaluationResults = $getResult->where('evaluation_id', $evaluation->id);
-                $criteriaBreakdown = $getCriteria->where('evaluation_id', $evaluation->id)
-                    ->map(function ($criterion) use ($evaluationResults) {
-                        $criterionScores = $evaluationResults->where('criteria_id', $criterion->id);
+
+                $criteriaIds = $evaluationResults->pluck('criteria_id')->unique()->filter()->values();
+                $criteriaMap = ScreeningEvaluationCriteria::whereIn('id', $criteriaIds)->get()->keyBy('id');
+                $criteriaBreakdown = $evaluationResults->groupBy('criteria_id')
+                    ->map(function ($criterionResults, $criteriaId) use ($criteriaMap) {
+                        $criterion = $criteriaMap->get($criteriaId);
                         return [
-                            'criterion' => $criterion->title ?? 'N/A', 
-                            'weight'    => $criterion->weight ?? 0, 
-                            'score'     => round($criterionScores->avg('score'), 2),
+                            'criterion' => $criterion?->title ?? 'N/A',
+                            'weight'    => $criterion?->weight ?? 0,
+                            'score'     => round($criterionResults->avg('score'), 2),
                         ];
                     })->values();
 
                 $judgesData = $evaluationResults->groupBy('user_id')
                     ->map(function ($judgeResults) {
-                        $judge = $judgeResults->first()->user; 
-                        
+                        $judge = $judgeResults->first()->user;
                         return [
                             'judge_id'         => $judge->id ?? 0,
                             'judge_name'       => $judge->name ?? 'Unknown',
-                            'judge_link'       => route('users.show', $judge->id ?? 0), 
+                            'judge_link'       => route('users.show', $judge->id ?? 0),
                             'individual_score' => round($judgeResults->avg('score'), 2),
                             'comments'         => $judgeResults->pluck('comment')->filter()->values()->all(),
                         ];
                     })->values();
 
                 $overallScore = $evaluationResults->isEmpty() ? 0 : $evaluationResults->avg('score');
+                $stepDate = $evaluation->step?->from
+                    ? \Carbon\Carbon::parse($evaluation->step->from)->format('M Y')
+                    : null;
 
                 return [
                     'step_id'            => $evaluation->step_id ?? 0,
-                    'step_name'          => $evaluation->step->name ?? 'Step Name',
+                    'step_name'          => $evaluation->step?->title ?? 'N/A',
                     'overall_score'      => round($overallScore, 2),
+                    'date'               => $stepDate,
                     'criteria_breakdown' => $criteriaBreakdown,
                     'judges'             => $judgesData,
                 ];
@@ -4417,37 +4455,43 @@ class ClientCompanyController extends Controller
                     $screeningsEvaluations->pluck('id')
                 )->where('company_id', $company_id)->get();
                
-            $finalstepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult, $getCriteria) {
+            $finalstepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult) {
                 $evaluationResults = $getResult->where('evaluation_id', $evaluation->id);
-                $criteriaBreakdown = $getCriteria->where('evaluation_id', $evaluation->id)
-                    ->map(function ($criterion) use ($evaluationResults) {
-                        $criterionScores = $evaluationResults->where('criteria_id', $criterion->id);
+
+                $criteriaIds = $evaluationResults->pluck('criteria_id')->unique()->filter()->values();
+                $criteriaMap = ScreeningEvaluationCriteria::whereIn('id', $criteriaIds)->get()->keyBy('id');
+                $criteriaBreakdown = $evaluationResults->groupBy('criteria_id')
+                    ->map(function ($criterionResults, $criteriaId) use ($criteriaMap) {
+                        $criterion = $criteriaMap->get($criteriaId);
                         return [
-                            'criterion' => $criterion->title ?? 'N/A', 
-                            'weight'    => $criterion->weight ?? 0, 
-                            'score'     => round($criterionScores->avg('score'), 2),
+                            'criterion' => $criterion?->title ?? 'N/A',
+                            'weight'    => $criterion?->weight ?? 0,
+                            'score'     => round($criterionResults->avg('score'), 2),
                         ];
                     })->values();
 
                 $judgesData = $evaluationResults->groupBy('user_id')
                     ->map(function ($judgeResults) {
-                        $judge = $judgeResults->first()->user; 
-                        
+                        $judge = $judgeResults->first()->user;
                         return [
                             'judge_id'         => $judge->id ?? 0,
                             'judge_name'       => $judge->name ?? 'Unknown',
-                            'judge_link'       => route('users.show', $judge->id ?? 0), 
+                            'judge_link'       => route('users.show', $judge->id ?? 0),
                             'individual_score' => round($judgeResults->avg('score'), 2),
                             'comments'         => $judgeResults->pluck('comment')->filter()->values()->all(),
                         ];
                     })->values();
 
                 $overallScore = $evaluationResults->isEmpty() ? 0 : $evaluationResults->avg('score');
+                $stepDate = $evaluation->step?->from
+                    ? \Carbon\Carbon::parse($evaluation->step->from)->format('M Y')
+                    : null;
 
                 return [
                     'step_id'            => $evaluation->step_id ?? 0,
-                    'step_name'          => $evaluation->step->name ?? 'Step Name',
+                    'step_name'          => $evaluation->step?->title ?? 'N/A',
                     'overall_score'      => round($overallScore, 2),
+                    'date'               => $stepDate,
                     'criteria_breakdown' => $criteriaBreakdown,
                     'judges'             => $judgesData,
                 ];
@@ -4608,29 +4652,25 @@ class ClientCompanyController extends Controller
 
                 $almuni->quizzes = json_encode($quizzes);
 
-                $startup_surveys= Surveys::where('organization_id', $company->cycledata->organization_id)->get();
+                $surveyResponseRecords = \App\SurveyResponses::where('user_id', $company?->user?->id)
+                    ->where('cycle_id', $company->cycle)
+                    ->with('survey')
+                    ->get();
                 $surveys = [];
-                foreach ($startup_surveys as $survey) {
-                    $answers = $survey->responses
-                        ->flatMap(function ($res) {
-
-                            $decoded = json_decode($res->responses, true);
-
-                            return collect($decoded)->map(function ($item) {
-                                return [
-                                    'question' => $item['question'] ?? '',
-                                    'answer'   => $item['answer'] ?? '',
-                                ];
-                            });
-                        })
-                        ->filter()
-                        ->values();
+                foreach ($surveyResponseRecords as $response) {
+                    $answered = !empty($response->responses);
+                    $answers  = $answered
+                        ? collect($response->responses)->map(fn($item) => [
+                            'question' => $item['question'] ?? '',
+                            'answer'   => $item['answer']   ?? '',
+                          ])->filter()->values()
+                        : collect();
                     $surveys[] = [
-                        'Survey_ID' => $survey->id ?? '',
-                        'Survey_title' => $survey->title ?? '',
-                        'program_step' =>  $survey->responses->first()?->cycle ? $survey->responses->first()?->cycle->title : '',
-                        'Date_completed' => $survey->responses->first()?->updated_at ? $survey->responses->first()?->updated_at?->format('Y-m-d H:i') : '',
-                        'Survey_answers' => $answers ?? '',
+                        'Survey_ID'      => $response->survey_id ?? '',
+                        'Survey_title'   => $response->survey?->title ?? '',
+                        'program_step'   => $response->cycle?->title ?? '',
+                        'Date_completed' => $answered ? $response->updated_at?->format('Y-m-d H:i') : '',
+                        'Survey_answers' => $answers,
                     ];
                 }
                 if(empty($surveys)) {
