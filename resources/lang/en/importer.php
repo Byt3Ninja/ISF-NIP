@@ -94,6 +94,8 @@ return [
         'founder_phone_already_enrolled' => 'Row :row: A founder with this phone number is already enrolled in a program. If you continue, this founder will be skipped from enrollment in this program.',
         'founder_email_exists_different_name' => 'Row :row: This email matches an existing founder, but the name is different. If you continue, this founder will be skipped from enrollment in this program.',
         'founder_phone_exists_different_name' => 'Row :row: This phone number matches an existing founder, but the name is different. If you continue, this founder will be skipped from enrollment in this program.',
+        'founder_email_duplicate_in_upload' => 'Row :row: This founder email is already used in an earlier row of this file. The duplicate row will be skipped.',
+        'founder_phone_duplicate_in_upload' => 'Row :row: This founder phone number is already used in an earlier row of this file. The duplicate row will be skipped.',
         'program_exists_different_dates' => 'Row :row: A program with the same name and type already exists, but the dates are different. If you continue, a new program will be created with the new dates.',
     ],
 
