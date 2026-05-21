@@ -1,0 +1,16 @@
+Program Name,Program Type,Program Start Date,Program End Date,Founder First Name,Founder Last Name,Founder Email,Founder Gender,Founder Phone,Country Code,Startup Name,Country
+Accelerator A,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex.morgan@example.com,Male,1020453664,20,Acme Robotics,Egypt
+Accelerator B,General_Program,5/1/2026,8/31/2026,Alex,Morgan,alex.morgan@example.com,Male,1282896946,20,Acme Logistics,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Sara,Hassan,sara.hassan@example.com,Female,1112233445,20,BlueWave Labs,Egypt
+Accelerator C,General_Program,3/1/2026,6/30/2026,Omar,Khaled,omar.khaled@example.com,Male,1554433221,20,Pyramid Cloud,Egypt
+Accelerator B,General_Program,5/1/2026,8/31/2026,Lina,Said,lina.said@example.com,Female,1554433221,20,Cedar Health,Egypt
+Hackathon Spring,Hackathon,6/1/2026,6/15/2026,Mona,Adel,mona.adel@example.com,Female,1009988776,20,Nile Energy,Egypt
+Accelerator C,General_Program,3/1/2026,6/30/2026,Karim,Nabil,karim.nabil@example.com,Male,1223344556,20,Desert Foods,Egypt
+Hackathon Spring,Hackathon,6/1/2026,6/15/2026,Karim,Nabil,karim.nabil@example.com,Male,1223344556,20,Desert Foods Two,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Hana,Reda,hana.reda@example.com,Female,1667788990,20,Oasis Mobility,Egypt
+Accelerator B,General_Program,5/1/2026,8/31/2026,Hana,Reda,hana.reda@example.com,Female,1667788990,20,Oasis Mobility 2,Egypt
+Accelerator D,General_Program,2/1/2026,5/31/2026,Yusuf,Tarek,yusuf.tarek@example.com,Male,1335577990,20,Cairo Analytics,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Nour,Saad,nour.saad@example.com,Female,1335577990,20,Sphinx Studio,Egypt
+Hackathon Spring,Hackathon,6/1/2026,6/15/2026,Tamer,Fouad,tamer.fouad@example.com,Male,1771122334,20,Phoenix Drinks,Egypt
+Accelerator C,General_Program,3/1/2026,6/30/2026,Salma,Magdy,salma.magdy@example.com,Female,1882244668,20,Verdant Farms,Egypt
+Accelerator D,General_Program,2/1/2026,5/31/2026,Salma,Magdy,salma.magdy@example.com,Female,1882244668,20,Verdant Farms 2,Egypt
