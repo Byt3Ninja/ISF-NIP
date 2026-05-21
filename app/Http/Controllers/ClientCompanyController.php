@@ -3618,29 +3618,23 @@ class ClientCompanyController extends Controller
         })->values()->toArray();
 
         $services = collect($services)->map(function ($service) {
-            
             return [
-                'name' => $service['Service_name'] ?? null,
-                'service_id' => 'SRV-'. $service['Service_ID'] ?? null,
+                'name'        => $service['Service_name'] ?? null,
                 'description' => $service['Description'] ?? null,
-                'badge_class' => $service['Price'] != 0 ? 'success' : 'primary',
             ];
         })->values()->toArray();
 
        $forms = collect($forms)
                 ->groupBy('ID')
-                ->map(function ($group) {
+                ->map(function ($group, $formId) {
 
                     $first = $group->first();
 
                     return [
-                        'title' => $first['Form_Title'] ?? null,
-                        'form_id' => 'FM-' . str_pad($first['ID'], 3, '0', STR_PAD_LEFT),
-                        'step_name' => $first['step_title'] ?? null,
-                        'step_id' => 'STP-FM-' . $first['Step_ID'],
+                        'title'           => $first['Form_Title'] ?? null,
+                        'step_name'       => $first['step_title'] ?? null,
                         'submission_date' => $first['Submission_Date'],
-                        'badge_class' => $first['Submission_Date'] ? 'success' : 'primary',
-                        'modal_id' => 1,
+                        'modal_id'        => 'formModal' . $formId,
 
                         'fields' => $group->map(function ($form) {
                             return [
