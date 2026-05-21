@@ -633,4 +633,6 @@ return [
   'total'  => 'Total',
   'male'   => 'Male',
   'female' => 'Female',
+  'no_programs_joined_yet' => 'No Programs Joined Yet',
+  'not_participating_any_program' => 'This startup is not currently participating in any programs.',
 ];
