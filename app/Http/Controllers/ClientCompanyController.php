@@ -3349,10 +3349,10 @@ class ClientCompanyController extends Controller
         $screeningScore      = collect($screening)->avg('overall_score') ?? 0;
         $finalScreeningScore = collect($finalScreen)->avg('overall_score') ?? 0;
 
-        $trainingCollection = collect($training)->filter(fn($t) => !empty($t['title']));
-        $attendedCount      = $trainingCollection->filter(fn($t) => ($t['attendance'] ?? '') === 'Attended')->count();
-        $attendanceRate     = $trainingCollection->count() > 0
-            ? round(($attendedCount / $trainingCollection->count()) * 100)
+        $mentorshipCollection = collect($mentorships)->filter(fn($m) => !empty($m['mentor_name']));
+        $attendedCount        = $mentorshipCollection->filter(fn($m) => ($m['attended'] ?? '') === 'Attended')->count();
+        $attendanceRate       = $mentorshipCollection->count() > 0
+            ? round(($attendedCount / $mentorshipCollection->count()) * 100)
             : 0;
 
         $milestonesCollection = collect($milestones)->filter(fn($m) => !empty($m['Milestone_title']));
