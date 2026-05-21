@@ -3686,6 +3686,7 @@ class ClientCompanyController extends Controller
         'forms',
         'legal_information',
         'pitch_deck',
+        'training',
         'screeningData',
         'trainingHours',
         'mentorshipHours',
