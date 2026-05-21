@@ -637,4 +637,6 @@ return [
   'total'  => 'الإجمالي',
   'male'   => 'ذكر',
   'female' => 'أنثى',
+  'no_programs_joined_yet' => 'لم يتم الانضمام لأي برامج بعد',
+  'not_participating_any_program' => 'هذه الشركة الناشئة لا تشارك حالياً في أي برامج.',
 ];

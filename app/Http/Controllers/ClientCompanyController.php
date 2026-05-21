@@ -261,6 +261,20 @@ class ClientCompanyController extends Controller
                 }
             }
 
+            $startDate = $cycle->start ? Carbon::parse($cycle->start) : null;
+            $endDate = $cycle->end ? Carbon::parse($cycle->end) : null;
+            $cycleStatus = 'upcoming';
+            if ($startDate && $endDate) {
+                $now = Carbon::now();
+                if ($now->between($startDate, $endDate)) {
+                    $cycleStatus = 'ongoing';
+                } elseif ($now->greaterThan($endDate)) {
+                    $cycleStatus = 'completed';
+                }
+            } elseif ($startDate && Carbon::now()->greaterThanOrEqualTo($startDate)) {
+                $cycleStatus = 'ongoing';
+            }
+
             $programs->push((object)[
                 'id' => $cycle->id,
                 'name' => $cycle->title,
@@ -270,12 +284,12 @@ class ClientCompanyController extends Controller
                     'name' => is_object($cycle->organization) ? ($cycle->organization->name ?? null) : $cycle->organization
                 ],
                 'cohort' => (object)[ 'name' => $cycle->cohort ?? null ],
-                'start_date' => Carbon::parse($cycle->start),
-                'completion_date' => Carbon::parse($cycle->end),
+                'start_date' => $startDate,
+                'completion_date' => $endDate,
                 'screening_score' => $currentScreeningScore,
                 'rank' => null,
                 'final_screening_score' => $currentFinalScoreForProgram,
-                'status' => 'upcoming',
+                'status' => $cycleStatus,
             ]);
         }
         $almunies = Almuni::where('company_id', $company->id)->get();
