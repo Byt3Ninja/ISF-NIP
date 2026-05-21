@@ -220,7 +220,7 @@ class SlotController extends Controller
 					$user = auth()->user();
 					$location =  $user->company?->cycledata?->offline_location_map ?? $user->company?->cycledata?->organization?->google_map_url 
 								?? null;
-					$address = $user->company?->cycledata?->offline_location_address ?? null;
+					$address = $user->company?->cycledata?->offline_location_address ?? $user->company?->cycledata?->organization?->address ?? null;
 				}
 
 			if ($isWeekly) {
