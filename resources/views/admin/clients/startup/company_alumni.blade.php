@@ -1043,8 +1043,9 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                         @foreach ($phaseData['criteria'] as $c)
                         <tr class="border-top">
                           <td class="fw-medium">{{ $c['name'] }}</td>
-                          <td class="text-center"><span class="badge bg-label-{{ $criteriaBadgeClass }}">{{ $c['weight']
-                              }}</span></td>
+                          <td>
+                            <span class="badge bg-label-{{ $criteriaBadgeClass }}">{{ $c['weight'] }}</span>
+                          </td>
                           <td class="text-end"><span class="badge bg-label-success">{{ $c['score'] }}</span></td>
                         </tr>
                         @endforeach
@@ -1071,7 +1072,11 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                         <tr class="border-top">
                           <td class="fw-medium">{{ $j['name'] }}</td>
                           <td>{{ $j['id'] }}</td>
-                          <td class="text-center"><span class="badge bg-label-{{ $badgeClass }}">{{ $j['score'] }}</span></td>
+                          <td>
+                            <span class="badge bg-label-{{ $badgeClass }}">
+                              {{ $j['score'] }}
+                            </span>
+                            </td>
                           <td class="small">{{ $j['comments'] }}</td>
                         </tr>
                         @endforeach
