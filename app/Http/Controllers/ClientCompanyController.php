@@ -3375,9 +3375,9 @@ class ClientCompanyController extends Controller
             ])->toArray();
             $judges = collect($first['judges'] ?? [])->map(fn($j) => [
                 'name'     => $j['judge_name'] ?? '',
-                'id'       => 'J-' . ($j['judge_id'] ?? ''),
+                'link'     => $j['judge_link'] ?? null,
                 'score'    => $j['individual_score'] ?? 0,
-                'comments' => implode(' ', (array) ($j['comments'] ?? [])),
+                'comments' => implode(' · ', array_filter((array) ($j['comments'] ?? []))),
             ])->toArray();
             return [
                 'step_id'       => 'STP-' . ($first['step_id'] ?? ''),
@@ -3590,26 +3590,28 @@ class ClientCompanyController extends Controller
         })->values()->toArray();
 
         $quizzes = collect($quizzes)->filter(fn($q) => !empty($q['Quiz_title']))->map(function ($quizze) {
-            $status = $quizze['Status'] ?? 'not_started';
-            $statusLabel = match($status) {
-                'passed'      => __('startup.passed'),
-                'failed'      => __('startup.failed'),
-                'not_started' => __('startup.not_started'),
-                default       => __('startup.not_started'),
-            };
-            $statusBadge = match($status) {
-                'passed'      => 'success',
-                'failed'      => 'danger',
-                'not_started' => 'secondary',
-                default       => 'secondary',
-            };
+            $raw = $quizze['Status'] ?? null;
+            // handle both old format (true/false/1/0/'') and new format ('passed'/'failed'/'not_started')
+            if ($raw === 'passed' || $raw === true || $raw === 1) {
+                $statusLabel = __('startup.passed');
+                $statusBadge = 'success';
+            } elseif ($raw === 'failed' || ($raw === false && $raw !== null && $raw !== '')) {
+                $statusLabel = __('startup.failed');
+                $statusBadge = 'danger';
+            } else {
+                $statusLabel = __('startup.not_started');
+                $statusBadge = 'secondary';
+            }
             $resultId = $quizze['Result_ID'] ?? null;
+            $dateCompleted = !empty($quizze['Date_completed']) ? $quizze['Date_completed'] : null;
+            $founder       = !empty($quizze['founder_completed_quiz']) ? $quizze['founder_completed_quiz'] : null;
+            $score         = ($quizze['Score'] !== null && $quizze['Score'] !== '') ? $quizze['Score'] : null;
             return [
                 'title'          => $quizze['Quiz_title'] ?? null,
                 'result_url'     => $resultId ? route('quizzes.quiz_results_view_details', $resultId) : null,
-                'date_completed' => $quizze['Date_completed'] ?? null,
-                'founder'        => $quizze['founder_completed_quiz'] ?? null,
-                'score'          => $quizze['Score'] ?? null,
+                'date_completed' => $dateCompleted,
+                'founder'        => $founder,
+                'score'          => $score,
                 'status_label'   => $statusLabel,
                 'status_badge'   => $statusBadge,
             ];
