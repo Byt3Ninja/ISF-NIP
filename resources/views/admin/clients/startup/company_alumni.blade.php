@@ -291,7 +291,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
         ['icon' => 'briefcase', 'color' => 'warning', 'label' => __('startup.business_type'), 'value' => $startup['business_type']],
         ['icon' => 'device-gamepad-3', 'color' => 'success', 'label' => __('startup.industry'), 'value' => $startup['industry']],
         ['icon' => 'packages', 'color' => 'danger', 'label' => __('startup.sector'), 'value' => $startup['sector']],
-        ['icon' => 'users', 'color' => 'primary', 'label' => __('startup.team_size'), 'value' => $startup['team_size']],
+      //  ['icon' => 'users', 'color' => 'primary', 'label' => __('startup.team_size'), 'value' => $startup['team_size']],
       ];
 
       $programInfo = [
@@ -645,7 +645,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-calendar me-1"></i>{{ __('startup.established_date') }}
+                    <i class="ti ti-calendar me-1"></i>{{ __('startup.completion_date') }}
                   </small>
                   <p class="mb-0 fw-bold text-dark">{{ $startup['established_at'] }}</p>
                 </div>
@@ -695,7 +695,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <div class="d-flex align-items-center gap-4">
                 
                   @foreach($startup['sdgs'] as $sdg)
-                    <span class="badge p-3 bg-light-subtle text-dark border">{{ $sdg }}</span>
+                    <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
                   @endforeach
                 </div>
               @endif
