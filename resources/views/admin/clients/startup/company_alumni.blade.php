@@ -662,18 +662,16 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
            
             <div class="row">
               <div class="col-12">
-                <div class="row">
-                  <div class="col-10">
-                    @if(empty($startup['sdgs']))
-                      <span class="badge p-3 bg-light-subtle text-dark border">{{ __('startup.no_sdg') }}</span>
-                    @else
-                      <div class="d-flex align-items-center gap-4">
-                        @foreach($startup['sdgs'] as $sdg)
-                          <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
-                        @endforeach
-                      </div>
-                    @endif
-                  </div>
+                <div class="w-75">
+                  @if(empty($startup['sdgs']))
+                    <span class="badge p-3 bg-light-subtle text-dark border">{{ __('startup.no_sdg') }}</span>
+                  @else
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                      @foreach($startup['sdgs'] as $sdg)
+                        <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
+                      @endforeach
+                    </div>
+                  @endif
                 </div>
               </div>
               
@@ -1282,7 +1280,6 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   <table class="table table-sm mb-0">
                     <thead class="table-light">
                       <tr>
-                        <th class="text-nowrap"><i class="ti ti-hash me-1"></i>{{ __('startup.quiz_id') }}</th>
                         <th class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ __('startup.quiz_title') }}</th>
                         <th class="text-nowrap"><i class="ti ti-calendar me-1"></i>{{ __('startup.date_completed') }}</th>
                         <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.founder') }}</th>
@@ -1291,17 +1288,26 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach ($quizzes as $key => $q)
+                      @foreach ($quizzes as $q)
                       <tr class="border-top">
-                        <td><span class="badge bg-label-{{ isset($badgeColors[$key + 1]) ? $badgeColors[$key + 1] : 'secondary' }}">{{ $q['quiz_id'] }}</span></td>
-                        <td class="fw-medium">{{ $q['title'] }}</td>
-                        <td>{{ $q['date_completed'] }}</td>
-                        <td>{{ $q['founder'] }}</td>
-                        <td class="text-center"><span class="badge bg-label-{{ $q['score_badge'] }}">{{ $q['score'] }}</span></td>
+                        <td class="fw-medium">
+                          @if($q['result_url'])
+                            <a href="{{ $q['result_url'] }}" target="_blank" class="text-primary">{{ $q['title'] }}</a>
+                          @else
+                            {{ $q['title'] }}
+                          @endif
+                        </td>
+                        <td>{{ $q['date_completed'] ?? '—' }}</td>
+                        <td>{{ $q['founder'] ?? '—' }}</td>
                         <td class="text-center">
-                          <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
-                            {{ $q['status'] }}
-                          </span>
+                          @if($q['score'] !== '' && $q['score'] !== null)
+                            <span class="badge bg-label-info">{{ $q['score'] }}</span>
+                          @else
+                            <span class="text-muted">—</span>
+                          @endif
+                        </td>
+                        <td class="text-center">
+                          <span class="badge bg-label-{{ $q['status_badge'] }}">{{ $q['status_label'] }}</span>
                         </td>
                       </tr>
                       @endforeach

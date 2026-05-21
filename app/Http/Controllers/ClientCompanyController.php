@@ -3404,7 +3404,7 @@ class ClientCompanyController extends Controller
         $milestonesCompleted  = $milestonesCollection->filter(fn($m) => (int)($m['Completion_percentage'] ?? 0) >= 100)->count();
 
         $quizzesCollection  = collect($quizzes)->filter(fn($q) => !empty($q['Quiz_title']));
-        $quizzesPassed      = $quizzesCollection->filter(fn($q) => ($q['Status'] ?? '') == 1)->count();
+        $quizzesPassed      = $quizzesCollection->filter(fn($q) => ($q['Status'] ?? '') === 'passed')->count();
         $avgQuizScore       = $quizzesCollection->count() > 0
             ? round($quizzesCollection->avg(fn($q) => (float) ($q['Score'] ?? 0)), 1)
             : 0;
@@ -3589,16 +3589,29 @@ class ClientCompanyController extends Controller
             ];
         })->values()->toArray();
 
-        $quizzes = collect($quizzes)->map(function ($quizze) {
-            
+        $quizzes = collect($quizzes)->filter(fn($q) => !empty($q['Quiz_title']))->map(function ($quizze) {
+            $status = $quizze['Status'] ?? 'not_started';
+            $statusLabel = match($status) {
+                'passed'      => __('startup.passed'),
+                'failed'      => __('startup.failed'),
+                'not_started' => __('startup.not_started'),
+                default       => __('startup.not_started'),
+            };
+            $statusBadge = match($status) {
+                'passed'      => 'success',
+                'failed'      => 'danger',
+                'not_started' => 'secondary',
+                default       => 'secondary',
+            };
+            $resultId = $quizze['Result_ID'] ?? null;
             return [
-                'quiz_id' => 'QZ-'. $quizze['Quiz_ID'] ?? null,
-                'title' => $quizze['Quiz_title'] ?? null,
+                'title'          => $quizze['Quiz_title'] ?? null,
+                'result_url'     => $resultId ? route('quizzes.quiz_results_view_details', $resultId) : null,
                 'date_completed' => $quizze['Date_completed'] ?? null,
-                'founder' => $quizze['founder_completed_quiz'] ?? null,
-                'score' => $quizze['Score'] ?? null,
-                'score_badge' => $quizze['Status'] == 1 ? 'success' : 'warning',
-                'status' => $quizze['Status'] == 1 ? __('startup.passed') : __('startup.failed'),
+                'founder'        => $quizze['founder_completed_quiz'] ?? null,
+                'score'          => $quizze['Score'] ?? null,
+                'status_label'   => $statusLabel,
+                'status_badge'   => $statusBadge,
             ];
         })->values()->toArray();
 
@@ -4631,24 +4644,21 @@ class ClientCompanyController extends Controller
                 }
                 $almuni->tasks = json_encode($MentorTasks);
 
-                $startup_quizzes= Quizzes::where('organization_id', $company->cycledata->organization_id)->get();
+                $startup_quizzes = Quizzes::where('organization_id', $company->cycledata->organization_id)->get();
                 $quizzes = [];
+                $companyUserId = $company?->user?->id;
                 foreach ($startup_quizzes as $quizze) {
-
-                    $result = $quizze->results->first(); // ممكن يرجع null
-                    $user   = $result?->user;            // برضه ممكن يكون null
+                    $result = $quizze->results()->where('user_id', $companyUserId)->first();
+                    $user   = $result?->user;
 
                     $quizzes[] = [
-                        'Quiz_ID' => $quizze->id ?? '',
-                        'Quiz_title' => $quizze->title ?? '',
-                        'Date_completed' => $result?->ended_at
-                            ? $result?->ended_at?->format('Y-m-d H:i')
-                            : '',
-                        'founder_completed_quiz' => $user
-                            ? ($user->first_name_en . " " . $user->last_name_en)
-                            : '',
-                        'Score' => $result?->score ?? '',
-                        'Status' => $result?->status ?? '',
+                        'Quiz_ID'               => $quizze->id ?? '',
+                        'Quiz_title'            => $quizze->title ?? '',
+                        'Result_ID'             => $result?->id ?? '',
+                        'Date_completed'        => $result?->ended_at?->format('Y-m-d H:i') ?? '',
+                        'founder_completed_quiz'=> $user ? ($user->first_name_en . ' ' . $user->last_name_en) : '',
+                        'Score'                 => $result?->score ?? '',
+                        'Status'                => $result ? ($result->status == 1 ? 'passed' : 'failed') : 'not_started',
                     ];
                 }
                 if(empty($quizzes)) {

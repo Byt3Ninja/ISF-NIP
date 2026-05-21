@@ -3853,4 +3853,5 @@ return [
   'submittedFiles' => 'الملفات المقدمة',
   'feedback_note_required' => 'ملاحظة التقييم مطلوبة',
   'Closed' => 'مغلق',
+  'submitting' => 'جاري الإرسال...',
 ];
