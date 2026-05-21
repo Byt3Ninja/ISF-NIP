@@ -255,14 +255,17 @@
                       </button>
                     @endunless
 
-                    <button type="button"
-                      class="btn btn-sm {{ $isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
-                      data-company-id="{{ $company->id }}"
-                      data-company-name="{{ $companyName }}"
-                      {{ $isAlumni || !$atAlumniStep ? 'disabled' : '' }}>
-                      <i class="ti ti-pennant ti-16px me-1"></i>
-                      <span>{{ $isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
-                    </button>
+                    <span @if(!$isAlumni && !$atAlumniStep) title="{{ __('startup.not_passed_final_screening_tooltip') }}" style="cursor:not-allowed;display:inline-block;" @endif>
+                      <button type="button"
+                        class="btn btn-sm {{ $isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
+                        data-company-id="{{ $company->id }}"
+                        data-company-name="{{ $companyName }}"
+                        @if(!$isAlumni && !$atAlumniStep) style="pointer-events:none;" @endif
+                        {{ $isAlumni || !$atAlumniStep ? 'disabled' : '' }}>
+                        <i class="ti ti-pennant ti-16px me-1"></i>
+                        <span>{{ $isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
+                      </button>
+                    </span>
 
                   </div>
                 </td>
