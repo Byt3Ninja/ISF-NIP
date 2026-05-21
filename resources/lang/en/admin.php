@@ -3797,4 +3797,5 @@ return [
   'submittedFiles' => 'Submitted Files',
   'feedback_note_required' => 'Feedback note required',
   'Closed' => 'Closed',
+  'submitting' => 'Submitting...',
 ];
