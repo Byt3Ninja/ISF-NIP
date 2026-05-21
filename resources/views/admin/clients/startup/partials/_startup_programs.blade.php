@@ -22,77 +22,7 @@
   @endforeach
 </div>
 
-@php
-$cycles = [
-    (object)[
-        'id' => 1,
-        'name' => 'Startup Hackathon 2024',
-        'img_url' => 'https://via.placeholder.com/80',
-        'type' => 'hackathon',
-        'status' => 'completed',
-        'start_date' => \Carbon\Carbon::parse('2024-01-10'),
-        'completion_date' => \Carbon\Carbon::parse('2024-01-20'),
-        'rank' => 1,
-        'screening_score' => 95,
-        'final_screening_score' => 98,
-        'organization' => (object)[
-            'name' => 'Tech Hub'
-        ],
-        'cohort' => 'Cohort 5'
-    ],
 
-    (object)[
-        'id' => 2,
-        'name' => 'General Innovation Program 2025',
-        'img_url' => 'https://via.placeholder.com/80',
-        'type' => 'general',
-        'status' => 'ongoing',
-        'start_date' => \Carbon\Carbon::parse('2025-02-01'),
-        'completion_date' => \Carbon\Carbon::parse('2025-07-01'),
-        'rank' => null,
-        'screening_score' => 88,
-        'final_screening_score' => 90,
-        'organization' => (object)[
-            'name' => 'Startup Egypt'
-        ],
-        'cohort' => 'Cohort 8',
-    ],
-
-    (object)[
-        'id' => 3,
-        'name' => 'AI Hackathon',
-        'img_url' => 'https://via.placeholder.com/80',
-        'type' => 'hackathon',
-        'status' => 'ongoing',
-        'start_date' => \Carbon\Carbon::parse('2025-03-15'),
-        'completion_date' => \Carbon\Carbon::parse('2025-03-25'),
-        'rank' => 2,
-        'screening_score' => 90,
-        'final_screening_score' => 92,
-        'organization' => (object)[
-            'name' => 'AI Labs'
-        ],
-        'cohort' => 'Cohort 9'
-    ],
-
-    (object)[
-        'id' => 4,
-        'name' => 'General Startup Bootcamp',
-        'img_url' => 'https://via.placeholder.com/80',
-        'type' => 'general',
-        'status' => 'completed',
-        'start_date' => \Carbon\Carbon::parse('2024-05-10'),
-        'completion_date' => \Carbon\Carbon::parse('2024-09-10'),
-        'rank' => null,
-        'screening_score' => 82,
-        'final_screening_score' => 85,
-        'organization' => (object)[
-            'name' => 'Innovation Hub'
-        ],
-        'cohort' => 'Cohort 6'
-    ],
-];
-@endphp
 
 
 
@@ -107,7 +37,7 @@ $cycles = [
       </div>
     </div>
     <div class="card-body">
-      @foreach ($programs as $program)
+      @forelse ($programs as $program)
         <div class="col-12">
           <div class="card shadow-none border overflow-hidden program-card mb-4">
     
@@ -188,7 +118,11 @@ $cycles = [
                     {{ __('startup.screening_score') }}
                   </small>
                   <span class="fw-bold fs-5">
-                    {{ isset($program->screening_score) ? $program->screening_score : '0' }} / 100
+                    @if(isset($program->screening_score) && $program->screening_score !== null)
+                      {{ $program->screening_score }} / 100
+                    @else
+                      —
+                    @endif
                   </span>
                 </div>
                 
@@ -199,8 +133,12 @@ $cycles = [
                       {{ __('startup.rank') }}
                     </small>
                     <span class="fw-bold fs-5">
-                      <i class="ti ti-medal fs-3 text-dark"></i>
-                      {{ $program->rank ?? 'ـ' }}
+                      @if(isset($program->rank) && $program->rank !== null)
+                        <i class="ti ti-medal fs-3 text-dark"></i>
+                        {{ $program->rank }}
+                      @else
+                        —
+                      @endif
                     </span>
                   </div>
                 @else
@@ -209,7 +147,11 @@ $cycles = [
                       {{ __('startup.final_screening_score') }}
                     </small>
                     <span class="fw-bold fs-5">
-                      {{ $program->final_screening_score ?? '0' }} / 100
+                      @if(isset($program->final_screening_score) && $program->final_screening_score !== null)
+                        {{ $program->final_screening_score }} / 100
+                      @else
+                        —
+                      @endif
                     </span>
                   </div>
                 @endif
@@ -241,7 +183,15 @@ $cycles = [
             </div>
           </div>
         </div>
-      @endforeach
+      @empty
+        <div class="col-12 text-center py-5">
+          <div class="avatar avatar-lg bg-label-secondary mx-auto mb-3">
+            <i class="ti ti-rocket fs-2 text-secondary"></i>
+          </div>
+          <h5 class="mb-1 text-dark">{{ __('startup.no_programs_joined_yet') ?? 'No Programs Joined Yet' }}</h5>
+          <p class="text-muted mb-0 small">{{ __('startup.not_participating_any_program') ?? 'This startup is not currently participating in any programs.' }}</p>
+        </div>
+      @endforelse
     </div>
   </div>
 </div>
