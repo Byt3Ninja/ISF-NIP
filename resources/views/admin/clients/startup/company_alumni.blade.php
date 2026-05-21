@@ -34,17 +34,17 @@
 // ];
 
 $startupStatValues = [
-  'screening_score'        => ['current' => 4.3, 'total' => 5],
-  'final_screening_score'  => ['current' => 4.6, 'total' => 5],
-  'training_hours'         => ['hours' => 32, 'minutes' => 15],
-  'mentorship_hours'       => ['hours' => 24, 'minutes' => 30],
-  'attendance_rate'        => 94,
-  'milestones_completed'   => ['current' => 7, 'total' => 8],
-  'quizzes_completed'      => ['current' => 12, 'total' => 12],
-  'avg_quiz_score'         => 87,
-  'in_kind_services'       => 8,
-  'surveys_completed'      => ['current' => 5, 'total' => 5],
-  'tasks_completed'        => ['current' => 24, 'total' => 26],
+  'screening_score'        => ['current' => $screeningScore,      'total' => 10],
+  'final_screening_score'  => ['current' => $finalScreeningScore, 'total' => 10],
+  'training_hours'         => $trainingHours,
+  'mentorship_hours'       => $mentorshipHours,
+  'attendance_rate'        => $attendanceRate,
+  'milestones_completed'   => ['current' => $milestonesCompleted, 'total' => $milestonesCollection->count()],
+  'quizzes_completed'      => ['current' => $quizzesPassed,       'total' => $quizzesCollection->count()],
+  'avg_quiz_score'         => $avgQuizScore,
+  'in_kind_services'       => $inKindServices,
+  'surveys_completed'      => ['current' => $surveysCompleted,    'total' => $surveysCollection->count()],
+  'tasks_completed'        => ['current' => $tasksCompleted,      'total' => $tasksCollection->count()],
 ];
 
 // Team configuration and data
@@ -291,7 +291,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
         ['icon' => 'briefcase', 'color' => 'warning', 'label' => __('startup.business_type'), 'value' => $startup['business_type']],
         ['icon' => 'device-gamepad-3', 'color' => 'success', 'label' => __('startup.industry'), 'value' => $startup['industry']],
         ['icon' => 'packages', 'color' => 'danger', 'label' => __('startup.sector'), 'value' => $startup['sector']],
-        ['icon' => 'users', 'color' => 'primary', 'label' => __('startup.team_size'), 'value' => $startup['team_size']],
+      //  ['icon' => 'users', 'color' => 'primary', 'label' => __('startup.team_size'), 'value' => $startup['team_size']],
       ];
 
       $programInfo = [
@@ -379,8 +379,10 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             {{-- Social Links --}}
             <div class="pt-5 d-flex flex-wrap gap-4 border-top">
               @foreach ($socials as $social)
-                @if ($social['key'])
+                @if (!empty($startup['links'][$social['key']]))
                   <a href="{{ $startup['links'][$social['key']] }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     class="d-inline-flex align-items-center fw-medium text-decoration-none link-primary hover-animate">
                     <i class="ti ti-{{ $social['icon'] }} me-2"></i>
                     {{ __('startup.' . $social['key']) }}
@@ -643,7 +645,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
               <div class="col-12 col-md-4">
                 <div class="p-3 rounded bg-light-subtle border">
                   <small class="text-muted text-uppercase fw-semibold d-block mb-1">
-                    <i class="ti ti-calendar me-1"></i>{{ __('startup.established_date') }}
+                    <i class="ti ti-calendar me-1"></i>{{ __('startup.completion_date') }}
                   </small>
                   <p class="mb-0 fw-bold text-dark">{{ $startup['established_at'] }}</p>
                 </div>
@@ -693,7 +695,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <div class="d-flex align-items-center gap-4">
                 
                   @foreach($startup['sdgs'] as $sdg)
-                    <span class="badge p-3 bg-light-subtle text-dark border">{{ $sdg }}</span>
+                    <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
                   @endforeach
                 </div>
               @endif
@@ -758,15 +760,16 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
               </h5>
               <small class="text-muted">{{ __('startup.team_section_subtitle') }}</small>
             </div>
-            <span class="badge bg-label-info">
+            {{-- <span class="badge bg-label-info">
               <i class="ti ti-users me-1"></i>{{ __('startup.team_size_badge', ['count' => count($teamData['employees']) +
               count($teamData['founders']) + 1]) }}
-            </span>
+            </span> --}}
           </div>
       
           <div class="card-body">
             <div class="row g-6">
               {{-- Leader --}}
+              {{--  
               <div class="col-12 col-lg-4">
                 <div class="card card-body border h-100 shadow-sm"
                   style="background: linear-gradient(135deg, rgba(88, 86, 214, 0.08) 0%, transparent 100%);">
@@ -792,9 +795,10 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   @endif
                 </div>
               </div>
+              --}}
       
               {{-- Founders --}}
-              <div class="col-12 col-lg-8">
+              <div class="col-12 col-lg-12">
                 <div class="card card-body border h-100 shadow-sm">
                   <h6 class="mb-3 fw-bold d-flex align-items-center gap-2">
                     <i class="ti ti-users text-info"></i>{{ __('startup.founders') }}
@@ -817,9 +821,13 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                               <td class="fw-medium">{{ $founder['name'] }}</td>
                               <td>{{ $founder['email'] }}</td>
                               <td class="text-end">
-                                <a href="{{ $founder['linkedin'] }}" class="fw-medium text-primary">
-                                  {{ __('startup.linkedin_view_profile') }}
-                                </a>
+                                @if(!empty($founder['linkedin']))
+                                  <a href="{{ $founder['linkedin'] }}" target="_blank" rel="noopener noreferrer" class="fw-medium text-primary">
+                                    {{ __('startup.linkedin_view_profile') }}
+                                  </a>
+                                @else
+                                  <span class="text-muted">—</span>
+                                @endif
                               </td>
                             </tr>
                             @endforeach
@@ -837,9 +845,16 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                 <h5 class="card-title mb-0 fw-bold d-flex align-items-center gap-2 text-capitalize">
                   <i class="ti ti-briefcase text-success"></i>{{ __('startup.Employees') }}
                 </h5>
-                <span class="badge bg-label-secondary">
-                  <i class="ti ti-users me-1"></i>{{ __('startup.count_label', ['value' => count($teamData['employees'])]) }}
-                </span>
+                @php
+                  $validEmployees = collect($teamData['employees'])->filter(fn($e) => !empty($e['name']));
+                  $maleCount      = $validEmployees->filter(fn($e) => strtolower($e['gender'] ?? '') === 'male')->count();
+                  $femaleCount    = $validEmployees->filter(fn($e) => strtolower($e['gender'] ?? '') === 'female')->count();
+                @endphp
+                <div class="d-flex gap-2">
+                  <span class="badge bg-label-secondary"><i class="ti ti-users me-1"></i>{{ __('startup.total') }}: {{ $validEmployees->count() }}</span>
+                  <span class="badge bg-label-info"><i class="ti ti-gender-male me-1"></i>{{ __('startup.male') }}: {{ $maleCount }}</span>
+                  <span class="badge bg-label-warning"><i class="ti ti-gender-female me-1"></i>{{ __('startup.female') }}: {{ $femaleCount }}</span>
+                </div>
               </div>
               @if(count($teamData['employees']) > 0)
                  
