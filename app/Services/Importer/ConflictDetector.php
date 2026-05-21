@@ -27,6 +27,10 @@ class ConflictDetector
         $fullNames   = []; // [rowNumber => 'first last' lowercase]
         $programKeys = []; // [rowNumber => ['name', 'type', 'start', 'end']]
 
+        // In-upload duplicate trackers: first occurrence wins; 2nd+ get warnings.
+        $emailFirstSeen = []; // [email_lc => rowNumber]
+        $phoneFirstSeen = []; // [phone:cc => rowNumber]
+
         $getCol = function (array $row, ?int $idx): ?string {
             if ($idx === null) return null;
             return isset($row[$idx]) ? trim((string) $row[$idx]) : null;
@@ -36,11 +40,34 @@ class ConflictDetector
             $rowNumber = $i + 2;
 
             $email = strtolower((string) $getCol($row, $mappings['founder_email'] ?? null));
-            if ($email !== '') $emails[$rowNumber] = $email;
+            if ($email !== '') {
+                $emails[$rowNumber] = $email;
+                if (isset($emailFirstSeen[$email])) {
+                    $warnings[] = new ConflictWarning(
+                        row: $rowNumber, type: 'founder_email_duplicate_in_upload',
+                        fieldKey: 'founder_email', value: $email,
+                        extras: ['first_row' => $emailFirstSeen[$email]]
+                    );
+                } else {
+                    $emailFirstSeen[$email] = $rowNumber;
+                }
+            }
 
             $phone = (string) $getCol($row, $mappings['founder_phone'] ?? null);
             $cc    = (string) $getCol($row, $mappings['founder_country_code'] ?? null);
-            if ($phone !== '') $phones[$rowNumber] = ['phone' => $phone, 'cc' => $cc];
+            if ($phone !== '') {
+                $phones[$rowNumber] = ['phone' => $phone, 'cc' => $cc];
+                $phoneKey = $phone . ':' . $cc;
+                if (isset($phoneFirstSeen[$phoneKey])) {
+                    $warnings[] = new ConflictWarning(
+                        row: $rowNumber, type: 'founder_phone_duplicate_in_upload',
+                        fieldKey: 'founder_phone', value: $phone,
+                        extras: ['first_row' => $phoneFirstSeen[$phoneKey]]
+                    );
+                } else {
+                    $phoneFirstSeen[$phoneKey] = $rowNumber;
+                }
+            }
 
             $fn = (string) $getCol($row, $mappings['founder_first_name'] ?? null);
             $ln = (string) $getCol($row, $mappings['founder_last_name']  ?? null);
