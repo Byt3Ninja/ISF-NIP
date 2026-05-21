@@ -564,6 +564,7 @@ $config = [
             <div class="mb-2">
               <textarea class="form-control" id="histReplyBody" name="message" rows="3"
                 placeholder="{{ __('admin.reply_placeholder') }}" maxlength="500"></textarea>
+                <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
             </div>
             <div class="mb-3">
               <label for="histReplyAttachment" class="form-label fw-semibold">
@@ -575,7 +576,6 @@ $config = [
               <div id="histReplyAttachmentError" class="invalid-feedback"></div>
             </div>
             <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
               <button type="submit" class="btn btn-sm btn-primary">
                 <i class="ti ti-send me-1"></i>{{ __('admin.reply') }}
               </button>
