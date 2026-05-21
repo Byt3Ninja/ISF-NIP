@@ -662,18 +662,16 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
            
             <div class="row">
               <div class="col-12">
-                <div class="row">
-                  <div class="col-10">
-                    @if(empty($startup['sdgs']))
-                      <span class="badge p-3 bg-light-subtle text-dark border">{{ __('startup.no_sdg') }}</span>
-                    @else
-                      <div class="d-flex align-items-center gap-4">
-                        @foreach($startup['sdgs'] as $sdg)
-                          <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
-                        @endforeach
-                      </div>
-                    @endif
-                  </div>
+                <div class="w-75">
+                  @if(empty($startup['sdgs']))
+                    <span class="badge p-3 bg-light-subtle text-dark border">{{ __('startup.no_sdg') }}</span>
+                  @else
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                      @foreach($startup['sdgs'] as $sdg)
+                        <span class="badge p-3 bg-light-subtle text-dark border">{{ __('admin.' . $sdg) }}</span>
+                      @endforeach
+                    </div>
+                  @endif
                 </div>
               </div>
               
