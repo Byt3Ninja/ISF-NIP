@@ -104,9 +104,7 @@ return [
   'employee_employment_required' => "يرجى اختيار نوع التوظيف",
   'employee_hiring_date_required' => "يرجى إدخال تاريخ التعيين",
   'employee_document_invalid_type' => 'نوع المستند غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و DOCX',
-  'document_too_large' => 'حجم المستند يجب أن يكون أقل من 10 ميجابايت',
   'document_upload_failed' => 'فشل في رفع المستند',
-  'saving' => 'جاري الحفظ...',
   'employee_add_success' => 'تم إضافة الموظف بنجاح',
   'employee_edit_success' => 'تم تحديث الموظف بنجاح',
   'employee_delete_success' => 'تم حذف الموظف بنجاح',
@@ -327,7 +325,8 @@ return [
   'step_id' => 'معرف الخطوة',
   'submission_date' => 'تاريخ الإرسال',
   'details' => 'التفاصيل',
-  'view_inputs' => 'عرض المدخلات',
+  'view_inputs'  => 'عرض المدخلات',
+  'form_inputs'  => 'حقول النموذج',
   'form_inputs_for' => 'مدخلات النموذج لـ :form',
   'field_name' => 'اسم الحقل',
   'field_type' => 'نوع الحقل',
@@ -482,7 +481,6 @@ return [
     'added_members_count' => 'تمت إضافة :count عضو إلى الفريق',
     'completed_milestones_count' => 'تم إكمال :count مرحلة',
     'make_mentorship_count' => ':count جلسة إرشاد',
-    'added_members_count' => 'تمت إضافة :count عضو إلى الفريق',
     'make_mentorships_count' => ':count جلسة إرشاد',
     'not_graduated_yet' => 'لم يتخرج بعد',
     'participate_in_hackathon_to_unlock' => 'شارك في هاكاثون لفتح الميزة',
@@ -573,7 +571,6 @@ return [
   'additional_info' => 'معلومات اضافية',
 
   // About Challenges Section
-  'about_challenges'        => 'نبذة عن الشركة الناشئة والتحديات',
   'problem_being_solved'    => 'ما المشكلة التي يتم حلها؟',
   'problem'                 => 'المشكلة',
   'about_market_opportunity'=> 'فرصة السوق',
@@ -597,13 +594,11 @@ return [
   'areas_of_expertise'      => 'مجالات الخبرة',
 
   // Sustainability Section
-  'sustainability_goals'    => 'أهداف الاستدامة',
 
   // Business Model Section
   'business_model'          => 'نموذج العمل',
   'how_we_operate'          => 'كيف نعمل',
   'model_type'              => 'نوع النموذج',
-  'description'             => 'الوصف',
   'business_plan'           => 'خطة العمل',
 
   // Financial Plan Section
