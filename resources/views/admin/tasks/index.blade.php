@@ -866,6 +866,22 @@ $(function () {
     $('#addTaskModal').offcanvas('show');
   });
 
+  function refreshActivities(taskId) {
+    if (!taskId) return;
+    $.ajax({
+      url: `/dashboard/tasks/${taskId}`,
+      method: 'GET',
+      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      success: function (res) {
+        if (res.success && res.data) {
+          const td = res.data;
+          renderActivitiesList(td.activities, '#vt-activities-list');
+          $('#vt-activity-count').text(td.activities?.length ?? 0);
+        }
+      }
+    });
+  }
+
   // ─── Send Comment (kanban-vt-offcanvas) ───────────────────────────────────
   $(document).on('click', '#vt-send-comment-btn', function () {
     const taskId  = $(this).data('task-id');
@@ -896,6 +912,7 @@ $(function () {
           </div>`);
         $('#vt-comment-count').text(parseInt($('#vt-comment-count').text() || '0') + 1);
         if ($editor) $editor.innerHTML = '';
+        refreshActivities(taskId);
       },
       error: () => toastr.error('{{ __("admin.unexpected_error") }}')
     });
@@ -1042,6 +1059,8 @@ $(function () {
         // Switch to Feedback History tab
         const $historyTab = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-feedback-history"]');
         if ($historyTab.length) bootstrap.Tab.getOrCreateInstance($historyTab[0]).show();
+
+        refreshActivities(taskId);
       },
       error: (xhr) => {
         toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}');
