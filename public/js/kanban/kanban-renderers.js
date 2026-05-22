@@ -187,12 +187,50 @@ function renderFeedbackList(feedbacks, containerSelector) {
 
 // ─── Submissions ──────────────────────────────────────────────────────────────
 
-function renderSubmissionsList(submissions, containerSelector) {
+function renderSubmissionsList(submissions, containerSelector, assignees) {
   const $c = $(containerSelector);
   const lbl = window.KanbanConfig.labels;
 
+  let assigneeHtml = '';
+  if (assignees && assignees.length) {
+    const ASSIGNEE_STATUS_BADGE = {
+      pending: `<span class="badge bg-label-warning" style="font-size:.65rem;">${lbl.pending}</span>`,
+      progress: `<span class="badge bg-label-info" style="font-size:.65rem;">${lbl.progress}</span>`,
+      review: `<span class="badge bg-label-primary" style="font-size:.65rem;">${lbl.review}</span>`,
+      completed: `<span class="badge bg-label-success" style="font-size:.65rem;">${lbl.completed}</span>`,
+      archived: `<span class="badge bg-label-secondary" style="font-size:.65rem;">${lbl.archived}</span>`,
+      pending_review: `<span class="badge bg-label-warning" style="font-size:.65rem;">${lbl.pendingReview}</span>`,
+      approved: `<span class="badge bg-label-success" style="font-size:.65rem;">${lbl.approved}</span>`,
+      rejected: `<span class="badge bg-label-danger" style="font-size:.65rem;">${lbl.rejected}</span>`,
+    };
+
+    assigneeHtml = `
+      <div class="mb-4 p-3 bg-light-subtle rounded border">
+        <div class="small fw-semibold text-uppercase text-muted mb-2 d-flex align-items-center gap-1">
+          <i class="ti ti-user"></i> ${lbl.assignee || 'Assignee'}
+        </div>
+        <div class="d-flex flex-column gap-2">
+          ${assignees.map(a => {
+            const imgUrl = a.logo || a.img_url;
+            const img = imgUrl
+              ? `<img src="${imgUrl}" alt="${a.name}" class="rounded-circle" style="width:32px;height:32px;object-fit:cover;">`
+              : `<span class="avatar-initial bg-label-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:12px;">${(a.name || 'U').substring(0, 2).toUpperCase()}</span>`;
+            return `
+              <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-flex flex-shrink-0">${img}</span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <a href="${a.profile_url || '#'}" target="_blank" class="fw-semibold text-dark text-decoration-none small">${a.name}</a>
+                  ${ASSIGNEE_STATUS_BADGE[a.status] || `<span class="badge bg-label-secondary" style="font-size:.65rem;">${a.status}</span>`}
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
   if (!submissions || !submissions.length) {
     $c.html(`
+      ${assigneeHtml}
       <div class="text-center py-5">
         <i class="ti ti-inbox ti-lg text-muted mb-2"></i>
         <p class="text-muted mb-0">${lbl.noSubmissions}</p>
@@ -208,8 +246,10 @@ function renderSubmissionsList(submissions, containerSelector) {
   };
 
   $c.html(
+    assigneeHtml +
+
     submissions
-      .map((sub) => {
+      .map((sub, index) => {
         const hasUser = !!(sub.user || sub.user_id);
         const statusBadge = hasUser ? STATUS_BADGE[sub.status] || "" : "";
 
@@ -291,7 +331,7 @@ function renderSubmissionsList(submissions, containerSelector) {
                       `
                       : `
                         <span class="fw-semibold text-dark">
-                          ${lbl.submission || "Submission"}
+                          ${lbl.submission || "Submission"} ${index + 1}
                         </span>
                       `
                   }

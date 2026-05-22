@@ -8,29 +8,29 @@
 @stop
 
 @php
-  function badgeClass($status) {
-    return match($status) {
-      'Completed' => 'bg-label-success',
-      'Pending'   => 'bg-label-warning',
-      'Rejected'  => 'bg-label-danger',
-      'Approved'  => 'bg-label-primary',
-      default     => 'bg-warning text-dark',
-    };
-  }
+function badgeClass($status)
+{
+  return match ($status) {
+    'Completed' => 'bg-label-success',
+    'Pending' => 'bg-label-warning',
+    'Rejected' => 'bg-label-danger',
+    'Approved' => 'bg-label-primary',
+    default => 'bg-warning text-dark',
+  };
+}
 
-  $tabs = [
-    ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
-    ['title' => __('admin.Services Requests'), 'route' => 'service_requests.list_all', 'icon' => 'ti ti-briefcase'],
-    // ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
-  ];
-  if( $_user->ableTo('serviceCategories.index', $permissions) )
-  {
-    $tabs[] = ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'];
-  }
+$tabs = [
+  ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
+  ['title' => __('admin.Services Requests'), 'route' => 'service_requests.list_all', 'icon' => 'ti ti-briefcase'],
+  // ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
+];
+if ($_user->ableTo('serviceCategories.index', $permissions)) {
+  $tabs[] = ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'];
+}
 @endphp
 
 @section('content')
-@if (!$_user->hasRole('serviceProvider') )
+@if (!$_user->hasRole('serviceProvider'))
   <x-navigation-pills :tabs="$tabs" />
 @endif     
 
@@ -39,12 +39,12 @@
  {{-- Stats Cards --}}
   <div class="row g-3 mb-6">
     @php
-    $config = [
-      'total'     => ['label' => 'total_requests',  'icon' => 'ti-clipboard-list', 'color' => 'primary', 'status' => null],
-      'pending'   => ['label' => 'Pending',          'icon' => 'ti-clock',          'color' => 'warning', 'status' => 'pending'],
-      'completed' => ['label' => 'Completed',         'icon' => 'ti-checks',         'color' => 'success', 'status' => 'completed'],
-      'decision'  => ['label' => 'approved_rejected', 'icon' => 'ti-checks',         'color' => 'info',    'status' => null],
-    ];
+$config = [
+  'total' => ['label' => 'total_requests', 'icon' => 'ti-clipboard-list', 'color' => 'primary', 'status' => null],
+  'pending' => ['label' => 'Pending', 'icon' => 'ti-clock', 'color' => 'warning', 'status' => 'pending'],
+  'completed' => ['label' => 'Completed', 'icon' => 'ti-checks', 'color' => 'success', 'status' => 'completed'],
+  'decision' => ['label' => 'approved_rejected', 'icon' => 'ti-checks', 'color' => 'info', 'status' => null],
+];
     @endphp
 
     @foreach($config as $key => $item)
@@ -160,130 +160,151 @@
   {{-- Requests Grid --}}
   <div class="row g-4">
     @forelse($requests as $request)
-    <div class="col-md-4">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body d-flex flex-column">
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body d-flex flex-column">
 
-          {{-- Header --}}
-          <div class="d-flex justify-content-between align-items-start mb-4">
-            <div class="d-flex align-items-center gap-2">
-              <div class="avatar avatar-md rounded">
-                <img src="{{ $request['image_url'] }}" alt="Avatar" class="rounded object-fit-cover border">
+            {{-- Header --}}
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar avatar-md rounded">
+                  <img src="{{ $request['image_url'] }}" alt="Avatar" class="rounded object-fit-cover border">
+                </div>
+                <div>
+                  <h6 class="mb-0">{{ $request['title'] }}</h6>
+                  <small class="text-muted">{{ $request['date'] }}</small>
+                </div>
               </div>
-              <div>
-                <h6 class="mb-0">{{ $request['title'] }}</h6>
-                <small class="text-muted">{{ $request['date'] }}</small>
-              </div>
+              <span class="badge {{ badgeClass($request['status']) }}">
+                {{ __('admin.' . $request['status']) }}
+              </span>
             </div>
-            <span class="badge {{ badgeClass($request['status']) }}">
-              {{ __('admin.' . $request['status']) }}
-            </span>
-          </div>
 
-          {{-- Description --}}
-          <p class="text-muted small flex-grow-1">{{ $request['description'] }}</p>
+            {{-- Description --}}
+            <p class="text-muted small flex-grow-1">{{ $request['description'] }}</p>
 
-          {{-- Price --}}
-          @if($request['price'])
-          <div class="mb-3">
-            <span class="fw-semibold text-dark">{{ $request['price'] }} {{ $request['currency'] }}</span>
-          </div>
-          @endif
-
-          {{-- Startup & Founder --}}
-          <div class="d-flex flex-column gap-2 mb-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="ti ti-building-skyscraper text-dark"></i>
-              <span class="text-body">{{ __('admin.Startup') }}:</span>
-              <a href="{{ $request['startup_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['startup_name'] }}</a>
+            {{-- Price --}}
+            @if($request['price'])
+            <div class="mb-3">
+              <span class="fw-semibold text-dark">{{ $request['price'] }} {{ $request['currency'] }}</span>
             </div>
-            <div class="d-flex align-items-center gap-2">
-              <i class="ti ti-user text-dark"></i>
-              <span class="text-body">{{ __('admin.registered') }}:</span>
-              <a href="{{ $request['founder_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['founder_name'] }}</a>
-            </div>
-          </div>
-
-          {{-- Service Provider --}}
-          <a href="{{ $request['service_provider']['profile_url'] ?? '#' }}" class="d-flex align-items-center mb-4 text-decoration-none">
-            <img src="{{ $request['service_provider']['image_url'] }}" class="rounded-circle me-2"
-              width="40" height="40" alt="provider">
-            <div class="fw-semibold text-dark">{{ $request['service_provider']['name'] }}</div>
-          </a>
-
-          {{-- Actions --}}
-          <div class="d-flex gap-2 mt-auto">
-            @if($request['status'] === 'Pending')
-            <button class="btn btn-primary w-100"
-              data-bs-toggle="offcanvas" data-bs-target="#offcanvasRespond"
-              data-request-id="{{ $request['id'] }}"
-              data-request-title="{{ $request['title'] }}"
-              data-startup-name="{{ $request['startup_name'] ?? 'N/A' }}"
-              data-founder-name="{{ $request['founder_name'] ?? 'N/A' }}"
-              data-provider-name="{{ $request['service_provider']['name'] }}">
-              <i class="ti ti-mail-fast me-1"></i> {{ __('admin.respond_to_request') }}
-            </button>
-
-            @elseif($request['status'] === 'Completed')
-              <button class="btn btn-primary w-100"
-                data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
-                data-request-id="{{ $request['id'] }}"
-                data-request-title="{{ $request['title'] }}"
-                data-provider-name="{{ $request['service_provider']['name'] }}"
-                data-provider-img="{{ $request['service_provider']['image_url'] }}"
-                data-status="{{ $request['status'] }}"
-                data-review-rating="{{ $request['rating'] ?? '' }}"
-                data-review-title="{{ $request['review_title'] ?? '' }}"
-                data-review-body="{{ $request['review_body'] ?? '' }}"
-                data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
-                data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
-                data-founder-name="{{ $request['founder_name'] ?? '' }}"
-                data-founder-img="{{ $request['founder_img'] ?? '' }}"
-                data-unread-count="{{ $request['unread_count'] ?? 0 }}"
-                data-tab="reviews">
-                <i class="ti ti-history me-1"></i> {{ __('admin.View') }} {{ __('admin.reviews') }}
-              </button>
-
-            @elseif($request['status'] === 'Approved')
-              <button class="btn btn-success w-100 btn-mark-complete"
-                data-request-id="{{ $request['id'] }}"
-                data-request-title="{{ $request['title'] }}">
-                <i class="ti ti-circle-check me-1"></i> {{ __('admin.mark_as_completed') }}
-              </button>
-
-            @else
-              <button class="btn btn-primary w-100"
-                data-bs-toggle="offcanvas" data-bs-target="#offcanvasMessage"
-                data-request-id="{{ $request['id'] }}"
-                data-request-title="{{ $request['title'] }}"
-                data-provider-name="{{ $request['service_provider']['name'] }}"
-                data-provider-img="{{ $request['service_provider']['image_url'] }}">
-                <i class="ti ti-send me-1"></i> {{ __('admin.Send_Message') }}
-              </button>
             @endif
 
-            <button class="btn btn-outline-primary"
-              data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
-              data-request-id="{{ $request['id'] }}"
-              data-request-title="{{ $request['title'] }}"
-              data-provider-name="{{ $request['service_provider']['name'] }}"
-              data-provider-img="{{ $request['service_provider']['image_url'] }}"
-              data-status="{{ $request['status'] }}"
-              data-review-rating="{{ $request['rating'] ?? '' }}"
-              data-review-title="{{ $request['review_title'] ?? '' }}"
-              data-review-body="{{ $request['review_body'] ?? '' }}"
-              data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
-              data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
-              data-founder-name="{{ $request['founder_name'] ?? '' }}"
-              data-founder-img="{{ $request['founder_img'] ?? '' }}"
-              data-unread-count="{{ $request['unread_count'] ?? 0 }}">
-              <i class="ti ti-history"></i>
-            </button>
-          </div>
+            {{-- Startup & Founder --}}
+            <div class="d-flex flex-column gap-2 mb-4">
+              <div class="d-flex align-items-center gap-2">
+                <i class="ti ti-building-skyscraper text-dark"></i>
+                <span class="text-body">{{ __('admin.Startup') }}:</span>
+                <a href="{{ $request['startup_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['startup_name'] }}</a>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <i class="ti ti-user text-dark"></i>
+                <span class="text-body">{{ __('admin.registered') }}:</span>
+                <a href="{{ $request['founder_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['founder_name'] }}</a>
+              </div>
+            </div>
 
+            {{-- Service Provider --}}
+            <a href="{{ $request['service_provider']['profile_url'] ?? '#' }}" class="d-flex align-items-center mb-4 text-decoration-none">
+              <img src="{{ $request['service_provider']['image_url'] }}" class="rounded-circle me-2"
+                width="40" height="40" alt="provider">
+              <div class="fw-semibold text-dark">{{ $request['service_provider']['name'] }}</div>
+            </a>
+
+            {{-- Actions --}}
+            <div class="d-flex gap-2 mt-auto">
+              @if($request['status'] === 'Pending')
+              <button class="btn btn-primary w-100"
+                data-bs-toggle="offcanvas" data-bs-target="#offcanvasRespond"
+                data-request-id="{{ $request['id'] }}"
+                data-request-title="{{ $request['title'] }}"
+                data-startup-name="{{ $request['startup_name'] ?? 'N/A' }}"
+                data-founder-name="{{ $request['founder_name'] ?? 'N/A' }}"
+                data-provider-name="{{ $request['service_provider']['name'] }}">
+                <i class="ti ti-mail-fast me-1"></i> {{ __('admin.respond_to_request') }}
+              </button>
+
+              @elseif($request['status'] === 'Completed')
+                <button class="btn btn-primary w-100"
+                  data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
+                  data-request-id="{{ $request['id'] }}"
+                  data-request-title="{{ $request['title'] }}"
+                  data-provider-name="{{ $request['service_provider']['name'] }}"
+                  data-provider-img="{{ $request['service_provider']['image_url'] }}"
+                  data-status="{{ $request['status'] }}"
+                  data-review-rating="{{ $request['rating'] ?? '' }}"
+                  data-review-title="{{ $request['review_title'] ?? '' }}"
+                  data-review-body="{{ $request['review_body'] ?? '' }}"
+                  data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+                  data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+                  data-founder-name="{{ $request['founder_name'] ?? '' }}"
+                  data-founder-img="{{ $request['founder_img'] ?? '' }}"
+                  data-unread-count="{{ $request['unread_count'] ?? 0 }}"
+                  data-tab="reviews">
+                  <i class="ti ti-history me-1"></i> {{ __('admin.View') }} {{ __('admin.reviews') }}
+                </button>
+
+              @elseif($request['status'] === 'Approved')
+                <button class="btn btn-success w-100 btn-mark-complete"
+                  data-request-id="{{ $request['id'] }}"
+                  data-request-title="{{ $request['title'] }}">
+                  <i class="ti ti-circle-check me-1"></i> {{ __('admin.mark_as_completed') }}
+                </button>
+                
+              @elseif($request['status'] === 'Rejected')
+                <button class="btn btn-primary w-100"
+                  data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
+                  data-request-id="{{ $request['id'] }}"
+                  data-request-title="{{ $request['title'] }}"
+                  data-provider-name="{{ $request['service_provider']['name'] }}"
+                  data-provider-img="{{ $request['service_provider']['image_url'] }}"
+                  data-status="{{ $request['status'] }}"
+                  data-review-rating="{{ $request['rating'] ?? '' }}"
+                  data-review-title="{{ $request['review_title'] ?? '' }}"
+                  data-review-body="{{ $request['review_body'] ?? '' }}"
+                  data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+                  data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+                  data-founder-name="{{ $request['founder_name'] ?? '' }}"
+                  data-founder-img="{{ $request['founder_img'] ?? '' }}"
+                  data-unread-count="{{ $request['unread_count'] ?? 0 }}">
+                  <i class="ti ti-history me-1"></i> {{ __('admin.view_history') }}
+                </button>
+
+              @else
+                <button class="btn btn-primary w-100"
+                  data-bs-toggle="offcanvas" data-bs-target="#offcanvasMessage"
+                  data-request-id="{{ $request['id'] }}"
+                  data-request-title="{{ $request['title'] }}"
+                  data-provider-name="{{ $request['service_provider']['name'] }}"
+                  data-provider-img="{{ $request['service_provider']['image_url'] }}">
+                  <i class="ti ti-send me-1"></i> {{ __('admin.Send_Message') }}
+                </button>
+              @endif
+
+              @if($request['status'] !== 'Rejected')
+                <button class="btn btn-outline-primary"
+                  data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
+                  data-request-id="{{ $request['id'] }}"
+                  data-request-title="{{ $request['title'] }}"
+                  data-provider-name="{{ $request['service_provider']['name'] }}"
+                  data-provider-img="{{ $request['service_provider']['image_url'] }}"
+                  data-status="{{ $request['status'] }}"
+                  data-review-rating="{{ $request['rating'] ?? '' }}"
+                  data-review-title="{{ $request['review_title'] ?? '' }}"
+                  data-review-body="{{ $request['review_body'] ?? '' }}"
+                  data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+                  data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+                  data-founder-name="{{ $request['founder_name'] ?? '' }}"
+                  data-founder-img="{{ $request['founder_img'] ?? '' }}"
+                  data-unread-count="{{ $request['unread_count'] ?? 0 }}">
+                  <i class="ti ti-history"></i>
+                </button>
+              @endif
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
     @empty
     <div class="col-12">
       @include('includes.no-result', ['message' => __('admin.no_service_requests_yet')])
@@ -541,11 +562,20 @@
           <form id="formHistoryReply" novalidate>
             <input type="hidden" name="request_id" id="histReplyRequestId">
             <div class="mb-2">
-              <textarea class="form-control" id="histReplyBody" name="reply" rows="3"
+              <textarea class="form-control" id="histReplyBody" name="message" rows="3"
                 placeholder="{{ __('admin.reply_placeholder') }}" maxlength="500"></textarea>
+                <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
+            </div>
+            <div class="mb-3">
+              <label for="histReplyAttachment" class="form-label fw-semibold">
+                {{ __('admin.Attachments') }}
+                <span class="text-muted fw-normal small">({{ __('admin.optional') }})</span>
+              </label>
+              <input type="file" class="form-control" id="histReplyAttachment" name="attachments[]" multiple
+                accept=".png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar">
+              <div id="histReplyAttachmentError" class="invalid-feedback"></div>
             </div>
             <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
               <button type="submit" class="btn btn-sm btn-primary">
                 <i class="ti ti-send me-1"></i>{{ __('admin.reply') }}
               </button>
@@ -1095,43 +1125,87 @@ if (ocRespond) {
   const formHistoryReply = $('#formHistoryReply');
   const fvHistoryReply = FV.formValidation(formHistoryReply, {
     fields: {
-      reply: {
+      message: {
         validators: {
           notEmpty:     { message: 'Reply cannot be empty.' },
           stringLength: { min: 2, max: 500, message: 'Reply must be 2–500 characters.' },
         },
       },
+      'attachments[]': {
+        validators: {
+          callback: {
+            message: '{{ app()->getLocale() == "ar" ? "نوع الملف غير مدعوم. الملفات المسموحة: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR" : "Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR" }}',
+            callback: function(input) {
+              const files = input.element.files;
+              if (!files || files.length === 0) return true;
+
+              const allowed = ['png','jpg','jpeg','webp','doc','docx','xls','xlsx','ppt','pptx','zip','rar'];
+
+              if (files.length > 5) {
+                return {
+                  valid: false,
+                  message: '{{ app()->getLocale() == "ar" ? "يمكنك رفع حتى 5 ملفات فقط." : "You can upload up to 5 files only." }}'
+                };
+              }
+
+              for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const ext = file.name.split('.').pop().toLowerCase();
+
+                if (!allowed.includes(ext)) return false;
+
+                if (file.size > 10 * 1024 * 1024) {
+                  return {
+                    valid: false,
+                    message: '{{ app()->getLocale() == "ar" ? "يجب ألا يزيد حجم الملف عن 10 ميجابايت." : "File size must be 10MB or less." }}'
+                  };
+                }
+              }
+
+              return true;
+            },
+          },
+        },
+      },
     },
     plugins: {
-      trigger:      new FV.plugins.Trigger(),
-      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-2' }),
+      trigger:      new FV.plugins.Trigger({
+        event: {
+          'attachments[]': 'change',
+        },
+      }),
+      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-2, .mb-3' }),
       autoFocus:    new FV.plugins.AutoFocus(),
       submitButton: new FV.plugins.SubmitButton(),
     },
   }).on('core.form.valid', () => {
     const submitBtn = formHistoryReply.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> {{ __("admin.reply") }}';
+
+    const formData = new FormData(formHistoryReply);
 
     fetch('{{ route("service_requests.send_message") }}', {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        request_id: $('#histReplyRequestId').value,
-        message: $('#histReplyBody').value,
-      }),
+      body: formData,
     })
     .then(res => res.json())
     .then(data => {
       submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i>{{ __("admin.reply") }}';
       if (data.status) {
         const d = data.data;
         const wrapper = document.createElement('div');
         let attachHtml = '';
-        if (d.attachment_url) {
+        if (d.attachments && d.attachments.length) {
+          attachHtml = d.attachments.map(a =>
+            `<div class="mt-1"><a href="${esc(a.url)}" target="_blank" class="text-white text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(a.name)}</a></div>`
+          ).join('');
+        } else if (d.attachment_url) {
           attachHtml = `<div class="mt-1"><a href="${esc(d.attachment_url)}" target="_blank" class="text-white text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(d.attachment_name)}</a></div>`;
         }
         wrapper.innerHTML = `
@@ -1148,6 +1222,7 @@ if (ocRespond) {
         thread.scrollTop = thread.scrollHeight;
         formHistoryReply.reset();
         $('#histReplyCount').textContent = '0';
+        document.getElementById('histReplyAttachment').value = '';
         fvHistoryReply.resetForm(true);
         showToast({ type: 'success', message: '{{ __("admin.message_sent_successfully") }}' });
       } else {
@@ -1156,6 +1231,7 @@ if (ocRespond) {
     })
     .catch(() => {
       submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i>{{ __("admin.reply") }}';
       showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
     });
   });
