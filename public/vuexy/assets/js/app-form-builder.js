@@ -269,6 +269,7 @@ function onContainerDrop(e) {
   if (drag.type !== 'section' || !drag.el) return;
   this.insertBefore(drag.el, drag.placeholder);
   removePlaceholder();
+  updateSectionNumbers();
   updateAllLogicPanels();
   reorderSections();
 }
@@ -322,10 +323,27 @@ function reorderSections() {
   _reorderTimers.sections = setTimeout(() => {
     const elements = [...document.querySelectorAll('#itemsContainer > .section-wrapper')];
 
-    const ids = elements.map(el => el.dataset.dbId || el.dataset.itemId);
+    // Construct robust sections payload containing the section title (or fallback)
+    // and the list of question DB IDs inside it. This makes section reordering
+    // 100% resilient against empty, duplicate, or renamed titles!
+    const sectionsPayload = elements.map((el, index) => {
+      const titleInput = el.querySelector('.section-title');
+      const title = (titleInput && titleInput.value.trim()) 
+        ? titleInput.value.trim() 
+        : `${t.section} ${index + 1}`;
+      
+      const qids = [...el.querySelectorAll('.question-card')]
+        .map(q => q.dataset.dbId || null)
+        .filter(id => id !== null && !isNaN(id));
+        
+      return {
+        title: title,
+        question_ids: qids
+      };
+    });
 
     _reorderPost(FB_CONFIG.routes.reorderSections, {
-      section_ids: ids,
+      sections: sectionsPayload,
     });
   }, 400);
 }
@@ -339,18 +357,21 @@ function reorderQuestions(targetSection = null) {
       : [...document.querySelectorAll('#itemsContainer .section-wrapper')];
 
     sections.forEach(section => {
-      const sectionId = section.dataset.dbId || `temp-${section.dataset.itemId}`;
-
-      const sectionIdNum  = parseInt(sectionId.replace('temp-', ''), 10) + 1;
-
+      // Use numeric DB ids for questions (builder_fields.id).
       const ids = [...section.querySelectorAll('.question-card')]
-        .map(el => el.dataset.dbId || el.dataset.itemId);
+        .map(el => el.dataset.dbId || null)
+        .filter(id => id !== null && !isNaN(id));
 
       if (!ids.length) return;
 
+      // Send the section title so the backend can update options.section
+      // for any question that was moved from another section.
+      const titleInput = section.querySelector('.section-title');
+      const sectionTitle = (titleInput && titleInput.value.trim()) ? titleInput.value.trim() : null;
+
       _reorderPost(FB_CONFIG.routes.reorderQuestions, {
-        section_id: sectionId,
-        question_ids: ids,
+        section_title: sectionTitle,
+        question_ids:  ids,
       });
     });
   }, 400);
@@ -402,6 +423,24 @@ function updateAllLogicPanels() {
       sections.map(s => `<option value="section-${s.id}">${t.go_to} ${s.title}</option>`).join('') +
       `<option value="submit">${t.submit_form}</option>`;
     select.value = current;
+  });
+}
+
+function updateSectionNumbers() {
+  document.querySelectorAll('.section-wrapper').forEach((section, index) => {
+    const badgeNum = index + 1;
+    
+    // Update the Section badge (e.g. "Section 1", "Section 2")
+    const badge = section.querySelector('.badge.bg-primary');
+    if (badge) {
+      badge.textContent = `${t.section} ${badgeNum}`;
+    }
+    
+    // Update the Add Question button text (e.g. "Add Question to Section 1")
+    const addBtn = section.querySelector('button[onclick^="addQuestionToSection"]');
+    if (addBtn) {
+      addBtn.innerHTML = `<i class="ti ti-plus"></i> ${t.add_question_section} ${badgeNum}`;
+    }
   });
 }
 
@@ -471,6 +510,7 @@ function addSection(sectionData = null) {
     sectionEl.querySelector('.section-logic').value = sectionData.logic;
   }
 
+  updateSectionNumbers();
   return sectionEl;
 }
 
@@ -479,6 +519,7 @@ function deleteSection(button) {
   const hasQuestions = wrapper.querySelectorAll('.question-card').length > 0;
   if (hasQuestions && !confirm(t.delete_section_questions)) return;
   wrapper.remove();
+  updateSectionNumbers();
   updateAllLogicPanels();
 }
 
@@ -829,24 +870,45 @@ function saveForm() {
   const formData = { title: formTitle, organization_id: organizationId, items: [] };
   const container = document.getElementById('itemsContainer');
 
+  // Build a map of old section itemIds to new index-based IDs in saved DOM order.
+  const sectionIdMap = {};
+  let sectionIndex = 0;
+  Array.from(container.children).forEach(child => {
+    if (child.classList.contains('drop-placeholder')) return;
+    if (child.dataset.itemType === 'section') {
+      const oldId = child.dataset.itemId;
+      if (oldId !== undefined) {
+        sectionIdMap[oldId] = sectionIndex++;
+      }
+    }
+  });
+
   Array.from(container.children).forEach(child => {
     if (child.classList.contains('drop-placeholder')) return;
     const itemType = child.dataset.itemType;
 
     if (itemType === 'section') {
+      let sectionLogic = child.querySelector('.section-logic').value;
+      if (sectionLogic && sectionLogic.startsWith('section-')) {
+        const oldId = sectionLogic.replace('section-', '');
+        if (sectionIdMap[oldId] !== undefined) {
+          sectionLogic = `section-${sectionIdMap[oldId]}`;
+        }
+      }
+
       const section = {
         type:        'section',
         title:       child.querySelector('.section-title').value,
         description: child.querySelector('.section-description').value,
-        logic:       child.querySelector('.section-logic').value,
+        logic:       sectionLogic,
         questions:   [],
       };
       child.querySelectorAll('.question-card').forEach(qCard => {
-        section.questions.push(extractQuestionData(qCard));
+        section.questions.push(extractQuestionData(qCard, sectionIdMap));
       });
       formData.items.push(section);
     } else if (itemType === 'question') {
-      formData.items.push(extractQuestionData(child));
+      formData.items.push(extractQuestionData(child, sectionIdMap));
     }
   });
 
@@ -881,7 +943,7 @@ function saveForm() {
     .catch(() => releaseFailureAlert({ message: t.error_saving_form }));
 }
 
-function extractQuestionData(questionCard) {
+function extractQuestionData(questionCard, sectionIdMap = null) {
   const questionType = questionCard.querySelector('.question-type').value;
   const question = {
     type:          'question',
@@ -900,7 +962,16 @@ function extractQuestionData(questionCard) {
       question.options.push(key);
       if (questionType === 'multiple_choice' || questionType === 'dropdown') {
         const logicSel = questionCard.querySelector(`.option-logic-${idx}`);
-        if (logicSel) question.logic[key] = logicSel.value;
+        if (logicSel) {
+          let logicVal = logicSel.value;
+          if (sectionIdMap && logicVal && logicVal.startsWith('section-')) {
+            const oldId = logicVal.replace('section-', '');
+            if (sectionIdMap[oldId] !== undefined) {
+              logicVal = `section-${sectionIdMap[oldId]}`;
+            }
+          }
+          question.logic[key] = logicVal;
+        }
       }
     });
   } else if (questionType === 'linear_scale') {

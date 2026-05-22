@@ -729,11 +729,132 @@ class FormBuilderController extends Controller
         }
     }
 
-    public function reorderSections(Request $request){
-        return response()->json(['status' => 'success']);
+    /**
+     * Reorder sections for a form.
+     *
+     * Payload (POST JSON):
+     *   {
+     *     "sections": [
+     *       { "title": "Section Name", "question_ids": [1, 5, 2] },
+     *       ...
+     *     ]
+     *   }
+     *
+     * Sections are purely logical groupings stored as the `section` key in
+     * each builder_field's options JSON. To persist a new section order, we
+     * process each section sequentially, assigning contiguous sort_orders
+     * and updating the `options.section` string value for all its questions.
+     */
+    public function reorderSections($id, Request $request)
+    {
+        $request->validate([
+            'sections'                => 'required|array',
+            'sections.*.title'        => 'nullable|string',
+            'sections.*.question_ids' => 'required|array',
+        ]);
+
+        $sectionsPayload = $request->input('sections');
+
+        try {
+            DB::transaction(function () use ($id, $sectionsPayload) {
+                $sortOrder = 1;
+                foreach ($sectionsPayload as $sec) {
+                    $title = $sec['title'] ?? '';
+                    $qids  = array_values(array_filter($sec['question_ids'], fn($v) => is_numeric($v)));
+                    
+                    foreach ($qids as $qid) {
+                        $field = BuilderField::where('id', $qid)
+                            ->where('builder_form_id', $id)
+                            ->first();
+                            
+                        if ($field) {
+                            $options = json_decode($field->getRawOriginal('options') ?? '{}', true) ?? [];
+                            $options['section'] = $title;
+                            
+                            $field->fill([
+                                'options'    => json_encode($options),
+                                'sort_order' => $sortOrder++
+                            ])->save();
+                        }
+                    }
+                }
+            });
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
     }
 
-    public function reorderQuestions(Request $request){
-        return response()->json(['status' => 'success']);
+    /**
+     * Reorder questions within a section (and optionally move between sections).
+     *
+     * Payload (POST JSON):
+     *   {
+     *     "section_title": "Section Title" | null,
+     *     "question_ids":  [3, 1, 7, ...]        ← builder_fields primary keys
+     *   }
+     *
+     * When section_title is provided and differs from a question's current
+     * options.section, the question's options JSON is updated so it belongs
+     * to the new section (cross-section drag-and-drop support).
+     */
+    public function reorderQuestions($id, Request $request)
+    {
+        $request->validate([
+            'question_ids'   => 'required|array',
+            'question_ids.*' => 'nullable',
+            'section_title'  => 'nullable|string',
+        ]);
+
+        $questionIds  = array_values(array_filter(
+            $request->input('question_ids'),
+            fn($v) => is_numeric($v)
+        ));
+        $sectionTitle = $request->input('section_title');
+
+        if (empty($questionIds)) {
+            return response()->json(['status' => 'success', 'message' => 'no db ids']);
+        }
+
+        try {
+            DB::transaction(function () use ($id, $questionIds, $sectionTitle) {
+                // Find the minimum sort_order slot occupied by these questions
+                // so we don't disturb the sort_order of other sections.
+                $minOrder = BuilderField::where('builder_form_id', $id)
+                    ->whereIn('id', $questionIds)
+                    ->min('sort_order') ?? 1;
+
+                $sortOrder = $minOrder;
+                foreach ($questionIds as $qid) {
+                    $field = BuilderField::where('id', $qid)
+                        ->where('builder_form_id', $id)
+                        ->first();
+
+                    if (!$field) {
+                        $sortOrder++;
+                        continue;
+                    }
+
+                    // Decode options to potentially update the section name.
+                    $options = json_decode($field->getRawOriginal('options') ?? '{}', true) ?? [];
+
+                    if ($sectionTitle !== null && ($options['section'] ?? null) !== $sectionTitle) {
+                        $options['section'] = $sectionTitle;
+                        $field->fill(['options' => json_encode($options)]);
+                    }
+
+                    $field->fill(['sort_order' => $sortOrder++])->save();
+                }
+            });
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
     }
 }
