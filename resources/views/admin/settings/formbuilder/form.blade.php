@@ -725,6 +725,43 @@
 
         section.style.display = "block";
 
+        // Check if there is any question in the current section that has conditional routing configured.
+        // If such a question exists, we need to check if the user has selected/checked any option.
+        // If they have not selected anything yet, we must STOP here and not continue to subsequent sections!
+        let hasUnansweredConditionalQuestion = false;
+
+        const dropdowns = section.querySelectorAll("select.question-logic");
+        dropdowns.forEach(select => {
+          const options = Array.from(select.options);
+          const isConditional = options.some(opt => opt.value && opt.dataset.logic && opt.dataset.logic !== "continue");
+          if (isConditional && !select.value) {
+            hasUnansweredConditionalQuestion = true;
+          }
+        });
+
+        const radios = section.querySelectorAll("input[type='radio'].question-logic");
+        const radioGroups = {};
+        radios.forEach(radio => {
+          if (!radioGroups[radio.name]) radioGroups[radio.name] = [];
+          radioGroups[radio.name].push(radio);
+        });
+
+        for (const groupName in radioGroups) {
+          const group = radioGroups[groupName];
+          const isConditional = group.some(radio => radio.dataset.logic && radio.dataset.logic !== "continue");
+          if (isConditional) {
+            const hasChecked = group.some(radio => radio.checked);
+            if (!hasChecked) {
+              hasUnansweredConditionalQuestion = true;
+            }
+          }
+        }
+
+        if (hasUnansweredConditionalQuestion) {
+          // Stop here! Hide any further sections until answered.
+          break;
+        }
+
         // Determine next step based on question logic within this section
         let logic = "continue";
         const inputs = section.querySelectorAll(".question-logic");
