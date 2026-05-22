@@ -98,19 +98,36 @@ class ExternalCyclesController extends Controller
 	{
 		$program = $this->getProgram( $org_slug, $program_slug );
 		if( empty( $program ) ) { abort(404); }
+
+		$firstFormStep = DB::table('steps')
+			->where('cycle_id', $program->id)
+			->where('stype', 1)
+			->orderBy('arr', 'ASC')
+			->first();
+
+		if ($firstFormStep) {
+			$stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
+			$stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
+			$now = now();
+
+			$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+			if (!$isOpen) {
+				return redirect()->to("/o/" . ($program->org_slug ?? $org_slug))->with('error', app()->getLocale() == 'ar' ? 'التقديم مغلق حالياً.' : 'Applications are currently closed.');
+			}
+		} else {
+			return redirect()->to("/o/" . ($program->org_slug ?? $org_slug))->with('error', app()->getLocale() == 'ar' ? 'التقديم مغلق حالياً.' : 'Applications are currently closed.');
+		}
+
+		if( auth()->check() )
+		{
+			$c = $program->id;
+			return redirect()->to("dashboard/cycles/view/$c");
+		}
 		else
 		{
-			if( auth()->check() )
-			{
-				$c = $program->id;
-				return redirect()->to("dashboard/cycles/view/$c");
-			}
-			else
-			{
-				$app_settings = Settings::find(1);
-				$VFEmail = $app_settings?->VFEmail ?? 1;
-				return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug', 'VFEmail'));
-			}
+			$app_settings = Settings::find(1);
+			$VFEmail = $app_settings?->VFEmail ?? 1;
+			return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug', 'VFEmail'));
 		}
 	}
 
@@ -365,6 +382,7 @@ class ExternalCyclesController extends Controller
 				'p.is_public',
 				'p.winners_announcement AS announced',
 				'p.winners_visibility AS visibility',
+				'o.slug AS org_slug',
 				'o.name_en AS en_org_name',
 				'o.name_ar AS ar_org_name',
 				'o.bio AS bio',
@@ -377,7 +395,10 @@ class ExternalCyclesController extends Controller
 			])
 			->leftJoin('organizations AS o', 'p.organization_id', '=', 'o.id')
 			->where('p.public_slug', $program_slug)
-			->where('o.short_code', $org_slug)
+			->where(function($query) use ($org_slug) {
+				$query->where('o.short_code', $org_slug)
+					->orWhere('o.slug', $org_slug);
+			})
 			->first();
 
 		if( !empty( $program ) )
