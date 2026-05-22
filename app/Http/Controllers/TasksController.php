@@ -120,7 +120,7 @@ class TasksController extends Controller
                         'img_url'    => $fb->user ? User::image_handler($fb->user->img_url) : null,
                         'decision'   => $fb->decision,
                         'text'       => $fb->note,
-                        'time'       => $fb->created_at->diffForHumans(),
+                        'time'       => $fb->created_at->format('d-m-Y H:i'),
                     ];
                 })->toArray(),
                 'activities' => $task->activities->sortByDesc('created_at')->map(function($act) {
@@ -445,7 +445,7 @@ class TasksController extends Controller
             'img_url'    => $fb->user ? User::image_handler($fb->user->img_url) : null,
             'decision'   => $fb->decision,
             'text'       => $fb->note,
-            'time'       => $fb->created_at->diffForHumans(),
+            'time'       => $fb->created_at->format('d-m-Y H:i'),
         ]);
 
         $activities = $task->activities->sortByDesc('created_at')->map(function ($act) {
@@ -1249,7 +1249,7 @@ class TasksController extends Controller
                     'img_url'    => User::image_handler($user->img_url),
                     'decision'   => $feedback->decision,
                     'text'       => $feedback->note,
-                    'time'       => $feedback->created_at->diffForHumans(),
+                    'time'       => $feedback->created_at->format('d-m-Y H:i'),
                 ],
                 'attachments' => $uploadedAttachments,
             ]);

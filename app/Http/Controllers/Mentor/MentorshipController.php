@@ -147,7 +147,7 @@ class MentorshipController extends Controller
                         'img_url'  => $fb->user ? User::image_handler($fb->user->img_url) : null,
                         'decision' => $fb->decision,
                         'text'     => $fb->note,
-                        'time'     => $fb->created_at->diffForHumans(),
+                        'time'     => $fb->created_at->format('d-m-Y H:i'),
                     ];
                 })->toArray(),
                 'activities' => $task->activities->map(function ($act) {
