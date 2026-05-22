@@ -297,7 +297,7 @@
 </script>
 @else
 <script>
-  const lang = '{{ $l }}';
+  window.lang = '{{ $l }}';
 </script>
 
 <!-- Page JS -->
