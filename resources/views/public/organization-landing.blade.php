@@ -365,7 +365,7 @@
   <!--/ Navigation Pills -->
 
   <!-- Programs Section -->
-  @if(isset($landingPrograms) && $landingPrograms->count() > 0)
+  @if(isset($landingPage) && $landingPage->programs_enabled)
   <section id="programs" class="section-py">
     <div class="container">
       @if($landingPage->programs_subtitle)
@@ -390,115 +390,142 @@
         </p>
       @endif
       
-      <div class="swiper-programs-carousel overflow-hidden">
-        <div class="swiper" id="swiper-programs">
-          <div class="swiper-wrapper">
-            @foreach($landingPrograms as $program)
-              <div class="swiper-slide h-100">
-                <div class="card h-100 border shadow-none mb-12" style="width: calc(100% - 24px); margin-inline-end: 24px;">
-                  <div class="card-body d-flex flex-column p-4">
+      @if(isset($landingPrograms) && $landingPrograms->count() > 0)
+        <div class="swiper-programs-carousel overflow-hidden">
+          <div class="swiper" id="swiper-programs">
+            <div class="swiper-wrapper">
+              @foreach($landingPrograms as $program)
+                <div class="swiper-slide h-100">
+                  <div class="card h-100 border shadow-none mb-12" style="width: calc(100% - 24px); margin-inline-end: 24px;">
+                    <div class="card-body d-flex flex-column p-4">
 
-                    {{-- Logo + Type badge --}}
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                      <div class="rounded-3 border bg-body-secondary d-flex align-items-center justify-content-center p-1"
-                          style="width: 56px; height: 56px; flex-shrink: 0;">
-                        <img src="{{ $program->logo ?? '/images/team/3.png' }}"
-                            alt="{{ $program->title }}"
-                            onerror="this.onerror=null;this.src='/images/team/3.png';"
-                            style="width: 40px; height: 40px; object-fit: contain;" />
-                      </div>
-                      <span class="badge bg-label-secondary rounded-pill">
-                        {{ __('cycles.' . ($program->type ?? 'General_Program')) }}
-                      </span>
-                    </div>
-
-                    {{-- Title --}}
-                    <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35;">
-                      {{ $program->title }}
-                    </h5>
-
-                    {{-- Description --}}
-                    @if($program->description)
-                      <p class="line-clamp-3 mb-0">
-                        {{ $program->description }}
-                      </p>
-                    @endif
-
-                    {{-- Push everything below to bottom --}}
-                    <div class="mt-auto">
-                      <hr class="opacity-25 my-3">
-
-                      {{-- Date + Location --}}
-                      @if($program->start || $program->location)
-                        <div class="d-flex flex-wrap gap-3 mb-4">
-                          @if($program->start)
-                            <div class="d-flex align-items-center gap-2">
-                              <div class="avatar">
-                                <div class="avatar-initial rounded">
-                                  <i class="ti ti-calendar text-dark"></i>
-                                </div>
-                              </div>
-                              <div>
-                                <div class="small text-secondary">
-                                  {{ __('admin.Program Duration') }}
-                                </div>
-                                <div class="fw-semibold">
-                                  {{ $program->start->format('M d') }}
-                                  @if($program->end)
-                                    – {{ $program->end->format('M d, Y') }}
-                                  @else
-                                    , {{ $program->start->format('Y') }}
-                                  @endif
-                                </div>
-                              </div>
+                      {{-- Logo + Type badge --}}
+                      @if($program->logo || $program->type)
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                          @if($program->logo)
+                            <div class="rounded-3 border bg-body-secondary d-flex align-items-center justify-content-center p-1"
+                                style="width: 56px; height: 56px; flex-shrink: 0;">
+                              <img src="{{ $program->logo }}"
+                                  alt="{{ $program->title }}"
+                                  style="width: 40px; height: 40px; object-fit: contain;" />
                             </div>
                           @endif
-
-                          @if($program->location)
-                            <div class="d-flex align-items-center gap-2">
-                              <div class="avatar">
-                                <div class="avatar-initial rounded">
-                                  <i class="ti ti-map-pin text-dark"></i>
-                                </div>
-                              </div>
-                              <div>
-                                <div class="small text-secondary">
-                                  {{ __('admin.Location') }}
-                                </div>
-                                <div class="fw-semibold">
-                                  {{ $program->location }}
-                                </div>
-                              </div>
-                            </div>
+                          @if($program->type)
+                            <span class="badge bg-label-secondary rounded-pill">
+                              {{ __('cycles.' . $program->type) }}
+                            </span>
                           @endif
                         </div>
                       @endif
 
-                      {{-- Application status + CTA --}}
-                      {{-- @if(true) --}}
+                      {{-- Title --}}
+                      @if($program->title)
+                        <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35;">
+                          {{ $program->title }}
+                        </h5>
+                      @endif
+
+                      {{-- Description --}}
+                      @if($program->description)
+                        <p class="line-clamp-3 mb-0">
+                          {{ $program->description }}
+                        </p>
+                      @endif
+
+                      {{-- Push everything below to bottom --}}
+                      <div class="mt-auto">
+                        <hr class="opacity-25 my-3">
+
+                        {{-- Date + Location --}}
+                        @if($program->start || $program->location)
+                          <div class="d-flex flex-wrap gap-3 mb-4">
+                            @if($program->start)
+                              <div class="d-flex align-items-center gap-2">
+                                <div class="avatar">
+                                  <div class="avatar-initial rounded">
+                                    <i class="ti ti-calendar text-dark"></i>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div class="small text-secondary">
+                                    {{ __('admin.Program Duration') }}
+                                  </div>
+                                  <div class="fw-semibold">
+                                    {{ \Carbon\Carbon::parse($program->start)->format('M d') }}
+                                    @if($program->end)
+                                      – {{ \Carbon\Carbon::parse($program->end)->format('M d, Y') }}
+                                    @else
+                                      , {{ \Carbon\Carbon::parse($program->start)->format('Y') }}
+                                    @endif
+                                  </div>
+                                </div>
+                              </div>
+                            @endif
+
+                            @if($program->location)
+                              <div class="d-flex align-items-center gap-2">
+                                <div class="avatar">
+                                  <div class="avatar-initial rounded">
+                                    <i class="ti ti-map-pin text-dark"></i>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div class="small text-secondary">
+                                    {{ __('admin.Location') }}
+                                  </div>
+                                  <div class="fw-semibold">
+                                    {{ $program->location }}
+                                  </div>
+                                </div>
+                              </div>
+                            @endif
+                          </div>
+                        @endif
+
+                        {{-- Application status + CTA --}}
                         @php
-                          $now = now();
+                          $firstFormStep = $program->steps()->where('stype', 1)->orderBy('arr', 'asc')->first();
 
-                          $isUpcoming = $program->start && $now->lt($program->start);
-                          $isOpen     = $program->start && $program->end && $now->between($program->start, $program->end);
-                          $isClosed   = $program->end && $now->gt($program->end);
+                          if ($firstFormStep) {
+                              $stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
+                              $stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
 
-                         $statusClass = $isOpen ? 'bg-label-success'
-                              : ($isUpcoming ? 'bg-label-warning'
-                               : 'bg-label-danger');
+                              $now = now();
+                              
+                              $isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+                              $isUpcoming = $stepStart !== null && $now->lt($stepStart);
+                              $isClosed = $stepEnd !== null && $now->gt($stepEnd);
+                          } else {
+                              $isOpen = false;
+                              $isUpcoming = false;
+                              $isClosed = true;
+                              $stepStart = null;
+                              $stepEnd = null;
+                          }
 
-                          $dotColor = $isOpen ? 'success'
-                                    : ($isUpcoming ? 'warning' : 'danger');
-
-                          $statusLabel = $isOpen ? __('admin.Open')
-                                        : ($isUpcoming ? __('admin.Starting_Soon')
-                                                      : __('admin.Closed'));
-                        
-                          $statusIcon = $isOpen ? 'hourglass'
-                                        : ($isUpcoming ? 'hourglass-empty'
-                                                      : 'lock');
-                          $dotColor    = $isOpen  ? 'success'
-                                      : ($isUpcoming ? 'warning' : 'danger');
+                          if ($isOpen) {
+                              $statusClass = 'bg-label-success';
+                              $dotColor = 'success';
+                              $statusIcon = 'hourglass';
+                              $statusLabel = $l == 'ar'
+                                  ? "مفتوح حتى " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . "."
+                                  : "Open Till " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . ".";
+                              $btnText = $l == 'ar' ? 'تقدم الآن.' : 'Apply Now.';
+                          } elseif ($isUpcoming) {
+                              $statusClass = 'bg-label-warning';
+                              $dotColor = 'warning';
+                              $statusIcon = 'hourglass-empty';
+                              $statusLabel = $l == 'ar'
+                                  ? "سيفتح في " . ($stepStart ? $stepStart->format('Y-m-d') : '') . "."
+                                  : "Will open in " . ($stepStart ? $stepStart->format('Y-m-d') : '') . ".";
+                              $btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications Open Soon';
+                          } else {
+                              $statusClass = 'bg-label-danger';
+                              $dotColor = 'danger';
+                              $statusIcon = 'lock';
+                              $statusLabel = $l == 'ar' ? "مغلق." : "Closed.";
+                              $btnText = $l == 'ar' ? 'التقديم مغلق.' : 'Applications Closed.';
+                          }
                         @endphp
 
                         <div class="d-flex align-items-center gap-2 mb-6">
@@ -518,43 +545,49 @@
                         </div>
 
                         @if($isOpen && $program->public_slug)
-                          <a href="/{{ $organization->short_code }}/program/{{ $program->public_slug }}/apply"
+                          <a href="/{{ $organization->short_code ?? $organization->slug }}/program/{{ $program->public_slug }}"
                             class="btn btn-primary w-100 fw-semibold"
                             style="border-radius: 10px; padding: 10px;">
-                            {{ __('admin.Apply Now') }}
+                            {{ $btnText }}
                             <i class="ti ti-arrow-narrow-{{ $isRtl ? 'left' : 'right' }} ms-2"></i>
                           </a>
                         @elseif($isUpcoming)
                           <button class="btn btn-label-warning w-100 fw-semibold" disabled>
-                            {{ __('admin.Starting_Soon') }}
+                            {{ $btnText }}
                           </button>
                         @else
                           <button class="btn btn-label-secondary w-100 fw-semibold" disabled>
-                            {{ __('admin.Applications_Closed') }}
+                            {{ $btnText }}
                           </button>
                         @endif
-                      {{-- @endif --}}
-                    </div>
+                      </div>
 
+                    </div>
                   </div>
                 </div>
-              </div>
-            @endforeach
+              @endforeach
+            </div>
+            <!-- Pagination -->
+            <div class="swiper-pagination pt-4"></div>
           </div>
-          <!-- Pagination -->
-          <div class="swiper-pagination pt-4"></div>
         </div>
-      </div>
-  
-      <!-- Navigation Controls -->
-      <div class="programs-nav-controls text-center pt-4" id="programs-nav-controls">
-        <button id="programs-previous-btn" class="btn btn-label-primary programs-btn programs-previous-btn me-4 scaleX-n1-rtl" type="button">
-          <i class="ti ti-chevron-left ti-md"></i>
-        </button>
-        <button id="programs-next-btn" class="btn btn-label-primary programs-btn programs-next-btn scaleX-n1-rtl" type="button">
-          <i class="ti ti-chevron-right ti-md"></i>
-        </button>
-      </div>
+    
+        <!-- Navigation Controls -->
+        <div class="programs-nav-controls text-center pt-4" id="programs-nav-controls">
+          <button id="programs-previous-btn" class="btn btn-label-primary programs-btn programs-previous-btn me-4 scaleX-n1-rtl" type="button">
+            <i class="ti ti-chevron-left ti-md"></i>
+          </button>
+          <button id="programs-next-btn" class="btn btn-label-primary programs-btn programs-next-btn scaleX-n1-rtl" type="button">
+            <i class="ti ti-chevron-right ti-md"></i>
+          </button>
+        </div>
+      @else
+        <div class="text-center py-8">
+          <h5 class="text-muted mb-0">
+            {{ $l == 'ar' ? 'لا توجد برامج متاحة حالياً.' : 'No programs are available right now.' }}
+          </h5>
+        </div>
+      @endif
     </div>
   </section>
   @endif
