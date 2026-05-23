@@ -10,10 +10,10 @@
          aria-label="{{ __('importer.ui.step1') }}">
         <input type="file" id="importer-file-input" accept=".csv,text/csv" class="d-none">
         <p class="mb-2">{{ __('importer.ui.step1') }} (.csv)</p>
-        <p class="text-muted small mb-0">
+        {{--  <p class="text-muted small mb-0">
             {{ __('importer.ui.actions.download') }}:
             <a href="{{ route('importer.template') }}">{{ __('importer.ui.title') }}</a>
-        </p>
+        </p>  --}}
     </div>
 
     <div id="importer-uploaded-info" class="alert alert-info d-none">
