@@ -11,20 +11,20 @@ $tabs = [
 
 $foundersPayload = [];
 if (isset($founders) && is_iterable($founders)) {
-    foreach ($founders as $f) {
-        if (is_array($f)) {
-            $foundersPayload[] = $f;
+    foreach ($founders as $founder) {
+        if (is_array($founder)) {
+            $foundersPayload[] = $founder;
             continue;
         }
         $foundersPayload[] = [
-            'id' => $f->id,
-            'name' => $f->Name,
-            'email' => $f->Email,
-            'phone' => $f->phone ?? null,
-            'linkedin' => $f->LinkedIn,
-            'join_date' => isset($f->join_date) && $f->join_date ? \Illuminate\Support\Carbon::parse($f->join_date)->format('Y-m-d') : null,
-            'type' => $f->founder_type ?? null,
-            'commitment' => $f->working_commitment ?? null,
+            'id' => $founder->id,
+            'name' => $founder->name,
+            'email' => $founder->email,
+            'phone' => $founder->phone ?? null,
+            'linkedin' => $founder->linkedin,
+            'join_date' => isset($founder->join_date) && $founder->join_date ? \Illuminate\Support\Carbon::parse($founder->join_date)->format('Y-m-d') : null,
+            'type' => $founder->type ?? null,
+            'commitment' => $founder->commitment ?? null,
         ];
     }
 }

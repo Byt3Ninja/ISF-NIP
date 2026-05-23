@@ -644,8 +644,8 @@
           phone: f.phone || "",
           linkedin: f.linkedin || "",
           join_date: f.join_date || "",
-          type: f.founder_type || "",
-          commitment: f.working_commitment || "",
+          type: f.type || f.founder_type || "",
+          commitment: f.commitment || f.working_commitment || "",
         });
         if (isEdit) {
           if (type === "founder" && res.founder) {
