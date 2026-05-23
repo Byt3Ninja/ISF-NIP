@@ -105,25 +105,38 @@ class RowImporter
 
         // --- company ---
         $companyDataRaw = [
-            'name_en'                => trim($row['startup_name'] ?? ''),
-            'name_ar'                => trim($row['startup_name'] ?? ''),
-            'country_id'             => $countryId,
-            'state_id'               => $stateId,
-            'sector'                 => $sectorId,
-            'address_en'             => trim($row['address'] ?? '') !== '' ? $row['address'] : null,
-            'address_ar'             => trim($row['address'] ?? '') !== '' ? $row['address'] : null,
-            'targeted_market'        => $targeted,
-            'est_date'               => $this->parseMdy($row['establishment_date'] ?? null),
-            'email'                  => $row['company_email'] ?? null,
-            'website'                => $row['company_website'] ?? null,
-            'facebook'               => $row['company_facebook'] ?? null,
-            'logo'                   => $row['company_logo'] ?? null,
-            'mission'                => $row['mission'] ?? null,
-            'mvp_prototype_link'     => $row['mvp_link'] ?? null,
-            'total_employees'        => $this->intOrNull($row['total_employees']  ?? null),
-            'male_employees'         => $this->intOrNull($row['male_employees']   ?? null),
-            'female_employees'       => $this->intOrNull($row['female_employees'] ?? null),
-            'cycle'                  => $cycle->id,
+            'name_en'                       => trim($row['startup_name'] ?? ''),
+            'name_ar'                       => trim($row['startup_name'] ?? ''),
+            'country_id'                    => $countryId,
+            'state_id'                      => $stateId,
+            'sector'                        => $sectorId,
+            'industries'                    => $this->nullIfBlank($row['industry'] ?? null),
+            'address_en'                    => $this->nullIfBlank($row['address'] ?? null),
+            'address_ar'                    => $this->nullIfBlank($row['address'] ?? null),
+            'targeted_market'               => $targeted,
+            'est_date'                      => $this->parseMdy($row['establishment_date'] ?? null),
+            'years_of_operations'           => $this->nullIfBlank($row['years_of_operations'] ?? null),
+            'product_or_service'            => $this->nullIfBlank($row['product_or_service'] ?? null),
+            'company_registration_type'     => $this->nullIfBlank($row['company_registration_type'] ?? null),
+            'previous_incubation'           => $this->yesNoToFlag($row['is_previously_incubated'] ?? null),
+            'previous_incubator'            => $this->nullIfBlank($row['previous_incubator'] ?? null),
+            'achievements'                  => $this->nullIfBlank($row['achievements'] ?? null),
+            'mission'                       => $this->nullIfBlank($row['mission'] ?? null),
+            'products_services_description' => $this->nullIfBlank($row['product_service_description'] ?? null),
+            'why_this_startup'              => $this->nullIfBlank($row['why_this_startup'] ?? null),
+            'startup_expertise'             => $this->nullIfBlank($row['startup_expertise'] ?? null),
+            'hear_about_us'                 => $this->nullIfBlank($row['key_areas'] ?? null),
+            'email'                         => $this->nullIfBlank($row['company_email'] ?? null),
+            'website'                       => $this->nullIfBlank($row['company_website'] ?? null),
+            'facebook'                      => $this->nullIfBlank($row['company_facebook'] ?? null),
+            'logo'                          => $this->nullIfBlank($row['company_logo'] ?? null),
+            'mvp_prototype_link'            => $this->nullIfBlank($row['mvp_link'] ?? null),
+            'total_employees'               => $this->intOrNull($row['total_employees']  ?? null),
+            'male_employees'                => $this->intOrNull($row['male_employees']   ?? null),
+            'female_employees'              => $this->intOrNull($row['female_employees'] ?? null),
+            'generate_revenue'              => $this->yesNoToYesNo($row['generate_revenue'] ?? null),
+            'average_annual_revenues'       => $this->intOrNull($row['average_annual_revenue'] ?? null),
+            'cycle'                         => $cycle->id,
         ];
 
         // Drop null values (preserve empty strings for NOT NULL DB columns).
@@ -239,6 +252,35 @@ class RowImporter
     private function intOrNull($v): ?int
     {
         return is_numeric($v) ? (int) $v : null;
+    }
+
+    private function nullIfBlank($v): ?string
+    {
+        if ($v === null) return null;
+        $t = trim((string) $v);
+        return $t === '' ? null : $t;
+    }
+
+    /** Yes/No → "1"/"0" for varchar(1) flag columns (e.g., previous_incubation). */
+    private function yesNoToFlag($v): ?string
+    {
+        $t = $this->nullIfBlank($v);
+        if ($t === null) return null;
+        $u = mb_strtolower($t, 'UTF-8');
+        if ($u === 'yes') return '1';
+        if ($u === 'no')  return '0';
+        return null;
+    }
+
+    /** Yes/No → "Yes"/"No" for varchar(3) columns (e.g., generate_revenue). */
+    private function yesNoToYesNo($v): ?string
+    {
+        $t = $this->nullIfBlank($v);
+        if ($t === null) return null;
+        $u = mb_strtolower($t, 'UTF-8');
+        if ($u === 'yes') return 'Yes';
+        if ($u === 'no')  return 'No';
+        return null;
     }
 
     private function parseMdy(?string $s): ?string

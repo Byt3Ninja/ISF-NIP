@@ -3,7 +3,7 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/importer/importer.css') }}?v={{ filemtime(public_path('css/importer/importer.css')) }}">
 
-<div class="container-fluid importer-v2" data-locale="{{ app()->getLocale() }}">
+<div class="container-fluid importer-v2 px-0" data-locale="{{ app()->getLocale() }}">
     <div class="card card-body">
         <div class="mb-3">
             <h4 class="fw-bold mb-1">{{ __('importer.ui.title') }}</h4>
