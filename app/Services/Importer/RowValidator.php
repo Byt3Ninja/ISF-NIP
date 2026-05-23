@@ -45,7 +45,8 @@ class RowValidator
             'gender_enum',
             'working_commitment_enum',
             'educational_status_enum',
-            'products_services_enum'   => $this->matchEnumCaseInsensitive($value, $opts['allowed_values'] ?? []) !== null ? null : $err,
+            'products_services_enum'   => $this->matchProductsServices($value, $opts['allowed_values'] ?? []) !== null ? null : $err,
+            'years_bucket_enum'        => $this->normalizeYearsBucket($value) !== null ? null : $err,
 
             default                    => null,
         };
@@ -313,16 +314,78 @@ class RowValidator
         foreach ($resolvedRow as $fieldKey => $value) {
             $field = ImporterFieldSchema::find($fieldKey);
             if (!$field) continue;
-            $allowed = $field['allowed_values'] ?? null;
-            if (!is_array($allowed) || empty($allowed)) continue;
             $v = trim((string) $value);
             if ($v === '') continue;
-            $canonical = $this->matchEnumCaseInsensitive($v, $allowed);
-            if ($canonical !== null) {
-                $resolvedRow[$fieldKey] = $canonical;
+
+            $validator = $field['validator'] ?? null;
+            $allowed   = $field['allowed_values'] ?? null;
+
+            if ($validator === 'products_services_enum') {
+                $canon = $this->matchProductsServices($v, $allowed ?? []);
+            } elseif ($validator === 'years_bucket_enum') {
+                $canon = $this->normalizeYearsBucket($v);
+            } elseif (is_array($allowed) && !empty($allowed)) {
+                $canon = $this->matchEnumCaseInsensitive($v, $allowed);
+            } else {
+                $canon = null;
+            }
+
+            if ($canon !== null) {
+                $resolvedRow[$fieldKey] = $canon;
             }
         }
         return $resolvedRow;
+    }
+
+    /**
+     * Match Product/Service input, accepting plural forms and "and"/"&"/"+" variants
+     * as synonyms for the canonical "Product + Service".
+     */
+    public function matchProductsServices(string $value, array $allowed): ?string
+    {
+        $direct = $this->matchEnumCaseInsensitive($value, $allowed);
+        if ($direct !== null) return $direct;
+
+        $n = mb_strtolower(trim($value), 'UTF-8');
+        $n = preg_replace('/\s+/', ' ', $n);
+
+        $aliases = [
+            'products'              => 'Product',
+            'services'              => 'Service',
+            'products and services' => 'Product + Service',
+            'product and service'   => 'Product + Service',
+            'products & services'   => 'Product + Service',
+            'product & service'     => 'Product + Service',
+            'products + services'   => 'Product + Service',
+        ];
+        if (isset($aliases[$n]) && in_array($aliases[$n], $allowed, true)) {
+            return $aliases[$n];
+        }
+        return null;
+    }
+
+    /**
+     * Map either a canonical bucket (0-2/2-5/5-10/10+) or a plain number of years
+     * to one of the four canonical buckets. Returns null when input is unparseable.
+     * Bucket boundaries are inclusive of the lower bound, exclusive of the upper.
+     */
+    public function normalizeYearsBucket(string $value): ?string
+    {
+        $v = trim($value);
+        if ($v === '') return null;
+
+        foreach (['0-2', '2-5', '5-10', '10+'] as $bucket) {
+            if (strcasecmp($v, $bucket) === 0) return $bucket;
+        }
+        if (is_numeric($v)) {
+            $n = (float) $v;
+            if ($n < 0)  return null;
+            if ($n < 2)  return '0-2';
+            if ($n < 5)  return '2-5';
+            if ($n < 10) return '5-10';
+            return '10+';
+        }
+        return null;
     }
 
     private function parseMdy(string $value): ?Carbon
