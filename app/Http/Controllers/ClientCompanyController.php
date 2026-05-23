@@ -943,22 +943,52 @@ class ClientCompanyController extends Controller
 
                 if ($company_instance) {
                     $founders = $teamMembers->where('TeamMember', 'Founder')->values();
-                    $Shareholders = $teamMembers->where('TeamMember', 'Shareholder')->values();
-                    $Investors = $teamMembers->where('TeamMember', 'Investor')->values();
+                    $shareholders = $teamMembers->where('TeamMember', 'Shareholder')->values();
+                    $investors = $teamMembers->where('TeamMember', 'Investor')->values();
 
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
                     $Planneds = collect();
                     $Archiveds = collect();
                 } else {
-                    $founders = 'NA';
-                    $Shareholders = 'NA';
-                    $Investors = 'NA';
+                    $founders = collect();
+                    $shareholders = collect();
+                    $investors = collect();
                     $milestones = collect();
                     $Achieveds = 'NA';
                     $Planneds = 'NA';
                     $Archiveds = 'NA';
                 }
+
+                $founders = $founders->map(function ($item) {
+                    $member = new stdClass;
+                    
+                    $member->id = $item->id;
+                    $member->name = $item->Name;
+                    $member->email = $item->Email;
+                    $member->type = $item->founder_type;
+                    $member->phone = $item->phone;
+                    $member->join_date = $item->join_date;
+                    $member->linkedin = $item->LinkedIn;
+                    $member->commitment = $item->working_commitment;
+                    return $member;
+                });
+                $investors = $investors->map(function ($item) {
+                    $member = new stdClass;
+                    $member->id = $item->id;
+                    $member->name = $item->Name;
+                    $member->type = $item->investorType;
+                    $member->investment_amount = $item->InvestmentAmount;
+                    return $member;
+                });
+                $shareholders = $shareholders->map(function ($item) {
+                    $member = new stdClass;
+                    $member->id = $item->id;
+                    $member->name = $item->Name;
+                    $member->role = $item->RoleShereholder;
+                    $member->percentage = $item->PresentagShereholder;
+                    return $member;
+                });
                 $Stages = Stage::all();
 
                 $Currencies = Currency::where('enabled', 1)->get(); // جلب جميع الأعضاء
@@ -1131,8 +1161,8 @@ class ClientCompanyController extends Controller
                 'client',
                 '_countries',
                 'founders',
-                'Shareholders',
-                'Investors',
+                'shareholders',
+                'investors',
                 'Currencies',
                 'milestones',
                 'Achieveds',
