@@ -237,7 +237,7 @@ class ClientCompanyController extends Controller
 
         $programs = collect();
 
-        $cycle = Cycle::find($company->cycle);
+        $cycle = Cycle::with(['steps', 'organization'])->find($company->cycle);
         if ($cycle) {
             $currentScreeningScore = null;
             $screenSteps = Step::where('cycle_id', $cycle->id)->where('stype', 2)->pluck('id');
@@ -275,6 +275,8 @@ class ClientCompanyController extends Controller
                 $cycleStatus = 'ongoing';
             }
 
+            $custom_form = $cycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
+            $submissions = Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first();
             $programs->push((object)[
                 'id' => $cycle->id,
                 'name' => $cycle->title,
@@ -284,15 +286,15 @@ class ClientCompanyController extends Controller
                     'name' => is_object($cycle->organization) ? ($cycle->organization->name ?? null) : $cycle->organization
                 ],
                 'cohort' => (object)[ 'name' => $cycle->cohort ?? null ],
-                'start_date' => $startDate,
-                'completion_date' => $endDate,
+                'start_date' => $submissions ? Carbon::parse($submissions->created_at) : null,
+                'completion_date' => null,
                 'screening_score' => $currentScreeningScore,
                 'rank' => null,
                 'final_screening_score' => $currentFinalScoreForProgram,
                 'status' => $cycleStatus,
             ]);
         }
-        $almunies = Almuni::where('company_id', $company->id)->get();
+        $almunies = Almuni::where('company_id', $company->id)->with(['cycle', 'cycle.steps', 'cycle.organization'])->get();
         $mentorshipToSum = collect();
         $trainingToSum = collect();
         $finalScreenAvg = collect();
@@ -318,7 +320,9 @@ class ClientCompanyController extends Controller
 
             // Primary source: load cycle directly from DB via cycle_id
             if ($almuni->cycle_id) {
-                $almuniCycle = Cycle::with('organization')->find($almuni->cycle_id);
+                $almuniCycle = $almuni->cycle;
+                $custom_form = $almuniCycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
+                $submissions = Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first();
                 if ($almuniCycle) {
                     $almuniScreeningScore = null;
                     if (!empty($almuni->screening)) {
@@ -334,6 +338,7 @@ class ClientCompanyController extends Controller
                         $alumniFinalScore = $fsScores->isNotEmpty() ? round($fsScores->avg(), 2) : null;
                     }
 
+                    // Formdata
                     $programs->push((object)[
                         'id'                    => $almuniCycle->id,
                         'name'                  => $almuniCycle->title,
@@ -341,8 +346,8 @@ class ClientCompanyController extends Controller
                         'type'                  => strtolower($almuniCycle->type ?? ''),
                         'organization'          => (object)['name' => is_object($almuniCycle->organization) ? ($almuniCycle->organization->name ?? null) : $almuniCycle->organization],
                         'cohort'                => (object)['name' => $almuniCycle->cohort ?? null],
-                        'start_date'            => $almuniCycle->start ? Carbon::parse($almuniCycle->start) : null,
-                        'completion_date'       => $almuniCycle->end ? Carbon::parse($almuniCycle->end) : null,
+                        'start_date'            => $submissions ? Carbon::parse($submissions->created_at) : null,
+                        'completion_date'       => $almuni->created_at ? Carbon::parse($almuni->created_at) : null,
                         'screening_score'       => $almuniScreeningScore,
                         'rank'                  => null,
                         'final_screening_score' => $alumniFinalScore,
