@@ -167,7 +167,7 @@
                 </div>
                 
                 <!-- Action -->
-                @if($program->status !== 'upcoming')
+                @if($program->status !== 'upcoming' && $program->program_type == 'alumni')
                 <div class="col-6 col-md-2 col-lg-2">
                   <div class="text-end">
                     <a href="{{ route('company.alumni_view', ['id' => $company->id, 'cycle_id' => $program->id]) }}"
