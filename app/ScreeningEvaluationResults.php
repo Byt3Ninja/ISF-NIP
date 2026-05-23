@@ -751,6 +751,75 @@ class ScreeningEvaluationResults extends Model
 				return $judge;
 			});
 
+			if( $processedJudges->isEmpty() )
+			{
+				$fallbackJudges = $_criteria->flatMap(function( $category ) {
+					return $category->details->flatMap(function( $sub ) {
+						return $sub->details->pluck('judger');
+					});
+				})->filter(function( $j ) {
+					return !empty( $j ) && !empty( $j->id );
+				})->unique('id')->values();
+
+				$processedJudges = $fallbackJudges->map(function( $j ) use ( $formCommentsByJudge, $customFields, $criteria, $company_id ) {
+					$judger_id = $j->id ?? 0;
+					$out = new stdClass;
+					$out->id = $judger_id;
+					$out->name = $j->name ?? '';
+					$out->phone = $j->phone ?? '';
+					$out->email = $j->email ?? '';
+					$out->image_url = $j->image_url ?? '';
+
+					$details = $criteria->map(function( $item ) use ( $judger_id ) {
+						$subDetails = $item->subCriteria->filter(function( $sub ) use ( $judger_id ) {
+							$r = $sub->results->where('judger_id', $judger_id)->values()->first();
+							return !empty( $r );
+						})->values()->map(function( $sub ) use ( $judger_id ) {
+							$r = $sub->results->where('judger_id', $judger_id)->values()->first();
+							$o = new stdClass;
+							$o->id = $sub->id;
+							$o->name = $sub->name;
+							$o->weight = $sub->weight;
+							$o->score = $r->given_score;
+							$o->max = $r->max;
+							$o->comment = $r->comment;
+							$o->status = $r->status;
+							$o->value = ( $r->given_score / $r->max ) * $sub->weight;
+							return $o;
+						});
+
+						$o = new stdClass;
+						$o->id = $item->id;
+						$o->name = $item->name;
+						$o->weight = $item->weight;
+						$o->score = round( $subDetails->sum('value') * 100 ) / 100;
+						$o->value = ( round( ( $o->score * $o->weight ) * 100 ) / 100 );
+						$o->details = $subDetails;
+						return $o;
+					});
+
+					$comment = $customFields->where('judger_id', $judger_id)->where('field', 'final_comment')->first();
+					$hasResults = $details->contains(function( $d ) { return $d->details->isNotEmpty(); });
+
+					$evaluation = new stdClass;
+					$evaluation->id = $company_id;
+					$evaluation->status = $hasResults ? 'Published' : 'Not Evaluated';
+					$evaluation->value = ( round( $details->sum('value') * 100 ) / 100 );
+					$evaluation->comment = !empty( $comment ) ? $comment->value : '';
+					$evaluation->approval = !empty( $comment ) ? $comment->approval : 'pending';
+					$evaluation->details = $details;
+					$out->evaluation = $evaluation;
+
+					$out->form_comments = $formCommentsByJudge->get($judger_id, collect())->map(function( $c ) {
+						return (object)[
+							'question' => $c->question,
+							'comment' => $c->comment,
+						];
+					})->values();
+					return $out;
+				});
+			}
+
 			$output[$company_id] = [
 				'total' => ( ( round( $_criteria->sum('value') * 100 ) ) / 100),
 				'criteria' => $_criteria,

@@ -236,28 +236,47 @@ class ClientCompanyController extends Controller
         $compoundAnnualGrowthRate = $records_metadata['compoundAnnualGrowthRate'];
 
         $programs = collect();
+        $avgFinalScreenings = collect([]);
 
         $cycle = Cycle::with(['steps', 'organization'])->find($company->cycle);
-        if ($cycle) {
+        if( $cycle )
+        {
             $currentScreeningScore = null;
             $screenSteps = Step::where('cycle_id', $cycle->id)->where('stype', 2)->pluck('id');
-            if ($screenSteps->isNotEmpty()) {
-                $screenEvals = ScreeningEvaluation::whereIn('step_id', $screenSteps)->pluck('id');
+            if( $screenSteps->isNotEmpty() )
+            {
+                $screening_details = ScreeningEvaluationResults::results( $screenSteps->first(), [$company->id] )[$company->id];
+
+                /* $screenEvals = ScreeningEvaluation::whereIn('step_id', $screenSteps)->pluck('id');
                 if ($screenEvals->isNotEmpty()) {
                     $screenResults = ScreeningEvaluationResults::whereIn('evaluation_id', $screenEvals)
                         ->where('company_id', $company->id)->get();
                     $currentScreeningScore = $screenResults->isNotEmpty() ? round($screenResults->avg('score'), 2) : null;
+                } */
+
+                if( !empty( $screening_details ) )
+                {
+                    $currentScreeningScore = $screening_details['total'] * 100;
                 }
             }
 
             $currentFinalScoreForProgram = null;
             $finalStepsForProgram = Step::where('cycle_id', $cycle->id)->where('stype', 5)->pluck('id');
-            if ($finalStepsForProgram->isNotEmpty()) {
-                $finalEvalsForProgram = ScreeningEvaluation::whereIn('step_id', $finalStepsForProgram)->pluck('id');
-                if ($finalEvalsForProgram->isNotEmpty()) {
+            if( $finalStepsForProgram->isNotEmpty() )
+            {
+                $final_screening_details = ScreeningEvaluationResults::results( $finalStepsForProgram->first(), [$company->id] )[$company->id];
+
+                /* $finalEvalsForProgram = ScreeningEvaluation::whereIn('step_id', $finalStepsForProgram)->pluck('id');
+                 if ($finalEvalsForProgram->isNotEmpty()) {
                     $finalResultsForProgram = ScreeningEvaluationResults::whereIn('evaluation_id', $finalEvalsForProgram)
                         ->where('company_id', $company->id)->get();
                     $currentFinalScoreForProgram = $finalResultsForProgram->isNotEmpty() ? round($finalResultsForProgram->avg('score'), 2) : null;
+                } */
+
+                if( !empty( $final_screening_details ) )
+                {
+                    $currentFinalScoreForProgram = $final_screening_details['total'] * 100;
+                    $avgFinalScreenings->push( $final_screening_details );
                 }
             }
 
@@ -292,6 +311,7 @@ class ClientCompanyController extends Controller
                 'rank' => null,
                 'final_screening_score' => $currentFinalScoreForProgram,
                 'status' => $cycleStatus,
+                'program_type' => 'running'
             ]);
         }
         $almunies = Almuni::where('company_id', $company->id)->with(['cycle', 'cycle.steps', 'cycle.organization'])->get();
@@ -323,19 +343,32 @@ class ClientCompanyController extends Controller
                 $almuniCycle = $almuni->cycle;
                 $custom_form = $almuniCycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
                 $submissions = Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first();
-                if ($almuniCycle) {
+                if ($almuniCycle)
+                {
                     $almuniScreeningScore = null;
-                    if (!empty($almuni->screening)) {
-                        $screenArr = is_array($almuni->screening) ? $almuni->screening : json_decode($almuni->screening, true);
+                    if( !empty( $almuni->screening ) )
+                    {
+                        $screening_details = ScreeningEvaluationResults::results( $almuni->screening_data[0]->step_id, [$company->id] )[$company->id];
+                        /* $screenArr = is_array($almuni->screening) ? $almuni->screening : json_decode($almuni->screening, true);
                         $sScores = collect($screenArr ?? [])->pluck('overall_score')->filter();
-                        $almuniScreeningScore = $sScores->isNotEmpty() ? round($sScores->avg(), 2) : null;
+                        $almuniScreeningScore = $sScores->isNotEmpty() ? round($sScores->avg(), 2) : null; */
+
+                        $almuniScreeningScore = $screening_details ? $screening_details['total'] * 100 : null;
                     }
 
                     $alumniFinalScore = null;
-                    if (!empty($almuni->final_screening)) {
-                        $fsArr = is_array($almuni->final_screening) ? $almuni->final_screening : json_decode($almuni->final_screening, true);
+                    if( !empty( $almuni->final_screening ) )
+                    {
+                        $final_screening_details = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]->step_id, [$company->id] )[$company->id];
+                        if( !empty( $final_screening_details ) )
+                        {
+                            $avgFinalScreenings->push( $final_screening_details );
+                        }
+                        /* $fsArr = is_array($almuni->final_screening) ? $almuni->final_screening : json_decode($almuni->final_screening, true);
                         $fsScores = collect($fsArr ?? [])->pluck('overall_score')->filter();
-                        $alumniFinalScore = $fsScores->isNotEmpty() ? round($fsScores->avg(), 2) : null;
+                        $alumniFinalScore = $fsScores->isNotEmpty() ? round($fsScores->avg(), 2) : null; */
+
+                        $alumniFinalScore = $final_screening_details ? $final_screening_details['total'] * 100 : null;
                     }
 
                     // Formdata
@@ -352,6 +385,7 @@ class ClientCompanyController extends Controller
                         'rank'                  => null,
                         'final_screening_score' => $alumniFinalScore,
                         'status'                => 'completed',
+                        'program_type'          => 'alumni'
                     ]);
                     continue;
                 }
@@ -436,6 +470,7 @@ class ClientCompanyController extends Controller
             }
         }
 
+        /*
         // Get alumni final screening scores
         $alumniScores = collect();
         foreach ($almunies as $almuni) {
@@ -461,8 +496,9 @@ class ClientCompanyController extends Controller
             $allScores = $allScores->merge($alumniScores);
         }
 
-        $avgFinalScreening = $allScores->isNotEmpty() ? round($allScores->avg(), 2) : 0;
+        $avgFinalScreening = $allScores->isNotEmpty() ? round($allScores->avg(), 2) : 0;  */
 
+        $avgFinalScreening = $avgFinalScreenings->avg('total') * 100 . '%';
         // Calculate avgAttendanceRate from mentorship sessions only
         $currentMentorships = collect();
         if ($company->cycledata) {
@@ -503,7 +539,7 @@ class ClientCompanyController extends Controller
             'totalMentorshipHours' => $totalMentorshipHours,
             'totalTrainingHours'   => $totalMentorshipHoursTraining,
             'avgFinalScreening'    => $avgFinalScreening,
-            'avgAttendanceRate'    => $avgAttendanceRate,
+            'avgAttendanceRate'    => $avgAttendanceRate . '%',
         ];
         // Financial Projection
         $availableValuationDates = FinancialProjection::where('company_id', $company->id)
@@ -3363,8 +3399,7 @@ class ClientCompanyController extends Controller
 
     public function companyAlumni(Request $request, $id, $cycle_id)
     {
-       
-        $almuni = Almuni::where('cycle_id', $cycle_id)->where('company_id', $id)->first();
+        $almuni = Almuni::where('cycle_id', $cycle_id)->where('company_id', $id)->with(['company'])->first();
         if(empty($almuni)){
             return redirect()->back()->with('error', 'Alumni not found');
         }
@@ -3389,14 +3424,22 @@ class ClientCompanyController extends Controller
         $surveys     = $this->decodeAlumniJson($almuni?->surveys);
         $services    = $this->decodeAlumniJson($almuni?->services);
 
+        $company = $almuni->company;
+        $screeningResultsData = ScreeningEvaluationResults::results( $almuni->screening_data[0]->step_id, $company->id )[$company->id];
+        $finalScreeningResultsData = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]->step_id, $company->id )[$company->id];
+
         // ── Stats calculations ──────────────────────────────────────────
         $trainingTotalMin   = collect($training)->sum(fn($t) => (int) ($t['duration'] ?? 0));
         $mentorshipTotalMin = collect($mentorships)->sum(fn($m) => (int) ($m['duration'] ?? 0));
         $trainingHours      = ['hours' => (int) floor($trainingTotalMin / 60),  'minutes' => $trainingTotalMin % 60];
         $mentorshipHours    = ['hours' => (int) floor($mentorshipTotalMin / 60), 'minutes' => $mentorshipTotalMin % 60];
 
-        $screeningScore      = collect($screening)->avg('overall_score') ?? 0;
-        $finalScreeningScore = collect($finalScreen)->avg('overall_score') ?? 0;
+        // $screeningScore      = collect($screening)->avg('overall_score') ?? 0;
+        // $finalScreeningScore = collect($finalScreen)->avg('overall_score') ?? 0;
+        $screeningScore      = $screeningResultsData['total'] ?? 0;
+        $finalScreeningScore = $finalScreeningResultsData['total'] ?? 0;
+        $screeningScore      = ( $screeningScore * 100 ) . '%';
+        $finalScreeningScore = ( $finalScreeningScore * 100 ) . '%';
 
         $buildScreeningPhase = function (array $phaseArray) {
             $first = collect($phaseArray)->filter(fn($e) => !empty($e['step_id']))->first();
@@ -3709,35 +3752,40 @@ class ClientCompanyController extends Controller
                 })->values()->toArray();
     
 
-        return view('admin.clients.startup.company_alumni', compact('startup',
-        'teamData',
-        'ownershipData',
-        'mentorshipData',
-        'milestones',
-        'tasks',
-        'quizzes',
-        'surveys',
-        'services',
-        'forms',
-        'legal_information',
-        'pitch_deck',
-        'training',
-        'screeningData',
-        'trainingHours',
-        'mentorshipHours',
-        'screeningScore',
-        'finalScreeningScore',
-        'attendanceRate',
-        'milestonesCompleted',
-        'milestonesCollection',
-        'quizzesPassed',
-        'quizzesCollection',
-        'avgQuizScore',
-        'surveysCompleted',
-        'surveysCollection',
-        'inKindServices',
-        'tasksCompleted',
-        'tasksCollection'));
+        return view('admin.clients.startup.company_alumni', compact(
+                'startup',
+                'teamData',
+                'ownershipData',
+                'mentorshipData',
+                'milestones',
+                'tasks',
+                'quizzes',
+                'surveys',
+                'services',
+                'forms',
+                'legal_information',
+                'pitch_deck',
+                'training',
+                'screeningData',
+                'trainingHours',
+                'mentorshipHours',
+                'screeningScore',
+                'finalScreeningScore',
+                'attendanceRate',
+                'milestonesCompleted',
+                'milestonesCollection',
+                'quizzesPassed',
+                'quizzesCollection',
+                'avgQuizScore',
+                'surveysCompleted',
+                'surveysCollection',
+                'inKindServices',
+                'tasksCompleted',
+                'tasksCollection',
+                'screeningResultsData',
+                'finalScreeningResultsData',
+            )
+        );
     }
 
     function decodeAlumniJson($value)
