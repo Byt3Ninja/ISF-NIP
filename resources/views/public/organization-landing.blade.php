@@ -85,25 +85,25 @@
 </head>
  
 @php
- $sections = [
-   ['id' => 'programs', 'label' => __('admin.Programs'), 'visible' => $landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0],
-   ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
-   ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
-   ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
-   ['id' => 'partners', 'label' => __('admin.Partners'), 'visible' => $landingPage->partners_enabled && !empty($partnersWithUrls)],
-  ];
+$sections = [
+  ['id' => 'programs', 'label' => __('admin.Programs'), 'visible' => $landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0],
+  ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
+  ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
+  ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
+  ['id' => 'partners', 'label' => __('admin.Partners'), 'visible' => $landingPage->partners_enabled && !empty($partnersWithUrls)],
+];
 
-  if (!empty($customSections)) {
-    foreach ($customSections as $customSection) {
-      $sections[] = [
-        'id' => 'custom-' . $customSection->id,
-        'label' => $customSection->title,
-        'visible' => !empty($customSection->content),
-      ];
-    }
+if (!empty($customSections)) {
+  foreach ($customSections as $customSection) {
+    $sections[] = [
+      'id' => 'custom-' . $customSection->id,
+      'label' => $customSection->title,
+      'visible' => !empty($customSection->content),
+    ];
   }
+}
 
-  $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
+$colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
 @endphp
 
 <body>
@@ -303,14 +303,14 @@
                 </a>
               @endif
               @php
-                $socialLinks = [
-                  'x' => $organization->twitter_handle,
-                  'linkedin' => $organization->linkedin_company_url,
-                  'facebook' => $organization->facebook_page_url,
-                  'instagram' => $organization->instagram_profile_url,
-                  'tiktok' => $organization->tiktok_url,
-                  'youtube' => $organization->youtube_channel_url
-                ]
+$socialLinks = [
+  'x' => $organization->twitter_handle,
+  'linkedin' => $organization->linkedin_company_url,
+  'facebook' => $organization->facebook_page_url,
+  'instagram' => $organization->instagram_profile_url,
+  'tiktok' => $organization->tiktok_url,
+  'youtube' => $organization->youtube_channel_url
+]
               @endphp
               @if(array_filter($socialLinks))
                 <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
@@ -484,48 +484,48 @@
 
                         {{-- Application status + CTA --}}
                         @php
-                          $firstFormStep = $program->steps()->where('stype', 1)->orderBy('arr', 'asc')->first();
+      $firstFormStep = $program->steps()->where('stype', 1)->orderBy('arr', 'asc')->first();
 
-                          if ($firstFormStep) {
-                              $stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
-                              $stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
+      if ($firstFormStep) {
+        $stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
+        $stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
 
-                              $now = now();
-                              
-                              $isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
-                              $isUpcoming = $stepStart !== null && $now->lt($stepStart);
-                              $isClosed = $stepEnd !== null && $now->gt($stepEnd);
-                          } else {
-                              $isOpen = false;
-                              $isUpcoming = false;
-                              $isClosed = true;
-                              $stepStart = null;
-                              $stepEnd = null;
-                          }
+        $now = now();
 
-                          if ($isOpen) {
-                              $statusClass = 'bg-label-success';
-                              $dotColor = 'success';
-                              $statusIcon = 'hourglass';
-                              $statusLabel = $l == 'ar'
-                                  ? "مفتوح حتى " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . "."
-                                  : "Open Till " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . ".";
-                              $btnText = $l == 'ar' ? 'تقدم الآن.' : 'Apply Now.';
-                          } elseif ($isUpcoming) {
-                              $statusClass = 'bg-label-warning';
-                              $dotColor = 'warning';
-                              $statusIcon = 'hourglass-empty';
-                              $statusLabel = $l == 'ar'
-                                  ? "سيفتح في " . ($stepStart ? $stepStart->format('Y-m-d') : '') . "."
-                                  : "Will open in " . ($stepStart ? $stepStart->format('Y-m-d') : '') . ".";
-                              $btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications Open Soon';
-                          } else {
-                              $statusClass = 'bg-label-danger';
-                              $dotColor = 'danger';
-                              $statusIcon = 'lock';
-                              $statusLabel = $l == 'ar' ? "مغلق." : "Closed.";
-                              $btnText = $l == 'ar' ? 'التقديم مغلق.' : 'Applications Closed.';
-                          }
+        $isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+        $isUpcoming = $stepStart !== null && $now->lt($stepStart);
+        $isClosed = $stepEnd !== null && $now->gt($stepEnd);
+      } else {
+        $isOpen = false;
+        $isUpcoming = false;
+        $isClosed = true;
+        $stepStart = null;
+        $stepEnd = null;
+      }
+
+      if ($isOpen) {
+        $statusClass = 'bg-label-success';
+        $dotColor = 'success';
+        $statusIcon = 'hourglass';
+        $statusLabel = $l == 'ar'
+          ? "مفتوح حتى " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . "."
+          : "Open Till " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . ".";
+        $btnText = $l == 'ar' ? 'تقدم الآن.' : 'Apply Now.';
+      } elseif ($isUpcoming) {
+        $statusClass = 'bg-label-warning';
+        $dotColor = 'warning';
+        $statusIcon = 'hourglass-empty';
+        $statusLabel = $l == 'ar'
+          ? "سيفتح في " . ($stepStart ? $stepStart->format('Y-m-d') : '') . "."
+          : "Will open in " . ($stepStart ? $stepStart->format('Y-m-d') : '') . ".";
+        $btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications Open Soon';
+      } else {
+        $statusClass = 'bg-label-danger';
+        $dotColor = 'danger';
+        $statusIcon = 'lock';
+        $statusLabel = $l == 'ar' ? "مغلق." : "Closed.";
+        $btnText = $l == 'ar' ? 'التقديم مغلق.' : 'Applications Closed.';
+      }
                         @endphp
 
                         <div class="d-flex align-items-center gap-2 mb-6">
@@ -906,9 +906,9 @@
   <section id="landingContact" class="section-py bg-body landing-contact">
     <div class="container">
       <div class="text-center mb-4">
-        <span class="badge bg-label-primary">{{ __('admin.Contact us') }}</span>
+        <span class="badge bg-label-primary">{{ __('admin.Contact') }}</span>
       </div>
-      <h4 class="text-center mb-1">
+      <h4 class="text-center mb-12">
         <span class="position-relative fw-extrabold z-1"
           >{{ __('admin.get_in_touch') }}
           <img
@@ -917,8 +917,61 @@
             class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
         </span>
       </h4>
-      <p class="text-center mb-12 pb-md-4">{{ __('admin.org_landing_contact_description') }}</p>
-      <div class="row g-6">
+      <div class="row justify-content-center">
+        <div class="col-3">
+          @if($organization->contact_email)
+            <a class="card" href="mailto:{{ $organization->contact_email }}">
+              <div class="card-body">
+                <div class="d-flex flex-column justify-content-center align-items-center">
+                  <div class="avatar avatar-lg mb-4">
+                    <div class="avatar-initial rounded-circle bg-label-primary">
+                      <i class="ti ti-mail ti-lg text-primary"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-1">{{ __('admin.Email') }}</h5>
+                  <h6 class="mb-0">{{ $organization->contact_email }}</h6>
+                </div>
+              </div>
+            </a>
+          @endif
+        </div>
+        <div class="col-3">
+          @if($organization->contact_phone)
+            <a class="card" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
+              <div class="card-body">
+                <div class="d-flex flex-column justify-content-center align-items-center">
+                  <div class="avatar avatar-lg mb-4">
+                    <div class="avatar-initial rounded-circle bg-label-primary">
+                      <i class="ti ti-phone ti-lg text-primary"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-1">{{ __('admin.Phone') }}</h5>
+                  <h6 class="mb-0">{{ $organization->country_code }}{{ $organization->contact_phone }}</h6>
+                </div>
+              </div>
+            </a>
+          @endif
+        </div>
+        <div class="col-3">
+          @if ($organization->address)
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex flex-column justify-content-center align-items-center">
+                  <div class="avatar avatar-lg mb-4">
+                    <div class="avatar-initial rounded-circle bg-label-primary">
+                      <i class="ti ti-map-pin ti-lg text-primary"></i>
+                    </div>
+                  </div>
+                  <h5 class="mb-1">{{ __('admin.Location') }}</h5>
+                  <h6 class="mb-0">{{ $organization->address }}</h6>
+                </div>
+              </div>
+            </div>
+          @endif
+        </div>
+      </div>
+      {{-- <p class="text-center mb-12 pb-md-4">{{ __('admin.org_landing_contact_description') }}</p> --}}
+      {{-- <div class="row g-6">
         <div class="col-lg-5">
           <div class="contact-img-box position-relative border p-2 h-100">
             <img
@@ -1016,7 +1069,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> --}}
     </div>
   </section>
   <!-- Contact Us: End -->
