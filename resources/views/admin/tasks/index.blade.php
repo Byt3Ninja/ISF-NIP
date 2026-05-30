@@ -105,8 +105,9 @@ window.KanbanConfig = {
     remove:        '{{ __("admin.Remove") }}',
     download:      '{{ __("admin.Download") }}',
     maxFilesReached:        '{{ __("admin.max_5_files_reached") }}',
-    invalidFileType:        '{{ __("admin.invalid_file_type") }}',
+    invalidFileType:        '{{ __("admin.Invalid_task_file_type") }}',
     exceedsSizeLimit:       '{{ __("admin.exceeds_size_limit") }}',
+    uploadFailedRetry:      '{{ __("admin.upload_failed_retry") }}',
     pleaseAddFiles:         '{{ __("admin.please_add_files") }}',
     uploading:              '{{ __("admin.uploading") }}',
     uploaded:               '{{ __("admin.uploaded") }}',
@@ -953,7 +954,7 @@ $(function () {
   // Feedback dropzone change
   $(document).on('change', '#vt-fb-dropzone-input', function () {
     const allowedTypes = ['pdf','png','jpg','jpeg','svg','zip','rar','doc','docx','xls','xlsx','ppt','pptx'];
-    const maxSize      = 10 * 1024 * 1024;
+    const maxSize      = 5 * 1024 * 1024;
     const files        = Array.from(this.files);
     const errors       = [];
 
@@ -969,7 +970,7 @@ $(function () {
         return false;
       }
       if (file.size > maxSize) {
-        errors.push(`{{ __("admin.file_exceeds_10_limit") }}`);
+        errors.push(`{{ __("admin.file_exceeds_5_limit") }}`);
         return false;
       }
       return true;
@@ -1421,6 +1422,11 @@ $(function () {
       error: xhr => toastr.error(xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}')
     });
   });
+
+  // Init dropzone for offcanvas uploads
+  if (typeof initDropzone === 'function') {
+    initDropzone(window.tasks || []);
+  }
 })();
 </script>
 @stop

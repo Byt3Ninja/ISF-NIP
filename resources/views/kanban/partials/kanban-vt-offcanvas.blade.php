@@ -268,52 +268,52 @@
 
       {{-- YOUR SUBMISSION TAB --}}
       @if (!$_user->ableTo('tasks.update', $permissions))
-      <div class="tab-pane fade p-4" id="vt-your-submission" role="tabpanel">
-        <div class="rounded-2 overflow-hidden" style="border:2px solid var(--bs-primary);">
+        <div class="tab-pane fade p-4" id="vt-your-submission" role="tabpanel">
+          <div class="rounded-2 overflow-hidden" style="border:2px solid var(--bs-primary);">
 
-          <div class="px-3 py-2 d-flex align-items-center justify-content-between bg-label-primary">
-            <span class="small fw-semibold text-primary d-flex align-items-center gap-1">
-              <i class="ti ti-send ti-xs"></i>
-              {{ __('admin.your_submission') }}
-            </span>
-            <span class="small text-dark">
-              {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 5MB {{ __('admin.each') }}
-            </span>
-          </div>
-
-          <div class="p-3">
-            <div class="mb-3" id="vt-submission-note-wrapper">
-              <label class="form-label small fw-medium" for="vt-submission-note">{{ __('admin.submission_note_label') }}</label>
-              <textarea id="vt-submission-note" class="form-control form-control-sm" rows="3"
-                placeholder="{{ __('admin.submission_note_placeholder') }}"></textarea>
-            </div>
-
-            <div id="vt-dropzone"
-                 class="border border-dashed rounded-2 p-3 text-center position-relative"
-                 style="cursor:pointer;transition:border-color .2s,background .2s;">
-              <input type="file" id="vt-dropzone-input"
-                class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
-                accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain"
-                multiple />
-              <i class="ti ti-cloud-upload ti-md text-primary mb-1 d-block"></i>
-              <p class="mb-1 small fw-medium">{{ __('admin.dropzone') }}</p>
-              <p class="mb-0 text-muted" style="font-size:.7rem;">{{ __('admin.max_5_files') }}</p>
-            </div>
-
-            <div id="vt-dropzone-queue" class="d-flex flex-column gap-2 mt-2"></div>
-
-            <div class="d-flex align-items-center justify-content-between mt-3">
-              <div class="invalid-feedback d-block small" id="vt-upload-error"></div>
-              <button type="button" class="btn btn-sm btn-primary text-nowrap px-8 ms-auto d-flex align-items-center gap-1"
-                      id="vt-dropzone-upload-btn" data-always-show="true">
+            <div class="px-3 py-2 d-flex align-items-center justify-content-between bg-label-primary">
+              <span class="small fw-semibold text-primary d-flex align-items-center gap-1">
                 <i class="ti ti-send ti-xs"></i>
-                {{ __('admin.send_submission') }}
-              </button>
+                {{ __('admin.your_submission') }}
+              </span>
+              <span class="small text-dark">
+                {{ __('admin.max') }} 5 {{ __('admin.files') ?? 'files' }} · 5MB {{ __('admin.each') }}
+              </span>
             </div>
-          </div>
 
+            <div class="p-3">
+              <div class="mb-3" id="vt-submission-note-wrapper">
+                <label class="form-label small fw-medium" for="vt-submission-note">{{ __('admin.submission_note_label') }}</label>
+                <textarea id="vt-submission-note" class="form-control form-control-sm" rows="3"
+                  placeholder="{{ __('admin.submission_note_placeholder') }}"></textarea>
+              </div>
+
+              <div id="vt-dropzone"
+                   class="border border-dashed rounded-2 p-3 text-center position-relative"
+                   style="cursor:pointer;transition:border-color .2s,background .2s;">
+                <input type="file" id="vt-dropzone-input"
+                  class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor:pointer;"
+                  accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed,text/plain"
+                  multiple />
+                <i class="ti ti-cloud-upload ti-md text-primary mb-1 d-block"></i>
+                <p class="mb-1 small fw-medium">{{ __('admin.dropzone') }}</p>
+                <p class="mb-0 text-muted" style="font-size:.7rem;">{{ __('admin.supported_files_message') }}</p>
+              </div>
+
+              <div id="vt-dropzone-queue" class="d-flex flex-column gap-2 mt-2"></div>
+
+              <div class="d-flex align-items-center justify-content-between mt-3">
+                <div class="invalid-feedback d-block small" id="vt-upload-error"></div>
+                <button type="button" class="btn btn-sm btn-primary text-nowrap px-8 ms-auto d-flex align-items-center gap-1"
+                        id="vt-dropzone-upload-btn" data-always-show="true">
+                  <i class="ti ti-send ti-xs"></i>
+                  {{ __('admin.send_submission') }}
+                </button>
+              </div>
+            </div>
+
+          </div>
         </div>
-      </div>
       @endif
 
       {{-- COMMENTS TAB (hidden) --}}

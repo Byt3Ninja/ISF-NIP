@@ -786,7 +786,7 @@ class TasksController extends Controller
             }
 
             $request->validate([
-                'attachment' => 'required|file|max:10240|mimes:jpeg,jpg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,txt,csv',
+                'attachment' => 'required|file|max:5120|mimes:jpeg,jpg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,txt,csv',
             ]);
 
             /** @var \App\User $uploader */
