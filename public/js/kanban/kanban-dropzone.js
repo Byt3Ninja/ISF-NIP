@@ -7,7 +7,7 @@
  */
 
 const DZ_MAX_FILES   = 5;
-const DZ_MAX_SIZE_MB = 5;
+const DZ_MAX_SIZE_MB = 10;
 const DZ_ACCEPT_TYPES = [
   'image/jpeg','image/jpg','image/png','image/gif','image/webp','image/svg+xml',
   'application/pdf',
@@ -22,6 +22,19 @@ const DZ_ACCEPT_TYPES = [
 ];
 
 let dzQueue = []; // { file, id }
+
+function dzToggleDisabled() {
+  const $dz   = $('#vt-dropzone');
+  const $input = $('#vt-dropzone-input');
+  const lbl   = window.KanbanConfig.labels;
+  if (dzQueue.length >= DZ_MAX_FILES) {
+    $dz.css({ opacity: '.5', cursor: 'not-allowed' });
+    $input.prop('disabled', true);
+  } else {
+    $dz.css({ opacity: '', cursor: '' });
+    $input.prop('disabled', false);
+  }
+}
 
 function dzRenderQueue() {
   const $q = $('#vt-dropzone-queue');
@@ -45,6 +58,7 @@ function dzRenderQueue() {
   if (!$('#vt-dropzone-upload-btn').data('always-show')) {
     $('#vt-dropzone-upload-btn').toggleClass('d-none', dzQueue.length === 0);
   }
+  dzToggleDisabled();
 }
 
 function dzAddFiles(files) {
@@ -54,13 +68,17 @@ function dzAddFiles(files) {
 
   Array.from(files).forEach(file => {
     if (dzQueue.length >= DZ_MAX_FILES) {
-      $error.text(lbl.maxFilesReached); return;
+      $error.text(lbl.maxFilesReached);
+      dzToggleDisabled();
+      return;
     }
     if (!DZ_ACCEPT_TYPES.includes(file.type)) {
-      $error.text(`"${file.name}" ${lbl.invalidFileType}`); return;
+      $error.text(lbl.invalidFileType);
+      return;
     }
     if (file.size > DZ_MAX_SIZE_MB * 1024 * 1024) {
-      $error.text(`"${file.name}" ${lbl.exceedsSizeLimit}`); return;
+      $error.text(lbl.exceedsSizeLimit);
+      return;
     }
     if (dzQueue.find(i => i.file.name === file.name && i.file.size === file.size)) return;
     dzQueue.push({ file, id: Date.now() + Math.random() });
@@ -160,8 +178,10 @@ function initDropzone(tasks) {
           dzQueue = dzQueue.filter(i => i.id !== item.id);
           completed++; checkDone();
         },
-        error: function () {
+        error: function (xhr) {
           $(`#dzq-${item.id} .dz-progress-bar`).css({ width: '100%', background: 'var(--bs-danger)' });
+          const serverMsg = xhr.responseJSON?.message || xhr.responseJSON?.errors?.attachment?.[0];
+          $('#vt-upload-error').text(serverMsg || lbl.uploadFailedRetry || 'Upload failed. Please try again.');
           failed++; completed++; checkDone();
         }
       });
