@@ -145,8 +145,9 @@
       uploaded:                 @json(__('admin.uploaded')),
       failed:                   @json(__('admin.Failed')),
       maxFilesReached:          @json(__('admin.max_5_files_reached')),
-      invalidFileType:          @json(__('admin.Invalid_file_type')),
+      invalidFileType:          @json(__('admin.Invalid_task_file_type')),
       exceedsSizeLimit:         @json(__('admin.file_exceeds_10_limit')),
+      uploadFailedRetry:        @json(__('admin.upload_failed_retry')),
       // Comments
       noComments:     @json(__('admin.no_comments')),
       commentSuccess: @json(__('admin.comment_success')),
