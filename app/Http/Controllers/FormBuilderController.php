@@ -416,6 +416,23 @@ class FormBuilderController extends Controller
 
         $form_data = $request->form_fields_data;
 
+        // Backend validation: Do not allow saving empty sections
+        if (isset($form_data['items']) && is_array($form_data['items'])) {
+            foreach ($form_data['items'] as $item) {
+                if (($item['type'] ?? null) === 'section') {
+                    if (empty($item['questions']) || !is_array($item['questions'])) {
+                        $message = app()->getLocale() === 'ar' 
+                            ? 'لا يمكن حفظ قسم فارغ. يرجى إضافة أسئلة للقسم أو حذفه.' 
+                            : 'An empty section cannot be saved. Please add questions to the section or delete it.';
+                        return response()->json([
+                            'success' => false,
+                            'message' => $message,
+                        ], 422);
+                    }
+                }
+            }
+        }
+
         // Route parameter `{id}` is the authoritative form identifier.
         // "0" / missing means "create new"; any other value means "update that
         // specific form" (including renaming it). The old implementation
