@@ -124,4 +124,5 @@ return [
     'New_Form' => 'New Form',
     'Discard_Create' => 'Discard & Create New',
     'Unsaved_Changes_New_Form' => 'You have unsaved changes. Creating a new form will discard them.',
+    'empty_section_error' => 'An empty section cannot be saved. Please add questions to the section or delete it.',
 ];

@@ -389,6 +389,7 @@
       form_saved_successfully:      '{{ __("builder.Form_saved_successfully") }}',
       form_updated_successfully:    '{{ __("builder.Form_updated_successfully") }}',
       error_saving_form:            '{{ __("builder.Error_saving_form") }}',
+      empty_section_error:          '{{ __("builder.empty_section_error") }}',
       error_occurred:               '{{ __("builder.Error_Occurred") }}',
       /* ── modal / delete ── */
       edit_form:                    '{{ __("builder.Edit_Form") }}',
