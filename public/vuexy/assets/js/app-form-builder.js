@@ -290,10 +290,18 @@ function onQuestionZoneDrop(e) {
   e.preventDefault();
   e.stopPropagation();
   if (drag.type !== 'question' || !drag.el) return;
+
+  const sourceSection = drag.sourceList ? drag.sourceList.closest('.section-wrapper') : null;
   const targetSection = this.closest('.section-wrapper');
+
   this.insertBefore(drag.el, drag.placeholder);
   removePlaceholder();
-  reorderQuestions(targetSection);
+
+  if (sourceSection && sourceSection !== targetSection) {
+    reorderQuestions([targetSection, sourceSection]);
+  } else {
+    reorderQuestions(targetSection);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -348,13 +356,16 @@ function reorderSections() {
   }, 400);
 }
 
-function reorderQuestions(targetSection = null) {
+function reorderQuestions(targetSections = null) {
   clearTimeout(_reorderTimers.questions);
 
   _reorderTimers.questions = setTimeout(() => {
-    const sections = targetSection
-      ? [targetSection]
-      : [...document.querySelectorAll('#itemsContainer .section-wrapper')];
+    let sections;
+    if (targetSections) {
+      sections = Array.isArray(targetSections) ? targetSections : [targetSections];
+    } else {
+      sections = [...document.querySelectorAll('#itemsContainer .section-wrapper')];
+    }
 
     sections.forEach(section => {
       // Use numeric DB ids for questions (builder_fields.id).
@@ -864,6 +875,19 @@ function saveForm() {
   }
   if (!organizationId) {
     releaseWarningAlert({ message: t.organization_required });
+    return;
+  }
+
+  // Validate that no section is empty (has 0 questions)
+  let hasEmptySection = false;
+  document.querySelectorAll('#itemsContainer > .section-wrapper').forEach(wrapper => {
+    if (wrapper.querySelectorAll('.question-card').length === 0) {
+      hasEmptySection = true;
+    }
+  });
+
+  if (hasEmptySection) {
+    releaseWarningAlert({ message: t.empty_section_error });
     return;
   }
 
