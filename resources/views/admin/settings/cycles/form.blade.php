@@ -830,7 +830,9 @@
         const checkboxes = document.querySelectorAll(`input[name="${CSS.escape(input.name)}"]`);
         show = Array.from(checkboxes).some(cb => cb.checked && cb.value === '__OTHER__');
       }
-      const wrapper = document.getElementById(input.id + '_other_wrapper');
+      const wrapper = input.type === 'select-one'
+        ? document.getElementById(input.id + '_other_wrapper')
+        : input.closest('.application-question-card')?.querySelector('[id$="_other_wrapper"]');
       if (wrapper) {
         wrapper.classList.toggle('d-none', !show);
       }
@@ -852,10 +854,17 @@
       }
     });
 
+    function findOtherInput(field) {
+      if (field.type === 'select-one') {
+        return document.getElementById(field.id + '_other');
+      }
+      return field.closest('.application-question-card')?.querySelector('[id$="_other"]');
+    }
+
     form.addEventListener('submit', function (e) {
       document.querySelectorAll('select.question-logic, input[type="radio"].question-logic:checked').forEach(field => {
         if (field.value === '__OTHER__') {
-          const otherInput = document.getElementById(field.id + '_other');
+          const otherInput = findOtherInput(field);
           if (otherInput && otherInput.value.trim()) {
             const hidden = document.createElement('input');
             hidden.type = 'hidden';
@@ -868,7 +877,7 @@
       });
       document.querySelectorAll('input[type="checkbox"].question-logic:checked').forEach(cb => {
         if (cb.value === '__OTHER__') {
-          const otherInput = document.getElementById(cb.id + '_other');
+          const otherInput = findOtherInput(cb);
           if (otherInput && otherInput.value.trim()) {
             const hidden = document.createElement('input');
             hidden.type = 'hidden';
