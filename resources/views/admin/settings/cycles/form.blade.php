@@ -186,6 +186,22 @@
                                       @endforeach
                                     </select>
                                   </div>
+                                  <div id="{{ $fieldId }}_other_wrapper" class="mt-2 {{ old($fieldName) === '__OTHER__' ? '' : 'd-none' }}">
+                                    <div class="input-group">
+                                      <span class="input-group-text bg-label-primary border-end-0">
+                                        <i class="ti ti-edit"></i>
+                                      </span>
+                                      <input
+                                        type="text"
+                                        class="form-control other-field"
+                                        name="{{ $fieldName }}_other"
+                                        id="{{ $fieldId }}_other"
+                                        placeholder="{{ __('builder.Other_value') }}"
+                                        value="{{ old($fieldName . '_other') }}"
+                                        {{ $isReadOnly ? 'disabled' : '' }}
+                                      />
+                                    </div>
+                                  </div>
                                   @break
 
                                 @case('paragraph')
@@ -220,6 +236,22 @@
                                         </label>
                                       </div>
                                     @endforeach
+                                    <div id="{{ $fieldId }}_other_wrapper" class="mt-2 {{ old($fieldName) === '__OTHER__' ? '' : 'd-none' }}">
+                                      <div class="input-group">
+                                        <span class="input-group-text bg-label-primary border-end-0">
+                                          <i class="ti ti-edit"></i>
+                                        </span>
+                                        <input
+                                          type="text"
+                                          class="form-control other-field"
+                                          name="{{ $fieldName }}_other"
+                                          id="{{ $fieldId }}_other"
+                                          placeholder="{{ __('builder.Other_value') }}"
+                                          value="{{ old($fieldName . '_other') }}"
+                                          {{ $isReadOnly ? 'disabled' : '' }}
+                                        />
+                                      </div>
+                                    </div>
                                   </div>
                                   @break
 
@@ -243,6 +275,22 @@
                                         </label>
                                       </div>
                                     @endforeach
+                                    <div id="{{ $fieldId }}_other_wrapper" class="mt-2 d-none">
+                                      <div class="input-group">
+                                        <span class="input-group-text bg-label-primary border-end-0">
+                                          <i class="ti ti-edit"></i>
+                                        </span>
+                                        <input
+                                          type="text"
+                                          class="form-control other-field"
+                                          name="{{ $fieldName }}_other"
+                                          id="{{ $fieldId }}_other"
+                                          placeholder="{{ __('builder.Other_value') }}"
+                                          value="{{ old($fieldName . '_other') }}"
+                                          {{ $isReadOnly ? 'disabled' : '' }}
+                                        />
+                                      </div>
+                                    </div>
                                   </div>
                                   @break
 
@@ -770,6 +818,68 @@
         }, 600);
       }
     }
+
+    function toggleOtherField(input) {
+      let show = false;
+      if (input.type === 'select-one') {
+        show = input.value === '__OTHER__';
+      } else if (input.type === 'radio') {
+        const checked = document.querySelector(`input[name="${CSS.escape(input.name)}"]:checked`);
+        show = checked && checked.value === '__OTHER__';
+      } else if (input.type === 'checkbox') {
+        const checkboxes = document.querySelectorAll(`input[name="${CSS.escape(input.name)}"]`);
+        show = Array.from(checkboxes).some(cb => cb.checked && cb.value === '__OTHER__');
+      }
+      const wrapper = document.getElementById(input.id + '_other_wrapper');
+      if (wrapper) {
+        wrapper.classList.toggle('d-none', !show);
+      }
+    }
+
+    document.querySelectorAll('.question-logic').forEach(input => {
+      if (['select-one', 'radio', 'checkbox'].includes(input.type)) {
+        toggleOtherField(input);
+      }
+    });
+
+    document.addEventListener('change', function (e) {
+      if (e.target.matches('.question-logic')) {
+        if (e.target.type === 'radio') {
+          document.querySelectorAll(`input[name="${CSS.escape(e.target.name)}"]`).forEach(r => toggleOtherField(r));
+        } else {
+          toggleOtherField(e.target);
+        }
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      document.querySelectorAll('select.question-logic, input[type="radio"].question-logic:checked').forEach(field => {
+        if (field.value === '__OTHER__') {
+          const otherInput = document.getElementById(field.id + '_other');
+          if (otherInput && otherInput.value.trim()) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = field.name;
+            hidden.value = otherInput.value.trim();
+            form.appendChild(hidden);
+            field.disabled = true;
+          }
+        }
+      });
+      document.querySelectorAll('input[type="checkbox"].question-logic:checked').forEach(cb => {
+        if (cb.value === '__OTHER__') {
+          const otherInput = document.getElementById(cb.id + '_other');
+          if (otherInput && otherInput.value.trim()) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = cb.name;
+            hidden.value = otherInput.value.trim();
+            form.appendChild(hidden);
+            cb.disabled = true;
+          }
+        }
+      });
+    });
 
     logicInputs.forEach(input => {
       input.addEventListener("change", function () {

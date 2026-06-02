@@ -417,7 +417,7 @@ class MentorshipTaskController extends Controller
 				'label'  => __('admin.Submissions') ?? 'Submissions',
 				'badge'  => ['id' => 'vt-submissions-count', 'class' => 'bg-label-warning'],
 				'active' => false,
-				'show'=> auth()->user()->hasAnyRole(['admin', 'subadmin', 'organizationManager']),
+				'show'=> auth()->user()->hasAnyRole(['admin', 'subadmin', 'organizationManager', 'registered']),
 			],
 			[
 				'target' => '#vt-feedback',
