@@ -1198,6 +1198,7 @@ class ClientCompanyController extends Controller
                 $request->validate([
                     'Currency' => 'nullable',
                     'pre_money_valuation' => 'nullable|numeric|min:0',
+                    'financial_plan_description' => 'nullable|max:255',
                     'raised_fund' => 'nullable|numeric|min:0',
                     'Funding_Target' => 'nullable|numeric|min:0',
                     'stage' => 'nullable',
@@ -1209,6 +1210,7 @@ class ClientCompanyController extends Controller
                     'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
                     'raised_fund.numeric' => __('admin.Raised fund must be a number'),
                     'raised_fund.min' => __('admin.Raised fund must be a positive number'),
+                    'financial_plan_description.max' => __('admin.financial_plan_description max length is 255 characters'),
                 ]);
 
                 $data['Funding_Target'] = $data['Funding_Target'] == null ? 0 : $data['Funding_Target'];

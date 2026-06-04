@@ -196,6 +196,7 @@
                           <textarea
                           oninput="this.value = this.value.trimStart()"
                            class="form-control"
+                           maxlength="255"
                           id="financial_plan_description" placeholder="{{ __('admin.financial_plan_description') }}" name="financial_plan_description" autocomplete="financial_plan_description">{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
                       </div>
                     </div>
