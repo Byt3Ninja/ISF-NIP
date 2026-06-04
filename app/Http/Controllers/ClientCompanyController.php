@@ -1741,12 +1741,16 @@ class ClientCompanyController extends Controller
                         // try find existing technology by name (case-insensitive)
                         $existing = Technology::whereRaw('LOWER(name) = ?', [mb_strtolower($tag)])->first();
                         if ($existing) {
-                            $techIds[] = $existing->id;
+                            if( !in_array($existing->id, $techIds) ) {
+                                $techIds[] = $existing->id;
+                            }
                         } else {
                             $newTech = new Technology();
                             $newTech->name = $tag;
                             $newTech->save();
-                            $techIds[] = $newTech->id;
+                            if( !in_array($newTech->id, $techIds) ) {
+                                $techIds[] = $newTech->id;
+                            }
                         }
                     }
                 }
@@ -1832,6 +1836,7 @@ class ClientCompanyController extends Controller
                                 'user_id' => $user->id,
                                 'industry_id' => $industryId,
                                 'sector_id' => $sectorId,
+                                'technology_id' => null,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
                             ];
@@ -1867,6 +1872,7 @@ class ClientCompanyController extends Controller
                                 'company_id' => $result->id,
                                 'user_id' => $user->id,
                                 'industry_id' => $industryId,
+                                'sector_id' => null,
                                 'technology_id' => $techId,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
