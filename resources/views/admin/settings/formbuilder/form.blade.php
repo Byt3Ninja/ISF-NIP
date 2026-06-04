@@ -442,8 +442,8 @@
 
                     <div class="d-flex flex-column flex-sm-row gap-2">
                       @if(auth()->user()->hasAnyRole('registered'))
-                        <button type="submit" class="btn btn-primary btn-lg">
-                          <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }}
+                        <button type="button" class="btn btn-primary btn-lg" disabled>
+                          <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }} {{ $l == 'en' ? '(Preview)' : '(معاينة)' }}
                         </button>
                       @endif
                       <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
@@ -476,7 +476,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('applicationPreviewForm');
-    const submitMode = 'native';
 
     if (!form || typeof FormValidation === 'undefined') {
       return;
@@ -518,7 +517,6 @@
     const t = translations[locale];
     const fields = {};
     const processedNames = new Set();
-    let isSubmitting = false;
 
     const getLabel = field => {
       const questionCard = field.closest('.application-question-card');
@@ -637,8 +635,6 @@
       return;
     }
 
-    const hasFileField = form.querySelector('input[type="file"]') !== null;
-
     const pluginConfig = {
       trigger: new FormValidation.plugins.Trigger(),
       bootstrap5: new FormValidation.plugins.Bootstrap5({
@@ -649,11 +645,6 @@
       submitButton: new FormValidation.plugins.SubmitButton(),
       autoFocus: new FormValidation.plugins.AutoFocus()
     };
-    // Only auto-submit when there are no file fields. With file fields we
-    // intercept with a confirmation dialog below (all-or-nothing submission).
-    if (!hasFileField) {
-      pluginConfig.defaultSubmit = new FormValidation.plugins.DefaultSubmit();
-    }
 
     const fv = FormValidation.formValidation(form, {
       fields,
@@ -701,18 +692,6 @@
       });
     });
 
-    // All-or-nothing submit confirmation for forms containing file uploads.
-    // Files cannot be repopulated by `old()` after a failed submission, so we
-    // warn the user once upfront: either the submission completes fully, or
-    // they cancel and nothing is sent.
-    if (hasFileField) {
-      fv.on('core.form.valid', function () {
-        const ok = window.confirm(t.confirm_submit_title + '\n\n' + t.confirm_submit_message);
-        if (ok) {
-          HTMLFormElement.prototype.submit.call(form);
-        }
-      });
-    }
   });
 </script>
 
@@ -823,18 +802,11 @@
       }
 
       if (next === "submit") {
-        const form = document.getElementById("applicationPreviewForm");
-        if (form) {
-          if (form.querySelector('input[type="file"]')) {
-            var locale = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-            var msg = locale === 'ar'
-              ? 'بمجرد الإرسال، لا يمكن استرجاع الملفات المرفوعة تلقائياً في حال حدوث خطأ من الخادم. ستحتاج إلى إعادة إرفاقها. هل تريد المتابعة؟'
-              : 'Once you submit, uploaded files cannot be recovered automatically if a server-side error occurs. You will need to re-attach them. Continue?';
-            if (!window.confirm(msg)) return;
-            HTMLFormElement.prototype.submit.call(form);
-          } else {
-            form.submit();
-          }
+        // Preview mode – show the submit step instead of actually submitting
+        sections.forEach(function (s) { s.style.display = "none"; });
+        if (submitStep) {
+          submitStep.style.display = "block";
+          submitStep.scrollIntoView({ behavior: "smooth", block: "start" });
         }
         return;
       }
