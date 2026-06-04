@@ -88,7 +88,6 @@
               @csrf
               <input type="hidden" name="builder_form_id" value="{{ $id }}" />
               <input type="hidden" name="field_ids" value="{{ $fieldIds }}" />
-
               @foreach($form['build_data'] as $sectionIndex => $section)
                 <div class="section-wrapper" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
                   <div class="card border shadow-sm overflow-hidden">
@@ -756,14 +755,6 @@
       return logic;
     }
 
-    function getNextSectionIndex(currentIndex, logic) {
-      if (logic === "submit") return "submit";
-      if (logic.startsWith("section-")) {
-        return parseInt(logic.replace("section-", ""));
-      }
-      return currentIndex + 1;
-    }
-
     function updateNavButton(section) {
       const nextBtn = section.querySelector(".btn-next");
       if (!nextBtn) return;
@@ -812,7 +803,24 @@
     function doNavigate(currentSection) {
       const logic = getNextLogic(currentSection);
       const currentIndex = parseInt(currentSection.dataset.sectionId);
-      const next = getNextSectionIndex(currentIndex, logic);
+
+      let next;
+      if (logic === "submit") {
+        next = "submit";
+      } else if (logic.startsWith("section-")) {
+        var targetId = parseInt(logic.replace("section-", ""));
+        // Same guards as old updateFormVisibility: must be forward, not visited, valid
+        if (!sectionHistory.includes(targetId) && targetId > currentIndex && sections[targetId]) {
+          next = targetId;
+        } else if (sections[currentIndex + 1]) {
+          next = currentIndex + 1;
+        } else {
+          next = "submit";
+        }
+      } else {
+        // continue – next sequential
+        next = sections[currentIndex + 1] ? currentIndex + 1 : "submit";
+      }
 
       if (next === "submit") {
         const form = document.getElementById("applicationPreviewForm");
@@ -831,7 +839,7 @@
         return;
       }
 
-      if (next >= 0 && next < sections.length && !sectionHistory.includes(next)) {
+      if (!sectionHistory.includes(next)) {
         sectionHistory.push(next);
       }
 
@@ -866,12 +874,32 @@
       showSection(0);
     }
 
-    // Update button text when selections change
+    function hasConfiguredLogic(input) {
+      if (input.tagName === "SELECT") {
+        return Array.from(input.options).some(function (opt) {
+          return opt.dataset.logic && opt.dataset.logic !== "continue";
+        });
+      }
+      if (input.type === "radio" || input.type === "checkbox") {
+        var group = document.querySelectorAll('[name="' + input.name.replace(/"/g, '\\"') + '"]');
+        return Array.from(group).some(function (el) {
+          return el.dataset.logic && el.dataset.logic !== "continue";
+        });
+      }
+      return false;
+    }
+
+    // Auto-navigate when a conditional-logic input changes
     logicInputs.forEach(function (input) {
       input.addEventListener("change", function () {
         var section = this.closest(".section-wrapper");
-        if (section && section.style.display !== "none") {
-          updateNavButton(section);
+        if (!section || section.style.display === "none") return;
+
+        updateNavButton(section);
+
+        if (hasConfiguredLogic(this)) {
+          // Auto-advance without validation (matches old show/hide behaviour)
+          doNavigate(section);
         }
       });
     });
