@@ -920,6 +920,7 @@ return [
 	'Raised fund is required' => 'Raised fund is required',
 	'Raised fund must be a number' => 'Raised fund must be a number',
 	'Raised fund must be a positive number' => 'Raised fund must be a positive number',
+	'financial_plan_description max length is 255 characters' => 'Financial plan description must not exceed 255 characters.',
 	'Stage is required' => 'Stage is required',
 	'Invalid stage' => 'Invalid stage',
 	'Targeted market is required' => 'Targeted market is required',
