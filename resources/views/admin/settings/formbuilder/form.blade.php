@@ -88,7 +88,6 @@
               @csrf
               <input type="hidden" name="builder_form_id" value="{{ $id }}" />
               <input type="hidden" name="field_ids" value="{{ $fieldIds }}" />
-
               @foreach($form['build_data'] as $sectionIndex => $section)
                 <div class="section-wrapper" data-section-logic="{{ $section['logic'] ?? 'continue' }}" data-section-id="{{ $sectionIndex }}">
                   <div class="card border shadow-sm overflow-hidden">
@@ -406,6 +405,23 @@
                         @endforeach
                       </div>
                     </div>
+
+                    <div class="card-footer border-top bg-body px-4 px-lg-5 py-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                          {{ $sectionIndex + 1 }} / {{ count($form['build_data']) }} {{ $l == 'en' ? 'Sections' : 'اقسام' }}
+                        </div>
+                        <div class="d-flex gap-2">
+                          <button type="button" class="btn btn-outline-secondary btn-prev d-none" data-section-id="{{ $sectionIndex }}">
+                            <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
+                          </button>
+                          <button type="button" class="btn btn-primary btn-next" data-section-id="{{ $sectionIndex }}">
+                            <span class="btn-next-text">{{ $l == 'en' ? 'Next' : 'التالي' }}</span>
+                            <i class="ti ti-arrow-right ms-2 btn-next-icon"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               @endforeach
@@ -643,6 +659,7 @@
       fields,
       plugins: pluginConfig,
       init: instance => {
+        window._formValidation = fv;
         instance.on('plugins.message.placed', function (e) {
           if (e.element.closest('.application-field-control')) {
             e.element.closest('.application-field-control').insertAdjacentElement('afterend', e.messageElement);
@@ -707,125 +724,201 @@
     const sections = document.querySelectorAll(".section-wrapper");
     const submitStep = document.getElementById("submit-step");
     const logicInputs = document.querySelectorAll(".question-logic");
+    const nextBtns = document.querySelectorAll(".btn-next");
+    const prevBtns = document.querySelectorAll(".btn-prev");
+    const sectionHistory = [0];
 
-    function updateFormVisibility() {
-      // 1. Hide everything initially
-      sections.forEach(s => s.style.display = "none");
-      if (submitStep) submitStep.style.display = "none";
+    function getNextLogic(section) {
+      let logic = "continue";
+      const inputs = section.querySelectorAll(".question-logic");
 
-      // 2. Start from Section 1 (index 0)
-      let currentPath = [0];
-      let reachedEnd = false;
-
-      // 3. Follow the logic
-      for (let i = 0; i < currentPath.length; i++) {
-        const idx = currentPath[i];
-        const section = sections[idx];
-        if (!section) continue;
-
-        section.style.display = "block";
-
-        // Check if there is any question in the current section that has conditional routing configured.
-        // If such a question exists, we need to check if the user has selected/checked any option.
-        // If they have not selected anything yet, we must STOP here and not continue to subsequent sections!
-        let hasUnansweredConditionalQuestion = false;
-
-        const dropdowns = section.querySelectorAll("select.question-logic");
-        dropdowns.forEach(select => {
-          const options = Array.from(select.options);
-          const isConditional = options.some(opt => opt.value && opt.dataset.logic && opt.dataset.logic !== "continue");
-          if (isConditional && !select.value) {
-            hasUnansweredConditionalQuestion = true;
-          }
-        });
-
-        const radios = section.querySelectorAll("input[type='radio'].question-logic");
-        const radioGroups = {};
-        radios.forEach(radio => {
-          if (!radioGroups[radio.name]) radioGroups[radio.name] = [];
-          radioGroups[radio.name].push(radio);
-        });
-
-        for (const groupName in radioGroups) {
-          const group = radioGroups[groupName];
-          const isConditional = group.some(radio => radio.dataset.logic && radio.dataset.logic !== "continue");
-          if (isConditional) {
-            const hasChecked = group.some(radio => radio.checked);
-            if (!hasChecked) {
-              hasUnansweredConditionalQuestion = true;
-            }
-          }
+      inputs.forEach(input => {
+        let questionLogic = "continue";
+        if (input.tagName === "SELECT") {
+          const selectedOption = input.options[input.selectedIndex];
+          questionLogic = selectedOption ? (selectedOption.dataset.logic || "continue") : "continue";
+        } else if (input.type === "radio" && input.checked) {
+          questionLogic = input.dataset.logic || "continue";
+        } else if (input.type === "checkbox" && input.checked) {
+          const jumpLogic = input.dataset.logic || "continue";
+          if (jumpLogic !== "continue") questionLogic = jumpLogic;
         }
-
-        if (hasUnansweredConditionalQuestion) {
-          // Stop here! Hide any further sections until answered.
-          break;
+        if (questionLogic !== "continue") {
+          logic = questionLogic;
         }
+      });
 
-        // Determine next step based on question logic within this section
-        let logic = "continue";
-        const inputs = section.querySelectorAll(".question-logic");
-        
-        // Strategy: The last logical jump found in the section's selected options wins.
-        // If no question-level logic is found, we fall back to the section's own logic.
-        inputs.forEach(input => {
-          let questionLogic = "continue";
-          if (input.tagName === "SELECT") {
-            const selectedOption = input.options[input.selectedIndex];
-            questionLogic = selectedOption ? (selectedOption.dataset.logic || "continue") : "continue";
-          } else if (input.type === "radio" && input.checked) {
-            questionLogic = input.dataset.logic || "continue";
-          } else if (input.type === "checkbox" && input.checked) {
-            const jumpLogic = input.dataset.logic || "continue";
-            if (jumpLogic !== "continue") questionLogic = jumpLogic;
-          }
-          
-          if (questionLogic !== "continue") {
-            logic = questionLogic;
-          }
-        });
-
-        if (logic === "continue") {
-          logic = section.dataset.sectionLogic || "continue";
-        }
-
-        if (logic === "submit") {
-          reachedEnd = true;
-          break;
-        } else if (logic.startsWith("section-")) {
-          const targetId = parseInt(logic.replace("section-", ""));
-          // To avoid loops and ensure forward progress
-          if (!currentPath.includes(targetId) && targetId > idx && sections[targetId]) {
-            currentPath.push(targetId);
-          } else {
-            // Fallback: if invalid/backward jump, just continue to next or end
-            if (sections[idx + 1]) {
-              currentPath.push(idx + 1);
-            } else {
-              reachedEnd = true;
-            }
-          }
-        } else {
-          // continue logic
-          if (sections[idx + 1]) {
-            currentPath.push(idx + 1);
-          } else {
-            reachedEnd = true;
-          }
-        }
+      if (logic === "continue") {
+        logic = section.dataset.sectionLogic || "continue";
       }
 
-      if (reachedEnd && submitStep) {
-        submitStep.style.display = "block";
+      return logic;
+    }
+
+    function updateNavButton(section) {
+      const nextBtn = section.querySelector(".btn-next");
+      if (!nextBtn) return;
+
+      const logic = getNextLogic(section);
+      const textSpan = nextBtn.querySelector(".btn-next-text");
+      const iconSpan = nextBtn.querySelector(".btn-next-icon");
+
+      if (nextBtn.dataset.action === "submitting") return;
+
+      if (logic === "submit") {
+        if (textSpan) textSpan.textContent = "Submit";
+        if (iconSpan) iconSpan.className = "ti ti-send ms-2 btn-next-icon";
+        nextBtn.dataset.action = "submit";
+      } else {
+        if (textSpan) textSpan.textContent = "Next";
+        if (iconSpan) iconSpan.className = "ti ti-arrow-right ms-2 btn-next-icon";
+        nextBtn.dataset.action = "next";
       }
     }
 
-    logicInputs.forEach(input => {
-      input.addEventListener("change", updateFormVisibility);
+    function showSection(index) {
+      sections.forEach(s => { s.style.display = "none"; });
+      if (submitStep) submitStep.style.display = "none";
+
+      if (index === "submit" || index < 0 || index >= sections.length) {
+        if (submitStep) {
+          submitStep.style.display = "block";
+          submitStep.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+
+      const section = sections[index];
+      section.style.display = "block";
+      updateNavButton(section);
+
+      const prevBtn = section.querySelector(".btn-prev");
+      if (prevBtn) {
+        prevBtn.classList.toggle("d-none", sectionHistory.length <= 1);
+      }
+
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function doNavigate(currentSection) {
+      const logic = getNextLogic(currentSection);
+      const currentIndex = parseInt(currentSection.dataset.sectionId);
+
+      let next;
+      if (logic === "submit") {
+        next = "submit";
+      } else if (logic.startsWith("section-")) {
+        var targetId = parseInt(logic.replace("section-", ""));
+        // Same guards as old updateFormVisibility: must be forward, not visited, valid
+        if (!sectionHistory.includes(targetId) && targetId > currentIndex && sections[targetId]) {
+          next = targetId;
+        } else if (sections[currentIndex + 1]) {
+          next = currentIndex + 1;
+        } else {
+          next = "submit";
+        }
+      } else {
+        // continue – next sequential
+        next = sections[currentIndex + 1] ? currentIndex + 1 : "submit";
+      }
+
+      if (next === "submit") {
+        const form = document.getElementById("applicationPreviewForm");
+        if (form) {
+          if (form.querySelector('input[type="file"]')) {
+            var locale = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+            var msg = locale === 'ar'
+              ? 'بمجرد الإرسال، لا يمكن استرجاع الملفات المرفوعة تلقائياً في حال حدوث خطأ من الخادم. ستحتاج إلى إعادة إرفاقها. هل تريد المتابعة؟'
+              : 'Once you submit, uploaded files cannot be recovered automatically if a server-side error occurs. You will need to re-attach them. Continue?';
+            if (!window.confirm(msg)) return;
+            HTMLFormElement.prototype.submit.call(form);
+          } else {
+            form.submit();
+          }
+        }
+        return;
+      }
+
+      if (!sectionHistory.includes(next)) {
+        sectionHistory.push(next);
+      }
+
+      showSection(next);
+    }
+
+    function navigateNext(currentSection) {
+      var fv = window._formValidation;
+      if (fv) {
+        fv.validate().then(function (result) {
+          if (result.valid) {
+            doNavigate(currentSection);
+          } else {
+            var firstError = currentSection.querySelector(".is-invalid");
+            if (firstError) firstError.focus();
+          }
+        });
+      } else {
+        doNavigate(currentSection);
+      }
+    }
+
+    function navigatePrev(currentSection) {
+      if (sectionHistory.length <= 1) return;
+      sectionHistory.pop();
+      var prev = sectionHistory[sectionHistory.length - 1];
+      showSection(prev);
+    }
+
+    // Initialize: show first section
+    if (sections.length > 0) {
+      showSection(0);
+    }
+
+    function hasConfiguredLogic(input) {
+      if (input.tagName === "SELECT") {
+        return Array.from(input.options).some(function (opt) {
+          return opt.dataset.logic && opt.dataset.logic !== "continue";
+        });
+      }
+      if (input.type === "radio" || input.type === "checkbox") {
+        var group = document.querySelectorAll('[name="' + input.name.replace(/"/g, '\\"') + '"]');
+        return Array.from(group).some(function (el) {
+          return el.dataset.logic && el.dataset.logic !== "continue";
+        });
+      }
+      return false;
+    }
+
+    // Auto-navigate when a conditional-logic input changes
+    logicInputs.forEach(function (input) {
+      input.addEventListener("change", function () {
+        var section = this.closest(".section-wrapper");
+        if (!section || section.style.display === "none") return;
+
+        updateNavButton(section);
+
+        if (hasConfiguredLogic(this)) {
+          // Auto-advance without validation (matches old show/hide behaviour)
+          doNavigate(section);
+        }
+      });
     });
 
-    // Initial run to respect values from old() or defaults
-    updateFormVisibility();
+    // Handle next button clicks
+    nextBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var section = this.closest(".section-wrapper");
+        if (section) navigateNext(section);
+      });
+    });
+
+    // Handle previous button clicks
+    prevBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var section = this.closest(".section-wrapper");
+        if (section) navigatePrev(section);
+      });
+    });
   });
 </script>
 @stop
