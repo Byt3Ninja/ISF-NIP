@@ -2555,6 +2555,14 @@ class HomeController extends Controller
                 ->get();
         }
         $data['milestones'] = $milestones;
+        $data['profile_completed'] = true;
+        $data['company_completed'] = true;
+
+        if( $user->hasRole('registered') )
+        {
+            $data['profile_completed'] = $profileComplete;
+            $data['company_completed'] = $startupComplete;
+        }
 
         return view('includes.dashboard', $data);
     }
