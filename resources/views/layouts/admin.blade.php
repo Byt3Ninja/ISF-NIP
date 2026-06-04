@@ -43,6 +43,10 @@
             </div>
           </div>
 
+          <!-- Profile Reminder Modal -->
+          @include('partials.profile_reminder_modal')
+          <!-- /Profile Reminder Modal -->
+
           <!-- Survey Reminder Modal -->
           @include('partials.survey_reminder_modal')
           <!-- /Survey Reminder Modal -->
