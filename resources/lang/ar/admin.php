@@ -892,6 +892,7 @@ return [
 	'Raised fund is required' => 'التمويل المرفوع مطلوب',
 	'Raised fund must be a number' => 'التمويل المرفوع يجب أن يكون رقمًا',
 	'Raised fund must be a positive number' => 'التمويل المرفوع يجب أن يكون رقمًا موجبًا',
+	'financial_plan_description max length is 255 characters' => 'وصف الخطة المالية يجب ألا يتجاوز 255 حرفًا',
 	'Stage is required' => 'المرحلة مطلوبة',
 	'Invalid stage' => 'المرحلة غير صحيحة',
 	'Targeted market is required' => 'السوق المستهدف مطلوب',
