@@ -1484,7 +1484,6 @@ return [
 	'Organization Manager English Last Name' => 'اسم العائلة لمدير المؤسسة باللغة الإنجليزية',
 	'Organization Manager Arabic Last Name' => 'اسم العائلة لمدير المؤسسة باللغة العربية',
 	'Score' => 'النقاط',
-	'all Assessments' => 'جميع التقييمات',
 	'categories' => [
 		'food_beverage' => 'الأطعمة والمشروبات',
 		'technology' => 'التكنولوجيا',
@@ -3801,6 +3800,8 @@ return [
 	'max_5_files_reached' => 'لقد وصلت إلى الحد الأقصى (5) من الملفات لهذه المهمة.',
 	'feedback_success' => 'تم إرسال الملاحظات بنجاح.',
 	'no_submissions' => 'لا توجد تقديمات بعد.',
+	'no_notes_available' => 'لا توجد ملاحظات .',
+	'no_submitted_files_available' => 'لا توجد ملفات تم تسليمها.',
 	'pending_review' => 'في انتظار المراجعة',
 	'just_now' => 'الآن',
 	'email_thank_you' => 'شكراً لاستخدامكم نظامنا!',
