@@ -161,8 +161,10 @@
       passTask:       @json(__('admin.pass_task')),
       needsRevision:  @json(__('admin.needs_revision')),
       // Submissions
-      noSubmissions:  @json(__('admin.no_submissions')),
-      pendingReview:  @json(__('admin.pending_review')),
+      noSubmissions:             @json(__('admin.no_submissions')),
+      noNotesAvailable:          @json(__('admin.no_notes_available')),
+      noSubmittedFilesAvailable: @json(__('admin.no_submitted_files_available')),
+      pendingReview:             @json(__('admin.pending_review')),
       approved:       @json(__('admin.Approved')),
       rejected:       @json(__('admin.Rejected')),
       // Activities
