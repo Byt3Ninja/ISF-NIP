@@ -3745,6 +3745,8 @@ return [
 	'max_5_files_reached' => 'You\'ve reached the maximum of 5 files for this task.',
 	'feedback_success' => 'Feedback submitted succesfully.',
 	'no_submissions' => 'No submissions yet.',
+	'no_notes_available' => 'No notes available.',
+	'no_submitted_files_available' => 'No submitted files available.',
 	'pending_review' => 'Pending Review',
 	'just_now' => 'Just Now',
 	'email_thank_you' => 'Thank you for using our system!',

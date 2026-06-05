@@ -234,11 +234,13 @@ class TasksController extends Controller
                     // Store the file
                     $path = $file->store('tasks/attachments', 'public');
                     $attachments[] = [
-                        'name'   => $file->getClientOriginalName(),
-                        'path'   => $path,
-                        'size'   => $file->getSize(),
-                        'type'   => $file->getMimeType(),
-                        'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'name'       => $file->getClientOriginalName(),
+                        'path'       => $path,
+                        'size'       => $file->getSize(),
+                        'type'       => $file->getMimeType(),
+                        'status'     => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'company_id' => $uploader->company_id,
+                        'user_id'    => $uploader->id,
                         'created_at' => now()->toDateTimeString(),
                     ];
                 }
@@ -604,11 +606,13 @@ class TasksController extends Controller
                     // Store the file
                     $path = $file->store('tasks/attachments', 'public');
                     $attachments[] = [
-                        'name'   => $file->getClientOriginalName(),
-                        'path'   => $path,
-                        'size'   => $file->getSize(),
-                        'type'   => $file->getMimeType(),
-                        'status' => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'name'       => $file->getClientOriginalName(),
+                        'path'       => $path,
+                        'size'       => $file->getSize(),
+                        'type'       => $file->getMimeType(),
+                        'status'     => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'company_id' => $uploader->company_id,
+                        'user_id'    => $uploader->id,
                         'created_at' => now()->toDateTimeString(),
                     ];
                 }
@@ -802,6 +806,8 @@ class TasksController extends Controller
                 'status'     => $uploader->hasRole('registered') ? 'submission' : 'attachment',
                 'note'       => $request->input('note', ''),
                 'batch_id'   => $request->input('batch_id', ''),
+                'company_id' => $uploader->company_id,
+                'user_id'    => $uploader->id,
                 'created_at' => now()->toDateTimeString(),
             ];
 

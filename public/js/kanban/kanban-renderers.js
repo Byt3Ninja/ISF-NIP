@@ -280,7 +280,7 @@ function renderSubmissionsList(submissions, containerSelector, assignees) {
 
                     <div class="flex-grow-1 overflow-hidden">
                       <div class="small fw-medium text-truncate">${f.name}</div>
-                      ${sz ? `<small class="text-muted">${sz}</small>` : ""}
+                      <small class="text-muted">${[sz, f.created_at ? new Date(f.created_at).toLocaleDateString() : ""].filter(Boolean).join(" · ")}</small>
                     </div>
 
                     <i class="ti ti-download text-muted flex-shrink-0"></i>
@@ -294,7 +294,7 @@ function renderSubmissionsList(submissions, containerSelector, assignees) {
           : `
           <div class="mt-3 small text-muted">
             <i class="ti ti-paperclip-off me-1"></i>
-            ${lbl.noAttachments}
+            ${lbl.noSubmittedFilesAvailable || "No submitted files available."}
           </div>
         `;
 
@@ -346,21 +346,16 @@ function renderSubmissionsList(submissions, containerSelector, assignees) {
 
             </div>
 
-            ${
-              sub.note
-                ? `
-                  <div class="mt-3">
-                    <div class="small fw-semibold text-uppercase text-muted mb-1">
-                      ${lbl.submissionNote || "Submission Note"}
-                    </div>
-
-                    <div class="bg-light-subtle rounded p-3 small text-body">
-                      ${sub.note}
-                    </div>
-                  </div>
-                `
-                : ""
-            }
+            <div class="mt-3">
+              <div class="small fw-semibold text-uppercase text-muted mb-1">
+                ${lbl.submissionNote || "Submission Note"}
+              </div>
+              ${
+                sub.note
+                  ? `<div class="bg-light-subtle rounded p-3 small text-body">${sub.note}</div>`
+                  : `<div class="bg-light-subtle rounded p-3 small text-muted fst-italic">${lbl.noNotesAvailable || "No notes available."}</div>`
+              }
+            </div>
 
             ${filesHtml}
 
