@@ -340,14 +340,14 @@ class quizzesController extends Controller
 			// 	return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
 			// }
 
-			$company = $user->company;
-			$cycleData = $company->cycledata;
+			$company = $user?->company;
+			$cycleData = $company?->cycledata;
 
 			// if( empty( $cycleData ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 
 			QuizResults::refresh_my_attempts();
-			if (!empty($cycleData->organization_id))
+			if (!empty($cycleData?->organization_id))
 			{
 				$organization_id = $cycleData->organization_id;
 				$get_step = Step::where('stype', 4)->where('cycle_id', $cycleData->id)->get();
