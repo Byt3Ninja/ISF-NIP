@@ -1093,7 +1093,7 @@ class TasksController extends Controller
                 }
             }
 
-            if($task->status == 'review') {
+            if($status == 'review') {
                 return response()->json([
                     'success' => true,
                     'message' => app()->getLocale() == 'ar'
