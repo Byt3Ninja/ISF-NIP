@@ -154,6 +154,11 @@ function initKanbanDragDrop(tasks) {
           type: "PATCH",
           contentType: "application/json",
           data: JSON.stringify({ status: newStatus }),
+          success: function (response) {
+            if (response.message) {
+              toastr.success(response.message);
+            }
+          },
           error: function (xhr) {
             if (task) task.status = oldStatus;
             $(evt.from).find("[data-empty-board]").remove();
