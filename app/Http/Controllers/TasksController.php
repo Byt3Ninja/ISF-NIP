@@ -795,6 +795,10 @@ class TasksController extends Controller
 
             /** @var \App\User $uploader */
             $uploader = auth()->user();
+
+            if ($task->status === 'completed' && $uploader->hasRole('registered')) {
+                return response()->json(['success' => false, 'message' => 'Task is already completed.'], 422);
+            }
             $file = $request->file('attachment');
             $path = $file->store('tasks/attachments', 'public');
 
