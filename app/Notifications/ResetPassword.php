@@ -3,17 +3,13 @@
 namespace App\Notifications;
 
 use App\Traits\ConfiguresSmtp;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Lang;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
-class ResetPassword extends Notification implements ShouldQueue
+class ResetPassword extends Notification
 {
-    use Queueable, ConfiguresSmtp;
+    use ConfiguresSmtp;
 
     /**
      * The password reset token.
