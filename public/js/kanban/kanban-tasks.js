@@ -196,6 +196,17 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     $('#vt-submissions-count').text(taskData.submissions_count ?? (taskData.submissions ? taskData.submissions.length : 0));
     $('#vt-activity-count').text(taskData.activities_count ?? (taskData.activities ? taskData.activities.length : 0));
 
+    // Toggle "Your Submission" tab — hidden when task is completed
+    const $ysTabBtn = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-your-submission"]');
+    const $ysPane   = $('#vt-your-submission');
+    if (taskData.status === 'completed') {
+      $ysTabBtn.addClass('d-none');
+      $ysPane.addClass('d-none');
+    } else {
+      $ysTabBtn.removeClass('d-none');
+      $ysPane.removeClass('d-none');
+    }
+
     $('#vt-edit-trigger-btn').data('task-id', taskId);
     $('#vt-upload-btn-task-id').val(taskId);
     $('#vt-send-comment-btn').data('task-id', taskId);
