@@ -117,6 +117,27 @@ class FileManagerServiceTest extends TestCase
     }
 
     /** @test */
+    public function it_rejects_blacklisted_extensions_during_upload()
+    {
+        $file = UploadedFile::fake()->create('hacked.php', 100);
+
+        $this->expectException(ValidationException::class);
+
+        $this->fileManager->upload($file, 'documents', 'public');
+    }
+
+    /** @test */
+    public function it_rejects_blacklisted_mimes_during_upload()
+    {
+        // SVG is blacklisted for stored XSS prevention
+        $file = UploadedFile::fake()->create('vector.svg', 100, 'image/svg+xml');
+
+        $this->expectException(ValidationException::class);
+
+        $this->fileManager->upload($file, 'documents', 'public');
+    }
+
+    /** @test */
     public function it_can_get_full_url_from_relative_path()
     {
         $path = 'documents/sample.pdf';

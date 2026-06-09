@@ -26,6 +26,27 @@ class FileManagerService
      */
     public function upload(UploadedFile $file, string $directory, ?string $disk = null): string
     {
+        $extension = strtolower($file->getClientOriginalExtension());
+        $mimeType = strtolower($file->getMimeType());
+
+        $blacklistedExtensions = [
+            'php', 'php3', 'php4', 'php5', 'phtml', 'phar', 'phps', 
+            'asp', 'aspx', 'jsp', 'jspx', 'exe', 'bat', 'cmd', 
+            'sh', 'bash', 'pl', 'cgi', 'py', 'html', 'htm', 'svg'
+        ];
+
+        $blacklistedMimes = [
+            'text/html', 'image/svg+xml', 'application/x-php', 'text/php', 
+            'application/x-httpd-php', 'application/x-httpd-php-source', 
+            'application/x-msdownload', 'application/x-sh'
+        ];
+
+        if (in_array($extension, $blacklistedExtensions) || in_array($mimeType, $blacklistedMimes)) {
+            $validator = Validator::make([], []);
+            $validator->errors()->add('file', 'File extension or type is not allowed for security reasons.');
+            throw new ValidationException($validator);
+        }
+
         $disk = $disk ?? config('filesystems.default');
         
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
