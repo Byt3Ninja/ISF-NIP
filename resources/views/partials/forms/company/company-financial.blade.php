@@ -222,6 +222,7 @@
               placeholder="{{ __('admin.financial_plan_description') }}"
               name="financial_plan_description"
               autocomplete="financial_plan_description"
+              maxlength="255"
             >{{ $client->company ? $client->company->financial_plan_description : old('financial_plan_description') }}</textarea>
           </div>
 

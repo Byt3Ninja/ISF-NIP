@@ -88,6 +88,8 @@ class AppServiceProvider extends ServiceProvider
             );
         });
         view()->composer('*', function ($view) use ($settings) {
+            $profile_completed = true;
+            $company_completed = true;
             if (session()->has('locale')) {
                 \App::setLocale(session()->get('locale'));
             } elseif (auth()->check()) {
@@ -116,6 +118,14 @@ class AppServiceProvider extends ServiceProvider
                     $organization_id = $user->organization_id;
                     $organization_ids = $organization_id ? [$organization_id] : [];
                 }
+                if( $user->hasRole('registered') )
+                {
+                    $profile_completed = method_exists($user, 'hasCompletedProfile') ? $user->hasCompletedProfile() : (!empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone));
+                    $company_completed = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : ($user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage));
+
+                    if( $view->getName() === 'admin.clients.profile.editProfile' ) { $profile_completed = true; $company_completed = true; }
+                    if( $view->getName() === 'admin.clients.company' ) { $profile_completed = true; $company_completed = true; }
+                }
             }
             $platformName = config('app.name');
             if( $settings )
@@ -123,7 +133,7 @@ class AppServiceProvider extends ServiceProvider
                 $platformName = $l == 'ar' ? $settings->ar_title : $settings->title;
                 $platformName = $platformName ?? config('app.name');
             }
-            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'platformName' => $platformName]);
+            $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'platformName' => $platformName, 'is_profile_completed' => $profile_completed, 'is_company_completed' => $company_completed]);
         });
 
         view()->composer('partials.menu', function ($view) {

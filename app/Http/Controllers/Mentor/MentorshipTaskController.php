@@ -246,12 +246,37 @@ class MentorshipTaskController extends Controller
                         'created_at' => $act->created_at->format('Y-m-d H:i'),
                     ];
                 })->toArray(),
-				'submissions'       => [],
+				'submissions' => $attachments
+					->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+					->when(
+						$user->hasRole('registered'),
+						fn($col) => $col->filter(fn($a) => !isset($a['company_id']) || $a['company_id'] === $user->company_id)
+					)
+					->groupBy(fn($a) => ($a['batch_id'] ?? '') ?: md5($a['path'] ?? $a['name']))
+					->map(fn($group) => [
+						'status' => 'pending_review',
+						'time'   => isset($group->first()['created_at'])
+							? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
+							: '',
+						'note'  => $group->first()['note'] ?? null,
+						'files' => $group->map(fn($a) => [
+							'name'       => $a['name'],
+							'url'        => Storage::url($a['path']),
+							'size_bytes' => $a['size'] ?? null,
+							'created_at' => $a['created_at'] ?? null,
+						])->values()->toArray(),
+					])->values()->toArray(),
 
 				'comments_count'    => $task->comments()->count(),
 				'feedbacks_count'   => $task->feedbacks()->count(),
 				'activities_count'  => $task->activities->count(),
-				'submissions_count' => $attachments->where('status', 'submission')->count(),
+				'submissions_count' => $attachments
+					->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+					->when(
+						$user->hasRole('registered'),
+						fn($col) => $col->filter(fn($a) => !isset($a['company_id']) || $a['company_id'] === $user->company_id)
+					)
+					->count(),
 				'attachments_count' => $attachments->where('status', 'attachment')->count(),
 			];
 		})->values()->toArray();

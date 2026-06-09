@@ -1561,6 +1561,7 @@ class ClientCompanyController extends Controller
                 $request->validate([
                     'Currency' => 'nullable',
                     'pre_money_valuation' => 'nullable|numeric|min:0',
+                    'financial_plan_description' => 'nullable|max:255',
                     'raised_fund' => 'nullable|numeric|min:0',
                     'Funding_Target' => 'nullable|numeric|min:0',
                     'stage' => 'nullable',
@@ -1575,6 +1576,7 @@ class ClientCompanyController extends Controller
                     'pre_money_valuation.min' => __('admin.Pre-money valuation must be a positive number'),
                     'raised_fund.numeric' => __('admin.Raised fund must be a number'),
                     'raised_fund.min' => __('admin.Raised fund must be a positive number'),
+                    'financial_plan_description.max' => __('admin.financial_plan_description max length is 255 characters'),
                     'generate_revenue.required' => __('admin.this_field_is_required'),
                     'generate_revenue.in' => __('admin.this_field_is_required'),
                     'average_annual_revenues.required_if' => __('admin.this_field_is_required'),
@@ -2142,12 +2144,16 @@ class ClientCompanyController extends Controller
                         // try find existing technology by name (case-insensitive)
                         $existing = Technology::whereRaw('LOWER(name) = ?', [mb_strtolower($tag)])->first();
                         if ($existing) {
-                            $techIds[] = $existing->id;
+                            if( !in_array($existing->id, $techIds) ) {
+                                $techIds[] = $existing->id;
+                            }
                         } else {
                             $newTech = new Technology();
                             $newTech->name = $tag;
                             $newTech->save();
-                            $techIds[] = $newTech->id;
+                            if( !in_array($newTech->id, $techIds) ) {
+                                $techIds[] = $newTech->id;
+                            }
                         }
                     }
                 }
@@ -2233,6 +2239,7 @@ class ClientCompanyController extends Controller
                                 'user_id' => $user->id,
                                 'industry_id' => $industryId,
                                 'sector_id' => $sectorId,
+                                'technology_id' => null,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
                             ];
@@ -2268,6 +2275,7 @@ class ClientCompanyController extends Controller
                                 'company_id' => $result->id,
                                 'user_id' => $user->id,
                                 'industry_id' => $industryId,
+                                'sector_id' => null,
                                 'technology_id' => $techId,
                                 'created_at' => $timestamp,
                                 'updated_at' => $timestamp
