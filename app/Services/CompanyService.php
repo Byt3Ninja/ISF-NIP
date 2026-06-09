@@ -12,10 +12,12 @@ use App\Http\Resources\CompanyProfileResource;
 class CompanyService
 {
     protected CompanyRepository $companyRepository;
+    protected FileManagerService $fileManager;
 
-    public function __construct(CompanyRepository $companyRepository)
+    public function __construct(CompanyRepository $companyRepository, ?FileManagerService $fileManager = null)
     {
         $this->companyRepository = $companyRepository;
+        $this->fileManager = $fileManager ?? app(FileManagerService::class);
     }
 
     public function getCompanies(array $filters, bool $isApi = true)
@@ -81,9 +83,7 @@ class CompanyService
 
             // Logo
             if (!empty($data['logo'])) {
-                $image = $data['logo'];
-                $img_path = $image->store('images/logo', 'public_uploads');
-                $company->logo = Storage::disk('public_uploads')->url($img_path);
+                $company->logo = $this->fileManager->update($data['logo'], $company->logo, 'images/logo', 'public_uploads');
             }
 
             // Social Links
@@ -169,22 +169,31 @@ class CompanyService
     {
         if (!empty($data['pitchDeckFile'])) {
             $file = $data['pitchDeckFile'];
-            $path = $file->storeAs($user->company_id . '/pitch_decks/documents', $file->getClientOriginalName(), 'pitch_deck');
-            $company->pitch_deck = 'pitch_decks/' . $path;
+            $company->pitch_deck = $this->fileManager->update(
+                $file, 
+                $company->pitch_deck, 
+                $user->company_id . '/pitch_decks/documents', 
+                'pitch_deck'
+            );
         }
 
         if (!empty($data['financialPlanAttachment'])) {
             $file = $data['financialPlanAttachment'];
-            $path = $file->storeAs($user->company_id . '/financial_plan/documents', $file->getClientOriginalName(), 'pitch_deck');
-            $company->financial_plan = 'financial_plan/' . $path;
+            $company->financial_plan = $this->fileManager->update(
+                $file, 
+                $company->financial_plan, 
+                $user->company_id . '/financial_plan/documents', 
+                'pitch_deck'
+            );
         }
 
         if (!empty($data['documents'])) {
-            $existing = json_decode($company->documents ?? '[]', true);
-            foreach ($data['documents'] as $doc) {
-                $path = $doc->storeAs($user->company_id . '/pitch_decks/documents', $doc->getClientOriginalName(), 'pitch_deck');
-                $existing[] = 'pitch_decks/' . $path;
+            $existing = json_decode($company->getRawOriginal('documents') ?? '[]', true);
+            if (!is_array($existing)) {
+                $existing = [];
             }
+            $newPaths = $this->fileManager->uploadMultiple($data['documents'], $user->company_id . '/pitch_decks/documents', 'pitch_deck');
+            $existing = array_merge($existing, $newPaths);
             $company->documents = json_encode($existing);
         }
 
@@ -197,9 +206,12 @@ class CompanyService
                 default => 'others',
             };
 
-            $path = $user->company_id . '/business_plan/' . $folder . '/';
-            $file->storeAs($path, $file->getClientOriginalName(), ['disk' => 'pitch_deck']);
-            $company->business_plan = 'business_plan/' . $path . $file->getClientOriginalName();
+            $company->business_plan = $this->fileManager->update(
+                $file, 
+                $company->business_plan, 
+                $user->company_id . '/business_plan/' . $folder, 
+                'pitch_deck'
+            );
         }
 
         if (isset($data['pitchDeckVideoUrl'])) {

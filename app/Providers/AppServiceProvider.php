@@ -37,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Broadcast::routes();
 
+        $settings = null;
+
         if (Schema::hasTable('settings'))
         {
             try {

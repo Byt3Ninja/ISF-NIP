@@ -240,17 +240,14 @@ class InvitationController extends Controller
     private function uploadToUsersDisk(UploadedFile $file): array
     {
          $extension = $file->guessExtension();
-        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $safeName = Str::slug($originalName);
-        $date = now()->format('Y-m-d_H-i-s');
-        $fileName = $safeName . '_' . $date . '.' . $extension;
-        Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
-        return [
-            'file_name' => $fileName,
-            'file_url'  => Storage::disk('UsersDiskInviteMentor')->url($fileName),
-            'extension' => $extension,
-            'size'      => $file->getSize(),
-        ];
+         $fileManager = app(\App\Services\FileManagerService::class);
+         $fileName = $fileManager->upload($file, '', 'UsersDiskInviteMentor');
+         return [
+             'file_name' => $fileName,
+             'file_url'  => $fileManager->getUrl($fileName, 'UsersDiskInviteMentor'),
+             'extension' => $extension,
+             'size'      => $file->getSize(),
+         ];
     }
 
     /**
@@ -273,11 +270,7 @@ class InvitationController extends Controller
 
     private function deleteFromUsersDisk(string $fileName): bool
     {
-        if (Storage::disk('UsersDiskInviteMentor')->exists($fileName)) {
-            return Storage::disk('UsersDiskInviteMentor')->delete($fileName);
-        }
-
-        return false;
+        return app(\App\Services\FileManagerService::class)->delete($fileName, 'UsersDiskInviteMentor');
     }
 
     public function deleteFile(Request $request)

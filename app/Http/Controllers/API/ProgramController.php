@@ -155,29 +155,26 @@ class ProgramController extends Controller
             $cycle->financial_guideline = $request->financialGuideline;
             $cycle->legal_guideline = $request->legalGuideline;
 
+            $fileManager = app(\App\Services\FileManagerService::class);
+
             if ($request->hasFile('programGuidelineFile')) {
-                $originalName = $request->file('programGuidelineFile')->getClientOriginalName();
-                $cycle->program_guideline_file = $request->file('programGuidelineFile')->storeAs('programs', $originalName, 'public_uploads');
+                $cycle->program_guideline_file = $fileManager->upload($request->file('programGuidelineFile'), 'programs', 'public_uploads');
             }
 
             if ($request->hasFile('financialPolicyPdf')) {
-                $originalName = $request->file('financialPolicyPdf')->getClientOriginalName();
-                $cycle->financial_guideline_file = $request->file('financialPolicyPdf')->storeAs('programs', $originalName, 'public_uploads');
+                $cycle->financial_guideline_file = $fileManager->upload($request->file('financialPolicyPdf'), 'programs', 'public_uploads');
             }
 
             if ($request->hasFile('legalPolicyPdf')) {
-                $originalName = $request->file('legalPolicyPdf')->getClientOriginalName();
-                $cycle->legal_guideline_file = $request->file('legalPolicyPdf')->storeAs('programs', $originalName, 'public_uploads');
+                $cycle->legal_guideline_file = $fileManager->upload($request->file('legalPolicyPdf'), 'programs', 'public_uploads');
             }
 
             if ($request->hasFile('delegationPdf')) {
-                $originalName = $request->file('delegationPdf')->getClientOriginalName();
-                $cycle->delegation_file = $request->file('delegationPdf')->storeAs('programs', $originalName, 'public_uploads');
+                $cycle->delegation_file = $fileManager->upload($request->file('delegationPdf'), 'programs', 'public_uploads');
             }
 
             if ($request->hasFile('imgUrl')) {
-                 $path = $request->file('imgUrl')->store('programs', 'public_uploads');
-                 $cycle->img_url = $path;
+                $cycle->img_url = $fileManager->upload($request->file('imgUrl'), 'programs', 'public_uploads');
             }
             if (auth()->user()->hasRole('OrganizationManager')) {
 
@@ -339,28 +336,26 @@ class ProgramController extends Controller
         $cycle->auto_approve_mentorship_requests = $validated['autoApproveMentorshipRequests'];
     }
 
+    $fileManager = app(\App\Services\FileManagerService::class);
+
     if (isset($validated['imgUrl'])) {
-        $cycle->img_url = $validated['imgUrl']->store('programs', 'public_uploads');
+        $cycle->img_url = $fileManager->update($validated['imgUrl'], $cycle->img_url, 'programs', 'public_uploads');
     }
 
     if (isset($validated['programGuidelineFile'])) {
-        $fileName = uniqid() . '_' . $validated['programGuidelineFile']->getClientOriginalName();
-        $cycle->program_guideline_file = $validated['programGuidelineFile']->storeAs('programs', $fileName, 'public_uploads');
+        $cycle->program_guideline_file = $fileManager->update($validated['programGuidelineFile'], $cycle->program_guideline_file, 'programs', 'public_uploads');
     }
 
     if (isset($validated['financialPolicyPdf'])) {
-        $fileName = uniqid() . '_' . $validated['financialPolicyPdf']->getClientOriginalName();
-        $cycle->financial_guideline_file = $validated['financialPolicyPdf']->storeAs('programs', $fileName, 'public_uploads');
+        $cycle->financial_guideline_file = $fileManager->update($validated['financialPolicyPdf'], $cycle->financial_guideline_file, 'programs', 'public_uploads');
     }
 
     if (isset($validated['legalPolicyPdf'])) {
-        $fileName = uniqid() . '_' . $validated['legalPolicyPdf']->getClientOriginalName();
-        $cycle->legal_guideline_file = $validated['legalPolicyPdf']->storeAs('programs', $fileName, 'public_uploads');
+        $cycle->legal_guideline_file = $fileManager->update($validated['legalPolicyPdf'], $cycle->legal_guideline_file, 'programs', 'public_uploads');
     }
 
     if (isset($validated['delegationPdf'])) {
-        $fileName = uniqid() . '_' . $validated['delegationPdf']->getClientOriginalName();
-        $cycle->delegation_file = $validated['delegationPdf']->storeAs('programs', $fileName, 'public_uploads');
+        $cycle->delegation_file = $fileManager->update($validated['delegationPdf'], $cycle->delegation_file, 'programs', 'public_uploads');
     }
 
     $cycle->save();

@@ -371,36 +371,30 @@ class CyclesController extends Controller
             $cycle->offline_location_map = $request->offline_location_map;
 
 
+            $fileManager = app(\App\Services\FileManagerService::class);
             $cycle->program_guideline = $request->program_guideline;
             if ($request->hasFile('program-guideline-pdf')) {
-                $originalName = $request->file('program-guideline-pdf')->getClientOriginalName();
-                $cycle->program_guideline_file = $request->file('program-guideline-pdf')->storeAs('programs', $originalName, 'public_uploads');
+                $cycle->program_guideline_file = $fileManager->update($request->file('program-guideline-pdf'), $cycle->program_guideline_file, 'programs', 'public_uploads');
             }
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
             if ($request->hasFile('financial_policy_pdf')) {
-                $originalName = $request->file('financial_policy_pdf')->getClientOriginalName();
-                $cycle->financial_guideline_file = $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                $cycle->financial_guideline_file = $fileManager->update($request->file('financial_policy_pdf'), $cycle->financial_guideline_file, 'programs', 'public_uploads');
             }
             $cycle->legal_guideline = $request->legal_policy;
             if ($request->hasFile('legal_policy_pdf')) {
-                $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
-                $cycle->legal_guideline_file =  $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                $cycle->legal_guideline_file = $fileManager->update($request->file('legal_policy_pdf'), $cycle->legal_guideline_file, 'programs', 'public_uploads');
             }
             if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
-                $originalName = $request->file('delegation_pdf')->getClientOriginalName();
-                $cycle->delegation_file =  $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
-               
+                $cycle->delegation_file = $fileManager->update($request->file('delegation_pdf'), $cycle->delegation_file, 'programs', 'public_uploads');
             }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
             if ($request->hasFile('img_url')) {
-                    $image = $request->file('img_url');
-                    $imageName = time() . '.' . $image->getClientOriginalExtension();
-                    $image->move(public_path('programs/'), $imageName);
-                    $cycle->img_url = 'programs/' . $imageName;
-                }
+                $image = $request->file('img_url');
+                $cycle->img_url = app(\App\Services\FileManagerService::class)->update($image, $cycle->img_url, 'programs', 'public_uploads');
+            }
                     $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
                     // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
 
@@ -832,10 +826,10 @@ class CyclesController extends Controller
                 $cycle->offline_location_map = $request->offline_location_map;
                 // Check if file is uploaded
 
+                $fileManager = app(\App\Services\FileManagerService::class);
                 $cycle->program_guideline = $request->program_guideline;
                 if ($request->hasFile('program-guideline-pdf')) {
-                    $originalName = $request->file('program-guideline-pdf')->getClientOriginalName();
-                    $cycle->program_guideline_file = $request->file('program-guideline-pdf')->storeAs('programs', $originalName, 'public_uploads');
+                    $cycle->program_guideline_file = $fileManager->upload($request->file('program-guideline-pdf'), 'programs', 'public_uploads');
                 }
 
 
@@ -843,27 +837,20 @@ class CyclesController extends Controller
                 $cycle->currency_type = $request->currency_type;
                 $cycle->financial_guideline = $request->financial_policy;
                 if ($request->hasFile('financial_policy_pdf')) {
-                    $originalName = $request->file('financial_policy_pdf')->getClientOriginalName();
-                    $cycle->financial_guideline_file =  $request->file('financial_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                    $cycle->financial_guideline_file = $fileManager->upload($request->file('financial_policy_pdf'), 'programs', 'public_uploads');
                 }
 
                 $cycle->legal_guideline = $request->legal_policy;
                 if ($request->hasFile('legal_policy_pdf')) {
-                    $originalName = $request->file('legal_policy_pdf')->getClientOriginalName();
-                    $cycle->legal_guideline_file = $request->file('legal_policy_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                    $cycle->legal_guideline_file = $fileManager->upload($request->file('legal_policy_pdf'), 'programs', 'public_uploads');
                 }
 
                 if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
-                    $originalName = $request->file('delegation_pdf')->getClientOriginalName();
-                    $cycle->delegation_file = $request->file('delegation_pdf')->storeAs('programs', $originalName, 'public_uploads');
+                    $cycle->delegation_file = $fileManager->upload($request->file('delegation_pdf'), 'programs', 'public_uploads');
                 }
                 if ($request->hasFile('img_url')) {
                     $image = $request->file('img_url');
-                    $imageName = time() . '.' . $image->getClientOriginalExtension();
-
-                    $image->move(public_path('programs/'), $imageName);
-                    $cycle->img_url = 'programs/' . $imageName;
-                    
+                    $cycle->img_url = $fileManager->upload($image, 'programs', 'public_uploads');
                 }
                 $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
                 // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;

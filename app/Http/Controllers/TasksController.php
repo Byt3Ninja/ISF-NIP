@@ -100,7 +100,7 @@ class TasksController extends Controller
                         'note' => $group->first()['note'] ?? null,
                         'files' => $group->map(fn($a) => [
                             'name'       => $a['name'],
-                            'url'        => asset('storage/' . $a['path']),
+                            'url'        => app(\App\Services\FileManagerService::class)->getUrl($a['path'], 'public'),
                             'size_bytes' => $a['size'] ?? null,
                         ])->values()->toArray(),
                     ])->values()->toArray(),
@@ -232,7 +232,7 @@ class TasksController extends Controller
                     }
 
                     // Store the file
-                    $path = $file->store('tasks/attachments', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public');
                     $attachments[] = [
                         'name'   => $file->getClientOriginalName(),
                         'path'   => $path,
@@ -383,7 +383,7 @@ class TasksController extends Controller
             ->map(fn($a) => [
                 'id'   => md5($a['path']),
                 'name' => $a['name'],
-                'url'  => asset('storage/' . $a['path']),
+                'url'  => app(\App\Services\FileManagerService::class)->getUrl($a['path'], 'public'),
                 'size' => $a['size'] ?? null,
                 'created_at' => $a['created_at'] ?? '',
             ])->values();
@@ -399,7 +399,7 @@ class TasksController extends Controller
                 'note' => $group->first()['note'] ?? null,
                 'files' => $group->map(fn($a) => [
                     'name'       => $a['name'],
-                    'url'        => asset('storage/' . $a['path']),
+                    'url'        => app(\App\Services\FileManagerService::class)->getUrl($a['path'], 'public'),
                     'size_bytes' => $a['size'] ?? null,
                 ])->values()->toArray(),
             ])->values();
@@ -602,7 +602,7 @@ class TasksController extends Controller
                     if ($file->getSize() > 10485760) continue;
 
                     // Store the file
-                    $path = $file->store('tasks/attachments', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public');
                     $attachments[] = [
                         'name'   => $file->getClientOriginalName(),
                         'path'   => $path,
@@ -704,7 +704,7 @@ class TasksController extends Controller
             if ($task->attachments) {
                 foreach ($task->attachments as $attachment) {
                     if (isset($attachment['path'])) {
-                        Storage::disk('public')->delete($attachment['path']);
+                        app(\App\Services\FileManagerService::class)->delete($attachment['path'], 'public');
                     }
                 }
             }
@@ -792,7 +792,8 @@ class TasksController extends Controller
             /** @var \App\User $uploader */
             $uploader = auth()->user();
             $file = $request->file('attachment');
-            $path = $file->store('tasks/attachments', 'public');
+            $fileManager = app(\App\Services\FileManagerService::class);
+            $path = $fileManager->upload($file, 'tasks/attachments', 'public');
 
             $newAtt = [
                 'name'       => $file->getClientOriginalName(),
@@ -811,7 +812,7 @@ class TasksController extends Controller
 
             return response()->json([
                 'success'    => true,
-                'attachment' => array_merge($newAtt, ['url' => Storage::disk('public')->url($path)]),
+                'attachment' => array_merge($newAtt, ['url' => $fileManager->getUrl($path, 'public')]),
             ]);
 
         } catch (\Exception $e) {
@@ -846,9 +847,7 @@ class TasksController extends Controller
             }
 
             // Delete physical file
-            if (Storage::disk('public')->exists($target['path'])) {
-                Storage::disk('public')->delete($target['path']);
-            }
+            app(\App\Services\FileManagerService::class)->delete($target['path'], 'public');
 
             $task->update(['attachments' => $remaining]);
 
@@ -902,9 +901,11 @@ class TasksController extends Controller
             }
 
             $filePath = $attachment['path'];
+            $fileManager = app(\App\Services\FileManagerService::class);
+            $relativePath = $fileManager->getRelativePath($filePath, 'public');
             
             // Check if file exists in storage
-            if (!Storage::disk('public')->exists($filePath)) {
+            if (!Storage::disk('public')->exists($relativePath)) {
                 return response()->json([
                     'success' => false,
                     'message' => app()->getLocale() == 'ar'
@@ -914,11 +915,11 @@ class TasksController extends Controller
             }
 
             // Get file information
-            $mimeType = $attachment['type'] ?? Storage::disk('public')->mimeType($filePath);
+            $mimeType = $attachment['type'] ?? Storage::disk('public')->mimeType($relativePath);
             $originalName = $attachment['name'];
 
             // Return file download response
-            return Storage::disk('public')->download($filePath, $originalName, [
+            return Storage::disk('public')->download($relativePath, $originalName, [
                 'Content-Type' => $mimeType,
                 'Content-Disposition' => 'attachment; filename="' . $originalName . '"'
             ]);
@@ -1175,7 +1176,7 @@ class TasksController extends Controller
                     ], 422);
                 }
                 foreach ($files as $file) {
-                    $path = $file->store('tasks/attachments', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public');
                     $newAtt = [
                         'name'       => $file->getClientOriginalName(),
                         'path'       => $path,

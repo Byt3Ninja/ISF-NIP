@@ -26,11 +26,12 @@ use Namu\WireChat\Models\Message as WireChatMessage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
+use App\Traits\HasFileCleanup;
 
 class User extends Authenticatable implements MustVerifyEmail, HasLocalePreference
 {
     // use Auditable;
-    use HasFactory, Notifiable, HasRoles, HasApiTokens, Chatable;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens, Chatable, HasFileCleanup;
     // use SoftDeletes;
     public static $module = 'Users';
 
@@ -100,6 +101,10 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         }
 	}
 
+    protected array $fileFields = [
+        'img_url' => 'public_uploads',
+    ];
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -138,14 +143,12 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     public static function image_handler( $img )
     {
         if( !$img ) { return "/images/placeholder.jpg"; }
-        if( $img && !str_starts_with($img, 'https://') ) { return "/191014/" . $img; }
-        return $img;
+        return app(\App\Services\FileManagerService::class)->getUrl($img, 'public_uploads');
     }
     // ==========> Attributes <=====================
     public function getImageUrlAttribute()
     {
-        $image = $this->img_url;
-        return self::image_handler( $image );
+        return self::image_handler($this->img_url);
     }
     public function getFirstNameAttribute()
     {

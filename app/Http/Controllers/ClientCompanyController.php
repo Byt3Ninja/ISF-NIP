@@ -1429,25 +1429,13 @@ class ClientCompanyController extends Controller
                 } else {
                     if ($request->hasFile('Commercial_Register')) {
                         $file = $request->file('Commercial_Register');
-                        $originalName = $file->getClientOriginalName();
-                        $path = $companyId . '/documents/'; // بدون documents
-
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'document'
-                        ]);
-                        $Commercial_Register = '/documents/' . $path . $originalName;
+                        $Commercial_Register = app(\App\Services\FileManagerService::class)->update($file, $company->Commercial_Register, $companyId . '/documents', 'document');
                     } else {
                         $Commercial_Register = $company->Commercial_Register ?? 'null';
                     }
                     if ($request->hasFile('Tax_Card')) {
                         $file = $request->file('Tax_Card');
-                        $originalName = $file->getClientOriginalName();
-                        $path = $companyId . '/documents/';
-                        // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'document'
-                        ]);
-                        $Tax_Card = '/documents/' . $path . $originalName;
+                        $Tax_Card = app(\App\Services\FileManagerService::class)->update($file, $company->Tax_Card, $companyId . '/documents', 'document');
                     } else {
                         $Tax_Card = $company->Tax_Card ?? 'null';
                     }
@@ -1606,19 +1594,13 @@ class ClientCompanyController extends Controller
                 if ($request->hasFile('financial_plan')) {
                     $file = $request->file('financial_plan'); // التعامل مع ملف واحد فقط
                     if ($file->isValid()) {
-                        $originalName = $file->getClientOriginalName();
                         $folder = match (true) {
                             str_starts_with($file->getMimeType(), 'image/') => 'images',
                             str_starts_with($file->getMimeType(), 'video/') => 'videos',
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $path = $companyId . '/financial_plan/' . $folder . '/';
-                        // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_deck'
-                        ]);
-                        $uploadedFile = 'pitch_decks/' . $path . $originalName;
+                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
                     }
                 } else {
                     $uploadedFile = $company->financial_plan;
@@ -1723,13 +1705,7 @@ class ClientCompanyController extends Controller
 
                 if ($request->hasFile('pitch_deck')) {
                     $file = $request->file('pitch_deck');
-                    $originalName = $file->getClientOriginalName();
-                    $path = $companyId . '/pitch_decks/';
-                    // تخزين الملف بنفس اسمه الأصلي في مجلد public مباشرة
-                    $file->storeAs($path, $originalName, [
-                        'disk' => 'pitch_deck'
-                    ]);
-                    $pitch_deck = 'pitch_decks/' . $path . $originalName;
+                    $pitch_deck = app(\App\Services\FileManagerService::class)->update($file, $company->pitch_deck, $companyId . '/pitch_decks', 'pitch_deck');
                 } else {
                     return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                 }
@@ -1749,24 +1725,8 @@ class ClientCompanyController extends Controller
             if ($data['CompanyN'] == 11) {
                 if ($request->hasFile('documents')) {
                     $files = $request->file('documents');
-                    $uploadedFiles = [];
-                    foreach ($files as $file) {
-                        if ($file->isValid()) {
-                            $originalName = $file->getClientOriginalName();
-                            $folder = match (true) {
-                                str_starts_with($file->getMimeType(), 'image/') => 'images',
-                                str_starts_with($file->getMimeType(), 'video/') => 'videos',
-                                in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
-                                default => 'others',
-                            };
-                            $path = $companyId . '/pitch_decks/' . $folder . '/';
-                            // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                            $file->storeAs($path, $originalName, [
-                                'disk' => 'pitch_deck'
-                            ]);
-                            $uploadedFiles[] = 'pitch_decks/' . $path . $originalName;
-                        }
-                    }
+                    $oldDocs = json_decode($company->documents ?? '[]', true) ?? [];
+                    $uploadedFiles = app(\App\Services\FileManagerService::class)->updateMultiple($files, $oldDocs, $companyId . '/pitch_decks', 'pitch_deck');
                 } else {
                     return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                 }
@@ -1810,22 +1770,15 @@ class ClientCompanyController extends Controller
                 if ($request->hasFile('business_plan')) {
                     $file = $request->file('business_plan'); // التعامل مع ملف واحد فقط
                     if ($file->isValid()) {
-                        $originalName = $file->getClientOriginalName();
                         $folder = match (true) {
                             str_starts_with($file->getMimeType(), 'image/') => 'images',
                             str_starts_with($file->getMimeType(), 'video/') => 'videos',
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $path = $companyId . '/business_plan/' . $folder . '/';
-                        // تخزين الملف بنفس اسمه الأصلي في مجلد مخصص
-                        $file->storeAs($path, $originalName, [
-                            'disk' => 'pitch_deck'
-                        ]);
-                        $uploadedFile = 'pitch_decks/' . $path . $originalName;
+                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->business_plan, $companyId . '/business_plan/' . $folder, 'pitch_deck');
                     }
                 } else {
-                    // return redirect()->back()->with(['msg' => 'Business Plan file not selected', 'class' => 'danger'])->withInput();
                     $uploadedFile = $result->business_plan;
                 }
 
@@ -2992,12 +2945,11 @@ class ClientCompanyController extends Controller
             $documents = [];
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $index => $file) {
-                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
+                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public');
 
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => asset('storage/' . $filePath),
+                        'url' => app(\App\Services\FileManagerService::class)->getUrl($filePath, 'public'),
                         'path' => $filePath,
                     ];
                 }
@@ -3155,8 +3107,8 @@ class ClientCompanyController extends Controller
                             $document = $existingDocuments[$index];
 
                             // Delete physical file if it exists
-                            if (isset($document['path']) && \Storage::disk('public')->exists($document['path'])) {
-                                \Storage::disk('public')->delete($document['path']);
+                            if (isset($document['path'])) {
+                                app(\App\Services\FileManagerService::class)->delete($document['path'], 'public');
                                 \Log::info('EditMileStone: Physical file deleted', [
                                     'path' => $document['path'],
                                     'milestone_id' => $milestone->id
@@ -3181,8 +3133,7 @@ class ClientCompanyController extends Controller
                 ]);
 
                 foreach ($request->file('documents') as $index => $file) {
-                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $filePath = $file->storeAs('milestones/' . $id, $fileName, 'public');
+                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public');
 
                     \Log::info('EditMileStone: File uploaded', [
                         'original_name' => $file->getClientOriginalName(),
@@ -3192,7 +3143,7 @@ class ClientCompanyController extends Controller
 
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => asset('storage/' . $filePath),
+                        'url' => app(\App\Services\FileManagerService::class)->getUrl($filePath, 'public'),
                         'path' => $filePath,
                     ];
                 }
@@ -3851,12 +3802,11 @@ class ClientCompanyController extends Controller
             if ($request->hasFile('documents')) {
                 $documents = [];
                 foreach ($request->file('documents') as $index => $file) {
-                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public');
 
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => asset('storage/' . $path),
+                        'url' => app(\App\Services\FileManagerService::class)->getUrl($path, 'public'),
                         'path' => $path
                     ];
                 }
@@ -3943,8 +3893,8 @@ class ClientCompanyController extends Controller
                         if (isset($existingDocs[$index])) {
                             $document = $existingDocs[$index];
                             // Delete physical file
-                            if (isset($document['path']) && Storage::disk('public')->exists($document['path'])) {
-                                Storage::disk('public')->delete($document['path']);
+                            if (isset($document['path'])) {
+                                app(\App\Services\FileManagerService::class)->delete($document['path'], 'public');
                             }
                         }
                     }
@@ -3959,12 +3909,11 @@ class ClientCompanyController extends Controller
             if ($request->hasFile('documents')) {
                 $newDocuments = [];
                 foreach ($request->file('documents') as $index => $file) {
-                    $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
-                    $path = $file->storeAs('employees/' . $id . '/documents', $fileName, 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public');
 
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => asset('storage/' . $path),
+                        'url' => app(\App\Services\FileManagerService::class)->getUrl($path, 'public'),
                         'path' => $path
                     ];
                 }

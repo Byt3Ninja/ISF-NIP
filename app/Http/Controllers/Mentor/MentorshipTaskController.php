@@ -1075,34 +1075,19 @@ class MentorshipTaskController extends Controller
 		} else {
 			$card = (int) $task->id;
 			$session = (int) $task->mentorship_request_id;
-			$instance = Storage::disk('mentorship_tasks');
-			$sessionDir = (string) $session;
-			$targetDir  = $sessionDir . '/' . $card;
-
-			if( !$instance->directoryExists( $sessionDir ) ) { $instance->makeDirectory($sessionDir); }
-			if( !$instance->directoryExists($targetDir) ) { $instance->makeDirectory($targetDir); }
+			$fileManager = app(\App\Services\FileManagerService::class);
+			$targetDir  = $session . '/' . $card;
 
 			$filesToAdd = [];
 			foreach ($request->attachments as $attachment) {
-				$check_file = $instance->missing($targetDir . '/' . $attachment->getClientOriginalName());
-				if (!$check_file) {
-					$counter = 1;
-					do {
-						$file_name = str_replace('.' . $attachment->getClientOriginalExtension(), '', $attachment->getClientOriginalName()) . '-' . $counter++ . '.' . $attachment->getClientOriginalExtension();
-						$check_file = $instance->missing($targetDir . '/' .  $file_name);
-					} while (!$check_file);
-				} else {
-					$file_name = $attachment->getClientOriginalName();
-				}
-				$file_name = strtolower(str_replace(' ', '-', $file_name));
+				$path = $fileManager->upload($attachment, $targetDir, 'mentorship_tasks');
 				$filesToAdd[] = [
 					'mentorship_request_id' => $task->mentorship_request_id,
 					'mentorship_task_id' => $task->id,
 					'user_id' => $user->id,
 					'file_name' => $attachment->getClientOriginalName(),
-					'file' => $file_name,
+					'file' => $path,
 				];
-				$path = $instance->putFileAs($targetDir, $attachment, $file_name);
 			}
 			MentorshipTaskFile::insert($filesToAdd);
 			$lang = app()->getLocale();
@@ -1124,14 +1109,8 @@ class MentorshipTaskController extends Controller
 		if (empty($file)) {
 			return response()->json(['status' => false, 'message' => 'File not found']);
 		} else {
-			$instance = Storage::disk('mentorship_tasks');
-			$session = $file->mentorship_request_id;
-			$card = $file->mentorship_task_id;
-			$sessionDir = (string) $session;
-			$targetDir  = $sessionDir . '/' . $card;
-
-			$check_file = $instance->missing($targetDir . '/' . $file->file);
-			if( !$check_file ) { $instance->delete($targetDir . '/' . $file->file); }
+			$fileManager = app(\App\Services\FileManagerService::class);
+			$fileManager->delete($file->getRawOriginal('file'), 'mentorship_tasks');
 			$file->delete();
 			return response()->json(['status' => true, 'message' => 'File deleted successfully']);
 		}
