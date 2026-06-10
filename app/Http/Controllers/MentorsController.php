@@ -602,13 +602,7 @@ class MentorsController extends Controller
 				$fileName = '';
 				if ($request->hasFile('file_url')) {
 					$file = $request->file('file_url');
-					$fileName = $file->store($request->user_id, ['disk' => 'UsersDiskInviteMentor']);
-					$extension = $file->guessExtension();
-					$originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-					$safeName = Str::slug($originalName);
-					$date = now()->format('Y-m-d_H-i-s');
-					$fileName = $safeName . '_' . $date . '.' . $extension;
-					Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
+					$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor');
 				}
 
 				
@@ -725,15 +719,9 @@ class MentorsController extends Controller
 					// 	$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
 					// }
 					if ($request->hasFile('file_url')) {
-					$file = $request->file('file_url');
-					$fileName = $file->store($request->user_id, ['disk' => 'UsersDiskInviteMentor']);
-					$extension = $file->guessExtension();
-					$originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-					$safeName = Str::slug($originalName);
-					$date = now()->format('Y-m-d_H-i-s');
-					$fileName = $safeName . '_' . $date . '.' . $extension;
-					Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
-				}
+						$file = $request->file('file_url');
+						$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor');
+					}
 
 					$cycle = Cycle::find($request->cycle_id);
 					$autoApprove = $cycle->auto_approve_mentorship_requests;

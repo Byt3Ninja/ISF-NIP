@@ -26,6 +26,7 @@ return [
         'completedTasks'=>'عدد المهام المنتهية',
         'nonCompletedTasks'=>'عدد المهام الغير منتهية',
         'comment_already_exists' => 'تم بالفعل ارسال هذا التعليق من قبل',
+        'task_completed_no_submission' => 'تم إنجاز هذه المهمة — لا يمكن قبول تسليمات جديدة.',
     ],
     'mentorshipRequests'=>[
         'all'=>'عرض جلسات الارشارد',

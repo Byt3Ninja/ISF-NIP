@@ -14,7 +14,7 @@ class FileUploadSecurityTest extends TestCase
 
     private function setupRegistration(): void
     {
-        Settings::updateOrCreate(['id' => 1], ['VFEmail' => 0]);
+        Settings::factory()->create(['id' => 1, 'VFEmail' => 0]);
         Role::firstOrCreate(['name' => 'Registered'], ['default_for' => 'Registered']);
     }
 

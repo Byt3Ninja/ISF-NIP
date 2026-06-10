@@ -412,76 +412,22 @@ class SettingsController extends Controller
 	{
 		$id = $request->input('id');
 		$updateSittings = Settings::where('id', $id)->first();
+		$fileManager = app(\App\Services\FileManagerService::class);
 
 		if( $request->hasFile('logo') )
 		{
-			$image = $request->file('logo');
-
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			$newName = 'logo'; 
-
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-
-			// تركيب الاسم الجديد مع الامتداد
-			$logo = $newName . '.' . $extension;
-
-			if (Storage::disk('logo_uploads')->exists($logo)) { Storage::disk('logo_uploads')->delete($logo); }
-
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$path = $image->storeAs('', $logo, 'logo_uploads');
-		} else { $logo = $updateSittings->Logo; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$logo = $fileManager->update($request->file('logo'), $updateSittings->Logo, '', 'logo_uploads');
+		} else { $logo = $updateSittings->Logo; }
 
 		if ($request->hasFile('header'))
 		{
-			$image = $request->file('header');
-
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = 'mailheader'; 
-
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-
-			// تركيب الاسم الجديد مع الامتداد
-			$header = $newName . '.' . $extension;
-
-			if (Storage::disk('logo_uploads')->exists($header)) { Storage::disk('logo_uploads')->delete($header); }
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$path = $image->storeAs('', $header, 'logo_uploads');
-		} else { $header = $updateSittings->header; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$header = $fileManager->update($request->file('header'), $updateSittings->header, '', 'logo_uploads');
+		} else { $header = $updateSittings->header; }
 
 		if ($request->hasFile('footer'))
 		{
-			$image = $request->file('footer');
-
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = 'mailfooter'; 
-
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			
-			// تركيب الاسم الجديد مع الامتداد
-			$footer = $newName . '.' . $extension;
-
-			if (Storage::disk('logo_uploads')->exists($footer)) { Storage::disk('logo_uploads')->delete($footer); }
-
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$path = $image->storeAs('', $footer, 'logo_uploads');
-
-			// حفظ الصورة بالاسم الجديد
-			// $image->storeAs('public/images/footer', $footer);
-		} else { $footer = $updateSittings->footer; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$footer = $fileManager->update($request->file('footer'), $updateSittings->footer, '', 'logo_uploads');
+		} else { $footer = $updateSittings->footer; }
 
 		$updateSittings->Logo = $logo;
 		$updateSittings->header = $header;
@@ -682,23 +628,13 @@ class SettingsController extends Controller
 		$Img1 =  Settings::findOrfail('7');
 		$Img2 =  Settings::findOrfail('8');
 		$Img3 =  Settings::findOrfail('9');
+		$fileManager = app(\App\Services\FileManagerService::class);
 	
 		//Image 1 =======================================
 		if ($request->hasFile('img1'))
 		{
-			$image = $request->file('img1');
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = $originalName; 
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			// تركيب الاسم الجديد مع الامتداد
-			$img1name = $newName . '.' . $extension;
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$img1 = $image->storeAs('', $img1name, 'Home_upload');
-		} else { $img1 = $Img1->img_url; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$img1 = $fileManager->update($request->file('img1'), $Img1->img_url, '', 'Home_upload');
+		} else { $img1 = $Img1->img_url; }
 
 		$ar_img1title = $request->input('ar_img1title');
 		$img1title = $request->input('img1title');
@@ -722,19 +658,8 @@ class SettingsController extends Controller
 		// Image 2 =======================================
 		if ($request->hasFile('img2'))
 		{
-			$image = $request->file('img2');
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = $originalName; 
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			// تركيب الاسم الجديد مع الامتداد
-			$img2name = $newName . '.' . $extension;
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$img2 = $image->storeAs('', $img2name, 'Home_upload');
-		} else { $img2 = $Img2->img_url; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$img2 = $fileManager->update($request->file('img2'), $Img2->img_url, '', 'Home_upload');
+		} else { $img2 = $Img2->img_url; }
 
 		$ar_img2title = $request->input('ar_img2title');
 		$img2title = $request->input('img2title');
@@ -758,19 +683,8 @@ class SettingsController extends Controller
 		// Image 3 =======================================
 		if ($request->hasFile('img3'))
 		{
-			$image = $request->file('img3');
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = $originalName; 
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			// تركيب الاسم الجديد مع الامتداد
-			$img3name = $newName . '.' . $extension;
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$img3 = $image->storeAs('', $img3name, 'Home_upload');
-		} else { $img3 = $Img3->img_url; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$img3 = $fileManager->update($request->file('img3'), $Img3->img_url, '', 'Home_upload');
+		} else { $img3 = $Img3->img_url; }
 	
 		$ar_img3title = $request->input('ar_img3title');
 		$img3title = $request->input('img3title');

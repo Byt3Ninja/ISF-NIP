@@ -6,13 +6,14 @@ use App\User;
 use App\Like;
 use App\Step;
 use App\Traits\Auditable;
+use App\Traits\HasFileCleanup;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Company extends Model
 {
-    use HasFactory;
+    use HasFactory, HasFileCleanup;
     // use Auditable;
     public static $module = 'Company';
     
@@ -124,6 +125,17 @@ class Company extends Model
     ];
 
 
+    protected array $fileFields = [
+        'logo' => 'companies',
+        'pitch_deck' => 'pitch_deck',
+        'business_plan' => 'pitch_deck',
+        'financial_plan' => 'pitch_deck',
+        'business_model' => 'pitch_deck',
+        'documents' => 'pitch_deck',
+        'Commercial_Register' => 'document',
+        'Tax_Card' => 'document',
+    ];
+
     protected $casts = [
         'business_categories' => 'array',
         'product_photo' => 'array',
@@ -134,45 +146,65 @@ class Company extends Model
     public static function logo_handler( $img )
     {
         if( !$img ) { return '/app-assets/images/logo_placeholder.png'; }
-        return $img;
+        return app(\App\Services\FileManagerService::class)->getUrl($img, 'companies');
     }
     // ===========> Attributes <==============
     public function getLogoUrlAttribute()
     {
-        $image = $this->logo;
-        return self::logo_handler( $image );
+        return self::logo_handler($this->logo);
     }
     public function getBusinessModelUrlAttribute()
     {
-        $file = $this->business_model;
-        if (!$file) {
+        if (!$this->business_model) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return $file;
+        return app(\App\Services\FileManagerService::class)->getUrl($this->business_model, 'pitch_deck');
     }
     public function getBusinessPlanUrlAttribute()
     {
-        $file = $this->business_plan;
-        if (!$file) {
+        if (!$this->business_plan) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return $file;
+        return app(\App\Services\FileManagerService::class)->getUrl($this->business_plan, 'pitch_deck');
     }
     public function getPitchDeckUrlAttribute()
     {
-        $file = $this->pitch_deck;
-        if (!$file) {
+        if (!$this->pitch_deck) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return $file;
+        return app(\App\Services\FileManagerService::class)->getUrl($this->pitch_deck, 'pitch_deck');
     }
     public function getFinancialPlanUrlAttribute()
     {
-        $file = $this->financial_plan;
-        if (!$file) {
+        if (!$this->financial_plan) {
             return '/app-assets/images/logo_placeholder.png';
         }
-        return $file;
+        return app(\App\Services\FileManagerService::class)->getUrl($this->financial_plan, 'pitch_deck');
+    }
+    public function getDocumentsUrlsAttribute()
+    {
+        $docs = json_decode($this->documents ?? '[]', true);
+        if (empty($docs) || !is_array($docs)) {
+            return [];
+        }
+        $fileManager = app(\App\Services\FileManagerService::class);
+        return array_map(fn($doc) => $fileManager->getUrl($doc, 'pitch_deck'), $docs);
+    }
+
+    public function getCommercialRegisterUrlAttribute()
+    {
+        if (!$this->Commercial_Register || $this->Commercial_Register === 'null') {
+            return null;
+        }
+        return app(\App\Services\FileManagerService::class)->getUrl($this->Commercial_Register, 'document');
+    }
+
+    public function getTaxCardUrlAttribute()
+    {
+        if (!$this->Tax_Card || $this->Tax_Card === 'null') {
+            return null;
+        }
+        return app(\App\Services\FileManagerService::class)->getUrl($this->Tax_Card, 'document');
     }
 
     public function getNameAttribute()
