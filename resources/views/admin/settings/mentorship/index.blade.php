@@ -327,7 +327,7 @@ $(function () {
     
     // Call the fetchSlots function from the new booking modal
     if (typeof fetchSlots === 'function') {
-      fetchSlots(mentorId, cycleId, orgId);
+      fetchSlots(mentorId, cycleId, orgId, userId);
     } else {
       console.error('fetchSlots function not found. Make sure partials.book-session-modal is included.');
     }
