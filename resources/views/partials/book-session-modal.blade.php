@@ -20,6 +20,16 @@
       </div>
 
       <div class="modal-body">
+        <!-- Startup Selection (Only for Admin when booking) -->
+        <div id="startupSelectWrap" class="mb-4" style="display: none;">
+          <label for="startupSelect" class="form-label mb-2 fw-semibold">
+            {{ $l == 'en' ? 'Select Startup' : 'اختر الشركة الناشئة' }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" id="startupSelect">
+            <option value="">{{ $l == 'en' ? 'Select Startup' : 'اختر الشركة الناشئة' }}</option>
+          </select>
+        </div>
+
         <div class="row mb-6 g-4">
           <!-- Calendar Section -->
           <div class="col-auto mb-6 mb-lg-0">
@@ -53,7 +63,7 @@
         <!-- Session Details -->
         <div id="sessionDetails" class="bg-light-subtle border rounded p-3 mt-3" style="display: none;">
           <h6 class="fw-semibold mb-3">{{ __('admin.session_details_label') }}</h6>
-          <div class="row g-3">
+          <div class="row g-3" id="singleSessionDetails">
             <div class="col-md-6">
               <div class="d-flex gap-2">
                 <i class="ti ti-calendar"></i>
@@ -120,6 +130,12 @@
               </div>
             </div>
           </div>
+          <div id="multiSessionDetails" style="display: none;">
+            <div class="col-12">
+              <ul class="list-group list-group-flush" id="selectedSlotsList">
+              </ul>
+            </div>
+          </div>
         </div>
 
         <!-- File Upload -->
@@ -172,6 +188,7 @@
     const state = {
       slots: [],
       selectedSlot: null,
+      selectedSlots: [],
       selectedDate: null,
       calendar: null,
       offlineDisabled: false,
@@ -180,6 +197,7 @@
       mentorId: null,
       cycleId: null,
       organizationId: null,
+      userId: null,
     };
 
     const SESSION_TYPES = {
@@ -193,6 +211,16 @@
       Offline: '<i class="ti ti-map-pin ti-14px"></i>',
       Both:    '<i class="ti ti-screen-share ti-14px"></i>'
     };
+
+    const isAdmin = @json(auth()->user()->hasAnyRole(['admin', 'organizationManager', 'subadmin']));
+
+    if (isAdmin) {
+      $('#singleSessionDetails').hide();
+      $('#multiSessionDetails').show();
+    } else {
+      $('#singleSessionDetails').show();
+      $('#multiSessionDetails').hide();
+    }
 
     // ─── Utilities ────────────────────────────────────────────────────────────
     const parseTime    = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
@@ -261,27 +289,40 @@
 
     // ─── Build FormData ───────────────────────────────────────────────────────
     const buildFormData = () => {
-      const slot = state.selectedSlot;
       const fd   = new FormData();
 
       fd.append('_token',             '{{ csrf_token() }}');
       fd.append('mentorid',           state.mentorId);
       fd.append('organization_id',    state.organizationId);
       fd.append('cycle_id',           state.cycleId);
-      fd.append('date',               state.selectedDate);
-      fd.append('session_start_time', slot.start_time);
-      fd.append('session_end_time',   slot.end_time);
-      fd.append('timeFrom',           slot.start_time);
-      fd.append('timeTo',             slot.end_time);
-      fd.append('session_type',       slot.session_type);
       fd.append('notes',              $('#additionalNotes').val() || '');
-
-      @if (isset(auth()->user()->company->id))
-        fd.append('user_id', '{{ auth()->user()->company->id }}');
-      @endif
 
       const file = $('#fileUpload')[0].files[0];
       if (file) fd.append('file_url', file);
+
+      if (isAdmin) {
+        const selectedUserId = $('#startupSelect').val();
+        fd.append('user_id', selectedUserId);
+
+        state.selectedSlots.forEach((slot, index) => {
+          fd.append(`selected_dates[${index}][date]`,         state.selectedDate);
+          fd.append(`selected_dates[${index}][time_from]`,    slot.start_time);
+          fd.append(`selected_dates[${index}][time_to]`,      slot.end_time);
+          fd.append(`selected_dates[${index}][session_type]`, slot.session_type);
+        });
+      } else {
+        const slot = state.selectedSlot;
+        fd.append('date',               state.selectedDate);
+        fd.append('session_start_time', slot.start_time);
+        fd.append('session_end_time',   slot.end_time);
+        fd.append('timeFrom',           slot.start_time);
+        fd.append('timeTo',             slot.end_time);
+        fd.append('session_type',       slot.session_type);
+
+        @if (isset(auth()->user()->company->id))
+          fd.append('user_id', '{{ auth()->user()->company->id }}');
+        @endif
+      }
 
       return fd;
     };
@@ -322,11 +363,9 @@
 
     const isSlotBlocked = (slot, dateStr) => {
       if (!state.blocked_intervals?.length) return false;
-      const [year, month, day] = dateStr.split('-').map(Number);
-      const [sh, sm] = slot.start_time.split(':').map(Number);
-      const [eh, em] = slot.end_time.split(':').map(Number);
-      const start = new Date(year, month - 1, day, sh, sm, 0).getTime() / 1000;
-      const end   = new Date(year, month - 1, day, eh, em, 0).getTime() / 1000;
+      const offset = '{{ date('P') }}';
+      const start = moment(`${dateStr} ${slot.start_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').unix();
+      const end   = moment(`${dateStr} ${slot.end_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').unix();
       return state.blocked_intervals.some(i => start < i.end && end > i.start);
     };
 
@@ -356,8 +395,14 @@
         const location    = slot?.location || '';
         const showMap     = location && (slot.session_type === 'Offline' || slot.session_type === 'Both');
 
+        const inputType   = isAdmin ? 'checkbox' : 'radio';
+        const isChecked   = isAdmin
+          ? state.selectedSlots.some(s => s.start_time === slot.start_time && s.end_time === slot.end_time)
+          : (state.selectedSlot && state.selectedSlot.start_time === slot.start_time && state.selectedSlot.end_time === slot.end_time);
+        const borderClass = isChecked ? 'border-primary' : '';
+
         return `
-          <div class="card shadow-none mb-2 border slot-card" data-slot-index="${i}">
+          <div class="card shadow-none mb-2 border slot-card ${borderClass}" data-slot-index="${i}">
             <div class="card-body p-3">
               <div class="d-flex align-items-center justify-content-between">
                 <div class="flex-grow-1">
@@ -371,19 +416,16 @@
                       ${icon} ${sessionType}
                     </span>
                     ${showMap ? `
-                      <a href="${/^https?:\/\/.+/i.test(location)
-                                  ? location
-                                  : `https://www.google.com/maps/search/${encodeURIComponent(location)}`
-                                }"
+                      <a href="${location}"
                         target="_blank"
                         class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2 text-decoration-none"
                         title="${location}">
                         <i class="ti ti-map-pin ti-16px"></i>
-                        <span>${location.length > 20 ? location.slice(0, 20) + '…' : location}</span>
+                        <span>Google Maps</span>
                       </a>` : ''}
                   </div>
                 </div>
-                <input type="radio" class="form-check-input ms-2" name="slot" value="${i}">
+                <input type="${inputType}" class="form-check-input ms-2" name="slot" value="${i}" ${isChecked ? 'checked' : ''}>
               </div>
             </div>
           </div>`;
@@ -391,10 +433,39 @@
 
       $container.html(html);
 
+      $container.find('.slot-card').on('click', function (e) {
+        if ($(e.target).closest('a, input').length) return;
+        const $input = $(this).find('input[name="slot"]');
+        if (isAdmin) {
+          $input.prop('checked', !$input.prop('checked')).trigger('change');
+        } else {
+          $input.prop('checked', true).trigger('change');
+        }
+      });
+
       $container.find('input[name="slot"]').on('change', function () {
-        selectSlot(slots[parseInt($(this).val())], $(this).closest('.slot-card'));
+        if (isAdmin) {
+          state.selectedSlots = [];
+          $container.find('.slot-card').removeClass('border-primary');
+          $container.find('input[name="slot"]:checked').each(function () {
+            const idx = parseInt($(this).val());
+            state.selectedSlots.push(slots[idx]);
+            $(this).closest('.slot-card').addClass('border-primary');
+          });
+          updateSelectedSlotsDisplay();
+        } else {
+          selectSlot(slots[parseInt($(this).val())], $(this).closest('.slot-card'));
+        }
       });
     };
+
+    const checkSubmitState = () => {
+      const hasSelected = isAdmin ? state.selectedSlots.length > 0 : state.selectedSlot !== null;
+      const startupSelected = isAdmin ? !!$('#startupSelect').val() : true;
+      $('#submit-button').prop('disabled', !hasSelected || !state.fileValid || !startupSelected);
+    };
+
+    $('#startupSelect').on('change', checkSubmitState);
 
     // ─── selectSlot ───────────────────────────────────────────────────────────
     const selectSlot = (slot, $card) => {
@@ -410,25 +481,19 @@
       $('#detailDuration').text(`${duration} @lang('admin.min')`);
 
       if (slot.session_type !== 'Online') {
-        if (slot.Address) {
-          $('#detailAddressWrap').show();
-          $('#detailAddress').text(`${slot.Address ?? ''}`);
-        } else {
-          $('#detailAddressWrap').hide();
-        }
+        $('#detailAddressWrap').show();
+        $('#detailAddress').text(slot.Address ? slot.Address : '-');
+      } else {
+        $('#detailAddressWrap').hide();
       }
 
       // ── Location in details (same row as duration) ──
       const loc     = slot?.location || '';
       const locText = loc.length > 30 ? loc.slice(0, 30) + '…' : loc;
-      const showLoc = loc && (slot.session_type === 'Offline' || slot.session_type === 'Both');
+      const showLoc = loc && slot.session_type !== 'Online';
       if (showLoc) {
-       const href = /^https?:\/\/.+/i.test(loc)
-          ? loc
-          : `https://www.google.com/maps/search/${encodeURIComponent(loc)}`;
-
         $('#detailLocation')
-          .attr('href', href)
+          .attr('href', loc)
           .text(locText);
 
         $('#detailLocationWrap').show();
@@ -438,7 +503,52 @@
 
       $('#sessionDetails').show();
       hideMessages();
-      $('#submit-button').prop('disabled', !state.fileValid);
+      checkSubmitState();
+    };
+
+    const updateSelectedSlotsDisplay = () => {
+      const $container = $('#selectedSlotsList');
+      if (state.selectedSlots.length === 0) {
+        $('#sessionDetails').hide();
+        checkSubmitState();
+        return;
+      }
+
+      const html = state.selectedSlots.map(slot => {
+        const duration = calcDuration(slot.start_time, slot.end_time);
+        const icon     = ICONS[slot.session_type] || ICONS.Both;
+        const sessionType = SESSION_TYPES[slot.session_type] || SESSION_TYPES.Both;
+        
+        let offlineDetails = '';
+        if (slot.session_type !== 'Online') {
+          const address = slot.Address ? slot.Address : '-';
+          const loc = slot.location || '';
+          const mapsLink = loc ? `
+            <a href="${loc}" target="_blank" class="badge bg-light-subtle text-dark rounded px-2 text-decoration-none ms-2">
+              <i class="ti ti-map-pin"></i> Google Maps
+            </a>` : '';
+          offlineDetails = `
+            <div class="small text-muted mt-1">
+              <strong>@lang('admin.Address'):</strong> ${address}
+              ${mapsLink}
+            </div>`;
+        }
+
+        return `
+          <li class="list-group-item px-0 py-2 border-bottom">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="fw-semibold small">${formatTime12(slot.start_time)} - ${formatTime12(slot.end_time)}</div>
+                <div class="small text-muted">${duration} @lang('mentor.min') | ${icon} ${sessionType}</div>
+                ${offlineDetails}
+              </div>
+            </div>
+          </li>`;
+      }).join('');
+
+      $container.html(html);
+      $('#sessionDetails').show();
+      checkSubmitState();
     };
 
     // ─── Calendar ─────────────────────────────────────────────────────────────
@@ -462,6 +572,7 @@
         onChange: ([date], dateStr) => {
           state.selectedDate = dateStr;
           state.selectedSlot = null;
+          state.selectedSlots = [];
           renderSlots(dateStr);
           $('#sessionDetails').hide();
           hideMessages();
@@ -492,6 +603,7 @@
 
     const resetForm = () => {
       state.selectedSlot = null;
+      state.selectedSlots = [];
       state.selectedDate = getToday();
       state.fileValid    = true;
       $('#fileUpload').val('');
@@ -500,6 +612,10 @@
       hideMessages();
       $('button[data-filter]').removeClass('active btn-primary').addClass('border border-light');
       $('button[data-filter="all"]').addClass('active btn-primary').removeClass('border border-light');
+      if (isAdmin) {
+        $('#startupSelect').val('');
+        $('#startupSelectWrap').hide();
+      }
       resetCalendar();
     };
 
@@ -513,7 +629,7 @@
     };
 
     // ─── fetchSlots (public entry point) ─────────────────────────────────────
-    window.fetchSlots = (mentorId, cycleId, organizationId) => {
+    window.fetchSlots = (mentorId, cycleId, organizationId, userId = null) => {
       if (!mentorId || !cycleId || !organizationId) {
         alert('{{ __('mentor.mentor_not_entrolled_in_cycle') }}');
         return;
@@ -522,11 +638,12 @@
       state.mentorId       = mentorId;
       state.cycleId        = cycleId;
       state.organizationId = organizationId;
+      state.userId         = userId;
 
       $.ajax({
         url: `/dashboard/availability/slots/${mentorId}`,
         method: 'GET',
-        data: { active_only: 'true' },
+        data: { active_only: 'true', cycle_id: cycleId, organization_id: organizationId },
         dataType: 'json'
       })
       .done(result => {
@@ -535,6 +652,27 @@
         state.offlineDisabled   = !result?.offline_allowed;
 
         if (result?.user) $('#mentorName').text(result.user.name || 'Mentor Name');
+
+        // Startup selection for Admin
+        if (isAdmin) {
+          const $select = $('#startupSelect');
+          $select.html('<option value="">{{ $l == "en" ? "Select Startup" : "اختر الشركة الناشئة" }}</option>');
+          
+          if (result?.startups && result.startups.length > 0) {
+            result.startups.forEach(startup => {
+              $select.append(`<option value="${startup.id}">${startup.name}</option>`);
+            });
+          }
+
+          if (state.userId) {
+            $select.val(state.userId);
+            $('#startupSelectWrap').hide();
+          } else {
+            $('#startupSelectWrap').show();
+          }
+        } else {
+          $('#startupSelectWrap').hide();
+        }
 
         $('#bookingModal').modal('show');
         resetCalendar();
@@ -550,6 +688,7 @@
             </button>`
           );
         }
+        checkSubmitState();
       })
       .fail(xhr => {
         let msg = 'Could not load availability slots.';
@@ -587,13 +726,18 @@
           $('#fileName').html(`<i class="ti ti-paperclip me-1"></i>${file.name}`).show();
         }
       }
-      $('#submit-button').prop('disabled', !state.selectedSlot || !state.fileValid);
+      checkSubmitState();
     });
 
     // ─── AJAX Submit ──────────────────────────────────────────────────────────
     $('#submit-button').on('click', function () {
-      if (!state.selectedSlot) {
+      const hasSelected = isAdmin ? state.selectedSlots.length > 0 : state.selectedSlot !== null;
+      if (!hasSelected) {
         showError('{{ __('mentor.select_available_slot') }}');
+        return;
+      }
+      if (isAdmin && !$('#startupSelect').val()) {
+        showError('{{ $l == "en" ? "Please select a startup." : "يرجى اختيار شركة ناشئة." }}');
         return;
       }
       if (!state.fileValid) {
