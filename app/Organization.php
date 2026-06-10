@@ -5,6 +5,7 @@ namespace App;
 use App\Like;
 
 use App\Traits\Auditable;
+use App\Traits\HasFileCleanup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,7 +14,7 @@ use Illuminate\Support\Str;
 
 class Organization extends Model
 {
-	use HasFactory, Auditable, SoftDeletes;
+	use HasFactory, Auditable, SoftDeletes, HasFileCleanup;
 	public static $module = 'Organizations';
 	protected $fillable = [
 		'name_ar',
@@ -63,6 +64,10 @@ class Organization extends Model
 		'tiktok_url',
 	];
 
+	protected array $fileFields = [
+		'img_url' => 'organizations',
+	];
+
 	protected $casts = [
 		'is_draft' => 'boolean',
 		'status' => 'boolean',
@@ -92,18 +97,11 @@ class Organization extends Model
 			return '/images/logo-placeholder.png';
 		}
 
-		// Check if it's an old path (starts with 'organizations/')
 		if (str_starts_with($image, 'organizations/')) {
 			return asset($image);
 		}
 
-		// Check if it's a full URL or starts with /
-		if (str_starts_with($image, 'http') || str_starts_with($image, '/')) {
-			return $image;
-		}
-
-		// New storage path - return route to serve from storage
-		return route('organizations.logo', $image);
+		return app(\App\Services\FileManagerService::class)->getUrl($image, 'organizations');
 	}
 
 	/**
