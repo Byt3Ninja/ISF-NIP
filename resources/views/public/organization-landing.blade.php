@@ -58,6 +58,13 @@
     html {
       direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};
     }
+    .card-hover {
+      transition: box-shadow 0.25s ease, transform 0.25s ease;
+    }
+    .card-hover:hover {
+      box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08) !important;
+      transform: translateY(-2px);
+    }
   </style>
 
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
@@ -917,55 +924,70 @@ $socialLinks = [
             class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
         </span>
       </h4>
-      <div class="row justify-content-center">
-        <div class="col-3">
+      <div class="row g-6 align-items-stretch">
+        <div class="col-lg-6 d-flex flex-column gap-4">
           @if($organization->contact_email)
-            <a class="card" href="mailto:{{ $organization->contact_email }}">
-              <div class="card-body">
-                <div class="d-flex flex-column justify-content-center align-items-center">
-                  <div class="avatar avatar-lg mb-4">
-                    <div class="avatar-initial rounded-circle bg-label-primary">
-                      <i class="ti ti-mail ti-lg text-primary"></i>
-                    </div>
+            <a class="card border shadow-none card-hover transition-shadow" href="mailto:{{ $organization->contact_email }}">
+              <div class="card-body d-flex align-items-center gap-4">
+                <div class="avatar avatar-lg flex-shrink-0">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    <i class="ti ti-mail ti-lg text-primary"></i>
                   </div>
-                  <h5 class="mb-1">{{ __('admin.Email') }}</h5>
-                  <h6 class="mb-0">{{ $organization->contact_email }}</h6>
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="text-muted small fw-medium mb-1">{{ __('admin.Email') }}</span>
+                  <h6 class="mb-0 fw-semibold">{{ $organization->contact_email }}</h6>
                 </div>
               </div>
             </a>
           @endif
-        </div>
-        <div class="col-3">
           @if($organization->contact_phone)
-            <a class="card" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
-              <div class="card-body">
-                <div class="d-flex flex-column justify-content-center align-items-center">
-                  <div class="avatar avatar-lg mb-4">
-                    <div class="avatar-initial rounded-circle bg-label-primary">
-                      <i class="ti ti-phone ti-lg text-primary"></i>
-                    </div>
+            <a class="card border shadow-none card-hover transition-shadow" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
+              <div class="card-body d-flex align-items-center gap-4">
+                <div class="avatar avatar-lg flex-shrink-0">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    <i class="ti ti-phone ti-lg text-primary"></i>
                   </div>
-                  <h5 class="mb-1">{{ __('admin.Phone') }}</h5>
-                  <h6 class="mb-0">{{ $organization->country_code }}{{ $organization->contact_phone }}</h6>
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="text-muted small fw-medium mb-1">{{ __('admin.Phone') }}</span>
+                  <h6 class="mb-0 fw-semibold">{{ $organization->country_code }}{{ $organization->contact_phone }}</h6>
+                </div>
+              </div>
+            </a>
+          @endif
+          @if($organization->address)
+            <a class="card border shadow-none card-hover transition-shadow" href="{{ $organization->google_map_url ?: '#' }}" target="{{ $organization->google_map_url ? '_blank' : '_self' }}">
+              <div class="card-body d-flex align-items-center gap-4">
+                <div class="avatar avatar-lg flex-shrink-0">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    <i class="ti ti-map-pin ti-lg text-primary"></i>
+                  </div>
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="text-muted small fw-medium mb-1">{{ __('admin.Location') }}</span>
+                  <h6 class="mb-0 fw-semibold">{{ $organization->address }}</h6>
                 </div>
               </div>
             </a>
           @endif
         </div>
-        <div class="col-3">
-          @if ($organization->address)
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex flex-column justify-content-center align-items-center">
-                  <div class="avatar avatar-lg mb-4">
-                    <div class="avatar-initial rounded-circle bg-label-primary">
-                      <i class="ti ti-map-pin ti-lg text-primary"></i>
-                    </div>
-                  </div>
-                  <h5 class="mb-1">{{ __('admin.Location') }}</h5>
-                  <h6 class="mb-0">{{ $organization->address }}</h6>
-                </div>
-              </div>
+        <div class="col-lg-6 d-flex">
+          @php
+            $mapQuery = $organization->address ?: $organization->name_en;
+            $mapEmbedUrl = 'https://www.google.com/maps?q=' . urlencode($mapQuery) . '&output=embed&z=14';
+          @endphp
+          @if($organization->google_map_url || $organization->address)
+            <div class="card border shadow-none w-100 overflow-hidden">
+              <iframe
+                src="{{ $mapEmbedUrl }}"
+                width="100%"
+                height="100%"
+                style="border:0; min-height: 350px; display: block;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
             </div>
           @endif
         </div>
