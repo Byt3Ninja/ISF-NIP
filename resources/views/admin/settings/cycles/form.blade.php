@@ -427,12 +427,28 @@
                       @endforeach
                     </div>
                   </div>
+                  <div class="card-footer border-top bg-body px-4 px-lg-5 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="text-muted small">
+                        {{ $sectionIndex + 1 }} / {{ count($form['build_data']) }} {{ $l == 'en' ? 'Sections' : 'اقسام' }}
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-prev d-none" data-section-id="{{ $sectionIndex }}">
+                          <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
+                        </button>
+                        <button type="button" class="btn btn-primary btn-next" data-section-id="{{ $sectionIndex }}">
+                          <span class="btn-next-text">{{ $l == 'en' ? 'Next' : 'التالي' }}</span>
+                          <i class="ti ti-arrow-right ms-2 btn-next-icon"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             @endforeach
 
             @if(!$isReadOnly)
-              <div class="card border shadow-none">
+              <div class="card border shadow-none" id="submit-step">
                 <div class="card-body p-4 p-lg-5">
                   <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                     <div>
@@ -445,9 +461,14 @@
                           : 'تحقق من الاجابات المطلوبة وقم بالتقديم بمجرد انتهاء التحقق' }}
                       </p>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                      <i class="ti ti-send me-2"></i>{{ __('admin.submit') }}
-                    </button>
+                    <div class="d-flex flex-column flex-sm-row gap-2">
+                      <button type="button" class="btn btn-outline-secondary btn-lg btn-prev-submit">
+                        <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
+                      </button>
+                      <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="ti ti-send me-2"></i>{{ __('admin.submit') }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -609,7 +630,7 @@
       processedNames.add(field.name);
     });
 
-    if (Object.keys(fields).length === 0) {
+        if (Object.keys(fields).length === 0) {
       return;
     }
 
@@ -623,7 +644,6 @@
           eleValidClass: ''
         }),
         submitButton: new FormValidation.plugins.SubmitButton(),
-        defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
         autoFocus: new FormValidation.plugins.AutoFocus()
       },
       init: instance => {
@@ -639,6 +659,8 @@
         });
       }
     });
+
+    window._formValidation = fv;
 
     fv.on('plugins.message.placed', function (e) {
       if (e.element.closest('.application-field-control')) {
@@ -793,32 +815,235 @@
     const sections = document.querySelectorAll(".section-wrapper");
     const form = document.querySelector("form");
     const submitBtn = form?.querySelector('button[type="submit"]');
-    const submitCard = submitBtn?.closest('.card');
+    const submitStep = document.getElementById("submit-step");
     const logicInputs = document.querySelectorAll(".question-logic");
+    const nextBtns = document.querySelectorAll(".btn-next");
+    const prevBtns = document.querySelectorAll(".btn-prev");
+    const prevSubmitBtn = document.querySelector(".btn-prev-submit");
+    const sectionHistory = [0];
 
-    sections.forEach(section => {
-      section.style.display = "block";
-    });
+    // Enable/disable inputs in a section
+    function setSectionInputsEnabled(section, enabled) {
+      const inputs = section.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        if (input.name === '_token' || input.name === 'builder_form_id' || input.name === 'field_ids' || input.name === 'cycle' || input.name === 'id') {
+          return;
+        }
+        input.disabled = !enabled;
+      });
+    }
 
-    function handleLogic(element) {
-      if (!element) return;
+    function getNextLogic(section) {
       let logic = "continue";
+      const inputs = section.querySelectorAll(".question-logic");
 
-      if (element.tagName === "SELECT") {
-        const selectedOption = element.options[element.selectedIndex];
-        logic = selectedOption ? selectedOption.dataset.logic : "continue";
+      inputs.forEach(input => {
+        let questionLogic = "continue";
+        if (input.tagName === "SELECT") {
+          const selectedOption = input.options[input.selectedIndex];
+          questionLogic = selectedOption ? (selectedOption.dataset.logic || "continue") : "continue";
+        } else if (input.type === "radio" && input.checked) {
+          questionLogic = input.dataset.logic || "continue";
+        } else if (input.type === "checkbox" && input.checked) {
+          const jumpLogic = input.dataset.logic || "continue";
+          if (jumpLogic !== "continue") questionLogic = jumpLogic;
+        }
+        if (questionLogic !== "continue") {
+          logic = questionLogic;
+        }
+      });
+
+      if (logic === "continue") {
+        logic = section.dataset.sectionLogic || "continue";
       }
 
-      if (logic === "submit") {
-        if (submitCard) {
-          submitCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      return logic;
+    }
+
+    function getActivePath() {
+      const path = [0];
+      let current = 0;
+      while (current < sections.length) {
+        const section = sections[current];
+        if (!section) break;
+        const logic = getNextLogic(section);
+        if (logic === "submit") {
+          path.push("submit");
+          break;
+        } else if (logic.startsWith("section-")) {
+          const targetId = parseInt(logic.replace("section-", ""));
+          if (sections[targetId]) {
+            path.push(targetId);
+            current = targetId;
+          } else {
+            if (sections[current + 1]) {
+              path.push(current + 1);
+              current = current + 1;
+            } else {
+              path.push("submit");
+              break;
+            }
+          }
+        } else {
+          if (sections[current + 1]) {
+            path.push(current + 1);
+            current = current + 1;
+          } else {
+            path.push("submit");
+            break;
+          }
         }
-        setTimeout(() => {
-          if (form) form.submit();
-        }, 600);
+      }
+      return path;
+    }
+
+    function updateNavButton(section) {
+      const nextBtn = section.querySelector(".btn-next");
+      if (!nextBtn) return;
+
+      const logic = getNextLogic(section);
+      const textSpan = nextBtn.querySelector(".btn-next-text");
+      const iconSpan = nextBtn.querySelector(".btn-next-icon");
+
+      if (logic === "submit") {
+        if (textSpan) textSpan.textContent = document.documentElement.lang === 'ar' ? 'ذهاب للتسليم' : 'Go to submit';
+        if (iconSpan) iconSpan.className = "ti ti-arrow-right ms-2 btn-next-icon";
+      } else {
+        if (textSpan) textSpan.textContent = document.documentElement.lang === 'ar' ? 'التالي' : 'Next';
+        if (iconSpan) iconSpan.className = "ti ti-arrow-right ms-2 btn-next-icon";
       }
     }
 
+    function showSection(index) {
+      sections.forEach(s => { 
+        s.style.display = "none"; 
+        setSectionInputsEnabled(s, false);
+      });
+      if (submitStep) submitStep.style.display = "none";
+
+      if (index === "submit") {
+        if (submitStep) {
+          submitStep.style.display = "block";
+          submitStep.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+
+      const section = sections[index];
+      if (section) {
+        section.style.display = "block";
+        setSectionInputsEnabled(section, true);
+        updateNavButton(section);
+
+        const prevBtn = section.querySelector(".btn-prev");
+        if (prevBtn) {
+          prevBtn.classList.toggle("d-none", sectionHistory.length <= 1);
+        }
+
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function validateSection(section) {
+      var fv = window._formValidation;
+      if (!fv) return Promise.resolve(true);
+
+      const inputs = section.querySelectorAll('input[name], select[name], textarea[name]');
+      const promises = [];
+      const validatedNames = new Set();
+
+      inputs.forEach(input => {
+        let name = input.name;
+        if (name && fv.getFields()[name] && !validatedNames.has(name)) {
+          validatedNames.add(name);
+          promises.push(fv.validateField(name));
+        }
+      });
+
+      if (promises.length === 0) {
+        return Promise.resolve(true);
+      }
+
+      return Promise.all(promises).then(results => {
+        return results.every(status => status === 'Valid');
+      });
+    }
+
+    function doNavigate(currentSection) {
+      const activePath = getActivePath();
+      const currentIndex = parseInt(currentSection.dataset.sectionId);
+      const idxInPath = activePath.indexOf(currentIndex);
+
+      if (idxInPath !== -1 && activePath[idxInPath + 1] !== undefined) {
+        const next = activePath[idxInPath + 1];
+        if (!sectionHistory.includes(next)) {
+          sectionHistory.push(next);
+        }
+        showSection(next);
+      }
+    }
+
+    function navigateNext(currentSection) {
+      validateSection(currentSection).then(function (isValid) {
+        if (isValid) {
+          doNavigate(currentSection);
+        } else {
+          var firstError = currentSection.querySelector(".is-invalid");
+          if (firstError) firstError.focus();
+        }
+      });
+    }
+
+    function navigatePrev(currentSection) {
+      if (sectionHistory.length <= 1) return;
+      sectionHistory.pop();
+      var prev = sectionHistory[sectionHistory.length - 1];
+      showSection(prev);
+    }
+
+    // Initialize: show Section 1
+    if (sections.length > 0) {
+      showSection(0);
+    }
+
+    // Auto-update button labels when options change
+    logicInputs.forEach(function (input) {
+      input.addEventListener("change", function () {
+        var section = this.closest(".section-wrapper");
+        if (!section || section.style.display === "none") return;
+        updateNavButton(section);
+
+        // Truncate future visited sections from history as choice changed
+        const currentIndex = parseInt(section.dataset.sectionId);
+        const historyIndex = sectionHistory.indexOf(currentIndex);
+        if (historyIndex !== -1) {
+          sectionHistory.splice(historyIndex + 1);
+        }
+      });
+    });
+
+    // Handle next/prev button clicks
+    nextBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var section = this.closest(".section-wrapper");
+        if (section) navigateNext(section);
+      });
+    });
+
+    prevBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var section = this.closest(".section-wrapper");
+        if (section) navigatePrev(section);
+      });
+    });
+
+    if (prevSubmitBtn) {
+      prevSubmitBtn.addEventListener("click", function () {
+        navigatePrev(null);
+      });
+    }
+
+    // Toggle Other Fields helper logic
     function toggleOtherField(input) {
       let show = false;
       if (input.type === 'select-one') {
@@ -861,40 +1086,87 @@
       return field.closest('.application-question-card')?.querySelector('[id$="_other"]');
     }
 
-    form.addEventListener('submit', function (e) {
-      document.querySelectorAll('select.question-logic, input[type="radio"].question-logic:checked').forEach(field => {
-        if (field.value === '__OTHER__') {
-          const otherInput = findOtherInput(field);
-          if (otherInput && otherInput.value.trim()) {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = field.name;
-            hidden.value = otherInput.value.trim();
-            form.appendChild(hidden);
-            field.disabled = true;
-          }
+    // Form submission interception: dynamic enabled/disabled path and active field_ids setting
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        // Run final validation check on all active sections
+        var fv = window._formValidation;
+        if (fv) {
+          // Temporarily enable everything in the active path to run validator properly
+          const activePath = getActivePath();
+          activePath.forEach(idx => {
+            if (typeof idx === 'number' && sections[idx]) {
+              setSectionInputsEnabled(sections[idx], true);
+            }
+          });
         }
-      });
-      document.querySelectorAll('input[type="checkbox"].question-logic:checked').forEach(cb => {
-        if (cb.value === '__OTHER__') {
-          const otherInput = findOtherInput(cb);
-          if (otherInput && otherInput.value.trim()) {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = cb.name;
-            hidden.value = otherInput.value.trim();
-            form.appendChild(hidden);
-            cb.disabled = true;
+        
+        // Handle '__OTHER__' selection normalization
+        document.querySelectorAll('select.question-logic, input[type="radio"].question-logic:checked').forEach(field => {
+          if (field.value === '__OTHER__') {
+            const otherInput = findOtherInput(field);
+            if (otherInput && otherInput.value.trim()) {
+              const hidden = document.createElement('input');
+              hidden.type = 'hidden';
+              hidden.name = field.name;
+              hidden.value = otherInput.value.trim();
+              form.appendChild(hidden);
+              field.disabled = true;
+            }
           }
-        }
+        });
+        document.querySelectorAll('input[type="checkbox"].question-logic:checked').forEach(cb => {
+          if (cb.value === '__OTHER__') {
+            const otherInput = findOtherInput(cb);
+            if (otherInput && otherInput.value.trim()) {
+              const hidden = document.createElement('input');
+              hidden.type = 'hidden';
+              hidden.name = cb.name;
+              hidden.value = otherInput.value.trim();
+              form.appendChild(hidden);
+              cb.disabled = true;
+            }
+          }
+        });
       });
-    });
+    }
 
-    logicInputs.forEach(input => {
-      input.addEventListener("change", function () {
-        handleLogic(this);
+    // Hook FormValidation success event to do final path enabling/disabling & updating field_ids
+    if (window._formValidation) {
+      window._formValidation.on('core.form.valid', function () {
+        const activePath = getActivePath();
+
+        // 1. Enable inputs in active sections, disable all others (so they are excluded from POST)
+        sections.forEach((s, idx) => {
+          if (activePath.includes(idx)) {
+            setSectionInputsEnabled(s, true);
+          } else {
+            setSectionInputsEnabled(s, false);
+          }
+        });
+
+        // 2. Gather active field IDs and update the hidden 'field_ids' field
+        const activeFieldIds = [];
+        activePath.forEach(idx => {
+          if (typeof idx !== 'number' || !sections[idx]) return;
+          sections[idx].querySelectorAll('input[name], select[name], textarea[name]').forEach(input => {
+            const match = input.name.match(/^field_(\d+)/);
+            if (match) {
+              activeFieldIds.push(match[1]);
+            }
+          });
+        });
+        const uniqueFieldIds = [...new Set(activeFieldIds)].join(',');
+        
+        const fieldIdsInput = form.querySelector('input[name="field_ids"]');
+        if (fieldIdsInput) {
+          fieldIdsInput.value = uniqueFieldIds;
+        }
+
+        // 3. Programmatically submit using the native submit (avoids FormValidation loop)
+        form.submit();
       });
-    });
+    }
   });
 </script>
 @stop

@@ -17,7 +17,6 @@ use App\Formfield;
 use App\Messenger;
 use App\Screening;
 use Carbon\Carbon;
-
 use App\BuilderForm;
 use App\BuilderField;
 use http\Env\Response;
@@ -1242,7 +1241,7 @@ class CyclesController extends Controller
         ]);
         abort_if($validator->fails(), 422, "Data error");
 
-        $field_map_ids = explode(",", $request->input('field_ids'));
+        $field_map_ids = array_filter(array_map('intval', explode(",", $request->input('field_ids'))));
 
         $the_form = BuilderForm::findOrFail( $step->data );
         $fields = $the_form->fields()
@@ -1361,7 +1360,10 @@ class CyclesController extends Controller
             $custom_messages[$field_name . '.required'] = $L['required'];
         } */
 
-        foreach( $field_mapper as $field )
+        $active_fields = $field_mapper->whereIn('id', $field_map_ids);
+        $inactive_fields = $field_mapper->whereNotIn('id', $field_map_ids);
+
+        foreach( $active_fields as $field )
         {
             $field_name = 'field_' . $field['id'];
             $type = $field['type'] ?? 'text';
@@ -1462,7 +1464,7 @@ class CyclesController extends Controller
             ]);
         } */
 
-        foreach( $field_mapper as $field )
+        foreach( $active_fields as $field )
         {
             $field_name = 'field_' . $field['id'];
             if( $field['type'] == 'file' )
@@ -1500,6 +1502,12 @@ class CyclesController extends Controller
                 'updated_at' => now()
             ]);
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
+
+        $inactive_ids = $inactive_fields->pluck('id')->toArray();
+        if( !empty($inactive_ids) )
+        {
+            Formdata::whereIn('field_id', $inactive_ids)->where('company_id', $cid)->delete();
         }
 
         $data = [];
