@@ -517,7 +517,7 @@ class MentorsController extends Controller
 		$cycle = Cycle::find($request->cycle_id);
 		
 		$request->validate([
-			'notes' => 'nullable|string|max:255',
+			'notes' => 'nullable|string|max:1000',
 		]);
 		$user = auth()->user();
 		$getMentor = User::find($request->mentorid);
@@ -555,6 +555,7 @@ class MentorsController extends Controller
 				$date = $dateItem['date'];
 				$time_from = $dateItem['time_from'];
 				$time_to = $dateItem['time_to'];
+				$slot_session_type = $dateItem['session_type'] ?? $request->session_type;
 
 				$this->meetingService = OnlineMeetingFactory::create();
 				$datefrom = $date . ' ' . $time_from;
@@ -576,21 +577,32 @@ class MentorsController extends Controller
 
 				$dayName = Carbon::parse($date)->format('l');
 
-				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `date` LIKE ? AND tfrom <= ? AND tto >= ?";
 				$schedules = DB::select($schedules_q, [
 					$request->mentorid,
-					'%' . $dayName . '%',
+					'%' . $date . '%',
 					$time_from,
 					$time_to
 				]);
 
 				if ($schedules == null) {
+					$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+					$schedules = DB::select($schedules_q, [
+						$request->mentorid,
+						'%' . $dayName . '%',
+						$time_from,
+						$time_to
+					]);
+				}
+
+				if ($schedules == null) {
 					$errors[] = "Mentor not available on $date from $time_from to $time_to";
 					continue;
 				}
-				if($request->session_type == 'Offline'){
+				if($slot_session_type == 'Offline'){
 					if($settings->allow_offline_sessions == 0){
 						$errors[] = 'Offline sessions are not allowed';
+						continue;
 					}
 				}
 
@@ -638,7 +650,7 @@ class MentorsController extends Controller
 					'organization_id' => $request->organization_id,
 					'cycle_id' => $request->cycle_id,
 					'fileurl' => $fileName,
-					'session_type' => $request->session_type
+					'session_type' => $slot_session_type
 				]);
 
 				$successCount++;

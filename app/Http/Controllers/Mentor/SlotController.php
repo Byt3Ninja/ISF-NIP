@@ -211,17 +211,45 @@ class SlotController extends Controller
 			$schedules = $schedules->where('session_type', '!=','Offline');
 		}
 
+		// Resolve location and address based on cycle/program or organization
+		$cycleId = $request->input('cycle_id');
+		$organizationId = $request->input('organization_id');
+		
+		$cycle = null;
+		if ($cycleId) {
+			$cycle = \App\Cycle::with('organization')->find($cycleId);
+		}
+		if (!$cycle) {
+			$user = auth()->user();
+			if ($user && $user->company) {
+				$cycle = $user->company->cycledata;
+			}
+		}
+
+		$location = null;
+		$address = null;
+		if ($cycle) {
+			$location = $cycle->offline_location_map ?? ($cycle->organization->google_map_url ?? null);
+			$address = $cycle->offline_location_address ?? ($cycle->organization->address ?? null);
+		} elseif ($organizationId) {
+			$org = \App\Organization::find($organizationId);
+			if ($org) {
+				$location = $org->google_map_url;
+				$address = $org->address;
+			}
+		}
+
 		$slots = collect(); // we will push items manually
 
 		foreach ($schedules as $item) {
 			$isWeekly = $item->type == 'Weekly';
 
-			if($item->session_type == 'Offline'){
-					$user = auth()->user();
-					$location =  $user->company?->cycledata?->offline_location_map ?? $user->company?->cycledata?->organization?->google_map_url 
-								?? null;
-					$address = $user->company?->cycledata?->offline_location_address ?? $user->company?->cycledata?->organization?->address ?? null;
-				}
+			$slotLoc = null;
+			$slotAddr = null;
+			if ($item->session_type === 'Offline') {
+				$slotLoc = $location;
+				$slotAddr = $address;
+			}
 
 			if ($isWeekly) {
 				// cleanWeekday() must return an array of weekdays
@@ -236,8 +264,8 @@ class SlotController extends Controller
 						'end_time'     => substr($item->tto, 0, 5),
 						'session_type' => $item->session_type,
 						'weekly'       => true,
-						'location'     => $location ?? null,
-						'Address'      => $address ?? null,
+						'location'     => $slotLoc,
+						'Address'      => $slotAddr,
 						'starts_from'  => $item->dfrom ? $item->dfrom->format('Y-m-d') : null,
 					]);
 				}
@@ -252,8 +280,8 @@ class SlotController extends Controller
 					'end_time'     => substr($item->tto, 0, 5),
 					'session_type' => $item->session_type,
 					'weekly'       => false,
-					'location'     => $location ?? null,
-					'Address'      => $address ?? null,
+					'location'     => $slotLoc,
+					'Address'      => $slotAddr,
 				]);
 			}
 			
@@ -281,6 +309,21 @@ class SlotController extends Controller
 			];
 		}
 		
+		// If user is admin/subadmin/orgManager, return list of startups in that cycle
+		$startups = [];
+		if ($cycleId && auth()->user()->hasAnyRole(['admin', 'organizationManager', 'subadmin'])) {
+			$startups = \App\Company::where('cycle', $cycleId)
+				->with('user')
+				->get()
+				->map(function ($c) {
+					return [
+						'id' => $c->user->id ?? 0,
+						'name' => $c->name . ' (' . ($c->user->name ?? '') . ')',
+					];
+				})
+				->filter(fn($item) => $item['id'] > 0)
+				->values();
+		}
 
 		// If fetching for a mentor, include mentor info
 		if ($id) {
@@ -294,10 +337,11 @@ class SlotController extends Controller
 				'data' => $slots,
 				'blocked_intervals' => $blockedIntervals,
 				'offline_allowed' => $offline_allowed,
+				'startups' => $startups,
 			], 200);
 		}
 
-		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed], 200);
+		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed, 'startups' => $startups], 200);
 	}
 
 
