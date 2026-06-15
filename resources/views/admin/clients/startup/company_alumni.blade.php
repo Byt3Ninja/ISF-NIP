@@ -371,18 +371,18 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
 
     @php
       $startupStatsConfig = [
-        'screening_score' => [
-            'format' => 'number',
-            'label'  => __('startup.screening_score'),
-            'icon'   => 'search',
-            'color'  => 'primary',
-        ],
-        'final_screening_score' => [
-            'format' => 'number',
-            'label'  => __('startup.final_screening_score'),
-            'icon'   => 'award',
-            'color'  => 'success',
-        ],
+       // 'screening_score' => [
+       //     'format' => 'number',
+       //     'label'  => __('startup.screening_score'),
+       //     'icon'   => 'search',
+       //     'color'  => 'primary',
+       // ],
+      //'final_screening_score' => [
+      //      'format' => 'number',
+      //      'label'  => __('startup.final_screening_score'),
+      //      'icon'   => 'award',
+      //      'color'  => 'success',
+      //  ],
         'training_hours' => [
             'format' => 'time',
             'label'  => __('startup.training_hours'),
@@ -511,11 +511,11 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
           'icon' => 'briefcase',
           'label' => __('startup.ownership_investors_tab'),
         ],
-        [
-          'id' => 'screening',
-          'icon' => 'search',
-          'label' => __('startup.screening_tab'),
-        ],
+        //[
+        //  'id' => 'screening',
+        //  'icon' => 'search',
+        //  'label' => __('startup.screening_tab'),
+        //],
         [
           'id' => 'training',
           'icon' => 'school',
@@ -967,7 +967,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
       <!--/ Ownership Tab -->
 
       <!-- Screening Tab -->
-      <div class="tab-pane fade show active" id="tab-screening" role="tabpanel" aria-labelledby="tab-screening-trigger">
+      {{-- <div class="tab-pane fade show active" id="tab-screening" role="tabpanel" aria-labelledby="tab-screening-trigger"> --}}
         {{--  <div id="program-screening" class="card mb-6 shadow-sm">
           <div class="card-header">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2 text-capitalize">
@@ -1089,7 +1089,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
             </div>
           </div>
         </div>  --}}
-        <div id="custom-program-screening" class="card mb-6 shadow-sm">
+        {{-- <div id="custom-program-screening" class="card mb-6 shadow-sm">
           <div class="card-body">
             <div class="row g-4">
               <div class="col-12">
@@ -1180,8 +1180,9 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </div> --}}
+      {{-- </div> --}}
+
       <!--/ Screening Tab -->
 
       <!-- Mentorship Tab -->
