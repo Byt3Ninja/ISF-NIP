@@ -887,8 +887,8 @@ class ClientCompanyController extends Controller
                 {
                     $company_members = Team_Member::where('Company_id', $user->company->id)->get();
                     $founders = $company_members->where('TeamMember', 'Founder')->values();
-                    $Shareholders = $company_members->where('TeamMember', 'Shareholder')->values();
-                    $Investors = $company_members->where('TeamMember', 'Investor')->values();
+                    $shareholders = $company_members->where('TeamMember', 'Shareholder')->values();
+                    $investors = $company_members->where('TeamMember', 'Investor')->values();
                     // For backward compatibility, create empty collections
                     $Achieveds = collect();
                     $Planneds = collect();
@@ -897,8 +897,8 @@ class ClientCompanyController extends Controller
                 else
                 {
                     $founders = 'NA';
-                    $Shareholders = 'NA';
-                    $Investors = 'NA';
+                    $shareholders = 'NA';
+                    $investors = 'NA';
                     $milestones = collect();
                     $Achieveds = 'NA';
                     $Planneds = 'NA';
