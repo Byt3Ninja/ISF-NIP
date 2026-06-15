@@ -348,7 +348,7 @@ class ClientCompanyController extends Controller
                     $almuniScreeningScore = null;
                     if( !empty( $almuni->screening ) )
                     {
-                        $screening_details = ScreeningEvaluationResults::results( $almuni->screening_data[0]->step_id, [$company->id] )[$company->id];
+                        $screening_details = ScreeningEvaluationResults::results( $almuni->screening_data[0]['step_id'] ?? 0, [$company->id] )[$company->id] ?? null;
                         /* $screenArr = is_array($almuni->screening) ? $almuni->screening : json_decode($almuni->screening, true);
                         $sScores = collect($screenArr ?? [])->pluck('overall_score')->filter();
                         $almuniScreeningScore = $sScores->isNotEmpty() ? round($sScores->avg(), 2) : null; */
@@ -359,7 +359,7 @@ class ClientCompanyController extends Controller
                     $alumniFinalScore = null;
                     if( !empty( $almuni->final_screening ) )
                     {
-                        $final_screening_details = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]->step_id, [$company->id] )[$company->id];
+                        $final_screening_details = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]['step_id'] ?? 0, [$company->id] )[$company->id] ?? null;
                         if( !empty( $final_screening_details ) )
                         {
                             $avgFinalScreenings->push( $final_screening_details );
@@ -1540,7 +1540,7 @@ class ClientCompanyController extends Controller
                     'startup_expertise' => 'nullable|string|max:1000',
                 ]);
                 if (isset($data['Sustainable_development'])) {
-                    $result->Sustainable_development = json_encode($data['Sustainable_development']);
+                    $result->Sustainable_development = $data['Sustainable_development'];
                 } else {
                     $result->Sustainable_development = '';
                 }
@@ -3413,30 +3413,30 @@ class ClientCompanyController extends Controller
         if(empty($almuni)){
             return redirect()->back()->with('error', 'Alumni not found');
         }
-        $basicInfo   = $this->decodeAlumniJson($almuni?->basic_startup_information);
-        $programInfo = $this->decodeAlumniJson($almuni?->program);
-        $leaderInfo  = $this->decodeAlumniJson($almuni?->startup_leader_information);
-        $legal_information = $this->decodeAlumniJson($almuni?->legal_information);
-        $pitch_deck  = $this->decodeAlumniJson($almuni?->pitch_deck);
-        $founders    = $this->decodeAlumniJson($almuni?->founders);
-        $employees   = $this->decodeAlumniJson($almuni?->employees);
-        $shareholders= $this->decodeAlumniJson($almuni?->shareholders);
-        $investors   = $this->decodeAlumniJson($almuni?->investors);
-        $screening   = $this->decodeAlumniJson($almuni?->screening);
-        $finalScreen = $this->decodeAlumniJson($almuni?->final_screening);
-        $training    = $this->decodeAlumniJson($almuni?->training);
-        $milestones  = $this->decodeAlumniJson($almuni?->milestones);
+        $basicInfo   = $almuni?->basic_startup_information ?? [];
+        $programInfo = $almuni?->program ?? [];
+        $leaderInfo  = $almuni?->startup_leader_information ?? [];
+        $legal_information = $almuni?->legal_information ?? [];
+        $pitch_deck  = $almuni?->pitch_deck ?? [];
+        $founders    = $almuni?->founders ?? [];
+        $employees   = $almuni?->employees ?? [];
+        $shareholders= $almuni?->shareholders ?? [];
+        $investors   = $almuni?->investors ?? [];
+        $screening   = $almuni?->screening ?? [];
+        $finalScreen = $almuni?->final_screening ?? [];
+        $training    = $almuni?->training ?? [];
+        $milestones  = $almuni?->milestones ?? [];
 
-        $mentorships = $this->decodeAlumniJson($almuni?->mentorship);
-        $tasks       = $this->decodeAlumniJson($almuni?->tasks);
+        $mentorships = $almuni?->mentorship ?? [];
+        $tasks       = $almuni?->tasks ?? [];
 
-        $quizzes     = $this->decodeAlumniJson($almuni?->quizzes);
-        $surveys     = $this->decodeAlumniJson($almuni?->surveys);
-        $services    = $this->decodeAlumniJson($almuni?->services);
+        $quizzes     = $almuni?->quizzes ?? [];
+        $surveys     = $almuni?->surveys ?? [];
+        $services    = $almuni?->services ?? [];
 
         $company = $almuni->company;
-        $screeningResultsData = ScreeningEvaluationResults::results( $almuni->screening_data[0]->step_id, $company->id )[$company->id];
-        $finalScreeningResultsData = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]->step_id, $company->id )[$company->id];
+        $screeningResultsData = ScreeningEvaluationResults::results( $almuni->screening_data[0]['step_id'] ?? 0, $company->id )[$company->id] ?? [];
+        $finalScreeningResultsData = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]['step_id'] ?? 0, $company->id )[$company->id] ?? [];
 
         // ── Stats calculations ──────────────────────────────────────────
         $trainingTotalMin   = collect($training)->sum(fn($t) => (int) ($t['duration'] ?? 0));
@@ -3505,10 +3505,11 @@ class ClientCompanyController extends Controller
         $tasksCollection  = collect($tasks)->filter(fn($t) => !empty($t['Task_title']));
         $tasksCompleted   = $tasksCollection->filter(fn($t) => ($t['Status'] ?? '') === 'completed')->count();
         // ────────────────────────────────────────────────────────────────
-        $forms       = $this->decodeAlumniJson($almuni?->submitted_forms);
-        $technologies = $this->decodeAlumniJson($basicInfo['Technologies']);
-        $sectors     = $this->decodeAlumniJson($basicInfo['Sectors']);
-        $industries  = $this->decodeAlumniJson($basicInfo['Industries']);
+        $forms       = $almuni?->submitted_forms ?? [];
+        $relations   = collect($basicInfo['Relations'] ?? []);
+        $industries  = ['name' => $relations->whereNotNull('industry')->first()['industry'] ?? null];
+        $sectors     = ['name' => $relations->whereNotNull('sector')->first()['sector'] ?? null];
+        $technologies = ['name' => $relations->whereNotNull('technologies')->first()['technologies'] ?? null];
         
         
         $startup = [
@@ -3534,7 +3535,7 @@ class ClientCompanyController extends Controller
                 'end'    => $programInfo[0]['Completion_Date'] ?? null,
             ],
 
-            'sdgs' => json_decode($almuni->sustainability_goals, true),
+            'sdgs' => $almuni->sustainability_goals ?? [],
 
             'links' => [
                 'website'   => $basicInfo['Website_Link'] ?? null,
@@ -3636,7 +3637,7 @@ class ClientCompanyController extends Controller
 
             if (!empty($download)) {
 
-                $files = json_decode($download, true); // decode JSON
+                $files = is_array($download) ? $download : json_decode($download, true);
 
                 if (is_array($files)) {
                     foreach ($files as $file) {
@@ -3798,17 +3799,6 @@ class ClientCompanyController extends Controller
         );
     }
 
-    function decodeAlumniJson($value)
-    {
-        if (empty($value)) {
-            return [];
-        }
-
-   
-        $clean = trim($value, '"');
-
-        return json_decode($clean, true) ?? [];
-    }
 
     public function addEmployee(Request $request, $id)
     {
@@ -4227,41 +4217,6 @@ class ClientCompanyController extends Controller
             $almuni->established_date = date('Y-m-d H:i:s');
             $team_leaders = $this->companyService->getTeamMember($id);
             
-            $industry_ids = $company_relations->where('industry_id', '!=', null);
-            $industry= [];
-            foreach($industry_ids as $indusry_id) {
-                $industry['id'] = $indusry_id->industry_id;
-                $industry['name'] = $indusry_id->industry->name_en;
-            }
-            if(empty($industry)){
-                $industry['id'] = null;
-                $industry['name'] = null;
-            }
-            $jIndustry = json_encode($industry);
-            
-            $sector_ids = $company_relations->where('sector_id', '!=', null);
-            $sectors = [];
-            foreach($sector_ids as $sector_id) {
-                $sectors['id'] = $sector_id->sector_id;
-                $sectors['name'] = $sector_id->sector->name_en;
-            }
-            if(empty($sectors)){
-                $sectors['id'] = null;
-                $sectors['name'] = null;
-            }
-            $jSectors = json_encode($sectors);
-            $technology_ids = $company_relations->where('technology_id', '!=', null);
-            $technologies = [];
-            foreach($technology_ids as $technology_id) {
-                $technologies['id'] = $technology_id->technology_id;
-                $technologies['name'] = $technology_id->technology->name;
-            }
-            if(empty($technologies)){
-                $technologies['id'] = null;
-                $technologies['name'] = null;
-            }
-            $jTechnologies = json_encode($technologies);
-            
             //Relations Data
             $relations_data = $company_relations->map(function ($relation) {
                                     return [
@@ -4288,9 +4243,6 @@ class ClientCompanyController extends Controller
                     'development_stage' => $company->development_stage ?? '',
                     'funding_stage' => $company->funding_stage ?? '',
                     'team_size' => $team_leaders->count() ?? '',
-                    'Sectors' => $jSectors ?? '',
-                    'Industries' => $jIndustry ?? '',
-                    'Technologies' => $jTechnologies ?? '',
 
                     'Social Media Links' => [
                         'Facebook' => $company->facebook ?? '',
@@ -4302,7 +4254,7 @@ class ClientCompanyController extends Controller
                         'tiktok' => $company->tiktok ?? '',
                     ],
                 ];
-            $almuni->basic_startup_information = json_encode($basic_startup_information);
+            $almuni->basic_startup_information = $basic_startup_information;
 
                 $startup_leader_information = [];
 
@@ -4318,7 +4270,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
                 
-                $almuni->startup_leader_information = json_encode($startup_leader_information);
+                $almuni->startup_leader_information = $startup_leader_information;
 
                 $getfounders = $team_leaders->where('TeamMember', 'Founder')->values();
 
@@ -4340,7 +4292,7 @@ class ClientCompanyController extends Controller
                         'LinkedIn_Profile' => null,
                     ];
                 }
-                $almuni->founders = json_encode($founders);
+                $almuni->founders = $founders;
                 
                 $getemployees = \App\Employee::where('company_id', $company->id)->get();
                 $employees = [];
@@ -4365,7 +4317,7 @@ class ClientCompanyController extends Controller
                         'Start Date'      => null,
                     ];
                 }
-                $almuni->employees = json_encode($employees);
+                $almuni->employees = $employees;
 
                 $getShareholders = $team_leaders->where('TeamMember', 'Shareholder')->values();
                 $shareholders = [];
@@ -4393,7 +4345,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                $almuni->shareholders = json_encode($shareholders);
+                $almuni->shareholders = $shareholders;
 
 
                 $getInvestors = $team_leaders->where('TeamMember', 'Investor')->values();
@@ -4419,9 +4371,9 @@ class ClientCompanyController extends Controller
                         'Type' => null
                     ];
                 }
-                $almuni->investors = json_encode($investors);
+                $almuni->investors = $investors;
 
-                $almuni->sustainability_goals = $company->Sustainable_development;
+                $almuni->sustainability_goals = json_decode($company->Sustainable_development, true) ?? [];
 
 
                     $pitch_deck[] = [
@@ -4438,7 +4390,7 @@ class ClientCompanyController extends Controller
                             'pitch_deck_summary' => null,
                         ];
                     }
-                $almuni->pitch_deck = json_encode($pitch_deck);
+                $almuni->pitch_deck = $pitch_deck;
 
 
                 $legal_information[] = [
@@ -4455,7 +4407,7 @@ class ClientCompanyController extends Controller
                             'Country_Register_id' => null,
                         ];
                     }
-                $almuni->legal_information = json_encode($legal_information);
+                $almuni->legal_information = $legal_information;
 
                     $cycle[] = [
                         'Program_Name' => $company->cycledata->title ?? '',
@@ -4477,7 +4429,7 @@ class ClientCompanyController extends Controller
                             'Type' => null,
                         ];
                     }
-                $almuni->program = json_encode($cycle);
+                $almuni->program = $cycle;
 
 
             $company_id = $company->id;
@@ -4551,7 +4503,7 @@ class ClientCompanyController extends Controller
             });
             $screeningData = $stepsData;
 
-                $almuni->screening = json_encode($screeningData);
+                $almuni->screening = $screeningData->values()->toArray();
 
                     //Final Screening
                 $cycle_id = $company->cycle;
@@ -4619,7 +4571,7 @@ class ClientCompanyController extends Controller
             });
                 $FinalscreeningData = $finalstepsData;
 
-                $almuni->final_screening = json_encode($FinalscreeningData);
+                $almuni->final_screening = $FinalscreeningData->values()->toArray();
 
 
                  // Training
@@ -4643,7 +4595,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                $almuni->training = json_encode($trainings);
+                $almuni->training = $trainings;
 
                 $startup_mentorship = MentorshipRequest::where('cycle_id', $company->cycle)
                 ->where('user_id', $company?->user?->id)
@@ -4675,7 +4627,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                $almuni->mentorship = json_encode($mentorships);
+                $almuni->mentorship = $mentorships;
 
 
                 $startup_milestones = Milestone::where('company_id', $company->id)->get();
@@ -4688,7 +4640,7 @@ class ClientCompanyController extends Controller
                         'Due_date' => $milestone->created_at?->format('Y-m-d H:i') ?? '',
                         'Completion_percentage' => $milestone->completion_percentage,
                         // 'Linked_deliverables' => $milestone->done == '1' ? 'Attended' : 'Not Attended',
-                        'download' => $milestone->documents,
+                        'download' => is_array($milestone->documents) ? $milestone->documents : json_decode($milestone->documents, true),
                     ];
                 }
                 if(empty($milestones)) {
@@ -4701,7 +4653,7 @@ class ClientCompanyController extends Controller
                         'download' => null,
                     ];
                 }
-                $almuni->milestones = json_encode($milestones);
+                $almuni->milestones = $milestones;
 
 
                 // Program Tasks
@@ -4738,7 +4690,7 @@ class ClientCompanyController extends Controller
                         'Who_created_task' => null,
                     ];
                 }
-                $almuni->tasks = json_encode($MentorTasks);
+                $almuni->tasks = $MentorTasks;
 
                 $startup_quizzes = Quizzes::where('organization_id', $company->cycledata->organization_id)->get();
                 $quizzes = [];
@@ -4768,7 +4720,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                $almuni->quizzes = json_encode($quizzes);
+                $almuni->quizzes = $quizzes;
 
                 $surveyResponseRecords = \App\SurveyResponses::where('user_id', $company?->user?->id)
                     ->where('cycle_id', $company->cycle)
@@ -4801,7 +4753,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                $almuni->surveys = json_encode($surveys);
+                $almuni->surveys = $surveys;
 
                 $startup_services= ServicesRequests::where('user_id', $company?->user?->id)->get();
                 $services = [];
@@ -4823,7 +4775,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                $almuni->services = json_encode($services);
+                $almuni->services = $services;
 
                 $formSubmissions = [];
                 $l =  app()->getLocale();
@@ -4953,7 +4905,7 @@ class ClientCompanyController extends Controller
                     ];
                 }
 
-                $almuni->submitted_forms = json_encode($formSubmissions);
+                $almuni->submitted_forms = $formSubmissions;
 
             $almuni->save();
 

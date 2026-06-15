@@ -78,12 +78,12 @@ class Almuni extends Model
 
     public function getScreeningDataAttribute()
     {
-        return collect( json_decode( $this->screening ) );
+        return collect(  $this->screening );
     }
 
     public function getFinalScreeningDataAttribute()
     {
-        return collect( json_decode( $this->final_screening ) );
+        return collect(  $this->final_screening  );
     }
     
 }
