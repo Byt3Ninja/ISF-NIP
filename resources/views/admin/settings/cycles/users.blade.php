@@ -255,6 +255,10 @@
                       </button>
                     @endunless
 
+                    @php
+                     $typeProgram = $cycles->where('id', $id)->first();   
+                    @endphp
+                    @if($typeProgram->type == 'General_Program')
                     <span @if(!$isAlumni && !$atAlumniStep) title="{{ __('startup.not_passed_final_screening_tooltip') }}" style="cursor:not-allowed;display:inline-block;" @endif>
                       <button type="button"
                         class="btn btn-sm {{ $isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
@@ -266,6 +270,7 @@
                         <span>{{ $isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
                       </button>
                     </span>
+                    @endif
 
                   </div>
                 </td>
