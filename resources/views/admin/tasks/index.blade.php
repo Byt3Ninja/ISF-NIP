@@ -669,6 +669,7 @@ $(function () {
       $.ajax({
         url: `/dashboard/tasks/${taskId}`,
         method: 'GET',
+
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
         success: function (res) {
         if (!res.success) return toastr.error('{{ __("admin.unexpected_error") }}');
@@ -744,7 +745,10 @@ $(function () {
         
         renderAttachmentsList(td.attachments, td.id, '#vt-attachments-list', isAbleToDeleteAttachment);
         $('#vt-attachments-count').text(td.attachments.length ?? 0);
-        renderActivitiesList(td.activities,            '#vt-activities-list');
+        const filteredActivities = companyId
+            ? (td.activities || []).filter(act => String(act.company_id) === String(companyId))
+            : (td.activities || []);
+        renderActivitiesList(filteredActivities,       '#vt-activities-list');
         renderCommentsList(td.comments,                '#vt-comments-list');
         const filteredFeedbacks = companyId
             ? (td.feedbacks || []).filter(fb => String(fb.company_id) === String(companyId))
@@ -758,7 +762,7 @@ $(function () {
         $('#vt-comment-count').text(td.comments?.length ?? 0);
         $('#vt-feedback-count').text(filteredFeedbacks.length ?? 0);
         $('#vt-submissions-count').text(td.submissions?.length ?? 0);
-        $('#vt-activity-count').text(td.activities?.length ?? 0);
+        $('#vt-activity-count').text(filteredActivities.length ?? 0);
 
         const isInReview = displayedStatus === 'review';
         
@@ -867,7 +871,7 @@ $(function () {
     $('#addTaskModal').offcanvas('show');
   });
 
-  function refreshActivities(taskId) {
+  function refreshActivities(taskId, companyId) {
     if (!taskId) return;
     $.ajax({
       url: `/dashboard/tasks/${taskId}`,
@@ -876,8 +880,11 @@ $(function () {
       success: function (res) {
         if (res.success && res.data) {
           const td = res.data;
-          renderActivitiesList(td.activities, '#vt-activities-list');
-          $('#vt-activity-count').text(td.activities?.length ?? 0);
+          const filtered = companyId
+            ? (td.activities || []).filter(act => String(act.company_id) === String(companyId))
+            : (td.activities || []);
+          renderActivitiesList(filtered, '#vt-activities-list');
+          $('#vt-activity-count').text(filtered.length ?? 0);
         }
       }
     });
@@ -913,7 +920,7 @@ $(function () {
           </div>`);
         $('#vt-comment-count').text(parseInt($('#vt-comment-count').text() || '0') + 1);
         if ($editor) $editor.innerHTML = '';
-        refreshActivities(taskId);
+        refreshActivities(taskId, $('#vt-fb-company-id').val() || null);
       },
       error: () => toastr.error('{{ __("admin.unexpected_error") }}')
     });
@@ -1061,7 +1068,7 @@ $(function () {
         const $historyTab = $('#viewTaskOffcanvas .nav-tabs .nav-link[data-bs-target="#vt-feedback-history"]');
         if ($historyTab.length) bootstrap.Tab.getOrCreateInstance($historyTab[0]).show();
 
-        refreshActivities(taskId);
+        refreshActivities(taskId, companyId);
       },
       error: (xhr) => {
         toastr.error(xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}');

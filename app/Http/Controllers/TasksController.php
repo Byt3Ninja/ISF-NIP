@@ -52,15 +52,21 @@ class TasksController extends Controller
         $tags = Tags::select('id', 'name')->orderBy("id", "desc")->get();
 
         // Fetch real tasks from database
+        $isRegistered  = $user->hasRole('registered');
+        $userCompanyId = $user->company_id;
+
         $tasksData = ProgramTask::with(['program', 'assignees', 'creator', 'feedbacks.user', 'activities.user'])
             ->when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
                 $q->whereHas('program', function($pq) use ($orgIds) {
                     $pq->whereIn('organization_id', $orgIds);
                 });
             })
+            ->when($isRegistered && $userCompanyId, function ($q) use ($userCompanyId) {
+                $q->whereHas('assignees', fn($q) => $q->where('companies.id', $userCompanyId));
+            })
             ->orderBy('created_at', 'desc')
             ->get();
-        $tasks = $tasksData->map(function($task) {
+        $tasks = $tasksData->map(function($task) use ($isRegistered, $userCompanyId) {
             return [
                 'id' => $task->id,
                 'title' => $task->title,
@@ -69,20 +75,22 @@ class TasksController extends Controller
                     'id' => $task->program_id,
                     'title' => $task->program->title ?? 'N/A',
                 ],
-                'assignees' => $task->assignees->map(function($assignee) {
-                    return [
-                        'id' => $assignee->id,
-                        'name' => $assignee->name ?? $assignee->name_en ?? 'N/A',
-                        'status' => $assignee->pivot->status,
-                        'lastUpdated' => $assignee->pivot->last_updated 
-                            ? (is_string($assignee->pivot->last_updated) 
-                                ? $assignee->pivot->last_updated 
-                                : $assignee->pivot->last_updated->format('Y-m-d'))
-                            : 'N/A',
-                        'logo' => $assignee->logo ?? null,
-                        'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
-                    ];
-                })->toArray(),
+                'assignees' => $task->assignees
+                    ->when($isRegistered && $userCompanyId, fn($c) => $c->filter(fn($a) => $a->id == $userCompanyId))
+                    ->map(function($assignee) {
+                        return [
+                            'id' => $assignee->id,
+                            'name' => $assignee->name ?? $assignee->name_en ?? 'N/A',
+                            'status' => $assignee->pivot->status,
+                            'lastUpdated' => $assignee->pivot->last_updated
+                                ? (is_string($assignee->pivot->last_updated)
+                                    ? $assignee->pivot->last_updated
+                                    : $assignee->pivot->last_updated->format('Y-m-d'))
+                                : 'N/A',
+                            'logo' => $assignee->logo ?? null,
+                            'profile_url' => url('/dashboard/companyProfile/' . $assignee->id),
+                        ];
+                    })->values()->toArray(),
                 'inReviewCount' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
                 'priority' => $task->priority,
                 'overallStatus' => $task->status,
@@ -111,19 +119,23 @@ class TasksController extends Controller
                     'avatar' => $task->creator->image_url,
                     'profile_url' => url('/dashboard/show/UserProfile/' . $task->creator->id),
                 ] : null,
-                'feedbacks' => $task->feedbacks->map(function($fb) {
-                    return [
-                        'id'         => $fb->id,
-                        'user'       => $fb->user->name ?? 'N/A',
-                        'user_id'    => $fb->user_id,
-                        'company_id' => $fb->company_id,
-                        'img_url'    => $fb->user ? User::image_handler($fb->user->img_url) : null,
-                        'decision'   => $fb->decision,
-                        'text'       => $fb->note,
-                        'time'       => $fb->created_at->format('d-m-Y H:i'),
-                    ];
-                })->toArray(),
-                'activities' => $task->activities->sortByDesc('created_at')->map(function($act) {
+                'feedbacks' => $task->feedbacks
+                    ->when($isRegistered && $userCompanyId, fn($c) => $c->filter(fn($fb) => $fb->company_id == $userCompanyId))
+                    ->map(function($fb) {
+                        return [
+                            'id'         => $fb->id,
+                            'user'       => $fb->user->name ?? 'N/A',
+                            'user_id'    => $fb->user_id,
+                            'company_id' => $fb->company_id,
+                            'img_url'    => $fb->user ? User::image_handler($fb->user->img_url) : null,
+                            'decision'   => $fb->decision,
+                            'text'       => $fb->note,
+                            'time'       => $fb->created_at->format('d-m-Y H:i'),
+                        ];
+                    })->values()->toArray(),
+                'activities' => $task->activities
+                    ->when($isRegistered && $userCompanyId, fn($c) => $c->filter(fn($act) => $act->company_id == $userCompanyId))
+                    ->sortByDesc('created_at')->map(function($act) {
                     $action = match($act->action) {
                         'create' => 'created this task',
                         'update' => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
@@ -301,13 +313,17 @@ class TasksController extends Controller
             ProgramTaskAssignee::where('program_task_id', $task->id)
                 ->update(['status' => $request->status, 'last_updated' => now()]);
 
-            ProgramTaskActivity::create([
-                'program_task_id' => $task->id,
-                'user_id'         => auth()->id(),
-                'action'          => 'create',
-            ]);
-
             $assignees_company = $task->assignees()->pluck('company_id')->toArray();
+
+            foreach ($assignees_company as $cId) {
+                ProgramTaskActivity::create([
+                    'program_task_id' => $task->id,
+                    'user_id'         => auth()->id(),
+                    'action'          => 'create',
+                    'company_id'      => $cId,
+                ]);
+            }
+
             $assignees = User::whereIn('company_id', $assignees_company)->get();
             $mentor = User::find($task->created_by);
             $startupNames = $task->assignees->pluck('name')->filter()->values()->toArray();
@@ -406,22 +422,27 @@ class TasksController extends Controller
                 ])->values()->toArray(),
             ])->values();
 
-        $assignees = $task->assignees->map(function ($company) {
-            $founder = $company->resolveUser();
-            return [
-                'id'          => $company->id,
-                'name'        => $company->name ?? $company->name_en,
-                'logo'        => $company->logo ? (str_starts_with($company->logo, 'http') ? $company->logo : asset('storage/' . $company->logo)) : null,
-                'profile_url' => url('/dashboard/companyProfile/' . $company->id),
-                'status'      => $company->pivot->status,
-                'founder'     => $founder ? [
-                    'id'          => $founder->id,
-                    'name'        => $founder->name,
-                    'avatar'      => User::image_handler($founder->img_url),
-                    'profile_url' => url('/dashboard/show/UserProfile/' . $founder->id),
-                ] : null,
-            ];
-        });
+        $showUser        = auth()->user();
+        $filterCompanyId = $showUser->hasRole('registered') ? $showUser->company_id : null;
+
+        $assignees = $task->assignees
+            ->when($filterCompanyId, fn($c) => $c->filter(fn($a) => $a->id == $filterCompanyId))
+            ->map(function ($company) {
+                $founder = $company->resolveUser();
+                return [
+                    'id'          => $company->id,
+                    'name'        => $company->name ?? $company->name_en,
+                    'logo'        => $company->logo ? (str_starts_with($company->logo, 'http') ? $company->logo : asset('storage/' . $company->logo)) : null,
+                    'profile_url' => url('/dashboard/companyProfile/' . $company->id),
+                    'status'      => $company->pivot->status,
+                    'founder'     => $founder ? [
+                        'id'          => $founder->id,
+                        'name'        => $founder->name,
+                        'avatar'      => User::image_handler($founder->img_url),
+                        'profile_url' => url('/dashboard/show/UserProfile/' . $founder->id),
+                    ] : null,
+                ];
+            });
 
         $creator = $task->creator ? [
             'id'          => $task->creator->id,
@@ -439,7 +460,9 @@ class TasksController extends Controller
             'time'    => $c->created_at->diffForHumans(),
         ]);
 
-        $feedbacks = $task->feedbacks->sortByDesc('created_at')->values()->map(fn($fb) => [
+        $feedbacks = $task->feedbacks
+            ->when($filterCompanyId, fn($c) => $c->filter(fn($fb) => $fb->company_id == $filterCompanyId))
+            ->sortByDesc('created_at')->values()->map(fn($fb) => [
             'id'         => $fb->id,
             'user'       => $fb->user->name ?? 'N/A',
             'user_id'    => $fb->user_id,
@@ -450,7 +473,9 @@ class TasksController extends Controller
             'time'       => $fb->created_at->format('d-m-Y H:i'),
         ]);
 
-        $activities = $task->activities->sortByDesc('created_at')->map(function ($act) {
+        $activities = $task->activities
+            ->when($filterCompanyId, fn($c) => $c->filter(fn($act) => $act->company_id == $filterCompanyId))
+            ->sortByDesc('created_at')->map(function ($act) {
             $action = match($act->action) {
                 'create'   => 'created this task',
                 'update'   => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
@@ -467,6 +492,7 @@ class TasksController extends Controller
                 'action'     => $action,
                 'time'       => $act->created_at->diffForHumans(),
                 'created_at' => $act->created_at->format('Y-m-d H:i'),
+                'company_id' => $act->company_id,
             ];
         })->values();
 
@@ -562,19 +588,23 @@ class TasksController extends Controller
 
             $task->update($data);
 
-            $trackable = ['title', 'description', 'priority', 'status', 'due_date'];
+            $trackable         = ['title', 'description', 'priority', 'status', 'due_date'];
+            $assigneeCompanies = $task->assignees()->pluck('company_id')->toArray();
             foreach ($trackable as $col) {
                 $old = $oldValues[$col] ?? null;
                 $new = $task->$col ?? null;
                 if ((string) $old !== (string) $new) {
-                    ProgramTaskActivity::create([
-                        'program_task_id' => $task->id,
-                        'user_id'         => auth()->id(),
-                        'action'          => 'update',
-                        'column'          => $col,
-                        'was'             => $old,
-                        'new'             => $new,
-                    ]);
+                    foreach ($assigneeCompanies as $cId) {
+                        ProgramTaskActivity::create([
+                            'program_task_id' => $task->id,
+                            'user_id'         => auth()->id(),
+                            'action'          => 'update',
+                            'column'          => $col,
+                            'was'             => $old,
+                            'new'             => $new,
+                            'company_id'      => $cId,
+                        ]);
+                    }
                 }
             }
 
@@ -1043,6 +1073,7 @@ class TasksController extends Controller
                     'column'          => 'status',
                     'was'             => $oldStatus,
                     'new'             => $status,
+                    'company_id'      => $user->company_id ?: null,
                 ]);
 
                 $moveNotifAction = null;
@@ -1218,6 +1249,7 @@ class TasksController extends Controller
                 'program_task_id' => $task->id,
                 'user_id'         => auth()->id(),
                 'action'          => 'feedback',
+                'company_id'      => $companyId ?: null,
             ]);
 
             $targetCompanyIds = $companyId
