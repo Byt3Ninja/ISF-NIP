@@ -131,9 +131,10 @@ function initDropzone(tasks) {
   $('#vt-dropzone-upload-btn').on('click', function () {
     const lbl  = cfg.labels;
     const $btn = $(this);
+    const isSubmission = !!$btn.data('always-show');
     const originalHtml = $btn.html();
     if (!dzQueue.length) {
-      if ($btn.data('always-show')) {
+      if (isSubmission) {
         $('#vt-upload-error').text(lbl.pleaseAddFiles || 'Please add at least one file.');
       }
       return;
@@ -146,8 +147,9 @@ function initDropzone(tasks) {
     $btn.prop('disabled', true).html(`<span class="spinner-border spinner-border-sm me-1"></span>${lbl.uploading}`);
 
     let completed = 0, failed = 0;
-    const total    = dzQueue.length;
-    const snapshot = [...dzQueue];
+    const total       = dzQueue.length;
+    const snapshot    = [...dzQueue];
+    const uploadedAtts = [];
 
     snapshot.forEach(item => {
       const fd = new FormData();
@@ -167,13 +169,17 @@ function initDropzone(tasks) {
           setTimeout(() => $(`#dzq-${item.id}`).fadeOut(200, function () { $(this).remove(); }), 400);
 
           const newAtt = response.attachment || { id: Date.now(), name: item.file.name, url: '#' };
-          const task   = tasks.find(t => t.id == taskId);
-          if (task) {
-            if (!task.attachments) task.attachments = [];
-            task.attachments.push(newAtt);
+          uploadedAtts.push(newAtt);
+
+          if (!isSubmission) {
+            const task = tasks.find(t => t.id == taskId);
+            if (task) {
+              if (!task.attachments) task.attachments = [];
+              task.attachments.push(newAtt);
+            }
+            if ($('#vt-attachments-list').find('span.text-muted').length) $('#vt-attachments-list').empty();
+            $('#vt-attachments-list').append(buildAttachmentItem(newAtt, taskId, true));
           }
-          if ($('#vt-attachments-list').find('span.text-muted').length) $('#vt-attachments-list').empty();
-          $('#vt-attachments-list').append(buildAttachmentItem(newAtt, taskId, true));
 
           dzQueue = dzQueue.filter(i => i.id !== item.id);
           completed++; checkDone();
@@ -189,8 +195,9 @@ function initDropzone(tasks) {
 
     function checkDone() {
       if (completed < total) return;
-      if (failed > 0) toastr.warning(`${total - failed} ${lbl.uploaded}, ${failed} ${lbl.failed}.`);
-      else {
+      if (failed > 0) {
+        toastr.warning(`${total - failed} ${lbl.uploaded}, ${failed} ${lbl.failed}.`);
+      } else {
         toastr.success(lbl.attachmentUploadedSuccess);
         if (isSubmission && uploadedAtts.length) {
           const task = tasks.find(t => t.id == taskId);

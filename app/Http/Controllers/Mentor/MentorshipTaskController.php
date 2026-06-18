@@ -252,12 +252,16 @@ class MentorshipTaskController extends Controller
                         'created_at' => $act->created_at->format('Y-m-d H:i'),
                     ];
                 })->toArray(),
-				'submissions' => $attachments
-					->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+				'submissions' => $task->assignees
 					->when(
 						$user->hasRole('registered'),
-						fn($col) => $col->filter(fn($a) => !isset($a['company_id']) || $a['company_id'] === $user->company_id)
+						fn($col) => $col->filter(fn($a) => $a->id == $user->company_id)
 					)
+					->flatMap(fn($assignee) => collect(
+						is_string($assignee->pivot->attachment)
+							? json_decode($assignee->pivot->attachment, true) ?? []
+							: ($assignee->pivot->attachment ?? [])
+					))
 					->groupBy(fn($a) => ($a['batch_id'] ?? '') ?: md5($a['path'] ?? $a['name']))
 					->map(fn($group) => [
 						'status' => 'pending_review',
@@ -276,12 +280,17 @@ class MentorshipTaskController extends Controller
 				'comments_count'    => $task->comments()->count(),
 				'feedbacks_count'   => $task->feedbacks()->count(),
 				'activities_count'  => $task->activities->count(),
-				'submissions_count' => $attachments
-					->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+				'submissions_count' => $task->assignees
 					->when(
 						$user->hasRole('registered'),
-						fn($col) => $col->filter(fn($a) => !isset($a['company_id']) || $a['company_id'] === $user->company_id)
+						fn($col) => $col->filter(fn($a) => $a->id == $user->company_id)
 					)
+					->flatMap(fn($assignee) => collect(
+						is_string($assignee->pivot->attachment)
+							? json_decode($assignee->pivot->attachment, true) ?? []
+							: ($assignee->pivot->attachment ?? [])
+					))
+					->groupBy(fn($a) => ($a['batch_id'] ?? '') ?: md5($a['path'] ?? $a['name']))
 					->count(),
 				'attachments_count' => $attachments->where('status', 'attachment')->count(),
 			];

@@ -97,12 +97,17 @@ class TasksController extends Controller
                 'dueDate' => $task->due_date ? $task->due_date->format('Y-m-d') : 'N/A',
                 'tags' => $task->tags ?? [],
                 'attachments' => $task->attachments ?? [],
-                'submissions' => collect($task->attachments ?? [])
-                    ->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+                'submissions' => $task->assignees
+                    ->when($isRegistered && $userCompanyId, fn($c) => $c->filter(fn($a) => $a->id == $userCompanyId))
+                    ->flatMap(fn($assignee) => collect(
+                        is_string($assignee->pivot->attachment)
+                            ? json_decode($assignee->pivot->attachment, true) ?? []
+                            : ($assignee->pivot->attachment ?? [])
+                    ))
                     ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
                     ->map(fn($group) => [
                         'user' => null, 'img_url' => null, 'user_id' => null,
-                        'status' => 'pending_review', 'time' => isset( $group->first()['created_at'] )
+                        'status' => 'pending_review', 'time' => isset($group->first()['created_at'])
                             ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
                             : '',
                         'note' => $group->first()['note'] ?? null,
@@ -407,12 +412,20 @@ class TasksController extends Controller
                 'created_at' => $a['created_at'] ?? '',
             ])->values();
 
-        $fmtSubs = collect($allAtt)
-            ->filter(fn($a) => ($a['status'] ?? '') === 'submission')
+        /** @var \App\User $showUser */
+        $showUser        = auth()->user();
+        $filterCompanyId = $showUser->hasRole('registered') ? $showUser->company_id : null;
+
+        $assigneeRows = ProgramTaskAssignee::where('program_task_id', $task->id)
+            ->when($filterCompanyId, fn($q) => $q->where('company_id', $filterCompanyId))
+            ->get();
+
+        $fmtSubs = $assigneeRows
+            ->flatMap(fn($a) => collect($a->attachment ?? []))
             ->groupBy(fn($a) => $a['batch_id'] ?? md5($a['path'] ?? $a['name']))
             ->map(fn($group) => [
                 'user' => null, 'img_url' => null, 'user_id' => null,
-                'status' => 'pending_review', 'time' => isset( $group->first()['created_at'] )
+                'status' => 'pending_review', 'time' => isset($group->first()['created_at'])
                     ? \Carbon\Carbon::parse($group->first()['created_at'])->diffForHumans()
                     : '',
                 'note' => $group->first()['note'] ?? null,
@@ -422,9 +435,6 @@ class TasksController extends Controller
                     'size_bytes' => $a['size'] ?? null,
                 ])->values()->toArray(),
             ])->values();
-
-        $showUser        = auth()->user();
-        $filterCompanyId = $showUser->hasRole('registered') ? $showUser->company_id : null;
 
         $assignees = $task->assignees
             ->when($filterCompanyId, fn($c) => $c->filter(fn($a) => $a->id == $filterCompanyId))
@@ -742,14 +752,23 @@ class TasksController extends Controller
                 ], 404);
             }
 
-            // Delete attachments if any
-            if ($task->attachments) {
-                foreach ($task->attachments as $attachment) {
-                    if (isset($attachment['path'])) {
-                        app(\App\Services\FileManagerService::class)->delete($attachment['path'], 'public');
-                    }
+            $fileManager = app(\App\Services\FileManagerService::class);
+
+            // Delete task-level attachments
+            foreach ($task->attachments ?? [] as $attachment) {
+                if (isset($attachment['path'])) {
+                    $fileManager->delete($attachment['path'], 'public');
                 }
             }
+
+            // Delete assignee-level attachments (submissions)
+            ProgramTaskAssignee::where('program_task_id', $task->id)->each(function ($assignee) use ($fileManager) {
+                foreach ($assignee->attachment ?? [] as $att) {
+                    if (isset($att['path'])) {
+                        $fileManager->delete($att['path'], 'public');
+                    }
+                }
+            });
 
             $task->delete();
 
@@ -846,7 +865,6 @@ class TasksController extends Controller
                 'path'       => $path,
                 'size'       => $file->getSize(),
                 'type'       => $file->getMimeType(),
-                'status'     => $uploader->hasRole('registered') ? 'submission' : 'attachment',
                 'note'       => $request->input('note', ''),
                 'batch_id'   => $request->input('batch_id', ''),
                 'company_id' => $uploader->company_id,
@@ -899,32 +917,54 @@ class TasksController extends Controller
                 return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
             }
 
-            $attachments = $task->attachments ?? [];
-            $target = null;
-            $remaining = [];
+            $fileManager = app(\App\Services\FileManagerService::class);
 
-            foreach ($attachments as $att) {
+            // Search task-level attachments first
+            $taskAtts  = $task->attachments ?? [];
+            $target    = null;
+            $remaining = [];
+            foreach ($taskAtts as $att) {
                 if ($att['name'] === $filename) {
                     $target = $att;
                 } else {
                     $remaining[] = $att;
                 }
             }
-
-            if (!$target) {
-                return response()->json(['success' => false, 'message' => 'Attachment not found.'], 404);
+            if ($target) {
+                $fileManager->delete($target['path'], 'public');
+                $task->update(['attachments' => $remaining]);
+                return response()->json([
+                    'success'     => true,
+                    'message'     => app()->getLocale() == 'ar' ? 'تم حذف المرفق بنجاح' : 'Attachment deleted successfully.',
+                    'attachments' => $remaining,
+                ]);
             }
 
-            // Delete physical file
-            app(\App\Services\FileManagerService::class)->delete($target['path'], 'public');
+            // Search assignee-level attachments (submissions)
+            $assignees = ProgramTaskAssignee::where('program_task_id', $taskId)->get();
+            foreach ($assignees as $assignee) {
+                $atts      = $assignee->attachment ?? [];
+                $found     = null;
+                $remaining = [];
+                foreach ($atts as $att) {
+                    if ($att['name'] === $filename) {
+                        $found = $att;
+                    } else {
+                        $remaining[] = $att;
+                    }
+                }
+                if ($found) {
+                    $fileManager->delete($found['path'], 'public');
+                    $assignee->update(['attachment' => $remaining]);
+                    return response()->json([
+                        'success'     => true,
+                        'message'     => app()->getLocale() == 'ar' ? 'تم حذف المرفق بنجاح' : 'Attachment deleted successfully.',
+                        'attachments' => $remaining,
+                    ]);
+                }
+            }
 
-            $task->update(['attachments' => $remaining]);
-
-            return response()->json([
-                'success' => true,
-                'message' => app()->getLocale() == 'ar' ? 'تم حذف المرفق بنجاح' : 'Attachment deleted successfully.',
-                'attachments' => $remaining,
-            ]);
+            return response()->json(['success' => false, 'message' => 'Attachment not found.'], 404);
 
         } catch (\Exception $e) {
             \Log::error('Error deleting attachment: ' . $e->getMessage());
@@ -949,13 +989,24 @@ class TasksController extends Controller
                 ], 404);
             }
 
-            // Find the attachment in the task's attachments array
+            // Search task-level attachments
             $attachment = null;
-            if ($task->attachments) {
-                foreach ($task->attachments as $att) {
-                    if ($att['name'] === $filename) {
-                        $attachment = $att;
-                        break;
+            foreach ($task->attachments ?? [] as $att) {
+                if ($att['name'] === $filename) {
+                    $attachment = $att;
+                    break;
+                }
+            }
+
+            // If not found, search assignee-level attachments (submissions)
+            if (!$attachment) {
+                $assignees = ProgramTaskAssignee::where('program_task_id', $taskId)->get();
+                foreach ($assignees as $assignee) {
+                    foreach ($assignee->attachment ?? [] as $att) {
+                        if ($att['name'] === $filename) {
+                            $attachment = $att;
+                            break 2;
+                        }
                     }
                 }
             }

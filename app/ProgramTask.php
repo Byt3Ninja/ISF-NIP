@@ -65,7 +65,7 @@ class ProgramTask extends Model
     public function assignees()
     {
         return $this->belongsToMany(Company::class, 'program_task_assignees', 'program_task_id', 'company_id')
-                    ->withPivot('status', 'last_updated')
+                    ->withPivot('status', 'last_updated', 'attachment')
                     ->withTimestamps();
     }
 
