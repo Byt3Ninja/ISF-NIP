@@ -38,12 +38,12 @@ class UploadCycleCustomPageImageRequest extends FormRequest
     public function messages()
     {
         return [
-            'image.required' => __('admin.Image is required'),
-            'image.image' => __('admin.File must be an image'),
-            'image.mimes' => __('admin.Image must be jpeg, png, jpg, gif, or webp'),
-            'image.max' => __('admin.Image size must not exceed 5MB'),
-            'cycle_id.required' => __('admin.Cycle ID is required'),
-            'cycle_id.exists' => __('admin.Invalid cycle'),
+            'image.required' => __('admin.file_image_required_validation'),
+            'image.image' => __('admin.file_image_type_validation'),
+            'image.mimes' => __('admin.file_mimes_validation'),
+            'image.max' => __('admin.file_size_validation'),
+            'cycle_id.required' => __('admin.cycle_required_validation'),
+            'cycle_id.exists' => __('admin.cycle_exists_validation'),
         ];
     }
 }

@@ -3463,6 +3463,15 @@ return [
 	'attachment' => 'المرفق',
 	'Created By' => 'انشيء بواسطة',
 
+	'file_image_required_validation' => 'الصورة مطلوبة.',
+	'file_image_type_validation' => 'الملف يجب ان يكون صورة.',
+	'file_mimes_validation' => 'الصورة يجب ان تكون jpeg, png, jpg, gif, او webp.',
+	'file_size_validation' => 'حجم الصورة يجب ان يكون اقل من 5MB.',
+	'cycle_required_validation' => 'البرنامج مطلوب.',
+	'cycle_exists_validation' => 'برنامج غير صحيح.',
+	'step_required_validation' => 'المرحلة مطلوبة.',
+	'step_exists_validation' => 'مرحلة غير صحيحة.',
+
 	'Image uploaded successfully' => 'تم رفع الصورة بنجاح',
 	'Image upload failed' => 'فشل رفع الصورة',
 	'Image not found' => 'الصورة غير موجودة',

@@ -153,6 +153,12 @@ return [
             'url' => env('APP_URL') . '/cycle-custom-pages',
             'visibility' => 'private',
         ],
+        'screening_guidelines' => [
+            'driver' => 'local',
+            'root' => storage_path('app/screening_guidelines'),
+            'url' => env('APP_URL') . '/screening-guidelines',
+            'visibility' => 'private',
+        ],
         'companies' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads/companies'),

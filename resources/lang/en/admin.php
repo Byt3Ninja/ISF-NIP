@@ -3407,6 +3407,15 @@ return [
 	'attachment' => 'Attachment',
 	'Created By' => 'Created By',
 
+	'file_image_required_validation' => 'Image is required.',
+	'file_image_type_validation' => 'File must be an image.',
+	'file_mimes_validation' => 'Image must be jpeg, png, jpg, gif, or webp.',
+	'file_size_validation' => 'Image size must not exceed 5MB.',
+	'cycle_required_validation' => 'Cycle ID is required.',
+	'cycle_exists_validation' => 'Invalid cycle.',
+	'step_required_validation' => 'Step ID is required.',
+	'step_exists_validation' => 'Invalid step.',
+	
 	'Image uploaded successfully' => 'Image uploaded successfully.',
 	'Image upload failed' => 'Image upload failed.',
 	'Image not found' => 'Image not found.',

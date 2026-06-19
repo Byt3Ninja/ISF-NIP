@@ -18,6 +18,8 @@ class Permissions
         'clients.profile_view',
         'cycle.custom_pages.image',
         'cycle.custom_pages.upload_image',
+        'screening.guidelines.upload_image',
+        'screening.guidelines.image',
         'service_provider.reviews',
         'service_provider.profile',
         'organizations.logo',

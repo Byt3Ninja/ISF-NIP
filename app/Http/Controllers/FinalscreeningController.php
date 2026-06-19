@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UploadScreeningGuidelinesImageRequest;
 
 class FinalscreeningController extends Controller
 {
@@ -553,6 +555,108 @@ class FinalscreeningController extends Controller
 			return Redirect::back()->with('message', 'Meeting_added_successfully');
 		} else {return Redirect::back()->with('message2', 'Error');}
 	}
+
+	/**
+	 * Upload image for custom page content
+	 * 
+	 * @param UploadScreeningGuidelinesImageRequest $request
+	 * @param int $id
+	 * @return \Illuminate\Http\JsonResponse
+	 */
+	public function uploadImage(UploadScreeningGuidelinesImageRequest $request, $id)
+	{
+		// Verify Step ID matches route parameter
+		$user = auth()->user();
+		if ($id != $request->step_id ) {
+			return response()->json([
+				'status' => false,
+				'message' => __('cycles.invalid_step_for_upload')
+			], 403);
+		}
+		if( !$user || !$user->ableToAny(['screening.update', 'screening.store']) )
+		{
+			return response()->json([
+				'status' => false,
+				'message' => __('cycles.guidelines_permissions')
+			], 403);
+		}
+
+		try {
+			$image = $request->file('image');
+			$stepId = $request->step_id;
+
+			// Generate unique filename: timestamp_cycleId_randomString.ext
+			$filename = time() . '_' . $stepId . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+			// Store in cycle-specific subfolder
+			$path = "{$stepId}/{$filename}";
+			Storage::disk('screening_guidelines')->put($path, file_get_contents($image));
+
+			// Optional: Resize image to optimize storage (using Intervention Image)
+			$fullPath = Storage::disk('screening_guidelines')->path($path);
+			if (class_exists('\Intervention\Image\Facades\Image')) {
+				\Intervention\Image\Facades\Image::make($fullPath)
+					->resize(1200, null, function ($constraint) {
+						$constraint->aspectRatio();
+						$constraint->upsize();
+					})
+					->save();
+			}
+
+			// Generate URL for image access
+			$url = route('screening.guidelines.image', [
+				'step_id' => $stepId,
+				'filename' => $filename
+			]);
+
+			return response()->json([
+				'status' => true,
+				'url' => $url,
+				'message' => __('admin.Image uploaded successfully')
+			]);
+
+		} catch (\Exception $e) {
+			\Log::error('Screening guidelines image upload failed: ' . $e->getMessage());
+
+			return response()->json([
+				'status' => false,
+				'message' => __('admin.Image upload failed')
+			], 500);
+		}
+	}
+
+	/**
+	 * Serve uploaded image with access control
+	 *
+	 * @param Request $request
+	 * @param int $step_id
+	 * @param string $filename
+	 * @return \Illuminate\Http\Response
+	 */
+	public function serveImage(Request $request, $step_id, $filename)
+	{
+		$user = auth()->user();
+
+		// Verify cycle exists and user has access
+		$step = Step::findOrFail($step_id);
+
+		// Build file path
+		$path = "{$step_id}/{$filename}";
+		$disk = Storage::disk('screening_guidelines');
+
+		// Check if file exists
+		if (!$disk->exists($path)) {
+			abort(404, __('admin.Image not found'));
+		}
+
+		// Get file contents and MIME type
+		$file = $disk->get($path);
+		$mimeType = $disk->mimeType($path);
+
+		// Return file response
+		return response($file, 200)->header('Content-Type', $mimeType);
+	}
+
 	public function results(Request $request, $id = 0)
 	{
 		$user = auth()->user();
