@@ -190,6 +190,7 @@ return [
 
     // Service Provider Dashboard
     'sp_dashboard' => 'Dashboard',
+    'sp_dashboard_desc' => 'Overview of your service performance and pending requests.',
     'sp_my_dashboard' => 'My Dashboard',
     'sp_total_services' => 'Total Services',
     'sp_active_services' => 'Active Services',
@@ -241,4 +242,11 @@ return [
     'sp_status_rejected_message' => 'Your request has been rejected.',
     'sp_status_rejected_support' => 'If you believe this is a mistake, please contact us at :email.',
     'sp_status_rejected_reason_label' => 'Reason',
+    'sp_request_volume' => 'Request volume',
+    'sp_service_distribution' => 'Service distribution',
+    'sp_weekly' => 'Weekly',
+    'sp_requests' => 'Requests',
+    'sp_top_share' => 'Top Share',
+    'sp_total' => 'Total',
+    'sp_completion_rate' => 'Completion Rate'
 ];

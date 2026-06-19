@@ -190,6 +190,7 @@ return [
 
     // لوحة تحكم مزود الخدمة
     'sp_dashboard' => 'لوحة التحكم',
+    'sp_dashboard_desc' => 'نظرة عامة على أداء الخدمة والطلبات المعلقة.',
     'sp_my_dashboard' => 'لوحة التحكم الخاصة بي',
     'sp_total_services' => 'إجمالي الخدمات',
     'sp_active_services' => 'الخدمات النشطة',
@@ -241,4 +242,11 @@ return [
     'sp_status_rejected_message' => 'تم رفض طلبك',
     'sp_status_rejected_support' => 'إذا كنت تعتقد أن هذا القرار غير صحيح، يرجى التواصل معنا عبر :email',
     'sp_status_rejected_reason_label' => 'السبب',
+    'sp_request_volume' => 'مستوى الطلبات',
+    'sp_service_distribution' => 'توزيع الخدمات',
+    'sp_weekly' => 'أسبوعي',
+    'sp_requests' => 'الطلبات',
+    'sp_top_share' => 'أعلى مشاركة',
+    'sp_total' => 'إجمالي',
+    'sp_completion_rate' => 'معدل الإنجاز'
 ];
