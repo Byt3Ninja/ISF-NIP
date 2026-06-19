@@ -46,6 +46,8 @@ use App\Notifications\StartupJoiningNotification;
 
 class CyclesController extends Controller
 {
+    use \App\Traits\ValidatesUrlDomains;
+
     protected $whatsAppService;
     public function __construct(WhatsAppService $whatsAppService)
     {
@@ -1160,7 +1162,7 @@ class CyclesController extends Controller
         });
         $field_map_ids = $fields->pluck('pivot.id')->toArray();
         // تجهيز البيانات بشكل منسق
-        $structured = $fields->map(function ($field) { 
+        $structured = $fields->map(function ($field) {
             $options = (array) $field->options;
             return [
                 'id'          => $field->pivot->id,
@@ -1173,6 +1175,7 @@ class CyclesController extends Controller
                     ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
                     : [],
                 'logic'       => $options['logic'] ?? 'continue',
+                'allowed_domains' => $options['allowed_domains'] ?? '',
             ];
         })
         ->groupBy('section')
@@ -1190,6 +1193,7 @@ class CyclesController extends Controller
                         'type'        => $q['type'],
                         'options'     => $q['options'],
                         'logic'       => (array) $q['logic'],
+                        'allowed_domains' => $q['allowed_domains'] ?? '',
                     ];
                 })->toArray(),
             ];
@@ -1223,7 +1227,14 @@ class CyclesController extends Controller
         foreach ($answers as $answer) {
             $inputs[ 'field_' . $answer->field_id] = $answer->answer;
         };
-        session()->flashInput($inputs);
+        // Seed old() with the saved DB answers ONLY on a normal page load. When
+        // saveForm() fails validation it redirects back here with ->withInput();
+        // flashing the DB values would overwrite that just-submitted input and
+        // blank out the form (especially on a first submission with no saved
+        // rows). So defer to any input that is already flashed.
+        if (! session()->hasOldInput()) {
+            session()->flashInput($inputs);
+        }
 
         return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
@@ -1291,16 +1302,20 @@ class CyclesController extends Controller
         $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
         $messages_map = [
             'en' => [
-                'required'  => 'This field is required.',
-                'email'     => 'Please enter a valid email address.',
+                'required'        => 'This field is required.',
+                'email'           => 'Please enter a valid email address.',
+                'url'             => 'Please enter a valid URL starting with http:// or https://.',
+                'allowed_domains' => 'The URL must belong to one of these domains: :domains.',
                 'numeric'   => 'Please enter numbers only.',
                 'time'      => 'Please enter a valid time.',
                 'file_size' => 'File size must not exceed 10 MB.',
                 'file_type' => 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
             ],
             'ar' => [
-                'required'  => 'هذا الحقل مطلوب.',
-                'email'     => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'required'        => 'هذا الحقل مطلوب.',
+                'email'           => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'url'             => 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+                'allowed_domains' => 'يجب أن ينتمي الرابط إلى أحد هذه النطاقات: :domains.',
                 'numeric'   => 'يرجى إدخال أرقام فقط.',
                 'time'      => 'يرجى إدخال وقت صحيح.',
                 'file_size' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
@@ -1385,6 +1400,19 @@ class CyclesController extends Controller
                     $rules[] = 'email';
                     $custom_messages[$field_name . '.email'] = $L['email'];
                     break;
+                case 'url':
+                    $rules[] = 'url';
+                    $custom_messages[$field_name . '.url'] = $L['url'];
+                    $allowedDomains = $this->parseAllowedDomains($field['allowed_domains'] ?? '');
+                    if (!empty($allowedDomains)) {
+                        $domainsLabel = implode(', ', $allowedDomains);
+                        $rules[] = function ($attribute, $value, $fail) use ($allowedDomains, $domainsLabel, $L) {
+                            if ($value !== null && $value !== '' && !$this->urlHostAllowed($value, $allowedDomains)) {
+                                $fail(str_replace(':domains', $domainsLabel, $L['allowed_domains']));
+                            }
+                        };
+                    }
+                    break;
                 case 'number':
                 case 'linear_scale':
                     $rules[] = 'numeric';
@@ -1414,7 +1442,11 @@ class CyclesController extends Controller
                     break;
             }
 
-            $rules_array[$field_name] = implode('|', $rules);
+            // Closure rules (e.g. the allowed-domains check) can't be joined into
+            // the pipe-delimited string, so pass the array form when any rule is
+            // not a plain string; otherwise keep the original string format.
+            $hasClosureRule = collect($rules)->contains(fn ($r) => !is_string($r));
+            $rules_array[$field_name] = $hasClosureRule ? $rules : implode('|', $rules);
             $custom_messages[$field_name . '.required'] = $L['required'];
         }
 

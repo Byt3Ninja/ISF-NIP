@@ -371,6 +371,7 @@
                                         value="{{ old($fieldName) }}"
                                         placeholder="{{ $question['label'] }}"
                                         data-qtype="url"
+                                        data-allowed-domains="{{ $question['allowed_domains'] ?? '' }}"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
                                     </div>
@@ -489,6 +490,7 @@
         numeric: 'Please enter numbers only.',
         time: 'Please enter a valid time.',
         url: 'Please enter a valid URL starting with http:// or https://.',
+        allowed_domains: 'The URL must belong to one of these domains: ',
         file_size: 'File size must not exceed 10 MB.',
         file_type: 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
         confirm_submit_title: 'Submit application?',
@@ -502,6 +504,7 @@
         numeric: 'يرجى إدخال أرقام فقط.',
         time: 'يرجى إدخال وقت صحيح.',
         url: 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+        allowed_domains: 'يجب أن ينتمي الرابط إلى أحد هذه النطاقات: ',
         file_size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
         file_type: 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
         confirm_submit_title: 'إرسال النموذج؟',
@@ -515,6 +518,23 @@
     const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
     const t = translations[locale];
+
+    // URL "allowed domains" matching — mirrors App\Traits\ValidatesUrlDomains so
+    // client and server enforce the same rule (host equals the domain or is a
+    // subdomain of it). Empty list = no restriction.
+    const parseAllowedDomains = raw => (raw || '')
+      .split(',')
+      .map(d => d.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, ''))
+      .filter(Boolean);
+
+    const urlHostAllowed = (url, allowedDomains) => {
+      if (!allowedDomains.length) return true;
+      let host;
+      try { host = new URL(url).hostname.toLowerCase().replace(/^www\./, ''); }
+      catch (e) { return false; }
+      return allowedDomains.some(d => host === d || host.endsWith('.' + d));
+    };
+
     const fields = {};
     const processedNames = new Set();
 
@@ -596,11 +616,19 @@
       }
 
       if (qtype === 'url') {
+        const allowedDomains = parseAllowedDomains(field.dataset.allowedDomains);
         validators.callback_url = {
           message: t.url,
           callback: function () {
             const value = (field.value || '').trim();
-            return value === '' || /^(https?:\/\/).+/i.test(value);
+            if (value === '') return true;
+            if (!/^(https?:\/\/).+/i.test(value)) {
+              return { valid: false, message: t.url };
+            }
+            if (!urlHostAllowed(value, allowedDomains)) {
+              return { valid: false, message: t.allowed_domains + allowedDomains.join(', ') };
+            }
+            return true;
           }
         };
       }

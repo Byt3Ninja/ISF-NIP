@@ -425,16 +425,20 @@
                                   @break
 
                                 @case('short_answer')
+                                @case('url')
+                                @case('email')
                                 @default
                                   <div class="input-group">
                                     <span class="input-group-text bg-label-primary border-end-0">
                                       <i class="{{ $meta['icon'] }}"></i>
                                     </span>
                                     <input
-                                      type="text"
+                                      type="{{ $question['type'] === 'email' ? 'email' : ($question['type'] === 'url' ? 'url' : 'text') }}"
                                       class="form-control application-short-answer @error($fieldName) is-invalid @enderror"
                                       id="{{ $fieldId }}"
                                       name="{{ $fieldName }}"
+                                      data-qtype="{{ $question['type'] }}"
+                                      data-allowed-domains="{{ $question['allowed_domains'] ?? '' }}"
                                       value="{{ old($fieldName) }}"
                                       placeholder="{{ $question['label'] }}"
                                       {{ $question['is_required'] ? 'required' : '' }}
@@ -535,6 +539,7 @@
         email: 'Please enter a valid email address.',
         phone: 'Please enter a valid phone number.',
         url: 'Please enter a valid URL starting with http:// or https://.',
+        allowed_domains: 'The URL must belong to one of these domains: ',
         file_size: 'File size must not exceed 10 MB.',
         file_type: 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
       },
@@ -543,6 +548,7 @@
         email: 'يرجى إدخال بريد إلكتروني صحيح.',
         phone: 'يرجى إدخال رقم هاتف صالح.',
         url: 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+        allowed_domains: 'يجب أن ينتمي الرابط إلى أحد هذه النطاقات: ',
         file_size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
         file_type: 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
       }
@@ -555,6 +561,22 @@
     const fields = {};
     const processedNames = new Set();
     let isSubmitting = false;
+
+    // URL "allowed domains" matching — mirrors App\Traits\ValidatesUrlDomains so
+    // the client and server enforce the same rule (host equals the domain or is
+    // a subdomain of it). Empty list = no restriction.
+    const parseAllowedDomains = raw => (raw || '')
+      .split(',')
+      .map(d => d.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, ''))
+      .filter(Boolean);
+
+    const urlHostAllowed = (url, allowedDomains) => {
+      if (!allowedDomains.length) return true;
+      let host;
+      try { host = new URL(url).hostname.toLowerCase().replace(/^www\./, ''); }
+      catch (e) { return false; }
+      return allowedDomains.some(d => host === d || host.endsWith('.' + d));
+    };
 
     const getLabel = field => {
       const questionCard = field.closest('.application-question-card');
@@ -599,12 +621,16 @@
       const validators = {};
       const labelText = label.toLowerCase();
       const isRequired = field.required || field.getAttribute('aria-required') === 'true';
+      // Authored field type (e.g. 'email', 'url') takes precedence over the
+      // label heuristic, which only catches short_answer fields whose label
+      // happens to mention "email"/"website" (GV-2813).
+      const qtype = field.dataset.qtype || '';
 
       if (isRequired) {
         addRequiredValidator(validators, field, label);
       }
 
-      if (labelText.includes('email')) {
+      if (qtype === 'email' || labelText.includes('email')) {
         validators.emailAddress = {
           message: t.email
         };
@@ -620,12 +646,20 @@
         };
       }
 
-      if (labelText.includes('url') || labelText.includes('linkedin') || labelText.includes('portfolio') || labelText.includes('website')) {
+      if (qtype === 'url' || labelText.includes('url') || labelText.includes('linkedin') || labelText.includes('portfolio') || labelText.includes('website')) {
+        const allowedDomains = parseAllowedDomains(field.dataset.allowedDomains);
         validators.callback_url = {
           message: t.url,
           callback: function () {
             const value = field.value.trim();
-            return value === '' || /^(https?:\/\/).+/i.test(value);
+            if (value === '') return true;
+            if (!/^(https?:\/\/).+/i.test(value)) {
+              return { valid: false, message: t.url };
+            }
+            if (!urlHostAllowed(value, allowedDomains)) {
+              return { valid: false, message: t.allowed_domains + allowedDomains.join(', ') };
+            }
+            return true;
           }
         };
       }

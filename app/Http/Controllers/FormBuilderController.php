@@ -11,6 +11,7 @@ use App\Field;
 
 class FormBuilderController extends Controller
 {
+    use \App\Traits\ValidatesUrlDomains;
 
     /**
      * show the builder
@@ -167,6 +168,11 @@ class FormBuilderController extends Controller
                     'type' => $type,
                     'options' => is_array($listOptions) ? $listOptions : explode(',', $listOptions),
                     'logic' => $logic,
+                    // Re-hydrate the URL "allowed domains" config so the builder
+                    // repopulates it on edit (the JS reads url_config.allowed_domains).
+                    'url_config' => $type === 'url'
+                        ? ['allowed_domains' => $options->allowed_domains ?? '']
+                        : null,
                 ];
             });
 
@@ -189,6 +195,7 @@ class FormBuilderController extends Controller
                                 'type' => $f['type'],
                                 'options' => $f['options'],
                                 'logic' => $f['logic'],
+                                'url_config' => $f['url_config'] ?? null,
                             ];
                         })->values()->toArray(),
                     ];
@@ -251,6 +258,7 @@ class FormBuilderController extends Controller
                     ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
                     : [],
                 'logic'         => $options['logic'] ?? [],
+                'allowed_domains' => $options['allowed_domains'] ?? '',
             ];
         })
         ->groupBy('section')
@@ -270,6 +278,7 @@ class FormBuilderController extends Controller
                         'type'        => $q['type'],
                         'options'     => $q['options'],
                         'logic'       => $q['logic'],
+                        'allowed_domains' => $q['allowed_domains'] ?? '',
                     ];
                 })->toArray(),
             ];
@@ -313,16 +322,20 @@ class FormBuilderController extends Controller
         $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
         $messages_map = [
             'en' => [
-                'required'  => 'This field is required.',
-                'email'     => 'Please enter a valid email address.',
+                'required'        => 'This field is required.',
+                'email'           => 'Please enter a valid email address.',
+                'url'             => 'Please enter a valid URL starting with http:// or https://.',
+                'allowed_domains' => 'The URL must belong to one of these domains: :domains.',
                 'numeric'   => 'Please enter numbers only.',
                 'time'      => 'Please enter a valid time.',
                 'file_size' => 'File size must not exceed 10 MB.',
                 'file_type' => 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
             ],
             'ar' => [
-                'required'  => 'هذا الحقل مطلوب.',
-                'email'     => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'required'        => 'هذا الحقل مطلوب.',
+                'email'           => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'url'             => 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+                'allowed_domains' => 'يجب أن ينتمي الرابط إلى أحد هذه النطاقات: :domains.',
                 'numeric'   => 'يرجى إدخال أرقام فقط.',
                 'time'      => 'يرجى إدخال وقت صحيح.',
                 'file_size' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
@@ -353,6 +366,19 @@ class FormBuilderController extends Controller
                     $rules[] = 'email';
                     $custom_messages[$field_name . '.email'] = $L['email'];
                     break;
+                case 'url':
+                    $rules[] = 'url';
+                    $custom_messages[$field_name . '.url'] = $L['url'];
+                    $allowedDomains = $this->parseAllowedDomains($field_options->allowed_domains ?? '');
+                    if (!empty($allowedDomains)) {
+                        $domainsLabel = implode(', ', $allowedDomains);
+                        $rules[] = function ($attribute, $value, $fail) use ($allowedDomains, $domainsLabel, $L) {
+                            if ($value !== null && $value !== '' && !$this->urlHostAllowed($value, $allowedDomains)) {
+                                $fail(str_replace(':domains', $domainsLabel, $L['allowed_domains']));
+                            }
+                        };
+                    }
+                    break;
                 case 'number':
                 case 'linear_scale':
                     $rules[] = 'numeric';
@@ -376,7 +402,11 @@ class FormBuilderController extends Controller
                     break;
             }
 
-            $rules_array[$field_name] = implode('|', $rules);
+            // Closure rules (e.g. the allowed-domains check) can't be joined into
+            // the pipe-delimited string, so pass the array form when any rule is
+            // not a plain string; otherwise keep the original string format.
+            $hasClosureRule = collect($rules)->contains(fn ($r) => !is_string($r));
+            $rules_array[$field_name] = $hasClosureRule ? $rules : implode('|', $rules);
             $custom_messages[$field_name . '.required'] = $L['required'];
         }
 
