@@ -1230,7 +1230,6 @@ class CyclesController extends Controller
 
     public function saveForm(Request $request)
     {
-
         $id = $request->id;
         $user = auth()->user();
         $step = Step::where('id', $id)->first();
@@ -1256,6 +1255,16 @@ class CyclesController extends Controller
             $output = array_merge($output, $options);
             return $output;
         });
+
+        // Harden the client-supplied `field_ids`. The stepper computes this list
+        // from the active navigation path, and the controller trusts it to decide
+        // which answers to keep vs. delete. A malformed payload (empty after
+        // filtering, or IDs that don't belong to this form) must be rejected
+        // BEFORE the destructive delete below — otherwise a truncated list would
+        // silently wipe previously-saved answers.
+        $valid_field_ids = $field_mapper->pluck('id')->map('intval')->all();
+        $unknown_ids = array_diff($field_map_ids, $valid_field_ids);
+        abort_if(empty($field_map_ids) || !empty($unknown_ids), 422, "Data error");
 
         // Pre-hydrate the request with previously-submitted file paths so the
         // `required` rule on file fields passes when the founder re-opens an
@@ -1504,10 +1513,19 @@ class CyclesController extends Controller
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         }
 
+        // Clear answers for fields that are NOT on the active navigation path
+        // (e.g. a logic branch the founder did not take). This is intentional
+        // pruning, but it is destructive — it is only reached because the
+        // `field_ids` list was validated above to be non-empty and to contain
+        // only IDs that belong to this form. The delete is further scoped to
+        // this company AND this form so it can never touch unrelated answers.
         $inactive_ids = $inactive_fields->pluck('id')->toArray();
         if( !empty($inactive_ids) )
         {
-            Formdata::whereIn('field_id', $inactive_ids)->where('company_id', $cid)->delete();
+            Formdata::whereIn('field_id', $inactive_ids)
+                ->where('company_id', $cid)
+                ->where('form_id', $id)
+                ->delete();
         }
 
         $data = [];

@@ -130,8 +130,34 @@
                           $meta = $typeMeta[$question['type']] ?? ['icon' => 'ti ti-help', 'label' => ucfirst(str_replace('_', ' ', $question['type']))];
                           $fullWidthTypes = ['paragraph', 'multiple_choice', 'checkboxes', 'linear_scale', 'file'];
                           $columnClass = in_array($question['type'], $fullWidthTypes, true) ? 'col-12' : 'col-12 col-xl-6';
-                          $checkboxAnswers = collect($answers)->where('field_id', $question['id'])->first()?->answer ?? '[]';
-                          $checkboxAnswers = json_decode($checkboxAnswers, true);
+                          // old($fieldName) is the single source of truth: the
+                          // controller flashInput()s DB answers on GET, and
+                          // withInput() re-flashes the submission on a validation
+                          // redirect. The value can be an array (POST of field_X[])
+                          // or a JSON string (flashed DB answer) — normalize both.
+                          $checkboxAnswers = old($fieldName, []);
+                          if (is_string($checkboxAnswers)) {
+                              $decoded = json_decode($checkboxAnswers, true);
+                              $checkboxAnswers = is_array($decoded) ? $decoded : array_filter([$checkboxAnswers]);
+                          }
+                          $checkboxAnswers = is_array($checkboxAnswers) ? $checkboxAnswers : [];
+
+                          // Detect a custom "Other" answer: any saved value that is
+                          // not one of the predefined options is the free text the
+                          // user typed (the __OTHER__ marker was replaced on save).
+                          $predefinedOptions = $question['options'] ?? [];
+                          $checkboxOtherValue = collect($checkboxAnswers)
+                              ->first(fn($v) => $v !== '__OTHER__' && !in_array($v, $predefinedOptions, true));
+
+                          // Same detection for scalar fields (dropdown / multiple_choice):
+                          // a stored value that matches no predefined option is an
+                          // "Other" free-text answer. Used to re-select __OTHER__,
+                          // reveal the box, and prefill it on reload.
+                          $scalarOld = old($fieldName);
+                          $scalarOtherValue = ($scalarOld !== null && $scalarOld !== '' && $scalarOld !== '__OTHER__' && !in_array($scalarOld, $predefinedOptions, true))
+                              ? $scalarOld
+                              : null;
+                          $scalarIsOther = $scalarOld === '__OTHER__' || $scalarOtherValue !== null;
                         @endphp
 
                         <div class="{{ $columnClass }}">
@@ -179,14 +205,14 @@
                                         <option
                                           value="{{ $option }}"
                                           data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
-                                          {{ old($fieldName) == $option ? 'selected' : '' }}
+                                          {{ ($scalarOld == $option || ($option === '__OTHER__' && $scalarIsOther)) ? 'selected' : '' }}
                                         >
                                           {{ $option === '__OTHER__' ? __('builder.Other') : $option }}
                                         </option>
                                       @endforeach
                                     </select>
                                   </div>
-                                  <div id="{{ $fieldId }}_other_wrapper" class="mt-2 {{ old($fieldName) === '__OTHER__' ? '' : 'd-none' }}">
+                                  <div id="{{ $fieldId }}_other_wrapper" class="mt-2 {{ $scalarIsOther ? '' : 'd-none' }}">
                                     <div class="input-group">
                                       <span class="input-group-text bg-label-primary border-end-0">
                                         <i class="ti ti-edit"></i>
@@ -197,7 +223,7 @@
                                         name="{{ $fieldName }}_other"
                                         id="{{ $fieldId }}_other"
                                         placeholder="{{ __('builder.Other_value') }}"
-                                        value="{{ old($fieldName . '_other') }}"
+                                        value="{{ old($fieldName . '_other', $scalarOtherValue) }}"
                                         {{ $isReadOnly ? 'disabled' : '' }}
                                       />
                                     </div>
@@ -227,7 +253,7 @@
                                           id="{{ $fieldId }}_{{ $optionIndex }}"
                                           value="{{ $option }}"
                                           data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
-                                          {{ old($fieldName) == $option ? 'checked' : '' }}
+                                          {{ ($scalarOld == $option || ($option === '__OTHER__' && $scalarIsOther)) ? 'checked' : '' }}
                                           {{ $question['is_required'] ? 'required' : '' }}
                                           {{ $isReadOnly ? 'disabled' : '' }}
                                         />
@@ -236,7 +262,7 @@
                                         </label>
                                       </div>
                                     @endforeach
-                                    <div id="{{ $fieldId }}_other_wrapper" class="mt-2 {{ old($fieldName) === '__OTHER__' ? '' : 'd-none' }}">
+                                    <div id="{{ $fieldId }}_other_wrapper" class="mt-2 {{ $scalarIsOther ? '' : 'd-none' }}">
                                       <div class="input-group">
                                         <span class="input-group-text bg-label-primary border-end-0">
                                           <i class="ti ti-edit"></i>
@@ -247,7 +273,7 @@
                                           name="{{ $fieldName }}_other"
                                           id="{{ $fieldId }}_other"
                                           placeholder="{{ __('builder.Other_value') }}"
-                                          value="{{ old($fieldName . '_other') }}"
+                                          value="{{ old($fieldName . '_other', $scalarOtherValue) }}"
                                           {{ $isReadOnly ? 'disabled' : '' }}
                                         />
                                       </div>
@@ -265,7 +291,7 @@
                                           name="{{ $fieldName }}[]"
                                           id="{{ $fieldId }}_{{ $optionIndex }}"
                                           value="{{ $option }}"
-                                          {{ is_array($checkboxAnswers) && in_array($option, $checkboxAnswers, true) ? 'checked' : '' }}
+                                          {{ (in_array($option, $checkboxAnswers, true) || ($option === '__OTHER__' && $checkboxOtherValue !== null)) ? 'checked' : '' }}
                                           data-logic="{{ $question['logic'][$option] ?? 'continue' }}"
                                           {{ $question['is_required'] ? 'required' : '' }}
                                           {{ $isReadOnly ? 'disabled' : '' }}
@@ -275,7 +301,7 @@
                                         </label>
                                       </div>
                                     @endforeach
-                                    <div id="{{ $fieldId }}_other_wrapper" class="mt-2 d-none">
+                                    <div id="{{ $fieldId }}_other_wrapper" class="mt-2 {{ $checkboxOtherValue !== null ? '' : 'd-none' }}">
                                       <div class="input-group">
                                         <span class="input-group-text bg-label-primary border-end-0">
                                           <i class="ti ti-edit"></i>
@@ -286,7 +312,7 @@
                                           name="{{ $fieldName }}_other"
                                           id="{{ $fieldId }}_other"
                                           placeholder="{{ __('builder.Other_value') }}"
-                                          value="{{ old($fieldName . '_other') }}"
+                                          value="{{ old($fieldName . '_other', $checkboxOtherValue) }}"
                                           {{ $isReadOnly ? 'disabled' : '' }}
                                         />
                                       </div>
@@ -813,7 +839,12 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     const sections = document.querySelectorAll(".section-wrapper");
-    const form = document.querySelector("form");
+    // MUST target the application form by id. `document.querySelector("form")`
+    // returns the FIRST form in the DOM — which is the header's
+    // #stop-impersonation-form (when impersonating) or #logout-form (normal
+    // login), both rendered before this one. Submitting that wrong form is what
+    // logged the user out / stopped impersonation instead of saving answers.
+    const form = document.getElementById("cycleApplicationForm");
     const submitBtn = form?.querySelector('button[type="submit"]');
     const submitStep = document.getElementById("submit-step");
     const logicInputs = document.querySelectorAll(".question-logic");
@@ -863,36 +894,38 @@
     function getActivePath() {
       const path = [0];
       let current = 0;
+      // Guard against cyclic section logic (a "section-N" jump that points back
+      // to an already-visited section). Without this the while loop never
+      // terminates and freezes the browser ("a script is slowing down the page").
+      const visited = new Set([0]);
       while (current < sections.length) {
         const section = sections[current];
         if (!section) break;
         const logic = getNextLogic(section);
+
+        let nextIndex;
         if (logic === "submit") {
           path.push("submit");
           break;
         } else if (logic.startsWith("section-")) {
           const targetId = parseInt(logic.replace("section-", ""));
-          if (sections[targetId]) {
-            path.push(targetId);
-            current = targetId;
-          } else {
-            if (sections[current + 1]) {
-              path.push(current + 1);
-              current = current + 1;
-            } else {
-              path.push("submit");
-              break;
-            }
-          }
+          nextIndex = sections[targetId] ? targetId : current + 1;
         } else {
-          if (sections[current + 1]) {
-            path.push(current + 1);
-            current = current + 1;
-          } else {
-            path.push("submit");
-            break;
-          }
+          nextIndex = current + 1;
         }
+
+        if (!sections[nextIndex]) {
+          path.push("submit");
+          break;
+        }
+        // A jump to an already-visited section would loop forever; stop here.
+        if (visited.has(nextIndex)) {
+          path.push("submit");
+          break;
+        }
+        visited.add(nextIndex);
+        path.push(nextIndex);
+        current = nextIndex;
       }
       return path;
     }
@@ -1063,6 +1096,36 @@
       }
     }
 
+    // Restore "__OTHER__" selections after a validation-failure redirect. On
+    // submit the JS normalizes __OTHER__ into the typed free-text value (see the
+    // submit handler), so old($fieldName) comes back as the custom text and no
+    // longer matches the __OTHER__ option. We detect this via the still-present
+    // old() value of the `_other` text box: if it has content, the user picked
+    // Other — so re-select the __OTHER__ option and reveal its input.
+    document.querySelectorAll('.other-field').forEach(otherInput => {
+      if (!otherInput.value.trim()) return;
+
+      const card = otherInput.closest('.application-question-card');
+      if (!card) return;
+
+      // Re-select the __OTHER__ option on the source field(s).
+      const select = card.querySelector('select.question-logic');
+      if (select) {
+        select.value = '__OTHER__';
+      }
+      card.querySelectorAll('input.question-logic[value="__OTHER__"]').forEach(input => {
+        if (input.type === 'radio' || input.type === 'checkbox') {
+          input.checked = true;
+        }
+      });
+
+      // Reveal the wrapper holding the free-text box.
+      const wrapper = card.querySelector('[id$="_other_wrapper"]');
+      if (wrapper) {
+        wrapper.classList.remove('d-none');
+      }
+    });
+
     document.querySelectorAll('.question-logic').forEach(input => {
       if (['select-one', 'radio', 'checkbox'].includes(input.type)) {
         toggleOtherField(input);
@@ -1086,84 +1149,83 @@
       return field.closest('.application-question-card')?.querySelector('[id$="_other"]');
     }
 
-    // Form submission interception: dynamic enabled/disabled path and active field_ids setting
-    if (form) {
-      form.addEventListener('submit', function (e) {
-        // Run final validation check on all active sections
-        var fv = window._formValidation;
-        if (fv) {
-          // Temporarily enable everything in the active path to run validator properly
-          const activePath = getActivePath();
-          activePath.forEach(idx => {
-            if (typeof idx === 'number' && sections[idx]) {
-              setSectionInputsEnabled(sections[idx], true);
-            }
-          });
+    // Re-enable every input on the active path and refresh the hidden
+    // `field_ids` value so the POST body contains the answers. The stepper
+    // disables hidden sections (see showSection), and disabled inputs are
+    // excluded from the submission — without this, the form would post empty,
+    // failing server validation and bouncing the user back to login.
+    // Replace any selected "__OTHER__" marker with the typed free-text value so
+    // the server stores the real answer, not the literal "__OTHER__" sentinel.
+    // MUST run on every submit path — including FormValidation's programmatic
+    // form.submit(), which does NOT fire the form's 'submit' event. (Previously
+    // this lived only in the submit-event handler, so FV submissions saved the
+    // raw "__OTHER__" string and lost the typed text.)
+    function normalizeOtherFields() {
+      const handle = field => {
+        // Skip already-normalized fields so calling this twice (submit event +
+        // FV core.form.valid both run prepareSubmission) doesn't append a
+        // duplicate hidden input.
+        if (field.disabled || field.value !== '__OTHER__') return;
+        const otherInput = findOtherInput(field);
+        if (otherInput && otherInput.value.trim()) {
+          const hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = field.name;
+          hidden.value = otherInput.value.trim();
+          form.appendChild(hidden);
+          field.disabled = true; // exclude the raw "__OTHER__" value from the POST
         }
-        
-        // Handle '__OTHER__' selection normalization
-        document.querySelectorAll('select.question-logic, input[type="radio"].question-logic:checked').forEach(field => {
-          if (field.value === '__OTHER__') {
-            const otherInput = findOtherInput(field);
-            if (otherInput && otherInput.value.trim()) {
-              const hidden = document.createElement('input');
-              hidden.type = 'hidden';
-              hidden.name = field.name;
-              hidden.value = otherInput.value.trim();
-              form.appendChild(hidden);
-              field.disabled = true;
-            }
-          }
-        });
-        document.querySelectorAll('input[type="checkbox"].question-logic:checked').forEach(cb => {
-          if (cb.value === '__OTHER__') {
-            const otherInput = findOtherInput(cb);
-            if (otherInput && otherInput.value.trim()) {
-              const hidden = document.createElement('input');
-              hidden.type = 'hidden';
-              hidden.name = cb.name;
-              hidden.value = otherInput.value.trim();
-              form.appendChild(hidden);
-              cb.disabled = true;
-            }
+      };
+
+      form.querySelectorAll('select.question-logic, input[type="radio"].question-logic:checked, input[type="checkbox"].question-logic:checked')
+        .forEach(handle);
+    }
+
+    function prepareSubmission() {
+      const activePath = getActivePath();
+
+      // 1. Enable inputs in active sections, disable all others (so they are excluded from POST)
+      sections.forEach((s, idx) => {
+        setSectionInputsEnabled(s, activePath.includes(idx));
+      });
+
+      // 2. Normalize "__OTHER__" selections into their typed free-text values
+      //    (after enabling active sections so their fields are reachable).
+      normalizeOtherFields();
+
+      // 3. Gather active field IDs and update the hidden 'field_ids' field
+      const activeFieldIds = [];
+      activePath.forEach(idx => {
+        if (typeof idx !== 'number' || !sections[idx]) return;
+        sections[idx].querySelectorAll('input[name], select[name], textarea[name]').forEach(input => {
+          const match = input.name.match(/^field_(\d+)/);
+          if (match) {
+            activeFieldIds.push(match[1]);
           }
         });
       });
+      const fieldIdsInput = form.querySelector('input[name="field_ids"]');
+      if (fieldIdsInput) {
+        fieldIdsInput.value = [...new Set(activeFieldIds)].join(',');
+      }
     }
 
-    // Hook FormValidation success event to do final path enabling/disabling & updating field_ids
+    // Form submission interception: dynamic enabled/disabled path and active field_ids setting
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        // Re-enable the active path and normalize "__OTHER__" on EVERY submit,
+        // regardless of whether FormValidation is active. This is the path used
+        // when FV is NOT created (no field has a validator); when FV IS active,
+        // its core.form.valid handler calls prepareSubmission() instead.
+        prepareSubmission();
+      });
+    }
+
+    // Hook FormValidation success event to do final path enabling/disabling,
+    // refresh field_ids, then submit natively (avoids the FormValidation loop).
     if (window._formValidation) {
       window._formValidation.on('core.form.valid', function () {
-        const activePath = getActivePath();
-
-        // 1. Enable inputs in active sections, disable all others (so they are excluded from POST)
-        sections.forEach((s, idx) => {
-          if (activePath.includes(idx)) {
-            setSectionInputsEnabled(s, true);
-          } else {
-            setSectionInputsEnabled(s, false);
-          }
-        });
-
-        // 2. Gather active field IDs and update the hidden 'field_ids' field
-        const activeFieldIds = [];
-        activePath.forEach(idx => {
-          if (typeof idx !== 'number' || !sections[idx]) return;
-          sections[idx].querySelectorAll('input[name], select[name], textarea[name]').forEach(input => {
-            const match = input.name.match(/^field_(\d+)/);
-            if (match) {
-              activeFieldIds.push(match[1]);
-            }
-          });
-        });
-        const uniqueFieldIds = [...new Set(activeFieldIds)].join(',');
-        
-        const fieldIdsInput = form.querySelector('input[name="field_ids"]');
-        if (fieldIdsInput) {
-          fieldIdsInput.value = uniqueFieldIds;
-        }
-
-        // 3. Programmatically submit using the native submit (avoids FormValidation loop)
+        prepareSubmission();
         form.submit();
       });
     }
