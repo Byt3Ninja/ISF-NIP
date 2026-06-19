@@ -1,5 +1,13 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+@stop
+
+@section('scripts')
+    <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+@stop
+
 @section('content')
 <div class="">
   <div class="">
@@ -258,14 +266,18 @@
               class="form-control" required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.start_date') }}</label>
-            <input id="step-from-date" name="fromDate" type="text" class="form-control date"
-              required>
+            <label class="form-label" for="ScreeningSelect">{{ __('cycles.Choose screening type') }}:</label>
+            <select class="form-control select2" id="ScreeningSelect" name="mScreeningSelect" required>
+              <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
+              <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
+              <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
+            </select>
           </div>
+          <input type="hidden" id="mfromDate" name="fromDate">
+          <input type="hidden" id="mtoDate" name="toDate">
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.end_date') }}</label>
-            <input id="step-to-date" name="toDate" type="text" class="form-control date"
-              required>
+            <label class="form-label">{{ __('admin.Date Range') }}</label>
+            <input id="step-range-picker" name="date_range" type="text" class="form-control" required>
           </div>
           <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Description') }}</label>
@@ -301,11 +313,6 @@
       });
     });
 
-    // Initialize date pickers
-    $('.date').flatpickr({
-      enableTime: false,
-      dateFormat: 'Y-m-d'
-    });
   });
 
   // // Toggle submit button disable state on form change
@@ -321,9 +328,29 @@
       $('#step-form-modal').modal('show');
       $('#step-id-value').val(stepData.id);
       $('#step-title').val(stepData.title);
-      $('#step-from-date').val(stepData.start_date);
-      $('#step-to-date').val(stepData.end_date);
       $('#step-description').val(stepData.description);
+
+      // Preselect the current screening type; default to grouptogroup for null or legacy values.
+      let stype = stepData.screening_type_value;
+      if (stype !== 'onetoall' && stype !== 'grouptoall' && stype !== 'grouptogroup') {
+        stype = 'grouptogroup';
+      }
+      $('#ScreeningSelect').val(stype).trigger('change.select2');
+
+      // Seed hidden date inputs (start_date maps to from, end_date maps to to), with a today fallback.
+      $('#mfromDate').val(stepData.start_date || moment().format('YYYY-MM-DD'));
+      $('#mtoDate').val(stepData.end_date || moment().format('YYYY-MM-DD'));
+
+      // Combined range picker; no locale so date_range posts MM/DD/YYYY matching the controller m/d/Y parse.
+      $('#step-range-picker').daterangepicker({
+        opens: $('html').attr('dir') === 'rtl' ? 'left' : 'right',
+        drops: 'up',
+        startDate: stepData.start_date ? moment(stepData.start_date) : moment(),
+        endDate: stepData.end_date ? moment(stepData.end_date) : moment(),
+      }).on('apply.daterangepicker', function (ev, picker) {
+        $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+        $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+      });
     }
   });
 

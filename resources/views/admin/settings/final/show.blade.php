@@ -3,6 +3,7 @@
 @section('vendorstyle')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <style>
   .note-modal {
     margin-top: 100px !important;
@@ -367,19 +368,23 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
           <div class="form-group mb-3">
+            <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
+            <select class="form-select select2" id="mFormSelect" name="mFormSelect" required>
+              @foreach($forms as $f)
+                <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>{{ $f->form_name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Title') }}</label>
             <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
               class="form-control" required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.start_date') }}</label>
-            <input id="step-from-date" name="fromDate" type="text" class="form-control date"
-              required>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.end_date') }}</label>
-            <input id="step-to-date" name="toDate" type="text" class="form-control date"
-              required>
+            <label class="form-label" for="step-range-picker">{{ __('admin.start_date') }} - {{ __('admin.end_date') }}:</label>
+            <input type="hidden" name="fromDate" id="mfromDate">
+            <input type="hidden" name="toDate" id="mtoDate">
+            <input type="text" id="step-range-picker" class="form-control" name="date_range">
           </div>
           <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Description') }}</label>
@@ -440,6 +445,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+    <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop
 
 @section('pagescripts')
@@ -521,27 +527,38 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         }, 100);
       }
 
-      // Initialize date pickers
-      $('.date').flatpickr({
-        enableTime: false,
-        dateFormat: 'Y-m-d'
-      });
     });
 
     $('.edit-step-btn').on('click', function () {
       const stepData = $(this).data('step');
-
-      console.log('stepData', stepData)
 
       if (stepData) {
         $('#stepForm input[name="_token"]').val($('meta[name="csrf-token"]').attr('content'));
         $('#step-form-modal').modal('show');
         $('#step-id-value').val(stepData.id);
         $('#step-title').val(stepData.title);
-        $('#step-from-date').val(stepData.to);
-        $('#step-to-date').val(stepData.from);
         $('#step-description').val(stepData.description);
 
+        // Preselect the current form only when the step's data column holds a form id.
+        // Legacy steps may have a stale/empty data column, so leave the server default in place.
+        if (stepData.data) {
+          $('#mFormSelect').val(stepData.data).trigger('change.select2');
+        }
+
+        // Seed hidden date inputs (correct mapping: from -> start, to -> end)
+        $('#mfromDate').val(stepData.from || moment().format('YYYY-MM-DD'));
+        $('#mtoDate').val(stepData.to || moment().format('YYYY-MM-DD'));
+
+        // Combined range picker, mirroring the Steps Page dialog
+        $('#step-range-picker').daterangepicker({
+          opens: $('html').attr('dir') === 'rtl' ? 'left' : 'right',
+          drops: 'up',
+          startDate: stepData.from ? moment(stepData.from) : moment(),
+          endDate: stepData.to ? moment(stepData.to) : moment(),
+        }).on('apply.daterangepicker', function(ev, picker) {
+          $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+          $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+        });
       }
     });
 

@@ -143,6 +143,10 @@ class FinalscreeningController extends Controller
 				->get()
 				->keyBy(fn ($f) => "{$f->cycle_id}-{$f->arr}");
 
+		// Org-scoped BuilderForms for the list-page Modify Step form dropdown.
+		$orgIds = $steps->pluck('cycle.organization_id')->filter()->unique()->values();
+		$formsByOrg = \App\BuilderForm::whereIn('organization_id', $orgIds)->get()->groupBy('organization_id');
+
 		/** -------------------------
 		 * Build finalScreeningSteps
 		 * ------------------------- */
@@ -184,6 +188,8 @@ class FinalscreeningController extends Controller
 				'judges'		=> $judgesForStep,
 				'companies'	    => $companiesForStep,
 				'form'		    => $form ? (object) ['id' => $form->id, 'title' => $form->title] : null,
+				'form_id'         => $step->form_id,
+				'organization_id' => $step->cycle?->organization_id,
 			];
 		});
 
@@ -203,7 +209,7 @@ class FinalscreeningController extends Controller
 			]
 		);
 
-		return view('admin.settings.final.index', compact('finalScreeningSteps', 'paginatedFinalSteps', 'programs_in_final_screening'));
+		return view('admin.settings.final.index', compact('finalScreeningSteps', 'paginatedFinalSteps', 'programs_in_final_screening', 'formsByOrg'));
 	}
 
 	public function show($id = 0)

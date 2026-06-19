@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+@stop
+
 @section('content')
 <div class="">
   <div class="">
@@ -255,14 +259,14 @@
               class="form-control" required>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.start_date') }}</label>
-            <input id="step-from-date" name="fromDate" type="text" class="form-control date"
-              required>
+            <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
+            <select class="form-select select2" id="mFormSelect" name="mFormSelect" required></select>
           </div>
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.end_date') }}</label>
-            <input id="step-to-date" name="toDate" type="text" class="form-control date"
-              required>
+            <label class="form-label" for="step-range-picker">{{ __('admin.start_date') }} - {{ __('admin.end_date') }}:</label>
+            <input type="hidden" name="fromDate" id="mfromDate">
+            <input type="hidden" name="toDate" id="mtoDate">
+            <input type="text" id="step-range-picker" class="form-control" name="date_range">
           </div>
           <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Description') }}</label>
@@ -285,7 +289,14 @@
 <!--/ Step Form Modal -->
 @endsection
 
+@section('scripts')
+    <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+@stop
+
 @section('pagescripts')
+<script>
+  const formsByOrg = @json($formsByOrg->map(fn($g) => $g->map(fn($f) => ['id' => $f->id, 'name' => $f->form_name])->values()));
+</script>
 <script>
   $(function () {
     // Initialize Select2
@@ -296,11 +307,6 @@
         dropdownParent: $this.parent(),
         // allowClear: true
       });
-    });
-    // Initialize date pickers
-    $('.date').flatpickr({
-      enableTime: false,
-      dateFormat: 'Y-m-d'
     });
   });
 
@@ -317,9 +323,35 @@
       $('#step-form-modal').modal('show');
       $('#step-id-value').val(stepData.id);
       $('#step-title').val(stepData.title);
-      $('#step-from-date').val(stepData.start_date);
-      $('#step-to-date').val(stepData.end_date);
       $('#step-description').val(stepData.description);
+
+      // Populate the form dropdown with this step's organization forms, preselecting the step's form.
+      // Build options with the DOM API so form names are text-escaped (no innerHTML injection).
+      const orgForms = (formsByOrg && formsByOrg[stepData.organization_id]) ? formsByOrg[stepData.organization_id] : [];
+      const $formSelect = $('#mFormSelect').empty();
+      orgForms.forEach(function (f) {
+        const $option = $('<option>').val(f.id).text(f.name);
+        if (String(f.id) === String(stepData.form_id)) {
+          $option.prop('selected', true);
+        }
+        $formSelect.append($option);
+      });
+      $formSelect.trigger('change.select2');
+
+      // Seed hidden date inputs (map start_date to from, end_date to to), with a today fallback.
+      $('#mfromDate').val(stepData.start_date || moment().format('YYYY-MM-DD'));
+      $('#mtoDate').val(stepData.end_date || moment().format('YYYY-MM-DD'));
+
+      // Combined range picker; no locale so the visible date_range posts MM/DD/YYYY for the controller parse.
+      $('#step-range-picker').daterangepicker({
+        opens: $('html').attr('dir') === 'rtl' ? 'left' : 'right',
+        drops: 'up',
+        startDate: stepData.start_date ? moment(stepData.start_date) : moment(),
+        endDate: stepData.end_date ? moment(stepData.end_date) : moment(),
+      }).on('apply.daterangepicker', function (ev, picker) {
+        $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+        $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+      });
     }
   });
 
