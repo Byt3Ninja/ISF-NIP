@@ -759,6 +759,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
     Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');
     Route::post('final/addzoom', 'FinalscreeningController@addzoom')->name('screening.zoom_add');
+    Route::post('final/{id}/upload_image', 'FinalscreeningController@uploadImage')->name('screening.guidelines.upload_image');
+
     Route::get('final/results/{id?}', 'FinalscreeningController@results')->name('screening.results_view');
     Route::get('final/{step_id}/{company_id}', 'FinalscreeningController@view')->name('screening.form_view');
     Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers')->name('screening.users_view_details');
@@ -925,6 +927,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     });
 });
 Route::get('cycle-custom-pages/{cycle_id}/{filename}', 'CycleCustomPagesController@serveImage')->name('cycle.custom_pages.image');
+Route::get('screening-guidelines/{step_id}/{filename}', 'FinalscreeningController@serveImage')->name('screening.guidelines.image');
 
 // Organization Logo from Storage
 Route::get('organizations/logo/{filename?}', 'OrganizationWizardController@getLogo')->name('organizations.logo');
