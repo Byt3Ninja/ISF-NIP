@@ -38,6 +38,8 @@ use stdClass;
 
 class ScreeningController extends Controller
 {
+    use \App\Traits\ManagesStepForm;
+
 	protected $whatsAppService;
 	public function __construct(WhatsAppService $whatsAppService)
 	{
@@ -330,9 +332,20 @@ class ScreeningController extends Controller
 		$request->validate([
 			'step_id' => 'required|exists:steps,id',
 			'form_id' => 'nullable|exists:builder_forms,id',
+			'confirm' => 'nullable|boolean',
 		]);
 
-		Step::where('id', $request->step_id)->update(['form_id' => $request->form_id]);
+		$step = Step::findOrFail($request->step_id);
+		$result = $this->applyFormToStep($step, $request->form_id, (bool) $request->boolean('confirm'));
+
+		if ($result['status'] === 'needs_confirmation') {
+			return response()->json([
+				'success'            => false,
+				'needs_confirmation' => true,
+				'counts'             => $result['counts'],
+				'message'            => __('admin.step_form_change_has_submissions'),
+			]);
+		}
 
 		return response()->json([
 			'success' => true,

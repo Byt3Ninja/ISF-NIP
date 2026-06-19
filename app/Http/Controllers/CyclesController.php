@@ -47,6 +47,7 @@ use App\Notifications\StartupJoiningNotification;
 class CyclesController extends Controller
 {
     use \App\Traits\ValidatesUrlDomains;
+    use \App\Traits\ManagesStepForm;
 
     protected $whatsAppService;
     public function __construct(WhatsAppService $whatsAppService)
@@ -470,6 +471,7 @@ class CyclesController extends Controller
                     'description' => $request->description,
                     'stype' => $stype,
                     'data' => $data,
+                    'form_id' => $data,
                     'arr' => $request->arr,
                     'from' => $request->fromDate,
                     'to' => $request->toDate
@@ -555,6 +557,7 @@ class CyclesController extends Controller
                     'description' => $request->description,
                     'stype' => $stype,
                     'data' => $data,
+                    'form_id' => $fform,
                     'arr' => $request->arr,
                     'from' => $request->fromDate,
                     'to' => $request->toDate
@@ -721,22 +724,17 @@ class CyclesController extends Controller
                     }
 					$updatedArray['public_slug'] = url_slugify( $request->public_slug );
                 }
+                // Update non-form metadata (title/description/dates and, for
+                // stype 1, the public_slug computed above), but NOT data/form_id —
+                // those plus the field snapshot are handled by applyFormToStep so
+                // every entry point behaves identically (sync + warn + re-snapshot).
+                unset($updatedArray['data']);
                 Step::where('id', $request->sid)->update($updatedArray);
-                $form_fields = FormField::where('step_id', $step8->id)->where('builder_forms_id', $step8->data)->get();
-                if ($form_fields->isEmpty()) {
-                    $new = BuilderField::where('builder_form_id', $step8->data)->orderBy('id')->get();
-                    if (count($new) > 0) {
-                        foreach ($new as $n) {
-                            Formfield::insert([
-                                'step_id' => $request->sid,
-                                'field_id' => $n->field_id,
-                                'options' => json_encode($n->options),
-                                'builder_forms_id' => $n->builder_form_id
-                            ]);
-                        }
-                    }
-                }else{
-                    $form_fields = FormField::where('step_id', $step8->id)->whereNull('builder_forms_id')->update(['builder_forms_id' => $request->mFormSelect]);
+
+                $result = $this->applyFormToStep($step8->fresh(), $request->mFormSelect, (bool) $request->boolean('confirm_form_change'));
+                if ($result['status'] === 'needs_confirmation') {
+                    return redirect()->back()
+                        ->with('message2', __('admin.step_form_change_has_submissions'));
                 }
             } else {
                 

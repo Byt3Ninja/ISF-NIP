@@ -187,7 +187,7 @@
                         </div>
 
                         <div class="d-flex align-items-center" id="mob">
-                          <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }})" id="{{ $step->id }}"
+                          <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }},{{ \App\Formdata::where('step_id', $step->id)->distinct('company_id')->count('company_id') }})" id="{{ $step->id }}"
                             title="{{ __('cycles.Edit Title and dates') }}">
                             <span class="btn btn-icon btn-label-info rounded-circle">
                               <i class="ti ti-edit text-info"></i></span>
@@ -471,6 +471,7 @@
 
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
+          <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
           <input type="hidden" name="type" id="type7" value="8">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
@@ -667,12 +668,42 @@ if (addStepForm) {
 }
 
 if (editStepForm) {
+  // Tracks the form value the dialog was opened with, so we only warn when the
+  // manager actually changed the selected form.
+  let editStepOriginalFormId = null;
+  $('#ModifyStepForm').on('shown.bs.modal', function () {
+    editStepOriginalFormId = $('#mFormSelect').val();
+    $('#confirm_form_change').val('0');
+  });
+
   editStepForm.addEventListener('submit', function (event) {
     event.preventDefault();
-    if (validateStepForm(editStepForm, 'edit')) {
-      disableFormWithLoading(editStepForm);
-      editStepForm.submit();
+    if (!validateStepForm(editStepForm, 'edit')) {
+      return;
     }
+
+    const mFormSelect = document.getElementById('mFormSelect');
+    const stepHasSubmissions = $('#ModifyStepForm').data('has-submissions') ? Number($('#ModifyStepForm').data('has-submissions')) : 0;
+    const formChanged = mFormSelect && editStepOriginalFormId !== null && mFormSelect.value !== editStepOriginalFormId;
+
+    if (formChanged && stepHasSubmissions > 0 && $('#confirm_form_change').val() !== '1') {
+      releaseWarningAlert({
+        title: '{{ __("admin.step_form_change_warning_title") }}',
+        message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', stepHasSubmissions),
+        confirmText: '{{ __("admin.Yes") }}',
+        cancelText: '{{ __("admin.cancel") }}',
+        confirmColor: 'danger',
+        onConfirm: function () {
+          $('#confirm_form_change').val('1');
+          disableFormWithLoading(editStepForm);
+          editStepForm.submit();
+        }
+      });
+      return;
+    }
+
+    disableFormWithLoading(editStepForm);
+    editStepForm.submit();
   });
 }
 function clearValidationOnChange(form, mode = 'add') {
@@ -950,7 +981,7 @@ if (editStepForm) {
       }
     }
 
-    function ModifyStep(set, id) {
+    function ModifyStep(set, id, submissionsCount) {
       var cycle = $('#ccycle').find(":selected").val();
       $.ajaxSetup({
         headers: {
@@ -1050,6 +1081,7 @@ if (editStepForm) {
 
               // $('#mfromDate').val(response.from);
               // $('#mtoDate').val(response.to);
+              $('#ModifyStepForm').attr('data-has-submissions', submissionsCount || 0);
               $('#ModifyStepForm').modal('show');
             },
             error: function(error) {

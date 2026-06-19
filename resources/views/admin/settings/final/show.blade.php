@@ -665,24 +665,47 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
           }
         });
       });
-      // Form selection change handler
+      // Form selection change handler. The previous value is tracked so we can
+      // revert the select2 if the manager cancels a destructive change.
+      let lastFormSelectValue = $('#step-form-select').val();
       $('#step-form-select').on('change', function() {
-        const stepId = $(this).data('step-id');
-        const formId = $(this).val();
-        $.ajax({
-          url: '{{ route("screening.update_step_form") }}',
-          type: 'POST',
-          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-          data: { step_id: stepId, form_id: formId || null },
-          success: function(response) {
-            if (response.success) {
-              releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: response.message });
+        const $select = $(this);
+        const stepId = $select.data('step-id');
+        const formId = $select.val();
+
+        const sendUpdate = function(confirmed) {
+          $.ajax({
+            url: '{{ route("screening.update_step_form") }}',
+            type: 'POST',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: { step_id: stepId, form_id: formId || null, confirm: confirmed ? 1 : 0 },
+            success: function(response) {
+              if (response.success) {
+                lastFormSelectValue = formId;
+                releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: response.message });
+              } else if (response.needs_confirmation) {
+                const count = response.counts ? response.counts.total : 0;
+                releaseWarningAlert({
+                  title: '{{ __("admin.step_form_change_warning_title") }}',
+                  message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', count),
+                  confirmText: '{{ __("admin.Yes") }}',
+                  cancelText: '{{ __("admin.cancel") }}',
+                  confirmColor: 'danger',
+                  onConfirm: function() { sendUpdate(true); },
+                  onCancel: function() {
+                    $select.val(lastFormSelectValue).trigger('change.select2');
+                  }
+                });
+              }
+            },
+            error: function(xhr) {
+              $select.val(lastFormSelectValue).trigger('change.select2');
+              releaseFailureAlert({ title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
             }
-          },
-          error: function(xhr) {
-            releaseFailureAlert({ title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
-          }
-        });
+          });
+        };
+
+        sendUpdate(false);
       });
 
       // Initialize tooltips

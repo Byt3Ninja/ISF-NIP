@@ -384,6 +384,7 @@ class FinalscreeningController extends Controller
 
 	public function view($sid, $cid)
 	{
+		return abort(404);
 		// Insure company belong to Judger first
 		$myid = Auth::id();
 		$fs = Finalscreening::where('company_id',$cid)->where('step_id',$sid)->where('judges', 'like', "%\"{$myid}\"%")->get();
@@ -406,6 +407,7 @@ class FinalscreeningController extends Controller
 
 	public function save(Request $request)
 	{
+		return abort(404);
 		$id = $request->id;
 		$validator = Validator::make($request->all(), [
 			'id' => 'required|integer|exists:steps,id',
