@@ -4089,7 +4089,7 @@ class ClientCompanyController extends Controller
             'company_ids' => 'required|array',
             'company_ids.*' => 'required|integer|exists:companies,id',
         ]);
-
+        
         $companyIds = $request->input('company_ids');
         $processedCount = 0;
         $errors = [];
@@ -4099,13 +4099,13 @@ class ClientCompanyController extends Controller
             foreach ($companyIds as $id) {
                 $company = Company::find($id);
                 if (!$company) continue;
-
-                // Validation: Must have country
-                if ($company->country_id == null) {
-                    $errors[] = $company->name_en . ': ' . __('startup.You cannot add this startup to alumni because it has no country');
-                    continue;
+                if($company->cycleData->allow_non_company == 0){
+                    // Validation: Must have country
+                    if ($company->country_id == null) {
+                        $errors[] = $company->name_en . ': ' . __('startup.You cannot add this startup to alumni because it has no country');
+                        continue;
+                    }
                 }
-
                 // Validation: Must be on Final Screening step (stype=5)
                 $step = Step::where('id', $company->step)->first();
                 if (!$step || $step->stype != 5) {
@@ -4152,13 +4152,15 @@ class ClientCompanyController extends Controller
     {
         try {
             $company = Company::findOrFail($id);
-
-            // Validation: Must have country
-            if ($company->country_id == null) {
-                return response()->json([
-                    'success' => false,
-                    'message' => __('startup.You cannot add this startup to alumni because it has no country')
-                ], 422);
+            
+            if($company->cycleData->allow_non_company == 0){
+                // Validation: Must have country
+                if ($company->country_id == null) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('startup.You cannot add this startup to alumni because it has no country')
+                    ], 422);
+                }
             }
 
             // Validation: Must be on Final Screening step (stype=5)
