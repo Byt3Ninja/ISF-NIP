@@ -8373,6 +8373,16 @@
                 ]
             },
             {
+                "name": "dashboard.widgets_cards_service_provider_completion_rate_view",
+                "description": "Show Completion Rate Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
                 "name": "dashboard.widgets_cards_service_provider_requests_30_days_view",
                 "description": "Show Requests (30 Days) Card (Service Provider)",
                 "guard_name": "web",

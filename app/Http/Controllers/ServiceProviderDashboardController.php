@@ -54,12 +54,14 @@ class ServiceProviderDashboardController extends Controller
      */
     private function getSummaryData(array $serviceIds, array $permissions): array
     {
+        $l = App::getLocale();
         $summary = [
             'totalServices' => 0,
             'activeServices' => 0,
             'requests30Days' => 0,
             'pendingRequests' => 0,
             'medianResponseTime' => null,
+            'completionRate' => null,
         ];
 
         if (empty($serviceIds)) {
@@ -71,9 +73,32 @@ class ServiceProviderDashboardController extends Controller
                 ->whereNull('deleted_at')
                 ->get();
 
-        $services_requests = DB::table('services_requests')
-                ->whereIn('service_id', $serviceIds)
-                ->whereNull('deleted_at')
+        $services_requests = DB::table('services_requests as sr')
+                ->select([
+                    'sr.id',
+                    'sr.service_id',
+                    'sr.user_id',
+                    'sr.comment',
+                    'sr.date_time',
+                    'sr.approved',
+                    'sr.decided_at',
+                    'sr.rate',
+                    'sr.rate_comment',
+                    'sr.review_title',
+                    'sr.review_body',
+                    'sr.reviewed_at',
+                    'sr.admin_comment',
+                    'sr.admin',
+                    'sr.done',
+                    'sr.created_at',
+                    'sr.updated_at',
+                    'sr.deleted_at',
+                    's.name_en',
+                    's.name_ar',
+                ])
+                ->leftJoin('services as s', 'sr.service_id', '=', 's.id')
+                ->whereIn('sr.service_id', $serviceIds)
+                ->whereNull('sr.deleted_at')
                 ->get();
 
         if (in_array('dashboard.widgets_cards_service_provider_total_services_view', $permissions)) {
@@ -121,6 +146,74 @@ class ServiceProviderDashboardController extends Controller
             }
         }
 
+        if (in_array('dashboard.widgets_cards_service_provider_completion_rate_view', $permissions)) {
+            $summary['completionRate'] = round( ( $services_requests->where('done', 1)->count() / $services_requests->count() ) * 100 );
+        }
+
+        $volumes = $services_requests->map(function ($r) {
+            $r->weekday = Carbon::parse($r->created_at)->format('D');
+            return $r;
+        });
+        
+        $requestVolume = [
+            ['day' => 'Sat', 'value' => $volumes->where('weekday', 'Sat')->count()],
+            ['day' => 'Sun', 'value' => $volumes->where('weekday', 'Sun')->count()],
+            ['day' => 'Mon', 'value' => $volumes->where('weekday', 'Mon')->count()],
+            ['day' => 'Tue', 'value' => $volumes->where('weekday', 'Tue')->count()],
+            ['day' => 'Wed', 'value' => $volumes->where('weekday', 'Wed')->count()],
+            ['day' => 'Thu', 'value' => $volumes->where('weekday', 'Thu')->count()],
+            ['day' => 'Fri', 'value' => $volumes->where('weekday', 'Fri')->count()],
+        ];
+
+        $available_colors = [
+            ['color' => '#7F77DD', 'dim' => '#C8C4EE'],
+            ['color' => '#1D9E75', 'dim' => '#9FE1CB'],
+            ['color' => '#EF9F27', 'dim' => '#FAD89A'],
+            ['color' => '#5DCAA5', 'dim' => '#A8E4D5'],
+            ['color' => '#E5616F', 'dim' => '#F6BEC4'],
+            ['color' => '#3B9AD9', 'dim' => '#AED7F0'],
+            ['color' => '#C778DD', 'dim' => '#E8C4EF'],
+            ['color' => '#E07A3F', 'dim' => '#F4C8A9'],
+            ['color' => '#4FB286', 'dim' => '#B9E2D0'],
+            ['color' => '#D9B23B', 'dim' => '#F0E0AE'],
+            ['color' => '#5C77E0', 'dim' => '#BCC6F4'],
+            ['color' => '#9E5DCA', 'dim' => '#D5BCE8'],
+            ['color' => '#27A8B0', 'dim' => '#A9DEE2'],
+            ['color' => '#E0617F', 'dim' => '#F4BECB'],
+        ];
+
+        $totalRequests = $services_requests->count();
+        $chartServices = $services_requests->groupBy('service_id')->map(function ($r) use ($l, $totalRequests) {
+            $count = $r->count();
+            return ['name' => $r->first()->{'name_' . $l}, 'count' => $count, 'color' => '', 'dim' => '', 'pct' =>  $totalRequests > 0 ? ( round($count / $totalRequests * 100) ) : 0 ];
+        })->values()->map(function ($r, $index) use ($available_colors) {
+            $palette = $available_colors[$index % count($available_colors)];
+            $r['color'] = $palette['color'];
+            $r['dim']   = $palette['dim'];
+            return $r;
+        });
+
+        $chartServices = $chartServices->toArray();
+
+        $topService = collect($chartServices)->sortByDesc('count')->first();
+        $rvLabels = json_encode(array_column($requestVolume, 'day'));
+        $rvData = json_encode(array_column($requestVolume, 'value'));
+        $sdColors = json_encode(array_column($chartServices, 'color'));
+        $sdDimColors = json_encode(array_column($chartServices, 'dim'));
+        $sdData = json_encode(array_column($chartServices, 'count'));
+        $sdLabels = json_encode(array_column($chartServices, 'name'));
+
+        $summary['extras'] = [
+            'totalRequests' => $totalRequests,
+            'chartServices' => $chartServices,
+            'topService'    => $topService,
+            'rvLabels'      => $rvLabels,
+            'rvData'        => $rvData,
+            'sdColors'      => $sdColors,
+            'sdDimColors'   => $sdDimColors,
+            'sdData'        => $sdData,
+            'sdLabels'      => $sdLabels
+        ];
         return $summary;
     }
 
@@ -434,6 +527,8 @@ class ServiceProviderDashboardController extends Controller
 
         // Summary widget data
         $summary = $this->getSummaryData($serviceIds, $permissions);
+        $extras = $summary['extras'];
+        unset($summary['extras']);
 
         // Services list for filter dropdown
         $services = DB::table('services')
@@ -461,7 +556,7 @@ class ServiceProviderDashboardController extends Controller
         $canQuickAction = in_array('service_provider_request.quick_action', $permissions);
         $canBulkAction = in_array('service_provider_request.bulk_action', $permissions);
 
-        return view('admin.service-provider.dashboard', compact(
+        return view('admin.service-provider.dashboard', array_merge(compact(
             'summary',
             'services',
             'inboxRows',
@@ -470,7 +565,7 @@ class ServiceProviderDashboardController extends Controller
             'canBulkAction',
             'approvalStatus',
             'rejectionReason'
-        ));
+        ), $extras));
     }
 
     /**
