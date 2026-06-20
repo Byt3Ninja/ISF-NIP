@@ -648,5 +648,11 @@ return [
     'change_training_step' => 'Change Training Step',
     'please_select_step' => 'Please select a step',
     'delete_program' => 'Delete Program',
-    'program_delete_success' => 'Program deleted successfully!'
+    'program_delete_success' => 'Program deleted successfully!',
+    'program_not_found' => 'Program not found',
+    'email_checked_successfully' => 'Email checked successfully',
+    'program_not_public' => 'Program is no longer public',
+    'login_success' => 'Logged in successfully',
+    'invalid_credentials' => 'Invalid credentials provided',
+    'joined_program_success' => 'You have successfully joined the program',
 ];

@@ -642,5 +642,11 @@ return [
     'please_select_step' => 'يرجى اختيار المرحلة',
     'delete_program' => 'حذف البرنامج',
     'delete_program_message' => 'هل أنت متأكد من رغبتك في حذف هذا البرنامج؟',
-    'program_delete_success' => 'تم حذف البرنامج بنجاح!'
+    'program_delete_success' => 'تم حذف البرنامج بنجاح!',
+    'program_not_found' => 'البرنامج غير موجود',
+    'email_checked_successfully' => 'تم التحقق من البريد الالكتروني بنجاح',
+    'program_not_public' => 'البرنامج لم يعد محتوى عام',
+    'login_success' => 'تم تسجيل الدخول بنجاح',
+    'invalid_credentials' => 'بيانات الدخول غير صحيحة',
+    'joined_program_success' => 'لقد قمت بالانضمام للبرنامج بنجاح',
 ];

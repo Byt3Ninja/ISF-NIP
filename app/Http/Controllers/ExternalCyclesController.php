@@ -135,7 +135,7 @@ class ExternalCyclesController extends Controller
 	{
 		$request = request();
 		$program = $this->getProgram( $org_slug, $program_slug );
-		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => 'Program not found']); }
+		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => __('cycles.program_not_found') ]); }
 		else
 		{
 			if( $program->is_public == 1 )
@@ -175,8 +175,8 @@ class ExternalCyclesController extends Controller
 						return $output;
 					});
 				} else { $fields = null; $fields_ids = null; }
-				return response()->json(['status' => true, 'message' => 'Email checked successfully', 'step' => $_step, 'fields' => $fields, 'fields_ids' => $fields_ids]);
-			} else { return response()->json(['status' => false, 'message' => 'Program not longer public']); }
+				return response()->json(['status' => true, 'message' => __('cycles.email_checked_successfully'), 'step' => $_step, 'fields' => $fields, 'fields_ids' => $fields_ids]);
+			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
 
@@ -184,7 +184,7 @@ class ExternalCyclesController extends Controller
 	{
 		$request = request();
 		$program = $this->getProgram( $org_slug, $program_slug );
-		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => 'Program not found']); }
+		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => __('cycles.program_not_found') ]); }
 		else
 		{
 			if( $program->is_public == 1 )
@@ -199,9 +199,9 @@ class ExternalCyclesController extends Controller
 					Auth::login(Auth::user());
 					$c = $program->id;
 					$url = URL::to("dashboard/cycles/view/$c");
-					return response()->json(['status' => true, 'message' => 'Logged in successfully', 'url' => $url]);
-				} else { return response()->json(['status' => false, 'message' => 'Invalid credentials']); }
-			} else { return response()->json(['status' => false, 'message' => 'Program not longer public']); }
+					return response()->json(['status' => true, 'message' => __('cycles.login_success') , 'url' => $url]);
+				} else { return response()->json(['status' => false, 'message' => __('cycles.invalid_credentials') ] ); }
+			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
 
@@ -209,7 +209,7 @@ class ExternalCyclesController extends Controller
 	{
 		$request = request();
 		$program = $this->getProgram( $org_slug, $program_slug );
-		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => 'Program not found']); }
+		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => __('cycles.program_not_found') ]); }
 		else
 		{
 			if( $program->is_public == 1 )
@@ -366,7 +366,7 @@ class ExternalCyclesController extends Controller
 					Log::info('Throwable: ', [$e] );
 					return response()->json(['status' => false, 'message' => 'Throwable: occur']);
 				}
-			} else { return response()->json(['status' => false, 'message' => 'Program not longer public']); }
+			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
 
