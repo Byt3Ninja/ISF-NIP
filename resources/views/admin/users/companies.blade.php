@@ -42,10 +42,6 @@
         {{ __('admin.filters') }}
       </button>
 
-      @php
-        $hasActiveFilters = request()->hasAny(['programFilter', 'sector', 'stage', 'orgnization', 'status', 'alumni']) ||
-          (request()->has('sectors') && !empty(request('sectors')));
-      @endphp
       @if($hasActiveFilters)
         <a href="{{ route('users.view_companies') }}" class="btn btn-outline-primary" title="{{ __('admin.Reset') }}">
           <i class="ti ti-refresh me-2"></i>
@@ -82,16 +78,6 @@
         </div>
       @else
         @foreach ($companies as $company)
-          @php
-            $isAlumni = $company->alumni == '1' || $company->alumni == 1;
-            $founders = $company->teamMembers->where('TeamMember', 'Founder');
-            $sustainable_array = json_decode($company->Sustainable_development ?? '[]');
-            $companyName = $company->{'name_' . $l};
-            $initials = implode('', array_map(function ($word) {
-              return mb_substr($word, 0, 1);
-            }, explode(' ', preg_replace('/[^\w\s]/', '', $companyName))));
-            $yearsOp = $company->est_date ? \Carbon\Carbon::parse($company->est_date)->diffInYears(now()) : null;
-          @endphp
           <div class="col-lg-4">
             <div class="card border shadow-none h-100 rounded-4 card-hover">
               <div class="card-body p-4 d-flex flex-column">
@@ -117,15 +103,15 @@
                       <div class="min-w-0">
                         <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
                           <h5 class="mb-1 fw-semibold text-dark text-truncate" style="max-width:180px;">
-                            {{ $companyName }}
+                            {{ $company->name }}
                           </h5>
                         </a>
 
                         <div class="d-flex align-items-center gap-2">
                           <span
-                            class="badge {{ $isAlumni ? 'bg-label-danger' : 'bg-label-primary' }} fw-medium px-3 py-1_5">
-                            <i class="ti {{ $isAlumni ? 'ti-award' : 'ti-flame' }} ti-xs me-1"></i>
-                            {{ $isAlumni ? __('startup.alumni') : 'Incubated' }}
+                            class="badge {{ $company->isAlumni ? 'bg-label-danger' : 'bg-label-primary' }} fw-medium px-3 py-1_5">
+                            <i class="ti {{ $company->isAlumni ? 'ti-award' : 'ti-flame' }} ti-xs me-1"></i>
+                            {{ $company->isAlumni ? __('startup.alumni') : 'Incubated' }}
                           </span>
                           @if($company->stage && optional($company->stagE)->{'name_' . $l})
                             <span class="badge bg-label-secondary fw-medium px-2 py-1_5">
@@ -188,8 +174,8 @@
                       <span class="d-flex align-items-center">
                         <i class="ti ti-calendar-event me-1"></i>
                         {{ $company->est_date }}
-                        @if($yearsOp !== null)
-                          <span class="ms-1">({{ $yearsOp }} {{ $yearsOp == 1 ? 'yr' : 'yrs' }})</span>
+                        @if($company->yearsOp !== null)
+                          <span class="ms-1">({{ $company->yearsOp }} {{ $company->yearsOp == 1 ? 'yr' : 'yrs' }})</span>
                         @endif
                       </span>
                     @else
@@ -218,29 +204,22 @@
                       <span class="fw-semibold text-dark small text-uppercase">{{ __('admin.Founders') }}</span>
                     </div>
 
-                    @if (count($founders) > 0)
+                    @if (count($company->founders) > 0)
                       <div class="d-flex align-items-center gap-2 ps-3">
-                        @foreach ($founders->take(3) as $founder)
-                          @php
-                            $fName = $founder->Name ?? '';
-                            $fInitials = implode('', array_map(function ($w) {
-                              return mb_substr($w, 0, 1);
-                            }, explode(' ', $fName)));
-                            $fInitials = mb_strtoupper(mb_substr($fInitials, 0, 2));
-                          @endphp
+                        @foreach ($company->founders->take(3) as $founder)
                           <div class="d-flex align-items-center gap-1">
                             <div class="avatar avatar-xs mb-0">
                               <div
-                                class="avatar-initial rounded-circle text-dark" title="{{ $fName }}">
-                                {{ $fInitials ?: '?' }}
+                                class="avatar-initial rounded-circle text-dark" title="{{ $founder->Name }}">
+                                {{ $founder->initials ?: '?' }}
                               </div>
                             </div>
                             <span class="small text-secondary fw-medium">{{ $founder->Name }}</span>
                           </div>
                         @endforeach
-                        @if (count($founders) > 3)
+                        @if (count($company->founders) > 3)
                           <span class="badge bg-label-secondary rounded-pill fw-medium">
-                            +{{ count($founders) - 3 }}
+                            +{{ count($company->founders) - 3 }}
                           </span>
                         @endif
                       </div>
@@ -265,18 +244,15 @@
                       <span class="fw-semibold text-dark small text-uppercase">{{ __('admin.sustainability_goals') }}</span>
                     </div>
 
-                    @if (!empty($sustainable_array) && count($sustainable_array) > 0)
+                    @if (!empty($company->sustainable_array) && count($company->sustainable_array) > 0)
                       <div class="d-flex align-items-center gap-1 ps-3 flex-wrap">
-                        @foreach ($sustainable_array as $Sustainable)
-                          @php
-                            $icon = $SustainableIcons->where('title', $Sustainable)->first();
-                          @endphp
-                          @if ($icon && $icon->icon_ar)
-                            <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar }}" alt="{{ $Sustainable }}"
+                        @foreach ($company->sustainable_array as $Sustainable)
+                          @if ($Sustainable['icon'] && $Sustainable['icon']->icon_ar)
+                            <img src="/images/sustainability/{{ $l }}/{{ $Sustainable['icon']->icon_ar }}" alt="{{ $Sustainable['title'] }}"
                               class="border rounded" width="28" height="28" style="object-fit:contain;"
-                              title="{{ $Sustainable }}">
+                              title="{{ $Sustainable['title'] }}">
                           @else
-                            <span class="badge bg-label-secondary rounded-pill small fw-normal px-2">{{ $Sustainable }}</span>
+                            <span class="badge bg-label-secondary rounded-pill small fw-normal px-2">{{ $Sustainable['title'] }}</span>
                           @endif
                         @endforeach
                         <a href="#" data-bs-toggle="modal" data-bs-target="#sustainabilityModal{{ $company->id }}"
@@ -293,15 +269,12 @@
                               <div class="text-center mb-4">
                                 <h4 class="mb-3 fw-bold">{{ __('admin.sustainability_goals') }}</h4>
                                 <div class="row justify-content-center">
-                                  @foreach ($sustainable_array as $Sustainable)
-                                    @php
-                                      $icon = $SustainableIcons->where('title', $Sustainable)->first();
-                                    @endphp
+                                  @foreach ($company->sustainable_array as $Sustainable)
                                     <div class="col-md-3 col-sm-4 col-6 mb-3">
                                       <div class="border shadow-sm rounded p-3 d-flex justify-content-center align-items-center"
                                         style="height: 120px;">
-                                        @if ($icon && $icon->icon_ar)
-                                          <img src="/images/sustainability/{{ $l }}/{{ $icon->icon_ar ?? '1.png' }}" alt="icon"
+                                        @if ($Sustainable['icon'] && $Sustainable['icon']->icon_ar)
+                                          <img src="/images/sustainability/{{ $l }}/{{ $Sustainable['icon']->icon_ar ?? '1.png' }}" alt="icon"
                                             class="img-fluid" style="max-width: 100%; max-height: 100%;">
                                         @endif
                                       </div>
@@ -413,15 +386,6 @@
             <label for="organizationFilter" class="form-label">{{ __('admin.Organizations') }}</label>
             <select name="orgnization" id="organizationFilter" class="form-select select2">
               <option value="">{{ __('admin.All_Organizations') }}</option>
-              @php
-$authUser = auth()->user();
-if ($authUser->hasRole('Admin')) {
-  $orgs = App\Organization::all();
-} else {
-  $orgIds = $authUser->organizations_ids;
-  $orgs = App\Organization::whereIn('id', $orgIds)->get();
-}
-              @endphp
               @foreach ($orgs as $org)
                 <option value="{{ $org->id }}" {{ request('orgnization') == $org->id ? 'selected' : '' }}>
                   {{ $org->{'name_' . $l} }}
@@ -435,12 +399,9 @@ if ($authUser->hasRole('Admin')) {
           <label for="programFilter" class="form-label">{{ __('cycles.Cycle') }}</label>
           <select name="programFilter" id="programFilter" class="form-select select2">
             <option value="">{{ __('admin.All_Programs') }}</option>
-            @php
-$cycles = App\Cycle::all();
-            @endphp
             @if(isset($cycles) && count($cycles) > 0)
               @foreach ($cycles as $cycle)
-                <option value="{{ $cycle->id }}" {{ request('programFilter') == $cycle->id ? 'selected' : '' }}>
+                <option value="{{ $cycle->id }}" {{ $cycle->selected ? 'selected' : '' }}>
                   {{ $cycle->title }}
                 </option>
               @endforeach
@@ -452,9 +413,6 @@ $cycles = App\Cycle::all();
           <label for="stageFilter" class="form-label">{{ __('admin.stage') }}</label>
           <select name="stage" id="stageFilter" class="form-select select2">
             <option value="">{{ __('admin.All_Stages') }}</option>
-            @php
-$stages = App\Stage::all()->unique('name_' . $l);
-            @endphp
             @foreach ($stages as $stage)
               <option value="{{ $stage->id }}" {{ request('stage') == $stage->id ? 'selected' : '' }}>
                 {{ $stage->{'name_' . $l} }}
@@ -468,14 +426,10 @@ $stages = App\Stage::all()->unique('name_' . $l);
           <select name="sectors[]" id="sectors" class="form-select select2" multiple="multiple"
             data-placeholder="{{ __('admin.Select_Sectors') }}">
             <option value=""></option>
-            @php
-$sectors = App\Sector::whereNull('parent_id')->with('children')->get();
-$selectedSectors = request('sectors', []);
-            @endphp
             @foreach ($sectors as $sector_group)
               <optgroup label="{{ $sector_group->name }}">
                 @foreach ($sector_group->children as $sector)
-                  <option value="{{ $sector->id }}" {{ in_array($sector->id, $selectedSectors) ? 'selected' : '' }}>
+                  <option value="{{ $sector->id }}" {{ $sector->selected ? 'selected' : '' }}>
                     @if(str_contains('name_' . $l, 'ar') || str_contains('name_' . $l, 'en'))
                       {{ $sector->{'name_' . $l} }}
                     @else

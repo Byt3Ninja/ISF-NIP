@@ -3347,13 +3347,64 @@ class ClientCompanyController extends Controller
 
         $companies = $this->companyService->getCompanies($filters, isApi: false);
 
-       
-
         // Pass the language variable
+        $user = auth()->user();
         $l = app()->getLocale();
 
+        $cycles = Cycle::all();
         $SustainableIcons = SustainableIcon::all();
-        return view('admin/users/companies', compact('companies', 'l', 'SustainableIcons'));
+        $stages = Stage::all()->unique('name_' . $l);
+        $sectors = Sector::whereNull('parent_id')->with('children')->get();
+        $selectedSectors = $request->input('sectors', []);
+
+        $hasActiveFilters = $request->hasAny(['programFilter', 'sector', 'stage', 'orgnization', 'status', 'alumni']) || ($request->has('sectors') && !empty($request->sectors));
+        $orgs = $user->user_organizations();
+
+        $cycles = $cycles->map(function ($cycle) use ($request) {
+            $cycle->selected = $request->programFilter == $cycle->id;
+            return $cycle;
+        });
+
+        $sectors = $sectors->map(function ($sector) use ($request, $selectedSectors) {
+            $sector->selected = in_array($sector->id, $selectedSectors);
+            return $sector;
+        });
+
+        $companies->through(function ($company) use ( $request, $SustainableIcons ) {
+            $isAlumni = $company->alumni == '1' || $company->alumni == 1;
+            $founders = $company->teamMembers->where('TeamMember', 'Founder');
+            $founders = $founders->map(function ($founder) {
+                $fName = $founder->Name ?? '';
+                $fInitials = implode('', array_map(function ($w) {
+                    return mb_substr($w, 0, 1);
+                }, explode(' ', $fName)));
+                $fInitials = mb_strtoupper(mb_substr($fInitials, 0, 2));
+                $founder->initials = $fInitials;
+                return $founder;
+            });
+            $sustainable_array = json_decode($company->Sustainable_development ?? '[]');
+            foreach ($sustainable_array as $key => $Sustainable)
+            {
+                $icon = $SustainableIcons->where('title', $Sustainable)->first();
+                $sustainable_array[$key] = [
+                    'title' => $Sustainable,
+                    'icon' => $icon
+                ];
+            }
+            $initials = implode('', array_map(function ($word) {
+                return mb_substr($word, 0, 1);
+            }, explode(' ', preg_replace('/[^\w\s]/', '', $company->name ?? ''))));
+            $yearsOp = $company->est_date ? Carbon::parse($company->est_date)->diffInYears(now()) : null;
+
+            $company->isAlumni = $isAlumni;
+            $company->founders = $founders;
+            $company->sustainable_array = $sustainable_array;
+            $company->initials = $initials;
+            $company->yearsOp = $yearsOp;
+            return $company;
+        });
+
+        return view('admin/users/companies', compact('companies', 'SustainableIcons', 'hasActiveFilters', 'orgs', 'cycles', 'stages', 'sectors'));
     }
 
     public function companyAlumni(Request $request, $id, $cycle_id)

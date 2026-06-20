@@ -243,6 +243,11 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         return $this->belongsToMany(Organization::class, 'user_organizations')->withTimestamps();
     }
 
+    public function user_organizations() {
+        $ids = $this->getOrganizationsIdsAttribute();
+        return Organization::whereIn('id', $ids)->get();
+    }
+
     public function inviteMentors()
     {
         return $this->hasMany(InviteMentor::class, 'mentor_id');
