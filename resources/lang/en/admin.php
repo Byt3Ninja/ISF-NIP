@@ -3815,5 +3815,10 @@ return [
   'Invalid_task_file_type' => 'Unsupported file type. Allowed formats: PDF, PNG, JPG, SVG, ZIP, RAR, DOC, DOCX, XLS, XLSX, PPT, PPTX.',
   'step_form_change_has_submissions' => 'This step already has submitted data. Changing the form will permanently delete those submissions.',
   'step_form_change_warning_title' => 'Change form for this step?',
-  'step_form_change_confirm' => 'This step has :count submission(s). Changing the form will permanently delete them. This cannot be undone. Continue?'
+  'step_form_change_confirm' => 'This step has :count submission(s). Changing the form will permanently delete them. This cannot be undone. Continue?',
+  'see_all_startups' => 'See all Startups',
+  'sustainability_goals' => 'Sustainability Goals',
+  'no_sustainability_goals_listed' => 'No sustainability goals listed',
+  'view_all' => 'View all',
+  'filters' => 'Filters',
 ];

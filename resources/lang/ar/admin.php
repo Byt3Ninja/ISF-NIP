@@ -3870,5 +3870,10 @@ return [
   'Invalid_task_file_type' => 'نوع الملف غير مدعوم. الصيغ المسموح بها: PDF, PNG, JPG, SVG, ZIP, RAR, DOC, DOCX, XLS, XLSX, PPT, PPTX.',
   'step_form_change_has_submissions' => 'هذه المرحلة تحتوي على بيانات مُرسَلة بالفعل. تغيير النموذج سيحذف هذه البيانات نهائياً.',
   'step_form_change_warning_title' => 'تغيير نموذج هذه المرحلة؟',
-  'step_form_change_confirm' => 'تحتوي هذه المرحلة على :count مشاركة. تغيير النموذج سيحذفها نهائياً. لا يمكن التراجع عن هذا الإجراء. هل تريد المتابعة؟'
+  'step_form_change_confirm' => 'تحتوي هذه المرحلة على :count مشاركة. تغيير النموذج سيحذفها نهائياً. لا يمكن التراجع عن هذا الإجراء. هل تريد المتابعة؟',
+  'see_all_startups' => 'اطلع على جميع المناقشات الشركات الناشئة',
+  'sustainability_goals' => 'أهداف الاستدامة',
+  'no_sustainability_goals_listed' => 'لم يتم إدراج أهداف الاستدامة',
+  'view_all' => 'عرض الكل',
+  'filters' => 'الفلاتر',
 ];
