@@ -4217,7 +4217,7 @@ class ClientCompanyController extends Controller
     {
         $id = $company->id;
         try {
-            $company_relations = CompanyRelation::where('company_id', $id)->where('user_id', $company?->user?->id)->get();
+            $company_relations = CompanyRelation::where('company_id', $id)/*->where('user_id', $company?->user?->id)*/->get();
             
             $almuni = new Almuni();
             $almuni->user_id = $company?->user?->id;

@@ -305,7 +305,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                   </div>
                   <div>
                     <h5 class="mb-0 fw-bold text-dark">{{ $startup['name'] }}</h5>
-                    <span class="text-secondary small">{{ $startup['industry']  ? __('admin.categories.' . $startup['industry']) : '---' }}</span>
+                    <span class="text-secondary small">{{ $startup['industry']  ? $startup['industry'] : '---' }}</span>
                   </div>
                 </div>
                 <p class="text-muted small mb-0">{{ $startup['description'] }}</p>
