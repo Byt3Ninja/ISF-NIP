@@ -161,7 +161,7 @@
                 <div class="content-left">
                   <span class="text-heading">{{ __('dashboard.sp_completion_rate') }}</span>
                   <div class="d-flex align-items-center my-1">
-                    <h4 class="mb-0 me-2" id="widget-median-time">
+                    <h4 class="mb-0 me-2" id="widget-completion-rate">
                       {{ $summary['completionRate'] !== null ? $summary['completionRate'] . '%' : '—' }}
                     </h4>
                   </div>
@@ -586,6 +586,9 @@
         if (summary.activeServices !== undefined) $('#widget-active-services').text(summary.activeServices);
         if (summary.requests30Days !== undefined) $('#widget-requests-30').text(summary.requests30Days);
         if (summary.pendingRequests !== undefined) $('#widget-pending').text(summary.pendingRequests);
+        if (summary.completionRate !== undefined) {
+          $('#widget-completion-rate').text(summary.completionRate !== null ? summary.completionRate + '%' : '—');
+        }
         if (summary.medianResponseTime !== undefined) {
           $('#widget-median-time').text(summary.medianResponseTime !== null ? summary.medianResponseTime + 'h' : '—');
         }
