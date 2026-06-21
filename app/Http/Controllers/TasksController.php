@@ -314,15 +314,16 @@ class TasksController extends Controller
                 ->update(['status' => $request->status, 'last_updated' => now()]);
 
             $assignees_company = $task->assignees()->pluck('company_id')->toArray();
-
+            $activity = [];
             foreach ($assignees_company as $cId) {
-                ProgramTaskActivity::create([
+                $activity[] = [
                     'program_task_id' => $task->id,
                     'user_id'         => auth()->id(),
                     'action'          => 'create',
                     'company_id'      => $cId,
-                ]);
-            }
+                ];
+                }
+                ProgramTaskActivity::insert($activity);
 
             $assignees = User::whereIn('company_id', $assignees_company)->get();
             $mentor = User::find($task->created_by);
@@ -590,22 +591,28 @@ class TasksController extends Controller
 
             $trackable         = ['title', 'description', 'priority', 'status', 'due_date'];
             $assigneeCompanies = $task->assignees()->pluck('company_id')->toArray();
-            foreach ($trackable as $col) {
-                $old = $oldValues[$col] ?? null;
-                $new = $task->$col ?? null;
-                if ((string) $old !== (string) $new) {
-                    foreach ($assigneeCompanies as $cId) {
-                        ProgramTaskActivity::create([
-                            'program_task_id' => $task->id,
-                            'user_id'         => auth()->id(),
-                            'action'          => 'update',
-                            'column'          => $col,
-                            'was'             => $old,
-                            'new'             => $new,
-                            'company_id'      => $cId,
-                        ]);
-                    }
-                }
+            $now     = now();
+            $changes = collect($trackable)
+                ->filter(fn($col) => (string) ($oldValues[$col] ?? null) !== (string) ($task->$col ?? null))
+                ->map(fn($col) => ['col' => $col, 'old' => $oldValues[$col] ?? null, 'new' => $task->$col ?? null]);
+
+            $activities = $changes
+                ->crossJoin($assigneeCompanies)
+                ->map(fn($pair) => [
+                    'program_task_id' => $task->id,
+                    'user_id'         => auth()->id(),
+                    'action'          => 'update',
+                    'column'          => $pair[0]['col'],
+                    'was'             => $pair[0]['old'],
+                    'new'             => $pair[0]['new'],
+                    'company_id'      => $pair[1],
+                    'created_at'      => $now,
+                    'updated_at'      => $now,
+                ])
+                ->toArray();
+
+            if (!empty($activities)) {
+                ProgramTaskActivity::insert($activities);
             }
 
             // Update assignees if provided — always sync status to task status on edit
