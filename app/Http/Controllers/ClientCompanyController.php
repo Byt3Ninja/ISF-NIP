@@ -896,9 +896,9 @@ class ClientCompanyController extends Controller
                 }
                 else
                 {
-                    $founders = 'NA';
-                    $shareholders = 'NA';
-                    $investors = 'NA';
+                    $founders = collect();
+                    $shareholders = collect();
+                    $investors = collect();
                     $milestones = collect();
                     $Achieveds = 'NA';
                     $Planneds = 'NA';
