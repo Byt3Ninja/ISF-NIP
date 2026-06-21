@@ -287,9 +287,13 @@ class ScreeningController extends Controller
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 
 		if( $cstep ) {
-			// Use the preceding step's ID (not BuilderForm ID) to also include companies still at the prior step
-			$precedingStep = Step::where('cycle_id', $cstep->cycle_id)->where('arr', $cstep->arr - 1)->first();
-			$companies = Company::whereIn('step', array_filter([$precedingStep?->id, $cstep->id]))->get();
+			// Only startups that have actually progressed to THIS screening step
+			// belong here. Including the preceding (Custom Form) step's companies
+			// made startups still sitting in the Custom Form step appear in the
+			// Screening phase before they were advanced (GV-3237). A startup must
+			// be moved to the screening step (via "change step") before it can be
+			// assigned to judges.
+			$companies = Company::where('step', $cstep->id)->get();
 		} else {
 			$cstep = [];
 		}
@@ -692,7 +696,12 @@ class ScreeningController extends Controller
 		$outlist ? $outlist = ('[' . str_replace(['[', ']'], '', json_encode($outlist)) . ']') : $outlist = [];
 		$menu = $selected = '';
 		$l = session()->get('locale') ?? 'ar';
-		foreach (Company::whereIn('step', [$fid, $sid])->get() as $comp) {
+		// Only offer startups that have progressed to THIS screening step ($sid).
+		// $fid is a BuilderForm id (not a step id), so the previous
+		// whereIn('step', [$fid, $sid]) only ever matched Custom Form step
+		// companies by an accidental id collision, pulling startups that had not
+		// yet advanced to the screening phase into the assignment list (GV-3237).
+		foreach (Company::where('step', $sid)->get() as $comp) {
 			if (in_array($comp->id,  $list['users'] ?? [])) {
 				$selected = " selected ";
 			}
