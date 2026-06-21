@@ -1221,7 +1221,13 @@ class CyclesController extends Controller
 
 
         $inputs = [];
-        $answers = Formfield::rightJoin('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
+        // Scope previously-submitted answers to THIS step. The same BuilderForm
+        // (and therefore the same field_map_ids) can be assigned to multiple
+        // steps — e.g. a Custom Form step and a Final Screening step. Without a
+        // step_id filter, answers submitted in one step bleed into the other's
+        // form, since field_id alone is shared across every step using the form
+        // (GV-3226).
+        $answers = Formfield::rightJoin('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', $user->id)->where('form_data.step_id', $id)->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_data.id', 'ASC')->get();
         foreach ($answers as $answer) {
             $inputs[ 'field_' . $answer->field_id] = $answer->answer;
         };
@@ -1525,7 +1531,14 @@ class CyclesController extends Controller
                 $request->{$field_name} = json_encode($request->{$field_name});
             }
 
-            Formdata::where('field_id', $field['id'])->where('company_id', $cid)->delete();
+            // Scope the delete to THIS step (form_data.form_id holds the step id).
+            // The same BuilderForm — and therefore the same field_id values — can
+            // be assigned to multiple steps (e.g. a Custom Form step and a Final
+            // Screening step). Deleting by field_id + company_id alone would wipe
+            // the other step's answers for the shared fields, so re-submitting one
+            // step destroyed the other's saved data (GV-3226). This mirrors the
+            // form_id scoping already used by the inactive-fields cleanup below.
+            Formdata::where('field_id', $field['id'])->where('company_id', $cid)->where('form_id', $id)->delete();
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
             Formdata::updateOrInsert([
                 'field_id' => $field['id'],
