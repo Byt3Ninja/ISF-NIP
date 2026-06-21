@@ -9,6 +9,7 @@ return [
 	'E-Mail' => 'E-Mail',
 	'Password' => 'Password',
 	'Remember' => 'Remember Me',
+	'stay_logged' => 'Stay Logged In',
 	'Forgot' => 'Forgot Your Password?',
 	'Name' => 'Name',
 	'Confirm' => 'Confirm Password',
