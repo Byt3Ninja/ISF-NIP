@@ -282,14 +282,14 @@ $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark
             </div>
 
             <!-- Headline -->
-            <h1 class="fw-bold display-4 mb-3 text-dark">
+            {{-- <h1 class="fw-bold display-4 mb-3 text-dark">
               {{ __('admin.org_landing_heading') }}
-            </h1>
+            </h1> --}}
             
             <!-- Description -->
-            <h2 class="hero-sub-title h5 mb-6 mb-md-12 text-break">
+            <h4 class="hero-sub-title mb-6 mb-md-12 text-break">
               {{ Str::limit($organization->bio, 300) }}
-            </h2>
+            </h4>
 
             <!-- Industries -->
             @if($organization->industries && $organization->industries->count() > 0)
