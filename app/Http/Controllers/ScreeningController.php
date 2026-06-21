@@ -239,13 +239,17 @@ class ScreeningController extends Controller
 			abort(404);
 		}
 
-		// Determine the selected form: use form_id if set, else fall back to position-based lookup
-		if ($cstep->form_id) {
-			$form = \App\BuilderForm::find($cstep->form_id);
-		} else {
-			$formStep = Step::where('cycle_id', $cstep->cycle_id)->where('stype', 1)->where('arr', $cstep->arr - 1)->first();
-			$form = $formStep && $formStep->data ? \App\BuilderForm::find($formStep->data) : null;
-		}
+		// Determine the selected form from the step's own pointers. form_id and
+		// data are kept in sync by applyFormToStep(): attaching a form sets both,
+		// removing a form nulls both. A null/empty form pointer therefore means
+		// "no form" — either never configured or explicitly removed — and must be
+		// honored. The old position-based fallback to the preceding Custom Form
+		// step re-derived a removed form on every reload, so the removal never
+		// appeared to persist (GV-3243). data is read as a fallback only for
+		// legacy steps that predate the form_id column and still carry the form
+		// id in data.
+		$formId = $cstep->form_id ?: ($cstep->data ?: null);
+		$form = $formId ? \App\BuilderForm::find($formId) : null;
 
 		// Get all available forms for the organization (for the form selection dropdown)
 		$forms = \App\BuilderForm::where('organization_id', $cstep->cycle->organization_id)->get();
