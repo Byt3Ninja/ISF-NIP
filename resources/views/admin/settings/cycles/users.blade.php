@@ -1,13 +1,6 @@
 @extends('layouts.admin')
 
 @section('content')
-  @php
-    $com          = \App\Company::where('cycle', $id)->get();
-    $cycleId      = request()->route('id');
-    $currentCycle = $cycles->firstWhere('id', $id);
-    $cycleTitle   = $cycles->where('id', request('id'))->pluck('title')->implode(', ');
-  @endphp
-
   <div class="content-body">
 
     {{-- ── Flash messages ── --}}
@@ -177,35 +170,14 @@
           </thead>
           <tbody>
             @foreach ($companies as $company)
-              @php
-                $userName    = trim(($company->user->{'first_name_'.$l} ?? '').' '.($company->user->{'last_name_'.$l} ?? ''));
-                $companyName = $company->{'name_'.$l};
-
-                $goAlumni = \App\Step::where('cycle_id', $company->cycle)
-                              ->where('stype', '!=', '7')
-                              ->orderBy('arr', 'desc')
-                              ->where('stype', '=', '5')
-                              ->first();
-
-                $currentStepTitle = \App\Step::where('cycle_id', $company->cycle)
-                                      ->orderBy('arr')
-                                      ->where('stype', '!=', '7')
-                                      ->get()
-                                      ->where('id', $company->step)
-                                      ->pluck('title')
-                                      ->implode(', ');
-
-                $atAlumniStep  = $goAlumni && $company->step == $goAlumni->id;
-                $isAlumni      = $company->isAlumni;
-              @endphp
               <tr>
                 <td>
                   <input type="checkbox" class="form-check-input chboxcyclesReg"
                     data-company-id="{{ $company->id }}"
                     data-user-id="{{ $company->user->id ?? '' }}"
-                    data-company-name="{{ $companyName }}"
-                    data-is-alumni="{{ $isAlumni ? '1' : '0' }}"
-                    data-at-alumni-step="{{ $atAlumniStep ? '1' : '0' }}"
+                    data-company-name="{{ $company->companyName }}"
+                    data-is-alumni="{{ $company->isAlumni ? '1' : '0' }}"
+                    data-at-alumni-step="{{ $company->atAlumniStep ? '1' : '0' }}"
                     value="1"
                     name="chboxcyclesReg[]">
                 </td>
@@ -217,7 +189,7 @@
                     <img src="{{ $company->logo ?? '/app-assets/images/logo_placeholder.png' }}"
                       onerror="this.src='/app-assets/images/logo_placeholder.png'"
                       alt="avatar" height="40" width="40" class="rounded-circle border">
-                    <small class="fw-semibold text-dark">{{ $companyName }}</small>
+                    <small class="fw-semibold text-dark">{{ $company->companyName }}</small>
                   </a>
                 </td>
 
@@ -229,7 +201,7 @@
                       onerror="if(this.src!=='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
                       alt="avatar" class="rounded-circle border" height="40" width="40">
                     <div class="d-flex flex-column">
-                      <small class="fw-semibold text-dark">{{ $userName }}</small>
+                      <small class="fw-semibold text-dark">{{ $company->userName }}</small>
                       <small class="text-muted">{{ $company->user->{'title_'.$l} ?? '' }}</small>
                     </div>
                   </a>
@@ -237,37 +209,33 @@
 
                 <td><small>{{ $company->user->phone ?? '' }}</small></td>
                 <td><small>{{ $company->user->email ?? '' }}</small></td>
-                <td><small>{{ $currentStepTitle }}</small></td>
+                <td><small>{{ $company->currentStepTitle }}</small></td>
 
                 {{-- Row actions --}}
                 <td>
                   <div class="d-flex flex-nowrap align-items-center gap-2">
 
-                    @unless ($isAlumni)
+                    @unless ($company->isAlumni)
                       <button type="button"
                         class="btn btn-sm btn-light text-nowrap change-step-single"
                         data-company-id="{{ $company->id }}"
-                        data-company-name="{{ $companyName }}"
-                        data-user-name="{{ $userName }}"
+                        data-company-name="{{ $company->companyName }}"
+                        data-user-name="{{ $company->userName }}"
                         data-current-step="{{ $company->step }}"
-                        data-current-step-title="{{ $currentStepTitle }}">
+                        data-current-step-title="{{ $company->currentStepTitle }}">
                         <i class="ti ti-pencil ti-16px me-1"></i> {{ __('cycles.change_step') }}
                       </button>
                     @endunless
-
-                    @php
-                     $typeProgram = $cycles->where('id', $id)->first();   
-                    @endphp
-                    @if($typeProgram->type == 'General_Program')
-                    <span @if(!$isAlumni && !$atAlumniStep) title="{{ __('startup.not_passed_final_screening_tooltip') }}" style="cursor:not-allowed;display:inline-block;" @endif>
+                    @if($company?->cycleData?->type == 'General_Program')
+                    <span @if(!$company->isAlumni && !$company->atAlumniStep) title="{{ __('startup.not_passed_final_screening_tooltip') }}" style="cursor:not-allowed;display:inline-block;" @endif>
                       <button type="button"
-                        class="btn btn-sm {{ $isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
+                        class="btn btn-sm {{ $company->isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
                         data-company-id="{{ $company->id }}"
-                        data-company-name="{{ $companyName }}"
-                        @if(!$isAlumni && !$atAlumniStep) style="pointer-events:none;" @endif
-                        {{ $isAlumni || !$atAlumniStep ? 'disabled' : '' }}>
+                        data-company-name="{{ $company->companyName }}"
+                        @if(!$company->isAlumni && !$company->atAlumniStep) style="pointer-events:none;" @endif
+                        {{ $company->isAlumni || !$company->atAlumniStep ? 'disabled' : '' }}>
                         <i class="ti ti-pennant ti-16px me-1"></i>
-                        <span>{{ $isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
+                        <span>{{ $company->isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
                       </button>
                     </span>
                     @endif
@@ -406,15 +374,6 @@
             {{-- Funding Stage --}}
             <div class="mb-3">
               <label class="form-label">{{ __('admin.Funding_Stage') }}</label>
-              @php
-                $fundingStages = [
-                  'Pre_seed_funding_stage' => __('admin.Pre_seed_funding_stage'),
-                  'Seed_funding_stage'     => __('admin.Seed_funding_stage'),
-                  'Series_A_funding'       => __('admin.Series_A_funding'),
-                  'Series_B_funding'       => __('admin.Series_B_funding'),
-                  'Series_C_funding'       => __('admin.Series_C_funding'),
-                ];
-              @endphp
               <select class="form-select select2" name="funding_stage">
                 <option value="">{{ __('cycles.Select') }}</option>
                 @foreach ($fundingStages as $value => $label)
@@ -441,7 +400,6 @@
             {{-- Business Type --}}
             <div class="mb-3">
               <label class="form-label">{{ __('cycles.Business_Type') }}</label>
-              @php $bTypes = ['B2C','B2B','B2B2C','C2C','B2G','Platform']; @endphp
               <select class="form-select select2" name="BType">
                 <option value="0">{{ __('admin.All') }}</option>
                 @foreach ($bTypes as $bt)

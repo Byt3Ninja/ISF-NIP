@@ -255,13 +255,50 @@ class CyclesController extends Controller
 
         $companies = $companies->merge($alumniCompanies);
 
-        $companies = $companies->map(function ($company) use ($alumniCompanyIds) {
+        $l = app()->getLocale();
+
+        $companies = $companies->map(function ($company) use ($alumniCompanyIds, $l) {
             $company->isAlumni = $alumniCompanyIds->contains($company->id);
+
+            $goAlumni = Step::where('cycle_id', $company->cycle)
+                            ->where('stype', '!=', '7')
+                            ->orderBy('arr', 'desc')
+                            ->where('stype', '=', '5')
+                            ->first();
+
+            $company->goAlumni         = $goAlumni;
+            $company->atAlumniStep     = $goAlumni && $company->step == $goAlumni->id;
+            $company->currentStepTitle = Step::where('cycle_id', $company->cycle)
+                                             ->orderBy('arr')
+                                             ->where('stype', '!=', '7')
+                                             ->get()
+                                             ->where('id', $company->step)
+                                             ->pluck('title')
+                                             ->implode(', ');
+            $company->userName    = trim(($company->user->{'first_name_'.$l} ?? '').' '.($company->user->{'last_name_'.$l} ?? ''));
+            $company->companyName = $company->{'name_'.$l};
+
             return $company;
         });
 
-        
-        return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
+        $com          = Company::where('cycle', $id)->get();
+        $cycleId      = request()->route('id');
+        $currentCycle = $cycles->firstWhere('id', $id);
+        $cycleTitle   = $cycles->where('id', request('id'))->pluck('title')->implode(', ');
+        $fundingStages = [
+            'Pre_seed_funding_stage' => __('admin.Pre_seed_funding_stage'),
+            'Seed_funding_stage'     => __('admin.Seed_funding_stage'),
+            'Series_A_funding'       => __('admin.Series_A_funding'),
+            'Series_B_funding'       => __('admin.Series_B_funding'),
+            'Series_C_funding'       => __('admin.Series_C_funding'),
+        ];
+        $bTypes = ['B2C', 'B2B', 'B2B2C', 'C2C', 'B2G', 'Platform'];
+
+        return view('admin.settings.cycles.users', compact(
+            'cycles', 'id', 'companies', 'steps',
+            'com', 'cycleId', 'currentCycle', 'cycleTitle',
+            'fundingStages', 'bTypes'
+        ));
     }
 
     public function modify(Request $request)
