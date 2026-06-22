@@ -168,7 +168,7 @@
                       class="badge bg-label-primary rounded-pill text-decoration-none px-2 py-1">
                       <i class="ti ti-rocket ti-xs me-1"></i>{{ Str::limit($step->program->title, 30) }}
                     </a>
-                    <a href="{{ route('organizations.edit', $step->organization->id) }}"
+                    <a href="{{ $_user->ableTo('organization.wizard.edit', $permissions) ? route('organization.wizard.edit', $step->organization->id) . '?step=1' : 'javascript:void(0);' }}"
                       class="badge bg-label-secondary rounded-pill text-decoration-none px-2 py-1">
                       <i class="ti ti-building ti-xs me-1"></i>{{ Str::limit($step->organization->name, 20) }}
                     </a>
