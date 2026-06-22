@@ -2608,7 +2608,19 @@ class HomeController extends Controller
             $users_gender_q .= " WHERE u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $users_gender_q .= " GROUP BY gender";
-        $users_gender = collect(DB::select($users_gender_q));
+        $users_gender = collect(DB::select($users_gender_q))
+            ->filter(fn($item) => in_array(strtolower($item->gender ?? ''), ['male', 'female']))
+            ->values()
+            ->map(function ($item) {
+                $item->gender = strtolower($item->gender);
+                return $item;
+            })
+            ->keyBy('gender');
+
+        $users_gender = collect([
+            (object) ['gender' => 'female', 'total' => $users_gender->get('female')->total ?? 0],
+            (object) ['gender' => 'male', 'total' => $users_gender->get('male')->total ?? 0],
+        ]);
 
         $data['countries'] = $country_data;
         $data['sector_data'] = $sector_data;
