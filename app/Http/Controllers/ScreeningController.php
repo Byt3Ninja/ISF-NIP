@@ -540,6 +540,16 @@ class ScreeningController extends Controller
 		// Clear existing screenings for this step
 		Screening::where('step_id', $stepId)->delete();
 
+		// Accumulate the full set of judges assigned to each company across ALL
+		// panels. A company may appear in more than one panel (e.g. its own panel
+		// plus a shared "all startups" panel), so each company's Finalscreening
+		// row must hold the UNION of every panel's judges. Writing per-panel with
+		// updateOrCreate keyed on (step_id, company_id) overwrote earlier panels,
+		// leaving only the last panel's judges (GV: final screening results showed
+		// a single judge for every company). We build the map here and persist it
+		// once, after the loop.
+		$judgesByCompany = [];
+
 		// Create new screenings if panels exist
 		foreach ($panels as $index => $panel) {
 			$panelNumber = $index + 1;
@@ -602,16 +612,30 @@ class ScreeningController extends Controller
 			$panels[$index]['meeting_link'] = $meetingLink;
 			$panels[$index]['meeting_password'] = $meetingPassword;
 
-			// Sync to Finalscreening table if step type is 5 (Final Screening)
+			// Accumulate this panel's judges into each of its companies' judge set
+			// (Final Screening only). Persisted once after the loop so companies in
+			// multiple panels keep the union of all their panels' judges.
 			if ($step && $step->stype == 5) {
 				foreach ($companyIds as $companyId) {
-					// The Finalscreening model casts `judges` to array, so it json_encodes on save.
-					// Pass the array directly — passing a pre-encoded string causes double-encoding.
-					\App\Finalscreening::updateOrCreate(
-						['step_id' => $stepId, 'company_id' => $companyId],
-						['judges' => $judgeIds]
-					);
+					$judgesByCompany[$companyId] = array_merge($judgesByCompany[$companyId] ?? [], $judgeIds);
 				}
+			}
+		}
+
+		// Persist the Final Screening judge assignments. Mirror the screenings
+		// rebuild above: clear the step's existing rows, then write one row per
+		// company holding the merged (unique) judge list. The clear removes stale
+		// rows for companies/panels no longer present in this submission.
+		if ($step && $step->stype == 5) {
+			\App\Finalscreening::where('step_id', $stepId)->delete();
+			foreach ($judgesByCompany as $companyId => $judgeIds) {
+				// The Finalscreening model casts `judges` to array, so it json_encodes on save.
+				// Pass the array directly — passing a pre-encoded string causes double-encoding.
+				\App\Finalscreening::create([
+					'step_id' => $stepId,
+					'company_id' => $companyId,
+					'judges' => array_values(array_unique(array_map('intval', $judgeIds))),
+				]);
 			}
 		}
 

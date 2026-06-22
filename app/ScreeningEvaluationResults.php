@@ -271,7 +271,12 @@ class ScreeningEvaluationResults extends Model
 								if( !empty( $getResult ) )
 								{
 									$weight = $getResult->weight;
-									$weighted_score = ( intval( $result->score ) / 5 ) * $weight;
+									// Judges score each sub-criterion on a 1–10 scale (see the
+									// score select in _startup_screening_canvas.blade.php), so the
+									// raw score is normalized against a max of 10. Dividing by 5
+									// here doubled every score (e.g. 76% rendered as 152%); the
+									// per-judge breakdown in results() already uses /10 correctly.
+									$weighted_score = ( intval( $result->score ) / 10 ) * $weight;
 									$result->weighted_score = $weighted_score;
 								}
 								$company->results[$results_key] = $result;
@@ -357,7 +362,17 @@ class ScreeningEvaluationResults extends Model
 		$all_companies = Company::whereIn('cycle', $all_cycles)->get();
 		$all_steps = Step::whereIn('cycle_id', $all_cycles)->orderBy('arr')->get();
 
-		$evaluations = ScreeningEvaluation::whereIn('step_id', $step_ids)->get()->keyBy('step_id');
+		// Load evaluations through getEvaluationData() so each carries its
+		// `categories` structure (with weights normalized to fractions). A bare
+		// ScreeningEvaluation::get() leaves `categories` unset, which made the
+		// weighting block below a no-op and produced a 0% score for every
+		// startup on the screening results report. metadata() already loads
+		// evaluations this way; this brings the report path in line.
+		$evaluationData = ScreeningEvaluation::getEvaluationData($step_ids);
+		if (!$evaluationData instanceof \Illuminate\Support\Collection) {
+			$evaluationData = collect($evaluationData ? [$evaluationData] : []);
+		}
+		$evaluations = $evaluationData->keyBy('step');
 
 		$evaluation_ids = $evaluations->pluck('id')->filter()->values();
 		$all_results = self::whereIn('evaluation_id', $evaluation_ids)->get();
@@ -461,7 +476,9 @@ class ScreeningEvaluationResults extends Model
 								$sub = $subCriteria->firstWhere('id', $result->criteria_id);
 								if ($sub) {
 									$weight = $sub->weight;
-									$result->weighted_score = (intval($result->score) / 5) * $weight;
+									// 1–10 score scale: normalize against 10, not 5. Matches
+									// metadata() and the per-judge breakdown in results().
+									$result->weighted_score = (intval($result->score) / 10) * $weight;
 								}
 							}
 						}
