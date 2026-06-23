@@ -137,8 +137,13 @@
                   </h6>
                   <div class="d-flex align-items-center gap-1">
                     @php
+                      // Status from the step's date window vs today. Guard null
+                      // dates (treat a missing window as active, not "completed",
+                      // which a null < today comparison would wrongly produce).
                       $today = date('Y-m-d');
-                      $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in_progress');
+                      $status = (!empty($step->end_date) && $step->end_date < $today)
+                        ? 'completed'
+                        : ((!empty($step->start_date) && $step->start_date > $today) ? 'upcoming' : 'in_progress');
                       $statusColor = ($status == 'completed') ? 'success' : (($status == 'upcoming') ? 'warning' : 'primary');
                     @endphp
                     <span class="badge bg-label-{{ $statusColor }} text-capitalize">
