@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded', function () {
       $(dateInput).flatpickr({
         enableTime: false,
         dateFormat: 'Y-m-d',
-        minDate: 'today',
+        // minDate: 'today',
       });
     }
   }
