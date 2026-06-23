@@ -549,8 +549,14 @@ class HomeController extends Controller
         }
 
         if (array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions)) {
-            $today = date("Y-m-d");
-            $inputs = [$today];
+            // A startup belongs to "First screening" based on its CURRENT step
+            // (companies.step = the screening step), not on whether today falls
+            // inside the step's from/to window. The old `today BETWEEN from AND to`
+            // gate hid valid in-progress initial screenings whose date window had
+            // already passed (e.g. a judge still had startups sitting at the step).
+            // The company join below already restricts to startups currently at
+            // the screening step, so the window filter only ever dropped real rows.
+            $inputs = [];
             $isJudgeOnly = !$user->hasAnyRole(['admin', 'organizationmanager']);
             $screeningJoinUserClause = $isJudgeOnly ? ' AND sc.user_id = ?' : '';
             if ($isJudgeOnly) { array_unshift($inputs, $user->id); }
@@ -598,8 +604,7 @@ class HomeController extends Controller
                 LEFT JOIN
                     users u ON u.company_id = cp.id AND u.HaveCompany = 1
                 WHERE
-                    ? BETWEEN s.from AND s.to
-                    AND s.deleted_at IS NULL
+                    s.deleted_at IS NULL
                     AND s.stype = 2
                     AND s.id IN (
                         SELECT
@@ -716,8 +721,9 @@ class HomeController extends Controller
                     steps s ON fs.step_id = s.id
                 LEFT JOIN
                     cycles cy ON s.cycle_id = cy.id
-                WHERE   
+                WHERE
                     fs.deleted_at IS NULL
+                    AND c.step = fs.step_id
             ";
             if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
                 // judges may be stored either as a JSON array of string IDs (legacy: ["15","16"])
@@ -2215,7 +2221,11 @@ class HomeController extends Controller
             'icon' => 'ti ti-chalkboard',
             'text' => 'First screening',
             'permissions' => ['dashboard.widgets_cards_filtration_view'],
-            'count' => $filtration->count(),
+            // Count startups currently in initial screening (not the number of
+            // steps). Mirrors the Final screening card, which counts companies.
+            // An initial step the judge owns but with no startup currently sitting
+            // at it contributes 0.
+            'count' => $filtration->map(function ($step) { return $step->companies; })->flatten()->count(),
             'isRating' => false,
         ];
         $data['countCards'][] = [
