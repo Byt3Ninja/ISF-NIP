@@ -2,6 +2,15 @@
 
 @section('vendorstyle')
     <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+    <style>
+      /* Edit-step picker is positioned via JS using viewport-fixed coords so the
+         month/year selectors stay fully visible inside the modal (GV-3736). */
+      .daterangepicker.drp-viewport-fixed {
+        margin-top: 0 !important;
+        position: fixed !important;
+        z-index: 1080;
+      }
+    </style>
 @stop
 
 @section('scripts')
@@ -342,17 +351,66 @@
       $('#mtoDate').val(stepData.end_date || moment().format('YYYY-MM-DD'));
 
       // Combined range picker; no locale so date_range posts MM/DD/YYYY matching the controller m/d/Y parse.
-      $('#step-range-picker').daterangepicker({
+      // Positioned via JS (viewport-fixed) instead of drops:'up', which clipped
+      // the picker inside the modal and hid the month/year selectors (GV-3736).
+      const $stepRangeInput = $('#step-range-picker');
+      $stepRangeInput.daterangepicker({
         opens: $('html').attr('dir') === 'rtl' ? 'left' : 'right',
-        drops: 'up',
         startDate: stepData.start_date ? moment(stepData.start_date) : moment(),
         endDate: stepData.end_date ? moment(stepData.end_date) : moment(),
       }).on('apply.daterangepicker', function (ev, picker) {
         $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
         $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
       });
+
+      positionStepRangePicker($stepRangeInput);
     }
   });
+
+  function positionStepRangePicker($input) {
+    const drp = $input.data('daterangepicker');
+    if (!drp) return;
+    const $picker = drp.container;
+    $picker.addClass('drp-viewport-fixed');
+
+    const reposition = function () {
+      if (!drp.isShowing) return;
+      const inputRect = $input[0].getBoundingClientRect();
+      const pickerHeight = $picker.outerHeight();
+      const pickerWidth = $picker.outerWidth();
+      const viewportH = window.innerHeight;
+      const viewportW = window.innerWidth;
+      const gap = 4;
+
+      let top = inputRect.bottom + gap;
+      if (top + pickerHeight > viewportH - gap) {
+        const above = inputRect.top - pickerHeight - gap;
+        top = above >= gap ? above : Math.max(gap, viewportH - pickerHeight - gap);
+      }
+
+      let left;
+      if (drp.opens === 'left') {
+        left = inputRect.right - pickerWidth;
+      } else if (drp.opens === 'center') {
+        left = inputRect.left + inputRect.width / 2 - pickerWidth / 2;
+      } else {
+        left = inputRect.left;
+      }
+      left = Math.max(gap, Math.min(left, viewportW - pickerWidth - gap));
+
+      $picker.css({ top: top + 'px', left: left + 'px', right: 'auto', bottom: 'auto' });
+    };
+
+    $input.off('show.daterangepicker.viewport').on('show.daterangepicker.viewport', function () {
+      setTimeout(reposition, 0);
+    });
+    const $modal = $('#step-form-modal');
+    $modal.off('scroll.drpViewport').on('scroll.drpViewport', reposition);
+    $modal.find('.modal-body, .modal-dialog').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
+    $(window).off('scroll.drpViewport resize.drpViewport').on('scroll.drpViewport resize.drpViewport', reposition);
+
+    if (drp.isShowing) reposition();
+  }
 
   function handleDeleteStep(stepId) {
     $.ajaxSetup({
