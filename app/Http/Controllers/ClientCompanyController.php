@@ -346,9 +346,20 @@ class ClientCompanyController extends Controller
             if ($almuni->cycle_id) {
                 $almuniCycle = $almuni->cycle;
                 $custom_form = $almuniCycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
-                $submissions = Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first();
+                // $custom_form may be null when the cycle has no Custom Form step;
+                // guard the step_id lookup so we don't read ->id on null.
+                $submissions = $custom_form
+                    ? Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first()
+                    : null;
                 if ($almuniCycle)
                 {
+                    // screening / final_screening are JSON arrays of step entries.
+                    // Decode defensively (the value may arrive as a JSON string)
+                    // and read the first entry's step_id; missing/empty arrays
+                    // previously threw "Undefined array key 0" (GV-3735).
+                    $screeningEntries = is_array($almuni->screening) ? $almuni->screening : (json_decode($almuni->screening, true) ?: []);
+                    $finalScreeningEntries = is_array($almuni->final_screening) ? $almuni->final_screening : (json_decode($almuni->final_screening, true) ?: []);
+
                     $almuniScreeningScore = null;
                     if( !empty( $almuni->screening ) )
                     {
@@ -3450,8 +3461,12 @@ class ClientCompanyController extends Controller
         $services    = $almuni?->services ?? [];
 
         $company = $almuni->company;
-        $screeningResultsData = ScreeningEvaluationResults::results( $almuni->screening_data[0]['step_id'] ?? 0, $company->id )[$company->id] ?? [];
-        $finalScreeningResultsData = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]['step_id'] ?? 0, $company->id )[$company->id] ?? [];
+        // Decode defensively and read the first entry's step_id; an empty/missing
+        // screening array previously threw "Undefined array key 0" (GV-3735).
+        $screeningEntries = is_array($almuni->screening) ? $almuni->screening : (json_decode($almuni->screening, true) ?: []);
+        $finalScreeningEntries = is_array($almuni->final_screening) ? $almuni->final_screening : (json_decode($almuni->final_screening, true) ?: []);
+        $screeningResultsData = ScreeningEvaluationResults::results( data_get($screeningEntries, '0.step_id', 0), $company->id )[$company->id] ?? [];
+        $finalScreeningResultsData = ScreeningEvaluationResults::results( data_get($finalScreeningEntries, '0.step_id', 0), $company->id )[$company->id] ?? [];
 
         // ── Stats calculations ──────────────────────────────────────────
         $trainingTotalMin   = collect($training)->sum(fn($t) => (int) ($t['duration'] ?? 0));

@@ -113,7 +113,12 @@ class ScreeningEvaluationResults extends Model
 	{
 		$_steps = collect([]);
 		$companies = collect([]);
-		$evaluation = collect([]);
+		// Null (not an empty collection): when the step is missing/invalid the
+		// code below still runs and reads $evaluation?->id. An empty collection
+		// has no ->id, so $evaluation?->id threw "Property [id] does not exist on
+		// this collection instance" (e.g. opening a company profile that resolves
+		// to step_id 0). null short-circuits the null-safe accessor cleanly.
+		$evaluation = null;
 		$results = collect([]);
 		$comments = collect([]);
 		$get_comments = null;
