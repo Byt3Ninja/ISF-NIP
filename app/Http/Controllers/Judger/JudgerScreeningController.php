@@ -55,6 +55,41 @@ class JudgerScreeningController extends Controller
             $companies = collect(DB::select($companies_q, $bindings));
         }
 
+        // Keep only startups the judge is actually assigned to AT their CURRENT
+        // step. The query above matches any assigned company whose current step
+        // is one the judge screens *somewhere*, which leaked startups the judge
+        // screened in an earlier step but no longer judges after they advanced
+        // (e.g. screened in Initial, moved to Final under different judges). For
+        // an initial step (stype 2) the judge must be in screenings.users for
+        // that exact step; for a final step (stype 5) the judge must be in the
+        // finalscreenings.judges array for (step, company). This mirrors the
+        // judger dashboard, which already scopes by current-step assignment.
+        $screeningsByStep = $screenings->groupBy('step_id');
+        $finalAssignedByStep = \App\Finalscreening::whereIn('step_id', $companies->pluck('step_id')->unique()->filter()->toArray())
+            ->get()
+            ->filter(function ($f) use ($user_id) {
+                $judges = is_array($f->judges) ? $f->judges : (json_decode($f->judges, true) ?: []);
+                return in_array((int) $user_id, array_map('intval', $judges), true);
+            })
+            ->groupBy('step_id');
+
+        $companies = $companies->filter(function ($c) use ($screeningsByStep, $finalAssignedByStep, $user_id) {
+            $stepId = (int) $c->step_id;
+            if ((int) $c->step_type === 2) {
+                $assignedIds = ($screeningsByStep->get($stepId) ?? collect())
+                    ->pluck('users')
+                    ->map(fn ($u) => is_array($u) ? $u : (json_decode($u, true) ?: []))
+                    ->flatten()->map(fn ($i) => (int) $i)->all();
+                return in_array((int) $c->company_id, $assignedIds, true);
+            }
+            if ((int) $c->step_type === 5) {
+                $assignedCompanyIds = ($finalAssignedByStep->get($stepId) ?? collect())
+                    ->pluck('company_id')->map(fn ($i) => (int) $i)->all();
+                return in_array((int) $c->company_id, $assignedCompanyIds, true);
+            }
+            return false;
+        })->values();
+
         $l = app()->getLocale();
         $companies = $companies->map(function( $c ) use ( $l ) {
             $company = new stdClass;
