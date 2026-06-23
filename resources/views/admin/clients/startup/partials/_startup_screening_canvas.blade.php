@@ -320,7 +320,7 @@
             </div>
             <div class="tab-pane fade" id="pills-final-comments" role="tabpanel" aria-labelledby="pills-final-comments-tab">
               <div class="form-group mb-5">
-                <label for="is_approved" class="form-label">{{ __('admin.Your Decision')}}</label>
+                <label for="is_approved" class="form-label">{{ __('admin.Your Recommendation')}}</label>
                 <select class="form-select" name="is_approved" id="is_approved">
                   <option value="" {{ is_null( $evaluationForm->is_approved ) ? 'selected' : '' }}>{{ __('admin.Not Decided yet') }}</option>
                   <option value="1" {{ ( $evaluationForm->is_approved === 1 || $evaluationForm->is_approved === true ) ? 'selected' : '' }}>{{ __('admin.Decision Approved') }}</option>

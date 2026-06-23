@@ -1570,6 +1570,7 @@ return [
 	'Continue' => 'Continue',
 	'Final Comments' => 'Final Comments',
 	'Your Decision' => 'Your Decision',
+	'Your Recommendation' => 'Recommendation',
 	'Not Decided yet' => 'Not Decided yet',
 	'Decision Approved' => 'Approved',
 	'Decision Disapproved' => 'Disapproved',
