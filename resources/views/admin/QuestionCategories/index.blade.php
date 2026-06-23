@@ -75,7 +75,8 @@
 												<td class="text-center">
 													{{ $category->title }}</td>
 												<td class="text-center">
-													<a href="{{ route('organizations.edit', ['organization' => $category->organization->id]) }}"> {{ $category->organization->{'name_'.$l} }}</a></td>
+													<a href="{{ $_user->ableToAny(['organization.wizard.edit', 'organizations.edit'], $permissions) ? route('organization.wizard.edit', $category->organization->id) . '?step=1' : 'javascript:void(0);' }}"> {{ $category->organization->{'name_'.$l} }}</a>
+												</td>
 												<td class="text-center">
 													 {{ $category->questions->count() }} </td>
 												<td class="text-center">

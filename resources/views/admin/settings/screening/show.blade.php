@@ -127,7 +127,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
               </div>
 
               <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-success">
-                <a href="{{ route('organizations.edit', $cstep->cycle->organization->id) }}" class="d-flex align-items-start gap-3">
+                <a href="{{ $_user->ableToAny(['organization.wizard.edit', 'organizations.edit'], $permissions) ? route('organization.wizard.edit', $cstep->cycle->organization->id) . '?step=1' : 'javascript:void(0);' }}" class="d-flex align-items-start gap-3">
                   <div class="avatar">
                     <div class="avatar-initial rounded-circle bg-label-success">
                       <i class="ti ti-building"></i>

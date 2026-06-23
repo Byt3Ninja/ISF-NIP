@@ -92,14 +92,14 @@
 
               <td class="text-center">
                 @if($category->organization_id)
-                  @if( $_user->ableTo('organizations.edit') ) <a href="{{ url('dashboard/organizations/'.$category->organization_id.'/edit') }}"> @endif
+                  <a href="{{ $_user->ableToAny(['organization.wizard.edit', 'organizations.edit']) ? route('organization.wizard.edit', $category->organization_id) . '?step=1' : 'javascript:void(0);' }}">
                     {{ optional($category->organization)->{'name_'.$l} ?? '-' }}
-                  @if( $_user->ableTo('organizations.edit') ) </a> @endif
+                  </a>
                 @else
                   @if( $_user->hasRole('organizationManager') )
-                    @if( $_user->ableTo('organizations.edit') ) <a href="{{ url('dashboard/organizations/'.$category->organization_id.'/edit') }}"> @endif
+                    <a href="{{ $_user->ableToAny(['organization.wizard.edit', 'organizations.edit']) ? route('organization.wizard.edit', $category->organization_id) . '?step=1' : 'javascript:void(0);' }}">
                       {{ $_user->organizations?->first()?->name ?? '-' }}
-                    @if( $_user->ableTo('organizations.edit') ) </a> @endif
+                    </a>
                   @else
                     <span class="badge bg-label-primary">{{ __('admin.All_Organizations') }}</span>
                   @endif

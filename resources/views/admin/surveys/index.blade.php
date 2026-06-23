@@ -108,7 +108,7 @@ if ($_user->hasAnyRole('mentor|Registered')) {
                 <td><a href="{{ route('surveys.edit', $survey->id) }}">{{ $survey->id }}</a></td>
                 <td>{!! $survey->title !!}</td>
                 <td>
-                  <a href="{{ route('organizations.edit', $survey?->organization?->id ?? 0) }}">
+                  <a href="{{ $_user->ableToAny(['organization.wizard.edit', 'organizations.edit']) ? route('organization.wizard.edit', $survey?->organization?->id ?? 0) . '?step=1' : 'javascript:void(0);' }}">
                     {{ $survey?->organization?->{'name_' . $l} }}
                   </a>
                 </td>
