@@ -333,7 +333,18 @@ class ScreeningController extends Controller
 		$assignedJudgeIds = collect($judgingPanels)->pluck('judges')->flatten()->unique()->filter()->values();
 		$assignedCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()->unique()->filter()->values();
 
-		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds'));
+		// Off-step references: startups already saved into this step's panels that
+		// have since moved to another step. Shown as read-only reference chips in
+		// the panel (not addable/removable until they return to this step).
+		$currentStepCompanyIds = $companies->pluck('id')->map(fn ($i) => (int) $i)->all();
+		$offStepCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()
+			->map(fn ($i) => (int) $i)->filter()->unique()
+			->reject(fn ($i) => in_array($i, $currentStepCompanyIds, true))->values();
+		$offStepCompanies = $offStepCompanyIds->isNotEmpty()
+			? Company::whereIn('id', $offStepCompanyIds)->get()
+			: collect();
+
+		return view('admin.settings.screening.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds', 'offStepCompanies'));
 	}
 
 	public function updateStepForm(Request $request)
@@ -768,7 +779,11 @@ class ScreeningController extends Controller
 				});
 			})->where('stype', 2)->where('id', $id)->first();
 		}
-		$metadata = ScreeningEvaluationResults::metadata( $id );
+		// Results page is informative: show every startup that belongs to this
+		// step's evaluation regardless of its current step (so results stay
+		// visible after a startup is advanced). The assignment page (show) stays
+		// limited to the current step.
+		$metadata = ScreeningEvaluationResults::metadata( $id, null, null, true );
 		$companies = $metadata['companies'];
 		$_steps = $metadata['_steps'];
 		$judges = $metadata['judges'];
@@ -886,7 +901,9 @@ class ScreeningController extends Controller
 			}
 		}
 
-		$metadata = ScreeningEvaluationResults::metadata($id);
+		// Export mirrors the results page: include every startup belonging to the
+		// step's evaluation regardless of current step.
+		$metadata = ScreeningEvaluationResults::metadata($id, null, null, true);
 		$_companies = $metadata['_companies'];
 		$evaluation = $metadata['evaluation'];
 

@@ -43,7 +43,62 @@ class ScreeningEvaluationResults extends Model
 		return $this->belongsTo(Company::class, 'company_id');
 	}
 
-	public static function metadata( $step_id, $company_id = null, $preloaded = null )
+	/**
+	 * Company ids that belong to a step's evaluation regardless of current step:
+	 * the union of panel-assigned (screenings.users, stype=2), final-assigned
+	 * (finalscreenings.company_id, stype=5) and any startup with a stored result
+	 * for the step's evaluation. Uses $preloaded collections when provided to
+	 * avoid extra queries, otherwise queries directly.
+	 */
+	protected static function stepCompanyUniverse( $step_id, $getStep, $preloaded = null )
+	{
+		$ids = collect();
+
+		if( $getStep->stype == 5 )
+		{
+			$finals = $preloaded
+				? $preloaded['finalscreenings']->where('step_id', $step_id)
+				: Finalscreening::where('step_id', $step_id)->get();
+			$ids = $ids->merge( $finals->pluck('company_id') );
+		}
+		else
+		{
+			$screenings = $preloaded
+				? $preloaded['screenings']->where('step_id', $step_id)
+				: Screening::where('step_id', $step_id)->get();
+			$ids = $ids->merge(
+				$screenings->pluck('users')->map(function( $u ) {
+					return is_array( $u ) ? $u : ( json_decode( $u, true ) ?: [] );
+				})->flatten()
+			);
+		}
+
+		// Startups that have a stored result for this step's evaluation.
+		$evaluation = $preloaded
+			? ( $preloaded['evaluations']->firstWhere('step', $getStep->id) ?? null )
+			: ScreeningEvaluation::getEvaluationData( $getStep->id );
+		if( $evaluation && ($evaluation->id ?? null) )
+		{
+			$results = $preloaded
+				? $preloaded['results']->where('evaluation_id', $evaluation->id)
+				: self::where('evaluation_id', $evaluation->id)->get(['company_id']);
+			$ids = $ids->merge( $results->pluck('company_id') );
+		}
+
+		return $ids->map(fn($i) => intval($i))->filter()->unique()->values();
+	}
+
+	/**
+	 * @param bool $allCompanies When false (default) the company set is limited
+	 *   to startups currently AT the step (companies.step = step_id) — used by the
+	 *   screening/final assignment pages. When true the company set is widened to
+	 *   every startup that belongs to the step's evaluation regardless of its
+	 *   current step: the union of panel-assigned (screenings.users),
+	 *   final-assigned (finalscreenings.company_id) and any startup with a stored
+	 *   result for the step's evaluation. Used by the results pages and reports so
+	 *   results stay visible after a startup is advanced to the next step.
+	 */
+	public static function metadata( $step_id, $company_id = null, $preloaded = null, $allCompanies = false )
 	{
 		$_steps = collect([]);
 		$companies = collect([]);
@@ -58,13 +113,30 @@ class ScreeningEvaluationResults extends Model
 
 		if( $getStep )
 		{
-			$companies = $preloaded
-				? $preloaded['companies']->where('cycle', $getStep->cycle_id)->where('step', $step_id)->values()
-				: Company::with(['users', 'stepdata.cycle'])->where('cycle', $getStep->cycle_id)->where('step', $step_id)->get();
+			if( $allCompanies )
+			{
+				// Union of every startup that belongs to this step's evaluation,
+				// regardless of where it currently sits. Built from the same
+				// assignment + result data this method already loads below.
+				$assignedCompanyIds = self::stepCompanyUniverse( $step_id, $getStep, $preloaded );
 
+				$companies = $preloaded
+					? $preloaded['companies']->where('cycle', $getStep->cycle_id)->whereIn('id', $assignedCompanyIds)->values()
+					: Company::with(['users', 'stepdata.cycle'])->where('cycle', $getStep->cycle_id)->whereIn('id', $assignedCompanyIds)->get();
+			}
+			else
+			{
+				$companies = $preloaded
+					? $preloaded['companies']->where('cycle', $getStep->cycle_id)->where('step', $step_id)->values()
+					: Company::with(['users', 'stepdata.cycle'])->where('cycle', $getStep->cycle_id)->where('step', $step_id)->get();
+			}
+
+			// Derive the cycle list from the step itself (not the company set) so
+			// $_steps stays correct even when the widened company set is empty.
+			$cycleIds = $companies->pluck('cycle')->push($getStep->cycle_id)->filter()->unique();
 			$_steps = $preloaded
-				? $preloaded['allSteps']->whereIn('cycle_id', $companies->pluck('cycle')->unique())->sortBy('arr')->values()
-				: Step::whereIn('cycle_id', $companies->pluck('cycle')->unique())->orderBy('arr')->get();
+				? $preloaded['allSteps']->whereIn('cycle_id', $cycleIds)->sortBy('arr')->values()
+				: Step::whereIn('cycle_id', $cycleIds)->orderBy('arr')->get();
 
 			$evaluation = $preloaded
 				? ($preloaded['evaluations']->firstWhere('step', $getStep->id) ?? null)
@@ -326,8 +398,14 @@ class ScreeningEvaluationResults extends Model
 
 			$_companies[$companies_index]->average_score = $average_score ?? 0;
 			$_companies[$companies_index]->judges = $judges;
-			$_companies[$companies_index]->company_step_id = $getStep->id;
-			$_companies[$companies_index]->company_cycle_id = $getStep->cycle_id;
+			// Stamp the startup's ACTUAL current step (companies.step), not the
+			// evaluation step being processed. With $allCompanies=true a startup
+			// may be reported under one step's evaluation while currently sitting
+			// at another; the step badge / step filter must reflect where it
+			// really is. Fall back to the evaluation step for safety when the
+			// company carries no step.
+			$_companies[$companies_index]->company_step_id = $company->step ?? $getStep->id;
+			$_companies[$companies_index]->company_cycle_id = $company->cycle ?? $getStep->cycle_id;
 		}
 
 		return [

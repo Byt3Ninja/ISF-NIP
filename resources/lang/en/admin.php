@@ -2690,6 +2690,7 @@ return [
 	'initial_screening' => 'Initial Screening',
 	'assigned_startups' => 'Assigned Startups',
 	'no_startups_assigned' => 'No startups assigned',
+	'moved_off_step' => 'moved (no longer at this step)',
 	'no_judges_assigned' => 'No judges assigned',
 	'view_results' => 'View Results',
 	'judging_panels' => 'Judging Panels',

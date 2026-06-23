@@ -502,9 +502,12 @@ class ReportController extends Controller
             $preloadedSteps = $steps->keyBy('id');
             $allCycleIds = $steps->pluck('cycle_id')->unique()->toArray();
 
+            // Cycle-scoped (not step-scoped): the screening report is informative
+            // and shows every startup that belongs to a step's evaluation even
+            // after it has advanced to another step. metadata($allCompanies=true)
+            // below selects the relevant subset per step from this wider pool.
             $preloadedCompanies = Company::with(['users', 'stepdata.cycle'])
                 ->whereIn('cycle', $allCycleIds)
-                ->whereIn('step', $steps_ids)
                 ->get();
 
             $preloadedAllSteps = Step::whereIn('cycle_id', $allCycleIds)->orderBy('arr')->get();
@@ -599,7 +602,7 @@ class ReportController extends Controller
 
             // === Process per-step (no DB queries — all in-memory filtering) ===
             foreach ($steps as $step) {
-                $meta = ScreeningEvaluationResults::metadata($step->id, null, $preloaded);
+                $meta = ScreeningEvaluationResults::metadata($step->id, null, $preloaded, true);
                 $metadata->push($meta);
                 $stepResults = ScreeningEvaluationResults::results($step->id, null, $meta, $resultsPreloaded);
                 foreach ($stepResults as $companyId => $resultData) {
@@ -667,7 +670,11 @@ class ReportController extends Controller
         $allJudges = $allJudges->unique('id')->values();
 
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $resultsCompanyScores) {
+        // Cycle-wide step lookup (all stypes) so a startup's badge resolves to its
+        // CURRENT step even when that step is not part of this report's stype set
+        // (e.g. a final-screening report startup that has moved to another step).
+        $stepLookup = $_allSteps->concat($steps)->unique('id')->keyBy('id');
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $stepLookup, $resultsCompanyScores) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
 
@@ -682,7 +689,7 @@ class ReportController extends Controller
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->stepInfo = $steps->where('id', $company->step_id)->first();
+            $c->stepInfo = $stepLookup->get($company->step_id);
 
             // Filter judges to only those actually assigned to this company
             $judges = clone $_judges;
@@ -781,9 +788,12 @@ class ReportController extends Controller
             $preloadedSteps = $steps->keyBy('id');
             $allCycleIds = $steps->pluck('cycle_id')->unique()->toArray();
 
+            // Cycle-scoped (not step-scoped): the final screening report is
+            // informative and shows every startup that belongs to a step's
+            // evaluation even after it has advanced. metadata($allCompanies=true)
+            // below selects the relevant subset per step from this wider pool.
             $preloadedCompanies = Company::with(['users', 'stepdata.cycle'])
                 ->whereIn('cycle', $allCycleIds)
-                ->whereIn('step', $stepIds)
                 ->get();
 
             $preloadedAllSteps = Step::whereIn('cycle_id', $allCycleIds)->orderBy('arr')->get();
@@ -867,7 +877,7 @@ class ReportController extends Controller
 
             // === Process per-step (no DB queries — all in-memory filtering) ===
             foreach ($steps as $step) {
-                $meta = ScreeningEvaluationResults::metadata($step->id, null, $preloaded);
+                $meta = ScreeningEvaluationResults::metadata($step->id, null, $preloaded, true);
                 $metadata->push($meta);
                 $stepResults = ScreeningEvaluationResults::results($step->id, null, $meta, $resultsPreloaded);
                 foreach ($stepResults as $companyId => $resultData) {
@@ -946,8 +956,12 @@ class ReportController extends Controller
         })->values();
         $allJudges = $allJudges->unique('id')->values();
 
+        // Cycle-wide step lookup (all stypes) so a startup's badge resolves to its
+        // CURRENT step even when that step is outside this report's stype set
+        // (e.g. an initial-screening report startup that has advanced to final).
+        $stepLookup = $_allSteps->concat($steps)->unique('id')->keyBy('id');
         // Process companies with their evaluation data
-        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $steps, $resultsCompanyScores) {
+        $startups = $_allCompanies->map(function ($company) use ($allJudges, $allResults, $allCompanies, $stepLookup, $resultsCompanyScores) {
             $scoped = $allCompanies->where('id', $company->id)->first();
             $c = clone $scoped;
 
@@ -962,7 +976,7 @@ class ReportController extends Controller
             $c->company_cycle_id = $company->cycle_id;
             $c->score = $company->score;
             $_judges = $company->judges;
-            $c->stepInfo = $steps->where('id', $c->company_step_id)->first();
+            $c->stepInfo = $stepLookup->get($c->company_step_id);
 
             // Filter judges to only those actually assigned to this company
             $judges = clone $_judges;

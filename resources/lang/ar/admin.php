@@ -2741,6 +2741,7 @@ return [
 	'initial_screening' => 'التقييم الابتدائي',
 	'assigned_startups' => 'الشركات المعينة',
 	'no_startups_assigned' => 'لا شركات معينة',
+	'moved_off_step' => 'انتقلت (لم تعد في هذه المرحلة)',
 	'no_judges_assigned' => 'لا محكمين معينين',
 	'view_results' => 'عرض النتائج',
 	'judging_panels' => 'لجنة التقييم',

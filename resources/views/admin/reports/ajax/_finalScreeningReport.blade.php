@@ -325,28 +325,39 @@
 									<!-- Program and Step Information -->
 									<div class="mt-2 mb-4">
 										<div class="d-flex flex-wrap gap-1">
-											@if($company->stepdata && $company->stepdata->cycle)
-												<small class="badge bg-label-info text-info rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Program') }}: {{ $company->stepdata->cycle->title }}"
+											@php
+												$cycleForChip = ($company->stepdata && $company->stepdata->cycle) ? $company->stepdata->cycle : ($company->cycledata ?? null);
+												$programUrl = ($cycleForChip && isset($_user) && $_user->ableTo('programs.view', $permissions ?? []))
+													? url('dashboard/programlist/show/'.$cycleForChip->id) : null;
+											@endphp
+											@if($cycleForChip)
+												<{{ $programUrl ? 'a' : 'small' }} @if($programUrl) href="{{ $programUrl }}" @endif
+															class="badge bg-label-info text-info rounded-pill px-2 py-1 small text-decoration-none"
+															title="{{ __('cycles.Program') }}: {{ $cycleForChip->title }}"
 															data-bs-toggle="tooltip" data-bs-placement="top">
 													<i class="ti ti-components ti-16px me-1"></i>
-													{{ Str::limit($company->stepdata->cycle->title, 23) }}
-												</small>
-											@elseif($company->cycledata)
-												<small class="badge bg-label-info text-info rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Program') }}: {{ $company->cycledata->title }}"
-															data-bs-toggle="tooltip" data-bs-placement="top">
-													<i class="ti ti-components ti-16px me-1"></i>
-													{{ Str::limit($company->cycledata->title, 23) }}
-												</small>
+													{{ Str::limit($cycleForChip->title, 23) }}
+												</{{ $programUrl ? 'a' : 'small' }}>
 											@endif
 											@if($company->stepInfo)
-												<small class="badge bg-label-primary text-primary rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Step') }}: {{ $company->stepInfo->title }}"
+												@php
+													// Final-screening report: green when the startup is currently on a
+													// final step (stype 5), red otherwise. Step chip links to manage
+													// step (final or screening per type) when permitted.
+													$stepInfo = $company->stepInfo;
+													$onStage = (int) $stepInfo->stype === 5;
+													$stepChipClass = $onStage ? 'bg-label-success text-success' : 'bg-label-danger text-danger';
+													$stepUrl = (isset($_user) && $_user->ableTo('screening.show', $permissions ?? []))
+														? ((int) $stepInfo->stype === 5 ? url('dashboard/final/'.$stepInfo->id) : url('dashboard/screening/'.$stepInfo->id))
+														: null;
+												@endphp
+												<{{ $stepUrl ? 'a' : 'small' }} @if($stepUrl) href="{{ $stepUrl }}" @endif
+															class="badge {{ $stepChipClass }} rounded-pill px-2 py-1 small text-decoration-none"
+															title="{{ __('cycles.Step') }}: {{ $stepInfo->title }}"
 															data-bs-toggle="tooltip" data-bs-placement="top">
 													<i class="ti ti-step-into ti-16px me-1"></i>
-													{{ Str::limit($company->stepInfo->title, 18) }}
-												</small>
+													{{ Str::limit($stepInfo->title, 18) }}
+												</{{ $stepUrl ? 'a' : 'small' }}>
 											@endif
 										</div>
 									</div>

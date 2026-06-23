@@ -15,7 +15,16 @@
     @csrf
     <input type="hidden" name="step" value="{{ $cstep->id }}">
 
-    @php $l = app()->getLocale(); @endphp
+    @php
+      $l = app()->getLocale();
+      // Off-step references: startups already saved into a panel that have since
+      // moved to another step. Rendered as disabled (read-only) options so they
+      // remain visible in their panel but cannot be added/removed until they
+      // return to this step. Keyed by id for quick lookup.
+      $offStepCompanies = ($offStepCompanies ?? collect());
+      $offStepById = collect($offStepCompanies)->keyBy('id');
+      $offStepIds = $offStepById->keys()->map(fn ($i) => (int) $i)->all();
+    @endphp
 
     <div class="accordion mb-4" id="panels-container">
       @foreach($judgingPanels as $index => $panel)
@@ -54,13 +63,31 @@
                     <label class="form-label fw-semibold mb-0">{{ __('admin.Startups') }}</label>
                     <a href="javascript:void(0);" class="select-all-toggle small fw-medium">{{ __('admin.select_all') }}</a>
                   </div>
+                  @php
+                    // Off-step companies saved in THIS panel (read-only references).
+                    $panelOffStepIds = collect($panel['companies'] ?? [])->map(fn ($i) => (int) $i)
+                      ->filter(fn ($i) => in_array($i, $offStepIds, true))->unique()->values();
+                  @endphp
                   <select name="panels[{{ $index }}][companies][]" class="form-select select2" multiple data-placeholder="{{ __('admin.select_startups') }}">
                     @foreach($companies as $company)
                       <option value="{{ $company->id }}" @selected(in_array($company->id, (array)$panel['companies']))>
                         {{ $company->{'name_' . $l} }}
                       </option>
                     @endforeach
+                    {{-- Read-only reference options for startups that moved off this step --}}
+                    @foreach($panelOffStepIds as $offId)
+                      @php $offCompany = $offStepById->get($offId); @endphp
+                      @if($offCompany)
+                        <option value="{{ $offId }}" selected disabled data-moved="1">
+                          {{ $offCompany->{'name_' . $l} }} — {{ __('admin.moved_off_step') }}
+                        </option>
+                      @endif
+                    @endforeach
                   </select>
+                  {{-- Disabled options are not submitted; preserve off-step assignments explicitly --}}
+                  @foreach($panelOffStepIds as $offId)
+                    <input type="hidden" name="panels[{{ $index }}][companies][]" value="{{ $offId }}">
+                  @endforeach
                 </div>
               </div>
 
@@ -186,8 +213,9 @@ $(function () {
   
   $(document).on('click', '.select-all-toggle', function() {
     const $select = $(this).closest('.col-md-6').find('select');
-    const allOpts = $select.find('option').map((_, el) => $(el).val()).get();
-    const curr = $select.val() || [];
+    // Exclude disabled (read-only, off-step) options from select-all/deselect-all.
+    const allOpts = $select.find('option:not(:disabled)').map((_, el) => $(el).val()).get();
+    const curr = ($select.val() || []).filter(v => allOpts.includes(v));
     $select.val(curr.length === allOpts.length ? null : allOpts).trigger('change');
   });
   
@@ -204,6 +232,10 @@ $(function () {
     $clone.find('.select2-container').remove();
     $clone.find('.select2').removeClass('select2-hidden-accessible');
     $clone.find('*').removeAttr('data-select2-id');
+    // A fresh panel carries no off-step references: drop cloned read-only options
+    // and their preservation hidden inputs.
+    $clone.find('option[data-moved="1"]').remove();
+    $clone.find('input[type="hidden"][name*="[companies][]"]').remove();
     $clone.find('select, input[type="text"], input[type="url"]').val('');
     $clone.find('.select-all-toggle').text('{{ __("admin.select_all") }}');
     

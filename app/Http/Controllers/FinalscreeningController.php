@@ -134,8 +134,16 @@ class FinalscreeningController extends Controller
 			? Company::whereIn('id', $allAssignedIds)->get()->keyBy('id')
 			: collect();
 
-		$companies = $panelAssignmentsByStep->map(function ($ids) use ($assignedCompaniesById) {
-			return $ids->map(fn ($id) => $assignedCompaniesById->get($id))->filter()->values();
+		// The list page mirrors the assignment page: it shows startups that are
+		// CURRENTLY at the step (companies.step === step id), consistent with the
+		// initial-screening list. A startup assigned to a panel but already
+		// advanced to another step is excluded from the count/preview here; its
+		// evaluation still appears on the (informative) results/report pages.
+		$companies = $panelAssignmentsByStep->map(function ($ids, $stepId) use ($assignedCompaniesById) {
+			return $ids->map(fn ($id) => $assignedCompaniesById->get($id))
+				->filter()
+				->filter(fn ($c) => (int) $c->step === (int) $stepId)
+				->values();
 		});
 
 		$forms = Step::whereIn('cycle_id', $cycleIds)
@@ -305,9 +313,10 @@ class FinalscreeningController extends Controller
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 
 		if( $cstep ) {
-			// Use the preceding step's ID (not BuilderForm ID) to also include companies still at the prior step
-			$precedingStep = Step::where('cycle_id', $cstep->cycle_id)->where('arr', $cstep->arr - 1)->first();
-			$companies = Company::whereIn('step', array_filter([$precedingStep?->id, $cstep->id]))->get();
+			// The panel selector only offers startups CURRENTLY at this step
+			// (consistent with the initial-screening page). Startups still at the
+			// preceding step are not selectable until advanced here.
+			$companies = Company::where('step', $cstep->id)->get();
 		} else {
 			$cstep = [];
 		}
@@ -343,7 +352,26 @@ class FinalscreeningController extends Controller
 		$assignedJudgeIds = collect($judgingPanels)->pluck('judges')->flatten()->unique()->filter()->values();
 		$assignedCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()->unique()->filter()->values();
 
-		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds'));
+		// The "Assigned Startups" header reflects startups CURRENTLY at this step,
+		// consistent with the list page and the initial-screening behavior. A
+		// startup that was assigned to a panel but has since been advanced to
+		// another step is dropped here (its evaluation still shows on the results
+		// page). Keep it as the cstep's current companies intersected with the
+		// panel assignments.
+		$currentStepCompanyIds = Company::where('step', $cstep->id)->pluck('id')->map(fn ($i) => (int) $i)->all();
+		$allPanelCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()->map(fn ($i) => (int) $i)->filter()->unique()->values();
+		$assignedCompanyIds = $allPanelCompanyIds->intersect($currentStepCompanyIds)->values();
+
+		// Off-step references: startups already saved into this step's panels that
+		// have since moved to another step. They are shown in their panel as
+		// read-only reference chips (cannot be added/removed until they return to
+		// this step). Provide id+name so the partial can render their option.
+		$offStepCompanyIds = $allPanelCompanyIds->reject(fn ($i) => in_array($i, $currentStepCompanyIds, true))->values();
+		$offStepCompanies = $offStepCompanyIds->isNotEmpty()
+			? Company::whereIn('id', $offStepCompanyIds)->get()
+			: collect();
+
+		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds', 'offStepCompanies'));
 	}
 
 	public function update(Request $request)
@@ -699,13 +727,17 @@ class FinalscreeningController extends Controller
 			$evaluation->save();
 		}
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		$metadata = ScreeningEvaluationResults::metadata( $id );
-		$companies = $metadata['companies']->where('step', $id)->values();
+		// Results page is informative: include every startup belonging to this
+		// final step's evaluation regardless of current step. metadata() already
+		// returns the widened set, so the old ->where('step', $id) filters (which
+		// dropped startups advanced past the step) are removed.
+		$metadata = ScreeningEvaluationResults::metadata( $id, null, null, true );
+		$companies = $metadata['companies']->values();
 		$_steps = $metadata['_steps'];
 		$judges = $metadata['judges'];
 		$evaluation = $metadata['evaluation'];
 		$results = $metadata['results'];
-		$_companies = $metadata['_companies']->where('step', $id)->values();
+		$_companies = $metadata['_companies']->values();
 
 		$judges = $judges->map(function( $item ) {
 			$item->companies_ids = collect($item->companies)->pluck('id')->toArray();
@@ -755,8 +787,10 @@ class FinalscreeningController extends Controller
 			}
 		}
 
-		$metadata = ScreeningEvaluationResults::metadata($id);
-		$_companies = $metadata['_companies']->where('step', $id)->values();
+		// Export mirrors the results page: every startup belonging to this final
+		// step's evaluation regardless of current step.
+		$metadata = ScreeningEvaluationResults::metadata($id, null, null, true);
+		$_companies = $metadata['_companies']->values();
 		$evaluation = $metadata['evaluation'];
 
 		if ($_companies->isEmpty()) {
