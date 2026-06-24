@@ -2289,6 +2289,8 @@ return [
 	'prizes' => 'Prizes',
 	'add_prize' => 'Add Prize',
 	'evaluation_criteria' => 'Evaluation Criteria',
+	'criteria_not_configured_title' => 'Evaluation Criteria Not Configured',
+	'criteria_not_configured_message' => 'The evaluation criteria for this screening step have not been configured yet. Evaluation cannot be performed until the criteria are available.',
 	'add_evaluation_criterion' => 'Add Evaluation Criterion',
 	'total_weights' => 'Total Weights:',
 	'hackathon_banner_image' => 'Hackathon Banner Image',

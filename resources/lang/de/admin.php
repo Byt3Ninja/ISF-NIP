@@ -858,5 +858,7 @@ return [
 	'Tax_Card'=>'Tax Card No. ',
 	'Have_Rgister_Company'=>'Have Rgister Company',
 	'Country_Register'=>'Where you registered ?',
-	
+	'criteria_not_configured_title' => 'Bewertungskriterien nicht konfiguriert',
+	'criteria_not_configured_message' => 'Die Bewertungskriterien für diesen Screening-Schritt wurden noch nicht konfiguriert. Die Bewertung kann erst durchgeführt werden, wenn die Kriterien verfügbar sind.',
+
 ];

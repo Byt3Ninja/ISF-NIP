@@ -2334,6 +2334,8 @@ return [
 	'prizes' => 'الجوائز',
 	'add_prize' => 'إضافة جائزة',
 	'evaluation_criteria' => 'معايير التقييم',
+	'criteria_not_configured_title' => 'لم يتم تكوين معايير التقييم',
+	'criteria_not_configured_message' => 'لم يتم تكوين معايير التقييم لمرحلة الفحص هذه بعد. لا يمكن إجراء التقييم حتى تتوفر المعايير.',
 	'add_evaluation_criterion' => 'إضافة معيار تقييم',
 	'total_weights' => 'إجمالي الأوزان:',
 	'hackathon_banner_image' => 'صورة البانر للهاكثون',

@@ -196,13 +196,24 @@ class JudgerScreeningController extends Controller
             ],
         ]); */
 
+        // Show EVERY assigned startup regardless of the evaluation form state.
+        // A startup is "evaluatable" only when its evaluation form is published
+        // AND has at least one criterion configured. When it is not evaluatable
+        // (no evaluation record, still draft, or zero criteria) we keep the
+        // startup in the list but swap the gavel for a warning icon, which opens
+        // a popup explaining that evaluation cannot be performed yet. (GV-3786)
         $companies = $companies->map(function( $company ) {
             $step_id = $company->step->id;
-            $company->evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
+            $evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
+            $company->evaluation = $evaluation;
+
+            $status = trim( strtolower( $evaluation?->status ?? 'draft' ) );
+            $criteriaCount = $evaluation?->categories ? $evaluation->categories->count() : 0;
+            $company->evaluatable = ( $status == 'published' && $criteriaCount > 0 );
+
+            if( ! $company->evaluatable ) { $company->icon = 'ti ti-alert-triangle'; }
+
             return $company;
-        })->filter(function( $company ) {
-            $status = trim( strtolower( $company?->evaluation?->status ) ) ?? 'draft';
-            return $status == 'published' ? true : false;
         })->values();
 
         $statusCounts = $companies->groupBy('status')->map->count();

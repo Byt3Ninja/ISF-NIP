@@ -2,6 +2,13 @@
   // Show the canvas if the query parameter 'screening' is set to 'true'
   $showCanvas = request()->query('screening') === 'true';
   $hasGuidelines = (trim(strip_tags($evaluationForm->screening_guidelines ?? '')) !== '') || !empty($evaluationForm->screening_guidelines_file);
+
+  // The evaluation is "ready" only when its form is published AND has at least
+  // one criterion configured. When it is not ready we still show the judge an
+  // icon (a warning instead of the gavel) that, on click, explains evaluation
+  // cannot be performed until the criteria are configured. (GV-3786)
+  $criteriaCount = ( !empty( $evaluationForm ) && $evaluationForm->categories ) ? $evaluationForm->categories->count() : 0;
+  $evaluationReady = !empty( $evaluationForm ) && $evaluationForm->status == 'Published' && $criteriaCount > 0;
 @endphp
 
 <style>
@@ -25,7 +32,7 @@
 </style>
 
 
-@if( !empty( $evaluationForm ) && $evaluationForm->status == 'Published' )
+@if( $evaluationReady )
 <div class="screening-gavel" data-bs-target="#rightModalCanvas" data-bs-toggle="offcanvas" aria-controls="rightModalCanvas"
   onclick="document.querySelector('.template-customizer-open-btn').style.display = 'none';">
   <img src="/icons/not-started.svg" />
@@ -388,11 +395,27 @@
     </form>
   </div>
 </div>
+@else
+<div class="screening-gavel screening-criteria-warning" role="button"
+  title="{{ __('admin.criteria_not_configured_title') }}">
+  <i class="ti ti-alert-triangle fs-2 text-warning"></i>
+</div>
 @endif
 
 @push('scripts')
   <script>
     var categories = @json( $evaluationForm->categories );
+
+    // Warning icon (shown when the evaluation form isn't ready): explain that
+    // the criteria haven't been configured yet, so evaluation can't be done.
+    $(document).on('click', '.screening-criteria-warning', function () {
+      if (typeof window.releaseWarningAlert === 'function') {
+        window.releaseWarningAlert({
+          title: '{{ __('admin.criteria_not_configured_title') }}',
+          message: '{{ __('admin.criteria_not_configured_message') }}',
+        });
+      }
+    });
 
     $(document).on('click', '#pills-view-evaluation-tab', function() {
       $.each(categories, function(index, category) {
