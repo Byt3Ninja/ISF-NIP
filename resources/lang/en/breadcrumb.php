@@ -34,6 +34,7 @@ return [
     'manage_screening' => 'Manage Screening',
     'final_screening' => 'Final Screening',
     'manage_final_screening' => 'Manage Final Screening',
+    'screening_results' => 'Screening Results',
 
     // Assessments
     'assessments' => 'Assessments',

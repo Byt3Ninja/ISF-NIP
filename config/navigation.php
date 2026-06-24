@@ -136,6 +136,7 @@ return function () {
         ['title' => 'manage_screening', 'route' => 'screening.manage', 'group' => 'screening', 'menuOnly' => false],
         ['title' => 'final_screening', 'route' => 'screening.final', 'group' => 'screening', 'menuOnly' => false],
         ['title' => 'manage_final_screening', 'route' => 'screening.manage_final', 'group' => 'screening', 'menuOnly' => false],
+        ['title' => 'screening_results', 'route' => 'screening.results', 'group' => 'screening', 'menuOnly' => false],
         ['title' => 'assessments', 'route' => 'assessments.index', 'menuOnly' => true],
         ['title' => 'trainings', 'route' => 'trainings.sessions_list', 'menuOnly' => true],
         ['title' => 'training_courses', 'route' => 'trainings.list', 'group' => 'trainings', 'group_route' => 'trainings.sessions_list', 'menuOnly' => false],

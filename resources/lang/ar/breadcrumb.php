@@ -34,6 +34,7 @@ return [
     'manage_screening' => 'إدارة الفرز',
     'final_screening' => 'الفرز النهائي',
     'manage_final_screening' => 'إدارة الفرز النهائي',
+    'screening_results' => 'نتائج الفحص',
 
     // Assessments
     'assessments' => 'التقييمات',

@@ -694,7 +694,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('screening/update-step-form', 'ScreeningController@updateStepForm')->name('screening.update_step_form');
     Route::post('screening/save', 'ScreeningController@save');
     Route::post('screening/add', 'ScreeningController@add');
-    Route::get('screening/results/{id?}', 'ScreeningController@results');
+    Route::get('screening/results/{id?}', 'ScreeningController@results')->name('screening.results');
     Route::get('screening/resultsReport', 'ScreeningController@resultsReport')->name('screening.results_report');
     Route::get('{id?}/screening', 'ScreeningController@index');
     Route::get('screening/{fid}/{cid}', 'ScreeningController@view')->name('screening.view');

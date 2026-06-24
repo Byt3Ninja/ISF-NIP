@@ -5864,6 +5864,17 @@
                 ]
             },
             {
+                "name": "screening.results",
+                "description": "View Screening Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "screening.users_view_details",
                 "description": "Get User Details for Screening",
                 "guard_name": "web",
