@@ -312,7 +312,15 @@ if ($canRequestMentorship) {
                     <li class="d-flex align-items-center mb-2">
                       <i class="ti ti-language ti-lg"></i>
                       <strong class="mx-2">{{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}</strong>
-                      <span>{{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}</span>
+                      <span>
+                        @if($client->language === 'ar')
+                          {{ $l == 'ar' ? 'العربية' : 'Arabic' }}
+                        @elseif($client->language === 'en')
+                          {{ $l == 'ar' ? 'الإنجليزية' : 'English' }}
+                        @else
+                          {{ __('admin.Not_Available') }}
+                        @endif
+                      </span>
                     </li>
                   </ul>
 
