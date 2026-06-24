@@ -62,6 +62,17 @@ class ServiceProviderDashboardController extends Controller
             'pendingRequests' => 0,
             'medianResponseTime' => null,
             'completionRate' => null,
+            'extras' => [
+                'totalRequests' => 0,
+                'chartServices' => [],
+                'topService'    => null,
+                'rvLabels'      => '[]',
+                'rvData'        => '[]',
+                'sdColors'      => '[]',
+                'sdDimColors'   => '[]',
+                'sdData'        => '[]',
+                'sdLabels'      => '[]'
+            ]
         ];
 
         if (empty($serviceIds)) {
@@ -147,7 +158,8 @@ class ServiceProviderDashboardController extends Controller
         }
 
         if (in_array('dashboard.widgets_cards_service_provider_completion_rate_view', $permissions)) {
-            $summary['completionRate'] = round( ( $services_requests->where('done', 1)->count() / $services_requests->count() ) * 100 );
+            $requestsCount = $services_requests->count();
+            $summary['completionRate'] = $requestsCount > 0 ? ( round( ( $services_requests->where('done', 1)->count() / $services_requests->count() ) * 100 ) ) : 0;
         }
 
         $volumes = $services_requests->map(function ($r) {
