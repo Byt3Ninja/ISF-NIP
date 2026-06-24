@@ -1064,16 +1064,17 @@ class TasksController extends Controller
                 ], 400);
             }
 
-            $oldStatus = $task->status;
-            //$task->status = $status;
-            //$task->save();
+            $assigneeRow = ProgramTaskAssignee::where('program_task_id', $task->id)
+                ->where('company_id', $user->company_id)
+                ->first();
+            $oldStatus = $assigneeRow ? $assigneeRow->status : $task->status;
 
             ProgramTaskAssignee::where('program_task_id', $task->id)
                 ->where('company_id', $user->company_id)
                 ->update(['status' => $status, 'last_updated' => now()]);
            
             if ($task instanceof ProgramTask) {
-                ProgramTaskActivity::create([
+                $createdActivity = ProgramTaskActivity::create([
                     'program_task_id' => $task->id,
                     'user_id'         => auth()->id(),
                     'action'          => 'move',
@@ -1136,18 +1137,32 @@ class TasksController extends Controller
                 }
             }
 
-            if($status == 'review') {
-                return response()->json([
-                    'success' => true,
-                    'message' => app()->getLocale() == 'ar'
-                        ? 'تم إرسالها للمراجعة. سيتم مراجعة هذه المهمة بواسطة مُسند المهمة.'
-                        : 'Sent for review. This task will be reviewed by the assigner.'
-                ]);
+            $activityData = null;
+            if (!empty($createdActivity)) {
+                $createdActivity->load('user');
+                $actLabel = 'moved task' . ($createdActivity->was && $createdActivity->new
+                    ? ' from "' . $createdActivity->was . '" to "' . $createdActivity->new . '"'
+                    : '');
+                $activityData = [
+                    'user'       => $createdActivity->user->name ?? 'N/A',
+                    'user_id'    => $createdActivity->user_id,
+                    'img_url'    => $createdActivity->user ? \App\User::image_handler($createdActivity->user->img_url) : null,
+                    'action'     => $actLabel,
+                    'time'       => $createdActivity->created_at->diffForHumans(),
+                    'created_at' => $createdActivity->created_at->format('Y-m-d H:i'),
+                ];
             }
 
+            $message = $status === 'review'
+                ? (app()->getLocale() == 'ar'
+                    ? 'تم إرسالها للمراجعة. سيتم مراجعة هذه المهمة بواسطة مُسند المهمة.'
+                    : 'Sent for review. This task will be reviewed by the assigner.')
+                : __('admin.Task_status_updated_successfully');
+
             return response()->json([
-                'success' => true,
-                'message' => __('admin.Task_status_updated_successfully')
+                'success'  => true,
+                'message'  => $message,
+                'activity' => $activityData,
             ]);
 
         } catch (\Exception $e) {

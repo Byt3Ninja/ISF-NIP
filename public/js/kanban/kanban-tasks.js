@@ -208,6 +208,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     }
 
     $('#vt-edit-trigger-btn').data('task-id', taskId);
+    $('#viewTaskOffcanvas').data('current-task-id', taskId);
     $('#vt-upload-btn-task-id').val(taskId);
     $('#vt-send-comment-btn').data('task-id', taskId);
 
