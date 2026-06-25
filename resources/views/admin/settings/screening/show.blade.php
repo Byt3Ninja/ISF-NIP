@@ -658,7 +658,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
       });
 
       // Reinitialize ScreeningSelect when modal is shown to ensure interactivity
-      $('#stepForm').on('shown.bs.modal', function() {
+      $('#step-form-modal').on('shown.bs.modal', function() {
         $('#ScreeningSelect').select2('destroy').select2({
           placeholder: '{{ __('cycles.Choose screening type') }}',
           // allowClear: true,
@@ -670,7 +670,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         $('#ScreeningSelect').prop('disabled', false);
       });
 
-      $('#stepForm form').on('submit', function(e) {
+      $('#stepForm').on('submit', function(e) {
         const screeningType = $('#ScreeningSelect').val();
         console.log('Submitting screening type:', screeningType);
         if (!screeningType) {
@@ -762,6 +762,12 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 
         sendUpdate(false);
       });
+
+      // NOTE: select2 allow-clear (the x) already fires a native `change` after
+      // emptying the element (AllowClear._handleClear), which drives the change
+      // handler above with an empty value — so clearing routes through the same
+      // needs_confirmation warning path with no extra binding. A manual
+      // select2:clear → trigger('change') here would double-fire the AJAX.
 
       // Initialize tooltips
       document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));

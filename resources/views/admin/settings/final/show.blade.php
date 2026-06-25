@@ -375,9 +375,11 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         <div class="modal-body">
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
+          <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
           <div class="form-group mb-3">
             <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
-            <select class="form-select select2" id="mFormSelect" name="mFormSelect" required>
+            <select class="form-select select2" id="mFormSelect" name="mFormSelect">
+              <option value="" @selected(!$form)>{{ __('admin.no_form_option') }}</option>
               @foreach($forms as $f)
                 <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>{{ $f->form_name }}</option>
               @endforeach
@@ -780,6 +782,40 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         };
 
         sendUpdate(false);
+      });
+
+      // NOTE: select2 allow-clear (the x) already fires a native `change` after
+      // emptying the element (AllowClear._handleClear), which drives the change
+      // handler above with an empty value — so clearing routes through the same
+      // needs_confirmation warning path with no extra binding. A manual
+      // select2:clear → trigger('change') here would double-fire the AJAX.
+
+      // Edit-step popup form change: warn before de-attaching the form (changed or
+      // removed) when the step has submissions for the old form. Same rule as the
+      // inline selector, but this dialog submits the full #stepForm to cycles/modify
+      // (which otherwise redirects back with a flash). $stepFormSubmissions is the
+      // founder form_data count for this step (server-embedded).
+      let stepFormOriginalValue = null;
+      $('#step-form-modal').on('shown.bs.modal', function () {
+        stepFormOriginalValue = $('#mFormSelect').val();
+        $('#confirm_form_change').val('0');
+      });
+      $('#stepForm').on('submit', function (e) {
+        const current = $('#mFormSelect').val();
+        const changed = stepFormOriginalValue !== null && current !== stepFormOriginalValue;
+        const submissions = Number('{{ $stepFormSubmissions ?? 0 }}') || 0;
+        if (changed && submissions > 0 && $('#confirm_form_change').val() !== '1') {
+          e.preventDefault();
+          releaseWarningAlert({
+            title: '{{ __("admin.step_form_change_warning_title") }}',
+            message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', submissions),
+            confirmText: '{{ __("admin.Yes") }}',
+            cancelText: '{{ __("admin.cancel") }}',
+            confirmColor: 'danger',
+            onConfirm: function () { $('#confirm_form_change').val('1'); $('#stepForm')[0].submit(); }
+          });
+          return false;
+        }
       });
 
       // Initialize tooltips

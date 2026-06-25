@@ -267,6 +267,7 @@
         <div class="modal-body">
           <input type="hidden" name="sid" id="step-id-value">
           <input type="hidden" name="type" value="8">
+          <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
           <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Title') }}</label>
             <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
@@ -274,7 +275,7 @@
           </div>
           <div class="form-group mb-3">
             <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
-            <select class="form-select select2" id="mFormSelect" name="mFormSelect" required></select>
+            <select class="form-select select2" id="mFormSelect" name="mFormSelect"></select>
           </div>
           <div class="form-group mb-3">
             <label class="form-label" for="step-range-picker">{{ __('admin.start_date') }} - {{ __('admin.end_date') }}:</label>
@@ -329,10 +330,16 @@
   //   $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
   // });
 
+  // Founder form_data submissions for the step currently open in the edit modal,
+  // captured per-step so the form-change warning shows the real count and only
+  // fires when there is data to lose (form-de-attach rule, form_data only).
+  let editStepSubmissions = 0;
+
   $('.edit-step-btn').on('click', function () {
     const stepData = $(this).data('step');
 
     if (stepData) {
+      editStepSubmissions = Number(stepData.submissions_count) || 0;
       $('#stepForm input[name="_token"]').val($('meta[name="csrf-token"]').attr('content'));
       $('#step-form-modal').modal('show');
       $('#step-id-value').val(stepData.id);
@@ -343,6 +350,7 @@
       // Build options with the DOM API so form names are text-escaped (no innerHTML injection).
       const orgForms = (formsByOrg && formsByOrg[stepData.organization_id]) ? formsByOrg[stepData.organization_id] : [];
       const $formSelect = $('#mFormSelect').empty();
+      $formSelect.append($('<option>').val('').text('{{ __('admin.no_form_option') }}'));
       orgForms.forEach(function (f) {
         const $option = $('<option>').val(f.id).text(f.name);
         if (String(f.id) === String(stepData.form_id)) {
@@ -350,6 +358,7 @@
         }
         $formSelect.append($option);
       });
+      if (!stepData.form_id) { $formSelect.val(''); }
       $formSelect.trigger('change.select2');
 
       // Seed hidden date inputs (map start_date to from, end_date to to), with a today fallback.
@@ -370,6 +379,33 @@
       });
 
       positionStepRangePicker($stepRangeInput);
+    }
+  });
+
+  // Edit-step form change: warn before de-attaching the form (changed or removed)
+  // when the step has submissions for the old form. This dialog submits the full
+  // #stepForm to cycles/modify (which otherwise redirects back with a flash), so
+  // intercept here and show the confirm dialog instead. Count is per-step
+  // (stepData.submissions_count), captured into editStepSubmissions on open.
+  let stepFormOriginalValue = null;
+  $('#step-form-modal').on('shown.bs.modal', function () {
+    stepFormOriginalValue = $('#mFormSelect').val();
+    $('#confirm_form_change').val('0');
+  });
+  $('#stepForm').on('submit', function (e) {
+    const current = $('#mFormSelect').val();
+    const changed = stepFormOriginalValue !== null && current !== stepFormOriginalValue;
+    if (changed && editStepSubmissions > 0 && $('#confirm_form_change').val() !== '1') {
+      e.preventDefault();
+      releaseWarningAlert({
+        title: '{{ __("admin.step_form_change_warning_title") }}',
+        message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', editStepSubmissions),
+        confirmText: '{{ __("admin.Yes") }}',
+        cancelText: '{{ __("admin.cancel") }}',
+        confirmColor: 'danger',
+        onConfirm: function () { $('#confirm_form_change').val('1'); $('#stepForm')[0].submit(); }
+      });
+      return false;
     }
   });
 
@@ -462,5 +498,6 @@
       }
     });
   }
+
 </script>
 @stop

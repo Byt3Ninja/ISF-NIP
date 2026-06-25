@@ -722,7 +722,7 @@ class CyclesController extends Controller
             } elseif ($request->has("mScreeningSelect") && $request->mScreeningSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mScreeningSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
-            elseif ($request->has("mFormSelect") && $request->mFormSelect)
+            elseif ($request->has("mFormSelect"))
             {
                 $step8 = Step::find($request->sid);
                 $updatedArray = [
@@ -768,10 +768,14 @@ class CyclesController extends Controller
                 unset($updatedArray['data']);
                 Step::where('id', $request->sid)->update($updatedArray);
 
-                $result = $this->applyFormToStep($step8->fresh(), $request->mFormSelect, (bool) $request->boolean('confirm_form_change'));
+                $result = $this->applyFormToStep($step8->fresh(), $request->input('mFormSelect'), (bool) $request->boolean('confirm_form_change'));
                 if ($result['status'] === 'needs_confirmation') {
+                    // The flash partials render __('admin.' . $message2), so pass the
+                    // bare key (not the already-translated string) — otherwise the
+                    // banner shows the literal "admin.This step already has...".
+                    // This is only a fallback; the modal JS warns before submit.
                     return redirect()->back()
-                        ->with('message2', __('admin.step_form_change_has_submissions'));
+                        ->with('message2', 'step_form_change_has_submissions');
                 }
             } else {
                 

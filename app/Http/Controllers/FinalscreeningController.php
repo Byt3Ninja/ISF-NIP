@@ -30,6 +30,8 @@ use App\Http\Requests\UploadScreeningGuidelinesImageRequest;
 
 class FinalscreeningController extends Controller
 {
+	use \App\Traits\ManagesStepForm;
+
 	protected $meetingService;
 	public function __construct()
 	{
@@ -198,6 +200,9 @@ class FinalscreeningController extends Controller
 				'form'		    => $form ? (object) ['id' => $form->id, 'title' => $form->title] : null,
 				'form_id'         => $step->form_id,
 				'organization_id' => $step->cycle?->organization_id,
+				// Founder submissions for this step's current form, so the edit-step
+				// modal warns (with the count) before a form change discards them.
+				'submissions_count' => $this->stepSubmissionCounts($step)['total'],
 			];
 		});
 
@@ -371,7 +376,12 @@ class FinalscreeningController extends Controller
 			? Company::whereIn('id', $offStepCompanyIds)->get()
 			: collect();
 
-		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds', 'offStepCompanies'));
+		// Founder submissions tied to this step's current form. Used by the
+		// edit-step modal to warn (with the count) before a form change/removal
+		// discards them — the same form-de-attach rule as the inline selector.
+		$stepFormSubmissions = $cstep ? $this->stepSubmissionCounts($cstep)['total'] : 0;
+
+		return view('admin.settings.final.show', compact('cstep', 'judgers_list', 'judgers_count', 'companies', 'judges', 'form', 'forms', 'steps', 'id', 'svgs', 'evaluationForm', 'judgingPanels', 'assignedJudgeIds', 'assignedCompanyIds', 'offStepCompanies', 'stepFormSubmissions'));
 	}
 
 	public function update(Request $request)

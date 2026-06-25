@@ -477,7 +477,7 @@
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
             <div class="form-group mb-4">
-              <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
+              <select class="select form-control" id="mFormSelect" name="mFormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
                 {{-- @endforeach --}}
@@ -623,10 +623,7 @@
   }
 
   // Check for conditional required fields based on step type
-  if ((stepType.value === '1' || stepType.value === '5') && formSelect && formSelect.hasAttribute('required') && !formSelect.value) {
-    showError(formSelect, currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار نموذج.');
-    return false;
-  }
+  // Form is optional: a step may intentionally have no form ("— No form —").
 
   if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
     showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
@@ -1026,12 +1023,15 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty();
+                    const $mFormSelect = $('#mFormSelect').empty();
+                    $mFormSelect.append($('<option>').val('').text('{{ __('admin.no_form_option') }}'));
                     let appends = '';
                     response.data.forEach(function(form) {
                       appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
                     });
-                    $('#mFormSelect').append(appends);
+                    $mFormSelect.append(appends);
+                    if (!sData) { $mFormSelect.val(''); }
+                    $mFormSelect.trigger('change.select2');
                     menu.show();
                   },
                   error: function(error) {
@@ -1046,12 +1046,15 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty();
+                    const $mFormSelect = $('#mFormSelect').empty();
+                    $mFormSelect.append($('<option>').val('').text('{{ __('admin.no_form_option') }}'));
                     let appends = '';
                     response.data.forEach(function(form) {
                       appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
                     });
-                    $('#mFormSelect').append(appends);
+                    $mFormSelect.append(appends);
+                    if (!sData) { $mFormSelect.val(''); }
+                    $mFormSelect.trigger('change.select2');
                     $('#mmenu1').show();
                   },
                   error: function(error) {
