@@ -158,6 +158,7 @@ class TrainingController extends Controller
 			$checkget = $request->input('checkget');
 			$compid = $request->input('compid');
 			foreach ($compid as $index => $id) {
+				$cstep = null;
 				$company = Company::where('id', $id)->first();
 				$data['last_step'] = Step::findOrFail($checkget)->title;
 				if ($checkget == 0) {
@@ -180,6 +181,8 @@ class TrainingController extends Controller
 					$data['company_name_en'] = $company_owner->company->name_en;
 					$data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
 					$data['organization_name_en'] = $cstep->cycle->organization->name_en;
+					$data['start_date'] = $cstep ? $cstep->from : '-';
+					$data['preferred_language'] = $company_owner->language;
 
 					$mail = new ChangeCycle($data);
 					// $MSG = new TemplateEmail;

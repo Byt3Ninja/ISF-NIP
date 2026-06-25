@@ -847,6 +847,7 @@ class ScreeningController extends Controller
 				$data['last_step'] = $lastStep ? $lastStep->title : null;
 			}
 
+			$data['step_data'] = Step::find($request->step);
 			if ($request->step == "0") {
 				$update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
 			} else {

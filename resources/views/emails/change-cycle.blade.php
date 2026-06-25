@@ -1,37 +1,47 @@
+@php
+    $setting = App\Settings::first();
+    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
+    $lang = app()->getLocale();
+    if( in_array( strtolower( $data['preferred_language'] ), ['en', 'ar'] ) )
+    {
+        $lang = $data['preferred_language'];
+    }
+@endphp
+
 @extends('emails.layout.master')
 
 @section('content')
-    <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-3" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-        <tr>
-            <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:20px;line-height:150%;text-align:center;mso-line-height-alt:30px;">
-                    <p style="margin: 0; word-break: break-word;"><strong>{{ __('email.change_cycle_heading') }}</strong></p>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-4" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-        <tr>
-            <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:{{ app()->getLocale() === 'ar' ? 'right' : 'left' }};mso-line-height-alt:22.5px;" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
-                    <p style="margin: 0;">{{ __('email.hello') }} {{ $data['owner_name_'.app()->getLocale()] ?? __('email.user') }},</p>
-
-                    @if(isset($data['new_step']) && isset($data['last_step']))
-                        <p style="margin: 10px 0;">{!! __('email.cycle_changed', [
-                            'from' => '<strong>'.$data['last_step'].'</strong>',
-                            'to' => '<strong>'.$data['new_step'].'</strong>'
-                        ]) !!}</p>
-                    @endif
-
-                    @if(isset($data['organization_name_'.app()->getLocale()]))
-                        <p style="margin: 10px 0;"><strong>{{ __('email.organization') }}:</strong> {{ $data['organization_name_'.app()->getLocale()] }}</p>
-                    @endif
-
-                    <p style="margin: 10px 0 0;">{{ __('email.thank_you') }}</p>
-                    <p style="margin: 0;">{{ $org_name ?? config('app.name', 'GrowthLabs') }}</p>
-                </div>
-            </td>
-        </tr>
-    </table>
+    <tr>
+        <td class="content-block" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+            <h1 style="font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; box-sizing: border-box; font-size: 24px; color: #000; line-height: 1.2; font-weight: 400; margin: 20px 0 30px; padding: 0;">
+                {{ $lang === 'en' ? "Congratulations! You've Advanced to the Next Phase" : "تهانينا! لقد انتقلت إلى المرحلة التالية" }}
+            </h1>
+            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; line-height: 1.6; margin: 0 0 20px; padding: 0;">
+                {{ $lang === 'en' ? "Hello" : "مرحبًا" }} {{ $data['owner_name_'. $lang] ?? __('email.user') }},
+            </p>
+            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; line-height: 1.6; margin: 0 0 20px; padding: 0;">
+                {{ $lang === 'en' ? "We’re pleased to inform you that your startup has successfully progressed to the next phase of the program." : "يسعدنا إبلاغكم بأن شركتكم الناشئة قد انتقلت بنجاح إلى المرحلة التالية من البرنامج." }}
+            </p>
+            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 20px; padding: 0; color: #666;">
+                {{ $lang === 'en' ? "Phase Details:" : "تفاصيل المرحلة:" }}
+            </p>
+            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 20px; padding: 0; color: #666;">
+                {{ $lang === 'en' ? "Previous Phase: " : "المرحلة السابقة: " }}: {{ $data['last_step'] ?? '-' }}
+                <br />
+                {{ $lang === 'en' ? "New Phase: " : "المرحلة الجديدة: " }}: {{ $data['new_step'] ?? '-' }}
+                <br />
+                {{ $lang === 'en' ? "Start Date:" : "تاريخ البدء: " }}: {{ $data['start_date'] ?? '-' }}
+            </p>
+            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 20px; padding: 0; color: #666;">
+                {{ $lang === 'en' ? "Please log in to the platform to review the upcoming activities and requirements for this phase." : "يرجى تسجيل الدخول إلى المنصة للاطلاع على الأنشطة والمتطلبات القادمة الخاصة بهذه المرحلة." }}
+            </p>
+            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 20px; padding: 10px; background: #f5f5f5; border-radius: 3px; word-break: break-all;">
+                {{ $lang === 'en' ? "We look forward to supporting your continued journey and success." : "نتطلع إلى مواصلة دعم رحلتكم وتحقيق المزيد من النجاح." }}
+            </p>
+            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
+                {{ $lang === 'en' ? "Best regards" : "مع أطيب التحيات" }},<br>
+                {{ $platformName }}
+            </p>
+        </td>
+    </tr>
 @endsection

@@ -34,6 +34,7 @@ class SendChangeCycleNotificationJob implements ShouldQueue
 
     public function handle()
     {
+        $cstep = null;
         // log::info("notifying data: " . $this->company );
        if($this->step != "0"){
         $cstep = Step::findOrFail($this->step);
@@ -52,6 +53,8 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $data['organization_name_en'] = $cstep->cycle->organization->name_en ?? null;
         $data['emailCompany'] = $company_owner->email;
         $data['status'] = $this->step != "0" ? 'in' : 'out';
+        $data['start_date'] = $cstep ? $cstep->from : '-';
+        $data['preferred_language'] = $company_owner->language;
 
         // Log::info("notifying data: ", $data); 
         // // إرسال الحدث بالبث
@@ -64,7 +67,8 @@ class SendChangeCycleNotificationJob implements ShouldQueue
              
             foreach ($recipients as $recipient) {
                 try {
-                    $recipient->notify(new ChangeCycle( $data));
+                    $data['preferred_language'] = $recipient->language;
+                    $recipient->notify(new ChangeCycle( $data ) );
                 } catch (\Throwable $th) {
                     // يمكنك التسجيل هنا بدلاً من الرمي
                     Log::error("Error notifying user: " . $th->getMessage());
