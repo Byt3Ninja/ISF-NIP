@@ -157,14 +157,15 @@ class TrainingController extends Controller
 			]);
 			$checkget = $request->input('checkget');
 			$compid = $request->input('compid');
+			$cstep = Step::findOrFail($checkget) ?? null;
 			foreach ($compid as $index => $id) {
-				$cstep = null;
 				$company = Company::where('id', $id)->first();
-				$data['last_step'] = Step::findOrFail($checkget)->title;
+				$data['new_step'] = '-';
+				$data['last_step'] = Step::findOrFail($company?->step)?->title ?? '-';
 				if ($checkget == 0) {
 					$by = Auth::id();
 				} else {
-					$cstep = Step::findOrFail($checkget);
+					// $cstep = Step::findOrFail($checkget);
 					if ($cstep->arr > 1) {
 						$approved = 1;
 						$by = Auth::id();
@@ -174,6 +175,9 @@ class TrainingController extends Controller
 				$update = $company->update(['step' => $checkget, 'approved' => $approved, 'approved_by' => $by]);
 				if ($checkget != 0) {
 					/// notify Company Owner via Mail
+
+					$start_date = '-';
+					if( $cstep && $cstep->from ) { $start_date = Carbon::parse($cstep->from)->format('Y-m-d'); }
 					$company_owner = $company->user;
 					$data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
 					$data['owner_name_ar'] = $company_owner->first_name_ar . " " . $company_owner->last_name_ar;
@@ -181,7 +185,7 @@ class TrainingController extends Controller
 					$data['company_name_en'] = $company_owner->company->name_en;
 					$data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
 					$data['organization_name_en'] = $cstep->cycle->organization->name_en;
-					$data['start_date'] = $cstep ? $cstep->from : '-';
+					$data['start_date'] = $start_date;
 					$data['preferred_language'] = $company_owner->language;
 
 					$mail = new ChangeCycle($data);

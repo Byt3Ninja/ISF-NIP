@@ -42,6 +42,8 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $company = Company::with('user')->findOrFail($this->company);
         $data = [];
 
+		$start_date = '-';
+		if( $cstep && $cstep->from ) { $start_date = Carbon::parse($cstep->from)->format('Y-m-d'); }
         $company_owner = $company->user;
         $data['new_step'] = $this->new_step ?? null;
         $data['last_step'] = $this->last_step ?? null;
@@ -53,7 +55,7 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $data['organization_name_en'] = $cstep->cycle->organization->name_en ?? null;
         $data['emailCompany'] = $company_owner->email;
         $data['status'] = $this->step != "0" ? 'in' : 'out';
-        $data['start_date'] = $cstep ? $cstep->from : '-';
+        $data['start_date'] = $start_date;
         $data['preferred_language'] = $company_owner->language;
 
         // Log::info("notifying data: ", $data); 
