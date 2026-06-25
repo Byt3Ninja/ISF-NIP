@@ -293,6 +293,32 @@ class ScreeningEvaluationResults extends Model
 			}
 		}
 
+		// Union each judge's result-bearing companies into their startup set.
+		// $judge->startups above is built purely from the assignment source
+		// (panel screenings.users / finalscreenings / group). A judge can hold
+		// stored results for a company that is NOT in that assignment list — e.g.
+		// the startup advanced past the step, or the panel row was edited after
+		// evaluation. Without this union those evaluated pairs are dropped from the
+		// per-judge company list, so the report CARD shows "0 judges" even though
+		// results() (and the modal) resolve the score. Mirrors stepCompanyUniverse(),
+		// which already unions result-bearing companies into the company set. Scope
+		// to $companies so we never attach a company outside this metadata set.
+		$companyIdSet = $companies->pluck('id')->map(fn($i) => intval($i))->unique();
+		foreach( $judges as $index => $judge )
+		{
+			$resultCompanyIds = $results
+				->where('user_id', $judge->id)
+				->pluck('company_id')
+				->map(fn($i) => intval($i))
+				->unique()
+				->filter(fn($i) => $companyIdSet->contains($i));
+			$judges[$index]->startups = collect( $judge->startups )
+				->map(fn($i) => intval($i))
+				->merge( $resultCompanyIds )
+				->unique()
+				->values();
+		}
+
 		$scoped_comments = $comments->where('evaluation_id', $evaluation?->id)->values();
 		foreach( $judges as $index => $judge )
 		{
@@ -406,6 +432,11 @@ class ScreeningEvaluationResults extends Model
 			// company carries no step.
 			$_companies[$companies_index]->company_step_id = $company->step ?? $getStep->id;
 			$_companies[$companies_index]->company_cycle_id = $company->cycle ?? $getStep->cycle_id;
+			// Evaluation step this block belongs to (≠ current step once a startup
+			// advances). Used by the reports to dedup duplicate rows and to point
+			// the "View Complete Evaluation" modal at the step that actually holds
+			// the results. Distinct from company_step_id, which tracks current step.
+			$_companies[$companies_index]->evaluation_step_id = $getStep->id;
 		}
 
 		return [

@@ -647,6 +647,7 @@ class ReportController extends Controller
             $output->score = $resultsCompanyScores[$c->id] ?? $c->average_score;
             $output->step_id = $c->company_step_id;
             $output->cycle_id = $c->company_cycle_id;
+            $output->evaluation_step_id = $c->evaluation_step_id ?? $c->company_step_id;
             $output->judges = $c->judges->map(function($judge) use ($id, $resultsJudgeScores) {
                 $judge = clone $judge;
                 $oneResult = $judge->companies->where('id', $id)->first();
@@ -687,6 +688,8 @@ class ReportController extends Controller
 
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
+            // Final screening step that produced this row's results (see screeningReport).
+            $c->evaluation_step_id = $company->evaluation_step_id ?? $company->step_id;
             $c->score = $company->score;
             $_judges = $company->judges;
             $c->stepInfo = $stepLookup->get($company->step_id);
@@ -719,6 +722,15 @@ class ReportController extends Controller
 
             return $c;
         })->values();
+
+        // Drop spurious 0-judge duplicates (company advanced into a step it was
+        // never assigned at); keep one row per genuinely-evaluated round.
+        $evaluatedIds = $startups->filter(fn($c) => $c->judges->count() > 0)
+                                 ->pluck('id')->unique()->flip();
+        $startups = $startups
+            ->reject(fn($c) => $c->judges->count() === 0 && $evaluatedIds->has($c->id))
+            ->unique(fn($c) => $c->id . '-' . ($c->evaluation_step_id ?? $c->company_step_id))
+            ->values();
 
         // KPI cards derived from $startups (same source as displayed cards)
         $kpiData = [
@@ -935,6 +947,7 @@ class ReportController extends Controller
             $output->score = $resultsCompanyScores[$c->id] ?? $c->average_score;
             $output->step_id = $c->company_step_id;
             $output->cycle_id = $c->company_cycle_id;
+            $output->evaluation_step_id = $c->evaluation_step_id ?? $c->company_step_id;
             $output->judges = $c->judges->map(function($judge) use ($id, $resultsJudgeScores) {
                 $judge = clone $judge;
                 $oneResult = $judge->companies->where('id', $id)->first();
@@ -974,6 +987,10 @@ class ReportController extends Controller
 
             $c->company_step_id = $company->step_id;
             $c->company_cycle_id = $company->cycle_id;
+            // Screening step that produced this row's results (≠ current step for
+            // advanced startups). The modal button posts this so results() resolves
+            // the right evaluation; also the dedup key below. Fall back to current step.
+            $c->evaluation_step_id = $company->evaluation_step_id ?? $company->step_id;
             $c->score = $company->score;
             $_judges = $company->judges;
             $c->stepInfo = $stepLookup->get($c->company_step_id);
@@ -1006,6 +1023,18 @@ class ReportController extends Controller
 
             return $c;
         })->values();
+
+        // A startup evaluated in step A but currently sitting in step B appears in
+        // both step blocks: the step-A row carries its judges, the step-B row is a
+        // spurious cycle-pool duplicate with 0 judges. Drop ONLY that spurious
+        // duplicate (0 judges AND the same company has an evaluated row elsewhere).
+        // Genuinely re-screened startups keep one row per evaluated round.
+        $evaluatedIds = $startups->filter(fn($c) => $c->judges->count() > 0)
+                                 ->pluck('id')->unique()->flip();
+        $startups = $startups
+            ->reject(fn($c) => $c->judges->count() === 0 && $evaluatedIds->has($c->id))
+            ->unique(fn($c) => $c->id . '-' . ($c->evaluation_step_id ?? $c->company_step_id))
+            ->values();
 
         // KPI cards derived from $startups (same source as displayed cards)
         $kpiData = [

@@ -2,12 +2,11 @@
 
 @section('content')
   @php
-    $clist = [$cstep?->id];
-    if ($form) {
-      $clist = [$form->id, $cstep?->id];
-    }
-    $companies = \App\Company::whereIn('step', $clist);
-    
+    // Filter over the full evaluated set (same source as the card list below),
+    // not just startups currently at the step — otherwise filtering by judge or
+    // result silently drops startups that have advanced past this screening step.
+    $companies = $_companies;
+
     if (request('startup_id') != 0) {
       $companies = $companies->where('id', request('startup_id'));
     }
@@ -17,20 +16,18 @@
       $formId = $form->id ?? null;
       $judges = collect();
       $judges = $companies
-        ->get()
         ->map(function ($company) use ($formId) {
           return \App\User::whereIn('id', $company->judges($company->id, $formId))->get();
         })
         ->flatten();
     }
-    
+
     if (request('result_id') != 0) {
       $companyModel = new \App\Company();
       $comparison = request('result2_id'); // نوع المقارنة (==, <, >, <=, >=)
       $threshold = request('result_id'); // القيمة التي تتم المقارنة معها
 
       $filteredCompanies = $companies
-        ->get()
         ->filter(function ($company) use ($form, $companyModel, $comparison, $threshold) {
           $weight = $companyModel->companyWeight([$company->id], $form->id ?? '', 0);
 
@@ -47,7 +44,7 @@
 
       $companies = $filteredCompanies;
     } else {
-      $companies = $companies->get();
+      $companies = $companies->values();
     }
     $types = [
       'onetoall' => 'Assign One to all users',

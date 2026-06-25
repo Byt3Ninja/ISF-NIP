@@ -416,7 +416,7 @@
                     <button
                       class="final-screening-show-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
                       data-company="{{ $company->id }}"
-                      data-step="{{ $company->company_step_id }}"
+                      data-step="{{ $company->evaluation_step_id ?? $company->company_step_id }}"
                     >
                       <i class="ti ti-eye me-2"></i>
                       {{ __('cycles.View Complete Evaluation') }}
