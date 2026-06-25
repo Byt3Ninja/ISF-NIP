@@ -234,6 +234,7 @@ class ClientCompanyController extends Controller
         $avgMonthlyGrowth = $records_metadata['avgMonthlyGrowth'];
         $growthSinceFirstRecord = $records_metadata['growthSinceFirstRecord'];
         $compoundAnnualGrowthRate = $records_metadata['compoundAnnualGrowthRate'];
+        $growthSummary = $records_metadata['summary'];
 
         $programs = collect();
         $avgFinalScreenings = collect([]);
@@ -812,11 +813,12 @@ class ClientCompanyController extends Controller
         'technologies', 
         'sectors', 
         'industry', 
-        'years', 
-        'growth_records', 
-        'growthSinceFirstRecord', 
+        'years',
+        'growth_records',
+        'growthSinceFirstRecord',
         'avgMonthlyGrowth',
-        'compoundAnnualGrowthRate', 
+        'compoundAnnualGrowthRate',
+        'growthSummary',
         'programs',
         'programsSummary',
         'periods',
@@ -1169,6 +1171,7 @@ class ClientCompanyController extends Controller
                 'average_monthly_growth' => $records_metadata['avgMonthlyGrowth'],
                 'compound_annual_growth_rate' => $records_metadata['compoundAnnualGrowthRate']
             ];
+            $growthSummary = $records_metadata['summary'];
                 // dd($financialprojection);
             $company = $company_instance; // For backward compatibility in the view
 
@@ -1223,6 +1226,7 @@ class ClientCompanyController extends Controller
                 'growth_records',
                 'years',
                 'growthMetrics',
+                'growthSummary',
                 'company',
                 'is_currency_disabled',
                 'areasOfExpertise',

@@ -482,6 +482,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // startup growth
 
     Route::post('/startupGrowth/add', 'startupCustomerGrowthController@addRecord');
+    Route::post('/startupGrowth/update', 'startupCustomerGrowthController@updateRecord');
 
     // Company Alumni
     Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
