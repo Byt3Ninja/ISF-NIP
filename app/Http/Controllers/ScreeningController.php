@@ -817,6 +817,7 @@ class ScreeningController extends Controller
 		$successCount = 0;
 		$totalCount = count($companies);
 
+		$currentStep = Step::findOrFail($request->step);
 		foreach ($companies as $companyId) {
 			$approved = $by = null;
 			$data = [];
@@ -831,23 +832,23 @@ class ScreeningController extends Controller
 				continue; // Skip if company not found
 			}
 
+			$data['new_step'] = '-';
 			if ($request->step == "0") {
 				$by = Auth::id();
 				$data['new_step'] = 'Disapproved';
 			} else {
-				$cstep = Step::findOrFail($request->step);
+				// $cstep = Step::findOrFail($request->step);
 				$approved = 1;
 				$by = Auth::id();
-				$data['new_step'] = $cstep?->title;
+				$data['new_step'] = $currentStep?->title;
 			}
 
-			$data['last_step'] = null;
+			$data['last_step'] = '-';
 			if (!empty($company->step)) {
 				$lastStep = Step::find($company->step);
 				$data['last_step'] = $lastStep ? $lastStep->title : null;
 			}
 
-			$data['step_data'] = Step::find($request->step);
 			if ($request->step == "0") {
 				$update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
 			} else {
