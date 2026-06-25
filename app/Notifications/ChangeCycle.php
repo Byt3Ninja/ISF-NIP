@@ -104,15 +104,23 @@ class ChangeCycle extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        $lang = app()->getLocale();
+        if( in_array( strtolower( $notifiable->language ), ['en', 'ar'] ) )
+        {
+            $lang = $notifiable->language;
+        }
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+
+        $subject = $lang === 'en' ? "Congratulations! You've Advanced to the Next Phase" : "تهانينا! لقد انتقلت إلى المرحلة التالية";
         
         return (new MailMessage)
             ->from($from['address'], $from['name'])
-            ->subject(__('email.change_cycle_subject'))
+            // ->subject(__('email.change_cycle_subject'))
+            ->subject( $subject )
             ->view('emails.change-cycle', [
                 'data' => $this->data,
             ]);
