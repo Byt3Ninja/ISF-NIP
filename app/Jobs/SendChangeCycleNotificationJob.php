@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Company;
+use Carbon\Carbon;
 
 class SendChangeCycleNotificationJob implements ShouldQueue
 {
