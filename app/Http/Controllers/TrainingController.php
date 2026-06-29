@@ -1053,6 +1053,9 @@ class TrainingController extends Controller
 				$qrFilePath = '/qrcodes/' . $qrFileName;
 
 				// حفظ QR Code في `public/qrcodes/`
+				if (!file_exists(public_path('qrcodes'))) {
+					mkdir(public_path('qrcodes'), 0775, true);
+				}
 				$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
 
 				// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
@@ -1066,6 +1069,7 @@ class TrainingController extends Controller
 			}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@QrCodeTraining: ' . $e->getMessage());
+			return response()->json(['state' => 'failed', 'message' => $e->getMessage()], 500);
 		}
 	}
 
