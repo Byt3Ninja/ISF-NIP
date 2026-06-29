@@ -31,11 +31,14 @@
 <!-- Content wrapper -->
 <div class="">
 	<div class="">
-		@if(Auth::user()->hasRole('Registered'))
-			@if( isset($newhackathon) && $newhackathon )
-				{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
-				@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
-				<br>
+		
+		@if($_user->hasRole('Registered'))
+			@if($_user->company?->cycle == null)
+				@if( isset($newhackathon) && $newhackathon )
+					{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
+					@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
+					<br>
+				@endif
 			@endif
 		@endif
 
