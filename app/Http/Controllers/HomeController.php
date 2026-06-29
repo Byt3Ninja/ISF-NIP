@@ -1585,10 +1585,6 @@ class HomeController extends Controller
                             mr.zoom_date,
                             mr.created_at
                         FROM mentorship_requests mr
-                        INNER JOIN attendance_training_offline ato
-                            ON ato.mentorship_request_id = mr.id
-                            AND ato.user_id = {$user->id}
-                            AND ato.attendance = 1
                         WHERE
                             mr.mentor_id = {$user->id}
                             AND mr.approved = 'Yes'
