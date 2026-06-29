@@ -648,34 +648,48 @@ class ScreeningController extends Controller
 
 	public function changestep(Request $request)
 	{
-		$companies = is_array($request->company) ? $request->company : [$request->company];
+		$by = Auth::id();
+		$approved = null;
 		$successCount = 0;
+		$companies = is_array($request->company) ? $request->company : [$request->company];
 		$totalCount = count($companies);
 
-		$currentStep = Step::findOrFail($request->step);
-		foreach ($companies as $companyId) {
-			$approved = $by = null;
+		if( $request->step == "0" || $request->step == 0 ) { $currentStep = 'Disapproved'; }
+		else
+		{
+			$approved = 1;
+			$currentStep = Step::findOrFail($request->step);
+			if( !empty( $currentStep ) )
+			{
+				$currentStep = $currentStep?->title ?? '';
+			} else { $currentStep = ''; }
+		}
+
+		$getCompanies = Company::whereIn('id', $companies)->with(['stepdata'])->get();
+		foreach ($companies as $companyId)
+		{
 			$data = [];
-			$company = Company::where('id', $companyId)->first();
+			// $company = Company::where('id', $companyId)->first();
+			$company = $getCompanies->where('id', $companyId)->first();
 
 			if (!$company) {
 				continue; // Skip if company not found
 			}
 
-			$data['new_step'] = '-';
+			$data['new_step'] = $currentStep;
+			/* $data['new_step'] = '-';
 			if ($request->step == "0") {
-				$by = Auth::id();
 				$data['new_step'] = 'Disapproved';
 			} else {
 				// $cstep = Step::findOrFail($request->step);
-				$approved = 1;
-				$by = Auth::id();
+				
 				$data['new_step'] = $currentStep?->title;
-			}
+			} */
 
 			$data['last_step'] = '-';
 			if (!empty($company->step)) {
-				$lastStep = Step::find($company->step);
+				// $lastStep = Step::find($company->step);
+				$lastStep = $company->stepdata;
 				$data['last_step'] = $lastStep ? $lastStep->title : null;
 			}
 
