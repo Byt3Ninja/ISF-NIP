@@ -155,10 +155,16 @@
       if (!totalCustomers || totalCustomers <= 0) {
         showError('#add_growth_total_customers', '{{ __("startup.Total customers is required and must be greater than 0") }}');
         isValid = false;
+      } else if (!Number.isInteger(Number(totalCustomers))) {
+        showError('#add_growth_total_customers', '{{ __("startup.Please enter a valid whole number.") }}');
+        isValid = false;
       }
       const newCustomers = $('#add_growth_new_customers').val();
       if (newCustomers === '' || newCustomers < 0) {
         showError('#add_growth_new_customers', '{{ __("startup.New customers is required and must be 0 or greater") }}');
+        isValid = false;
+      } else if (!Number.isInteger(Number(newCustomers))) {
+        showError('#add_growth_new_customers', '{{ __("startup.Please enter a valid whole number.") }}');
         isValid = false;
       }
       if (newCustomers && totalCustomers && parseInt(newCustomers) > parseInt(totalCustomers)) {

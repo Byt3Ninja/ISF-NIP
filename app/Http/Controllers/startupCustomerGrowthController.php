@@ -24,11 +24,14 @@ class startupCustomerGrowthController extends Controller
 		$this->validate($request, [
 			"add_growth_year" => "required|numeric|in:" . implode(',', $years),
 			"add_growth_month" => "required|numeric|in:" . implode(',', $months),
-			"add_growth_total_customers" => "required|numeric|min:0",
-			"add_growth_new_customers" => "required|numeric|min:0",
+			"add_growth_total_customers" => "required|integer|min:0",
+			"add_growth_new_customers" => "required|integer|min:0",
 			"add_growth_segment" => "required|in:mixed,b2c,b2b,enterprise",
 			"add_growth_notes" => "sometimes|nullable",
 			"company_id" => "required|numeric|exists:companies,id"
+		], [
+			"add_growth_total_customers.integer" => "Please enter a valid whole number.",
+			"add_growth_new_customers.integer" => "Please enter a valid whole number."
 		]);
 
 		if( $user->hasRole('registered') )
