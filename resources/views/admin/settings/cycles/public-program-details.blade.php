@@ -438,7 +438,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 					<h6 class="fw-bold text-uppercase mb-4">{{ $l == 'en' ? 'Quick Links' : 'روابط سريعة' }}</h6>
 					<ul class="list-unstyled" style="color:var(--on-surface-variant);">
 						<li class="mb-2"><a href="/dashboard" class="text-reset text-decoration-none">{{ __('admin.Dashboard') }}</a></li>
-						<li class="mb-2"><a href="#" class="text-reset text-decoration-none">{{ $l == 'en' ? 'Privacy Policy' : 'سياسة الخصوصية' }}</a></li>
+						<li class="mb-2"><a href="{{ setting('privacy_url', '#') }}" class="text-reset text-decoration-none" {{ setting('privacy_url') ? 'target="_blank"' : '' }}>{{ $l == 'en' ? 'Privacy Policy' : 'سياسة الخصوصية' }}</a></li>
 					</ul>
 				</div>
 				<div class="col-lg-4">
