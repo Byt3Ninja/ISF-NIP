@@ -30,8 +30,8 @@ class startupCustomerGrowthController extends Controller
 			"add_growth_notes" => "sometimes|nullable",
 			"company_id" => "required|numeric|exists:companies,id"
 		], [
-			"add_growth_total_customers.integer" => "Please enter a valid whole number.",
-			"add_growth_new_customers.integer" => "Please enter a valid whole number."
+			"add_growth_total_customers.integer" => __('startup.please_enter_a_valid_whole_number'),
+			"add_growth_new_customers.integer" => __('startup.please_enter_a_valid_whole_number')
 		]);
 
 		if( $user->hasRole('registered') )

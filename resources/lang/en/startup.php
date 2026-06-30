@@ -547,6 +547,7 @@ return [
   'YoY growth' => 'YoY Growth',
   'Total customers is required and must be greater than 0' => 'Total customers is required and must be greater than 0',
   'New customers is required and must be 0 or greater' => 'New customers is required and must be 0 or greater',
+  'please_enter_a_valid_whole_number' => 'Please enter a valid whole number.',
   'The selected startups have not passed the final screening yet' => 'The selected startups have not passed the final screening.',
   'no_shareholders' => 'No shareholders',
   'no_investors' => 'No investors',

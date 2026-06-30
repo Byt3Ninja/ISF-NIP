@@ -545,6 +545,7 @@ return [
   'YoY growth' => 'النمو السنوي',
   'Total customers is required and must be greater than 0' => 'عدد العملاء الكلي مطلوب ويجب أن يكون أكبر من 0',
   'New customers is required and must be 0 or greater' => 'عدد العملاء في هذه الفترة مطلوب ويجب أن يكون 0 أو أكبر',
+  'please_enter_a_valid_whole_number' => 'يرجى إدخال عدد صحيح صالح.',
   'The selected startups have not passed the final screening yet' => 'الشركة الناشئة لم تجتز التقييم النهائي.',
   'no_shareholders' => 'لا يوجد مساهمون',
   'no_investors' => 'لا يوجد مستثمرون',

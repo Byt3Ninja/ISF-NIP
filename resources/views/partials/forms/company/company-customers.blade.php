@@ -156,7 +156,7 @@
         showError('#add_growth_total_customers', '{{ __("startup.Total customers is required and must be greater than 0") }}');
         isValid = false;
       } else if (!Number.isInteger(Number(totalCustomers))) {
-        showError('#add_growth_total_customers', '{{ __("startup.Please enter a valid whole number.") }}');
+        showError('#add_growth_total_customers', '{{ __("startup.please_enter_a_valid_whole_number") }}');
         isValid = false;
       }
       const newCustomers = $('#add_growth_new_customers').val();
@@ -164,10 +164,9 @@
         showError('#add_growth_new_customers', '{{ __("startup.New customers is required and must be 0 or greater") }}');
         isValid = false;
       } else if (!Number.isInteger(Number(newCustomers))) {
-        showError('#add_growth_new_customers', '{{ __("startup.Please enter a valid whole number.") }}');
+        showError('#add_growth_new_customers', '{{ __("startup.please_enter_a_valid_whole_number") }}');
         isValid = false;
-      }
-      if (newCustomers && totalCustomers && parseInt(newCustomers) > parseInt(totalCustomers)) {
+      } else if (totalCustomers && parseInt(newCustomers) > parseInt(totalCustomers)) {
         showError('#add_growth_new_customers', '{{ __("startup.New customers cannot exceed total customers") }}');
         isValid = false;
       }
