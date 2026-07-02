@@ -192,7 +192,23 @@ function initDropzone(tasks) {
       if (failed > 0) toastr.warning(`${total - failed} ${lbl.uploaded}, ${failed} ${lbl.failed}.`);
       else {
         toastr.success(lbl.attachmentUploadedSuccess);
-        $('#vt-submission-note').val('');
+        if (isSubmission && uploadedAtts.length) {
+          const task = tasks.find(t => t.id == taskId);
+          const newSub = {
+            status: 'pending_review',
+            time:   'just now',
+            note:   note || null,
+            files:  uploadedAtts.map(a => ({ name: a.name, url: a.url, size_bytes: a.size || null })),
+          };
+          if (task) {
+            if (!task.submissions) task.submissions = [];
+            task.submissions.push(newSub);
+            task.submissions_count = (task.submissions_count || 0) + 1;
+            $('#vt-submissions-count').text(task.submissions_count);
+          }
+          renderSubmissionsList(task ? task.submissions : [newSub], '#vt-submissions-list', task ? task.assignees : []);
+          $('#vt-submission-note').val('');
+        }
       }
       dzRenderQueue();
       $btn.prop("disabled", false).html(originalHtml);

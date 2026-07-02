@@ -193,7 +193,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
 
     $('#vt-comment-count').text(taskData.comments_count ?? (taskData.comments ? taskData.comments.length : 0));
     $('#vt-feedback-count').text(taskData.feedbacks_count ?? (taskData.feedbacks ? taskData.feedbacks.length : 0));
-    $('#vt-submissions-count').text(taskData.submissions_count ?? (taskData.submissions ? taskData.submissions.length : 0));
+    $('#vt-submissions-count').text(taskData.submissions_count || (taskData.submissions ? taskData.submissions.length : 0));
     $('#vt-activity-count').text(taskData.activities_count ?? (taskData.activities ? taskData.activities.length : 0));
 
     // Toggle "Your Submission" tab — hidden when task is completed
