@@ -182,11 +182,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
             return;
           }
           accountUserImage.src = window.URL.createObjectURL(fileInput.files[0]);
+          document.getElementById("should_remove_image").value = "0";
         }
       };
       resetFileInput.onclick = () => {
         fileInput.value = '';
         accountUserImage.src = placeholderImage;
+        document.getElementById("should_remove_image").value = "1";
       };
     }
   })();

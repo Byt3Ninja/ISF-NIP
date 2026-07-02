@@ -22,6 +22,7 @@
           <label for="upload" class="btn btn-primary me-3 mb-4" tabindex="0">
             <span class="d-none d-sm-block">{{ __('admin.Upload_New_Image') }}</span>
             <i class="ti ti-upload d-block d-sm-none"></i>
+            <input type="hidden" name="should_remove_image" id="should_remove_image" value="0" />
             <input
               hidden
               type="file"
