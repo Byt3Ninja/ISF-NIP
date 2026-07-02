@@ -192,12 +192,18 @@ class MentorshipTaskController extends Controller
 				// 	'founder' => null,
 				// ],
 
-				'assignees' => $task->assignees->map(fn($a) => [
-					'id'          => $a->id,
-					'name'        => $a->{'name_' . $lang} ?? $a->name_en ?? 'N/A',
-					'img_url'     => Company::logo_handler($a->logo),
-					'profile_url' => '/dashboard/companyProfile/' . $a->id,
-				])->toArray(),
+				'assignees' => $task->assignees
+					->when(
+						$user->hasRole('registered'),
+						fn($col) => $col->filter(fn($a) => $a->id == $user->company_id)
+					)
+					->map(fn($a) => [
+						'id'          => $a->id,
+						'name'        => $a->{'name_' . $lang} ?? $a->name_en ?? 'N/A',
+						'img_url'     => Company::logo_handler($a->logo),
+						'profile_url' => '/dashboard/companyProfile/' . $a->id,
+						'status'      => $a->pivot->status,
+					])->toArray(),
 				'in_review_count' => $task->assignees->filter(fn($a) => $a->pivot->status === 'review')->count(),
 				'attachments' => $attachments->map(fn($a, $i) => [
 					'id'          => $i + 1,
