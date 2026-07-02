@@ -482,9 +482,10 @@ class TasksController extends Controller
                 'update'   => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
                 'move'     => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
                 'comment'  => 'added a comment',
-                'feedback' => 'submitted feedback',
-                'delete'   => 'deleted this task',
-                default    => $act->action,
+                'feedback'   => 'submitted feedback',
+                'submission' => 'submitted a file',
+                'delete'     => 'deleted this task',
+                default      => $act->action,
             };
             return [
                 'user'       => $act->user->name ?? 'N/A',
@@ -853,9 +854,30 @@ class TasksController extends Controller
                 'created_at' => now()->toDateTimeString(),
             ];
 
-            $attachments = $task->attachments ?? [];
-            $attachments[] = $newAtt;
-            $task->update(['attachments' => $attachments]);
+            if ($uploader->hasRole('registered')) {
+                $assignee = ProgramTaskAssignee::where('program_task_id', $taskId)
+                    ->where('company_id', $uploader->company_id)
+                    ->first();
+
+                if (!$assignee) {
+                    return response()->json(['success' => false, 'message' => 'Not assigned to this task.'], 403);
+                }
+
+                $assigneeAtts   = $assignee->attachment ?? [];
+                $assigneeAtts[] = $newAtt;
+                $assignee->update(['attachment' => $assigneeAtts]);
+
+                ProgramTaskActivity::create([
+                    'program_task_id' => $taskId,
+                    'user_id'         => $uploader->id,
+                    'company_id'      => $uploader->company_id,
+                    'action'          => 'submission',
+                ]);
+            } else {
+                $attachments   = $task->attachments ?? [];
+                $attachments[] = array_merge($newAtt, ['status' => 'attachment']);
+                $task->update(['attachments' => $attachments]);
+            }
 
             return response()->json([
                 'success'    => true,
