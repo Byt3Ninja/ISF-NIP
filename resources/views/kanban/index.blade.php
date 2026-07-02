@@ -170,6 +170,9 @@
       // Activities
       noActivities:   @json(__('admin.no_recent_activities')),
       send_submission: @json(__('admin.send_submission')),
+      submissionNote: @json(__('admin.submission_note')),
+      submittedFiles: @json(__('admin.submittedFiles')),
+      submission: @json(__('admin.submission')),
     },
   };
 
