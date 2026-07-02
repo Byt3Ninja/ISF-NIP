@@ -41,6 +41,7 @@ class UpdateClientProfileRequest extends FormRequest
             'HaveCompany' => 'nullable|max:1',
             'technologies_used' => 'nullable|array',
             'technologies_used.*' => 'nullable|string|max:50',
+            'should_remove_image' => 'nullable|sometimes|boolean',
         ];
 
         if (Auth::user()->hasAnyRole(['Registered', 'registered'])) {

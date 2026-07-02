@@ -248,79 +248,32 @@ class ClientProfileController extends Controller
             //     $user->mentorExpertises()->sync($request->expertises);
             // }
 
-
-            if ($request->hasFile('img_url')) {
-
-                $getemail = User::where('id', $user->id)->first();
-
-                if ($request->email == $getemail->email) {
-                    //store the image
-                    $img_url = $request->file('img_url');
-                    //get the path of the stores image
-                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                    //resize
-                    Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) {
-                        $con->aspectRatio(); })->save();
-                    //update
-
-                    $result = $user->update($request->except(['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar']) + ['img_url' => $img_url]);
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->save();
-                } else {
-                    // if email changed send email verification
-                    //store the image
-                    $img_url = $request->file('img_url');
-                    //get the path of the stores image
-                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                    //resize
-                    Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) {
-                        $con->aspectRatio(); })->save();
-                    //update
-                    $result = $user->update($request->except(['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar']) + ['img_url' => $img_url]);
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->new_email = $request->email;
-
-                    $user->save();
-                    // إرسال رابط التحقق
-                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-
-                    Notification::route('mail', $user->new_email)
-                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
-                    return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
-                }
-
-
-
-
-            } else {
-                $getemail = User::where('id', $user->id)->first();
-
-                if ($request->email == $getemail->email) {
-
-                    $result = $user->update($request->except(['password', 'email', 'first_name_ar', 'last_name_ar']));
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->save();
-                } else {
-                    $result = $user->update($request->except(['password', 'email', 'first_name_ar', 'last_name_ar']));
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->new_email = $request->email;
-                    $user->save();
-                    // إرسال رابط التحقق
-                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-
-                    Notification::route('mail', $user->new_email)
-                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
-                    return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
-                }
+            $updateArray = [];
+            $excludeArray = ['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar'];
+            if( $request->hasFile('img_url') )
+            {
+                $img_url = $request->file('img_url');
+                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) { $con->aspectRatio(); })->save();
             }
+            else
+            {
+                $img_url = $user->img_url;
+                if( $request->has('should_remove_image') && $request->should_remove_image == 1 ) { $img_url = null; }
+            }
+            $updateArray = $request->except($excludeArray) + ['img_url' => $img_url];
+
+            $result = $user->update($updateArray);
+            $user->first_name_ar = $first_name_ar;
+            $user->last_name_ar = $last_name_ar;
+
+            if( $request->email != $user->email )
+            {
+                $user->new_email = $request->email;
+                Notification::route('mail', $user->new_email)->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
+            }
+            $user->save();
+            return redirect()->route('user.profile_view')->with(['msg' => 'UpdateSuccess', 'class' => 'success']);
 
             // Debug: Dump request data and company info
             \Log::info('Full request data:', $request->all());
