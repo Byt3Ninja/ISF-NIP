@@ -754,6 +754,15 @@ class TrainingController extends Controller
 			}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@addsession: ' . $e->getMessage());
+			$message = explode('response:', $e->getMessage());
+			if(isset($message[1]))
+			{
+				$error = trim($message[1], "\n");
+				$error = json_decode($error);
+				$final_output = $error->error->message;
+				return back()->with(['message' => $final_output, 'class' => 'danger']);
+			}
+			return back()->with(['message' => $e->getMessage(), 'class' => 'danger']);
 		}
 	}
 	public function editsession(Request $request, $id)
