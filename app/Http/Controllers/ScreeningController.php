@@ -1023,22 +1023,37 @@ class ScreeningController extends Controller
 
 	private function storeEvaluationCriteria( $request, $status )
 	{
+		// Coarse structural guard only. Per-field, name-pointing errors for the criteria
+		// tree are produced on publish by firstNamedCriterionError() below, so we keep
+		// the wildcard field rules out of here to avoid short-circuiting with a generic message.
 		$request->validate([
 			'action' => "required|in:{$status}",
 			'stepId' => 'required|integer|exists:steps,id',
 			'criteria' => 'required_if:action,publish|array',
 			'criteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
-			'criteria.*.name' => 'required_if:action,publish|nullable|string|max:255',
-			'criteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
-			'criteria.*.subCriteria' => 'required_if:action,publish|array|min:1',
 			'criteria.*.subCriteria.*.id' => 'nullable|sometimes|integer|exists:screening_evaluation_criteria,id',
-			'criteria.*.subCriteria.*.name' => 'required_if:action,publish|nullable|string|max:255',
-			'criteria.*.subCriteria.*.weight' => 'required_if:action,publish|numeric|between:0,1',
 			'screening_guidelines' => 'nullable|string',
+		], [
+			'action.required' => __('cycles.evaluation_action_invalid'),
+			'action.in' => __('cycles.evaluation_action_invalid'),
+			'stepId.required' => __('cycles.evaluation_step_invalid'),
+			'stepId.integer' => __('cycles.evaluation_step_invalid'),
+			'stepId.exists' => __('cycles.evaluation_step_invalid'),
+			'criteria.required_if' => __('cycles.evaluation_criteria_required'),
+			'criteria.array' => __('cycles.evaluation_criteria_required'),
 		]);
 
 		$id = $request->stepId;
 		$criteria = collect( $request->criteria );
+
+		// Precise, named field-level check: reports the exact criterion / sub-criterion at fault.
+		// Runs for BOTH actions so a bad weight can never reach the double(5,2) column and
+		// overflow it; drafts are only checked for range/format, publish also for completeness.
+		if( $request->has('criteria') && ($namedError = self::firstNamedCriterionError( $request->criteria, $status == 'publish' )) )
+		{
+			return response()->json(['status' => false, 'message' => $namedError], 200);
+		}
+
 		if( $status == 'publish' )
 		{
 			if( $criteria->sum('weight') != 1 )
@@ -1251,6 +1266,84 @@ class ScreeningController extends Controller
 				'data' => $evaluationForm->categories
 			]);
 		}
+	}
+
+	/**
+	 * Walk the submitted criteria/sub-criteria and return the first human-readable,
+	 * name-pointing validation error (or null if everything is fine).
+	 *
+	 * Weights arrive as 0..1 fractions (the UI converts the percentages the user
+	 * types) and are stored as fraction*100 into a double(5,2) column, so any value
+	 * outside 0..1 both breaks the weighting maths and overflows the column. That
+	 * range/format guard runs for BOTH draft and publish.
+	 *
+	 * $requireComplete distinguishes the two actions: on publish every field must be
+	 * filled in; a draft may be saved half-complete, so we only validate the values
+	 * that are actually present (a blank name or missing weight is allowed).
+	 *
+	 * When the failing field is the name itself, we fall back to the 1-based position.
+	 */
+	private static function firstNamedCriterionError( $criteria, $requireComplete = true )
+	{
+		foreach( (array) $criteria as $i => $criterion )
+		{
+			$cName = isset($criterion['name']) ? trim((string) $criterion['name']) : '';
+			$cLabel = $cName !== ''
+				? __('cycles.evaluation_named_criterion', ['name' => $cName])
+				: __('cycles.evaluation_named_criterion_position', ['position' => $i + 1]);
+			$cWeightPresent = isset($criterion['weight']) && $criterion['weight'] !== '' && $criterion['weight'] !== null;
+
+			if( $cName === '' )
+			{
+				if( $requireComplete ) { return __('cycles.evaluation_criterion_name_required_named', ['criterion' => $cLabel]); }
+			}
+			elseif( mb_strlen($cName) > 255 )
+			{
+				return __('cycles.evaluation_criterion_name_too_long_named', ['criterion' => $cLabel]);
+			}
+			if( !$cWeightPresent )
+			{
+				if( $requireComplete ) { return __('cycles.evaluation_criterion_weight_required_named', ['criterion' => $cLabel]); }
+			}
+			elseif( !is_numeric($criterion['weight']) || $criterion['weight'] < 0 || $criterion['weight'] > 1 )
+			{
+				return __('cycles.evaluation_criterion_weight_range_named', ['criterion' => $cLabel]);
+			}
+
+			$subCriteria = isset($criterion['subCriteria']) && is_array($criterion['subCriteria']) ? $criterion['subCriteria'] : [];
+			if( $requireComplete && count($subCriteria) < 1 )
+			{
+				return __('cycles.evaluation_subcriteria_required_named', ['criterion' => $cLabel]);
+			}
+
+			foreach( $subCriteria as $j => $sub )
+			{
+				$sName = isset($sub['name']) ? trim((string) $sub['name']) : '';
+				$sLabel = $sName !== ''
+					? __('cycles.evaluation_named_subcriterion', ['name' => $sName])
+					: __('cycles.evaluation_named_subcriterion_position', ['position' => $j + 1]);
+				$sWeightPresent = isset($sub['weight']) && $sub['weight'] !== '' && $sub['weight'] !== null;
+
+				if( $sName === '' )
+				{
+					if( $requireComplete ) { return __('cycles.evaluation_subcriterion_name_required_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]); }
+				}
+				elseif( mb_strlen($sName) > 255 )
+				{
+					return __('cycles.evaluation_subcriterion_name_too_long_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]);
+				}
+				if( !$sWeightPresent )
+				{
+					if( $requireComplete ) { return __('cycles.evaluation_subcriterion_weight_required_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]); }
+				}
+				elseif( !is_numeric($sub['weight']) || $sub['weight'] < 0 || $sub['weight'] > 1 )
+				{
+					return __('cycles.evaluation_subcriterion_weight_range_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	public function get($formId, $stepId, $panel)

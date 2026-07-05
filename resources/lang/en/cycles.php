@@ -383,6 +383,8 @@ return [
     'Important Notice' => 'Important Notice',
     'Select_Currency' => 'Select Currency',
     'Select' => 'Select',
+    'weight_required' => 'Weight is required',
+	  'weight_min_max' => 'Weight must be between 0 and 100',
     
     // New validation and input restriction translations
     'Only letters and spaces allowed' => 'Only letters and spaces allowed',
@@ -655,4 +657,33 @@ return [
     'login_success' => 'Logged in successfully',
     'invalid_credentials' => 'Invalid credentials provided',
     'joined_program_success' => 'You have successfully joined the program',
+
+    // Evaluation model validation (human-readable, non-technical)
+    'evaluation_action_invalid' => 'Something went wrong. Please refresh the page and try again.',
+    'evaluation_step_invalid' => 'Something went wrong. Please refresh the page and try again.',
+    'evaluation_criteria_required' => 'Please add at least one criterion before publishing.',
+    'evaluation_criterion_name_required' => 'Please enter a name for every criterion.',
+    'evaluation_criterion_name_too_long' => 'A criterion name is too long. Please keep it under 255 characters.',
+    'evaluation_criterion_weight_required' => 'Please enter a weight for every criterion.',
+    'evaluation_criterion_weight_range' => 'Each criterion weight must be a percentage between 0 and 100.',
+    'evaluation_subcriteria_required' => 'Each criterion must have at least one sub-criterion.',
+    'evaluation_subcriterion_name_required' => 'Please enter a name for every sub-criterion.',
+    'evaluation_subcriterion_name_too_long' => 'A sub-criterion name is too long. Please keep it under 255 characters.',
+    'evaluation_subcriterion_weight_required' => 'Please enter a weight for every sub-criterion.',
+    'evaluation_subcriterion_weight_range' => 'Each sub-criterion weight must be a percentage between 0 and 100.',
+
+    // Evaluation model validation — named (points to the exact criterion / sub-criterion)
+    'evaluation_named_criterion' => 'criterion ":name"',
+    'evaluation_named_criterion_position' => 'criterion #:position',
+    'evaluation_named_subcriterion' => 'sub-criterion ":name"',
+    'evaluation_named_subcriterion_position' => 'sub-criterion #:position',
+    'evaluation_criterion_name_required_named' => 'Please enter a name for :criterion.',
+    'evaluation_criterion_name_too_long_named' => 'The name of :criterion is too long. Please keep it under 255 characters.',
+    'evaluation_criterion_weight_required_named' => 'Please enter a weight for :criterion.',
+    'evaluation_criterion_weight_range_named' => 'The weight of :criterion must be a percentage between 0 and 100.',
+    'evaluation_subcriteria_required_named' => ':criterion must have at least one sub-criterion.',
+    'evaluation_subcriterion_name_required_named' => 'Please enter a name for :subcriterion under :criterion.',
+    'evaluation_subcriterion_name_too_long_named' => 'The name of :subcriterion under :criterion is too long. Please keep it under 255 characters.',
+    'evaluation_subcriterion_weight_required_named' => 'Please enter a weight for :subcriterion under :criterion.',
+    'evaluation_subcriterion_weight_range_named' => 'The weight of :subcriterion under :criterion must be a percentage between 0 and 100.',
 ];

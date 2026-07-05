@@ -378,6 +378,8 @@ return [
     'Important Notice' => 'إشعار مهم',
     'Select_Currency' => 'اختر العملة',
     'Select' => 'اختر',
+    'weight_required' => 'الوزن مطلوب',
+	  'weight_min_max' => 'الوزن يجب ان يكون بين 0 و 100',
     
     // New validation and input restriction translations
     'Only letters and spaces allowed' => 'يُسمح بالحروف والمسافات فقط',
@@ -649,4 +651,33 @@ return [
     'login_success' => 'تم تسجيل الدخول بنجاح',
     'invalid_credentials' => 'بيانات الدخول غير صحيحة',
     'joined_program_success' => 'لقد قمت بالانضمام للبرنامج بنجاح',
+
+    // Evaluation model validation (human-readable, non-technical)
+    'evaluation_action_invalid' => 'حدث خطأ ما. يُرجى تحديث الصفحة والمحاولة مرة أخرى.',
+    'evaluation_step_invalid' => 'حدث خطأ ما. يُرجى تحديث الصفحة والمحاولة مرة أخرى.',
+    'evaluation_criteria_required' => 'يُرجى إضافة معيار واحد على الأقل قبل النشر.',
+    'evaluation_criterion_name_required' => 'يُرجى إدخال اسم لكل معيار.',
+    'evaluation_criterion_name_too_long' => 'اسم أحد المعايير طويل جدًا. يُرجى ألا يتجاوز 255 حرفًا.',
+    'evaluation_criterion_weight_required' => 'يُرجى إدخال وزن لكل معيار.',
+    'evaluation_criterion_weight_range' => 'يجب أن يكون وزن كل معيار نسبة مئوية بين 0 و100.',
+    'evaluation_subcriteria_required' => 'يجب أن يحتوي كل معيار على معيار فرعي واحد على الأقل.',
+    'evaluation_subcriterion_name_required' => 'يُرجى إدخال اسم لكل معيار فرعي.',
+    'evaluation_subcriterion_name_too_long' => 'اسم أحد المعايير الفرعية طويل جدًا. يُرجى ألا يتجاوز 255 حرفًا.',
+    'evaluation_subcriterion_weight_required' => 'يُرجى إدخال وزن لكل معيار فرعي.',
+    'evaluation_subcriterion_weight_range' => 'يجب أن يكون وزن كل معيار فرعي نسبة مئوية بين 0 و100.',
+
+    // Evaluation model validation — named (points to the exact criterion / sub-criterion)
+    'evaluation_named_criterion' => 'المعيار ":name"',
+    'evaluation_named_criterion_position' => 'المعيار رقم :position',
+    'evaluation_named_subcriterion' => 'المعيار الفرعي ":name"',
+    'evaluation_named_subcriterion_position' => 'المعيار الفرعي رقم :position',
+    'evaluation_criterion_name_required_named' => 'يُرجى إدخال اسم لـ :criterion.',
+    'evaluation_criterion_name_too_long_named' => 'اسم :criterion طويل جدًا. يُرجى ألا يتجاوز 255 حرفًا.',
+    'evaluation_criterion_weight_required_named' => 'يُرجى إدخال وزن لـ :criterion.',
+    'evaluation_criterion_weight_range_named' => 'يجب أن يكون وزن :criterion نسبة مئوية بين 0 و100.',
+    'evaluation_subcriteria_required_named' => 'يجب أن يحتوي :criterion على معيار فرعي واحد على الأقل.',
+    'evaluation_subcriterion_name_required_named' => 'يُرجى إدخال اسم لـ :subcriterion ضمن :criterion.',
+    'evaluation_subcriterion_name_too_long_named' => 'اسم :subcriterion ضمن :criterion طويل جدًا. يُرجى ألا يتجاوز 255 حرفًا.',
+    'evaluation_subcriterion_weight_required_named' => 'يُرجى إدخال وزن لـ :subcriterion ضمن :criterion.',
+    'evaluation_subcriterion_weight_range_named' => 'يجب أن يكون وزن :subcriterion ضمن :criterion نسبة مئوية بين 0 و100.',
 ];
