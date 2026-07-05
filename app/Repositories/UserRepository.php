@@ -76,8 +76,6 @@ class UserRepository
             });
         }
         return $query;
-
-
     }
 
     /**
@@ -89,10 +87,9 @@ class UserRepository
      */
     public function paginate(Builder $query,  $perPage = 10, $page=null, $direction = 'desc'): LengthAwarePaginator
     {
-    $page = $page ?? Paginator::resolveCurrentPage();
+        $page = $page ?? Paginator::resolveCurrentPage();
 
-    return $query->with(['roles', 'company'])->orderBy('created_at', $direction)
-                 ->paginate($perPage, ['*'], 'page', $page);
+        return $query->with(['roles', 'company'])->orderBy('created_at', $direction)->paginate($perPage, ['*'], 'page', $page);
     }
 
     /**
@@ -104,82 +101,77 @@ class UserRepository
      */
     public function create(array $data)
     {
-        try {
+        try { 
+            $user = DB::transaction(function () use ($data) {
+                $user = User::create(attributes: [
+                    'first_name_en' => $data['first_name'],
+                    'last_name_en' => $data['last_name'],
+                    //this is a bug #1232
+                    'first_name_ar' => $data['first_name'],
+                    'last_name_ar' => $data['last_name'],
+                    //end bug
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'country_code' => $data['country_code'],
+                    'gender' => $data['gender'] ?? 'male',
+                    'password' => Hash::make($data['password']),
+                    'email_verified_at' => setting('VFEmail') == 1 ? null : now(),
+                    'must_change_password' => array_key_exists('must_change_password', $data) ? $data['must_change_password'] : false,
+                ]);
 
-            
-             
-                $user = DB::transaction(function () use ($data) {
-                    $user = User::create(attributes: [
-                        'first_name_en' => $data['first_name'],
-                        'last_name_en' => $data['last_name'],
-                        //this is a bug #1232
-                        'first_name_ar' => $data['first_name'],
-                        'last_name_ar' => $data['last_name'],
-                        //end bug
-                        'email' => $data['email'],
-                        'phone' => $data['phone'],
-                        'country_code' => $data['country_code'],
-                        'gender' => $data['gender'] ?? 'male',
-                        'password' => Hash::make($data['password']),
-                        'email_verified_at' => setting('VFEmail') == 1 ? null : now(),
+                if (isset($data['img_url']) && $data['img_url']) {
+                    $img_url = $data['img_url'];
+                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                    $user->img_url = $img_url;
+                }
+
+                if ($data['role'] == "mentor" && !auth()?->user()?->hasRole('admin'))
+                {
+                    UsersBio::create([
+                        'user_id' => $user->id,
+                        'bio_en' => $data['bio_en'],
+                        'linkedin' => $data['Linkedin'],
                     ]);
 
-                        if (isset($data['img_url']) && $data['img_url']) {
-                            $img_url = $data['img_url'];
-                            $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                            $user->img_url = $img_url;
+                    if (!empty($data['expertise']))
+                    {
+                        $expertise = [];
+                        foreach ($data['expertise'] as $expertiseId) {
+                            $expertise[] = [
+                                'expertise_id' => $expertiseId,
+                                'mentor_id' => $user->id
+                            ];
                         }
+                        DB::table('mentor_expertise')->insert($expertise);
 
-                    if ($data['role'] == "mentor" && !auth()?->user()?->hasRole('admin')) {
-                
-                        UsersBio::create([
-                            'user_id' => $user->id,
-                            'bio_en' => $data['bio_en'],
-                            'linkedin' => $data['Linkedin'],
-                        ]);
-
-                        if (!empty($data['expertise'])) {
-
-                            $expertises = [];
-                            foreach ($data['expertise'] as $expertiseId) {
-                                $expertises[] = [
-                                    'expertise_id' => $expertiseId,
-                                    'mentor_id' => $user->id
-                                ];
-                            }
-                            DB::table('mentor_expertise')->insert($expertises);
-
-                        }
-                        $user->title_en = $data['title_en'];
                     }
-                        $role = Role::where('name', $data['role'])->first();
-                        DB::table('model_has_roles')->insert([
-                            'role_id' => $role->id,
-                            'model_type' => User::class,
-                            'model_id' => $user->id,
-                        ]);
+                    $user->title_en = $data['title_en'];
+                }
+                $role = Role::where('name', $data['role'])->first();
+                DB::table('model_has_roles')->insert([
+                    'role_id' => $role->id,
+                    'model_type' => User::class,
+                    'model_id' => $user->id,
+                ]);
 
+                $user->save();
 
-                        $user->save();
-
-                    return $user->fresh(['roles']);
-                });
-            
-
+                return $user->fresh(['roles']);
+            });
 
             return [
-            'success' => true,
-            'message' => 'User created successfully',
-            'data'    => $user,
-            'errors'  => null
+                'success' => true,
+                'message' => 'User created successfully',
+                'data'    => $user,
+                'errors'  => null
             ];
 
         } catch (\Throwable $e) {
             return [
-            'success' => false,
-            'message' => 'Failed to create user',
-            'data'    => null,
-            'errors'  => [$e->getMessage()]
+                'success' => false,
+                'message' => 'Failed to create user',
+                'data'    => null,
+                'errors'  => [$e->getMessage()]
             ];
         }
     }
@@ -255,7 +247,6 @@ class UserRepository
     {
         try {
             $updatedUser = DB::transaction(function () use ($user, $data) {
-
                 $user->phone = $data['phone'] ?? $user->phone;
                 $user->first_name_en = $data['first_name'] ?? $user->first_name_en;
                 $user->last_name_en = $data['last_name'] ?? $user->last_name_en;
@@ -272,19 +263,19 @@ class UserRepository
                 $user->country_code = $data['country_code'] ?? $user->country_code;
                 $user->email_verified_at = $data['email_verified_at'] ?? null;
 
-                    if (isset($data['img_url']) && $data['img_url']) {
-                        $img_url = $data['img_url'];
-                        $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                        $user->img_url = $img_url;
-                    }
-
-                if (!empty($data['password'])) {
-                    $user->password = Hash::make($data['password']);
+                if (isset($data['img_url']) && $data['img_url'])
+                {
+                    $img_url = $data['img_url'];
+                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                    $user->img_url = $img_url;
                 }
+
+                if( !empty($data['password']) ) { $user->password = Hash::make($data['password']); }
 
                 $user->save();
 
-                if (isset($data['role'])) {
+                if (isset($data['role']))
+                {
                     $currentUser = auth()->user();
                     if (!$currentUser || !$currentUser->hasRole('Admin')) {
                         throw new \Illuminate\Auth\Access\AuthorizationException('Unauthorized role change.');
@@ -306,8 +297,6 @@ class UserRepository
             });
 
             return $updatedUser;
-
-
         } catch (\Throwable $e) {
             return [
                 'success' => false,
@@ -316,7 +305,6 @@ class UserRepository
             ];
         }
     }
-
 
     /**
      * Deactivate a user.
@@ -327,17 +315,10 @@ class UserRepository
     public function deactivate(User $user): bool|array
     {
         try {
-
             $user = User::find(id: $user->id);
-            if ($user->status === 'inactive') {
-                $user->status = 'active';
-            } else {
-                $user->status = 'inactive';
-            }
+            $user->status = $user->status === 'inactive' ? 'active' : 'inactive';
             $user->save();
-
             return true;
-
         } catch (\Throwable $e) {
             return [
                 'success' => false,
@@ -345,8 +326,8 @@ class UserRepository
                 'status' => 500
             ];
         }
-
     }
+
     /**
      * Delete a user.
      */
@@ -371,42 +352,38 @@ class UserRepository
      */
     public function roles()     
     {
-        try{
+        try {
+            $roles = Role::all();
+            $rolesData = $roles->map(function ($role) {
+                $users = User::role($role->name)->get();
 
-        
-        $roles= Role::all();
-        $rolesData = $roles->map(function ($role) {
-        $users = User::role($role->name)->get();
-
-        return [
-                'id'          => $role->id,
-                'name'        => $role->name,
-                'default_for' => $role->default_for,
-                'totalUsers'  => $users->count(),
-                'avatars'     => $users->map(function ($user) {
-                    return $user->img_url 
-                        ? Storage::disk('public_uploads')->url($user->img_url) 
-                        : null;
-                })->filter()->values()->toArray(),
-            ];
-        });
+                return [
+                    'id'          => $role->id,
+                    'name'        => $role->name,
+                    'default_for' => $role->default_for,
+                    'totalUsers'  => $users->count(),
+                    'avatars'     => $users->map(function ($user) {
+                        return $user->img_url ? Storage::disk('public_uploads')->url($user->img_url) : null;
+                    })->filter()->values()->toArray(),
+                ];
+            });
 
             return [
                 'success' => true,
                 'message' => 'Roles List successfully',
                 'data'    => $rolesData,
                 'errors'  => null
-                ];
+            ];
         } catch (\Throwable $e) {
             return [
-            'success' => false,
-            'message' => 'Failed to create user',
-            'data'    => null,
-            'errors'  => [$e->getMessage()]
+                'success' => false,
+                'message' => 'Failed to create user',
+                'data'    => null,
+                'errors'  => [$e->getMessage()]
             ];
         }
-
     }
+
     /**
      * get List of Country
      */
@@ -465,15 +442,13 @@ class UserRepository
         }
     }
 
-
-
-     /**
+    /**
       * Summary of getCompaniesForRegisteredUser
       * @param \App\User $user
       * @param array $filters
       * @return array{companies: Builder[]|Collection<TKey, TValue>|\Illuminate\Database\Eloquent\Collection, errorMessage: string|null}
       */
-     public function getCompaniesForRegisteredUser(User $user, array $filters): array
+    public function getCompaniesForRegisteredUser(User $user, array $filters): array
     {
         $l = app()->getLocale();
         $name = ($l == 'ar') ? 'name_ar' : 'name_en';
@@ -485,7 +460,8 @@ class UserRepository
 
         $company = $user->company;
         $orgIds = $user->organizations_ids;
-        if ($company && $company->cycle != null) {
+        if ($company && $company->cycle != null)
+        {
             $companies = Company::when(!empty($orgIds), function ($q) use ($orgIds) {
                     return $q->whereIn('organization_id', $orgIds);
                 })
@@ -507,6 +483,7 @@ class UserRepository
 
         return ['companies' => $companies, 'errorMessage' => $errorMessage];
     }
+
     /**
      * Summary of getCompaniesForOrgManager
      * Supports both single organization (organizationManager) and multiple organizations (Sub-Admin)
@@ -545,6 +522,7 @@ class UserRepository
 
         return ['companies' => $companies, 'errorMessage' => ''];
     }
+
     /**
      * Summary of getCompaniesForMentor
      * @param array $filters
@@ -572,6 +550,7 @@ class UserRepository
 
         return ['companies' => $companies, 'errorMessage' => ''];
     }
+
     /**
      * Summary of getCompaniesForAdmin
      * @param array $filters
@@ -594,8 +573,8 @@ class UserRepository
         }
 
         $companies = $query->when($search, function ($query) use ($search, $name) {
-            $query->where($name, 'like', '%' . $search . '%');
-        })
+                $query->where($name, 'like', '%' . $search . '%');
+            })
             ->when($sector, function ($query) use ($sector) {
                 $query->where('sector', 'like', '%' . $sector . '%');
             })
@@ -607,7 +586,6 @@ class UserRepository
         return ['companies' => $companies, 'errorMessage' => ''];
     }
 
-
     /**
      * Summary of importUsers
      * @param array $userData
@@ -617,8 +595,8 @@ class UserRepository
     {
         try {
             DB::beginTransaction();
-
-            foreach ($userData as $row) {
+            foreach ($userData as $row)
+            {
                 $user = User::create([
                     'email'    => $row[1],
                     'first_name_en'    => $row[2],
@@ -631,10 +609,12 @@ class UserRepository
                     'organization_id'    => '18',
                     'password' => Hash::make('123456789'),
                     'email_verified_at' => now(),
+                    'must_change_password' => true,
                 ]);
                 $user->allotRole('Registered');
 
-                if (isset($row[8]) && (int)$row[8] == 1) {
+                if( isset( $row[8] ) && (int) $row[8] == 1 )
+                {
                     $company = Company::create([
                         'country_id'    => (int)$row[7],
                         'name_en'    => $row[9],
@@ -666,42 +646,41 @@ class UserRepository
         }
     }
 
-  public function createRoleWithPermissions(array $data)
-{
-    return DB::transaction(function () use ($data) {
-        $role = Role::create([
-            'name' => $data['name'],
-        ]);
+    public function createRoleWithPermissions(array $data)
+    {
+        return DB::transaction(function () use ($data) {
+            $role = Role::create([
+                'name' => $data['name'],
+            ]);
 
-        $flattened = collect($data['permissions'])->flatten()->toArray();
-        $permissions = Permission::whereIn('name', $flattened)->pluck('id')->toArray();
-
-        $role->permissions()->sync($permissions);
-        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-
-        return $role->load('permissions');
-    });
-}
-
-public function updateRoleWithPermissions(int $id, array $data)
-{
-    return DB::transaction(function () use ($id, $data) {
-        $role = Role::findOrFail($id);
-
-        if (isset($data['name'])) {
-            $role->name = $data['name'];
-        }
-
-        $role->save();
-        if (isset($data['permissions'])) {
             $flattened = collect($data['permissions'])->flatten()->toArray();
             $permissions = Permission::whereIn('name', $flattened)->pluck('id')->toArray();
-            $role->permissions()->syncWithoutDetaching($permissions);
+
+            $role->permissions()->sync($permissions);
             app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-        }
 
-        return $role->load('permissions');
-    });
-}
+            return $role->load('permissions');
+        });
+    }
 
+    public function updateRoleWithPermissions(int $id, array $data)
+    {
+        return DB::transaction(function () use ($id, $data) {
+            $role = Role::findOrFail($id);
+
+            if (isset($data['name'])) {
+                $role->name = $data['name'];
+            }
+
+            $role->save();
+            if (isset($data['permissions'])) {
+                $flattened = collect($data['permissions'])->flatten()->toArray();
+                $permissions = Permission::whereIn('name', $flattened)->pluck('id')->toArray();
+                $role->permissions()->syncWithoutDetaching($permissions);
+                app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+            }
+
+            return $role->load('permissions');
+        });
+    }
 }
