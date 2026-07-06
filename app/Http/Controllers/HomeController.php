@@ -1207,6 +1207,7 @@ class HomeController extends Controller
                 if (!is_array($judges)) {
                     $judges = [];
                 }
+
                 if (count($judges) > 0)
                 {
                     $placeholders = implode(',', array_fill(0, count($judges), '?'));
@@ -1230,7 +1231,6 @@ class HomeController extends Controller
                         $judger->img_url = User::image_handler($item->img_url);
                         return $judger;
                     });
-                    
 
                     $myFinal->judges = $judgers;
                     $myFinal->company = new stdClass;
@@ -1251,11 +1251,8 @@ class HomeController extends Controller
                     unset($myFinal->user_last_name_ar);
                     unset($myFinal->user_title_en);
                     unset($myFinal->user_title_ar);
-                    } else {
-                        $judgers = collect();
-                    }
-                }
-
+                } else { $judgers = collect(); }
+            }
 
             $stepData = $company->stepdata;
             if (!empty($stepData)) {
