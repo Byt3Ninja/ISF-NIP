@@ -130,7 +130,7 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         $token = Str::random(64);
         $this->magic_login_token = $token;
         $this->magic_login_sent_at = now();
-        $this->must_change_password = true;
+        $this->must_change_password = false;
         $this->save();
 
         return \Illuminate\Support\Facades\URL::temporarySignedRoute(
