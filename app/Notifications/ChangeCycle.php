@@ -104,6 +104,7 @@ class ChangeCycle extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        $data = $this->data;
         $lang = app()->getLocale();
         if( in_array( strtolower( $notifiable->language ), ['en', 'ar'] ) )
         {
@@ -115,15 +116,29 @@ class ChangeCycle extends Notification implements ShouldQueue
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
 
-        $subject = $lang === 'en' ? "Congratulations! You've Advanced to the Next Phase" : "تهانينا! لقد انتقلت إلى المرحلة التالية";
-        
-        return (new MailMessage)
-            ->from($from['address'], $from['name'])
-            // ->subject(__('email.change_cycle_subject'))
-            ->subject( $subject )
-            ->view('emails.change-cycle', [
-                'data' => $this->data,
-            ]);
+        if( $data['status'] == 'in' )
+        {
+            $subject = $lang === 'en' ? "Congratulations! You've Advanced to the Next Phase" : "تهانينا! لقد انتقلت إلى المرحلة التالية";
+            return (new MailMessage)
+                ->from($from['address'], $from['name'])
+                // ->subject(__('email.change_cycle_subject'))
+                ->subject( $subject )
+                ->view('emails.change-cycle', [
+                    'data' => $data,
+                ]);
+        }
+        else
+        {
+            $data['program_title'] = $data['program']->{'name_' . $lang} ?? '';
+            $subject = $lang === 'en' ? "Update on Your {$data['program_title']} Application" : "تحديث بخصوص طلب انضمامكم إلى {$data['program_title']}";
+
+            return (new MailMessage)
+                ->from($from['address'], $from['name'])
+                ->subject( $subject )
+                ->view('emails.disapprove-startup', [
+                    'data' => $data,
+                ]);
+        }
     }
 
     /**

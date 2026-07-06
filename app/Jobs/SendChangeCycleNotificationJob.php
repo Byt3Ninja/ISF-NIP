@@ -37,9 +37,9 @@ class SendChangeCycleNotificationJob implements ShouldQueue
     {
         $cstep = null;
         // log::info("notifying data: " . $this->company );
-       if($this->step != "0"){
-        $cstep = Step::findOrFail($this->step);
-       }
+        if($this->step != "0"){
+            $cstep = Step::findOrFail($this->step);
+        }
         $company = Company::with('user')->findOrFail($this->company);
         $data = [];
 
@@ -58,6 +58,7 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $data['status'] = $this->step != "0" ? 'in' : 'out';
         $data['start_date'] = $start_date;
         $data['preferred_language'] = $company_owner->language;
+        $data['program'] = $cstep->cycle;
 
         // Log::info("notifying data: ", $data); 
         // // إرسال الحدث بالبث
