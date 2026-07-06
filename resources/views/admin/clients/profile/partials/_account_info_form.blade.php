@@ -177,8 +177,8 @@
           <label for="language" class="form-label fs-6 fw-bold">{{ __('admin.Language') }}</label>
           <select id="language" name="language" class="select2 form-select">
             <option value="">{{ __('admin.Select Language') }}</option>
-            <option value="en" {{ $client->language == 'en' ? 'selected' : '' }}>English</option>
-            <option value="ar" {{ $client->language == 'ar' ? 'selected' : '' }}>Arabic</option>
+            <option value="en" {{ $client->language == 'en' ? 'selected' : '' }}> {{ $l == 'en' ? 'English' : 'الانجليزية' }} </option>
+            <option value="ar" {{ $client->language == 'ar' ? 'selected' : '' }}> {{ $l == 'en' ? 'Arabic' : 'العربية' }} </option>
           </select>
         </div>
         

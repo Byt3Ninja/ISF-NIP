@@ -109,7 +109,7 @@
       callback: function (input) {
         const value = (input.value || '').trim();
         const errMsg = t('phone', 'invalidPhone');
-        if (value === '') return { valid: !required };
+        if (value === '') return required ? { valid: false, message: t('phone', 'notEmpty') } : { valid: true };
         if (!/^[\d\s\-\(\)]+$/.test(value)) return { valid: false, message: errMsg };
 
         const iti = $(input.element).data('iti');
