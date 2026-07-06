@@ -251,7 +251,7 @@
 
                         <!-- Mark Alumni Button -->
                         @php
-                          $isAlumni = \App\Almuni::where('company_id', $company->id)->exists();
+                          $isAlumni = \App\Almuni::where('company_id', $company->id)->where('cycle_id', $company->cycle)->exists();
                         @endphp
                         <button type="button" class="btn btn-sm {{ $isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
                           data-company-id="{{ $company->id }}"

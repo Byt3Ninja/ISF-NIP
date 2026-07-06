@@ -242,7 +242,7 @@ class CyclesController extends Controller
         }
 
 
-        $companies = $companies->get();
+        $companies = $companies->with(['user'])->get();
         return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
     }
 
