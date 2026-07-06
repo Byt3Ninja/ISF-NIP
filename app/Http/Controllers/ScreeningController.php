@@ -819,18 +819,19 @@ class ScreeningController extends Controller
 		$companies = is_array($request->company) ? $request->company : [$request->company];
 		$totalCount = count($companies);
 
+		$status = $request->step != "0" ? 'in' : 'out';
 		if( $request->step == "0" || $request->step == 0 ) { $currentStep = 'Disapproved'; }
 		else
 		{
 			$approved = 1;
-			$currentStep = Step::findOrFail($request->step);
+			$currentStep = Step::with(['cycle'])->findOrFail($request->step);
 			if( !empty( $currentStep ) )
 			{
 				$currentStep = $currentStep?->title ?? '';
 			} else { $currentStep = ''; }
 		}
 
-		$getCompanies = Company::whereIn('id', $companies)->with(['stepdata'])->get();
+		$getCompanies = Company::whereIn('id', $companies)->with(['stepdata', 'stepdata.cycle', 'cycledata'])->get();
 		foreach ($companies as $companyId)
 		{
 			$data = [];
@@ -862,7 +863,8 @@ class ScreeningController extends Controller
 				$lastStep = $company->stepdata;
 				$data['last_step'] = $lastStep ? $lastStep->title : null;
 			}
-
+			$data['status'] = $status;
+			$data['program'] = $company?->stepdata?->cycle ?? null;
 			if ($request->step == "0") {
 				$update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
 			} else {

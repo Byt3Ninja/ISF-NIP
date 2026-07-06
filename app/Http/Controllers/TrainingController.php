@@ -157,8 +157,10 @@ class TrainingController extends Controller
 			]);
 			$checkget = $request->input('checkget');
 			$compid = $request->input('compid');
-			$cstep = Step::findOrFail($checkget) ?? null;
-			foreach ($compid as $index => $id) {
+			$cstep = Step::with(['cycle'])->findOrFail($checkget) ?? null;
+			$status = $checkget != 0 ? 'in' : 'out';
+			foreach ($compid as $index => $id)
+			{
 				$company = Company::where('id', $id)->first();
 				$data['new_step'] = '-';
 				$data['last_step'] = Step::findOrFail($company?->step)?->title ?? '-';
@@ -173,7 +175,7 @@ class TrainingController extends Controller
 					$data['new_step'] = $cstep->title;
 				}
 				$update = $company->update(['step' => $checkget, 'approved' => $approved, 'approved_by' => $by]);
-				if ($checkget != 0) {
+				// if ($checkget != 0) {
 					/// notify Company Owner via Mail
 
 					$start_date = '-';
@@ -187,6 +189,8 @@ class TrainingController extends Controller
 					$data['organization_name_en'] = $cstep->cycle->organization->name_en;
 					$data['start_date'] = $start_date;
 					$data['preferred_language'] = $company_owner->language;
+					$data['program'] = $cstep->cycle;
+					$data['status'] = $status;
 
 					$mail = new ChangeCycle($data);
 					// $MSG = new TemplateEmail;
@@ -198,7 +202,7 @@ class TrainingController extends Controller
 							// throw $th;
 						}
 					}
-				}
+				// }
 			}
 			/// End of mail send
 			if ($update) {
