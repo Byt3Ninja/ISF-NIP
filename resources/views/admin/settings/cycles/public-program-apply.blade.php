@@ -378,9 +378,9 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									</div>
 									<div class="row">
 										<div class="col-md-6 mb-3">
-											<label for="register-first-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'الاسم الأول' : 'First Name' }}</label>
-											<input type="text" class="form-control" id="register-first-name" name="register-first-name" placeholder="{{ $l == 'ar' ? 'أدخل الاسم الأول' : 'Enter first name' }}">
-											<div id="register-first-name-feedback" class="invalid-feedback"></div>
+											<label for="register-first-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'الاسم الأول' : 'First Name' }}<span class="text-danger ms-1">*</span></label>
+											<input type="text" class="form-control" id="register-first-name" name="register-first-name" placeholder="{{ $l == 'ar' ? 'أدخل الاسم الأول' : 'Enter first name' }}" required>
+											<div id="register-first-name-feedback" class="invalid-feedback">{{ $l == 'ar' ? 'الاسم الأول مطلوب.' : 'First name is required.' }}</div>
 										</div>
 										<div class="col-md-6 mb-3">
 											<label for="register-last-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'اسم العائلة' : 'Last Name' }}</label>
@@ -572,6 +572,16 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									const reqText = '{{ $l == "ar" ? "مطلوب" : "required" }}';
 									const chooseText = '{{ $l == "ar" ? "اختر" : "Choose" }}';
 									const otherText = '{{ $l == "ar" ? "أخرى" : "Other" }}';
+									const otherValueText = '{{ $l == "ar" ? "يرجى التحديد" : "Please specify" }}';
+
+									// Free-text input revealed when the user picks the "Other" option.
+									// Hidden by default; toggled by the change handler; its value is
+									// merged into the field on submit (see normalizeOtherFields).
+									function otherWrapperHtml(fieldName, idFor) {
+										return `<div class="other-wrapper mt-2 d-none" data-other-for="${fieldName}">`
+											+ `<input type="text" class="form-control other-field" id="${idFor}_other" name="${fieldName}_other" placeholder="${otherValueText}" />`
+											+ `</div>`;
+									}
 
 									var sections = {};
 									$.each(response.fields, function(key, value) {
@@ -623,6 +633,9 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 														fieldsHtml += `<option value="${option}">${optLabel}</option>`;
 													});
 													fieldsHtml += `</select>`;
+													if (optionsList.indexOf('__OTHER__') !== -1) {
+														fieldsHtml += otherWrapperHtml(value.field_name, value.id_for);
+													}
 													break;
 
 												case 'paragraph':
@@ -631,7 +644,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													break;
 
 												case 'multiple_choice':
-													fieldsHtml += `<div class="options-group">`;
+													fieldsHtml += `<div class="options-group" data-group-name="${value.field_name}">`;
 													$.each(optionsList, function(i, option) {
 														var optLabel = option === '__OTHER__' ? otherText : option;
 														fieldsHtml += `<div class="form-check mb-2">`;
@@ -639,11 +652,14 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 														fieldsHtml += `<label class="form-check-label" for="${value.id_for}_${i}">${optLabel}</label>`;
 														fieldsHtml += `</div>`;
 													});
+													if (optionsList.indexOf('__OTHER__') !== -1) {
+														fieldsHtml += otherWrapperHtml(value.field_name, value.id_for);
+													}
 													fieldsHtml += `</div>`;
 													break;
 
 												case 'checkboxes':
-													fieldsHtml += `<div class="options-group">`;
+													fieldsHtml += `<div class="options-group" data-required-group="${isRequired ? '1' : '0'}" data-group-name="${value.field_name}">`;
 													$.each(optionsList, function(i, option) {
 														var optLabel = option === '__OTHER__' ? otherText : option;
 														fieldsHtml += `<div class="form-check mb-2">`;
@@ -651,6 +667,9 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 														fieldsHtml += `<label class="form-check-label" for="${value.id_for}_${i}">${optLabel}</label>`;
 														fieldsHtml += `</div>`;
 													});
+													if (optionsList.indexOf('__OTHER__') !== -1) {
+														fieldsHtml += otherWrapperHtml(value.field_name, value.id_for);
+													}
 													fieldsHtml += `</div>`;
 													break;
 
@@ -673,6 +692,21 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 												case 'file':
 													fieldsHtml += `<input type="file" class="form-control" id="${value.id_for}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" ${requiredAttr} />`;
+													break;
+
+												case 'number':
+													var numMin = (value.options && value.options.min !== undefined && value.options.min !== '') ? `min="${value.options.min}"` : '';
+													var numMax = (value.options && value.options.max !== undefined && value.options.max !== '') ? `max="${value.options.max}"` : '';
+													var numStep = (value.options && value.options.step !== undefined && value.options.step !== '') ? `step="${value.options.step}"` : '';
+													fieldsHtml += `<input type="number" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${numMin} ${numMax} ${numStep} ${requiredAttr} />`;
+													break;
+
+												case 'email':
+													fieldsHtml += `<input type="email" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													break;
+
+												case 'url':
+													fieldsHtml += `<input type="url" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
 													break;
 
 												case 'short_answer':
@@ -822,32 +856,116 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			return re.test(String(email).toLowerCase());
 		}
 
+		// Auto-clear the red validation state as soon as the user fills / changes a field.
+		$(document).on('input change', '#register-form input, #register-form select, #register-form textarea', function() {
+			const $field = $(this);
+			const type = $field.attr('type');
+			const name = $field.attr('name');
+
+			if (type === 'radio' || type === 'checkbox') {
+				// Clear the whole group (and its container marker) once any option is chosen.
+				if (name) {
+					$('#register-form').find(`input[name="${name}"]`).removeClass('is-invalid');
+				}
+				$field.closest('.options-group').find('.is-invalid').removeClass('is-invalid');
+			} else if ($field.val() && $field.val().toString().trim() !== '') {
+				$field.removeClass('is-invalid');
+			} else if (type === 'file' && this.files && this.files.length > 0) {
+				$field.removeClass('is-invalid');
+			}
+		});
+
+		// Show/hide the "Other" free-text input based on whether __OTHER__ is
+		// currently selected for that field (dropdown, radio group, checkbox group).
+		function toggleOtherWrapper(fieldName) {
+			const $form = $('#register-form');
+			const $wrapper = $form.find(`.other-wrapper[data-other-for="${fieldName}"]`);
+			if (!$wrapper.length) { return; }
+
+			let show = false;
+			const $select = $form.find(`select[name="${fieldName}"]`);
+			if ($select.length) {
+				show = $select.val() === '__OTHER__';
+			} else {
+				// radio uses name="field_x", checkbox uses name="field_x[]"
+				show = $form.find(`input[name="${fieldName}"]:checked[value="__OTHER__"], input[name="${fieldName}[]"]:checked[value="__OTHER__"]`).length > 0;
+			}
+
+			$wrapper.toggleClass('d-none', !show);
+			if (!show) {
+				$wrapper.find('.other-field').val('').removeClass('is-invalid');
+			}
+		}
+
+		$(document).on('change', '#register-form select, #register-form input[type="radio"], #register-form input[type="checkbox"]', function() {
+			let fieldName = $(this).attr('name') || '';
+			fieldName = fieldName.replace(/\[\]$/, ''); // checkbox groups post as field_x[]
+			toggleOtherWrapper(fieldName);
+		});
+
 		$(document).on('click', '#join_btn', function(e) {
 			e.preventDefault();
 			let $form = $('#register-form');
-			let formData = new FormData($form[0]);
 			let isValid = true;
 
 			$form.find('.is-invalid').removeClass('is-invalid');
 
+			// Track radio groups so each group is only validated once.
+			const validatedRadioGroups = {};
+
 			$form.find('[required]').each(function() {
 				const $field = $(this);
-				if ($field.is(':visible') && $field.attr('required') !== undefined) {
-					const type = $field.attr('type');
-					const value = $field.val();
+				if (!$field.is(':visible') || $field.attr('required') === undefined) {
+					return;
+				}
 
-					if (type === 'checkbox' && !$field.is(':checked')) {
-						$field.addClass('is-invalid');
+				const type = $field.attr('type');
+				const name = $field.attr('name');
+
+				if (type === 'radio') {
+					// Required radio group: at least one option in the group must be checked.
+					if (validatedRadioGroups[name]) { return; }
+					validatedRadioGroups[name] = true;
+					if ($form.find(`input[type="radio"][name="${name}"]:checked`).length === 0) {
+						$form.find(`input[type="radio"][name="${name}"]`).addClass('is-invalid');
 						isValid = false;
-					} else if (type === 'file') {
-						if (this.files.length === 0) {
-							$field.addClass('is-invalid');
-							isValid = false;
-						}
-					} else if (!value || value.trim() === '') {
+					}
+				} else if (type === 'checkbox') {
+					if (!$field.is(':checked')) {
 						$field.addClass('is-invalid');
 						isValid = false;
 					}
+				} else if (type === 'file') {
+					if (this.files.length === 0) {
+						$field.addClass('is-invalid');
+						isValid = false;
+					}
+				} else {
+					const value = $field.val();
+					if (!value || value.trim() === '') {
+						$field.addClass('is-invalid');
+						isValid = false;
+					}
+				}
+			});
+
+			// Required checkbox groups (rendered without a native `required` attribute):
+			// at least one box in the group must be checked.
+			$form.find('.options-group[data-required-group="1"]').each(function() {
+				const $group = $(this);
+				if (!$group.is(':visible')) { return; }
+				if ($group.find('input[type="checkbox"]:checked').length === 0) {
+					$group.find('input[type="checkbox"]').addClass('is-invalid');
+					isValid = false;
+				}
+			});
+
+			// When "Other" is selected, its free-text input must be filled in.
+			$form.find('.other-wrapper:not(.d-none)').each(function() {
+				const $otherInput = $(this).find('.other-field');
+				if (!$otherInput.val() || $otherInput.val().trim() === '') {
+					$otherInput.addClass('is-invalid');
+					isValid = false;
 				}
 			});
 
@@ -866,6 +984,42 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				});
 				return;
 			}
+			// Build the payload, replacing any "__OTHER__" marker with the typed
+			// free-text value so the server stores the real answer (matches portal).
+			let formData = new FormData($form[0]);
+
+			$form.find('.other-wrapper').each(function() {
+				const $wrapper = $(this);
+				const fieldName = $wrapper.data('other-for');
+				const otherVal = ($wrapper.find('.other-field').val() || '').trim();
+
+				// The helper "field_x_other" input is never sent to the server.
+				formData.delete(fieldName + '_other');
+
+				const $select = $form.find(`select[name="${fieldName}"]`);
+				const $checkboxes = $form.find(`input[name="${fieldName}[]"]`);
+
+				if ($select.length) {
+					if ($select.val() === '__OTHER__' && otherVal) {
+						formData.set(fieldName, otherVal);
+					}
+				} else if ($checkboxes.length) {
+					// Rebuild the checkbox array, swapping __OTHER__ for the typed value.
+					const checked = $checkboxes.filter(':checked').map(function() { return this.value; }).get();
+					if (checked.indexOf('__OTHER__') !== -1) {
+						formData.delete(fieldName + '[]');
+						checked.forEach(function(v) {
+							formData.append(fieldName + '[]', v === '__OTHER__' ? otherVal : v);
+						});
+					}
+				} else {
+					// radio: name="field_x"
+					if (formData.get(fieldName) === '__OTHER__' && otherVal) {
+						formData.set(fieldName, otherVal);
+					}
+				}
+			});
+
 			$.ajaxSetup({
 				headers: {
 					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -904,17 +1058,30 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 					console.log(error);
 					if( xhr.status == 422 )
 					{
-						var response = xhr.responseJSON;
-						$.each(response.errors, function(field, messages) {
-							var fieldName = field.replace(/\./g, '_');
-							var $input = $(`#${fieldName}`);
-							$input.addClass('is-invalid');
-							$input.next('.invalid-feedback').html(messages[0]);
-						});
+						var response = xhr.responseJSON || {};
+						var messagesList = [];
 
-						swal.fire({ 
+						// Base-field errors use Laravel's default shape: { errors: { field: [msg] } }
+						if (response.errors && typeof response.errors === 'object') {
+							$.each(response.errors, function(field, messages) {
+								var fieldName = field.replace(/\./g, '_');
+								var $input = $(`#${fieldName}`);
+								$input.addClass('is-invalid');
+								$input.next('.invalid-feedback').html(messages[0]);
+								messagesList.push(messages[0]);
+							});
+						}
+
+						// Dynamic form-field errors use { error: [ "msg", ... ] } (a flat array).
+						if (Array.isArray(response.error)) {
+							messagesList = messagesList.concat(response.error);
+						}
+
+						swal.fire({
 							title: '{{ $l == "ar" ? "خطأ في التحقق من البيانات" : "Validation Error" }}',
-							text: '{{ $l == "ar" ? "يرجى تصحيح الأخطاء في النموذج." : "Please correct the errors in the form." }}',
+							html: messagesList.length
+								? '<ul class="text-start mb-0">' + messagesList.map(function(m){ return '<li>' + m + '</li>'; }).join('') + '</ul>'
+								: '{{ $l == "ar" ? "يرجى تصحيح الأخطاء في النموذج." : "Please correct the errors in the form." }}',
 							icon: 'warning',
 							showCancelButton: false,
 							showConfirmButton: true,
@@ -945,9 +1112,10 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 		});
 
 		function datePicker() {
-			$('.datepicker').flatpickr({
-				dateFormat: 'Y-m-d'
-			});
+			// Match the portal form's flatpickr configuration so date/time fields
+			// render an actual picker (not a plain text box) and store consistent values.
+			flatpickr('.datepicker', { dateFormat: 'Y-m-d', allowInput: true });
+			flatpickr('.timepicker', { enableTime: true, noCalendar: true, dateFormat: 'H:i', allowInput: true });
 		}
 	</script>
 </body>

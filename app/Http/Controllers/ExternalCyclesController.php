@@ -219,6 +219,32 @@ class ExternalCyclesController extends Controller
 					'register-first-name' => 'required',
 					'register-last-name' => 'nullable|sometimes',
 				]);
+
+				// Validate the dynamic form fields (required/email rules) BEFORE creating
+				// any records, so a rejected submission never leaves an orphaned user/company.
+				$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
+				$fields = Formfield::where('step_id', $step->id)->get();
+
+				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields ) {
+					$field_options = $fields->where('id', $id)->first()->options;
+					if( $field_options->validation->required == 1 )
+					{
+						$rules = ['required'];
+						if( isset($field_options->type) && $field_options->type == "email" ) { $rules[] = 'email'; }
+						return [
+							'field_' . $id => implode("|", $rules)
+						];
+					} else { return ['field_' . $id => 'nullable']; }
+				});
+				$dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
+					'required' => app()->getLocale() == 'ar' ? "هذا الحقل مطلوب." : "field can't be left blank",
+					'email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.'
+				]);
+				if( $dynamic_validator->fails() )
+				{
+					return response()->json(['error' => $dynamic_validator->errors()->all()], 422);
+				}
+
 				DB::beginTransaction();
 				try {
 					$password = Str::random(6);
@@ -263,29 +289,6 @@ class ExternalCyclesController extends Controller
 
 					$user_id = $user->id;
 					$company_id = $company->id;
-
-					$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-					$fields = Formfield::where('step_id', $step->id)->get();
-
-					$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields ) {
-						$field_options = $fields->where('id', $id)->first()->options;
-						if( $field_options->validation->required == 1 )
-						{
-							$rules = ['required'];
-							if( isset($field_options->type) && $field_options->type == "email" ) { $rules[] = 'email'; }
-							return [
-								'field_' . $id => implode("|", $rules)
-							];
-						} else { return ['field_' . $id => 'nullable']; }
-					});
-					$dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
-						'required' => app()->getLocale() == 'ar' ? "هذا الحقل مطلوب." : "field can't be left blank",
-						'email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.'
-					]);
-					if( $dynamic_validator->fails() )
-					{
-						return response()->json(['error' => $dynamic_validator->errors()->all()], 422);
-					}
 
 					$company->cycle = $program->id;
 					$company->step = $step->id;
