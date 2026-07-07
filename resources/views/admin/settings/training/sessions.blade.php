@@ -339,7 +339,7 @@
         {{-- Step --}}
         <div class="col-12 mb-4">
           <label class="form-label">{{ __('cycles.Step') }} <span class="text-danger">*</span></label>
-          <select name="step_id" id="step" class="form-select select2">
+          <select name="step_id" id="step" class="form-select select2" {{ !is_null( request()->id ) ? 'disabled readonly' : '' }}>
             <option value="">{{ __('cycles.Select Step') }}</option>
             @foreach ($steps as $step)
               <option 
