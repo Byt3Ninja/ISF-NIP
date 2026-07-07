@@ -325,7 +325,7 @@
           @endphp
 
           <label class="form-label">{{ __('admin.Program') }} <span class="text-danger">*</span></label>
-          <select name="cycle_id" id="program" class="form-select select2">
+          <select name="cycle_id" id="program" class="form-select select2" {{ !is_null( request()->id ) ? 'disabled readonly' : '' }}>
             <option value="">{{ __('admin.Select Program') }}</option>
             @foreach ($cycles as $cycle)
               <option value="{{ $cycle->id }}"
