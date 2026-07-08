@@ -87,7 +87,7 @@ return [
     'Remove_Section' => 'إزالة القسم',
     'Section_title_optional' => 'عنوان القسم (اختياري)',
     'Submit_Form' => 'إرسال النموذج',
-    'Other' => 'Other',
+    'Other' => 'اخرى',
     'Drag_to_reorder' => 'Drag to reorder',
     'Number' => 'رقم',
     'Email' => 'بريد الإلكتروني',

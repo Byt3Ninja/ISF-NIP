@@ -3893,4 +3893,6 @@ return [
   'no_sustainability_goals_listed' => 'لم يتم إدراج أهداف الاستدامة',
   'view_all' => 'عرض الكل',
   'filters' => 'الفلاتر',
+  'Required field' => 'حقل مطلوب',
+  'Optional field' => 'حقل غير مطلوب',
 ];

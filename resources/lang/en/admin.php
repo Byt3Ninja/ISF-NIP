@@ -3838,4 +3838,6 @@ return [
   'no_sustainability_goals_listed' => 'No sustainability goals listed',
   'view_all' => 'View all',
   'filters' => 'Filters',
+  'Required field' => 'Required field',
+  'Optional field' => 'Optional field'
 ];

@@ -196,7 +196,7 @@
                                       </label>
                                     @endif
                                     <div class="text-muted small">
-                                      {{ $question['is_required'] ? 'Required field' : 'Optional field' }}
+                                      {{ $question['is_required'] ? __('admin.Required field') : __('admin.Optional field') }}
                                     </div>
                                   </div>
                                 </div>

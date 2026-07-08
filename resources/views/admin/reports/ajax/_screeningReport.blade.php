@@ -257,7 +257,7 @@
 								data-evaluation-statuses="{{ implode(',', array_filter($evaluationStatuses)) }}"
 								data-judge-ids="{{ implode(',', array_filter($companyJudgeIds)) }}"
 								data-cycle-id="{{ $company->company_cycle_id }}"
-								data-step-id="{{ $company->company_step_id }}">
+								data-step-id="{{ $company->evaluation_step_id ?? $company->company_step_id }}">
 								<div class="card border rounded-3 h-100">
 								<!-- Company Header -->
 								<div class="card-header bg-transparent border-0 pb-2">

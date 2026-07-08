@@ -110,6 +110,8 @@
                           <i class="ti ti-brand-zoom me-1"></i>
                           {{ __('admin.join_session') }}
                         </a>
+                      @elseif ($now > $session->end_time)
+                        <span class="text-danger"><i class="ti ti-alarm me-1"></i>{{ __('admin.Meeting_Expired') }}</span>
                       @elseif ($session->session_type == 'Offline' && $session->google_map_url)
                         <a href="{{ $session->google_map_url }}" target="_blank" class="btn btn-sm btn-primary">
                           <i class="ti ti-map-pin me-1"></i>
