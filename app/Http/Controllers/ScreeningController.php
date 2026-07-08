@@ -9,6 +9,7 @@ use App\Company;
 use App\Formdata;
 use App\Formfield;
 use App\Screening;
+use App\Finalscreening;
 use App\Events\ChangeStep;
 use Illuminate\Support\Arr;
 use App\ScreeningEvaluation;
@@ -295,6 +296,7 @@ class ScreeningController extends Controller
                 ];
                 if ($screening && $screening->session_date) {
                     $panelEntry['session'] = [
+						'checked' => !is_null($screening->session_date) && !is_null($screening->meeting_link),
                         'date' => $screening->session_date,
                         'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
                         'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
@@ -456,6 +458,7 @@ class ScreeningController extends Controller
 			'panels.*.meeting_link' => 'nullable|url',
 			'panels.*.start_time' => 'nullable',
 			'panels.*.end_time' => 'nullable',
+			'screening_type' => 'required|in:initial,final',
 		]);
 
 		$stepId = $request->step;
@@ -499,6 +502,51 @@ class ScreeningController extends Controller
 					\App\Finalscreening::updateOrCreate(
 						['step_id' => $stepId, 'company_id' => $companyId],
 						['judges' => json_encode($judgeIds)]
+					);
+				}
+			}
+		}
+
+		if( $request->screening_type == 'final' )
+		{
+			foreach( $panels as $index => $panel )
+			{
+				$duration = null;
+				$generate_datetime = null;
+				if( $request->has('panels.'.$index.'.session_date') )
+				{
+					$generate_datetime = $request->input('panels.'.$index.'.session_date');
+					if( $request->has('panels.'.$index.'.start_time') )
+					{
+						$generate_datetime .= ' ' . $request->input('panels.'.$index.'.start_time') . ':00';
+					}
+					else
+					{
+						$generate_datetime .= ' 00:00:00';
+					}
+					if( $request->has('panels.'.$index.'.end_time') )
+					{
+						$end_time = $request->input('panels.'.$index.'.session_date') . ' ' . $request->input('panels.'.$index.'.end_time') . ':00';
+						$duration = (strtotime($end_time) - strtotime($generate_datetime)) / 60; // duration in minutes
+						
+					}
+				}
+				$judges = $panel['judges'];
+				$companies = $panel['companies'];
+				foreach ($companies as $company)
+				{
+					Finalscreening::where('company_id',$company)->where('step_id', $stepId)->delete();
+					Finalscreening::insert(
+						[
+							'company_id' => $company,
+							'step_id' => $stepId,
+							'judges' => json_encode($judges),
+							'join_url' => $panel['meeting_link'] ?? null,
+							'datetime' => $generate_datetime ?? null,
+							'duration' => $duration ?? null,
+							'created_at' => now(),
+							'updated_at' => now()
+						]
 					);
 				}
 			}

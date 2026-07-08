@@ -1315,6 +1315,7 @@ return [
 	'Confirm Password' => 'تأكيد كلمة المرور',
 	'Financial plan attachment' => 'مرفق خطة العمل المالية',
 	'Final_Session' => 'جلسة نهاية',
+	'Screening_Sessions' => 'جلسات التقييم',
 	'View_Pitch_Deck_Video' => 'عرض فيديو Pitch Deck',
 	'An unexpected error occurred, please try again later' => 'حدث خطاء غير متوقع، يرجى المحاولة في وقت لاحق',
 	'Business Plan file not selected' => 'لم يتم تحديد ملف خطة العمل المالية',

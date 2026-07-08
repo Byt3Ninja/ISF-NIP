@@ -14,6 +14,7 @@
     <form method="POST" action="{{ route('screening.add_judging_panels') }}" id="judging-panels-form" novalidate>
     @csrf
     <input type="hidden" name="step" value="{{ $cstep->id }}">
+    <input type="hidden" name="screening_type" value="{{ $screening_type }}">
 
     @php $l = app()->getLocale(); @endphp
 
@@ -68,7 +69,7 @@
 
               <!-- Session -->
               <div class="form-check form-switch mb-3">
-                <input class="form-check-input session-toggle" type="checkbox" id="session-toggle-{{ $index + 1 }}" {{ !empty($panel['session']) ? 'checked' : '' }}>
+                <input class="form-check-input session-toggle" type="checkbox" id="session-toggle-{{ $index + 1 }}" {{ ( !empty($panel['session']) && $panel['session']['checked'] == true ) ? 'checked' : '' }}>
                 <label class="form-check-label fw-semibold">{{ __('admin.screening.schedule_session') }}</label>
               </div>
 
