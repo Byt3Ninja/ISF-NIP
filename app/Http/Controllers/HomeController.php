@@ -1153,6 +1153,7 @@ class HomeController extends Controller
         });
         
         $myFinal = null;
+        $myInitial = null;
         $days = request()->query('days', 14);
         $company = $user->company;
         $sessions = collect([]);
@@ -1266,6 +1267,34 @@ class HomeController extends Controller
                     $organization_id = $organization->id;
                 }
             }
+
+            $myInitial = Screening::where('step_id', $company->step)->with(['user'])->get();
+
+            $companyId = $company->id;
+            $myInitial = $myInitial->map(function ($item) {
+                $users = is_array( $item->users ) ? $item->users : json_decode($item->users, true);
+                $item->users = $users;
+                return $item;
+            })->filter(function ($item) use ($companyId) {
+                return in_array($companyId, $item->users);
+            })->values();
+
+            $myInitial = $myInitial->map(function ($item) {
+                $item->judge = $item->user;
+                if( !is_null( $item->session_date ) )
+                {
+                    $item->dateTime = ( $item->session_date . ' ' . ($item->start_time ?? '00:00:00') ) ?? null;
+                    $item->endTime = ( $item->session_date . ' ' . ($item->end_time ?? '00:00:00') ) ?? null;
+                    $item->duration = $item->dateTime && $item->endTime ? ( carbon::parse( $item->dateTime )->diffInMinutes( $item->endTime ) ) : null;
+                }
+                else
+                {
+                    $item->dateTime = null;
+                    $item->endTime = null;
+                    $item->duration = null;
+                }
+                return $item;
+            });
         }
 
         $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
@@ -1948,6 +1977,7 @@ class HomeController extends Controller
         $data['upcoming_sessions'] = $upcoming_sessions;
         $data['cType'] = $cType;
         $data['myFinal'] = $myFinal;
+        $data['myInitial'] = $myInitial;
         $data['sessions'] = $sessions;
         $data['cycle_id'] = $cycle_id;
         $data['days'] = $days;

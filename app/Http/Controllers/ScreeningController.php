@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Finalscreening;
 use App\Events\ChangeStep;
 use App\Events\JudgeAssigned;
 use App\Exports\ScreeningEvaluationExport;
@@ -314,6 +315,7 @@ class ScreeningController extends Controller
 				];
 				if ($screening && $screening->session_date) {
 					$panelEntry['session'] = [
+						'checked' => !is_null($screening->session_date) && !is_null($screening->meeting_link),
 						'date' => $screening->session_date,
 						'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
 						'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
@@ -560,6 +562,7 @@ class ScreeningController extends Controller
 		// a single judge for every company). We build the map here and persist it
 		// once, after the loop.
 		$judgesByCompany = [];
+		$meetingByCompany = [];
 
 		// Create new screenings if panels exist
 		foreach ($panels as $index => $panel) {
@@ -572,6 +575,8 @@ class ScreeningController extends Controller
 			$meetingPassword = null;
 			$zoomId = null;
 			$startUrl = null;
+			$startDateTime = null;
+			$duration = null;
 
 			if (!empty($panel['session_date']) && !empty($panel['start_time'])) {
 				try {
@@ -629,6 +634,11 @@ class ScreeningController extends Controller
 			if ($step && $step->stype == 5) {
 				foreach ($companyIds as $companyId) {
 					$judgesByCompany[$companyId] = array_merge($judgesByCompany[$companyId] ?? [], $judgeIds);
+					$meetingByCompany[$companyId] = [
+						'meeting_link' => $meetingLink,
+						'datetime' => $startDateTime,
+						'duration' => $duration
+					];
 				}
 			}
 		}
@@ -646,6 +656,9 @@ class ScreeningController extends Controller
 					'step_id' => $stepId,
 					'company_id' => $companyId,
 					'judges' => array_values(array_unique(array_map('intval', $judgeIds))),
+					'join_url' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['meeting_link'] ? ( $meetingByCompany[$companyId]['meeting_link'] ?? null ) : null,
+					'datetime' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['datetime'] ? ( $meetingByCompany[$companyId]['datetime'] ?? null ) : null,
+					'duration' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['duration'] ? ( $meetingByCompany[$companyId]['duration'] ?? null ) : null,
 				]);
 			}
 		}

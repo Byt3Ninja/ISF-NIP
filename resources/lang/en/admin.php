@@ -1322,6 +1322,7 @@ return [
 	'financial_plan_too_large' => 'File size must not exceed 10 MB.',
 	'financial_plan_invalid_type' => 'Supported file types are Word, Excel, PowerPoint, and PDF.',
 	'Final_Session' => 'Final Session',
+	'Screening_Sessions' => 'Screening Sessions',
 	'View_Pitch_Deck_Video' => 'View Pitch Deck Video',
 	'An unexpected error occurred, please try again later' => 'An unexpected error occurred, please try again later',
 	'Business Plan file not selected' => 'Business Plan file not selected',

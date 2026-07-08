@@ -89,6 +89,7 @@ return [
     'Your final session will start' => 'التقييم النهائي سوف يبدأ في',
     'Join here' => 'أنضم للاجتماع من هنا',
     'Your final session will start soon' => 'التقييم النهائي سوف يبدأ قريبا',
+    'Your screening session will start soon' => 'جلسة التقييم سوف تبدأ قريبا',
     'Coming sessions' => 'الجلسات القادمة',
     'Cycles' => 'البرامج',
     'My current schedule' => 'جدول مواعيدي',

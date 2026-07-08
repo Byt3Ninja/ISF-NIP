@@ -292,20 +292,31 @@ class FinalscreeningController extends Controller
 		{
 			// Fetch assigned companies for this panel from the screenings table
 			// In screenings table, 'users' column stores company IDs as JSON array
-			$assignedCompanies = DB::table('screenings')
+			$panelData = DB::table('screenings')
 				->where('step_id', $cstep->id)
 				->where('panel', $panel_id)
 				->whereNull('deleted_at')
-				->pluck('users')
+				// ->pluck('users')
+				->get()
 				->map(function($item) {
-					return is_array($item) ? $item : (json_decode($item, true) ?: []);
+					$users = is_array($item->users) ? $item->users : (json_decode($item->users, true) ?: []);
+					$session = [
+						'checked' => false,
+						'date' => $item->session_date,
+						'meeting_link' => $item->meeting_link,
+						'start_time' => $item->start_time,
+						'end_time' => $item->end_time,
+					];
+					$session['checked'] = !is_null($item->session_date) && !is_null($item->meeting_link);
+					return ['companies' => $users, 'session' => $session];
 				})
-				->flatten()
-				->unique()
+				// ->flatten()
+				// ->unique()
 				->values()
 				->toArray();
 
-			$judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $assignedCompanies ];
+			$panelData = count($panelData) > 0 ? array_values($panelData)[0] : ['companies' => [], 'session' => [] ];
+			$judgers_list[$panel_id] = ['judgers' => $judgers_ids, 'companies' => $panelData['companies'], 'session' => $panelData['session'] ];
 		}
 		$check = ScreeningEvaluation::where('step_id', $id)->first();
 		if( empty( $check ) )
@@ -316,35 +327,23 @@ class FinalscreeningController extends Controller
 		}
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
+		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
 
-		if( $cstep ) {
-			// The panel selector only offers startups CURRENTLY at this step
-			// (consistent with the initial-screening page). Startups still at the
-			// preceding step are not selectable until advanced here.
-			$companies = Company::where('step', $cstep->id)->get();
-		} else {
-			$cstep = [];
-		}
-
-		/** Prepare Judging Panels for View */
+		/** Prepare Judging Panels for View (Clean Code) */
 		$judgingPanels = [];
 		if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
 			foreach ($judgers_list as $panelId => $panelData) {
-				$screening = \App\Screening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
 				$panelEntry = [
 					'judges' => (array) ($panelData['judgers'] ?? []),
 					'companies' => (array) ($panelData['companies'] ?? []),
-					'session' => []
+					'session' => [
+						'checked' => $panelData['session']['checked'] ?? false,
+						'date' => $panelData['session']['date'] ?? null,
+						'meeting_link' => $panelData['session']['meeting_link'] ?? null,
+						'start_time' => $panelData['session']['start_time'] ?? null,
+						'end_time' => $panelData['session']['end_time'] ?? null
+					]
 				];
-				if ($screening && $screening->session_date) {
-					$panelEntry['session'] = [
-						'date' => $screening->session_date,
-						'start_time' => $screening->start_time ? substr($screening->start_time, 0, 5) : '',
-						'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
-						'meeting_link' => $screening->meeting_link,
-						'meeting_password' => $screening->meeting_password,
-					];
-				}
 				$judgingPanels[] = $panelEntry;
 			}
 		}

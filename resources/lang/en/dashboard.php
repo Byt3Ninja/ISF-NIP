@@ -89,6 +89,7 @@ return [
     'Your final session will start' => 'Your final session will start',
     'Join here' => 'Join here',
     'Your final session will start soon' => 'Your final session will start soon',
+    'Your screening session will start soon' => 'Your screening session will start soon',
     'Coming sessions' => 'Coming sessions',
     'Cycles' => 'Programs',
     'My current schedule' => 'My current schedule',

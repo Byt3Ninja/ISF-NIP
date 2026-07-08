@@ -317,7 +317,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
       <div class="tab-content bg-card shadow">
         <!-- Judging Panels Tab -->
         <div class="tab-pane fade show active" id="judging_panels" role="tabpanel" aria-labelledby="judging_panels-tab">
-          @include('partials.judging-panels')
+          @include('partials.judging-panels', ['id' => $id, 'screening_type' => 'final'])
         </div>
         <!--/ Judging Panels Tab -->
 

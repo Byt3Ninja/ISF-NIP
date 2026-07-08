@@ -1332,6 +1332,7 @@ return [
 	'financial_plan_too_large' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
 	'financial_plan_invalid_type' => 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF.',
 	'Final_Session' => 'جلسة نهاية',
+	'Screening_Sessions' => 'جلسات التقييم',
 	'View_Pitch_Deck_Video' => 'عرض فيديو Pitch Deck',
 	'An unexpected error occurred, please try again later' => 'حدث خطاء غير متوقع، يرجى المحاولة في وقت لاحق',
 	'Business Plan file not selected' => 'لم يتم تحديد ملف خطة العمل المالية',
