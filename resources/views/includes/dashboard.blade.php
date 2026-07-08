@@ -557,12 +557,15 @@
 												<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
 												<td> 
 													@php
+														$startTime = \Carbon\Carbon::parse($myFinal->datetime);
 														$endTime = \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
 													@endphp
-													@if(now() > $endTime)
+													@if( $startTime->format('Y-m-d') == date('Y-m-d') )
+														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+													@elseif(now() > $endTime)
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
-														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
 													@endif
 												</td>
 											</tr>
@@ -572,6 +575,88 @@
 								@else
 								<div class="text-center">
 									<h3>{{__('dashboard.Your final session will start soon')}}.</h3>
+								</div>
+								@endif
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+			@endif
+
+			@if( $cType == 2 && array_intersect(['dashboard.widgets_tables_my_final_session_view'], $permissions) )
+			<div class="col-12">
+				<section>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card mb-6">
+								<div class="card-header border-bottom">
+									<h5 class="card-title mb-0">{{ __("admin.Screening_Sessions") }}</h5>
+								</div>
+								@if( !is_null( $myInitial ) )
+								<div class="card-datatable table-responsive">
+									<table class="table mb-0 initialScreeningTable">
+										<thead class="table-light">
+											<tr>
+												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('admin.Judger')}}</th>
+												<th>{{__('cycles.Date/Time')}}</th>
+												<th>{{__('cycles.Done')}}</th>
+												<th>{{__('cycles.Actions')}}</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach( $myInitial as $screening )
+											<tr>
+												<td>
+													<div class="d-flex align-items-center">
+														<a class="media-left" href="/dashboard/users/{{ $_user->id }}/edit">
+															<img src="{{ $_user->image_url }}" alt="avatar"
+																class="rounded-circle me-3" height="40" width="40">
+														</a>
+														<a href="/dashboard/users/{{ $_user->id }}/edit">
+															<div class="media-body">
+																<h6 class="media-heading mb-0 text-nowrap">{{ $_user->name }}</h6>
+																<span class="font-small-2 text-nowrap">{{ $_user->title }}</span>
+															</div>
+														</a>
+													</div>
+												</td>
+												<td>
+													@if(!empty($screening->judge))
+														<div style="cursor: pointer;" class="d-flex align-items-center">
+															<img class="img-fluid rounded-circle me-3" src="{{ $screening->judge->image_url }}" alt="photo" height="20" width="20">
+															<div class="media-body">
+																<h6 class="media-heading mb-0 text-nowrap">{{ $screening->judge->name }}</h6>
+															</div>
+														</div>
+													@endif
+												</td>
+												<td>
+													@if( !is_null( $screening->dateTime ) )
+														{{ $screening->dateTime }} <br>({{ $screening->duration }}M)
+													@else
+														-
+													@endif
+												</td>
+												<td> {{ !is_null( $screening->dateTime ) && $screening->dateTime < now() ? __('Yes') : __('No') }} </td>
+												<td>
+													@if( !is_null( $screening->dateTime ) && !is_null( $screening->meeting_link ) && \Carbon\Carbon::parse( $screening->dateTime )->format('Y-m-d') == date('Y-m-d') )
+														<a href="{{ $screening->meeting_link }}" target="_blank">({{__('dashboard.Join now')}})</a>
+													@elseif( !is_null( $screening->endTime ) && now() > $screening->endTime)
+														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+													@else
+														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
+													@endif
+												</td>
+											</tr>
+											@endforeach
+										</tbody>
+									</table>
+								</div>
+								@else
+								<div class="text-center">
+									<h3>{{__('dashboard.Your screening session will start soon')}}.</h3>
 								</div>
 								@endif
 							</div>
@@ -2040,6 +2125,26 @@ document.addEventListener('DOMContentLoaded', function() {
 				@endif
 			});
 			$(".sessonsTable").DataTable({
+				"responsive": true,
+				"searching": true,
+				"lengthChange": false,
+				"paging": false,
+				"bInfo": false,
+				"columnDefs": [ {"orderable": false, "targets":  [3]}, ],
+				@if( $l == 'ar' )
+				"language": {
+					"sEmptyTable":	 "ليست هناك بيانات متاحة في الجدول",
+					"sLoadingRecords": "جارٍ التحميل...", "sProcessing":   "جارٍ التحميل...",
+					"sLengthMenu":   "أظهر _MENU_ مدخلات", "sZeroRecords":  "لم يعثر على أية سجلات",
+					"sInfo":		 "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+					"sInfoEmpty":	"يعرض 0 إلى 0 من أصل 0 سجل", "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+					"sInfoPostFix":  "", "sSearch":	   "ابحث:", "sUrl":		  "",
+					"oPaginate": {"sFirst":	"الأول", "sPrevious": "السابق", "sNext":	 "التالي", "sLast":	 "الأخير"},
+					"oAria": {"sSortAscending":  ": تفعيل لترتيب العمود تصاعدياً", "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"}
+				}
+				@endif
+			});
+			$(".initialScreeningTable").DataTable({
 				"responsive": true,
 				"searching": true,
 				"lengthChange": false,

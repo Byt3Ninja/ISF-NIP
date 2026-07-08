@@ -1306,6 +1306,7 @@ return [
 	'Confirm Password' => 'Confirm Password',
 	'Financial plan attachment' => 'Financial plan attachment',
 	'Final_Session' => 'Final Session',
+	'Screening_Sessions' => 'Screening Sessions',
 	'View_Pitch_Deck_Video' => 'View Pitch Deck Video',
 	'An unexpected error occurred, please try again later' => 'An unexpected error occurred, please try again later',
 	'Business Plan file not selected' => 'Business Plan file not selected',
