@@ -14,7 +14,7 @@
     <div class="col-md-6 mb-4">
       <div class="form-group">
         <label class="form-label" for="contact_email">
-          {{ __('admin.Email') }} <span class="text-danger">*</span>
+          {{ __('admin.Email') }}
         </label>
         <div class="input-group input-group-merge">
           <input 
@@ -85,7 +85,7 @@
     <div class="col-md-4 mb-4">
       <div class="form-group">
         <label class="form-label" for="state_id">
-          {{ __('admin.State') }} <span class="text-danger">*</span>
+          {{ __('admin.State/Governorate/Province') }}
         </label>
         <select
           class="form-select select2 @error('state_id') is-invalid @enderror"
@@ -111,13 +111,13 @@
     <div class="col-md-4 mb-4">
       <div class="form-group">
         <label class="form-label" for="city_id">
-          {{ __('admin.District') }} <!-- <span class="text-danger">*</span> -->
+          {{ __('admin.District') }}
         </label>
         <select
           class="form-select select2 @error('city_id') is-invalid @enderror"
           id="city_id"
           name="city_id"
-          data-placeholder="{{ __('admin.Select City') }}"
+          data-placeholder="{{ __('admin.Select District') }}"
         >
           <option value=""></option>
           @foreach($cities ?? [] as $city)
@@ -137,7 +137,7 @@
     <div class="col-12 mb-4">
       <div class="form-group">
         <label class="form-label" for="address">
-          {{ __('admin.Address') }} <span class="text-danger">*</span>
+          {{ __('admin.Address') }}
         </label>
         <textarea
           class="form-control @error('address') is-invalid @enderror"
@@ -155,7 +155,7 @@
     <div class="col-12 mb-4">
       <div class="form-group">
         <label class="form-label" for="google_map_url">
-          {{ __('admin.Google Maps URL') }} <span class="text-danger">*</span>
+          {{ __('admin.Google Maps URL') }}
         </label>
         <div class="input-group input-group-merge shadow-none">
           <input
@@ -166,7 +166,6 @@
             value="{{ old('google_map_url', $org->google_map_url ?? '') }}"
             placeholder="https://maps.google.com/..."
             maxlength="500"
-            required
           />
           <span class="input-group-text text-muted"><i class="ti ti-map-pin"></i></span>
         </div>

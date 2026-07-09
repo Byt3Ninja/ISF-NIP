@@ -123,6 +123,7 @@ return [
 	'Organization Status' => 'Status',
 	'Edit the Company information' => 'Edit the Startup information',
 	'State' => 'State',
+	'State/Governorate/Province' => 'State/Governorate/Province',
 	'Country' => 'Country',
 	'City' => 'City',
 	'District' => 'District',

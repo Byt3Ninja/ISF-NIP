@@ -136,6 +136,7 @@ return [
 	'Organization Status' => 'حالة المؤسسة',
 	'Edit the Company information' => 'تعديل بيانات الشركة',
 	'State' => 'المنطقة',
+	'State/Governorate/Province' => 'المنطقة/المحافظة',
 	'Country' => 'الدولة',
 	'City' => 'المدينة',
 	'District' => 'الحي',

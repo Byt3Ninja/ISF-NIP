@@ -21,14 +21,14 @@ class OrganizationStep2Request extends FormRequest
     {
         return [
             // Contact Information
-            'contact_email' => 'required|email|max:255|regex:/^[a-zA-Z0-9._%+\-@]+$/',
+            'contact_email' => 'nullable|email|max:255|regex:/^[a-zA-Z0-9._%+\-@]+$/',
             'country_code' => 'required_with:contact_phone|nullable|string|max:10',
             'contact_phone' => 'nullable|string|max:20|regex:/^[0-9\s\-\+\(\)]+$/',
             'country_id' => 'required|exists:countries,id',
-            'state_id' => 'required|exists:states,id',
+            'state_id' => 'nullable|exists:states,id',
             'city_id' => 'nullable|exists:cities,id',
-            'address' => 'required|string|max:500',
-            'google_map_url' => ['required', 'string', 'max:500', 'regex:#^https?://(www\.)?(google\.[a-z]{2,3}(/maps)?|maps\.google\.[a-z]{2,3}|goo\.gl|maps\.app\.goo\.gl)#i'],
+            'address' => 'nullable|string|max:500',
+            'google_map_url' => ['nullable', 'string', 'max:500', 'regex:#^https?://(www\.)?(google\.[a-z]{2,3}(/maps)?|maps\.google\.[a-z]{2,3}|goo\.gl|maps\.app\.goo\.gl)#i'],
 
             // Social Media (all optional)
             'linkedin_company_url' => 'nullable|url|max:255',

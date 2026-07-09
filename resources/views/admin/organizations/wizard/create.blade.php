@@ -340,7 +340,6 @@
           fields: {
             contact_email: {
               validators: {
-                notEmpty: { message: '{{ __("admin.Please enter the email address") }}' },
                 regexp: {
                   regexp: /^[a-zA-Z0-9._%+\-@]+$/,
                   message: '{{ __("admin.Please enter a valid email address") }}'
@@ -365,22 +364,18 @@
               }
             },
             state_id: {
-              validators: {
-                notEmpty: { message: '{{ __("admin.Please select the state") }}' }
-              }
+              validators: {}
             },
             city_id: {
               validators: {}
             },
             address: {
               validators: {
-                notEmpty: { message: '{{ __("admin.Please enter the address") }}' },
                 stringLength: { max: 500, message: '{{ __("admin.Address must not exceed 500 characters") }}' }
               }
             },
             google_map_url: {
               validators: {
-                notEmpty: { message: '{{ __("admin.Please enter the Google Maps URL") }}' },
                 regexp: {
                   regexp: /^https?:\/\/(www\.)?(google\.[a-z]{2,3}(\/maps)?|maps\.google\.[a-z]{2,3}|goo\.gl|maps\.app\.goo\.gl)/i,
                   message: '{{ __("admin.Please enter a valid Google Maps URL") }}'
