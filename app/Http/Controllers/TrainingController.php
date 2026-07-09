@@ -592,6 +592,7 @@ class TrainingController extends Controller
 		try {
 			$user = auth()->user();
 			$orgIds = $user->organizations_ids;
+			$original_step_id = $id;
 
 			$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereHas('cycle', function ($query) use ($orgIds) {
@@ -621,6 +622,10 @@ class TrainingController extends Controller
 			else
 			{
 				$sessions = $sessions->whereIn('step_id', $steps_ids);
+			}
+			if( $original_step_id != 0 )
+			{
+				$sessions = $sessions->where('step_id', $original_step_id);
 			}
 			$sessions = $sessions->get();
 
