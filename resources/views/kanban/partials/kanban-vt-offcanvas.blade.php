@@ -1,5 +1,5 @@
 {{-- VIEW TASK OFFCANVAS --}}
-<div class="offcanvas offcanvas-end w-px-{{ $_user->ableTo('tasks.update', $permissions) ? '800' : '600' }}" tabindex="-1" id="viewTaskOffcanvas">
+<div class="offcanvas offcanvas-end w-px-{{ $_user->ableTo('tasks.update', $permissions) ? '800' : '800' }}" tabindex="-1" id="viewTaskOffcanvas">
 
   {{-- Priority colour strip --}}
   <div id="vt-priority-bar" style="height:4px;flex-shrink:0;transition:background .3s;"></div>
