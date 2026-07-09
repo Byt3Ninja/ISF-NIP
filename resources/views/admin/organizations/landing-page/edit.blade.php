@@ -330,8 +330,9 @@
     */
     window.LPConfig = {
       orgId          : "{{ $org->id }}",
-      orgName        : "{{ $org->name }}", 
+      orgName        : "{{ $org->name }}",
       checkSlugUrl   : "{{ route('organization.wizard.check.slug', $org->id) }}",
+      csrfToken      : "{{ csrf_token() }}",
       requiredMsg    : "{{ __('admin.Required_Field') }}",
       stepIconOptions    : {!! json_encode($stepIconOptionsHtml) !!},
       metricIconOptions  : {!! json_encode($metricIconOptionsHtml) !!},

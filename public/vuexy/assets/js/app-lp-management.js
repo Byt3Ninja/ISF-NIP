@@ -462,8 +462,10 @@
       const slug = $('#slug').val().trim();
       if (!slug) return;
       const $fb = $('#slugAvailabilityFeedback').show().html(T.slugChecking + '...');
-      $.get(CFG.checkSlugUrl, { slug }).done(res => {
+      $.post(CFG.checkSlugUrl, { slug, _token: CFG.csrfToken }).done(res => {
         $fb.html(res.available ? `<span class="text-success">${T.slugAvailable}</span>` : `<span class="text-danger">${T.slugTaken}</span>`);
+      }).fail(() => {
+        $fb.html(`<span class="text-danger">${T.slugCheckError || T.slugTaken}</span>`);
       });
     });
 
