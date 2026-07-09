@@ -342,14 +342,18 @@
 											@if($company->stepInfo)
 												@php
 													// Final-screening report: green when the startup is currently on a
-													// final step (stype 5), red otherwise. Step chip links to manage
-													// step (final or screening per type) when permitted.
+													// final step (stype 5), red otherwise. Every step type links to its
+													// own manage page, each gated by that page's own permission. The {id}
+													// each route expects differs by type — screening, training and final
+													// take the STEP id; the custom form takes the step's BUILDER FORM id;
+													// mentorship assignment takes the CYCLE id — so passing the wrong id
+													// would 404 (GV-3841). Types with no manage page fall through to a
+													// plain non-clickable badge.
 													$stepInfo = $company->stepInfo;
-													$onStage = (int) $stepInfo->stype === 5;
+													$stype = (int) $stepInfo->stype;
+													$onStage = $stype === 5;
 													$stepChipClass = $onStage ? 'bg-label-success text-success' : 'bg-label-danger text-danger';
-													$stepUrl = (isset($_user) && $_user->ableTo('screening.show', $permissions ?? []))
-														? ((int) $stepInfo->stype === 5 ? url('dashboard/final/'.$stepInfo->id) : url('dashboard/screening/'.$stepInfo->id))
-														: null;
+													$stepUrl = stepManageUrl($stepInfo, $_user ?? null, $permissions ?? []);
 												@endphp
 												<{{ $stepUrl ? 'a' : 'small' }} @if($stepUrl) href="{{ $stepUrl }}" @endif
 															class="badge {{ $stepChipClass }} rounded-pill px-2 py-1 small text-decoration-none"
