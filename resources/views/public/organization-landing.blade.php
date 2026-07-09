@@ -141,7 +141,7 @@ $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark
             <!-- Brand -->
             <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center">
               @if($organization->img_url)
-                <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
+                <img src="{{ route('organizations.logo', $organization->img_url ?? '') }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
               @endif
               <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 20) }}</span>
             </a>
@@ -259,7 +259,7 @@ $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark
               <div class="me-6">
                 @if($organization->img_url)
                   <img 
-                    src="{{ $organization->imageUrl }}" 
+                    src="{{ route('organizations.logo', $organization->img_url ?? '') }}" 
                     alt="{{ $organization->name_en }}" 
                     width="50" 
                     height="50" 
