@@ -125,6 +125,13 @@
                     <div class="row g-4">
                       @foreach($section['questions'] as $question)
                         @php
+                          // "Dropdown" was retired as an authorable type (GV-3828);
+                          // existing dropdown questions render as multiple choice
+                          // (radio). Both store a single scalar answer, so this is a
+                          // render-time coercion with no data migration.
+                          if (($question['type'] ?? null) === 'dropdown') {
+                              $question['type'] = 'multiple_choice';
+                          }
                           $fieldName = 'field_' . $question['id'];
                           $fieldId = 'input-fld-' . $question['id'];
                           $meta = $typeMeta[$question['type']] ?? ['icon' => 'ti ti-help', 'label' => ucfirst(str_replace('_', ' ', $question['type']))];
@@ -227,6 +234,7 @@
                                         {{ $isReadOnly ? 'disabled' : '' }}
                                       />
                                     </div>
+                                    <div class="invalid-feedback other-required-feedback {{ $errors->has($fieldName . '_other') ? '' : 'd-none' }}">{{ $errors->first($fieldName . '_other') }}</div>
                                   </div>
                                   @break
 
@@ -277,6 +285,7 @@
                                           {{ $isReadOnly ? 'disabled' : '' }}
                                         />
                                       </div>
+                                      <div class="invalid-feedback other-required-feedback {{ $errors->has($fieldName . '_other') ? '' : 'd-none' }}">{{ $errors->first($fieldName . '_other') }}</div>
                                     </div>
                                   </div>
                                   @break
@@ -316,6 +325,7 @@
                                           {{ $isReadOnly ? 'disabled' : '' }}
                                         />
                                       </div>
+                                      <div class="invalid-feedback other-required-feedback {{ $errors->has($fieldName . '_other') ? '' : 'd-none' }}">{{ $errors->first($fieldName . '_other') }}</div>
                                     </div>
                                   </div>
                                   @break
@@ -422,6 +432,31 @@
                                       </a>
                                     </div>
                                   @endif
+                                  @break
+
+                                @case('number')
+                                  <div class="input-group">
+                                    <span class="input-group-text bg-label-primary border-end-0">
+                                      <i class="{{ $meta['icon'] }}"></i>
+                                    </span>
+                                    <input
+                                      type="number"
+                                      inputmode="decimal"
+                                      class="form-control application-short-answer @error($fieldName) is-invalid @enderror"
+                                      id="{{ $fieldId }}"
+                                      name="{{ $fieldName }}"
+                                      data-qtype="number"
+                                      data-min="{{ (isset($question['min']) && $question['min'] !== null && $question['min'] !== '') ? $question['min'] : 0 }}"
+                                      @if(isset($question['max']) && $question['max'] !== null && $question['max'] !== '') data-max="{{ $question['max'] }}" @endif
+                                      value="{{ old($fieldName) }}"
+                                      placeholder="{{ $question['label'] }}"
+                                      min="{{ (isset($question['min']) && $question['min'] !== null && $question['min'] !== '') ? $question['min'] : 0 }}"
+                                      @if(isset($question['max']) && $question['max'] !== null && $question['max'] !== '') max="{{ $question['max'] }}" @endif
+                                      @if(isset($question['step']) && $question['step'] !== null && $question['step'] !== '') step="{{ $question['step'] }}" @else step="any" @endif
+                                      {{ $question['is_required'] ? 'required' : '' }}
+                                      {{ $isReadOnly ? 'disabled' : '' }}
+                                    />
+                                  </div>
                                   @break
 
                                 @case('short_answer')
@@ -542,6 +577,10 @@
         allowed_domains: 'The URL must belong to one of these domains: ',
         file_size: 'File size must not exceed 10 MB.',
         file_type: 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
+        numeric: 'Please enter a valid number.',
+        number_min: 'Please enter a valid positive number.',
+        number_max: 'Please enter a number no greater than ',
+        email_regex: 'Please enter a valid email address (e.g. name@example.com).',
       },
       ar: {
         required: 'هذا الحقل مطلوب.',
@@ -551,6 +590,10 @@
         allowed_domains: 'يجب أن ينتمي الرابط إلى أحد هذه النطاقات: ',
         file_size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
         file_type: 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
+        numeric: 'يرجى إدخال رقم صحيح.',
+        number_min: 'يرجى إدخال رقم موجب صحيح.',
+        number_max: 'يرجى إدخال رقم لا يتجاوز ',
+        email_regex: 'يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com).',
       }
     };
 
@@ -607,6 +650,16 @@
             return field.files.length > 0 || field.value.trim() !== '';
           }
 
+          // A <input type="number"> containing non-numeric text (e.g.
+          // "1516aasv") reports an EMPTY .value but sets validity.badInput.
+          // Without this, the "required" rule fires with "This field is
+          // required." instead of the numeric message — misleading, since
+          // the user did type something. Treat badInput as "present" here so
+          // the numeric validator below produces the correct message.
+          if (field.validity && field.validity.badInput) {
+            return { valid: false, message: t.numeric };
+          }
+
           return field.value.trim() !== '';
         }
       };
@@ -634,6 +687,42 @@
         validators.emailAddress = {
           message: t.email
         };
+        // Require a dotted domain (rejects e.g. "user@example") without a
+        // live DNS lookup, matching the server's email:rfc + regex rule
+        // (GV-3832).
+        validators.regexp = {
+          regexp: /.+@.+\..+/,
+          message: t.email_regex
+        };
+      }
+
+      if (qtype === 'number') {
+        // Non-negative by default (GV-3831/GV-3453): when the field author
+        // set no min, floor at 0 via the data-min attribute rendered by the
+        // number-type input block. linear_scale is untouched — it keeps only
+        // its existing fixed 1-5 <select> and is not qtype="number".
+        const numMin = field.dataset.min !== undefined && field.dataset.min !== '' ? Number(field.dataset.min) : 0;
+        const numMax = field.dataset.max !== undefined && field.dataset.max !== '' ? Number(field.dataset.max) : null;
+        // Real, registered FormValidation.io validators only (GV QA fix):
+        // `callback_number` was not a registered validator key and was
+        // silently ignored, so numeric/min/max checks never ran. `numeric`,
+        // `greaterThan` and `lessThan` are confirmed registered in
+        // public/vuexy/assets/vendor/libs/@form-validation/popular.js.
+        validators.numeric = {
+          message: t.numeric
+        };
+        validators.greaterThan = {
+          min: numMin,
+          inclusive: true,
+          message: t.number_min
+        };
+        if (numMax !== null) {
+          validators.lessThan = {
+            max: numMax,
+            inclusive: true,
+            message: t.number_max + numMax
+          };
+        }
       }
 
       if (labelText.includes('phone')) {
@@ -1051,11 +1140,15 @@
     }
 
     function navigateNext(currentSection) {
+      // Enforce the "Other" free-text requirement for THIS section before
+      // advancing — FormValidation does not track the _other companion input,
+      // so validateSection() alone would let an empty "Other" slip through.
+      const otherInvalid = validateOtherInSection(currentSection);
       validateSection(currentSection).then(function (isValid) {
-        if (isValid) {
+        if (isValid && !otherInvalid) {
           doNavigate(currentSection);
         } else {
-          var firstError = currentSection.querySelector(".is-invalid");
+          var firstError = otherInvalid || currentSection.querySelector(".is-invalid");
           if (firstError) firstError.focus();
         }
       });
@@ -1173,6 +1266,21 @@
         } else {
           toggleOtherField(e.target);
         }
+        // Deselecting "Other" clears any pending "Other required" error.
+        const card = e.target.closest('.application-question-card');
+        if (card) {
+          const controls = card.querySelectorAll('select.question-logic, input.question-logic');
+          if (!Array.from(controls).some(isOtherSelected)) {
+            clearOtherError(card.querySelector('.other-field'));
+          }
+        }
+      }
+    });
+
+    // Clear the "Other required" error live as the user types into the box.
+    document.addEventListener('input', function (e) {
+      if (e.target.matches('.other-field') && e.target.value.trim()) {
+        clearOtherError(e.target);
       }
     });
 
@@ -1215,6 +1323,89 @@
         .forEach(handle);
     }
 
+    const OTHER_REQUIRED_MSG = document.documentElement.lang === 'ar'
+      ? 'هذا الحقل مطلوب عند اختيار "أخرى".'
+      : 'This field is required when "Other" is selected.';
+
+    // Block submission when "Other" is selected but its paired free-text
+    // input is empty. MUST run BEFORE normalizeOtherFields() strips the
+    // "__OTHER__" sentinel — once normalized, there is no reliable way to
+    // tell "Other was chosen" apart from any other typed answer.
+    // Returns true if the given choice control currently has "Other" selected.
+    function isOtherSelected(control) {
+      if (control.type === 'select-one') return control.value === '__OTHER__';
+      if (control.type === 'radio' || control.type === 'checkbox') {
+        return control.checked && control.value === '__OTHER__';
+      }
+      return false;
+    }
+
+    // Block submission when "Other" is selected but its paired free-text input
+    // is empty. Evaluated over the ACTIVE navigation path only — NOT the DOM
+    // enabled/disabled state. The stepper disables every section that is not
+    // currently displayed (see showSection), so at submit time the answer's own
+    // section is typically disabled; keying off `.disabled`/`.d-none` here made
+    // this check inert on multi-section forms. Instead we walk the active path,
+    // find choice controls whose value is "__OTHER__", and require their
+    // companion `.other-field` to be non-empty regardless of disabled state.
+    // Clear the "Other required" error on a single _other input.
+    function clearOtherError(otherInput) {
+      if (!otherInput) return;
+      otherInput.classList.remove('is-invalid');
+      const feedback = otherInput.closest('.application-question-card')?.querySelector('.other-required-feedback');
+      if (feedback) feedback.classList.add('d-none');
+    }
+
+    // Validate the "Other" free-text requirement within ONE section. Returns
+    // the first invalid `.other-field` element found, or null if all good.
+    function validateOtherInSection(section) {
+      let firstInvalid = null;
+      section.querySelectorAll('.application-question-card').forEach(card => {
+        const controls = card.querySelectorAll('select.question-logic, input.question-logic');
+        const otherPicked = Array.from(controls).some(isOtherSelected);
+        const otherInput = card.querySelector('.other-field');
+        if (!otherInput) return;
+
+        if (otherPicked && !otherInput.value.trim()) {
+          otherInput.classList.add('is-invalid');
+          const feedback = card.querySelector('.other-required-feedback');
+          if (feedback) {
+            feedback.textContent = OTHER_REQUIRED_MSG;
+            feedback.classList.remove('d-none');
+          }
+          if (!firstInvalid) firstInvalid = otherInput;
+        } else {
+          clearOtherError(otherInput);
+        }
+      });
+      return firstInvalid;
+    }
+
+    function validateOtherFields() {
+      let firstInvalid = null;
+      const activePath = getActivePath();
+      const activeSections = activePath
+        .filter(idx => typeof idx === 'number' && sections[idx])
+        .map(idx => sections[idx]);
+
+      activeSections.forEach(section => {
+        const invalid = validateOtherInSection(section);
+        if (invalid && !firstInvalid) firstInvalid = invalid;
+      });
+
+      if (firstInvalid) {
+        // The field lives in a section that may be hidden; reveal it so the
+        // user sees the error instead of a silent no-op submit.
+        const section = firstInvalid.closest('.section-wrapper');
+        if (section) {
+          const idx = parseInt(section.dataset.sectionId);
+          if (!isNaN(idx)) showSection(idx);
+        }
+        firstInvalid.focus();
+      }
+      return !firstInvalid;
+    }
+
     function prepareSubmission() {
       const activePath = getActivePath();
 
@@ -1247,6 +1438,14 @@
     // Form submission interception: dynamic enabled/disabled path and active field_ids setting
     if (form) {
       form.addEventListener('submit', function (e) {
+        // Validate BEFORE normalizeOtherFields() runs inside prepareSubmission()
+        // (see comment on validateOtherFields), so the "__OTHER__" sentinel is
+        // still intact to detect what's currently selected.
+        if (!validateOtherFields()) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
         // Re-enable the active path and normalize "__OTHER__" on EVERY submit,
         // regardless of whether FormValidation is active. This is the path used
         // when FV is NOT created (no field has a validator); when FV IS active,
@@ -1259,6 +1458,9 @@
     // refresh field_ids, then submit natively (avoids the FormValidation loop).
     if (window._formValidation) {
       window._formValidation.on('core.form.valid', function () {
+        if (!validateOtherFields()) {
+          return;
+        }
         prepareSubmission();
         form.submit();
       });

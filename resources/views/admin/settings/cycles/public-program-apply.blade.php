@@ -492,6 +492,15 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 	<script>
 		var stepper;
+		// Shared validation message strings (GV QA fix): these must be visible to
+		// BOTH the dynamic field renderer (inside the #check-email AJAX success
+		// closure) and the separate #join_btn submit handler below. Declaring
+		// them only inside the renderer closure caused a `numberMinText is not
+		// defined` ReferenceError on submit, which aborted the whole validation
+		// pass silently (nothing got validated).
+		const numericText = '{{ $l == "ar" ? "يرجى إدخال رقم صحيح." : "Please enter a valid number." }}';
+		const numberMinText = '{{ $l == "ar" ? "يرجى إدخال رقم موجب صحيح." : "Please enter a valid positive number." }}';
+		const emailFormatText = '{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com)." : "Please enter a valid email address (e.g. name@example.com)." }}';
 		document.addEventListener('DOMContentLoaded', function() {
 			stepper = new Stepper(document.querySelector('#stepper-form'), {
 				linear: true,
@@ -573,6 +582,10 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									const chooseText = '{{ $l == "ar" ? "اختر" : "Choose" }}';
 									const otherText = '{{ $l == "ar" ? "أخرى" : "Other" }}';
 									const otherValueText = '{{ $l == "ar" ? "يرجى التحديد" : "Please specify" }}';
+									const otherRequiredText = '{{ $l == "ar" ? "هذا الحقل مطلوب عند اختيار \"أخرى\"." : "This field is required when \"Other\" is selected." }}';
+									// numericText/numberMinText/emailFormatText are declared once at the
+									// top-level script scope (near `var stepper`) so both this renderer
+									// and the separate #join_btn submit handler can see them.
 
 									// Free-text input revealed when the user picks the "Other" option.
 									// Hidden by default; toggled by the change handler; its value is
@@ -580,6 +593,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									function otherWrapperHtml(fieldName, idFor) {
 										return `<div class="other-wrapper mt-2 d-none" data-other-for="${fieldName}">`
 											+ `<input type="text" class="form-control other-field" id="${idFor}_other" name="${fieldName}_other" placeholder="${otherValueText}" />`
+											+ `<div class="invalid-feedback other-required-feedback">${otherRequiredText}</div>`
 											+ `</div>`;
 									}
 
@@ -612,6 +626,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 										$.each(section.fields, function(key, value) {
 											var builderType = (value.options && value.options.type) ? value.options.type : 'short_answer';
+											// "Dropdown" was retired as an authorable type (GV-3828);
+											// existing dropdown fields render as multiple choice (radio).
+											// Both store a single scalar answer — render-time coercion,
+											// no data migration.
+											if (builderType === 'dropdown') { builderType = 'multiple_choice'; }
 											var isRequired = value.options && value.options.validation && value.options.validation.required == 1;
 											var requiredAttr = isRequired ? 'required' : '';
 											var requiredStar = isRequired ? '<span class="text-danger ms-1">*</span>' : '';
@@ -695,10 +714,13 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													break;
 
 												case 'number':
-													var numMin = (value.options && value.options.min !== undefined && value.options.min !== '') ? `min="${value.options.min}"` : '';
+													// Non-negative by default (GV-3831/GV-2814): when the field author
+													// set no min, default to 0 so the native stepper can't go negative.
+													var numMinVal = (value.options && value.options.min !== undefined && value.options.min !== '') ? value.options.min : 0;
+													var numMin = `min="${numMinVal}"`;
 													var numMax = (value.options && value.options.max !== undefined && value.options.max !== '') ? `max="${value.options.max}"` : '';
 													var numStep = (value.options && value.options.step !== undefined && value.options.step !== '') ? `step="${value.options.step}"` : '';
-													fieldsHtml += `<input type="number" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${numMin} ${numMax} ${numStep} ${requiredAttr} />`;
+													fieldsHtml += `<input type="number" inputmode="decimal" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${numMin} ${numMax} ${numStep} ${requiredAttr} />`;
 													break;
 
 												case 'email':
@@ -769,6 +791,17 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 						},
 						error: function(error) {
 							console.log(error);
+							// A 422 from validate_email carries the field validation
+							// error (e.g. email:dns rejecting an unresolvable domain).
+							// Surface it inline on the email field so the user can
+							// correct it here, at the Email step.
+							var validationMsg = error && error.responseJSON && error.responseJSON.errors
+								&& error.responseJSON.errors.email && error.responseJSON.errors.email[0];
+							if (error && error.status === 422 && validationMsg) {
+								$('#initial-email-feedback').html(validationMsg);
+								$('#initial-email').addClass('is-invalid');
+								return;
+							}
 							Swal.fire({
 								icon: 'error',
 								title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
@@ -965,6 +998,48 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				const $otherInput = $(this).find('.other-field');
 				if (!$otherInput.val() || $otherInput.val().trim() === '') {
 					$otherInput.addClass('is-invalid');
+					isValid = false;
+				}
+			});
+
+			// Number format/range check (GV-3831/GV-3453): reject non-numeric text
+			// and values below the field's min (defaults to 0 — see the 'number'
+			// render case above), respecting an authored max when present.
+			$form.find('input[type="number"]:not(:disabled)').each(function() {
+				const $field = $(this);
+				if (!$field.is(':visible')) { return; }
+				const value = $field.val();
+				if (value === '' || value === null) { return; }
+				const num = Number(value);
+				const min = $field.attr('min') !== undefined && $field.attr('min') !== '' ? Number($field.attr('min')) : 0;
+				const max = $field.attr('max') !== undefined && $field.attr('max') !== '' ? Number($field.attr('max')) : null;
+				let message = null;
+				if (isNaN(num)) {
+					message = numericText;
+				} else if (num < min) {
+					message = numberMinText;
+				} else if (max !== null && num > max) {
+					message = '{{ $l == "ar" ? "يرجى إدخال رقم لا يتجاوز " : "Please enter a number no greater than " }}' + max;
+				}
+				if (message) {
+					$field.addClass('is-invalid');
+					$field.next('.invalid-feedback').html(message);
+					isValid = false;
+				}
+			});
+
+			// Email format check (GV-3832): require a dotted domain (e.g. rejects
+			// "user@example") without a live DNS lookup. Skips #register-email —
+			// that field is disabled/pre-filled from the already-verified initial
+			// email step and is not one of the dynamic form fields.
+			$form.find('input[type="email"]:not(:disabled)').each(function() {
+				const $field = $(this);
+				if (!$field.is(':visible')) { return; }
+				const value = $field.val();
+				if (!value || value.trim() === '') { return; }
+				if (!/.+@.+\..+/.test(value.trim())) {
+					$field.addClass('is-invalid');
+					$field.next('.invalid-feedback').html(emailFormatText);
 					isValid = false;
 				}
 			});

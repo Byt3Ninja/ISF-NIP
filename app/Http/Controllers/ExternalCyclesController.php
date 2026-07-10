@@ -140,8 +140,14 @@ class ExternalCyclesController extends Controller
 		{
 			if( $program->is_public == 1 )
 			{
+				// Validate at THIS first step with the same strictness the final
+				// register step applies (register-email => email:dns, see
+				// registerUser). Previously this used a lenient `email` rule, so
+				// an address with an unresolvable domain (e.g. "nano@niny.ts")
+				// passed the Email step and only failed at the final Application
+				// step — where the user could no longer correct it in context.
 				$request->validate([
-					'email' => 'required|email',
+					'email' => 'required|email:dns',
 				], [
 					'email.email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.',
 					'email.required' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.',
@@ -220,26 +226,107 @@ class ExternalCyclesController extends Controller
 					'register-last-name' => 'nullable|sometimes',
 				]);
 
-				// Validate the dynamic form fields (required/email rules) BEFORE creating
-				// any records, so a rejected submission never leaves an orphaned user/company.
+				// Validate the dynamic form fields (required/email/number rules) BEFORE
+				// creating any records, so a rejected submission never leaves an
+				// orphaned user/company.
 				$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
 				$fields = Formfield::where('step_id', $step->id)->get();
 
-				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields ) {
+				$l = app()->getLocale();
+				$number_min_msg = $l == 'ar' ? 'يرجى إدخال رقم موجب صحيح.' : 'Please enter a valid positive number.';
+				$number_max_msg_tpl = $l == 'ar' ? 'يرجى إدخال رقم لا يتجاوز :max.' : 'Please enter a number no greater than :max.';
+				$numeric_msg = $l == 'ar' ? 'يرجى إدخال رقم صحيح.' : 'Please enter a valid number.';
+				$email_regex_msg = $l == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com).' : 'Please enter a valid email address (e.g. name@example.com).';
+				$dynamic_field_messages = [];
+
+				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields, &$dynamic_field_messages, $number_min_msg, $number_max_msg_tpl, $numeric_msg, $email_regex_msg ) {
 					$field_options = $fields->where('id', $id)->first()->options;
-					if( $field_options->validation->required == 1 )
-					{
-						$rules = ['required'];
-						if( isset($field_options->type) && $field_options->type == "email" ) { $rules[] = 'email'; }
-						return [
-							'field_' . $id => implode("|", $rules)
-						];
-					} else { return ['field_' . $id => 'nullable']; }
+					$field_name = 'field_' . $id;
+					$required = isset($field_options->validation->required) && $field_options->validation->required == 1;
+
+					$rules = [$required ? 'required' : 'nullable'];
+					$type = $field_options->type ?? null;
+
+					if ($type == 'email') {
+						// email:rfc catches malformed addresses; the regex additionally
+						// requires a dotted domain (e.g. rejects "user@example") without
+						// a live DNS lookup, per GV-3832.
+						$rules[] = 'email:rfc';
+						$rules[] = 'regex:/.+@.+\..+/';
+						$dynamic_field_messages[$field_name . '.regex'] = $email_regex_msg;
+					} elseif ($type == 'number') {
+						// Non-negative by default (GV-3831/GV-3453): when the field
+						// author set no min, floor at 0. Respect an authored min/max
+						// when present.
+						$min = (isset($field_options->min) && $field_options->min !== '') ? $field_options->min : 0;
+						$rules[] = 'numeric';
+						$rules[] = 'min:' . $min;
+						$dynamic_field_messages[$field_name . '.numeric'] = $numeric_msg;
+						$dynamic_field_messages[$field_name . '.min'] = $number_min_msg;
+						if (isset($field_options->max) && $field_options->max !== '') {
+							$rules[] = 'max:' . $field_options->max;
+							$dynamic_field_messages[$field_name . '.max'] = str_replace(':max', $field_options->max, $number_max_msg_tpl);
+						}
+					}
+
+					return [
+						$field_name => implode("|", $rules)
+					];
 				});
-				$dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
+
+				// "Other" free-text is mandatory once picked, on both layers.
+				// Detection keys off the SUBMITTED ANSWER still carrying the
+				// "__OTHER__" marker — NOT the presence of the `{field}_other`
+				// companion input. The client deletes `{field}_other` before POST
+				// and only rewrites "__OTHER__"->typed-text when the box is
+				// non-empty, so an empty "Other" leaves the raw "__OTHER__" in the
+				// answer. Keying off the companion input (as before) meant the
+				// rule was never added and the check was dead on this layer; this
+				// mirrors Layer 1 (CyclesController@saveForm) and is bypass-safe.
+				$other_required_msg = app()->getLocale() == 'ar'
+					? 'هذا الحقل مطلوب عند اختيار "أخرى".'
+					: 'This field is required when "Other" is selected.';
+				$other_messages = [];
+				foreach ( $fields as $field ) {
+					$field_options = $field->options;
+					$optionValues = $field_options->values ?? [];
+					if (!is_array($optionValues)) {
+						$optionValues = array_map('trim', explode(',', (string) $optionValues));
+					}
+					if (in_array('__OTHER__', $optionValues, true)) {
+						$field_name = 'field_' . $field->id;
+						$answer = $request->input($field_name);
+						$answerHasOther = is_array($answer)
+							? in_array('__OTHER__', $answer, true)
+							: $answer === '__OTHER__';
+						if ($answerHasOther) {
+							// The answer still carries the marker => Other was
+							// selected but the free-text was left empty. APPEND a
+							// closure rule to the field's existing rule string
+							// (don't overwrite its required/type rules) that fails
+							// while the raw "__OTHER__" marker is still present.
+							// A closure handles both scalar (radio/dropdown) and
+							// array (checkbox) answers; `not_in` does not apply
+							// element-wise to arrays.
+							$existingRule = $field_required_rules->get($field_name, 'nullable');
+							$rulesForField = is_array($existingRule) ? $existingRule : explode('|', $existingRule);
+							$rulesForField[] = function ($attribute, $value, $fail) use ($other_required_msg) {
+								$hasMarker = is_array($value)
+									? in_array('__OTHER__', $value, true)
+									: $value === '__OTHER__';
+								if ($hasMarker) {
+									$fail($other_required_msg);
+								}
+							};
+							$field_required_rules->put($field_name, $rulesForField);
+						}
+					}
+				}
+
+				$dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), array_merge([
 					'required' => app()->getLocale() == 'ar' ? "هذا الحقل مطلوب." : "field can't be left blank",
 					'email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.'
-				]);
+				], $other_messages, $dynamic_field_messages));
 				if( $dynamic_validator->fails() )
 				{
 					return response()->json(['error' => $dynamic_validator->errors()->all()], 422);

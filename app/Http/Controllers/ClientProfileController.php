@@ -270,6 +270,7 @@ class ClientProfileController extends Controller
             if( $request->email != $user->email )
             {
                 $user->new_email = $request->email;
+                $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
                 Notification::route('mail', $user->new_email)->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
             }
             $user->save();

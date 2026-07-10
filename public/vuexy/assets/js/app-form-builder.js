@@ -555,7 +555,6 @@ function createQuestionHTML(itemId, inSection = false) {
               <option value="paragraph">${t.paragraph}</option>
               <option value="multiple_choice">${t.multiple_choice}</option>
               <option value="checkboxes">${t.checkboxes}</option>
-              <option value="dropdown">${t.dropdown}</option>
               <option value="linear_scale">${t.linear_scale}</option>
               <option value="number">${t.number}</option>
               <option value="email">${t.email}</option>
@@ -1058,7 +1057,13 @@ function populateSection(sectionData) {
 
 function populateQuestionData(questionCard, questionData) {
   const title        = questionData.title         ?? questionData.label       ?? '';
-  const questionType = questionData.question_type  ?? questionData.type        ?? 'short_answer';
+  // "Dropdown" was retired as an authorable type (GV-3828). Existing questions
+  // stored as `dropdown` are loaded as `multiple_choice` — both store a single
+  // scalar answer, so this is a render-time coercion with no data migration.
+  // The type <select> no longer offers a `dropdown` option, so leaving it as
+  // `dropdown` would also leave the select with no matching value.
+  const rawType      = questionData.question_type  ?? questionData.type        ?? 'short_answer';
+  const questionType = rawType === 'dropdown' ? 'multiple_choice' : rawType;
   const required     = questionData.required       ?? questionData.is_required ?? false;
   const options      = questionData.options        ?? [];
   const logic        = questionData.logic          ?? {};

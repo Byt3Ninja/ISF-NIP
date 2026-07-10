@@ -1117,6 +1117,9 @@ class CyclesController extends Controller
                         ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
                         : [],
                     'logic'       => $options['logic'] ?? 'continue',
+                    'min'         => $options['min'] ?? null,
+                    'max'         => $options['max'] ?? null,
+                    'step'        => $options['step'] ?? null,
                 ];
             })
             ->groupBy('section')
@@ -1135,6 +1138,9 @@ class CyclesController extends Controller
                             'type'        => $q['type'],
                             'options'     => $q['options'],
                             'logic'       => $q['logic'],
+                            'min'         => $q['min'] ?? null,
+                            'max'         => $q['max'] ?? null,
+                            'step'        => $q['step'] ?? null,
                         ];
                     })->toArray(),
                 ];
@@ -1215,6 +1221,9 @@ class CyclesController extends Controller
                     : [],
                 'logic'       => $options['logic'] ?? 'continue',
                 'allowed_domains' => $options['allowed_domains'] ?? '',
+                'min'         => $options['min'] ?? null,
+                'max'         => $options['max'] ?? null,
+                'step'        => $options['step'] ?? null,
             ];
         })
         ->groupBy('section')
@@ -1233,6 +1242,9 @@ class CyclesController extends Controller
                         'options'     => $q['options'],
                         'logic'       => (array) $q['logic'],
                         'allowed_domains' => $q['allowed_domains'] ?? '',
+                        'min'         => $q['min'] ?? null,
+                        'max'         => $q['max'] ?? null,
+                        'step'        => $q['step'] ?? null,
                     ];
                 })->toArray(),
             ];
@@ -1352,9 +1364,13 @@ class CyclesController extends Controller
                 'url'             => 'Please enter a valid URL starting with http:// or https://.',
                 'allowed_domains' => 'The URL must belong to one of these domains: :domains.',
                 'numeric'   => 'Please enter numbers only.',
+                'number_min' => 'Please enter a valid positive number.',
+                'number_max' => 'Please enter a number no greater than :max.',
                 'time'      => 'Please enter a valid time.',
                 'file_size' => 'File size must not exceed 10 MB.',
                 'file_type' => 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
+                'other_required' => 'This field is required when "Other" is selected.',
+                'email_regex' => 'Please enter a valid email address (e.g. name@example.com).',
             ],
             'ar' => [
                 'required'        => 'هذا الحقل مطلوب.',
@@ -1362,9 +1378,13 @@ class CyclesController extends Controller
                 'url'             => 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
                 'allowed_domains' => 'يجب أن ينتمي الرابط إلى أحد هذه النطاقات: :domains.',
                 'numeric'   => 'يرجى إدخال أرقام فقط.',
+                'number_min' => 'يرجى إدخال رقم موجب صحيح.',
+                'number_max' => 'يرجى إدخال رقم لا يتجاوز :max.',
                 'time'      => 'يرجى إدخال وقت صحيح.',
                 'file_size' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
                 'file_type' => 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
+                'other_required' => 'هذا الحقل مطلوب عند اختيار "أخرى".',
+                'email_regex' => 'يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com).',
             ],
         ];
         $L = $messages_map[$locale];
@@ -1442,8 +1462,13 @@ class CyclesController extends Controller
             $rules[] = $required ? 'required' : 'nullable';
             switch ($type) {
                 case 'email':
-                    $rules[] = 'email';
+                    // email:rfc catches malformed addresses; the regex additionally
+                    // requires a dotted domain (e.g. rejects "user@example") without
+                    // doing a live DNS lookup (email:dns), per GV-3832.
+                    $rules[] = 'email:rfc';
+                    $rules[] = 'regex:/.+@.+\..+/';
                     $custom_messages[$field_name . '.email'] = $L['email'];
+                    $custom_messages[$field_name . '.regex'] = $L['email_regex'];
                     break;
                 case 'url':
                     $rules[] = 'url';
@@ -1459,6 +1484,21 @@ class CyclesController extends Controller
                     }
                     break;
                 case 'number':
+                    // Non-negative by default (GV-3831/GV-3453): when the field
+                    // author set no min, floor at 0. Respect an authored min/max
+                    // when present. linear_scale is handled separately below and
+                    // intentionally keeps only the plain `numeric` rule, since its
+                    // scale may legitimately start below 0.
+                    $rules[] = 'numeric';
+                    $custom_messages[$field_name . '.numeric'] = $L['numeric'];
+                    $numMin = (isset($field['min']) && $field['min'] !== '') ? $field['min'] : 0;
+                    $rules[] = 'min:' . $numMin;
+                    $custom_messages[$field_name . '.min'] = $L['number_min'];
+                    if (isset($field['max']) && $field['max'] !== '') {
+                        $rules[] = 'max:' . $field['max'];
+                        $custom_messages[$field_name . '.max'] = str_replace(':max', $field['max'], $L['number_max']);
+                    }
+                    break;
                 case 'linear_scale':
                     $rules[] = 'numeric';
                     $custom_messages[$field_name . '.numeric'] = $L['numeric'];
@@ -1493,6 +1533,34 @@ class CyclesController extends Controller
             $hasClosureRule = collect($rules)->contains(fn ($r) => !is_string($r));
             $rules_array[$field_name] = $hasClosureRule ? $rules : implode('|', $rules);
             $custom_messages[$field_name . '.required'] = $L['required'];
+
+            // "Other" free-text is mandatory once picked. The `values` option
+            // list is stored as a comma-joined string (see FormBuilderController),
+            // so normalize before checking for the __OTHER__ sentinel.
+            //
+            // Detection keys off the SUBMITTED ANSWER still carrying the
+            // "__OTHER__" marker — NOT the mere presence of the `{field}_other`
+            // key. The client only rewrites "__OTHER__" into the typed value
+            // when that value is non-empty (see normalizeOtherFields in the
+            // view); so when the user picks Other and leaves the box empty, the
+            // raw "__OTHER__" survives into the payload. Keying off the marker
+            // is reliable even when the answer's section is disabled at submit
+            // and the `{field}_other` companion input never posts.
+            $optionValues = $field['values'] ?? ($field['options'] ?? []);
+            if (!is_array($optionValues)) {
+                $optionValues = array_map('trim', explode(',', (string) $optionValues));
+            }
+            if (in_array('__OTHER__', $optionValues, true)) {
+                $answer = $request->input($field_name);
+                $answerHasOther = is_array($answer)
+                    ? in_array('__OTHER__', $answer, true)
+                    : $answer === '__OTHER__';
+                if ($answerHasOther) {
+                    $otherKey = $field_name . '_other';
+                    $rules_array[$otherKey] = 'required|string';
+                    $custom_messages[$otherKey . '.required'] = $L['other_required'];
+                }
+            }
         }
 
         $dynamic_validator = Validator::make($request->all(), $rules_array, $custom_messages);
