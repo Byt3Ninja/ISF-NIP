@@ -84,25 +84,12 @@ function getActivityMeta(action) {
   return { icon: 'ti-activity', color: 'secondary' };
 }
 
-function renderActivitiesList(activities, containerSelector) {
-  const $c = $(containerSelector);
-  if (!activities || !activities.length) {
-    $c.html(`
-      <div class="text-center py-5">
-        <div class="avatar avatar-md mb-3 mx-auto">
-          <span class="avatar-initial rounded-circle bg-label-secondary">
-            <i class="ti ti-activity ti-md"></i>
-          </span>
-        </div>
-        <p class="text-muted mb-0 small">${window.KanbanConfig.labels.noActivities}</p>
-      </div>`);
-    return;
-  }
-
-  const items = activities.map((act, i) => {
-    const isLast  = i === activities.length - 1;
-    const { icon, color } = getActivityMeta(act.action);
-    return `
+// Builds a single activity timeline <li>. Shared by the initial render and
+// the live-prepend flows (task move, submission upload) so all activity items
+// stay visually identical. `isLast` only affects bottom spacing.
+function buildActivityTimelineItem(act, isLast) {
+  const { icon, color } = getActivityMeta(act.action);
+  return `
       <li class="timeline-item timeline-item-transparent${isLast ? ' pb-1' : ''}">
         <span class="timeline-indicator timeline-indicator-${color}">
           <i class="ti ${icon}" style="font-size:.85rem;"></i>
@@ -132,7 +119,46 @@ function renderActivitiesList(activities, containerSelector) {
           </div>
         </div>
       </li>`;
-  }).join('');
+}
+
+// Prepends a newly-created activity to the open offcanvas's activity list and
+// bumps the badge. No-op unless the offcanvas is showing `taskId`. Used by the
+// task-move and submission-upload flows.
+function prependActivityToOffcanvas(act, taskId) {
+  const $oc = $('#viewTaskOffcanvas');
+  if (!$oc.hasClass('show') || $oc.data('current-task-id') != taskId) return;
+
+  const $list = $('#vt-activities-list');
+  const $ul   = $list.find('ul.timeline');
+  const html  = buildActivityTimelineItem(act, false);
+  if ($ul.length) {
+    $ul.prepend(html);
+  } else {
+    $list.html(`<ul class="timeline pt-1 ps-1">${html}</ul>`);
+  }
+
+  const current = parseInt($('#vt-activity-count').text()) || 0;
+  $('#vt-activity-count').text(current + 1);
+}
+
+function renderActivitiesList(activities, containerSelector) {
+  const $c = $(containerSelector);
+  if (!activities || !activities.length) {
+    $c.html(`
+      <div class="text-center py-5">
+        <div class="avatar avatar-md mb-3 mx-auto">
+          <span class="avatar-initial rounded-circle bg-label-secondary">
+            <i class="ti ti-activity ti-md"></i>
+          </span>
+        </div>
+        <p class="text-muted mb-0 small">${window.KanbanConfig.labels.noActivities}</p>
+      </div>`);
+    return;
+  }
+
+  const items = activities
+    .map((act, i) => buildActivityTimelineItem(act, i === activities.length - 1))
+    .join('');
 
   $c.html(`<ul class="timeline pt-1 ps-1">${items}</ul>`);
 }

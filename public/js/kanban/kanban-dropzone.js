@@ -175,6 +175,19 @@ function initDropzone(tasks) {
           const newAtt = response.attachment || { id: Date.now(), name: item.file.name, url: '#' };
           uploadedAtts.push(newAtt);
 
+          // Server logs a "submission" activity per uploaded file (registered
+          // users). Reflect it live so the Activities badge/list stay in sync
+          // without a page refresh.
+          if (response.activity) {
+            const task = tasks.find(t => t.id == taskId);
+            if (task) {
+              if (!task.activities) task.activities = [];
+              task.activities.unshift(response.activity);
+              task.activities_count = (task.activities_count || 0) + 1;
+            }
+            prependActivityToOffcanvas(response.activity, taskId);
+          }
+
           if (!isSubmission) {
             const task = tasks.find(t => t.id == taskId);
             if (task) {

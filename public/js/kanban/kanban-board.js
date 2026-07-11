@@ -164,47 +164,7 @@ function initKanbanDragDrop(tasks) {
                 task.activities.unshift(response.activity);
                 task.activities_count = (task.activities_count || 0) + 1;
               }
-              const $oc = $('#viewTaskOffcanvas');
-              const openTaskId = $oc.data('current-task-id');
-              if ($oc.hasClass('show') && openTaskId == taskId) {
-                const act = response.activity;
-                const { icon, color } = getActivityMeta(act.action);
-                const html = `
-                  <li class="timeline-item timeline-item-transparent">
-                    <span class="timeline-indicator timeline-indicator-${color}">
-                      <i class="ti ${icon}" style="font-size:.85rem;"></i>
-                    </span>
-                    <div class="timeline-event pb-3">
-                      <div class="rounded-2 p-3 bg-light-subtle" style="border-left:3px solid var(--bs-${color});">
-                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
-                          <div class="d-flex align-items-center gap-2">
-                            ${buildAvatar(act.user, act.img_url, act.user_id)}
-                            <span class="fw-semibold small text-dark">${act.user}</span>
-                          </div>
-                          <span class="badge bg-label-${color}" style="font-size:.65rem;">
-                            <i class="ti ti-clock ti-xs me-1"></i>${act.time}
-                          </span>
-                        </div>
-                        <p class="mb-0 small text-body lh-sm">${act.action}</p>
-                        ${act.created_at ? `
-                        <div class="mt-2 pt-2 border-top">
-                          <span class="text-muted" style="font-size:.68rem;">
-                            <i class="ti ti-calendar ti-xs me-1"></i>${act.created_at}
-                          </span>
-                        </div>` : ''}
-                      </div>
-                    </div>
-                  </li>`;
-                const $list = $('#vt-activities-list');
-                const $ul = $list.find('ul.timeline');
-                if ($ul.length) {
-                  $ul.prepend(html);
-                } else {
-                  $list.html(`<ul class="timeline pt-1 ps-1">${html}</ul>`);
-                }
-                const current = parseInt($('#vt-activity-count').text()) || 0;
-                $('#vt-activity-count').text(current + 1);
-              }
+              prependActivityToOffcanvas(response.activity, taskId);
             }
           },
           error: function (xhr) {

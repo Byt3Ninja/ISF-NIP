@@ -145,10 +145,11 @@ class TasksController extends Controller
                         'create' => 'created this task',
                         'update' => 'updated ' . $act->column . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
                         'move'   => 'moved task' . ($act->was && $act->new ? ' from "' . $act->was . '" to "' . $act->new . '"' : ''),
-                        'comment'  => 'added a comment',
-                        'feedback' => 'submitted feedback',
-                        'delete'   => 'deleted this task',
-                        default    => $act->action,
+                        'comment'    => 'added a comment',
+                        'feedback'   => 'submitted feedback',
+                        'submission' => 'submitted a file',
+                        'delete'     => 'deleted this task',
+                        default      => $act->action,
                     };
                     return [
                         'user'       => $act->user->name ?? 'N/A',
@@ -872,6 +873,8 @@ class TasksController extends Controller
                 'created_at' => now()->toDateTimeString(),
             ];
 
+            $activityData = null;
+
             if ($uploader->hasRole('registered')) {
                 $assignee = ProgramTaskAssignee::where('program_task_id', $taskId)
                     ->where('company_id', $uploader->company_id)
@@ -885,12 +888,22 @@ class TasksController extends Controller
                 $assigneeAtts[] = $newAtt;
                 $assignee->update(['attachment' => $assigneeAtts]);
 
-                ProgramTaskActivity::create([
+                $activity = ProgramTaskActivity::create([
                     'program_task_id' => $taskId,
                     'user_id'         => $uploader->id,
                     'company_id'      => $uploader->company_id,
                     'action'          => 'submission',
                 ]);
+
+                $activity->load('user');
+                $activityData = [
+                    'user'       => $activity->user->name ?? 'N/A',
+                    'user_id'    => $activity->user_id,
+                    'img_url'    => $activity->user ? \App\User::image_handler($activity->user->img_url) : null,
+                    'action'     => 'submitted a file',
+                    'time'       => $activity->created_at->diffForHumans(),
+                    'created_at' => $activity->created_at->format('Y-m-d H:i'),
+                ];
             } else {
                 $attachments   = $task->attachments ?? [];
                 $attachments[] = array_merge($newAtt, ['status' => 'attachment']);
@@ -900,6 +913,7 @@ class TasksController extends Controller
             return response()->json([
                 'success'    => true,
                 'attachment' => array_merge($newAtt, ['url' => $fileManager->getUrl($path, 'public')]),
+                'activity'   => $activityData,
             ]);
 
         } catch (\Exception $e) {
