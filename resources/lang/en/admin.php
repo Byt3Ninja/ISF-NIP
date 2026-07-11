@@ -3838,6 +3838,10 @@ return [
   'no_sustainability_goals_listed' => 'No sustainability goals listed',
   'view_all' => 'View all',
   'filters' => 'Filters',
+  'customer_growth_record_added' => 'Customer growth record added',
+  'customer_growth_record_updated' => 'Customer growth record updated successfully',
+  'customer_growth_record_deleted' => 'Customer growth record deleted successfully',
+  'customer_growth_already_exist' => 'Customer growth record already exists for this period',
   'Required field' => 'Required field',
   'Optional field' => 'Optional field'
 ];

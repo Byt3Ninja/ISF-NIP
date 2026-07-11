@@ -645,4 +645,11 @@ return [
   'female' => 'أنثى',
   'no_programs_joined_yet' => 'لم يتم الانضمام لأي برامج بعد',
   'not_participating_any_program' => 'هذه الشركة الناشئة لا تشارك حالياً في أي برامج.',
+  'Edit Customer Record' => 'تعديل سجل نمو العملاء',
+  'customer_growth_record_updated' => 'تم تحديث سجل نمو العملاء بنجاح',
+  'customer_growth_record_deleted' => 'تم حذف سجل نمو العملاء بنجاح',
+  'delete_customer_growth_confirm' => 'هل أنت متأكد من رغبتك في حذف سجل نمو العملاء هذا؟',
+  'Yearly' => 'سنوي',
+  'Year cumulative growth' => 'النمو التراكمي السنوي',
+  'Export CSV' => 'تصدير CSV',
 ];

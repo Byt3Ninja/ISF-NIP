@@ -6,6 +6,36 @@
       <i class="ti ti-plus me-2"></i> {{ __('admin.Add New') }}
     </button>
   </div>
+
+  <!-- Custom Filters & Export Row -->
+  <div class="card-body border-bottom py-5">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label fw-bold" for="filter_year">{{ __('startup.Year') }}</label>
+        <select id="filter_year" class="form-select">
+          <option value="">{{ __('startup.all_years') }}</option>
+          @foreach($growth_records->pluck('year')->unique()->sort() as $yr)
+            <option value="{{ $yr }}">{{ $yr }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold" for="filter_segment">{{ __('startup.Segment') }}</label>
+        <select id="filter_segment" class="form-select">
+          <option value="">{{ __('startup.Please_select_a_category') }}</option>
+          <option value="MIXED">{{ __('startup.mixed') }}</option>
+          <option value="B2C">B2C</option>
+          <option value="B2B">B2B</option>
+          <option value="ENTERPRISE">{{ __('startup.enterprise') }}</option>
+        </select>
+      </div>
+      <div class="col-md-4 text-md-end text-start">
+        <a id="export-csv-btn" href="/dashboard/startupGrowth/export/{{ $company?->id }}" class="btn btn-outline-secondary w-100 w-md-auto">
+          <i class="ti ti-download me-2"></i>{{ __('startup.Export CSV') }}
+        </a>
+      </div>
+    </div>
+  </div>
   <table class="datatables-basic table" id="growthTable">
     <thead class="table-light">
       <tr>
@@ -14,6 +44,7 @@
         <th>{{ __('startup.Total customers') }}</th>
         <th>{{ __('startup.New customers') }}</th>
         <th>{{ __('startup.MoM growth') }}</th>
+        <th>{{ __('startup.Year cumulative growth') }}</th>
         <th>{{ __('startup.Segment') }}</th>
         <th>{{ __('admin.Actions') }}</th>
       </tr>
@@ -22,25 +53,35 @@
       @foreach( $growth_records as $record )
         <tr>
           <td>{{ $record->year }}</td>
-          <td>{{ __('startup.mini_month_' . $record->month) }}</td>
+          <td>{{ $record->month ? __('startup.mini_month_' . $record->month) : __('startup.Yearly') }}</td>
           <td>{{ $record->total }}</td>
           <td>{{ $record->newly }}</td>
           <td>{{ $record->MoM }}</td>
+          <td>{{ $record->YearCumulative }}</td>
           <td>{{ strtoupper( $record->segment ) }}</td>
           <td>
-            <button type="button"
-              class="btn btn-sm btn-icon btn-text-secondary rounded-pill edit-growth-btn"
-              data-id="{{ $record->id }}"
-              data-year="{{ $record->year }}"
-              data-month="{{ $record->month }}"
-              data-total="{{ $record->total }}"
-              data-new="{{ $record->newly }}"
-              data-segment="{{ $record->segment }}"
-              data-notes="{{ $record->notes }}"
-              data-bs-toggle="modal" data-bs-target="#startupGrowthModal"
-              title="{{ __('admin.Edit') }}">
-              <i class="ti ti-edit"></i>
-            </button>
+            <div class="d-flex align-items-center">
+              <button type="button"
+                class="btn btn-sm btn-icon btn-text-secondary rounded-pill edit-growth-btn"
+                data-id="{{ $record->id }}"
+                data-year="{{ $record->year }}"
+                data-month="{{ $record->month }}"
+                data-total="{{ $record->total }}"
+                data-new="{{ $record->newly }}"
+                data-segment="{{ $record->segment }}"
+                data-notes="{{ $record->notes }}"
+                data-bs-toggle="modal" data-bs-target="#startupGrowthModal"
+                title="{{ __('admin.Edit') }}">
+                <i class="ti ti-edit"></i>
+              </button>
+              <form action="/dashboard/startupGrowth/delete/{{ $record->id }}" method="POST" class="delete-record-form d-inline ms-1">
+                @csrf
+                @method('DELETE')
+                <button type="submit" onclick="deleteRecord(event, this)" class="btn btn-sm btn-icon text-danger btn-text-danger rounded-pill waves-effect">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </form>
+            </div>
           </td>
         </tr>
       @endforeach
@@ -112,7 +153,7 @@
 @push('scripts')
 <script>
   $(document).ready(function(){
-    $('#growthTable').DataTable({
+    let table = $('#growthTable').DataTable({
       pageLength: 10,
       responsive: true,
       ordering: true,
@@ -128,6 +169,29 @@
       }
       @endif
     });
+    // Custom Filters
+    $('#filter_year').on('change', function() {
+      let val = this.value;
+      table.column(0).search(val ? '^\\s*' + $.fn.dataTable.util.escapeRegex(val) + '\\s*$' : '', true, false).draw();
+      updateExportUrl();
+    });
+
+    $('#filter_segment').on('change', function() {
+      let val = this.value;
+      table.column(6).search(val ? '^\\s*' + $.fn.dataTable.util.escapeRegex(val) + '\\s*$' : '', true, false).draw();
+      updateExportUrl();
+    });
+
+    function updateExportUrl() {
+      let year = $('#filter_year').val();
+      let segment = $('#filter_segment').val();
+      let baseUrl = '/dashboard/startupGrowth/export/{{ $company?->id }}';
+      let params = [];
+      if (year) params.push('year=' + year);
+      if (segment) params.push('segment=' + segment.toLowerCase());
+      let queryStr = params.length > 0 ? '?' + params.join('&') : '';
+      $('#export-csv-btn').attr('href', baseUrl + queryStr);
+    }
 
     $('#add-new-startup-growth-modal-btn').on('click', function() {
       setAddMode();
@@ -190,6 +254,19 @@
     $('#add-startup-growth-form')[0].reset();
     $('.is-invalid').removeClass('is-invalid');
     $('.invalid-feedback').remove();
+  }
+
+  alertify.defaults.transition = 'zoom';
+  alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+  alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+  alertify.defaults.theme.input = 'form-control';
+
+  function deleteRecord(event, button) {
+    event.preventDefault();
+    
+    alertify.confirm("{{ __('startup.delete_customer_growth_confirm') }}" , function(){
+      $(button).parent().submit();
+    }, function(){});
   }
 </script>
 @endpush

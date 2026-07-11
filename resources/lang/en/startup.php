@@ -650,4 +650,11 @@ return [
   'female' => 'Female',
   'no_programs_joined_yet' => 'No Programs Joined Yet',
   'not_participating_any_program' => 'This startup is not currently participating in any programs.',
+  'Edit Customer Record' => 'Edit Customer Record',
+  'customer_growth_record_updated' => 'Customer growth record updated successfully',
+  'customer_growth_record_deleted' => 'Customer growth record deleted successfully',
+  'delete_customer_growth_confirm' => 'Are you sure you want to delete this customer growth record?',
+  'Yearly' => 'Yearly',
+  'Year cumulative growth' => 'Year Cumulative Growth',
+  'Export CSV' => 'Export CSV',
 ];

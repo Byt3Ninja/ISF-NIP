@@ -47,9 +47,46 @@ class StartupCustomerGrowth extends Model
 
 		// Per-row month-over-month growth on TOTAL customers.
 		$previousTotal = null;
+		$recordsByYear = $records->groupBy('year');
 		foreach ($records as $index => $record) {
 			$records[$index]->MoM = self::momLabel($previousTotal, (int) $record->total);
 			$previousTotal = (int) $record->total;
+
+			// Year Cumulative Growth Calculation
+			$currentYear = $record->year;
+			$prevYearLastRecord = null;
+			$prevYear = (int)$currentYear - 1;
+			while ($prevYear >= $currentYear - 10) {
+				if (isset($recordsByYear[$prevYear]) && $recordsByYear[$prevYear]->count() > 0) {
+					$prevYearLastRecord = $recordsByYear[$prevYear]->last();
+					break;
+				}
+				$prevYear--;
+			}
+
+			if ($prevYearLastRecord) {
+				$yearBaseTotal = $prevYearLastRecord->total;
+			} else {
+				$firstOfCurrentYear = $recordsByYear[$currentYear]->first();
+				$yearBaseTotal = $firstOfCurrentYear->total - $firstOfCurrentYear->newly;
+				if ($yearBaseTotal <= 0) {
+					$yearBaseTotal = $firstOfCurrentYear->total;
+				}
+			}
+
+			if ($yearBaseTotal > 0) {
+				$cumVal = (($record->total - $yearBaseTotal) / $yearBaseTotal) * 100;
+				$cumValRounded = round($cumVal, 1);
+				if ($cumValRounded == 0) {
+					$YearCumulative = '0%';
+				} else {
+					$YearCumulative = ($cumValRounded > 0 ? '+' : '') . $cumValRounded . '%';
+				}
+			} else {
+				$YearCumulative = '–';
+			}
+			
+			$records[$index]->YearCumulative = $YearCumulative;
 		}
 
 		return [

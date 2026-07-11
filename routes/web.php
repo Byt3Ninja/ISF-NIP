@@ -483,6 +483,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::post('/startupGrowth/add', 'startupCustomerGrowthController@addRecord');
     Route::post('/startupGrowth/update', 'startupCustomerGrowthController@updateRecord');
+    Route::delete('/startupGrowth/delete/{id}', 'startupCustomerGrowthController@deleteRecord');
+    Route::get('/startupGrowth/export/{company_id}', 'startupCustomerGrowthController@exportRecords');
 
     // Company Alumni
     Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');

@@ -3893,6 +3893,10 @@ return [
   'no_sustainability_goals_listed' => 'لم يتم إدراج أهداف الاستدامة',
   'view_all' => 'عرض الكل',
   'filters' => 'الفلاتر',
+  'customer_growth_record_added' => 'تم إضافة سجل نمو العملاء بنجاح',
+  'customer_growth_record_updated' => 'تم تحديث سجل نمو العملاء بنجاح',
+  'customer_growth_record_deleted' => 'تم حذف سجل نمو العملاء بنجاح',
+  'customer_growth_already_exist' => 'سجل نمو العملاء موجود بالفعل لهذه الفترة',
   'Required field' => 'حقل مطلوب',
   'Optional field' => 'حقل غير مطلوب',
 ];

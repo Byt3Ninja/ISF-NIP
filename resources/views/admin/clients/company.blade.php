@@ -8,6 +8,8 @@
 @section('style')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/intl-tel-input/css/intlTelInput.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 <style>
 	.flatpickr-monthSelect-month.selected {
 		background-color: var(--bs-primary) !important;
@@ -212,6 +214,7 @@
 @section('scripts')
 {{-- Monthly Date Picker CDN ( For Financial Projection Form ) --}}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 
 <script src="/vuexy/assets/vendor/libs/intl-tel-input/js/intlTelInput.min.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>

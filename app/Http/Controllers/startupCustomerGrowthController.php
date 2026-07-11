@@ -104,4 +104,89 @@ class startupCustomerGrowthController extends Controller
 
 		return back()->with(['success' => __('startup.customer_growth_record_updated')]);
 	}
+
+	public function deleteRecord($id)
+	{
+		$user = auth()->user();
+		$record = StartupCustomerGrowth::findOrFail($id);
+
+		if( $user->hasRole('registered') )
+		{
+			if( $user->company_id != $record->company_id )
+			{
+				return back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+			}
+		}
+
+		$record->delete();
+
+		return back()->with(['msg' => 'customer_growth_record_deleted', 'class' => 'success']);
+	}
+
+	public function exportRecords(Request $request, $company_id)
+	{
+		$user = auth()->user();
+		if( $user->hasRole('registered') )
+		{
+			if( $user->company_id != $company_id )
+			{
+				return abort(403, 'Unauthorized');
+			}
+		}
+
+		$records_metadata = StartupCustomerGrowth::records($company_id);
+		$records = collect($records_metadata['records']);
+
+		// Apply filters if passed
+		if ($request->has('year') && $request->year != '') {
+			$records = $records->where('year', $request->year);
+		}
+		if ($request->has('segment') && $request->segment != '') {
+			$records = $records->where('segment', strtolower($request->segment));
+		}
+
+		$headers = [
+			'Content-Type' => 'text/csv; charset=UTF-8',
+			'Content-Disposition' => 'attachment; filename="customer_growth_history.csv"',
+			'Pragma' => 'no-cache',
+			'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+			'Expires' => '0'
+		];
+
+		$callback = function() use ($records) {
+			$file = fopen('php://output', 'w');
+			// Add UTF-8 BOM for Excel compatibility
+			fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+			// Headers
+			fputcsv($file, [
+				__('startup.Year'),
+				__('startup.Month'),
+				__('startup.Total customers'),
+				__('startup.New customers'),
+				__('startup.MoM growth'),
+				__('startup.Year cumulative growth'),
+				__('startup.Segment'),
+				__('startup.notes')
+			]);
+
+			foreach ($records as $record) {
+				$monthName = $record->month ? __('startup.month_' . $record->month) : __('startup.Yearly');
+				fputcsv($file, [
+					$record->year,
+					$monthName,
+					$record->total,
+					$record->newly,
+					$record->MoM,
+					$record->YearCumulative,
+					strtoupper($record->segment),
+					$record->notes
+				]);
+			}
+
+			fclose($file);
+		};
+
+		return response()->stream($callback, 200, $headers);
+	}
 }
