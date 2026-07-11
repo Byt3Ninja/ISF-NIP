@@ -173,6 +173,15 @@ class FormBuilderController extends Controller
                     'url_config' => $type === 'url'
                         ? ['allowed_domains' => $options->allowed_domains ?? '']
                         : null,
+                    // Re-hydrate the number min/max/step config so the builder
+                    // repopulates it on edit (the JS reads number_config.min/max/step).
+                    'number_config' => $type === 'number'
+                        ? [
+                            'min'  => $options->min  ?? '',
+                            'max'  => $options->max  ?? '',
+                            'step' => $options->step ?? '',
+                        ]
+                        : null,
                 ];
             });
 
@@ -196,6 +205,7 @@ class FormBuilderController extends Controller
                                 'options' => $f['options'],
                                 'logic' => $f['logic'],
                                 'url_config' => $f['url_config'] ?? null,
+                                'number_config' => $f['number_config'] ?? null,
                             ];
                         })->values()->toArray(),
                     ];

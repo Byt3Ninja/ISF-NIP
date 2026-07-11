@@ -622,6 +622,23 @@ function updateQuestionOptions(select) {
       <div>
         <input type="number" class="form-control text-muted"
           placeholder="${t.number_placeholder}" disabled>
+        <div class="row g-3 mt-1">
+          <div class="col-md-4">
+            <label class="form-label small text-muted">${t.min_value}</label>
+            <input type="number" name="questions[${cardId}][number_config][min]" class="number-min form-control form-control-sm"
+              placeholder="${t.min_optional}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted">${t.max_value}</label>
+            <input type="number" name="questions[${cardId}][number_config][max]" class="number-max form-control form-control-sm"
+              placeholder="${t.max_optional}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted">${t.step}</label>
+            <input type="number" name="questions[${cardId}][number_config][step]" class="number-step form-control form-control-sm"
+              placeholder="1" min="0" step="any">
+          </div>
+        </div>
       </div>`,
 
     email: `
