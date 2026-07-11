@@ -487,6 +487,7 @@ return [
 	'New Service request from' => 'طلب خدمة جديد من',
 	'You need to enable Have a company first' => 'يجب أن تفعل خيار (هل لديك شركة) أولاً',
 	'You already enrolled in a cycle.' => 'أنت بالفعل داخل برنامج حالياً',
+	'You have already submitted this form.' => 'لقد قمت بالفعل بإرسال هذا النموذج.',
 	'The selected cycle doesn\'t contain a data form.' => 'البرنامج المختارة لا تحتوي على نموذج للتسجيل',
 	'Documentations' => 'وثائق المساعدة',
 	'Edit Document' => 'تحرير مستند',

@@ -500,6 +500,7 @@ return [
 	'New Service request from' => 'New Service request from',
 	'You need to enable Have a company first' => 'You need to enable (Have a Startup) first.',
 	'You already enrolled in a cycle.' => 'You already enrolled in a Program.',
+	'You have already submitted this form.' => 'You have already submitted this form.',
 	'The selected cycle doesn\'t contain a data form.' => 'The selected program doesn\'t contain a data form.',
 	'Documentations' => 'Documentations',
 	'Edit Document' => 'Edit Document',

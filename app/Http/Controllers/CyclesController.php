@@ -1165,10 +1165,30 @@ class CyclesController extends Controller
             //     'form_id' => $step->id,
             //     'field_ids' => implode(",", $field_map_ids)
             // ];
-            if( $user->company->step == $id ) {
-                $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->orderBy('form_data.id', 'ASC')->select('answer')->pluck('answer')->toArray();
+            // GV-3827: populate saved answers so a submitted form renders
+            // read-only WITH the founder's answers on the /view route too
+            // (previously only /my did this, and only when the founder's
+            // current step happened to equal this one). Scope by user +
+            // this step (form_id, per saveForm's own scoping — see the
+            // comment in saveForm()) + this form's fields, so a founder who
+            // has moved to a later step still sees this step's answers when
+            // navigating back to it. Detection of "already submitted" (=>
+            // read-only) is driven by these rows via $answers->count() in
+            // the blade.
+            $inputs = [];
+            $answerRows = Formfield::rightJoin('form_data', 'form_fields.id', 'form_data.field_id')
+                ->where('form_data.user_id', Auth::id())
+                ->where('form_data.form_id', $id)
+                ->whereIn('form_data.field_id', $field_map_ids)
+                ->orderBy('form_data.id', 'ASC')
+                ->get(['form_data.field_id', 'form_data.answer']);
+            foreach ($answerRows as $row) {
+                $inputs['field_' . $row->field_id] = $row->answer;
             }
-            $answers = collect($answers);
+            if (! session()->hasOldInput()) {
+                session()->flashInput($inputs);
+            }
+            $answers = collect($answerRows->pluck('answer'));
             return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $c)->with('answers', $answers);
         }
     }
@@ -1398,6 +1418,35 @@ class CyclesController extends Controller
         $uid = $user->id;
         $company = $user->company;
         $cid = $company->id;
+
+        // GV-3827: a founder may submit this form only once. Detect a prior
+        // completed submission by the existence of form_data rows for this
+        // (user, company, step). The stepper never persists partial progress
+        // server-side (the whole form posts in one request), so row existence
+        // always means "already fully submitted", never "in progress".
+        // Scoped on `form_id`, not `step_id`: the destructive delete/insert
+        // below (and the GV-3226 fix) both key the "this step" scope off
+        // `form_id` (see the comment above the delete at ~line 1650 — "the
+        // same BuilderForm can be assigned to multiple steps ... this mirrors
+        // the form_id scoping"), so the guard must agree with that column.
+        //
+        // The flash message follows this controller's existing convention
+        // (see e.g. 'You already enrolled in a cycle.' above): an English
+        // key string translated via __('admin.'.$msg) using the en/ar
+        // resources/lang/*/admin.php files, NOT the blade's inline
+        // `$l == 'ar' ? … : …` pattern (that convention isn't in scope here;
+        // $l itself isn't defined in this method).
+        $alreadySubmitted = Formdata::where('user_id', Auth::id())
+            ->where('company_id', $cid)
+            ->where('form_id', $id)
+            ->exists();
+        if ($alreadySubmitted) {
+            return redirect()->back()->with([
+                'msg'   => 'You have already submitted this form.',
+                'class' => 'danger',
+            ]);
+        }
+
         $get_fields_data = Formfield::whereIn('id', $field_map_ids)->get();
         /* foreach ($field_map_ids as $fid)
         {

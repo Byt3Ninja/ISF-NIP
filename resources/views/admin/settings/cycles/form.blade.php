@@ -5,12 +5,12 @@
   $sections = collect($form['build_data'] ?? []);
   $totalSections = $sections->count();
   $totalQuestions = $sections->sum(fn($section) => count($section['questions'] ?? []));
-  // Previously this flag forced the whole form into a read-only view after
-  // first submission, which blocked GV-2134's "founder can edit a
-  // submitted form" flow. The form is now always editable; we only keep
-  // the flag to drive the "Submitted" badge and the CTA label.
   $hasSubmission = $answers->count() > 0;
-  $isReadOnly = false;
+  // GV-3827: the form is read-only once the founder has submitted it. This
+  // reverses GV-2134 (which hardcoded false to allow editing after submit,
+  // per an earlier product decision). All of GV-2134's file-upload and
+  // validation improvements are kept — only this flag changes.
+  $isReadOnly = $hasSubmission;
   $typeMeta = [
       'short_answer' => ['icon' => 'ti ti-pencil', 'label' => __('builder.Short_answer')],
       'paragraph' => ['icon' => 'ti ti-align-left', 'label' => __('builder.Paragraph')],
@@ -81,6 +81,15 @@
               <div class="d-flex align-items-center">
                 <i class="bx bx-{{ Session::get('class') == 'success' ? 'check-circle' : 'error' }} me-2"></i>
                 <span>{{ __('admin.'.session()->get('msg')) }} {{ Session::forget('msg') }}</span>
+              </div>
+            </div>
+          @endif
+
+          @if($isReadOnly)
+            <div class="alert alert-info rounded-3 mb-4" role="alert">
+              <div class="d-flex align-items-center">
+                <i class="ti ti-eye me-2"></i>
+                <span>{{ $l == 'ar' ? 'عرض فقط — تم تسجيل مشاركتك.' : 'View only — your submission has been recorded.' }}</span>
               </div>
             </div>
           @endif
@@ -492,22 +501,24 @@
                       @endforeach
                     </div>
                   </div>
-                  <div class="card-footer border-top bg-body px-4 px-lg-5 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="text-muted small">
-                        {{ $sectionIndex + 1 }} / {{ count($form['build_data']) }} {{ $l == 'en' ? 'Sections' : 'اقسام' }}
-                      </div>
-                      <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-prev d-none" data-section-id="{{ $sectionIndex }}">
-                          <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
-                        </button>
-                        <button type="button" class="btn btn-primary btn-next" data-section-id="{{ $sectionIndex }}">
-                          <span class="btn-next-text">{{ $l == 'en' ? 'Next' : 'التالي' }}</span>
-                          <i class="ti ti-arrow-right ms-2 btn-next-icon"></i>
-                        </button>
+                  @if(!$isReadOnly)
+                    <div class="card-footer border-top bg-body px-4 px-lg-5 py-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                          {{ $sectionIndex + 1 }} / {{ count($form['build_data']) }} {{ $l == 'en' ? 'Sections' : 'اقسام' }}
+                        </div>
+                        <div class="d-flex gap-2">
+                          <button type="button" class="btn btn-outline-secondary btn-prev d-none" data-section-id="{{ $sectionIndex }}">
+                            <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
+                          </button>
+                          <button type="button" class="btn btn-primary btn-next" data-section-id="{{ $sectionIndex }}">
+                            <span class="btn-next-text">{{ $l == 'en' ? 'Next' : 'التالي' }}</span>
+                            <i class="ti ti-arrow-right ms-2 btn-next-icon"></i>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  @endif
                 </div>
               </div>
             @endforeach
@@ -1161,8 +1172,17 @@
       showSection(prev);
     }
 
-    // Initialize: show Section 1
-    if (sections.length > 0) {
+    // GV-3827: in read-only mode there is no stepper — every section is
+    // shown at once (flat), inputs are already server-rendered `disabled`,
+    // and there is no Next/Back/Submit (gated out in the blade). Skip the
+    // stepper's initial-section logic entirely so nothing is hidden.
+    const IS_READONLY = @json($isReadOnly);
+
+    if (IS_READONLY) {
+      sections.forEach(function (s) { s.style.display = "block"; });
+      if (submitStep) submitStep.style.display = "none";
+    } else if (sections.length > 0) {
+      // Initialize: show Section 1
       showSection(0);
     }
 
