@@ -256,17 +256,17 @@
     $('.invalid-feedback').remove();
   }
 
-  alertify.defaults.transition = 'zoom';
-  alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-  alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-  alertify.defaults.theme.input = 'form-control';
-
   function deleteRecord(event, button) {
     event.preventDefault();
     
-    alertify.confirm("{{ __('startup.delete_customer_growth_confirm') }}" , function(){
-      $(button).parent().submit();
-    }, function(){});
+    releaseWarningAlert({
+      title: '{{ __("admin.Confirm") }}',
+      message: "{{ __('startup.delete_customer_growth_confirm') }}",
+      confirmText: '{{ __("admin.Yes") }}',
+      cancelText: '{{ __("admin.cancel") }}',
+      confirmColor: 'danger',
+      onConfirm: function () { $(button).parent().submit(); }
+    });
   }
 </script>
 @endpush
