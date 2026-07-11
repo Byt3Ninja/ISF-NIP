@@ -1106,7 +1106,7 @@ $socialLinks = [
           <div class="col-lg-5">
             <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center mb-6">
 
-              <img src="{{ $organization->image_url }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded">
+              <img src="{{ route('organizations.logo', $organization->img_url ?? '') }}"  alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded">
               <span class="app-brand-text footer-text fw-bold ms-2 ps-1">
                 {{ $isRtl ? $organization->name_ar : $organization->name_en }}
               </span>

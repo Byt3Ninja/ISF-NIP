@@ -339,7 +339,7 @@
 									</div>
 									<div class="d-flex align-items-center mt-3">
 										@if( !is_null( $organization ) )
-										<img src="{{ $organization->image_url }}" alt="avatar" class="rounded-circle" height="35"
+										<img src="{{ route('organizations.logo', $organization->img_url ?? '') }}" alt="avatar" class="rounded-circle" height="35"
 											width="35">
 										@else
 										<img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
