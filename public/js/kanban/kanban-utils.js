@@ -59,7 +59,7 @@ function validateFiles(fileInput, errorSelector) {
   const allowedTypes = [
     'image/jpeg','image/jpg','image/png','image/gif','image/webp','image/svg+xml',
     'application/pdf',
-    'application/zip','application/x-rar-compressed','application/vnd.rar',
+    'application/zip','application/x-rar-compressed','application/x-compressed','application/vnd.rar',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.ms-excel',

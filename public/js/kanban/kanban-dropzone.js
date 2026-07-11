@@ -20,7 +20,7 @@ const DZ_ACCEPT_TYPES = [
   'application/zip','application/x-zip-compressed',
   '.rar',
   'application/vnd.rar',
-  'application/x-rar-compressed',
+  'application/x-rar-compressed','application/x-compressed',
   'application/octet-stream',
   'text/plain',
 ];
