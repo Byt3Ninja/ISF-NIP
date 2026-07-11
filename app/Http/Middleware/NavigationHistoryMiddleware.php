@@ -326,6 +326,8 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
         'results_view_screening' => app()->getLocale() == 'en' ? 'Final Screening Results' : 'نتائج الفحص النهائي',
         'view_cycle' => app()->getLocale() == 'en' ? 'Form' : 'النموذج',
         'index_form_submission_detail' => app()->getLocale() == 'en' ? 'View Form Submission' : 'تقديم النماذج',
+        'list_mine_cycle' => app()->getLocale() == 'en' ? 'My Submission' : 'عرض مشاركتى',
+        'render_view_form' => app()->getLocale() == 'en' ? 'Form Details' : 'تفاصيل النموذج',
         
     ];
     if (isset($customReplacements[$cleanTitle])) {
