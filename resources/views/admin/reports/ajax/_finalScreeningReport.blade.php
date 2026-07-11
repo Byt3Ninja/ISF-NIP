@@ -94,7 +94,7 @@
 						<select id="final-screening-step-filter" class="form-select">
 							<option value="">{{ __('cycles.AllـSteps') }}</option>
 							@foreach ($steps as $step)
-								<option value="{{ $step->id }}">{{ $step->title }} [id: #{{ $step->id }}]</option>
+								<option value="{{ $step->id }}">{{ $step->title }}</option>
 							@endforeach
 						</select>
 					</div>
