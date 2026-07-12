@@ -887,7 +887,7 @@ class ScreeningController extends Controller
 			if ($update) {
 				$successCount++;
 				/// notify Company Owner via Mail
-				SendChangeCycleNotificationJob::dispatch($companyId, $request->step, $data['last_step'], $data['new_step']);
+				SendChangeCycleNotificationJob::dispatch($companyId, $request->step, $data['last_step'], $data['new_step'], $data['program']);
 			}
 		}
 
