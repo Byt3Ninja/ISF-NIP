@@ -447,7 +447,37 @@
   <script>
     (function () {
       'use strict';
-
+      const lang = document.documentElement.lang;
+      // Translations for multilingual support
+      const translations = {
+        en: {
+          actions: 'Actions',
+          search: 'Search',
+          view: 'View Details',
+          show: 'Show',
+          entries: 'entries',
+          showing: 'Showing',
+          to: 'to',
+          of: 'of',
+          filtered: 'filtered',
+          noMatchingRecords: 'No matching records found',
+          noDataAvailable: 'No data available in table',
+        },
+        ar: {
+          actions: 'الإجراءات',
+          search: 'بحث',
+          view: 'عرض التفاصيل',
+          show: 'عرض',
+          entries: 'المدخلات',
+          showing: 'عرض',
+          to: 'إلى',
+          of: 'من',
+          filtered: 'مصفاة',
+          noMatchingRecords: 'لا توجد سجلات مطابقة',
+          noDataAvailable: 'لا توجد بيانات متاحة في الجدول',
+        }
+      };
+      const t = translations[lang] || translations.en;
       const APPROVAL_STATUS = @json($approvalStatus ?? 'accepted');
 
       // If not approved, do not initialize interactive features
@@ -833,7 +863,29 @@
         ordering: true,
         columnDefs: [
           { orderable: false, targets: [0, 5] } // checkbox and actions columns
-        ]
+        ],
+        displayLength: 10,
+        lengthMenu: [10, 25, 50, 75, 100],
+        language: {
+          paginate: {
+            next: '<i class="ti ti-chevron-right ti-sm"></i>',
+            previous: '<i class="ti ti-chevron-left ti-sm"></i>'
+          },
+          search: `${t.search}:`,
+          searchPlaceholder: `${t.search}...`,
+          lengthMenu: `${t.show} <select class="form-select form-select-sm">` +
+            `<option value="10">10</option>` +
+            `<option value="25">25</option>` +
+            `<option value="50">50</option>` +
+            `<option value="75">75</option>` +
+            `<option value="100">100</option>` +
+            '</select> ' + t.entries,
+          info: `${t.showing} <span class="text-primary">_START_</span> ${t.to} <span class="text-primary">_END_</span> ${t.of} <span class="text-primary">_TOTAL_</span> ${t.entries}`,
+          infoEmpty: `${t.showing} 0 ${t.to} 0 ${t.of} 0 ${t.entries}`,
+          infoFiltered: `(${t.filtered} ${t.of} _MAX_ ${t.entries})`,
+          zeroRecords: `${t.noMatchingRecords}`,
+          emptyTable: `${t.noDataAvailable}`,
+        },
       });
 
     })();
