@@ -24,18 +24,21 @@ class SendChangeCycleNotificationJob implements ShouldQueue
     protected $step;
     protected $last_step;
     protected $new_step;
+    protected $program;
 
-    public function __construct($company, $step, $last_step, $new_step)
+    public function __construct($company, $step, $last_step, $new_step, $program = null)
     {
         $this->company = $company;
         $this->step = $step;
         $this->last_step = $last_step;
         $this->new_step = $new_step;
+        $this->program = $program;
     }
 
     public function handle()
     {
         $cstep = null;
+        $program = $this->program ?? null;
         // log::info("notifying data: " . $this->company );
         if($this->step != "0"){
             $cstep = Step::findOrFail($this->step);
@@ -58,7 +61,7 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $data['status'] = $this->step != "0" ? 'in' : 'out';
         $data['start_date'] = $start_date;
         $data['preferred_language'] = $company_owner->language;
-        $data['program'] = $cstep->cycle;
+        $data['program'] = $program;
 
         // Log::info("notifying data: ", $data); 
         // // إرسال الحدث بالبث
