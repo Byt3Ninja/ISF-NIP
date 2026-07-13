@@ -32,7 +32,7 @@
                                                                     <p style="margin: 0;">"{{ $title }}"</p>
                                                                     <p style="margin: 0;"> </p>
                                                                     <p style="margin: 0;">{{__('email.trainer_email.session_start')}}:
-                                                                        {{ FormatDate($date, 'd-m-Y h:i A') }}
+                                                                        {{ $date }}
                                                                     </p>
                                                                     <p style="margin: 0;"> </p>
                                                                     @if($type == 'sessions')
