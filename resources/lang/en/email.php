@@ -50,7 +50,7 @@ return [
 
     'trainer_email' => [
         'subject' => 'New Trainer Assignment',
-        'title' => 'Kindly note you have a new online trainingsession, with Title :',
+        'title' => 'Kindly note you have a new online training session, with Title :',
         'dear' => 'Dear',
         'session_start' => 'Session will start at',
         'link' => 'Link',
