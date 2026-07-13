@@ -296,7 +296,7 @@ class ClientCompanyController extends Controller
             }
 
             $custom_form = $cycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
-            $submissions = Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first();
+            $submissions = Formdata::where('company_id', $company?->id)->where('step_id', $custom_form?->id)->orderBy('created_at', 'asc')->first();
             $programs->push((object)[
                 'id' => $cycle->id,
                 'name' => $cycle->title,
