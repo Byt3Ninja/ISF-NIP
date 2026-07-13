@@ -154,9 +154,9 @@
                         <a class="dropdown-item" href="/dashboard/show-builder{{ $step->organization->id ? '?' . 'org_id=' . $step->organization->id : '' }}">
                           <i class="ti ti-plus me-1"></i> {{ __('builder.Add_New_Form') }}
                         </a>
-                        <button class="dropdown-item edit-step-btn" data-step='@json($step)'>
+                        {{--  <button class="dropdown-item edit-step-btn" data-step='@json($step)'>
                           <i class="ti ti-pencil me-1"></i> {{ __('admin.edit_step') }}
-                        </button>
+                        </button>  --}}
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item text-danger" onclick="handleDeleteStep({{ $step->id }})">
                           <i class="ti ti-trash me-1"></i> {{ __('admin.delete') }}
