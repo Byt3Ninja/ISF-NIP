@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use stdClass;
 use App\Notifications\MentorshipSessionRequestNotification;
+use App\Notifications\MentorshipSessionMentorBookingNotification;
 
 class MentorsController extends Controller
 {
@@ -550,6 +551,7 @@ class MentorsController extends Controller
 				
 				$errors = [];
 				$successCount = 0;
+				$bookedSessions = [];
 
 				foreach ($request->selected_dates as $index => $dateItem) {
 				$date = $dateItem['date'];
@@ -657,6 +659,25 @@ class MentorsController extends Controller
 
 				$successCount++;
 
+				$start = Carbon::parse($datefrom);
+				$end = $start->copy()->addMinutes($period);
+				$sessionType = $slot_session_type;
+				$location = $sessionType === 'Offline'
+					? ($cycle->offline_location_address ?? optional($cycle->organization)->address ?? null)
+					: null;
+
+				$bookedSessions[] = [
+					'founder_name' => '',
+					'startup_name' => '',
+					'date' => $start->format('Y-m-d'),
+					'start_time' => $start->format('h:i A'),
+					'end_time' => $end->format('h:i A'),
+					'type' => $sessionType,
+					'location' => $location,
+					'link' => $sessionType === 'Online' ? $joinUrl : null,
+					'is_hackathon' => strtolower($cycle->type) === 'hackathon'
+				];
+
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					SendMentorshipRequestJob::dispatch($request->mentorid, $date, $request->period, $userid, null, null, 'addwait');
 				}
@@ -664,6 +685,11 @@ class MentorsController extends Controller
 				
 
 				if ($successCount > 0) {
+					$mentor = User::find($request->mentorid);
+					$founder = User::find($request->user_id);
+					if ($mentor && $founder) {
+						$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
+					}
 					return back()->with(['message' => "Request_successfully_added_Startup"]);
 				} else {
 					return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
@@ -826,6 +852,10 @@ class MentorsController extends Controller
 			if (count($dateDatabase) > 0) {
 				return back()->with(['message2' => "Cant_add_request_date_is_Exist", 'notAdd' => 2]);
 			}
+
+			$bookedSessions = [];
+			$cycle = Cycle::find($request->cycle_id);
+
 			foreach ($dates as $key) {
 				$date = ltrim($key);
 				
@@ -862,10 +892,33 @@ class MentorsController extends Controller
 				]);
 
 				$this->notifyFounderOfReservedSession($createMentor);
+				$start = Carbon::parse($date);
+				$end = $start->copy()->addMinutes($request->period);
+				$sessionType = 'Online';
+				$joinUrl = $onlineMeeting['data']['join_url'];
+
+				$bookedSessions[] = [
+					'founder_name' => '',
+					'startup_name' => '',
+					'date' => $start->format('Y-m-d'),
+					'start_time' => $start->format('h:i A'),
+					'end_time' => $end->format('h:i A'),
+					'type' => $sessionType,
+					'location' => null,
+					'link' => $joinUrl,
+					'is_hackathon' => $cycle ? (strtolower($cycle->type) === 'hackathon') : false
+				];
 
 				SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), $onlineMeeting, null, null, 'add');
 				/// End of mail send
 			}
+
+			$mentor = User::find($request->mentorid);
+			$founder = User::find($request->userid);
+			if ($mentor && $founder && !empty($bookedSessions)) {
+				$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
+			}
+
 			return back()->with([
 				'message' => 'Session added successfully',
 				'add' => 1
