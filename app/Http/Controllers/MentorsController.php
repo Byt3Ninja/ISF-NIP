@@ -653,6 +653,8 @@ class MentorsController extends Controller
 					'session_type' => $slot_session_type
 				]);
 
+				$this->notifyFounderOfReservedSession($createMentor);
+
 				$successCount++;
 
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
@@ -755,7 +757,7 @@ class MentorsController extends Controller
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
 						$dateFormat = new \DateTime($datefrom);
 						
-						MentorshipRequest::create([
+						$createMentor = MentorshipRequest::create([
 							'mentor_id' => $request->mentorid,
 							'user_id' => $userid,
 							'comment' => $request->notes,
@@ -772,9 +774,11 @@ class MentorsController extends Controller
 							'session_type' => $request->session_type
 						]);
 
+						$this->notifyFounderOfReservedSession($createMentor);
+
 						$mentor = User::find($request->mentorid);
 					} else {
-						MentorshipRequest::create([
+						$createMentor = MentorshipRequest::create([
 							'mentor_id' => $request->mentorid,
 							'user_id' => Auth::id(),
 							'comment' => $request->notes,
@@ -789,6 +793,8 @@ class MentorsController extends Controller
 							'approved' => $approved,
 							'session_type' => $request->session_type
 						]);
+
+						$this->notifyFounderOfReservedSession($createMentor);
 					}
 					if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 						// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
@@ -839,7 +845,7 @@ class MentorsController extends Controller
 				// $dateAM = substr($date1, -2);
 				$dateFormat = new \DateTime($date);
 				// dd($dateFormat->format('Y-m-d H:i'));
-				MentorshipRequest::create([
+				$createMentor = MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
 					'user_id' => $request->userid,
 					'admin_comment' => $request->notes,
@@ -855,6 +861,7 @@ class MentorsController extends Controller
 					'cycle_id' => $request->cycle_id,
 				]);
 
+				$this->notifyFounderOfReservedSession($createMentor);
 
 				SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), $onlineMeeting, null, null, 'add');
 				/// End of mail send
@@ -1638,6 +1645,35 @@ class MentorsController extends Controller
 			return redirect()->away($session->start_url);
 		}else{
 			return redirect()->away($session->join_url);
+		}
+	}
+
+	private function notifyFounderOfReservedSession($mentorshipRequest)
+	{
+		try {
+			$startupUser = $mentorshipRequest->user;
+			if ($startupUser && $startupUser->company) {
+				$founder = $startupUser->company->resolveUser();
+				if ($founder && $founder->id !== Auth::id()) {
+					$zoomDate = Carbon::parse($mentorshipRequest->zoom_date);
+					$duration = $mentorshipRequest->period ?? 60;
+					$endDate = $zoomDate->copy()->addMinutes($duration);
+
+					$sessionData = [
+						'mentor_name' => $mentorshipRequest->mentor->name ?? 'N/A',
+						'session_date' => $zoomDate->format('Y-m-d'),
+						'start_time' => $zoomDate->format('H:i:s'),
+						'end_time' => $endDate->format('H:i:s'),
+						'session_type' => $mentorshipRequest->session_type ?? 'Online',
+						'location' => $mentorshipRequest->orgnization->address ?? ($mentorshipRequest->orgnization->google_map_url ?? null),
+						'meeting_link' => $mentorshipRequest->join_url ?? null,
+					];
+
+					$founder->notify(new \App\Notifications\MentorshipSessionFounderNotification($sessionData));
+				}
+			}
+		} catch (\Exception $e) {
+			\Log::error('Failed to notify founder of reserved session: ' . $e->getMessage());
 		}
 	}
 }
