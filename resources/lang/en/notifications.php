@@ -59,6 +59,7 @@ return [
         'whatsapp'  => ':greeting :line',
         'database' => 'New mentorship session notification',
         'subject' => 'Mentorship Session Update',
+        'founder_booking' => 'You have a new mentorship session with :mentor_name on :session_date at :start_time – :end_time (AM/PM).',
     ],
 
     'confirm_email_update' => [

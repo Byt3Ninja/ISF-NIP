@@ -59,6 +59,7 @@ return [
         'whatsapp'  => ':greeting :line',
         'database' => 'إشعار جلسة إرشاد جديدة',
         'subject' => 'تحديث جلسة الإرشاد',
+        'founder_booking' => 'لديك جلسة إرشاد جديدة مع :mentor_name بتاريخ :session_date في :start_time – :end_time (AM/PM).',
     ],
 
     'custom_email' => [

@@ -17,6 +17,7 @@ use App\Jobs\SendMentorshipRequestJob;
 use App\MentorshipRequest;
 use App\Notifications\MentorshipRequestNotification;
 use App\Notifications\MentorshipSession;
+use App\Notifications\MentorshipSessionFounderBookingNotification;
 use App\Notifications\TemplateEmail;
 use App\Schedule;
 use App\Services\WhatsAppService;
@@ -677,6 +678,16 @@ class MentorsController extends Controller
 					'link' => $sessionType === 'Online' ? $joinUrl : null,
 					'is_hackathon' => strtolower($cycle->type) === 'hackathon'
 				];
+
+				$founder = User::find($userid);
+				if ($founder) {
+					$founder->notify(new MentorshipSessionFounderBookingNotification(
+						$requestedMentor,
+						$date,
+						$time_from,
+						$time_to
+					));
+				}
 
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					SendMentorshipRequestJob::dispatch($request->mentorid, $date, $request->period, $userid, null, null, 'addwait');
