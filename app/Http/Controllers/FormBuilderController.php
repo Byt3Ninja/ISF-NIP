@@ -506,15 +506,20 @@ class FormBuilderController extends Controller
         });
 
         
-        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields) {
+        $section_index = 0;
+        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields, &$section_index) {
             
             if (($item['type'] ?? null) === 'question') {
-               
                 $section_title = null; 
                 $questions = [$item]; 
+                $description = null;
             }
             elseif (($item['type'] ?? null) === 'section') {
-                $section_title = $item['title'] ?? null;
+                $section_index++;
+                $section_title = trim($item['title'] ?? '');
+                if ($section_title === '') {
+                    $section_title = 'Section ' . $section_index;
+                }
                 $description = $item['description'] ?? null;
                 $questions = $item['questions'] ?? [];
             }

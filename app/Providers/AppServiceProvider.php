@@ -87,7 +87,10 @@ class AppServiceProvider extends ServiceProvider
                 config('mail.mailers.smtp.password') ?? env('MAIL_PASSWORD')
             );
         });
-        view()->composer('*', function ($view) use ($settings) {
+        view()->composer('*', function ($view) use (&$settings) {
+            if (!$settings && Schema::hasTable('settings')) {
+                $settings = Settings::find(1);
+            }
             $profile_completed = true;
             $company_completed = true;
             if (session()->has('locale')) {

@@ -427,33 +427,34 @@
                 </div>
               @endforeach
 
-              <div class="card border shadow-none" id="submit-step">
-                <div class="card-body p-4 p-lg-5">
-                  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-                    <div>
-                      <h5 class="mb-1">
-                        {{ $l == 'en' ? 'Ready to review this application?' : 'جاهز للمراجعة؟' }}
-                      </h5>
-                      <p class="text-muted mb-0">
-                        {{ $l == 'en' 
-                          ? 'Use the preview to validate content, required fields, and flow before publishing or submitting.' 
-                          : 'استخدم المعاينة للتحقق من المحتوى، الحقول المطلوبة، والتدفق قبل النشر أو الإرسال'}}
-                      </p>
-                    </div>
-
-                    <div class="d-flex flex-column flex-sm-row gap-2">
-                      @if(auth()->user()->hasAnyRole('registered'))
-                        <button type="button" class="btn btn-primary btn-lg" disabled>
-                          <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }} {{ $l == 'en' ? '(Preview)' : '(معاينة)' }}
-                        </button>
-                      @endif
-                      <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
-                        <i class="ti ti-edit me-2"></i>{{ __('builder.Edit_Form') }}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+               <div class="card border shadow-none" id="submit-step" style="display: none;">
+                 <div class="card-body p-4 p-lg-5">
+                   <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                     <div>
+                       <h5 class="mb-1">
+                         {{ $l == 'en' ? 'Ready to submit this application?' : 'جاهز لإرسال هذا النموذج؟' }}
+                       </h5>
+                       <p class="text-muted mb-0">
+                         {{ $l == 'en' 
+                           ? 'Please review your answers before submitting.' 
+                           : 'يرجى مراجعة إجاباتك قبل الإرسال.'}}
+                       </p>
+                     </div>
+ 
+                     <div class="d-flex flex-column flex-sm-row gap-2">
+                       <button type="button" class="btn btn-outline-secondary btn-prev-submit btn-lg">
+                         <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
+                       </button>
+                       <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-form">
+                         <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }}
+                       </button>
+                       <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
+                         <i class="ti ti-edit me-2"></i>{{ __('builder.Edit_Form') }}
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
             </form>
           @else
             <div class="alert alert-warning border border-warning rounded-3 mb-0">
@@ -670,7 +671,6 @@
         eleInvalidClass: 'is-invalid',
         eleValidClass: ''
       }),
-      submitButton: new FormValidation.plugins.SubmitButton(),
       autoFocus: new FormValidation.plugins.AutoFocus()
     };
 
@@ -786,7 +786,7 @@
     function showSection(index) {
       sections.forEach(s => { s.style.display = "none"; });
       if (submitStep) submitStep.style.display = "none";
-
+ 
       if (index === "submit" || index < 0 || index >= sections.length) {
         if (submitStep) {
           submitStep.style.display = "block";
@@ -794,29 +794,29 @@
         }
         return;
       }
-
+ 
       const section = sections[index];
       section.style.display = "block";
       updateNavButton(section);
-
+ 
       const prevBtn = section.querySelector(".btn-prev");
       if (prevBtn) {
-        prevBtn.classList.toggle("d-none", sectionHistory.length <= 1);
+        prevBtn.disabled = (sectionHistory.length <= 1);
+        prevBtn.classList.remove("d-none");
       }
-
+ 
       section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-
+ 
     function doNavigate(currentSection) {
       const logic = getNextLogic(currentSection);
       const currentIndex = parseInt(currentSection.dataset.sectionId);
-
+ 
       let next;
       if (logic === "submit") {
         next = "submit";
       } else if (logic.startsWith("section-")) {
         var targetId = parseInt(logic.replace("section-", ""));
-        // Same guards as old updateFormVisibility: must be forward, not visited, valid
         if (!sectionHistory.includes(targetId) && targetId > currentIndex && sections[targetId]) {
           next = targetId;
         } else if (sections[currentIndex + 1]) {
@@ -825,12 +825,10 @@
           next = "submit";
         }
       } else {
-        // continue – next sequential
         next = sections[currentIndex + 1] ? currentIndex + 1 : "submit";
       }
-
+ 
       if (next === "submit") {
-        // Preview mode – show the submit step instead of actually submitting
         sections.forEach(function (s) { s.style.display = "none"; });
         if (submitStep) {
           submitStep.style.display = "block";
@@ -838,22 +836,31 @@
         }
         return;
       }
-
+ 
       if (!sectionHistory.includes(next)) {
         sectionHistory.push(next);
       }
-
+ 
       showSection(next);
     }
-
+ 
     function navigateNext(currentSection) {
-      var fv = window._formValidation;
+      const fv = window._formValidation;
       if (fv) {
-        fv.validate().then(function (result) {
-          if (result.valid) {
+        // Validate only fields in the current section
+        const fieldsInSection = currentSection.querySelectorAll('input[name], select[name], textarea[name]');
+        const promises = [];
+        fieldsInSection.forEach(field => {
+          if (field.name && fv.getFields()[field.name]) {
+            promises.push(fv.validateField(field.name));
+          }
+        });
+        
+        Promise.all(promises).then(results => {
+          if (!results.includes('Invalid')) {
             doNavigate(currentSection);
           } else {
-            var firstError = currentSection.querySelector(".is-invalid");
+            const firstError = currentSection.querySelector(".is-invalid");
             if (firstError) firstError.focus();
           }
         });
@@ -861,19 +868,19 @@
         doNavigate(currentSection);
       }
     }
-
+ 
     function navigatePrev(currentSection) {
       if (sectionHistory.length <= 1) return;
       sectionHistory.pop();
       var prev = sectionHistory[sectionHistory.length - 1];
       showSection(prev);
     }
-
+ 
     // Initialize: show first section
     if (sections.length > 0) {
       showSection(0);
     }
-
+ 
     function hasConfiguredLogic(input) {
       if (input.tagName === "SELECT") {
         return Array.from(input.options).some(function (opt) {
@@ -888,22 +895,21 @@
       }
       return false;
     }
-
+ 
     // Auto-navigate when a conditional-logic input changes
     logicInputs.forEach(function (input) {
       input.addEventListener("change", function () {
         var section = this.closest(".section-wrapper");
         if (!section || section.style.display === "none") return;
-
+ 
         updateNavButton(section);
-
+ 
         if (hasConfiguredLogic(this)) {
-          // Auto-advance without validation (matches old show/hide behaviour)
           doNavigate(section);
         }
       });
     });
-
+ 
     // Handle next button clicks
     nextBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -911,13 +917,84 @@
         if (section) navigateNext(section);
       });
     });
-
+ 
     // Handle previous button clicks
     prevBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
         var section = this.closest(".section-wrapper");
         if (section) navigatePrev(section);
       });
+    });
+
+    // Handle submit step Back button click
+    const prevSubmitBtn = document.querySelector(".btn-prev-submit");
+    if (prevSubmitBtn) {
+      prevSubmitBtn.addEventListener("click", function () {
+        if (sectionHistory.length > 0) {
+          const prev = sectionHistory[sectionHistory.length - 1];
+          showSection(prev);
+        }
+      });
+    }
+
+    // Intercept form submit to validate active path only and set correct active field_ids
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const fv = window._formValidation;
+      if (fv) {
+        const promises = [];
+        sectionHistory.forEach(secIdx => {
+          const section = sections[secIdx];
+          if (section) {
+            const fields = section.querySelectorAll('input[name], select[name], textarea[name]');
+            fields.forEach(field => {
+              if (field.name && fv.getFields()[field.name]) {
+                promises.push(fv.validateField(field.name));
+              }
+            });
+          }
+        });
+        
+        Promise.all(promises).then(results => {
+          if (!results.includes('Invalid')) {
+            // Update field_ids hidden input to only contain fields from active sections
+            const activeFieldIds = [];
+            sectionHistory.forEach(secIdx => {
+              const section = sections[secIdx];
+              if (section) {
+                section.querySelectorAll('.application-question-card').forEach(qCard => {
+                  const input = qCard.querySelector('input[name], select[name], textarea[name]');
+                  if (input) {
+                    const match = input.name.match(/field_(\d+)/);
+                    if (match) {
+                      activeFieldIds.push(match[1]);
+                    }
+                  }
+                });
+              }
+            });
+            const fieldIdsInput = document.querySelector('input[name="field_ids"]');
+            if (fieldIdsInput) {
+              fieldIdsInput.value = activeFieldIds.join(',');
+            }
+            form.submit();
+          } else {
+            // Navigate to first section containing error
+            for (let i = 0; i < sectionHistory.length; i++) {
+              const secIdx = sectionHistory[i];
+              const section = sections[secIdx];
+              const firstError = section.querySelector('.is-invalid');
+              if (firstError) {
+                showSection(secIdx);
+                setTimeout(() => { firstError.focus(); }, 100);
+                break;
+              }
+            }
+          }
+        });
+      } else {
+        form.submit();
+      }
     });
   });
 </script>
