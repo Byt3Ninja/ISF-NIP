@@ -20,6 +20,8 @@ $canRequestMentorship =
   
 if ($canRequestMentorship) {
   $cycle = auth()->user()->company->cycledata;
+}else{
+  $cycle = null;
 }
 
  $schedules = App\Schedule::where('user_id', $client->id ?? auth()->id())
@@ -139,7 +141,7 @@ if ($canRequestMentorship) {
                       <button
                         type="button" 
                         class="btn btn-primary" 
-                        onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ $cycle->id }}, {{ $cycle->organization_id }}); }"
+                        onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $client->id }}, {{ isset($cycle) ? $cycle?->id : 0 }}, {{ isset($cycle) ? $cycle?->organization_id : 0 }}); }"
                       >
                       <i class="ti ti-calendar-plus me-2"></i>
                         {{ __('cycles.Request_Mentorship') }}
