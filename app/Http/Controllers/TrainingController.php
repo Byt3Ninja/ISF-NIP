@@ -529,7 +529,8 @@ class TrainingController extends Controller
 				'trainingId' => 'required|integer',
 			]);
 
-			$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user->company->step)->first();
+			$training = TrainingSession::where('training_Address', $request->trainingId)->where('step_id', $user?->company?->step)->first();
+			if( !$training ) { return response()->json(['status' => 'failed']); }
 
 			TrainingDuration::create([
 				'user_id' => $user->id,
