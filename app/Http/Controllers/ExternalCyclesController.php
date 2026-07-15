@@ -121,7 +121,8 @@ class ExternalCyclesController extends Controller
 		if( auth()->check() )
 		{
 			$c = $program->id;
-			return redirect()->to("dashboard/cycles/view/$c");
+			return redirect()->to("dashboard/dashboard");
+			// return redirect()->to("dashboard/cycles/view/$c");
 		}
 		else
 		{
