@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\{Cycle, User, Step, Company, Formfield, Formdata, TeamFormation};
+use App\{Cycle, User, Step, Company, Formfield, Formdata, TeamFormation, Settings};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
@@ -98,18 +98,45 @@ class ExternalCyclesController extends Controller
 	{
 		$program = $this->getProgram( $org_slug, $program_slug );
 		if( empty( $program ) ) { abort(404); }
+
+		$firstFormStep = DB::table('steps')
+			->where('cycle_id', $program->id)
+			->where('stype', 1)
+			->orderBy('arr', 'ASC')
+			->first();
+
+		if ($firstFormStep) {
+			$stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
+			$stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
+			$now = now();
+
+			$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+			if (!$isOpen) {
+				return redirect()->to("/o/" . ($program->org_slug ?? $org_slug))->with('error', app()->getLocale() == 'ar' ? 'التقديم مغلق حالياً.' : 'Applications are currently closed.');
+			}
+		} else {
+			return redirect()->to("/o/" . ($program->org_slug ?? $org_slug))->with('error', app()->getLocale() == 'ar' ? 'التقديم مغلق حالياً.' : 'Applications are currently closed.');
+		}
+
+		if( auth()->check() )
+		{
+			$user = auth()->user();
+			$c = $program->id;
+			if( $user->hasRole('Registered') )
+			{
+				if( $user?->company?->stepdata?->stype == 1 )
+				{
+					return redirect()->to("dashboard/cycles/view/" . $user->company->step );
+				}
+			}
+			return redirect()->to("dashboard/dashboard");
+			// return redirect()->to("dashboard/cycles/view/$c");
+		}
 		else
 		{
-			if( auth()->check() )
-			{
-				$c = $program->id;
-				return redirect()->to("dashboard/dashboard");
-				// return redirect()->to("dashboard/cycles/view/$c");
-			}
-			else
-			{
-				return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug'));
-			}
+			$app_settings = Settings::find(1);
+			$VFEmail = $app_settings?->VFEmail ?? 1;
+			return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug', 'VFEmail'));
 		}
 	}
 
@@ -177,7 +204,15 @@ class ExternalCyclesController extends Controller
 				{
 					Auth::login(Auth::user());
 					$c = $program->id;
-					$url = URL::to("dashboard/cycles/view/$c");
+					$user = auth()->user();
+					$url = URL::to("dashboard/dashboard");
+					if( $user->hasRole('Registered') )
+					{
+						if( $user?->company?->stepdata?->stype == 1 )
+						{
+							$url = URL::to("dashboard/cycles/view/" . $user->company->step );
+						}
+					}
 					return response()->json(['status' => true, 'message' => 'Logged in successfully', 'url' => $url]);
 				} else { return response()->json(['status' => false, 'message' => 'Invalid credentials']); }
 			} else { return response()->json(['status' => false, 'message' => 'Program not longer public']); }
