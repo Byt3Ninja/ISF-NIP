@@ -37,10 +37,7 @@
               <button type="button" class="btn-label-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           @endif
-          @php
-            $com = \App\Company::where('cycle', $id)->get();
-          @endphp
-          @if ($com->count() == 0)
+          @if ($companies->count() == 0)
             <input type="hidden" class="cyclesExcel" value="0">
           @else
             <input type="hidden" class="cyclesExcel" value="{{ request()->route('id') }}">
@@ -232,9 +229,7 @@
                     </td>
                     <td>
                       <small>
-                        {{ 
-                          \App\Step::where('cycle_id', $company->cycle)->orderBy('arr')->where('stype', '!=', '7')->get()->where('id', $company->step)->pluck('title')->implode(', ')
-                        }}
+                        {{ $company->currentStepTitle ?? '' }}
                       </small>
                     </td>
                     <td>
@@ -245,20 +240,17 @@
                           data-company-name="{{ $company->{'name_' . $l} }}"
                           data-user-name="{{ $company->user->{'first_name_' . $l} ?? '' }} {{ $company->user->{'last_name_' . $l} ?? '' }}"
                           data-current-step="{{ $company->step }}"
-                          data-current-step-title="{{ \App\Step::where('cycle_id', $company->cycle)->orderBy('arr')->where('stype', '!=', '7')->get()->where('id', $company->step)->pluck('title')->implode(', ') }}">
+                          data-current-step-title="{{ $company->currentStepTitle }}">
                           <i class="ti ti-pencil ti-16px me-1"></i> {{ __('cycles.change_step') }}
                         </button>
 
                         <!-- Mark Alumni Button -->
-                        @php
-                          $isAlumni = \App\Almuni::where('company_id', $company->id)->where('cycle_id', $company->cycle)->exists();
-                        @endphp
-                        <button type="button" class="btn btn-sm {{ $isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
+                        <button type="button" class="btn btn-sm {{ $company->isAlumni ? 'btn-secondary' : 'btn-primary' }} text-nowrap mark-alumni-btn"
                           data-company-id="{{ $company->id }}"
                           data-company-name="{{ $company->{'name_' . $l} }}"
-                          {{ $isAlumni ? 'disabled' : '' }}>
+                          {{ $company->isAlumni ? 'disabled' : '' }}>
                           <i class="ti ti-pennant ti-16px me-1"></i>
-                          <span>{{ $isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
+                          <span>{{ $company->isAlumni ? __('startup.already_alumni') : __('startup.mark_alumni') }}</span>
                         </button>
                       </div>
                     </td>
@@ -414,9 +406,6 @@
                 <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Country') }}</label>
                 <select name="country_id" class="form-select select2">
                   <option value="0">{{ __('cycles.All') }}</option>
-                  @php
-                    $countries = App\Country::all();
-                  @endphp
                   @foreach ($countries as $country)
                     <option value="{{ $country->id }}"
                       {{ $country->id == request('country_id') ? 'selected' : '' }}>{{ $country->{'name_' . $l} }}
@@ -428,9 +417,6 @@
                 <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Sector') }}</label>
                 <select name="sector_id" class="form-select select2">
                   <option value="0">{{ __('cycles.All') }}</option>
-                  @php
-                    $sectors = App\Sector::all();
-                  @endphp
                   @foreach ($sectors as $sector)
                     <option value="{{ $sector->id }}"
                       {{ $sector->id == request('sector_id') ? 'selected' : '' }}>{{ $sector->{'name_' . $l} }}
@@ -442,9 +428,6 @@
                 <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Select_Stage') }}</label>
                 <select name="Dstage_id" class="form-select select2">
                   <option value="0">{{ __('cycles.All') }}</option>
-                  @php
-                    $stages = App\Stage::all();
-                  @endphp
                   @foreach ($stages as $stage)
                     <option value="{{ $stage->id }}"
                       {{ $stage->id == request('Dstage_id') ? 'selected' : '' }}>{{ $stage->{'name_' . $l} }}
@@ -487,9 +470,6 @@
                   multiple
                   autocomplete="targeted_market"
                 >
-                  @php
-                    $countries = App\Country::all();
-                  @endphp
                   @foreach ($countries as $country)
                     <option value="{{ $country->id }}"
                       {{ $country->id == request('country_id') ? 'selected' : '' }}>
