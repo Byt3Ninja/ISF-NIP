@@ -337,7 +337,7 @@
               <label class="form-label">{{ __('admin.Country') }}</label>
               <select name="country_id" class="form-select select2" data-placeholder="{{ __('cycles.Select') }}">
                 <option value="">{{ __('cycles.Select') }}</option>
-                @foreach (App\Country::all() as $country)
+                @foreach ($countries as $country)
                   <option value="{{ $country->id }}" @selected($country->id == request('country_id'))>
                     {{ $country->{'name_'.$l} }}
                   </option>
@@ -350,7 +350,7 @@
               <label class="form-label">{{ __('admin.Sector') }}</label>
               <select name="sector_id" class="form-select select2" data-placeholder="{{ __('cycles.Select') }}">
                 <option value="">{{ __('cycles.Select') }}</option>
-                @foreach (App\Sector::all() as $sector)
+                @foreach ($sectors as $sector)
                   <option value="{{ $sector->id }}" @selected($sector->id == request('sector_id'))>
                     {{ $sector->{'name_'.$l} }}
                   </option>
@@ -363,7 +363,7 @@
               <label class="form-label">{{ __('admin.Stages') }}</label>
               <select name="Dstage_id" class="form-select select2">
                 <option value="">{{ __('cycles.Select') }}</option>
-                @foreach (App\Stage::all() as $stage)
+                @foreach ($stages as $stage)
                   <option value="{{ $stage->id }}" @selected($stage->id == request('Dstage_id'))>
                     {{ $stage->{'name_'.$l} }}
                   </option>
@@ -389,7 +389,7 @@
               <label class="form-label">{{ __('admin.Targeted_Market') }}</label>
               <select class="form-select select2" name="targeted_market[]" data-placeholder="{{ __('cycles.Select') }}"  multiple>
                 <option value="">{{ __('cycles.Select') }}</option>
-                @foreach (App\Country::all() as $country)
+                @foreach ($countries as $country)
                   <option value="{{ $country->id }}" @selected($country->id == request('country_id'))>
                     {{ $country->emoji . ' ' . $country->{'name_'.$l} }}
                   </option>
