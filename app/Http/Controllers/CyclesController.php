@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Country;
+use App\Sector;
+use App\Stage;
+use App\Almuni;
 use App\Form;
 use App\Step;
 use App\User;
@@ -203,16 +207,18 @@ class CyclesController extends Controller
         if ($id == 0) {
             $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);
-            })->orderBy('id', 'DESC')->get();
+            })->with(['organization'])->orderBy('id', 'DESC')->get();
             if (!empty($cycles->toArray())) {
                 $id = $cycles->pluck('id')[0];
             }
         } else {
             $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
                 return $q->whereIn('organization_id', $orgIds);
-            })->get();
+            })->with(['organization'])->get();
         }
+        $alumniCompanyIds = Almuni::where('cycle_id', $id)->pluck('company_id');
         $companies = Company::where('cycle', $id);
+        $alumniCompanies = Company::whereIn('id', $alumniCompanyIds)->get();
         $uniqueCycleIds = $companies->pluck('cycle')->unique();
         $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
         if ($request->step_id != 0) {
@@ -241,9 +247,35 @@ class CyclesController extends Controller
             $companies = $companies->where('business_type', $request->BType);
         }
 
-
+        $l = app()->getLocale();
         $companies = $companies->with(['user'])->get();
-        return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps'));
+        $companies = $companies->merge($alumniCompanies);
+        $getSteps = Step::where('stype', '!=', '7')->get();
+        $companies = $companies->map(function ($company) use ($alumniCompanyIds, $l, $getSteps) {
+            $company->isAlumni = $alumniCompanyIds->contains($company->id);
+            $goAlumni = $getSteps->where('cycle_id', $company->cycle)
+                            ->where('stype', '=', '5')
+                            ->sortByDesc('arr')
+                            ->first();
+
+            $currentStepTitle = $getSteps->where('cycle_id', $company->cycle)
+                            ->sortBy('arr')
+                            ->where('id', $company->step)
+                            ->pluck('title')
+                            ->implode(', ');
+
+            $company->goAlumni         = $goAlumni;
+            $company->atAlumniStep     = $goAlumni && $company->step == $goAlumni->id;
+            $company->currentStepTitle = $currentStepTitle;
+            $company->userName         = trim(($company->user->{'first_name_'.$l} ?? '').' '.($company->user->{'last_name_'.$l} ?? ''));
+            $company->companyName      = $company->{'name_'.$l};
+
+            return $company;
+        });
+        $countries = Country::all();
+        $sectors = Sector::all();
+        $stages = Stage::all();
+        return view('admin.settings.cycles.users', compact('cycles', 'id', 'companies', 'steps', 'countries', 'sectors', 'stages'));
     }
 
     public function modify(Request $request)
