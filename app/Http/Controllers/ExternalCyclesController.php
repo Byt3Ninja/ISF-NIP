@@ -120,7 +120,15 @@ class ExternalCyclesController extends Controller
 
 		if( auth()->check() )
 		{
+			$user = auth()->user();
 			$c = $program->id;
+			if( $user->hasRole('Registered') )
+			{
+				if( $user?->company?->stepdata?->stype == 1 )
+				{
+					return redirect()->to("dashboard/cycles/view/" . $user->company->step );
+				}
+			}
 			return redirect()->to("dashboard/dashboard");
 			// return redirect()->to("dashboard/cycles/view/$c");
 		}
@@ -205,7 +213,15 @@ class ExternalCyclesController extends Controller
 				{
 					Auth::login(Auth::user());
 					$c = $program->id;
-					$url = URL::to("dashboard/cycles/view/$c");
+					$user = auth()->user();
+					$url = URL::to("dashboard/dashboard");
+					if( $user->hasRole('Registered') )
+					{
+						if( $user?->company?->stepdata?->stype == 1 )
+						{
+							$url = URL::to("dashboard/cycles/view/" . $user->company->step );
+						}
+					}
 					return response()->json(['status' => true, 'message' => __('cycles.login_success') , 'url' => $url]);
 				} else { return response()->json(['status' => false, 'message' => __('cycles.invalid_credentials') ] ); }
 			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
