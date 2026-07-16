@@ -17,6 +17,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Notifications\MentorshipRequestNotification;
+use App\Notifications\MentorNotifyMentorshipNotification;
 
 class SendMentorshipRequestJob implements ShouldQueue
 {
@@ -207,60 +208,61 @@ class SendMentorshipRequestJob implements ShouldQueue
         }
         if ($this->action == 'modify') {
             $locale = app()->getLocale() ?? 'en';
-            $session = MentorshipRequest::findOrFail($this->id);
-            $rName = User::findOrFail($session->mentor_id);
-            $rName_usr = User::findOrFail($session->user_id);
-            $user = new User();
-            $user->email = $rName->email;
-            $user->id = $rName->id;
+            $session = MentorshipRequest::with(['user', 'mentor', 'user.company'])->findOrFail($this->id);
+            $mentor_user = $session->mentor;
+            $startup_user = $session->user;
+
             $date_Request = $session->zoom_date;
-            $rFullName = $rName->name;
-            $rFullName_usr = $rName_usr->name;
+            $mentorFullName = $mentor_user->name;
+            $startupFullName_user = $startup_user->name;
             $mentorMessage = [
                 __("messages.mentorship_session_subject", [], $locale),
-                __("messages.dear", ['name' => $rFullName], $locale),
+                __("messages.dear", ['name' => $mentorFullName], $locale),
                 $this->stat == 'Yes'
-                    ? __("messages.approved_mentor", ['other_party' => $rFullName_usr], $locale)
-                    : __("messages.denied_message", ['other_party' => $rFullName_usr], $locale),
+                    ? __("messages.approved_mentor", ['other_party' => $startupFullName_user], $locale)
+                    : __("messages.denied_message", ['other_party' => $startupFullName_user], $locale),
                 "/dashboard",
                 $this->stat == 'Yes'
-                    ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $rFullName_usr])
-                    : __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $rFullName_usr]),
+                    ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $startupFullName_user])
+                    : __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $startupFullName_user]),
             ];
             $MSG = new MentorshipSession($mentorMessage);
-            $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
-            $Massage = "Dear " . $rFullName . ", you have a new mentorship session with '" . $rFullName_usr . "',is Rejected Thanks from " . env('APP_NAME');
-            if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+            $phoneNumber = $startup_user->country_code_w_a . $startup_user->whatsapp;
+            $Massage = "Dear " . $mentorFullName . ", you have a new mentorship session with '" . $startupFullName_user . "',is Rejected Thanks from " . env('APP_NAME');
+            // if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $user->notify($MSG);
+                    // $mentor_user->notify($MSG);
+                    $mentor_user->notify(
+                        new MentorNotifyMentorshipNotification(
+                            $mentorMessage,
+                            $session
+                        )
+                    );
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify mentorship Notification Error: ' . $th->getMessage());
                 }
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
                 Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-            }
+            // }
             /// Notify User
-            $user = new User();
-            $user->email = $rName_usr->email;
-            $user->id = $rName_usr->id;
             $userMessage = [
                 __("messages.mentorship_session_subject", [], $locale),
-                __("messages.dear", ['name' => $rFullName_usr], $locale),
+                __("messages.dear", ['name' => $startupFullName_user], $locale),
                 $this->stat == 'Yes'
-                    ? __("messages.approved_message", ['other_party' => $rFullName], $locale)
-                    : __("messages.denied_message", ['other_party' => $rFullName], $locale),
+                    ? __("messages.approved_message", ['other_party' => $mentorFullName], $locale)
+                    : __("messages.denied_message", ['other_party' => $mentorFullName], $locale),
                 "/dashboard",
                 $this->stat == 'Yes'
-                    ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $rFullName])
-                    : __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $rFullName]),
+                    ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $mentorFullName])
+                    : __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $mentorFullName]),
             ];
             $MSG = new MentorshipSession($userMessage);
-            $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
-            $Massage = "Dear " . $rFullName_usr . ",you have a new mentorship session with '" . $rFullName . "',is Rejected Thanks from " . env('APP_NAME');
+            $phoneNumber = $startup_user->country_code_w_a . $startup_user->whatsapp;
+            $Massage = "Dear " . $startupFullName_user . ",you have a new mentorship session with '" . $mentorFullName . "',is Rejected Thanks from " . env('APP_NAME');
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $user->notify($MSG);
+                    $startup_user->notify($MSG);
                 } catch (\Throwable $th) {
                     Log::error('modify user Notification Error: ' . $th->getMessage());
                     // throw $th;
@@ -269,11 +271,11 @@ class SendMentorshipRequestJob implements ShouldQueue
                 Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
             }
             broadcast(new MentorshipSessionUpdated(
-                $rName->id,
-                $rName_usr->id,
+                $mentor_user->id,
+                $startup_user->id,
                 [
-                    'email' => $rName->email,
-                    'name' => $rName->name,
+                    'email' => $mentor_user->email,
+                    'name' => $mentor_user->name,
                 ],
                 $this->stat
             ));
