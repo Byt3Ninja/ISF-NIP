@@ -19,6 +19,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\MentorNotifyMentorshipNotification;
+use App\Notifications\StartupNotifyMentorshipApprovalNotification;
+use App\Notifications\StartupNotifyMentorshipRejectionNotification;
 
 class SendMentorshipRequestJob implements ShouldQueue
 {
@@ -255,7 +257,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             $MSG = new MentorshipSession($mentorMessage);
             $phoneNumber = $startup_user->country_code_w_a . $startup_user->whatsapp;
             $Massage = "Dear " . $mentorFullName . ", you have a new mentorship session with '" . $startupFullName_user . "',is Rejected Thanks from " . env('APP_NAME');
-            // if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+            if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
                     // $mentor_user->notify($MSG);
                     $mentor_user->notify(
@@ -270,7 +272,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 }
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
                 Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
-            // }
+            }
             /// Notify User
             $userMessage = [
                 __("messages.mentorship_session_subject", [], $locale),
@@ -288,7 +290,26 @@ class SendMentorshipRequestJob implements ShouldQueue
             $Massage = "Dear " . $startupFullName_user . ",you have a new mentorship session with '" . $mentorFullName . "',is Rejected Thanks from " . env('APP_NAME');
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $startup_user->notify($MSG);
+                    // $startup_user->notify($MSG);
+                    $status = strtolower( (string) $this->stat ) == 'yes' ? true : false;
+                    if( $status )
+                    {
+                        $startup_user->notify(
+                            new StartupNotifyMentorshipApprovalNotification(
+                                $userMessage,
+                                $session
+                            )
+                        );
+                    }
+                    else
+                    {
+                        $startup_user->notify(
+                            new StartupNotifyMentorshipRejectionNotification(
+                                $userMessage,
+                                $session
+                            )
+                        );
+                    }
                 } catch (\Throwable $th) {
                     Log::error('modify user Notification Error: ' . $th->getMessage());
                     // throw $th;

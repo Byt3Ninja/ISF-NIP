@@ -125,6 +125,25 @@ return [
         'inquiry_suggest' => 'If you need to reschedule or have any inquiries, feel free to contact us at any time.',
         'appreciate' => 'We appreciate your support and contribution to the program.',
     ],
+    'startup_mentorship_session_notify_email' => [
+        'approval' => [
+            'subject' => 'Your Mentorship Session Request Has Been Approved',
+            'informing' => 'We’re pleased to inform you that your mentorship session request has been approved.',
+            'session_details' => 'Session Details',
+            'mentor' => 'Mentor',
+            'date' => 'Date',
+            'time' => 'Time',
+            'session_link' => 'Session Link',
+            'ensure_on_time' => 'Please make sure to attend the session on time. You can access additional details by logging into the platform.',
+            'wishes' => 'We wish you a productive and successful session.',
+        ],
+        'rejection' => [
+            'subject' => 'Your Mentorship Session Request Has Been Rejected',
+            'thanking' => 'Thank you for submitting your mentorship session request.',
+            'informing' => 'After review, we regret to inform you that your request could not be approved at this time.',
+            'suggestion' => 'If needed, you may submit a new mentorship request through the platform or contact your program manager for further assistance.',
+        ]
+    ],
     'dear_male' => 'Dear Mr. ',
     'dear_female' => 'Dear Ms. ',
     'regards' => 'Best regards,',
