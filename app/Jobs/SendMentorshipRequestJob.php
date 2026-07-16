@@ -67,6 +67,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $mentor->notify(new MentorshipRequestNotification($data));
                 log::info('Sent New Mentorship Request notification to ' . $mentor->email);
             } catch (\Throwable $th) {
+                Log::error('add wait Notification Error: ' . $th->getMessage());
                 throw $th;
             }
             // Broadcast the RequestMentorship event
@@ -100,6 +101,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                     $user->notify($MSG);
                 } catch (\Throwable $th) {
                     // throw $th;
+                    Log::error('add Notification Error 1: ' . $th->getMessage());
                 }
                 $phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
                 $Massage = "Dear " . $mentor_name . ", 
@@ -128,6 +130,7 @@ class SendMentorshipRequestJob implements ShouldQueue
 
                 } catch (\Throwable $th) {
                     // throw $th;
+                    Log::error('add Notification Error 2: ' . $th->getMessage());
                 }
                 $phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
                 $Massage = "Dear " . $startup_owner->name . ",
@@ -176,6 +179,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                     $rName->notify($MSGM);
                 } catch (\Throwable $th) {
                     // throw $th;
+                    Log::error('modify session Notification Error 1: ' . $th->getMessage());
                 }
                 $phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
                 $Massage = "Dear " . $rName->name . ",
@@ -215,6 +219,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                     $rName_usr->notify($MSG);
                 } catch (\Throwable $th) {
                     // throw $th;
+                    Log::error('modify session Notification Error 2: ' . $th->getMessage());
                 }
                 $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
                 $Massage = "Dear " . $rName_usr->name . ",
@@ -264,6 +269,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                     $rName->notify($MSGM);
                 } catch (\Throwable $th) {
                     // throw $th;
+                    Log::error('modify mentorship Notification Error: ' . $th->getMessage());
                 }
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
                 Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
@@ -298,6 +304,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 try {
                     $rName_usr->notify($MSG);
                 } catch (\Throwable $th) {
+                    Log::error('modify user Notification Error: ' . $th->getMessage());
                     // throw $th;
                 }
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
