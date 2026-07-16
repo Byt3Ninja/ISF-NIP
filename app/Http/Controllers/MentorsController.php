@@ -612,9 +612,8 @@ class MentorsController extends Controller
 						// 
 						$numberOfParties = $parties->count();
 						$allowedPerSecond = 2;
-						$chunks = array_chunk($parties->toArray(), $allowedPerSecond);
-						foreach ($chunks as $chunk) {
-							$chunkParties = collect($chunk);
+						$chunks = $parties->chunk( $allowedPerSecond );
+						foreach ($chunks as $chunkParties) {
 							foreach( $chunkParties as $party )
 							{
 								$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
