@@ -836,9 +836,16 @@ class MentorsController extends Controller
 					if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 						// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
 						// 
-						foreach( $parties as $party )
-						{
-							$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
+						$numberOfParties = $parties->count();
+						$allowedPerSecond = 2;
+						$chunks = array_chunk($parties->toArray(), $allowedPerSecond);
+						foreach ($chunks as $chunk) {
+							$chunkParties = collect($chunk);
+							foreach( $chunkParties as $party )
+							{
+								$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
+							}
+							sleep(2);
 						}
 					}
 
