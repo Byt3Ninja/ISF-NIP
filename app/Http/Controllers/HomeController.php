@@ -2605,6 +2605,8 @@ class HomeController extends Controller
             company_relations cr ON cr.company_id = c.id
         INNER JOIN
             sectors s ON cr.sector_id = s.id
+        LEFT JOIN 
+            users u ON cy.organization_id = u.organization_id
         WHERE
              c.deleted_at IS NULL
              $conditions
