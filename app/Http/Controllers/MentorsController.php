@@ -360,13 +360,13 @@ class MentorsController extends Controller
 	public function addWait(Request $request)
 	{
 		$settings = Settings::where('id', 1)->first();
-		$cycle = Cycle::find($request->cycle_id);
 		
 		$request->validate([
 			'notes' => 'nullable|string|max:255',
 		]);
 		$user = auth()->user();
 		$getMentor = User::find($request->mentorid);
+		$getStartup = User::with(['company', 'company.cycledata'])->find($request->user_id);
 		$requestedMentor = $getMentor->name;
 		$requestNotes = $request->input('notes') ?: null;
 		$requestDate = $request->date;
@@ -390,8 +390,9 @@ class MentorsController extends Controller
 			'message' => $requestDateTime,
 		];
 
-		if($user->hasAnyRole(['admin', 'organizationManager', 'subadmin'])){
-			
+		if($user->hasAnyRole(['admin', 'organizationManager', 'subadmin']))
+		{
+			$cycle = $getStartup?->company?->cycledata;
 			if ($request->has('selected_dates')) {
 				
 				$errors = [];
@@ -501,135 +502,117 @@ class MentorsController extends Controller
 					return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
 				}
 			}
-
-		}else{
+		}
+		else
+		{
 			$startupName = $user?->company?->name ?: $user->name;
+			$cycle = $user?->company?->cycledata;
 			$parties = $cycle->organization->assignedUsers;
 			$platform_admins = User::role('admin')->get()->filter(function ($admin) {
 				return $admin->hasRole('admin');
 			})->values();
 			$parties = $parties->merge($platform_admins)->unique('id');
 
-				$this->meetingService = OnlineMeetingFactory::create();
-				$datefrom = $request->date . ' ' . $request->session_start_time;
-				$dateto = $request->date . ' ' . $request->session_end_time;
-				if ($request->period == '') {
-					$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
-				} else {
-					$period = $request->period;
-				}
-				$dayName = Carbon::parse($request->date)->format('l');
+			$this->meetingService = OnlineMeetingFactory::create();
+			$datefrom = $request->date . ' ' . $request->session_start_time;
+			$dateto = $request->date . ' ' . $request->session_end_time;
+			if ($request->period == '') {
+				$period = Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
+			} else {
+				$period = $request->period;
+			}
+			$dayName = Carbon::parse($request->date)->format('l');
 
-				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
-				$schedules = DB::select($schedules_q, [
-					$request->mentorid,
-					'%' . $dayName . '%',
-					$request->timeFrom,
-					$request->timeTo
-				]);
-				if ($schedules == null) {
-					return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
-				}
-				if($request->session_type == 'Offline'){
-					
-					if($settings->allow_offline_sessions == 0){
-						
-						return back()->with(['class' => 'danger','msg' => 'Offline sessions are not allowed']);
-					}
-				}
+			$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+			$schedules = DB::select($schedules_q, [
+				$request->mentorid,
+				'%' . $dayName . '%',
+				$request->timeFrom,
+				$request->timeTo
+			]);
+			if ($schedules == null) {
+				return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
+			}
+			if($request->session_type == 'Offline'){
 				
-				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
-					return back()->with(['class' => 'danger', 'msg' => __('api.max_concurrent_sessions_reached')]);
-				}
-
-				if ($request->mentorid) {
+				if($settings->allow_offline_sessions == 0){
 					
-					if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
-						return back()->with(['msg' => 'cannot_schedule_past_meeting']);
-					}
-					$fileName = '';
-					if ($request->hasFile('file_url')) {
-						$fileName = $request->file('file_url');
-						$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
-					}
+					return back()->with(['class' => 'danger','msg' => 'Offline sessions are not allowed']);
+				}
+			}
+			
+			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
+				return back()->with(['class' => 'danger', 'msg' => __('api.max_concurrent_sessions_reached')]);
+			}
 
-					$cycle = Cycle::find($request->cycle_id);
-					$autoApprove = $cycle->auto_approve_mentorship_requests;
-
-					$approved = null;
-					$userid = Auth::id();
-					$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
-					$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
-					$onlineMeeting = $this->meetingService->createMeeting($data);
-					if (!$onlineMeeting['success']) {
-						return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
-					}
-					$meetingId = $onlineMeeting['data']['id'];
-					$startUrl = $onlineMeeting['data']['start_url'];
-					$joinUrl = $onlineMeeting['data']['join_url'];
-					$passcode = $onlineMeeting['data']['passcode'] ?? null;
-					if ($autoApprove == 1) {
-						$approved = 'Yes';
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
-						$dateFormat = new \DateTime($datefrom);
-						
-						MentorshipRequest::create([
-							'mentor_id' => $request->mentorid,
-							'user_id' => $userid,
-							'comment' => $request->notes,
-							'approved' => 'Yes',
-							'start_url' => $startUrl,
-							'join_url' => $joinUrl,
-							'zoom_id' => $meetingId,
-							'zoom_passcode' => $passcode,
-							'zoom_date' => $dateFormat->format('Y-m-d H:i'),
-							'period' => $period,
-							'organization_id' => $request->organization_id,
-							'cycle_id' => $request->cycle_id,
-							'fileurl' => $fileName,
-							'session_type' => $request->session_type
-						]);
-
-						$mentor = User::find($request->mentorid);
-					} else {
-						MentorshipRequest::create([
-							'mentor_id' => $request->mentorid,
-							'user_id' => Auth::id(),
-							'comment' => $request->notes,
-							'start_url' => $startUrl,
-							'join_url' => $joinUrl,
-							'zoom_id' => $meetingId,
-							'zoom_date' => $datefrom,
-							'period' => $period,
-							'fileurl' => $fileName,
-							'organization_id' => $request->organization_id,
-							'cycle_id' => $request->cycle_id,
-							'approved' => $approved,
-							'session_type' => $request->session_type
-						]);
-					}
-					if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-						// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
-						// 
-						$numberOfParties = $parties->count();
-						$allowedPerSecond = 2;
-						$chunks = $parties->chunk( $allowedPerSecond );
-						foreach ($chunks as $chunkParties) {
-							foreach( $chunkParties as $party )
-							{
-								$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
-							}
-							sleep(2);
-						}
-					}
-
-					return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);
-				} else {
-					return back()->with(['msg' => "Error, can't add request", 'class' => 'danger']);
+			if ($request->mentorid) {
+				
+				if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
+					return back()->with(['msg' => 'cannot_schedule_past_meeting']);
+				}
+				$fileName = '';
+				if ($request->hasFile('file_url')) {
+					$fileName = $request->file('file_url');
+					$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
 				}
 
+				$autoApprove = $cycle->auto_approve_mentorship_requests;
+
+				$approved = null;
+				$userid = Auth::id();
+				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
+				$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
+				$onlineMeeting = $this->meetingService->createMeeting($data);
+				if (!$onlineMeeting['success']) {
+					return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
+				}
+				$meetingId = $onlineMeeting['data']['id'];
+				$startUrl = $onlineMeeting['data']['start_url'];
+				$joinUrl = $onlineMeeting['data']['join_url'];
+				$passcode = $onlineMeeting['data']['passcode'] ?? null;
+				$zoom_date = $datefrom;
+				if( $autoApprove == 1 )
+				{
+					$approved = 'Yes';																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																	
+					$dateFormat = new \DateTime($datefrom);
+					$zoom_date = $dateFormat->format('Y-m-d H:i');
+				}
+				MentorshipRequest::create([
+					'mentor_id' => $request->mentorid,
+					'user_id' => $userid,
+					'comment' => $request->notes,
+					'approved' => $approved,
+					'start_url' => $startUrl,
+					'join_url' => $joinUrl,
+					'zoom_id' => $meetingId,
+					'zoom_passcode' => $passcode,
+					'zoom_date' => $zoom_date,
+					'period' => $period,
+					'fileurl' => $fileName,
+					'organization_id' => $cycle->organization_id,
+					'cycle_id' => $cycle->id,
+					'session_type' => $request->session_type
+				]);
+				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
+					// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
+					// 
+					$numberOfParties = $parties->count();
+					$allowedPerSecond = 2;
+					$chunks = $parties->chunk( $allowedPerSecond );
+					foreach ($chunks as $chunkParties) {
+						foreach( $chunkParties as $party )
+						{
+							$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
+						}
+						sleep(2);
+					}
+				}
+
+				return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);
+			} else {
+				return back()->with(['msg' => "Error, can't add request", 'class' => 'danger']);
+			}
 		}
-		
 		return back()->with(['msg' => "Error, can't add request", 'class' => 'danger']);
 	}
 
