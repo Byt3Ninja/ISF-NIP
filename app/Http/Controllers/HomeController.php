@@ -2347,28 +2347,48 @@ class HomeController extends Controller
             $conditions = " WHERE cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $sector_data_q = "SELECT
+                s.id AS `id`,
                 s.name_en AS `sector_name_en`,
                 s.name_ar AS `sector_name_ar`,
-                count(c.id) AS total
+                -- count(c.id) AS total
+                cr.id AS `cr_id`,
+                cr.company_id AS `company_id`,
+                cr.sector_id AS `sector_id`,
+                cr.industry_id AS `industry_id`
             FROM
                 sectors s
-            INNER JOIN
-                companies c ON c.sector = s.id
-            INNER JOIN
+            LEFT JOIN
+                company_relations cr ON cr.sector_id = s.id
+            LEFT JOIN
+                companies c ON cr.company_id = c.id
+            LEFT JOIN
                 cycles cy on c.cycle = cy.id
             $conditions
-            GROUP BY
-                s.name_en,
-                s.name_ar
+            -- GROUP BY
+                -- s.name_en,
+                -- s.name_ar
         ";
-
-        $sector_data = collect(DB::select($sector_data_q))->map(function ($item) {
+        /* $sector_data = collect(DB::select($sector_data_q))->map(function ($item) {
             return [
                 'label_en' => $item->sector_name_en,
                 'label_ar' => $item->sector_name_ar,
                 'count' => $item->total,
             ];
-        });
+        }); */
+        // properly grouping data
+        $sector_data = collect(DB::select($sector_data_q));
+        $sector_data = $sector_data->filter(function($item) {
+            return !is_null( $item->cr_id );
+        })->values()->groupBy('id')->map(function($items) {
+            $base = $items->first();
+            $sector_data = new stdClass;
+            $sector_data->label_en = $base->sector_name_en;
+            $sector_data->label_ar = $base->sector_name_ar;
+            $sector_data->count = $items->groupBy('company_id')->count();
+            return $sector_data;
+        })->values();
+        
+        $sector_data = $sector_data->sortBy('count')->reverse()->values();
 
         if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
             $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
