@@ -19,6 +19,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\MentorNotifyMentorshipNotification;
+use App\Notifications\StartupNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipApprovalNotification;
 use App\Notifications\StartupNotifyMentorshipRejectionNotification;
 
@@ -58,17 +59,58 @@ class SendMentorshipRequestJob implements ShouldQueue
         if ($this->action == 'addwait') {
 
             $data = [];
-            $mentor = User::find($this->mentorId);
-            // ======> notify Mentor <=================
-            $data['Mentorname'] = $mentor->first_name_en . " " . $mentor->last_name_en;
-            $data['email'] = $mentor->email;
-            $data['date'] = $this->date;
-            $data['period'] = $this->period;
-            $data['user_name'] = Auth::user()->first_name_en . " " . Auth::user()->last_name_en;
-            $data['company_name'] = Auth::user()->company->name_en;
+            // $mentor = User::find($this->mentorId);
             try {
-                $mentor->notify(new MentorshipRequestNotification($data));
+                // ======> notify Mentor <=================
+                $locale = app()->getLocale() ?? 'en';
+                $session = MentorshipRequest::with(['user', 'mentor', 'user.company'])->findOrFail($this->id);
+
+                $mentor = $session->mentor;
+                $startup = $session->user;
+                $mentorFullName = $mentor->name;
+
+                $data['Mentorname'] = $mentor->first_name_en . " " . $mentor->last_name_en;
+                $data['email'] = $mentor->email;
+                $data['date'] = $this->date;
+                $data['period'] = $this->period;
+                $data['user_name'] = $startup->first_name_en . " " . $startup->last_name_en;
+                $data['company_name'] = $startup->company->name_en;
+                // $mentor->notify(new MentorshipRequestNotification($data));
+                $startupFullName_user = $startup->name;
+                $mentorMessage = [
+                    __("messages.mentorship_session_subject", [], $locale),
+                    __("messages.dear", ['name' => $mentorFullName], $locale),
+                    $this->stat == 'Yes'
+                        ? __("messages.approved_mentor", ['other_party' => $startupFullName_user], $locale)
+                        : __("messages.denied_message", ['other_party' => $startupFullName_user], $locale),
+                    "/dashboard",
+                    $this->stat == 'Yes'
+                        ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $startupFullName_user])
+                        : __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $startupFullName_user]),
+                ];
+                $mentor->notify(
+                    new MentorNotifyMentorshipNotification(
+                        $mentorMessage,
+                        $session
+                    )
+                );
                 log::info('Sent New Mentorship Request notification to ' . $mentor->email);
+
+                // notify the startup to the directly assigned session
+                $userMessage = [
+                    __("messages.mentorship_session_subject", [], $locale),
+                    __("messages.dear", ['name' => $startupFullName_user], $locale),
+                    __("messages.approved_message", ['other_party' => $mentorFullName], $locale),
+                    "/dashboard",
+                    __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $mentorFullName]),
+                ];
+                $startup->notify(
+                    new StartupNotifyMentorshipNotification(
+                        $userMessage,
+                        $session
+                    )
+                );
+                log::info('Sent New Mentorship Request notification to ' . $startup->email);
             } catch (\Throwable $th) {
                 Log::error('add wait Notification Error: ' . $th->getMessage());
                 throw $th;
