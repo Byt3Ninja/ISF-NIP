@@ -2593,31 +2593,30 @@ class HomeController extends Controller
             $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
         }
         $sector_distribution_q = "SELECT
-            c.sector,
+            s.id AS sector_id,
             s.name_en,
             s.name_ar,
-            count(c.id) AS total
-        FROM 
+            count(DISTINCT c.id) AS total
+        FROM
             companies c
-        INNER JOIN 
+        LEFT JOIN
             cycles cy ON c.cycle = cy.id
-        LEFT JOIN 
-            sectors s ON (CAST(c.sector AS CHAR) = CAST(s.id AS CHAR))
-                OR (c.sector = s.name_en)   
-                OR (c.sector = s.name_ar)                     
-        LEFT JOIN 
-            users u ON cy.organization_id = u.organization_id
+        INNER JOIN
+            company_relations cr ON cr.company_id = c.id
+        INNER JOIN
+            sectors s ON cr.sector_id = s.id
         WHERE
              c.deleted_at IS NULL
-             AND c.sector IS NOT NULL
              $conditions
         GROUP BY
-             c.sector, s.name_en, s.name_ar
+             s.id, s.name_en, s.name_ar
+        ORDER BY
+             total DESC
         ";
         $sector_distribution = collect(DB::select($sector_distribution_q))->map(function ($item) {
             return [
-                'sector_en' => $item->name_en ?? $item->sector ?? __('admin.undefined', [], 'en'),
-                'sector_ar' => $item->name_ar ?? $item->sector ?? __('admin.undefined', [], 'ar'),
+                'sector_en' => $item->name_en ?? __('admin.undefined', [], 'en'),
+                'sector_ar' => $item->name_ar ?? __('admin.undefined', [], 'ar'),
                 'count'     => $item->total,
             ];
         });
