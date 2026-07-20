@@ -83,9 +83,10 @@ class CyclesController extends Controller
         $sheet->setCellValue('F1', 'E-Mail');
         $sheet->setCellValue('G1', 'Current Step');
         $sheet->setCellValue('H1', 'Created_At');
-        $row = 2; 
+        $row = 2;
+        $stepsByCycle = \App\Step::whereIn('cycle_id', [$cycle])->orderBy('arr')->get()->groupBy('cycle_id');
         if(auth()->user()->hasRole('Admin')) {
-            Company::where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row) {
+            Company::with('user')->where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row, $stepsByCycle) {
                 foreach ($companies as $companie) {
                     $sheet->setCellValue('A' . $row, $companie?->id);
                     $sheet->setCellValue('B' . $row, $companie?->name);
@@ -93,7 +94,7 @@ class CyclesController extends Controller
                     $sheet->setCellValue('D' . $row, $companie?->user?->name);
                     $sheet->setCellValue('E' . $row, $companie?->user?->phone);
                     $sheet->setCellValue('F' . $row, $companie?->user?->email);
-                    foreach(\App\Step::where('cycle_id',$companie->cycle)->orderBy('arr')->get() as $step){
+                    foreach($stepsByCycle->get($companie->cycle, collect()) as $step){
                         $sheet->setCellValue('G' . $row, $step->title);
                     }
                     $sheet->setCellValue('H' . $row, $companie->created_at);
@@ -101,16 +102,16 @@ class CyclesController extends Controller
                 }
             });
         }else{
-        Company::where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row) {
+        Company::with('user')->where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row, $stepsByCycle) {
         foreach ($companies as $companie) {
-            
+
             $sheet->setCellValue('A' . $row, $companie?->id);
             $sheet->setCellValue('B' . $row, $companie?->name);
             $sheet->setCellValue('C' . $row, $companie?->user?->title);
             $sheet->setCellValue('D' . $row, $companie?->user?->name);
             $sheet->setCellValue('E' . $row, $companie?->user?->phone);
             $sheet->setCellValue('F' . $row, $companie?->user?->email);
-            foreach(\App\Step::where('cycle_id',$companie->cycle)->orderBy('arr')->get() as $step){
+            foreach($stepsByCycle->get($companie->cycle, collect()) as $step){
                 $sheet->setCellValue('G' . $row, $step->title);
             }
             $sheet->setCellValue('H' . $row, $companie->created_at);

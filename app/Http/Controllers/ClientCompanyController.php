@@ -319,6 +319,16 @@ class ClientCompanyController extends Controller
         $mentorshipToSum = collect();
         $trainingToSum = collect();
         $finalScreenAvg = collect();
+        // Cache ScreeningEvaluationResults::results() per step id so repeated
+        // step ids across alumni cycle records only trigger one batch of
+        // queries each, instead of a fresh set of queries per alumni row.
+        $stepResultsCache = [];
+        $resultsForStep = function ($stepId) use (&$stepResultsCache, $company) {
+            if (!array_key_exists($stepId, $stepResultsCache)) {
+                $stepResultsCache[$stepId] = ScreeningEvaluationResults::results($stepId, [$company->id])[$company->id] ?? null;
+            }
+            return $stepResultsCache[$stepId];
+        };
         foreach ($almunies as $almuni) {
             if (!empty($almuni->mentorship)) {
                 $mentorshipData = is_array($almuni->mentorship)
@@ -349,10 +359,8 @@ class ClientCompanyController extends Controller
                     $almuniScreeningScore = null;
                     if( !empty( $almuni->screening ) )
                     {
-                        $screening_details = ScreeningEvaluationResults::results( $almuni->screening_data[0]['step_id'] ?? 0, [$company->id] )[$company->id] ?? null;
-                        /* $screenArr = is_array($almuni->screening) ? $almuni->screening : json_decode($almuni->screening, true);
-                        $sScores = collect($screenArr ?? [])->pluck('overall_score')->filter();
-                        $almuniScreeningScore = $sScores->isNotEmpty() ? round($sScores->avg(), 2) : null; */
+                        $screeningStepId = data_get($screeningEntries, '0.step_id', 0);
+                        $screening_details = $resultsForStep($screeningStepId);
 
                         $almuniScreeningScore = $screening_details ? $screening_details['total'] * 100 : null;
                     }
@@ -360,7 +368,8 @@ class ClientCompanyController extends Controller
                     $alumniFinalScore = null;
                     if( !empty( $almuni->final_screening ) )
                     {
-                        $final_screening_details = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]['step_id'] ?? 0, [$company->id] )[$company->id] ?? null;
+                        $finalScreeningStepId = data_get($finalScreeningEntries, '0.step_id', 0);
+                        $final_screening_details = $resultsForStep($finalScreeningStepId);
                         if( !empty( $final_screening_details ) )
                         {
                             $avgFinalScreenings->push( $final_screening_details );

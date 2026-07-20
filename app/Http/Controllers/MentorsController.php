@@ -1142,6 +1142,8 @@ class MentorsController extends Controller
 				$userId = Auth::id();
 				$periods = $request->input('periods');
 
+				$now = now();
+				$rows = [];
 				foreach ($periods as $day => $times) {
 					// التحقق من وجود بيانات "from" و "to"
 					if (isset($times['from']) && isset($times['to'])) {
@@ -1150,18 +1152,22 @@ class MentorsController extends Controller
 
 							// تجاهل إذا كانت القيم فارغة
 							if (!is_null($from) && !is_null($to)) {
-								Schedule::create([
+								$rows[] = [
 									'user_id' => $userId,
 									'type' => $request->input('type'),
 									'days' => $day,
 									'tfrom' => $from,
 									'tto' => $to,
 									'notes' => $request->input('notes'),
-
-								]);
+									'created_at' => $now,
+									'updated_at' => $now,
+								];
 							}
 						}
 					}
+				}
+				if (!empty($rows)) {
+					Schedule::insert($rows);
 				}
 				return back()->with(['msg' => 'Saved', 'class' => 'success']);
 			}

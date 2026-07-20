@@ -1779,11 +1779,14 @@ class HomeController extends Controller
                     ->unique('survey_id');
             }
             
+            // Query responses by survey_id (not scope_id) to prevent duplicates across cycles
+            $responsesBySurvey = SurveyResponses::where('user_id', $user->id)
+                ->whereIn('survey_id', $surveys->pluck('survey_id')->unique())
+                ->get()
+                ->groupBy('survey_id');
+
             foreach ($surveys as $survey_scope) {
-                // Query responses by survey_id (not scope_id) to prevent duplicates across cycles
-                $my_responses = SurveyResponses::where('user_id', $user->id)
-                    ->where('survey_id', $survey_scope->survey_id)
-                    ->get();
+                $my_responses = $responsesBySurvey->get($survey_scope->survey_id, collect());
 
                 // Initialize fresh collection for each survey to avoid overwriting issues
                 $mentorshipFiltered = collect($surveyEligible)->where('triggered_on', 'mentorship');
