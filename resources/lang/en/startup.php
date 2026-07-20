@@ -657,4 +657,5 @@ return [
   'Yearly' => 'Yearly',
   'Year cumulative growth' => 'Year Cumulative Growth',
   'Export CSV' => 'Export CSV',
+  'no_feedback_provided_yet' => 'No feedback provided yet.',
 ];

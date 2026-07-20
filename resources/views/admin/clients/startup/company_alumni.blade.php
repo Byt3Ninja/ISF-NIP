@@ -1328,6 +1328,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                         <th class="text-nowrap"><i class="ti ti-user me-1"></i>{{ __('startup.mentor') }}</th>
                         <th class="text-nowrap"><i class="ti ti-user-circle me-1"></i>{{ __('startup.created_by') }}</th>
                         <th class="text-nowrap"><i class="ti ti-badge me-1"></i>{{ __('startup.status') }}</th>
+                        <th class="text-nowrap text-center"><i class="ti ti-history me-1"></i>{{ __('admin.feedback_history') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1344,6 +1345,64 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
                           <span class="badge bg-label-{{ isset($badgeColors[$key]) ? $badgeColors[$key] : 'secondary' }}">
                             {{ $task['status'] }}
                           </span>
+                        </td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-icon btn-text-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#feedbackHistoryModal-{{ $task['task_id'] }}">
+                            <i class="ti ti-history"></i>
+                          </button>
+
+                          <!-- Feedback History Modal -->
+                          <div class="modal fade text-start" id="feedbackHistoryModal-{{ $task['task_id'] }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title d-flex align-items-center gap-2">
+                                    <i class="ti ti-history text-primary"></i>
+                                    {{ __('admin.feedback_history') }} - {{ $task['title'] }}
+                                  </h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-start">
+                                  @if(!empty($task['feedbacks']) && count($task['feedbacks']) > 0)
+                                    <div class="table-responsive">
+                                      <table class="table table-striped table-hover table-sm">
+                                        <thead>
+                                          <tr>
+                                            <th style="width: 25%">{{ __('startup.date') }}</th>
+                                            <th style="width: 20%">{{ __('startup.status') }}</th>
+                                            <th>{{ __('startup.notes') }}</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          @foreach($task['feedbacks'] as $fb)
+                                            <tr>
+                                              <td>{{ \Carbon\Carbon::parse($fb['created_at'])->format('Y-m-d H:i') }}</td>
+                                              <td>
+                                                @if($fb['decision'] === 'pass')
+                                                  <span class="badge bg-label-success">{{ __('startup.passed') }}</span>
+                                                @else
+                                                  <span class="badge bg-label-warning">{{ __('admin.needs_revision') }}</span>
+                                                @endif
+                                              </td>
+                                              <td class="text-wrap">{{ $fb['note'] }}</td>
+                                            </tr>
+                                          @endforeach
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  @else
+                                    <div class="text-center py-4 text-muted">
+                                      <i class="ti ti-message-2-off ti-lg d-block mb-2"></i>
+                                      {{ __('startup.no_feedback_provided_yet') }}
+                                    </div>
+                                  @endif
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('startup.close') }}</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </td>
                       </tr>
                       @endforeach

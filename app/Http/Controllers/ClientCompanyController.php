@@ -4675,11 +4675,24 @@ class ClientCompanyController extends Controller
                         $q->where('company_id', $company->id);
                     })->with(['assignees' => function ($q) use ($company) {
                         $q->where('company_id', $company->id);
-                    }, 'creator'])->get();
+                    }, 'creator', 'feedbacks' => function ($q) use ($company) {
+                        $q->where('company_id', $company->id)->orderBy('created_at', 'desc');
+                    }, 'feedbacks.user'])->get();
                 $MentorTasks = [];
                 foreach ($startup_ProgramTasks as $ProgramTask) {
                     $pivot = $ProgramTask->assignees->first()?->pivot;
                     $isCompleted = ($pivot?->status === 'completed');
+                    
+                    $feedbacks = $ProgramTask->feedbacks->map(function ($fb) {
+                        return [
+                            'id'         => $fb->id,
+                            'decision'   => $fb->decision,
+                            'note'       => $fb->note,
+                            'created_at' => $fb->created_at?->format('Y-m-d H:i:s') ?? '',
+                            'user_name'  => $fb->user->name ?? '',
+                        ];
+                    })->toArray();
+
                     $MentorTasks[] = [
                         'Task_ID'         => $ProgramTask->id ?? '',
                         'Task_title'      => $ProgramTask->title ?? '',
@@ -4689,6 +4702,7 @@ class ClientCompanyController extends Controller
                         'Completion_date' => $isCompleted ? ($pivot?->last_updated ?? '') : '',
                         'Assigned_mentor' => '',
                         'Who_created_task' => ($ProgramTask->creator?->first_name_en . ' ' . $ProgramTask->creator?->last_name_en) ?? '',
+                        'feedbacks'       => $feedbacks,
                     ];
                 }
                 if(empty($MentorTasks)) {
@@ -4701,6 +4715,7 @@ class ClientCompanyController extends Controller
                         'Completion_date' => null,
                         'Assigned_mentor' => null,
                         'Who_created_task' => null,
+                        'feedbacks' => [],
                     ];
                 }
                 $almuni->tasks = $MentorTasks;

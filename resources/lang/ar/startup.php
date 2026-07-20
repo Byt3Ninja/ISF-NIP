@@ -652,4 +652,5 @@ return [
   'Yearly' => 'سنوي',
   'Year cumulative growth' => 'النمو التراكمي السنوي',
   'Export CSV' => 'تصدير CSV',
+  'no_feedback_provided_yet' => 'لا يوجد تقييم بعد.',
 ];
