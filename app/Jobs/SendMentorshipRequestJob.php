@@ -63,7 +63,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             try {
                 // ======> notify Mentor <=================
                 $locale = app()->getLocale() ?? 'en';
-                $session = MentorshipRequest::with(['user', 'mentor', 'user.company'])->findOrFail($this->id);
+                $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
 
                 $mentor = $session->mentor;
                 $startup = $session->user;
@@ -278,7 +278,7 @@ class SendMentorshipRequestJob implements ShouldQueue
         }
         if ($this->action == 'modify') {
             $locale = app()->getLocale() ?? 'en';
-            $session = MentorshipRequest::with(['user', 'mentor', 'user.company'])->findOrFail($this->id);
+            $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
             $mentor_user = $session->mentor;
             $startup_user = $session->user;
 

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Settings;
+use Carbon\Carbon;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -120,9 +121,15 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
         $this->configureSmtp($smtpSettings);
 
         $mentorship_session = $this->mentorship_session;
+        $cycle = $mentorship_session->cycle;
         $session_date = strtotime($mentorship_session->zoom_date);
+        $start = Carbon::parse($mentorship_session->zoom_date);
+        $end = $start->copy()->addMinutes($mentorship_session->period);
         $sessionDate = date('Y-m-d', $session_date);
-        $sessionTime = date('h:i A', $session_date);
+        $sessionTime = date('h:i A', $session_date) . ' - ' . date('h:i A', $end->timestamp);
+        $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
+        $location = $sessionType == 'offline' ? ($cycle->offline_location_address ?: optional($cycle->organization)->address ?: '-') : '-';
+        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: '-') : '-';
 
         $mentorName = $mentorship_session?->mentor?->name ?? '';
         return (new MailMessage)
@@ -131,10 +138,13 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
             ->view('emails.mentorship_notify_startup_approval_email', array_merge([
                 'party'             => $notifiable,
                 'mentorName'        => $mentorName,
+                'sessionType'       => $sessionType,
                 'sessionDate'       => $sessionDate,
                 'sessionTime'       => $sessionTime,
                 'sessionLink'       => $mentorship_session?->join_url ?? '',
                 'platformName'      => $platformName,
+                'location'          => $location,
+                'mapLink'           => $mapLink,
             ], $orgData));
     }
 

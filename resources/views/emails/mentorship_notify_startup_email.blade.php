@@ -14,7 +14,14 @@
                     <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.mentor') }} : {{ $mentorName }}</p>
                     <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.date') }} : {{ $sessionDate }} </p>
                     <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.time') }} : {{ $sessionTime }} </p>
-                    <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.session_link') }} : {{ $sessionLink }} </p>
+                    <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.session_type') }} : {{ $sessionType == 'online' ? __('email.online') : __('email.offline') }} </p>
+                    @if( $sessionType == 'online' || $sessionType == 'both' )
+                        <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.session_link') }} : {{ $sessionLink }} </p>
+                    @endif
+                    @if( $sessionType == 'offline' || $sessionType == 'both' )
+                        <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.session_address') }} : {{ $location }} </p>
+                        <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.map_location_link') }} : {{ $mapLink }} </p>
+                    @endif
                     <p style="margin: 15px 0px;"></p>
                     <p style="margin: 0;"> {{ __('email.startup_mentorship_session_notify_email.ensure_on_time') }}</p>
                     <p style="margin: 15px 0px;"></p>
