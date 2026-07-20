@@ -8,17 +8,33 @@
         </h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      
+
       <form id="session-form" method="post" action="/dashboard/mentorship/addwait" enctype="multipart/form-data"
         autocomplete="off">
-      
+
         @csrf
         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
           <input type="hidden" name="mentorid" value="0" id="mentorid">
           <input type="hidden" name="organization_id" id="addOrganizationID">
           <input type="hidden" name="cycle_id" id="addCycleID">
           <input type="hidden" name="user_id" id="addUserID">
-          
+
+          <!-- Startup Selection (For Admin/Tenant Admin) -->
+          <div class="mb-4 d-none" id="startup-select-container">
+            <div class="form-group">
+              <label for="startup_user_id" class="form-label fw-semibold fs-6 mb-1">
+                <i class="ti ti-building text-primary me-2"></i>
+                {{ $l == 'ar' ? 'اختر الشركة الناشئة' : 'Select Startup' }}:
+              </label>
+              <select class="form-select border-2" id="startup_user_id" name="user_id">
+                <option value="">{{ $l == 'ar' ? 'اختر شركة ناشئة' : 'Select a startup' }}</option>
+              </select>
+              <div class="invalid-feedback startup-error" style="display:none;">
+                {{ $l == 'ar' ? 'يرجى اختيار شركة ناشئة.' : 'Please select a startup.' }}
+              </div>
+            </div>
+          </div>
+
           <!-- Mentor Schedule Section -->
           <div class="mb-4" id="mentor-schedule-container">
             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -26,99 +42,41 @@
                 <i class="ti ti-clock-hour-4 text-primary me-2 fs-5"></i>
                 <h5 class="text-dark mb-0 fw-semibold">{{__('dashboard.Mentor schedule')}}</h5>
               </div>
-              <button type="button" class="btn btn-sm btn-outline-info" id="close-schedule-btn" title="{{__('dashboard.Hide schedule')}}">
-                <i class="ti ti-x"></i>
-              </button>
             </div>
             <div class="alert alert-info border-0 bg-light-primary">
               <ul class="mb-0 list-unstyled" id="schedule"></ul>
             </div>
           </div>
-          
-          <!-- Date Selection Section -->
+
+          <!-- Date and Time Selection (Predefined Slots) -->
           <div class="card border-0 mb-4">
             <div class="card-body p-3">
+              <!-- Title with Icon -->
+              <div class="d-flex align-items-center mb-3">
+                <i class="ti ti-calendar-event text-primary me-2 fs-5"></i>
+                <h5 class="text-dark mb-0 fw-semibold">{{ $l == 'ar' ? 'التاريخ والوقت' : 'Date & Time' }}</h5>
+              </div>
               <div class="row">
-                <div class="col-12">
-                  <div class="form-group">
-                    <label for="date" class="form-label d-flex align-items-center fw-semibold mb-3">
-                      <i class="ti ti-calendar me-2 text-primary"></i>
-                      {{__('dashboard.Date')}}:
-                    </label>
-                    <div class="input-group input-group-lg">
-                      <input type="text" class="form-control border-2" id="flatpickr-datetimeLimit"
-                        placeholder="{{__('dashboard.Select multiple dates')}}" name="date" required>
-                      <div class="input-group-text bg-primary border-primary">
-                        <i class="ti ti-calendar text-white"></i>
-                      </div>
-                    </div>
-                    <div class="invalid-feedback date-error">{{ __('admin.Please_select_date') }}</div>
-                    <div class="form-text d-flex align-items-center">
-                      <i class="ti ti-info-circle me-1"></i>
-                      {{__('dashboard.Click to select multiple dates for your sessions')}}
-                    </div>
+                <!-- Left Side: Inline Calendar -->
+                <div class="col-md-6 mb-4">
+                  <label class="form-label fs-6 fw-semibold mb-2">{{ $l == 'ar' ? 'اختر التاريخ' : 'Select Date' }}:</label>
+                  <div id="inline-calendar" class="d-flex justify-content-center"></div>
+                  <input type="hidden" id="flatpickr-datetimeLimit" name="date" required>
+                  <div class="invalid-feedback date-error" style="display:none;">{{ __('admin.Please_select_date') }}</div>
+                </div>
+                
+                <!-- Right Side: Slots Checklist -->
+                <div class="col-md-6 mb-4">
+                  <label class="form-label fs-6 fw-semibold mb-2">{{ $l == 'ar' ? 'المواعيد المتاحة' : 'Available Slots' }}:</label>
+                  <div id="slots-container" class="border rounded p-3 bg-light" style="max-height: 350px; overflow-y: auto;">
+                    <p class="text-muted mb-0 text-center py-4">{{ $l == 'ar' ? 'الرجاء اختيار تاريخ لعرض المواعيد المتاحة' : 'Please select a date to view available slots' }}</p>
                   </div>
+                  <div class="invalid-feedback slots-error" style="display:none;"></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Selected Dates with Time Options -->
-          <div id="selected-dates-container" class="d-none mb-4">
-            <div class="card border-primary">
-              <div class="card-header bg-light-primary border-primary">
-                <h6 class="text-primary mb-0 fw-semibold">
-                  <i class="ti ti-clock me-2"></i>
-                  {{__('dashboard.Selected Dates and Times')}}
-                </h6>
-              </div>
-              <div class="card-body">
-                <!-- Dynamic content will be inserted here -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Legacy time selectors (hidden, kept for backward compatibility) -->
-          <div class="row d-none">
-            <div class="col-6">
-              <div class="form-group mb-4">
-                <label for="from" class="form-label fw-semibold mb-2">
-                  <i class="ti ti-clock-hour-9 me-1"></i>
-                  {{__('dashboard.From')}}:
-                </label>
-                <select class="form-select form-select-lg" id="timeFrom" name="timeFrom">
-                </select>
-                <div class="invalid-feedback from-error">{{ __('admin.Please_select_from_time') }}</div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="form-group mb-4">
-                <label for="to" class="form-label fw-semibold mb-2">
-                  <i class="ti ti-clock-hour-3 me-1"></i>
-                  {{__('dashboard.To')}}:
-                </label>
-                <select class="form-select form-select-lg" id="timeTo" name="timeTo">
-                </select>
-                <div class="invalid-feedback to-error">{{ __('admin.Please_select_to_time') }}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 mb-4">
-            <div class="invalid-feedback" id="time-feedback">{{ __('admin.End_time_should_be_greater_than_start_time') }}</div>
-          </div>
-
-          <!-- Duration Display -->
-          <div id="duration-container" class="d-none mb-4">
-            <div class="alert alert-success border-0 d-flex align-items-center">
-              <i class="ti ti-clock-hour-4 me-2 fs-5"></i>
-              <div>
-                <span class="fw-semibold me-2">{{__('dashboard.Meeting duration')}}:</span>
-                <span id="duration" class="badge bg-success fs-6"></span>
-              </div>
-            </div>
-          </div>
-          
           <!-- File Upload Section -->
           <div class="card border-0 mb-4">
             <div class="card-body p-3">
@@ -130,11 +88,11 @@
                 accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint, text/plain, application/pdf, image/*">
               <div class="form-text mt-2">
                 <i class="ti ti-info-circle me-1"></i>
-                  {{ $l == 'ar' ? 'الصيغ المدعومة: PDF، DOC، XLS، PPT، الصور' : 'Supported formats: PDF, DOC, XLS, PPT, Images' }}
+                {{ $l == 'ar' ? 'الصيغ المدعومة: PDF، DOC، XLS، PPT، الصور' : 'Supported formats: PDF, DOC, XLS, PPT, Images' }}
               </div>
             </div>
           </div>
-          
+
           <!-- Notes Section -->
           <div class="card border-0">
             <div class="card-body p-3">
