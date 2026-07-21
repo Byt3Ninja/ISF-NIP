@@ -3899,4 +3899,5 @@ return [
   'customer_growth_already_exist' => 'سجل نمو العملاء موجود بالفعل لهذه الفترة',
   'Required field' => 'حقل مطلوب',
   'Optional field' => 'حقل غير مطلوب',
+  'Settings_Updated_Successfully' => 'تم تحديث الإعدادات بنجاح',
 ];

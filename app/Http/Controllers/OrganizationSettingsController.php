@@ -49,7 +49,7 @@ class OrganizationSettingsController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['message' => __('settings.email_config_saved')]);
             }
-            return back()->with('message', 'Settings Updated Successfully');
+            return back()->with('message', 'Settings_Updated_Successfully');
         }
 
         // SMTP provider (existing logic)
@@ -73,7 +73,7 @@ class OrganizationSettingsController extends Controller
         $settings = $this->orgSettings();
         $settings->fill($data)->save();
 
-        return back()->with('message', 'Settings Updated Successfully');
+        return back()->with('message', 'Settings_Updated_Successfully');
     }
 
     public function updateNotifications(Request $request)
@@ -96,7 +96,7 @@ class OrganizationSettingsController extends Controller
         $settings = $this->orgSettings();
         $settings->fill($payload)->save();
 
-        return back()->with('message', 'Settings Updated Successfully');
+        return back()->with('message', 'Settings_Updated_Successfully');
     }
 
     protected function authorizeAccess(): void

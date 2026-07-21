@@ -3843,5 +3843,6 @@ return [
   'customer_growth_record_deleted' => 'Customer growth record deleted successfully',
   'customer_growth_already_exist' => 'Customer growth record already exists for this period',
   'Required field' => 'Required field',
-  'Optional field' => 'Optional field'
+  'Optional field' => 'Optional field',
+  'Settings_Updated_Successfully' => 'Settings Updated Successfully',
 ];
