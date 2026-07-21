@@ -91,6 +91,7 @@ return [
     'Type' => 'Type',
     'Passcode' => 'Passcode',
     'Join_Meeting' => 'Join Meeting',
+    'open_maps' => 'Open Maps',
     'Notes' => 'Notes',
     'Attachments' => 'Attachments',
     'Best_regards' => 'Best regards,',
@@ -169,5 +170,4 @@ return [
     'dear_female' => 'Dear Ms. ',
     'regards' => 'Best regards,',
     'team' => ':platform_name Team',
-
 ];

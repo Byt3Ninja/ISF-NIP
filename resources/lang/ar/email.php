@@ -59,6 +59,7 @@ return [
     'Type' => 'النوع',
     'Passcode' => 'كود الدخول',
     'Join_Meeting' => 'انضم الي الجلسة',
+    'open_maps' => 'افتح الخريطة',
     'Notes' => 'ملاحظات',
     'Attachments' => 'المرفقات',
     'Best_regards' => 'اطيب التحيات،',

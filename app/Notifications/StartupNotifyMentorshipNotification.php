@@ -13,6 +13,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
+use App\Services\FileManagerService;
 use Throwable;
 
 class StartupNotifyMentorshipNotification extends Notification implements ShouldQueue
@@ -130,6 +131,17 @@ class StartupNotifyMentorshipNotification extends Notification implements Should
         $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
         $location = $sessionType == 'offline' ? ($cycle->offline_location_address ?: optional($cycle->organization)->address ?: '-') : '-';
         $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: '-') : '-';
+        $attachments = $mentorship_session->attachments;
+        if( empty( $attachments ) )
+        {
+            $attachments = $mentorship_session->fileurl ? [
+                [
+                    'url' => app(FileManagerService::class)->getUrl($mentorship_session->fileurl, 'UsersDiskInviteMentor'),
+                    'name' => basename($mentorship_session->fileurl),
+                    'path' => $mentorship_session->fileurl
+                ]
+            ] : [];
+        }
 
         $mentorName = $mentorship_session?->mentor?->name ?? '';
         return (new MailMessage)
@@ -145,6 +157,8 @@ class StartupNotifyMentorshipNotification extends Notification implements Should
                 'platformName'      => $platformName,
                 'location'          => $location,
                 'mapLink'           => $mapLink,
+                'attachments'       => $attachments,
+                'sessionNotes'      => $mentorship_session?->comment ?? '-',
             ], $orgData));
     }
 

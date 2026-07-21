@@ -6,6 +6,7 @@ use App\Events\MentorshipSessionUpdated;
 use App\Events\RequestMentorship;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
+use App\Services\FileManagerService;
 use App\Notifications\MentorshipRequestNotification;
 use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipSessionMentor;
@@ -64,6 +65,13 @@ class SendMentorshipRequestJob implements ShouldQueue
                 // ======> notify Mentor <=================
                 $locale = app()->getLocale() ?? 'en';
                 $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
+                $session->attachments = $session->fileurl ? [
+                    [
+                        'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
+                        'name' => basename($session->fileurl),
+                        'path' => $session->fileurl
+                    ]
+                ] : [];
 
                 $mentor = $session->mentor;
                 $startup = $session->user;
@@ -279,6 +287,13 @@ class SendMentorshipRequestJob implements ShouldQueue
         if ($this->action == 'modify') {
             $locale = app()->getLocale() ?? 'en';
             $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
+            $session->attachments = $session->fileurl ? [
+                [
+                    'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
+                    'name' => basename($session->fileurl),
+                    'path' => $session->fileurl
+                ]
+            ] : [];
             $mentor_user = $session->mentor;
             $startup_user = $session->user;
 
