@@ -696,11 +696,11 @@ class MentorsController extends Controller
 				}
 
 				if ($successCount > 0) {
-					$mentor = User::find($request->mentorid);
+					/* $mentor = User::find($request->mentorid);
 					$founder = User::find($request->user_id);
 					if ($mentor && $founder) {
 						$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
-					}
+					} */ 
 					return back()->with(['message' => "Request_successfully_added_Startup"]);
 				} else {
 					return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
