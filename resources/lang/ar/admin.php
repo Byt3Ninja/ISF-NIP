@@ -2658,7 +2658,7 @@ return [
 	'ConfirmRejectMessage' => 'هل أنت متأكد من رفض هذا الطلب؟ <br /> سيتم إرسال بريد إلكتروني إلى المستخدم مع سبب الرفض',
 	'RejectRequest' => 'رفض الطلب',
 	'ReasonIsRequired' => 'سبب الرفض مطلوب',
-	'ServiceProviders' => 'مقدمو الخدمات',
+	'ServiceProviders' => 'مقدمي الخدمات',
 	'pending_requests' => 'الطلبات المعلقة',
 	'date_requests' => 'تاريخ الطلبات',
 	'Service Provider' => 'مقدم الخدمة',

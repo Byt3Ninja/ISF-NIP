@@ -99,7 +99,7 @@ return [
     'edit_startup_profile' => 'تعديل ملف الشركة الناشئة',
     'judges' => 'المحكمون',
     'invitations' => 'الدعوات',
-    'services_providers' => 'مقدمو الخدمات',
+    'services_providers' => 'مقدمي الخدمات',
     'services_providers_requests' => 'طلبات مقدمي الخدمات',
 
     // Services & Resources
