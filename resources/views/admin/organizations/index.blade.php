@@ -94,7 +94,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                   </select>
                 </div>
                 <div class="col-lg-auto d-flex justify-content-end">
-                  @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store'], $permissions))
+                  @if ($_user->ableTo('organization.wizard.create', $permissions))
                     <a href="{{ route('organization.wizard.create') }}?step=1" class="btn btn-primary text-nowrap">
                       <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
                     </a>
