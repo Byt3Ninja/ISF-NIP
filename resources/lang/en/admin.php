@@ -3845,4 +3845,6 @@ return [
   'Required field' => 'Required field',
   'Optional field' => 'Optional field',
   'Settings_Updated_Successfully' => 'Settings Updated Successfully',
+  'pending_requests' => 'Pending Requests',
+  'date_requests' => 'Date Requests',
 ];

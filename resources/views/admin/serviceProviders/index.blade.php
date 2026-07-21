@@ -9,8 +9,8 @@
 @php
 $tabs = [
   ['id' => 'enrolled', 'title' => __('admin.ServiceProviders'), 'icon' => 'user-bolt'],
-  ['id' => 'pending',  'title' => __('admin.pending') . ' ' . __('admin.Requests'), 'icon' => 'hourglass-low', 'count' => $pending_requests_count],
-  ['id' => 'history',  'title' => __('admin.Requests') . ' ' . __('admin.History'), 'icon' => 'server-bolt'],
+  ['id' => 'pending',  'title' => __('admin.pending_requests'), 'icon' => 'hourglass-low', 'count' => $pending_requests_count],
+  ['id' => 'history',  'title' =>  __('admin.date_requests'), 'icon' => 'server-bolt'],
 ];
 @endphp
 
@@ -125,7 +125,7 @@ $tabs = [
 		<div class="tab-pane fade" id="pending" role="tabpanel">
 			<div class="card">
 				<div class="card-header border-bottom d-flex justify-content-between align-items-center">
-					<h5 class="card-title mb-0">{{ __('admin.pending') }} {{ __('admin.Requests') }}</h5>
+					<h5 class="card-title mb-0">{{ __('admin.pending_requests') }}</h5>
 					<div class="d-flex align-items-center gap-3">
 						<div class="dropdown">
 							<button class="btn btn-label-secondary dropdown-toggle" type="button" id="pendingExportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
