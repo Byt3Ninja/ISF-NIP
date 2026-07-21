@@ -73,7 +73,7 @@
                                         @endif
                                         @if( $sessionNotes != '-' )
                                             <tr>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentor_notify_email.session_notes') }}:</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px; vertical-align: top !important;">{{ __('email.mentor_notify_email.session_notes') }}:</td>
                                                 <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionNotes }}</td>
                                             </tr>
                                         @endif
