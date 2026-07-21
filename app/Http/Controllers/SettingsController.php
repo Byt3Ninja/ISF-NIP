@@ -802,8 +802,9 @@ class SettingsController extends Controller
 
     public function showSettings()
     {
-        $organization = auth()->user()->organization; 
-        $currencies = Currency::where('enabled',1)->get();  
+        $user = auth()->user();
+        $organization = $user->organization ?? Organization::whereIn('id', $user->organizations_ids)->first();
+        $currencies = Currency::where('enabled',1)->get();
         $timezones = collect(\DateTimeZone::listIdentifiers())
         ->mapWithKeys(function ($timezone) {
 			$zone = new \DateTimeZone($timezone);
@@ -926,6 +927,11 @@ class SettingsController extends Controller
         ]);
 
         $organization = Organization::find($request->input('id'));
+
+        if (!$organization) {
+            return redirect()->back()->with('error', 'Organization not found.');
+        }
+
         $organization->meeting_platform = $request->input('meeting_platform');
         $organization->max_concurrent_sessions = $request->input('max_concurrent_sessions');
 
@@ -962,6 +968,11 @@ class SettingsController extends Controller
         ]);
     
         $organization = Organization::find($request->input('id'));
+
+        if (!$organization) {
+            return redirect()->back()->with('error', 'Organization not found.');
+        }
+
         $organization->website_url = $request->input('website_url');
         $organization->facebook_page_url = $request->input('facebook_url');
         $organization->twitter_handle = $request->input('twitter_handle');

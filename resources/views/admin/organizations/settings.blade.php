@@ -64,6 +64,11 @@
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       @endif
+      @if (!$organization)
+        <div class="alert alert-warning" role="alert">
+          {{ __('settings.no_organization_linked') }}
+        </div>
+      @endif
       <!-- / Alert -->
       <!-- Tabs (mobile) -->
       <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none">

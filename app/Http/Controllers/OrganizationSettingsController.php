@@ -12,11 +12,16 @@ class OrganizationSettingsController extends Controller
         $this->middleware(['auth', 'verified', '2fa']);
     }
 
-    protected function orgSettings()
+    protected function orgSettings(): ?OrganizationSettings
     {
         $user = auth()->user();
         $orgIds = $user->organizations_ids;
-        $orgId = !empty($orgIds) ? $orgIds[0] : null;
+        $orgId = $orgIds[0] ?? null;
+
+        if (!$orgId) {
+            return null;
+        }
+
         return OrganizationSettings::firstOrCreate(['organization_id' => $orgId]);
     }
 
@@ -41,6 +46,12 @@ class OrganizationSettingsController extends Controller
             }
 
             $settings = $this->orgSettings();
+            if (!$settings) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => __('settings.no_organization_linked')], 422);
+                }
+                return back()->with('message2', __('settings.no_organization_linked'));
+            }
             $settings->fill([
                 'email_provider' => 'resend',
                 'resend_api_key' => $request->input('resend_api_key'),
@@ -71,6 +82,12 @@ class OrganizationSettingsController extends Controller
         $data['email_provider'] = 'smtp';
 
         $settings = $this->orgSettings();
+        if (!$settings) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('settings.no_organization_linked')], 422);
+            }
+            return back()->with('message2', __('settings.no_organization_linked'));
+        }
         $settings->fill($data)->save();
 
         return back()->with('message', 'Settings_Updated_Successfully');
@@ -94,6 +111,9 @@ class OrganizationSettingsController extends Controller
         ];
 
         $settings = $this->orgSettings();
+        if (!$settings) {
+            return back()->with('error', __('settings.no_organization_linked'));
+        }
         $settings->fill($payload)->save();
 
         return back()->with('message', 'Settings_Updated_Successfully');

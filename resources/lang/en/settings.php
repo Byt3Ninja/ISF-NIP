@@ -421,5 +421,6 @@ return [
 	'invalid_api_key' => 'Invalid API key.',
 	'email_config_saved' => 'Email configuration saved successfully.',
 	'email_config_failed' => 'Failed to save email configuration. Please try again.',
+	'no_organization_linked' => 'You are not assigned to an organization. Please contact the admin to assign you to an organization.',
 	'org_using_platform_email' => 'This organization is using the platform email configuration. Fill in your own email provider settings to set a custom configuration for this organization.',
 ];
