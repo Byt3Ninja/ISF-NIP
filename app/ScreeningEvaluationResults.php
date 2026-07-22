@@ -71,6 +71,17 @@ class ScreeningEvaluationResults extends Model
 					return is_array( $u ) ? $u : ( json_decode( $u, true ) ?: [] );
 				})->flatten()
 			);
+
+			// Startups currently sitting AT this screening step but never assigned
+			// to any panel and never evaluated. Without this they are absent from
+			// the report's universe entirely and can never be counted "Not
+			// Assigned" (GV-2177). Once a startup advances its companies.step moves
+			// on, so it stops being "at" this step and is not re-added here — it
+			// stays visible in this step only through its stored results above.
+			$atStep = $preloaded
+				? $preloaded['companies']->where('cycle', $getStep->cycle_id)->where('step', $step_id)
+				: Company::where('cycle', $getStep->cycle_id)->where('step', $step_id)->get(['id']);
+			$ids = $ids->merge( $atStep->pluck('id') );
 		}
 
 		// Startups that have a stored result for this step's evaluation.
