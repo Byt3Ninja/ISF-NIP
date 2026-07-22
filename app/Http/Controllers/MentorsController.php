@@ -674,7 +674,7 @@ class MentorsController extends Controller
 						'session_type' => $slot_session_type
 					]);
 
-					$this->notifyFounderOfReservedSession($createMentor);
+					// $this->notifyFounderOfReservedSession($createMentor);
 
 					$successCount++;
 
@@ -844,7 +844,7 @@ class MentorsController extends Controller
 					'cycle_id' => $cycle->id,
 					'session_type' => $request->session_type
 				]);
-				$this->notifyFounderOfReservedSession($createMentorshipRequest);
+				// $this->notifyFounderOfReservedSession($createMentorshipRequest);
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
 					// 
