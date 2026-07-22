@@ -225,11 +225,21 @@
 
             @else
               <button class="btn btn-primary w-100"
-                data-bs-toggle="offcanvas" data-bs-target="#offcanvasMessage"
+                data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistory"
                 data-request-id="{{ $request['id'] }}"
                 data-request-title="{{ $request['title'] }}"
                 data-provider-name="{{ $request['service_provider']['name'] }}"
-                data-provider-img="{{ $request['service_provider']['image_url'] }}">
+                data-provider-img="{{ $request['service_provider']['image_url'] }}"
+                data-status="{{ $request['status'] }}"
+                data-review-rating="{{ $request['rating'] ?? '' }}"
+                data-review-title="{{ $request['review_title'] ?? '' }}"
+                data-review-body="{{ $request['review_body'] ?? '' }}"
+                data-reviewed-at="{{ $request['reviewed_at'] ?? '' }}"
+                data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
+                data-founder-name="{{ $request['founder_name'] ?? '' }}"
+                data-founder-img="{{ $request['founder_img'] ?? '' }}"
+                data-unread-count="{{ $request['unread_count'] ?? 0 }}"
+                data-tab="messages">
                 <i class="ti ti-send me-1"></i> {{ __('admin.Send_Message') }}
               </button>
             @endif
@@ -248,8 +258,9 @@
               data-has-review="{{ $request['has_review'] ? '1' : '0' }}"
               data-founder-name="{{ $request['founder_name'] ?? '' }}"
               data-founder-img="{{ $request['founder_img'] ?? '' }}"
-              data-unread-count="{{ $request['unread_count'] ?? 0 }}">
-              <i class="ti ti-history"></i>
+              data-unread-count="{{ $request['unread_count'] ?? 0 }}"
+              data-tab="messages">
+              <i class="ti ti-send"></i>
             </button>
           </div>
 
@@ -520,13 +531,24 @@
           <form id="formHistoryReply" novalidate>
             <input type="hidden" name="request_id" id="histReplyRequestId">
             <div class="mb-2">
-              <textarea class="form-control" id="histReplyBody" name="reply" rows="3"
-                placeholder="{{ __('admin.reply_placeholder') }}" maxlength="500"></textarea>
+              <textarea class="form-control" id="histReplyBody" name="message" rows="3"
+                placeholder="{{ __('admin.reply_placeholder') }}" maxlength="1000"></textarea>
+              <div class="d-flex justify-content-end mt-1">
+                <small class="text-muted"><span id="histReplyCount">0</span>/1000</small>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="histReplyAttachment" class="form-label fw-semibold">
+                {{ __('admin.attachment') }}
+                <span class="text-muted fw-normal small">({{ __('admin.optional') }})</span>
+              </label>
+              <input type="file" class="form-control" id="histReplyAttachment" name="attachment"
+                accept=".png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar">
+              <div id="histReplyAttachmentError" class="invalid-feedback"></div>
             </div>
             <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted"><span id="histReplyCount">0</span>/500</small>
-              <button type="submit" class="btn btn-sm btn-primary">
-                <i class="ti ti-send me-1"></i>{{ __('admin.reply') }}
+              <button type="submit" class="btn btn-primary" id="btnHistReplySubmit" disabled>
+                <i class="ti ti-send me-1"></i>{{ __('admin.Send_Message') }}
               </button>
             </div>
           </form>
@@ -975,7 +997,11 @@ document.addEventListener('DOMContentLoaded', function () {
     lastHistoryBtn = btn;
     renderReviewTab(btn);
 
-    bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
+    if (btn.dataset.tab === 'messages') {
+      bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-messages')).show();
+    } else {
+      bootstrap.Tab.getOrCreateInstance($('#tab-timeline')).show();
+    }
     formHistoryReply.reset();
     $('#histReplyCount').textContent = '0';
     fvHistoryReply && fvHistoryReply.resetForm(true);
@@ -1072,22 +1098,28 @@ document.addEventListener('DOMContentLoaded', function () {
       let html = '';
       data.messages.forEach(msg => {
         const align = msg.is_mine ? 'end' : 'start';
-        const bgClass = msg.is_mine ? 'bg-primary text-white' : 'bg-light border';
-        const nameAlign = msg.is_mine ? 'text-end' : '';
-        const namepad = msg.is_mine ? 'pe-1' : 'ps-1';
+        const bgClass = msg.is_mine ? 'bg-primary text-white' : 'bg-light border text-dark';
+        const linkClass = msg.is_mine ? 'text-white' : 'text-primary';
+        const avatar = msg.sender_img || '/icons/account.svg';
+        const roleBadge = msg.sender_role ? `<span class="badge bg-label-secondary ms-1 me-1 px-1 py-0" style="font-size:10px;">${esc(msg.sender_role)}</span>` : '';
         let attachHtml = '';
         if (msg.attachment_url) {
-          const linkClass = msg.is_mine ? 'text-white' : 'text-primary';
-          attachHtml = `<div class="mt-1"><a href="${esc(msg.attachment_url)}" target="_blank" class="${linkClass} text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(msg.attachment_name)}</a></div>`;
+          attachHtml = `<div class="mt-2 pt-1 border-top border-white-50"><a href="${esc(msg.attachment_url)}" target="_blank" class="${linkClass} text-decoration-underline small fw-semibold"><i class="ti ti-paperclip me-1"></i>${esc(msg.attachment_name)}</a></div>`;
         }
         html += `
-          <div>
+          <div class="mb-3">
+            <div class="d-flex align-items-center gap-1 mb-1 ${msg.is_mine ? 'flex-row-reverse' : ''}">
+              <img src="${esc(avatar)}" class="rounded-circle border" width="24" height="24" alt="avatar">
+              <span class="fw-semibold small">${esc(msg.sender_name)}</span>
+              ${roleBadge}
+              <small class="text-muted" style="font-size:11px;">${esc(msg.created_at)}</small>
+            </div>
             <div class="d-flex justify-content-${align}">
-              <div class="${bgClass} rounded-3 px-3 py-2 small" style="max-width:75%">
-                ${esc(msg.body)}${attachHtml}
+              <div class="${bgClass} rounded-3 px-3 py-2 small shadow-sm" style="max-width:80%">
+                <div style="white-space: pre-wrap; word-break: break-word;">${esc(msg.body)}</div>
+                ${attachHtml}
               </div>
             </div>
-            <div class="${nameAlign}"><small class="text-muted ${namepad}">${esc(msg.sender_name)} · ${esc(msg.created_at)}</small></div>
           </div>`;
       });
       histMsgThread.innerHTML = html;
@@ -1102,64 +1134,122 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  charCounter($('#histReplyBody'), 'histReplyCount');
+  const histReplyBody = $('#histReplyBody');
+  const btnHistReplySubmit = $('#btnHistReplySubmit');
+
+  if (histReplyBody) {
+    histReplyBody.addEventListener('input', () => {
+      const textVal = histReplyBody.value.trim();
+      $('#histReplyCount').textContent = histReplyBody.value.length;
+      if (btnHistReplySubmit) {
+        btnHistReplySubmit.disabled = (textVal.length === 0);
+      }
+    });
+  }
 
   const formHistoryReply = $('#formHistoryReply');
   const fvHistoryReply = FV.formValidation(formHistoryReply, {
     fields: {
-      reply: {
+      message: {
         validators: {
-          notEmpty:     { message: 'Reply cannot be empty.' },
-          stringLength: { min: 2, max: 500, message: 'Reply must be 2–500 characters.' },
+          notEmpty:     { message: '{{ __('admin.message_required') }}' },
+          stringLength: { min: 1, max: 1000, message: '{{ __('admin.message_body_length') }}' },
+        },
+      },
+      attachment: {
+        validators: {
+          callback: {
+            callback: function(input) {
+              const files = input.element.files;
+              if (!files || files.length === 0) return true;
+
+              const file = files[0];
+              const ext = file.name.split('.').pop().toLowerCase();
+              const allowed = ['png','jpg','jpeg','webp','doc','docx','xls','xlsx','ppt','pptx','zip','rar'];
+
+              if (!allowed.includes(ext)) {
+                return {
+                  valid: false,
+                  message: '{{ app()->getLocale() == "ar" ? "نوع الملف غير مدعوم. الملفات المسموحة: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR." : "Unsupported file type. Allowed files: PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR" }}'
+                };
+              }
+
+              if (file.size > 10 * 1024 * 1024) {
+                return {
+                  valid: false,
+                  message: '{{ app()->getLocale() == "ar" ? "يجب ألا يزيد حجم الملف عن 10 ميجابايت." : "File size must be 10MB or less." }}'
+                };
+              }
+
+              return true;
+            },
+          },
         },
       },
     },
     plugins: {
-      trigger:      new FV.plugins.Trigger(),
-      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-2' }),
+      trigger:      new FV.plugins.Trigger({
+        event: {
+          attachment: 'change',
+        },
+      }),
+      bootstrap5:   new FV.plugins.Bootstrap5({ rowSelector: '.mb-2, .mb-3' }),
       autoFocus:    new FV.plugins.AutoFocus(),
       submitButton: new FV.plugins.SubmitButton(),
     },
   }).on('core.form.valid', () => {
     const submitBtn = formHistoryReply.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> {{ __("admin.Send_Message") }}';
+
+    const formData = new FormData(formHistoryReply);
 
     fetch('{{ route("service_requests.send_message") }}', {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        request_id: $('#histReplyRequestId').value,
-        message: $('#histReplyBody').value,
-      }),
+      body: formData,
     })
     .then(res => res.json())
     .then(data => {
       submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i>{{ __("admin.Send_Message") }}';
       if (data.status) {
         const d = data.data;
         const wrapper = document.createElement('div');
+        wrapper.className = 'mb-3';
         let attachHtml = '';
         if (d.attachment_url) {
-          attachHtml = `<div class="mt-1"><a href="${esc(d.attachment_url)}" target="_blank" class="text-white text-decoration-underline small"><i class="ti ti-paperclip me-1"></i>${esc(d.attachment_name)}</a></div>`;
+          attachHtml = `<div class="mt-2 pt-1 border-top border-white-50"><a href="${esc(d.attachment_url)}" target="_blank" class="text-white text-decoration-underline small fw-semibold"><i class="ti ti-paperclip me-1"></i>${esc(d.attachment_name)}</a></div>`;
         }
+        const avatar = d.sender_img || '/icons/account.svg';
+        const roleBadge = d.sender_role ? `<span class="badge bg-label-secondary ms-1 me-1 px-1 py-0" style="font-size:10px;">${esc(d.sender_role)}</span>` : '';
         wrapper.innerHTML = `
           <div>
+            <div class="d-flex align-items-center gap-1 mb-1 flex-row-reverse">
+              <img src="${esc(avatar)}" class="rounded-circle border" width="24" height="24" alt="avatar">
+              <span class="fw-semibold small">${esc(d.sender_name)}</span>
+              ${roleBadge}
+              <small class="text-muted" style="font-size:11px;">${esc(d.created_at)}</small>
+            </div>
             <div class="d-flex justify-content-end">
-              <div class="bg-primary text-white rounded-3 px-3 py-2 small" style="max-width:75%">
-                ${esc(d.body)}${attachHtml}
+              <div class="bg-primary text-white rounded-3 px-3 py-2 small shadow-sm" style="max-width:80%">
+                <div style="white-space: pre-wrap; word-break: break-word;">${esc(d.body)}</div>
+                ${attachHtml}
               </div>
             </div>
-            <div class="text-end"><small class="text-muted pe-1">${esc(d.sender_name)} · ${esc(d.created_at)}</small></div>
           </div>`;
-        document.getElementById('histMsgThread').appendChild(wrapper);
-        const thread = document.getElementById('histMsgThread');
-        thread.scrollTop = thread.scrollHeight;
+        const msgThread = document.getElementById('histMsgThread');
+        const placeholder = msgThread.querySelector('.ti-message-off');
+        if (placeholder) msgThread.innerHTML = '';
+        msgThread.appendChild(wrapper);
+        msgThread.scrollTop = msgThread.scrollHeight;
+
         formHistoryReply.reset();
         $('#histReplyCount').textContent = '0';
+        if (btnHistReplySubmit) btnHistReplySubmit.disabled = true;
         fvHistoryReply.resetForm(true);
         showToast({ type: 'success', message: '{{ __("admin.message_sent_successfully") }}' });
       } else {
@@ -1168,6 +1258,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     .catch(() => {
       submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ti ti-send me-1"></i>{{ __("admin.Send_Message") }}';
       showToast({ type: 'error', message: '{{ __("admin.unexpected_error") }}' });
     });
   });

@@ -4535,6 +4535,19 @@
                 ]
             },
             {
+                "name": "service_requests.download_attachment",
+                "description": "Download an Attachment in a Service Request Thread",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
                 "name": "users.directory_view",
                 "description": "View User Directory",
                 "guard_name": "web",

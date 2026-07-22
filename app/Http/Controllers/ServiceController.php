@@ -917,8 +917,15 @@ class ServiceController extends Controller
 
 		$attachmentPath = null;
 		$attachmentName = null;
+		$file = null;
 		if ($request->hasFile('attachment')) {
 			$file = $request->file('attachment');
+		} elseif ($request->hasFile('attachments')) {
+			$files = $request->file('attachments');
+			$file = is_array($files) ? ($files[0] ?? null) : $files;
+		}
+
+		if ($file && $file->isValid()) {
 			$attachmentName = $file->getClientOriginalName();
 			$attachmentPath = $file->store('', ['disk' => 'service_messages']);
 		}
@@ -941,6 +948,13 @@ class ServiceController extends Controller
 			$this->sendMessageInAppNotification($serviceRequest, $user, $recipientId);
 		}
 
+		$senderRole = __('admin.Admin');
+		if ($user->id === $founderId) {
+			$senderRole = __('admin.Founder');
+		} elseif ($user->id === $providerUserId) {
+			$senderRole = __('admin.serviceProvider');
+		}
+
 		return response()->json([
 			'status'  => true,
 			'message' => __('admin.message_sent_successfully'),
@@ -948,6 +962,8 @@ class ServiceController extends Controller
 				'id'              => $messageId,
 				'body'            => e($request->input('message')),
 				'sender_name'     => __('admin.You'),
+				'sender_role'     => $senderRole,
+				'sender_img'      => $user->img_url ? asset('191014/' . $user->img_url) : asset('icons/account.svg'),
 				'attachment_url'  => $attachmentPath ? route('service_requests.download_attachment', $messageId) : null,
 				'attachment_name' => $attachmentName,
 				'created_at'      => $now->format('M d, H:i'),
@@ -966,6 +982,7 @@ class ServiceController extends Controller
 
 		$requestQuery = DB::table('services_requests')
 			->join('services', 'services_requests.service_id', '=', 'services.id')
+			->leftJoin('service_providers', 'services.service_provider_id', '=', 'service_providers.id')
 			->where('services_requests.id', $id)
 			->whereNull('services_requests.deleted_at')
 			->whereNull('services.deleted_at');
@@ -984,13 +1001,21 @@ class ServiceController extends Controller
 			});
 		}
 
-		$exists = $requestQuery->select('services_requests.id')->first();
+		$exists = $requestQuery->select([
+			'services_requests.id',
+			'services_requests.user_id as founder_id',
+			'service_providers.user_id as provider_user_id',
+		])->first();
+
 		if (!$exists) {
 			return response()->json([
 				'status'  => false,
 				'message' => __('admin.Service request not found'),
 			], 404);
 		}
+
+		$founderId      = (int) ($exists->founder_id ?? 0);
+		$providerUserId = (int) ($exists->provider_user_id ?? 0);
 
 		$nameFirst = "first_name_{$locale}";
 		$nameLast  = "last_name_{$locale}";
@@ -1011,13 +1036,23 @@ class ServiceController extends Controller
 				'u.img_url as sender_img',
 			])
 			->get()
-			->map(function ($msg) use ($user) {
+			->map(function ($msg) use ($user, $founderId, $providerUserId) {
 				$isMine = (int) $msg->sender_id === $user->id;
+				$senderId = (int) $msg->sender_id;
+				if ($senderId === $founderId) {
+					$role = __('admin.Founder');
+				} elseif ($senderId === $providerUserId) {
+					$role = __('admin.serviceProvider');
+				} else {
+					$role = __('admin.Admin');
+				}
+
 				return [
 					'id'              => $msg->id,
 					'body'            => e($msg->body),
 					'sender_name'     => $isMine ? __('admin.You') : trim($msg->sender_name),
-					'sender_img'      => $msg->sender_img ? asset('191014/' . $msg->sender_img) : null,
+					'sender_role'     => $role,
+					'sender_img'      => $msg->sender_img ? asset('191014/' . $msg->sender_img) : asset('icons/account.svg'),
 					'is_mine'         => $isMine,
 					'attachment_url'  => $msg->attachment_path ? route('service_requests.download_attachment', $msg->id) : null,
 					'attachment_name' => $msg->attachment_name,
