@@ -519,6 +519,11 @@ class MentorsController extends Controller
 		
 		$request->validate([
 			'notes' => 'nullable|string|max:1000',
+			'file_url' => 'nullable|file|max:10240|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,png,jpeg,jpg',
+			'selected_dates' => 'nullable|array',
+		], [
+			'file_url.mimes' => __('mentor.unsupported_slot_attachment_format'),
+			'file_url.max'   => __('mentor.file_excced_10'),
 		]);
 		$user = auth()->user();
 		$getMentor = User::find($request->mentorid);
@@ -550,7 +555,19 @@ class MentorsController extends Controller
 		{
 			$cycle = $getStartup?->company?->cycledata;
 			if ($request->has('selected_dates')) {
-				
+
+				// Only one session type may be booked per time range. The modal
+				// disables conflicting slots, but re-check here so a crafted
+				// payload cannot double-book the same range.
+				$seenRanges = [];
+				foreach ($request->selected_dates as $dateItem) {
+					$rangeKey = ($dateItem['date'] ?? '') . '|' . ($dateItem['time_from'] ?? '') . '|' . ($dateItem['time_to'] ?? '');
+					if (isset($seenRanges[$rangeKey])) {
+						return back()->with(['class' => 'danger', 'msg' => 'duplicate_slot_selected']);
+					}
+					$seenRanges[$rangeKey] = true;
+				}
+
 				$errors = [];
 				$successCount = 0;
 				$bookedSessions = [];
@@ -611,8 +628,8 @@ class MentorsController extends Controller
 						}
 					}
 
-						if (Carbon::parse($date)->toDateString() < now()->toDateString()) {
-							$errors[] = "Cannot schedule meeting in the past: $date";
+						if (Carbon::parse($date . ' ' . $time_from)->isPast()) {
+							$errors[] = "Cannot schedule meeting in the past: $date $time_from";
 							continue;
 						}
 
@@ -748,7 +765,21 @@ class MentorsController extends Controller
 			if ($schedules == null) {
 				return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
 			}
-				
+
+			// A slot belongs to one startup. The modal hides taken slots, but
+			// re-check here to cover a stale page or two founders submitting at
+			// the same time. 'No' (rejected) does not hold the slot.
+			$alreadyBooked = MentorshipRequest::where('mentor_id', $request->mentorid)
+				->where('zoom_date', $datefrom)
+				->where(function ($q) {
+					$q->where('approved', 'Yes')->orWhereNull('approved');
+				})
+				->exists();
+
+			if ($alreadyBooked) {
+				return back()->with(['class' => 'danger', 'msg' => 'slot_just_booked']);
+			}
+
 			if($request->session_type == 'Offline'){
 				
 				if($settings->allow_offline_sessions == 0){
@@ -763,7 +794,7 @@ class MentorsController extends Controller
 
 			if ($request->mentorid) {
 				
-				if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
+				if (Carbon::parse($request->date . ' ' . $request->session_start_time)->isPast()) {
 					return back()->with(['msg' => 'cannot_schedule_past_meeting']);
 				}
 				$fileName = '';

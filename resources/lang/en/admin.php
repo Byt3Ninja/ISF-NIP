@@ -3847,4 +3847,6 @@ return [
   'Settings_Updated_Successfully' => 'Settings Updated Successfully',
   'pending_requests' => 'Pending Requests',
   'date_requests' => 'Date Requests',
+  'duplicate_slot_selected' => 'You can only select one session type for the same time slot.',
+  'slot_just_booked' => 'This time slot has just been booked. Please choose another slot.',
 ];

@@ -23,10 +23,10 @@
         <!-- Startup Selection (Only for Admin when booking) -->
         <div id="startupSelectWrap" class="mb-4" style="display: none;">
           <label for="startupSelect" class="form-label mb-2 fw-semibold">
-            {{ $l == 'en' ? 'Select Startup' : 'اختر الشركة الناشئة' }} <span class="text-danger">*</span>
+            {{ __('mentor.select_startup') }} <span class="text-danger">*</span>
           </label>
           <select class="form-select" id="startupSelect">
-            <option value="">{{ $l == 'en' ? 'Select Startup' : 'اختر الشركة الناشئة' }}</option>
+            <option value="">{{ __('mentor.select_startup') }}</option>
           </select>
         </div>
 
@@ -63,92 +63,20 @@
         <!-- Session Details -->
         <div id="sessionDetails" class="bg-light-subtle border rounded p-3 mt-3" style="display: none;">
           <h6 class="fw-semibold mb-3">{{ __('admin.session_details_label') }}</h6>
-          <div class="row g-3" id="singleSessionDetails">
-            <div class="col-md-6">
-              <div class="d-flex gap-2">
-                <i class="ti ti-calendar"></i>
-                <div>
-                  <div class="small">{{ __('admin.date') }}</div>
-                  <div class="fw-medium" id="detailDate">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="d-flex gap-2">
-                <i class="ti ti-video"></i>
-                <div>
-                  <div class="small">{{ __('mentor.session_type') }}</div>
-                  <div class="fw-medium" id="detailType">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="d-flex gap-2">
-                <i class="ti ti-clock"></i>
-                <div>
-                  <div class="small">{{ __('mentor.session_start_time') }}</div>
-                  <div class="fw-medium" id="displayStartTime">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="d-flex gap-2">
-                <i class="ti ti-clock"></i>
-                <div>
-                  <div class="small">{{ __('mentor.session_end_time') }}</div>
-                  <div class="fw-medium" id="displayEndTime">-</div>
-                </div>
-              </div>
-            </div>
-            <!-- Duration & Location on the same row -->
-            <div class="col-md-6">
-              <div class="d-flex gap-2">
-                <i class="ti ti-hourglass-empty"></i>
-                <div>
-                  <div class="small">{{ __('admin.duration') }}</div>
-                  <div class="fw-medium" id="detailDuration">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6" id="detailLocationWrap" style="display: none;">
-              <div class="d-flex gap-2">
-                <i class="ti ti-map-pin"></i>
-                <div>
-                  <div class="small">{{ __('admin.Location') }}</div>
-                  <a href="#" id="detailLocation" target="_blank"
-                     class="fw-medium text-decoration-underline text-body">-</a>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6" id="detailAddressWrap" style="display: none;">
-              <div class="d-flex gap-2">
-                <i class="ti ti-map-pin"></i>
-                <div>
-                  <div class="small">{{ __('admin.Address') }}</div>
-                  <div class="fw-medium" id="detailAddress">-</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="multiSessionDetails" style="display: none;">
-            <div class="col-12">
-              <ul class="list-group list-group-flush" id="selectedSlotsList">
-              </ul>
-            </div>
-          </div>
+          <div id="sessionDetailsBody"></div>
         </div>
 
         <!-- File Upload -->
         <div class="mt-3">
           <label class="form-label mb-2">
-            {{ $l == 'en' ? 'Attachment' : 'المرفق' }}
+            {{ __('mentor.attachment') }}
             <span class="text-muted fw-normal">({{ __('mentor.optional') }})</span>
           </label>
           <div class="border bg-light-subtle rounded p-4 text-center cursor-pointer"
             onclick="document.getElementById('fileUpload').click()">
             <i class="ti ti-cloud-upload mb-2"></i>
             <div class="fw-medium">{{ __('mentor.single_dropzone_description') }}</div>
-            <div class="small text-muted mt-1">PDF, DOC, DOCX, PPT, XLS, PNG, JPEG up to 10MB</div>
+            <div class="small text-muted mt-1">{{ __('mentor.allowed_formats_hint') }}</div>
           </div>
           <input type="file" id="fileUpload" class="d-none">
           <div id="fileError" class="text-danger small mt-2" style="display: none;"></div>
@@ -158,7 +86,7 @@
         <!-- Additional Notes -->
         <div class="mt-3">
           <label for="additionalNotes" class="form-label mb-2">
-            {{ $l == 'en' ? 'Additional Notes' : 'ملاحظات إضافية' }}
+            {{ __('mentor.additional_notes') }}
             <span class="text-muted fw-normal">({{ __('mentor.optional') }})</span>
           </label>
           <textarea class="form-control" id="additionalNotes" rows="3" maxlength="1000"
@@ -214,19 +142,14 @@
 
     const isAdmin = @json(auth()->user()->hasAnyRole(['admin', 'organizationManager', 'subadmin']));
 
-    if (isAdmin) {
-      $('#singleSessionDetails').hide();
-      $('#multiSessionDetails').show();
-    } else {
-      $('#singleSessionDetails').show();
-      $('#multiSessionDetails').hide();
-    }
-
     // ─── Utilities ────────────────────────────────────────────────────────────
     const parseTime    = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
     const calcDuration = (s, e) => parseTime(e) - parseTime(s);
     const formatTime12 = (t) => moment(t, 'HH:mm').format('hh:mm A');
     const getToday     = () => new Date().toISOString().split('T')[0];
+    const escapeHtml   = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
 
     const formatDate = (dateStr) =>
       new Date(dateStr).toLocaleDateString('en-US', {
@@ -269,7 +192,7 @@
         return { success: true, message: '{{ __('mentor.session_booked_successfully') }}' };
       }
       if (html.includes('mentor_not_available_in_this_time')) {
-        return { success: false, message: '{{ __('mentor.mentor_not_available_in_this_time') ?? 'Mentor is not available at this time.' }}' };
+        return { success: false, message: '{{ __('mentor.mentor_not_available_in_this_time') }}' };
       }
       if (html.includes('cannot_schedule_past_meeting')) {
         return { success: false, message: 'Cannot schedule a meeting in the past.' };
@@ -347,9 +270,12 @@
         if (state.slots.some(s => s.weekly && s.weekday === dayName)) dates.add(dateStr);
       }
 
-      dates.add(getToday());
-
-      return Array.from(dates).sort();
+      // Only offer dates that still have a slot left to book: drop any date
+      // whose slots are all past (today, late in the day) or already taken.
+      return Array.from(dates)
+        .filter(dateStr => getSlotsForDate(dateStr)
+          .some(s => !isSlotBlocked(s, dateStr) && !isSlotPast(s, dateStr)))
+        .sort();
     };
 
     const getSlotsForDate = (dateStr) => {
@@ -369,13 +295,27 @@
       return state.blocked_intervals.some(i => start < i.end && end > i.start);
     };
 
+    const isSlotPast = (slot, dateStr) => {
+      const offset = '{{ date('P') }}';
+      return moment(`${dateStr} ${slot.start_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').isSameOrBefore(moment());
+    };
+
     const filterSlots = (slots, filterType) => {
-      let available = slots.filter(s => !isSlotBlocked(s, s.date));
+      let available = slots.filter(s => !isSlotBlocked(s, s.date) && !isSlotPast(s, s.date));
       if (state.offlineDisabled) available = available.filter(s => s.session_type === 'Online');
       if (filterType === 'online')  return available.filter(s => s.session_type === 'Online');
       if (filterType === 'offline') return available.filter(s => s.session_type === 'Offline');
       return available;
     };
+
+    // A slot conflicts when another *selected* slot occupies the exact same
+    // time range with a different session type. Admins may book several
+    // different time ranges, but only one session type per time range.
+    const conflictsWithSelection = (slot) =>
+      state.selectedSlots.some(s =>
+        s.start_time   === slot.start_time &&
+        s.end_time     === slot.end_time   &&
+        s.session_type !== slot.session_type);
 
     // ─── Render slots ─────────────────────────────────────────────────────────
     const renderSlots = (dateStr) => {
@@ -388,6 +328,8 @@
         return;
       }
 
+      slots.forEach((s) => { s._key = `${s.id ?? 'x'}|${s.date ?? ''}|${s.start_time}|${s.end_time}|${s.session_type}`; });
+
       const html = slots.map((slot, i) => {
         const duration    = calcDuration(slot.start_time, slot.end_time);
         const icon        = ICONS[slot.session_type]         || ICONS.Both;
@@ -397,12 +339,14 @@
 
         const inputType   = isAdmin ? 'checkbox' : 'radio';
         const isChecked   = isAdmin
-          ? state.selectedSlots.some(s => s.start_time === slot.start_time && s.end_time === slot.end_time)
+          ? state.selectedSlots.some(s => s._key === slot._key)
           : (state.selectedSlot && state.selectedSlot.start_time === slot.start_time && state.selectedSlot.end_time === slot.end_time);
+        const isConflict  = isAdmin && !isChecked && conflictsWithSelection(slot);
         const borderClass = isChecked ? 'border-primary' : '';
+        const stateClass  = isConflict ? 'opacity-50 slot-conflict' : '';
 
         return `
-          <div class="card shadow-none mb-2 border slot-card ${borderClass}" data-slot-index="${i}">
+          <div class="card shadow-none mb-2 border slot-card ${borderClass} ${stateClass}" data-slot-index="${i}">
             <div class="card-body p-3">
               <div class="d-flex align-items-center justify-content-between">
                 <div class="flex-grow-1">
@@ -421,11 +365,16 @@
                         class="badge bg-light-subtle d-flex align-items-center gap-1 text-dark rounded px-2 text-decoration-none"
                         title="${location}">
                         <i class="ti ti-map-pin ti-16px"></i>
-                        <span>Google Maps</span>
+                        <span>@lang('mentor.google_maps')</span>
                       </a>` : ''}
                   </div>
+                  ${isConflict ? `
+                    <div class="small text-muted mt-1">
+                      <i class="ti ti-info-circle ti-14px me-1"></i>@lang('mentor.slot_type_conflict_hint')
+                    </div>` : ''}
                 </div>
-                <input type="${inputType}" class="form-check-input ms-2" name="slot" value="${i}" ${isChecked ? 'checked' : ''}>
+                <input type="${inputType}" class="form-check-input ms-2" name="slot" value="${i}"
+                       ${isChecked ? 'checked' : ''} ${isConflict ? 'disabled' : ''}>
               </div>
             </div>
           </div>`;
@@ -436,6 +385,7 @@
       $container.find('.slot-card').on('click', function (e) {
         if ($(e.target).closest('a, input').length) return;
         const $input = $(this).find('input[name="slot"]');
+        if ($input.prop('disabled')) return;
         if (isAdmin) {
           $input.prop('checked', !$input.prop('checked')).trigger('change');
         } else {
@@ -446,13 +396,12 @@
       $container.find('input[name="slot"]').on('change', function () {
         if (isAdmin) {
           state.selectedSlots = [];
-          $container.find('.slot-card').removeClass('border-primary');
           $container.find('input[name="slot"]:checked').each(function () {
-            const idx = parseInt($(this).val());
-            state.selectedSlots.push(slots[idx]);
-            $(this).closest('.slot-card').addClass('border-primary');
+            state.selectedSlots.push(slots[parseInt($(this).val())]);
           });
           updateSelectedSlotsDisplay();
+          // Re-render so conflicting slots gain/lose their disabled state.
+          renderSlots(dateStr);
         } else {
           selectSlot(slots[parseInt($(this).val())], $(this).closest('.slot-card'));
         }
@@ -467,86 +416,119 @@
 
     $('#startupSelect').on('change', checkSubmitState);
 
+    // ─── Shared session-details grid ──────────────────────────────────────────
+    // One template for every role, so the layout cannot diverge between the
+    // startup single-select and the admin multi-select views.
+    const renderSessionGrid = (slot, dateStr) => {
+      const duration    = calcDuration(slot.start_time, slot.end_time);
+      const sessionType = slot.session_type === 'Online'
+        ? '{{ __('mentor.online_video_call') }}'
+        : (SESSION_TYPES[slot.session_type] || SESSION_TYPES.Both);
+
+      const isOffline = slot.session_type !== 'Online';
+      const address   = slot.Address || '-';
+      const loc       = slot.location || '';
+      const locText   = loc.length > 30 ? loc.slice(0, 30) + '…' : loc;
+
+      const addressBlock = isOffline ? `
+        <div class="col-md-6">
+          <div class="d-flex gap-2">
+            <i class="ti ti-map-pin"></i>
+            <div>
+              <div class="small">@lang('admin.Address')</div>
+              <div class="fw-medium detail-address">${escapeHtml(address)}</div>
+            </div>
+          </div>
+        </div>` : '';
+
+      const locationBlock = (isOffline && loc) ? `
+        <div class="col-md-6">
+          <div class="d-flex gap-2">
+            <i class="ti ti-map-pin"></i>
+            <div>
+              <div class="small">@lang('admin.Location')</div>
+              <a href="${escapeHtml(loc)}" target="_blank"
+                 class="fw-medium text-decoration-underline text-body detail-location">${escapeHtml(locText)}</a>
+            </div>
+          </div>
+        </div>` : '';
+
+      return `
+        <div class="row g-3 session-grid">
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="ti ti-calendar"></i>
+              <div>
+                <div class="small">@lang('admin.date')</div>
+                <div class="fw-medium detail-date">${formatDate(dateStr)}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="ti ti-video"></i>
+              <div>
+                <div class="small">@lang('mentor.session_type')</div>
+                <div class="fw-medium detail-type">${sessionType}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="ti ti-clock"></i>
+              <div>
+                <div class="small">@lang('mentor.session_start_time')</div>
+                <div class="fw-medium detail-start">${formatTime12(slot.start_time)}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="ti ti-clock"></i>
+              <div>
+                <div class="small">@lang('mentor.session_end_time')</div>
+                <div class="fw-medium detail-end">${formatTime12(slot.end_time)}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="ti ti-hourglass-empty"></i>
+              <div>
+                <div class="small">@lang('admin.duration')</div>
+                <div class="fw-medium detail-duration">${duration} @lang('admin.min')</div>
+              </div>
+            </div>
+          </div>
+          ${addressBlock}
+          ${locationBlock}
+        </div>`;
+    };
+
     // ─── selectSlot ───────────────────────────────────────────────────────────
     const selectSlot = (slot, $card) => {
       $('.slot-card').removeClass('border-primary');
       $card.addClass('border-primary');
       state.selectedSlot = slot;
 
-      const duration = calcDuration(slot.start_time, slot.end_time);
-      $('#detailDate').text(formatDate(state.selectedDate));
-      $('#detailType').text(slot.session_type === 'Online' ? '{{ __('mentor.online_video_call') }}' : SESSION_TYPES[slot.session_type]);
-      $('#displayStartTime').text(formatTime12(slot.start_time));
-      $('#displayEndTime').text(formatTime12(slot.end_time));
-      $('#detailDuration').text(`${duration} @lang('admin.min')`);
-
-      if (slot.session_type !== 'Online') {
-        $('#detailAddressWrap').show();
-        $('#detailAddress').text(slot.Address ? slot.Address : '-');
-      } else {
-        $('#detailAddressWrap').hide();
-      }
-
-      // ── Location in details (same row as duration) ──
-      const loc     = slot?.location || '';
-      const locText = loc.length > 30 ? loc.slice(0, 30) + '…' : loc;
-      const showLoc = loc && slot.session_type !== 'Online';
-      if (showLoc) {
-        $('#detailLocation')
-          .attr('href', loc)
-          .text(locText);
-
-        $('#detailLocationWrap').show();
-      } else {
-        $('#detailLocationWrap').hide();
-      }
-
+      $('#sessionDetailsBody').html(renderSessionGrid(slot, state.selectedDate));
       $('#sessionDetails').show();
       hideMessages();
       checkSubmitState();
     };
 
     const updateSelectedSlotsDisplay = () => {
-      const $container = $('#selectedSlotsList');
       if (state.selectedSlots.length === 0) {
         $('#sessionDetails').hide();
         checkSubmitState();
         return;
       }
 
-      const html = state.selectedSlots.map(slot => {
-        const duration = calcDuration(slot.start_time, slot.end_time);
-        const icon     = ICONS[slot.session_type] || ICONS.Both;
-        const sessionType = SESSION_TYPES[slot.session_type] || SESSION_TYPES.Both;
-        
-        let offlineDetails = '';
-        if (slot.session_type !== 'Online') {
-          const address = slot.Address ? slot.Address : '-';
-          const loc = slot.location || '';
-          const mapsLink = loc ? `
-            <a href="${loc}" target="_blank" class="badge bg-light-subtle text-dark rounded px-2 text-decoration-none ms-2">
-              <i class="ti ti-map-pin"></i> Google Maps
-            </a>` : '';
-          offlineDetails = `
-            <div class="small text-muted mt-1">
-              <strong>@lang('admin.Address'):</strong> ${address}
-              ${mapsLink}
-            </div>`;
-        }
+      const html = state.selectedSlots
+        .map(slot => renderSessionGrid(slot, state.selectedDate))
+        .join('<hr class="my-3">');
 
-        return `
-          <li class="list-group-item px-0 py-2 border-bottom">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <div class="fw-semibold small">${formatTime12(slot.start_time)} - ${formatTime12(slot.end_time)}</div>
-                <div class="small text-muted">${duration} @lang('mentor.min') | ${icon} ${sessionType}</div>
-                ${offlineDetails}
-              </div>
-            </div>
-          </li>`;
-      }).join('');
-
-      $container.html(html);
+      $('#sessionDetailsBody').html(html);
       $('#sessionDetails').show();
       checkSubmitState();
     };
@@ -586,9 +568,12 @@
           $(dayElem).addClass(isAvailable ? 'available' : (isFuture ? 'unavailable' : ''));
         },
         onReady: (selectedDates, dateStr, instance) => {
+          const hasBookable = (d) =>
+            getSlotsForDate(d).some(s => !isSlotBlocked(s, d) && !isSlotPast(s, d));
+
           let targetDate = today;
-          if (!getSlotsForDate(today).length) {
-            const nextDate = dates.find(d => getSlotsForDate(d).length > 0);
+          if (!hasBookable(today)) {
+            const nextDate = dates.find(d => hasBookable(d));
             if (nextDate) targetDate = nextDate;
           }
           instance.setDate(targetDate, true);
@@ -656,7 +641,7 @@
         // Startup selection for Admin
         if (isAdmin) {
           const $select = $('#startupSelect');
-          $select.html('<option value="">{{ $l == "en" ? "Select Startup" : "اختر الشركة الناشئة" }}</option>');
+          $select.html('<option value="">{{ __('mentor.select_startup') }}</option>');
           
           if (result?.startups && result.startups.length > 0) {
             result.startups.forEach(startup => {
@@ -737,7 +722,7 @@
         return;
       }
       if (isAdmin && !$('#startupSelect').val()) {
-        showError('{{ $l == "en" ? "Please select a startup." : "يرجى اختيار شركة ناشئة." }}');
+        showError('{{ __('mentor.please_select_startup') }}');
         return;
       }
       if (!state.fileValid) {
@@ -785,7 +770,7 @@
             else if (json.message) msg = json.message;
           } catch (_) {}
         } else if (xhr.status === 419) {
-          msg = '{{ __('mentor.session_expired_messsage') }}';
+          msg = '{{ __('mentor.session_expired_message') }}';
         } else {
           try {
             const json = JSON.parse(xhr.responseText);

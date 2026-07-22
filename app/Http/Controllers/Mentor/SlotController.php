@@ -229,8 +229,8 @@ class SlotController extends Controller
 		$location = null;
 		$address = null;
 		if ($cycle) {
-			$location = $cycle->offline_location_map ?? ($cycle->organization->google_map_url ?? null);
-			$address = $cycle->offline_location_address ?? ($cycle->organization->address ?? null);
+			$location = $cycle->offline_location_map ?: ($cycle->organization->google_map_url ?: null);
+			$address = $cycle->offline_location_address ?: ($cycle->organization->address ?: null);
 		} elseif ($organizationId) {
 			$org = \App\Organization::find($organizationId);
 			if ($org) {

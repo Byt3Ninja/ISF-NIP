@@ -136,4 +136,12 @@ return [
     'session_booked_successfully' => 'تم حجز الجلسة بنجاح',
     'request_sent_success' => 'تم ارسال الطلب بنجاح',
     'session_expired_message' => 'انتهت صلاحية الجلسة. يرجى تحديث الصفحة والمحاولة مرة أخرى.',
+    'mentor_not_available_in_this_time' => 'المرشد غير متاح في هذا الوقت',
+    'additional_notes' => 'ملاحظات إضافية',
+    'select_startup' => 'اختر الشركة الناشئة',
+    'please_select_startup' => 'يرجى اختيار شركة ناشئة.',
+    'google_maps' => 'خرائط جوجل',
+    'allowed_formats_hint' => 'PDF, DOC, DOCX, PPT, XLS, PNG, JPEG بحد أقصى 10 ميجابايت',
+    'slot_type_conflict_hint' => 'تم اختيار نوع جلسة آخر لنفس هذا الوقت.',
+    'duplicate_slot_selected' => 'يمكنك اختيار نوع جلسة واحد فقط لنفس الموعد.',
 ];

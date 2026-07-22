@@ -3902,4 +3902,6 @@ return [
   'Required field' => 'حقل مطلوب',
   'Optional field' => 'حقل غير مطلوب',
   'Settings_Updated_Successfully' => 'تم تحديث الإعدادات بنجاح',
+  'duplicate_slot_selected' => 'يمكنك اختيار نوع جلسة واحد فقط لنفس الموعد.',
+  'slot_just_booked' => 'تم حجز هذا الموعد للتو. يرجى اختيار موعد آخر.',
 ];
