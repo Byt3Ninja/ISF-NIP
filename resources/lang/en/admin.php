@@ -1166,6 +1166,7 @@ return [
 	'Overall_Recommendation' => 'Overall Recommendation',
 	'Overall_Weighted_Score' => 'Overall Weighted Score',
 	'Question_assessment' => 'Question Assessment',
+	'No_Questions_Available' => 'No questions available',
 	'History' => 'History',
 	'Questions_answered' => 'Questions Answered',
 	'Answers' => 'Answers',

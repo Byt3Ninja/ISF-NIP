@@ -1162,6 +1162,7 @@ return [
 	'Overall_Recommendation' => 'التقييم العام',
 	'Overall_Weighted_Score' => 'نسبة التقييم العام',
 	'Question_assessment' => 'تقييم الأسئلة',
+	'No_Questions_Available' => 'لا توجد أسئلة',
 	'History' => 'التاريخ',
 	'Questions_answered' => 'الاسئلة المجابة',
 	'Answers' => 'الاجابات',
