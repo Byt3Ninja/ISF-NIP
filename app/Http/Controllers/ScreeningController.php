@@ -118,7 +118,6 @@ class ScreeningController extends Controller
 		 * Preload all related data
 		 * ------------------------- */
 		$stepIds   = $steps->pluck('id');
-		$cycleIds  = $steps->pluck('cycle_id')->unique();
 
 		$judges = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
 				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
@@ -135,10 +134,17 @@ class ScreeningController extends Controller
 				->get()
 				->groupBy('step');
 
-		$forms = Step::whereIn('cycle_id', $cycleIds)
-				->where('stype', 1)
-				->get()
-				->keyBy(fn ($f) => "{$f->cycle_id}-{$f->arr}");
+		// Resolve each step's form from its OWN pointer, mirroring show():
+		// form_id is the source of truth, data is a legacy fallback. Preload the
+		// referenced BuilderForms keyed by id to avoid an N+1 in the map below.
+		// The previous key-by-"cycle_id-stype-form_id" collided across steps and
+		// then ran ->where()->first() on a loaded model, which queried the whole
+		// builder_forms table and returned the org's first form regardless of the
+		// step's actual form (GV form mismatch on the screening list).
+		$formIds = $steps->map(fn ($s) => $s->form_id ?: (is_numeric($s->data) ? $s->data : null))
+				->filter()
+				->unique();
+		$forms = \App\BuilderForm::whereIn('id', $formIds)->get()->keyBy('id');
 
 		/** -------------------------
 		 * Build screeningSteps
@@ -158,9 +164,17 @@ class ScreeningController extends Controller
 				->map(fn ($c) => (object) ['id'   => $c->id, 'name' => $c->name_en,])
 				->values();
 
-			/** Form */
-			$formKey = "{$step->cycle_id}-" . ($step->arr - 1);
-			$form    = $forms->get($formKey);
+			/** Form — read straight from the step's own pointer, same as show().
+			 * Only surface the form when it belongs to the cycle's organization:
+			 * the manage-page dropdown is org-scoped, so a cross-org form there
+			 * shows "Select Form" (nothing selected). Guarding here keeps the list
+			 * consistent with the manage page instead of showing a form the manage
+			 * page can't select. */
+			$formId      = $step->form_id ?: (is_numeric($step->data) ? $step->data : null);
+			$formBuilder = $formId ? $forms->get($formId) : null;
+			if ($formBuilder && $formBuilder->organization_id != $step->cycle?->organization_id) {
+				$formBuilder = null;
+			}
 
 			/** Screening type */
 			$screeningType = match ($step->data) {
@@ -182,7 +196,7 @@ class ScreeningController extends Controller
 				'screening_type_value' => $step->data,
 				'judges'        => $judgesForStep,
 				'companies'     => $companiesForStep,
-				'form'          => $form ? (object) ['id' => $form->id, 'title' => $form->title] : null,
+				'form'          => $formBuilder ? (object) ['id' => $formBuilder->id, 'title' => $formBuilder?->form_name ?? '-'] : null,
 			];
 		});
 

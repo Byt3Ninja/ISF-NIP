@@ -42,6 +42,11 @@ class Step extends Model
 		return $this->hasMany(Formdata::class,'step_id');
 	}
 
+    public function formBuilder()
+    {
+        return $this->belongsTo(BuilderForm::class, "form_id", "id");
+    }
+
 	public function stepFiltrationJudges(){
 		return $this->belongsToMany(User::class,Screening::class,'step_id','user_id');
 	}
