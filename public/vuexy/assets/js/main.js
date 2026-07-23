@@ -41,6 +41,7 @@ if (document.getElementById('layout-menu')) {
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
   let searchMenuEl = document.querySelectorAll("#search-menu");
   let searchMenuIconEl = document.querySelectorAll("#search-menu-icon");
+  let menuFooterEl = document.querySelectorAll("#menu-footer");
 
   layoutMenuEl.forEach(function (element) {
     menu = new Menu(element, {
@@ -74,9 +75,12 @@ if (document.getElementById('layout-menu')) {
           );
 
           if (window.Helpers.isCollapsed()) {
+            // console.log('collapsed');
+            menuFooterEl[0].style.display = "none";
             searchMenuEl[0].style.display = "none";
             searchMenuIconEl[0].style.display = "block";
           } else {
+            menuFooterEl[0].style.display = "block";
             searchMenuEl[0].style.display = "block";
             searchMenuIconEl[0].style.display = "none";
           }
@@ -422,97 +426,171 @@ if (document.getElementById('layout-menu')) {
       } catch (e) {}
     }
   }
+  
+  // Handle search modal logic
+  document.getElementById('menuSearch')?.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const menuItems = document.querySelectorAll('#menuGrid .nav-item');
+    
+    menuItems.forEach(item => {
+      const label = item.getAttribute('data-label');
+      if (label.includes(searchTerm)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+  
+  // Handle search menu logic
+  document.getElementById("search-menu-input")?.addEventListener("input", function () {
+    const searchTerm = this.value.toLowerCase();
+  
+    const menu = document.querySelector('.menu-inner, .startup-menu-inner');
+    const items = menu.querySelectorAll('.menu-item');
+    const headers = menu.querySelectorAll('.menu-header');
+  
+    let anyVisible = false;
+  
+    // 1️⃣ Handle menu items (both grouped & flat)
+    items.forEach(item => {
+      if (item.id === 'search-menu') {
+        item.style.display = 'block';
+        return;
+      }
+  
+      if (item.id === 'search-menu-icon') {
+        item.style.display = 'none';
+        return;
+      }
+      
+      const hasSub = item.querySelector('.menu-sub');
+      let match = false;
+  
+      if (hasSub) {
+        // GROUPED MENU
+        const children = item.querySelectorAll('.menu-sub .menu-item');
+  
+        children.forEach(child => {
+          const label = child.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
+  
+          if (label.includes(searchTerm)) {
+            child.style.display = 'block';
+            match = true;
+          } else {
+            child.style.display = 'none';
+          }
+        });
+  
+        if (match || searchTerm === '') {
+          item.style.display = 'block';
+          item.classList.add('open');
+          anyVisible = true;
+        } else {
+          item.style.display = 'none';
+          item.classList.remove('open');
+        }
+      } else {
+        // FLAT MENU
+        const label = item.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
+  
+        if (label.includes(searchTerm) || searchTerm === '') {
+          item.style.display = 'block';
+          anyVisible = true;
+        } else {
+          item.style.display = 'none';
+        }
+      }
+    });
+  
+    // 2️⃣ Handle section headers
+    headers.forEach(header => {
+      let next = header.nextElementSibling;
+      let hasVisibleItem = false;
+  
+      while (next && !next.classList.contains('menu-header')) {
+        if (next.classList.contains('menu-item') && next.style.display !== 'none') {
+          hasVisibleItem = true;
+          break;
+        }
+        next = next.nextElementSibling;
+      }
+  
+      header.style.display = hasVisibleItem ? 'block' : 'none';
+    });
+  });
+  
+  // Debounce helper
+  const debounce = (fn, delay = 1000) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  };
+  
+  // Create debounced handler ONCE
+  const handleSearch = debounce((value) => {
+    const searchInputGroup = debouncedSearchInput.closest('.input-group');
+    if (searchInputGroup) {
+      const searchIcon = searchInputGroup.querySelector('i');
+      if (searchIcon) {
+        searchIcon.classList.remove('ti-search');
+        searchIcon.classList.add('ti-loader-2', 'ti-spin');
+      }
+    }
+  
+    const url = new URL(window.location);
+  
+    // 🔑 Always reset pagination on search change
+    url.searchParams.delete('page');
+  
+    if (value) {
+      url.searchParams.set('search', value);
+    } else {
+      url.searchParams.delete('search');
+    }
+  
+    // Preserve other query parameters
+    for (const [key, value] of url.searchParams) {
+      url.searchParams.set(key, value);
+    }
+  
+    window.location.href = url.href;
+  }, 1000);
+  
+  const debouncedSearchInput = document.getElementById('debounced-search');
+  if (debouncedSearchInput) {
+    debouncedSearchInput.addEventListener('input', function() {
+      console.log('this.value.toLowerCase()', this.value.toLowerCase());
+      handleSearch(this.value.toLowerCase());
+    });
+  }
 })();
 
-// Handle search modal logic
-document.getElementById('menuSearch')?.addEventListener('input', function() {
-  const searchTerm = this.value.toLowerCase();
-  const menuItems = document.querySelectorAll('#menuGrid .nav-item');
-  
-  menuItems.forEach(item => {
-    const label = item.getAttribute('data-label');
-    if (label.includes(searchTerm)) {
-      item.style.display = 'block';
-    } else {
-      item.style.display = 'none';
-    }
-  });
-});
+function resetSearchUI(input) {
+  const searchInputGroup = input.closest('.input-group');
+  if (!searchInputGroup) return;
 
-// Handle search menu logic
-document.getElementById("search-menu-input")?.addEventListener("input", function () {
-  const searchTerm = this.value.toLowerCase();
+  const searchIcon = searchInputGroup.querySelector('i');
+  if (!searchIcon) return;
 
-  const menu = document.querySelector('.menu-inner, .startup-menu-inner');
-  const items = menu.querySelectorAll('.menu-item');
-  const headers = menu.querySelectorAll('.menu-header');
+  searchIcon.classList.remove('ti-loader-2', 'ti-spin');
+  searchIcon.classList.add('ti-search');
+}
 
-  let anyVisible = false;
+function syncSearchWithURL() {
+  const input = document.getElementById('debounced-search');
+  if (!input) return;
 
-  // 1️⃣ Handle menu items (both grouped & flat)
-  items.forEach(item => {
-    if (item.id === 'search-menu') {
-      item.style.display = 'block';
-      return;
-    }
+  const url = new URL(window.location.href);
+  const searchParam = url.searchParams.get('search');
 
-    if (item.id === 'search-menu-icon') {
-      item.style.display = 'none';
-      return;
-    }
-    
-    const hasSub = item.querySelector('.menu-sub');
-    let match = false;
+  if (!searchParam) {
+    input.value = '';
+    resetSearchUI(input);
+  }
+}
 
-    if (hasSub) {
-      // GROUPED MENU
-      const children = item.querySelectorAll('.menu-sub .menu-item');
-
-      children.forEach(child => {
-        const label = child.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
-
-        if (label.includes(searchTerm)) {
-          child.style.display = 'block';
-          match = true;
-        } else {
-          child.style.display = 'none';
-        }
-      });
-
-      if (match || searchTerm === '') {
-        item.style.display = 'block';
-        item.classList.add('open');
-        anyVisible = true;
-      } else {
-        item.style.display = 'none';
-        item.classList.remove('open');
-      }
-    } else {
-      // FLAT MENU
-      const label = item.querySelector('.menu-link div')?.textContent.toLowerCase() || '';
-
-      if (label.includes(searchTerm) || searchTerm === '') {
-        item.style.display = 'block';
-        anyVisible = true;
-      } else {
-        item.style.display = 'none';
-      }
-    }
-  });
-
-  // 2️⃣ Handle section headers
-  headers.forEach(header => {
-    let next = header.nextElementSibling;
-    let hasVisibleItem = false;
-
-    while (next && !next.classList.contains('menu-header')) {
-      if (next.classList.contains('menu-item') && next.style.display !== 'none') {
-        hasVisibleItem = true;
-        break;
-      }
-      next = next.nextElementSibling;
-    }
-
-    header.style.display = hasVisibleItem ? 'block' : 'none';
-  });
-});
+// 🔥 Handles normal load + browser back cache
+window.addEventListener('pageshow', syncSearchWithURL);

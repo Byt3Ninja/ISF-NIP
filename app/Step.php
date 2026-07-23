@@ -4,10 +4,11 @@ namespace App;
 
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Step values explained
- * 
+ *
  * 1. Custom Form
  * 2. Screening
  * 3. Mentorship
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Step extends Model
 {
+	use HasFactory;
 	// use Auditable;
 	public static $module = 'Program Step';
 	protected $casts = ['from'  => 'date:Y-m-d', 'to' => 'date:Y-m-d',];
@@ -39,6 +41,11 @@ class Step extends Model
 	public function formData(){
 		return $this->hasMany(Formdata::class,'step_id');
 	}
+
+    public function formBuilder()
+    {
+        return $this->belongsTo(BuilderForm::class, "form_id", "id");
+    }
 
 	public function stepFiltrationJudges(){
 		return $this->belongsToMany(User::class,Screening::class,'step_id','user_id');

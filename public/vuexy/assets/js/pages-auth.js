@@ -6,17 +6,15 @@
 
 const translations = {
   en: {
-    username: {
-      notEmpty: 'Please enter username',
-      stringLength: 'Username must be more than 6 characters'
-    },
     first_name: {
       notEmpty: 'Please enter first name',
-      stringOnly: 'This field letters letters only.'
+      stringOnly: 'This field letters letters only.',
+      stringLength: "First name must not excceed 50 characters.",
     },
     last_name: {
       notEmpty: 'Please enter last name',
-      stringOnly: 'This field letters letters only.'
+      stringOnly: 'This field letters letters only.',
+      stringLength: "Last name must not excceed 50 characters.",
     },
     phone: {
       notEmpty: 'Please enter your phone number',
@@ -26,10 +24,6 @@ const translations = {
     email: {
       notEmpty: 'Please enter your email',
       emailAddress: 'Please enter valid email address'
-    },
-    email_username: {
-      notEmpty: 'Please enter email / username',
-      stringLength: 'Username must be more than 6 characters'
     },
     password: {
       notEmpty: 'Please enter your password',
@@ -62,19 +56,26 @@ const translations = {
       notEmpty: 'Please enter LinkedIn URL',
       uri: 'Please enter valid linkedin URL'
     }
+    ,
+    company_name: {
+      notEmpty: 'Please enter company name',
+      stringLength: "Company name must not excceed 50 characters.",
+    },
+    contact_name: {
+      notEmpty: 'Please enter contact name',
+      stringLength: "Contact name must not excceed 50 characters.",
+    }
   },
   ar: {
-    username: {
-      notEmpty: 'يرجى إدخال اسم المستخدم',
-      stringLength: 'يجب أن يكون اسم المستخدم أكثر من 6 أحرف'
-    },
     first_name: {
       notEmpty: 'يرجى إدخال الاسم الأول',
-      stringOnly: 'هذا الحقل يقبل الحروف فقط'
+      stringOnly: 'هذا الحقل يقبل الحروف فقط',
+      stringLength: "الاسم الأول يجب ان يكون لا يزيد عن 50 حرفًا",
     },
     last_name: {
       notEmpty: 'يرجى إدخال الاسم الأخير',
-      stringOnly: 'هذا الحقل يقبل الحروف فقط'
+      stringOnly: 'هذا الحقل يقبل الحروف فقط',
+      stringLength: "الاسم الأخير يجب ان يكون لا يزيد عن 50 حرفًا",
     },
     phone: {
       notEmpty: 'يرجى إدخال رقم الهاتف',
@@ -84,10 +85,6 @@ const translations = {
     email: {
       notEmpty: 'يرجى إدخال بريدك الإلكتروني',
       emailAddress: 'يرجى إدخال عنوان بريد إلكتروني صالح'
-    },
-    email_username: {
-      notEmpty: 'يرجى إدخال البريد الإلكتروني / اسم المستخدم',
-      stringLength: 'يجب أن يكون اسم المستخدم أكثر من 8 أحرف'
     },
     password: {
       notEmpty: 'يرجى إدخال كلمة المرور الخاصة بك',
@@ -120,38 +117,44 @@ const translations = {
       notEmpty: 'يرجى إدخال رابط لينكد ان',
       uri: 'يرجى ادخال رابط  لينكد ان صحيح'
     }
+    ,
+    company_name: {
+      notEmpty: 'يرجى إدخال اسم الشركة',
+      stringLength: "اسم الشركة يجب ان يكون لا يزيد عن 50 حرفًا",
+    },
+    contact_name: {
+      notEmpty: 'يرجى إدخال اسم جهة الاتصال',
+      stringLength: "اسم جهة الاتصال يجب ان يكون لا يزيد عن 50 حرفًا",
+    }
   }
 };
 
 const lang = document.documentElement.lang || 'en';
 let iti; // Declare iti in a scope accessible by custom validator
 
-function getValidationConfig(lang, isMentor) {
+function getValidationConfig(lang, isMentor, isServiceProvider) {
   const config = {
     fields: {
-      username: {
-        validators: {
-          notEmpty: {
-            message: translations[lang].username.notEmpty
-          },
-          stringLength: {
-            min: 6,
-            message: translations[lang].username.stringLength
-          }
-        }
-      },
       first_name: {
         validators: {
           notEmpty: {
             message: translations[lang].first_name.notEmpty
-          }
+          },
+          stringLength: {
+            max: 50,
+            message: translations[lang].first_name.stringLength
+          },
         }
       },
       last_name: {
         validators: {
           notEmpty: {
             message: translations[lang].last_name.notEmpty
-          }
+          },
+          stringLength: {
+            max: 50,
+            message: translations[lang].last_name.stringLength
+          },
         }
       },
       phone: {
@@ -348,7 +351,7 @@ function getValidationConfig(lang, isMentor) {
     }
   };
 
-  if (isMentor) {
+  if (isMentor || window.location.href.includes("MentorRole")) {
     config.fields.title_en = {
       validators: {
         notEmpty: {
@@ -387,6 +390,30 @@ function getValidationConfig(lang, isMentor) {
     };
   }
 
+  if (isServiceProvider) {
+    config.fields.first_name = {};
+    config.fields.last_name = {};
+    config.fields.company_name = {
+      validators: {
+        notEmpty: { message: translations[lang].company_name.notEmpty },
+        stringLength: {
+          max: 50,
+          message: translations[lang].company_name.stringLength
+        },
+      }
+    };
+    config.fields.contact_name = {
+      validators: {
+        notEmpty: { message: translations[lang].contact_name.notEmpty },
+        stringLength: {
+          max: 50,
+          message: translations[lang].contact_name.stringLength
+        },
+      }
+    };
+  }
+
+
   return config;
 }
 
@@ -394,8 +421,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
   (function () {
     const registerForm = document.getElementById('registerForm');
     const mentorInputsWrapper = document.getElementById('mentorInputsWrapper');
+    const serviceProviderInputsWrapper = document.getElementById('serviceProviderInputsWrapper');
     const mentorRoleRadio = document.getElementById('MentorRole');
     const founderRoleRadio = document.getElementById('FounderRole');
+    const serviceProviderRole = registerForm.querySelector('input[name="role"][value="Service Provider"]');
     const phoneInput = document.getElementById("phone");
     const countryCodeInput = document.querySelector("#phone_code");
     
@@ -503,6 +532,18 @@ document.addEventListener('DOMContentLoaded', function (e) {
           initializeValidation(validationConfig);
         }
       });
+    }
+
+    if (serviceProviderRole) {
+      serviceProviderRole.addEventListener("change", function() {
+        if (serviceProviderRole.checked) {
+           validationConfig = getValidationConfig(lang, false, true);
+          // if (mentorInputsWrapper) {
+          //   mentorInputsWrapper.style.display = 'none';
+          // }
+          initializeValidation(validationConfig);
+        }
+      })
     }
 
     // Two Steps Verification

@@ -94,7 +94,8 @@ class UserController extends Controller
         {   
             $this->authorize('update', Auth::user());
 
-            $result = $this->userService->update($user, $request->all());
+            $data = $request->except(['role', 'organization_id', 'api_token']);
+            $result = $this->userService->update($user, $data);
             if ($result['success']) {
                  return $this->success(new UserResource($result['user']), [], __('api.user_updated'));
             }

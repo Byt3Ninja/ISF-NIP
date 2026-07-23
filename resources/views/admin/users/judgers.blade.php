@@ -5,12 +5,11 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="content-overlay"></div>
+<div class="">
+  <div class="">
     <div class="content-header row">
       @if (session()->has('msg'))
-      <x-alert type="success" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
+        <x-alert type="success" message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
       @endif
       @if (session()->has('message2'))
         <x-alert type="danger" message="{{ __('admin.' . session()->get('message2')) }} {{ Session::forget('message2') }}" />
@@ -32,79 +31,59 @@
                   <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
                 </ul>
               </div>
-              {{-- <a href="{{ route('users.create') }}" class="btn btn-primary">
-                <i class="ti ti-plus me-1"></i>
-                {{ __('admin.Add New') }}
-              </a> --}}
             </div>
           </div>
         </div>
-        <div class="card-content">
-          <div class="card-body">
-            <!-- Datatable filter configuration fields in a row -->
-           
-            <!-- /Datatable filter configuration fields -->
-
-            <!-- datatable start -->
-            <div class="table-responsive">
-              <table id="users-list-datatable" class="table datatables-ajax">
-                <thead>
-                  <tr class="table-light">
-                    <th>#</th>
-                    <th>{{ __('admin.Name') }}</th>
-                    <th>{{ __('admin.Email') }}</th>
-                    <th>{{ __('admin.Phone') }}</th>
-                    <th>{{ __('admin.Gender') }}</th>
-                    {{-- <th>{{ __('admin.Role') }}</th>
-                    <th>{{ __('admin.HaveCompany') }}</th> --}}
-                    <th>{{ __('admin.Join_Date') }}</th>
-                    <th>
-                      @if( $_user->ableTo('users.destroy', $permissions) )
-                      {{ __('admin.Delete') }}
-                      @endif
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($judgers as $user)
-                  <tr id="row_{{ $user->id }}">
-                    <td>
-                      <a href="{{ route('users.edit', ['user' => $user->id]) }}">{{ $user->id }}</a>
-                    </td>
-                    <td style="font-size: small;">
-                      <a href="{{ route('users.edit', ['user' => $user->id]) }}">
-                        {{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}
-                      </a>
-                    </td>
-                    <td style="font-size: small;">{{ $user->email }}</td>
-                    <td style="font-size: small;">{{ $user->phone }}</td>
-                    <td style="font-size: small;" data-search="{{ $user->gender }}" data-sort="{{ $user->gender }}">
-                      {{ trim($user->gender) ? __('admin.' . $user->gender) : '-' }}
-                    </td>
-                    {{-- <td style="font-size: small;" data-search="{{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}">
-                      {{ $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified' }}
-                    </td>
-                    <td style="font-size: small;" data-search="{{ $user->company ? 'Yes' : 'No' }}">
-                      {{ $user->company ? __('admin.Yes') : __('admin.No') }}
-                    </td> --}}
-                    <td style="font-size: small;">{{ $user->created_at }}</td>
-                    <td style="padding: 0px;font-size: small;">
-                      @if( $_user->ableTo('users.destroy', $permissions) )
-                      <button id='deleteAction' data-id='{{ $user->id }}'
-                        data-url="{{ route('users.destroy', ['user' => $user->id]) }}" type="button"
-                        class="btn btn-label-danger btn-sm">
-                        <i class="ti ti-trash text-danger"> </i>
-                      </button>
-                      @endif
-                    </td>
-                  </tr>
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-            <!-- datatable ends -->
-          </div>
+        <!-- datatable start -->
+        <div class="table-responsive card-datatable">
+          <table id="users-list-datatable" class="table datatables-ajax">
+            <thead>
+              <tr class="table-light">
+                <th>#</th>
+                <th>{{ __('admin.Name') }}</th>
+                <th>{{ __('admin.Email') }}</th>
+                <th>{{ __('admin.Phone') }}</th>
+                <th>{{ __('admin.Gender') }}</th>
+                <th>{{ __('admin.Join_Date') }}</th>
+                <th>
+                  @if( $_user->ableTo('users.destroy', $permissions) )
+                  {{ __('admin.Delete') }}
+                  @endif
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($judgers as $user)
+              <tr id="row_{{ $user->id }}">
+                <td>
+                  <a href="{{ route('users.edit', ['user' => $user->id]) }}">{{ $user->id }}</a>
+                </td>
+                <td style="font-size: small;">
+                  <a href="{{ route('users.edit', ['user' => $user->id]) }}">
+                    {{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}
+                  </a>
+                </td>
+                <td style="font-size: small;">{{ $user->email }}</td>
+                <td style="font-size: small;">{{ $user->phone }}</td>
+                <td style="font-size: small;" data-search="{{ $user->gender }}" data-sort="{{ $user->gender }}">
+                  {{ trim($user->gender) ? __('admin.' . $user->gender) : '-' }}
+                </td>
+                <td style="font-size: small;">{{ $user->created_at }}</td>
+                <td style="padding: 0px;font-size: small;">
+                  @if( $_user->ableTo('users.destroy', $permissions) )
+                  <button id='deleteAction' data-id='{{ $user->id }}'
+                    data-url="{{ route('users.destroy', ['user' => $user->id]) }}" type="button"
+                    class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill">
+                    <i class="ti ti-trash ti-md"> </i>
+                  </button>
+                  @endif
+                </td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
         </div>
+        <!-- datatable ends -->
       </div>
     </div>
   </div>
@@ -122,10 +101,53 @@
       responsive: true,
       pageLength: 10,
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-      language: isRtl ? { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json' } : {},
-      dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-2"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+      language: {
+        url: document.dir == 'rtl'
+          ? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
+          : "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json",
+        sLengthMenu: '_MENU_',
+        search: '',
+        searchPlaceholder: '{{ __('admin.Search') }}...',
+      },
+      dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-1"l><"col-sm-12 col-md-7 filters"><"col-sm-12 col-md-3"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
       initComplete: function() {
         $('.filters').append( $('#datatable-filters') );
+
+         const addDropdownFilter = (colIndex, id, placeholder) => {
+          this.api().columns(colIndex).every(function () {
+            const column = this;
+            const seen = new Set();
+
+            const select = $(`
+              <select id="${id}" class="form-select text-capitalize"
+                style="width: 150px;">
+                <option value="">${placeholder}</option>
+              </select>
+            `)
+              .appendTo('.filters')
+              .on('change', function () {
+                const val = $.fn.dataTable.util.escapeRegex($(this).val());
+                column.search(val ? `^${val}$` : '', true, false).draw();
+              });
+
+            column.data().each(d => {
+              const value = d?.title ?? d; // object vs string
+
+              if (!value || seen.has(value)) return;
+
+              seen.add(value);
+              select.append(`<option value="${value}">${value}</option>`);
+            });
+          });
+        };
+
+        addDropdownFilter(4, 'gender', '{{ __('admin.All_Genders') }}');
+
+        // Styles fix
+        setTimeout(() => {
+          $('.dataTables_filter .form-control').removeClass('form-control-sm');
+          $('.dataTables_length .form-select').removeClass('form-select-sm');
+        }, 300);
       },
       columnDefs: [
         {

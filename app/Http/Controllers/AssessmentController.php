@@ -22,6 +22,7 @@ class AssessmentController extends Controller
      */
     public function index(Request $request)
     {
+        $_user = Auth::user();
         $assessments = Assessment::with('user');
 
         // فلترة حسب startup_id
@@ -48,7 +49,21 @@ class AssessmentController extends Controller
     // الحصول على النتائج بعد التصفية
     $assessments = $assessments->get();
 
-        $users = User::role('Registered')->get();
+        $users = User::role('Registered');
+        if( $_user->hasRole('organizationManager') )
+        {
+            $OrgIds = $_user->organizations_ids;
+            $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
+                $q->where('organization_id', $OrgIds);
+            });
+        }elseif( $_user->hasRole('subadmin') )
+        {
+            $OrgIds = $_user->organizations_ids;
+            $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
+                $q->whereIn('organization_id', $OrgIds);
+            });
+        }
+            $users = $users->get();
         return view('admin.Assessment.assessment', compact('assessments', 'users'));
     }
 
@@ -85,7 +100,7 @@ class AssessmentController extends Controller
                 $companyid = $user->company_id;
                 $company = Company::find($companyid);
                 
-                $title = $company->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
+                $title = $company?->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
                
                 $assessment = Assessment::create([
                     'user_id' => $userid,
@@ -98,7 +113,7 @@ class AssessmentController extends Controller
                 
                 $questions = QuestionsBank::where('group', 'assessment')->get();
 
-                if( $company->stage == null )
+                if( $company?->stage == null )
                 {
                     $assessment = Assessment::find($assessmentId);
                     $assessment->delete();
@@ -108,7 +123,9 @@ class AssessmentController extends Controller
                 foreach( $questions as $question )
                 {
                     $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
-                   
+                    if( $weight == null ){
+                        return redirect()->back()->with(['class'=>'danger', 'message'=>__('please_correct_stage_or_category_or_subcategory_in_your_company')]);
+                    }
                     UserScore::create([
                         'user_id' => $userid,
                         'category_id' => $question->ascategory_id,
@@ -276,7 +293,7 @@ class AssessmentController extends Controller
             return [
                 'can_proceed' => false,
                 'redirect' => route('assessments.take'),
-                'message' => __('AlreadyHaveAssessment'),
+                'message' => __('admin.AlreadyHaveAssessment'),
                 'class' => 'warning'
             ];
         }
@@ -359,8 +376,9 @@ class AssessmentController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
+               
             }
-
+                
             // Bulk insert user scores for better performance
             UserScore::insert($userScores);
             DB::commit();

@@ -5,8 +5,8 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 		<div class="content-overlay"></div>
 		
 		<div class="content-body">
@@ -198,8 +198,7 @@
 													<input type="text" name="quiz_answer_text[]" class="form-control" placeholder="{{ $l == 'en' ? 'Answer text' : 'نص الإجابة' }}" value="{{ old('quiz_answer_text.0') }}">
 													
 													<!-- Score input for assessment -->
-													<input type="text" name="quiz_answer_score[]" class="form-control assessment-input" placeholder="{{ $l == 'en' ? 'Answer suggestion' : 'اقتراح الإجابة' }}" value="{{ old('quiz_answer_score.0') }}" style="display: none;">
-													
+                                                    
 													<!-- Status select for quiz -->
 													<select name="quiz_answer_status[]" class="form-select quiz-input" style="display: none;">
 														<option value="true" {{ old('quiz_answer_status.0') == 'true' ? 'selected' : '' }}>{{ __('admin.quizAnswerCorrect') }}</option>
@@ -242,7 +241,7 @@
 									<div class="col-12 mt-12">
 										<div class="d-flex justify-content-end gap-3">
 											<a href="{{ route('questions-bank.index') }}" class="btn btn-outline-secondary">
-												<i class="ti ti-arrow-left me-1"></i>
+												<i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-1"></i>
 												{{__('admin.Cancel')}}
 											</a>
 											<button type="submit" class="btn btn-primary">
@@ -313,7 +312,6 @@ function toggleSections(questionGroup) {
 		// Add required attributes for assessment fields
 		document.querySelector('#ascategory_id').setAttribute('required', 'required');
 		document.querySelector('#subcategory_id').setAttribute('required', 'required');
-		showAssessmentInputs();
 	}
 }
 
@@ -350,12 +348,6 @@ function updateQuestionCategories() {
 
 function showQuizInputs() {
 	document.querySelectorAll('.quiz-input').forEach(input => input.style.display = 'block');
-	document.querySelectorAll('.assessment-input').forEach(input => input.style.display = 'none');
-}
-
-function showAssessmentInputs() {
-	document.querySelectorAll('.assessment-input').forEach(input => input.style.display = 'block');
-	document.querySelectorAll('.quiz-input').forEach(input => input.style.display = 'none');
 }
 
 // Initialize form when DOM is ready
@@ -416,14 +408,14 @@ document.addEventListener('DOMContentLoaded', function() {
 	function addAnswerItem(questionGroup) {
 		const answerItem = document.createElement('div');
 		answerItem.className = 'answer-item mb-3';
+		var statusSelect = questionGroup === 'quiz' ? `<select name="quiz_answer_status[]" class="form-select quiz-input">
+				<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
+				<option value="false">{{ __('admin.quizAnswerWrong') }}</option>
+			</select>` : '';
 		answerItem.innerHTML = `
 			<div class="d-flex align-items-center gap-2">
 				<input type="text" name="quiz_answer_text[]" class="form-control" placeholder="{{ $l == 'en' ? 'Answer text' : 'نص الإجابة' }}">
-				<input type="text" name="quiz_answer_score[]" class="form-control assessment-input" placeholder="{{ $l == 'en' ? 'Answer suggestion' : 'اقتراح الإجابة' }}" style="display: ${questionGroup === 'assessment' ? 'block' : 'none'};">
-				<select name="quiz_answer_status[]" class="form-select quiz-input" style="display: ${questionGroup === 'quiz' ? 'block' : 'none'};">
-					<option value="true">{{ __('admin.quizAnswerCorrect') }}</option>
-					<option value="false">{{ __('admin.quizAnswerWrong') }}</option>
-				</select>
+				${statusSelect}
 				<button type="button" class="btn btn-outline-danger btn-sm remove-answer-btn">
 					<i class="ti ti-trash"></i>
 				</button>

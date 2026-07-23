@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
+use App\Services\MailConfig;
 use Illuminate\Support\Facades\Broadcast;
 use App\Observers\WireChatMessageObserver;
 use Namu\WireChat\Models\Message;
@@ -36,13 +37,24 @@ class AppServiceProvider extends ServiceProvider
     {
         Broadcast::routes();
 
+        $settings = null;
+
         if (Schema::hasTable('settings'))
         {
             try {
                 $settings = Settings::find(1);
 
                 if ($settings) {
-                    Config::set('mail.default', env('MAIL_MAILER', 'gmail'));
+                    if ($settings->email_provider === 'resend' && $settings->resend_api_key) {
+                        $data = [
+                            'transport' => 'resend',
+                            'api_key' => $settings->resend_api_key,
+                            'from_address' => $settings->Mail ?? config('mail.from.address'),
+                            'from_name' => $settings->title ?? config('mail.from.name', 'Your App Name'),
+                        ];
+                        MailConfig::set($data);
+                    } else {
+                        Config::set('mail.default', $settings?->email_provider ?? 'smtp');
                         Config::set('mail.mailers.smtp.host', $settings->host ?? env('MAIL_HOST'));
                         Config::set('mail.mailers.smtp.port', $settings->Port ?? env('MAIL_PORT'));
                         Config::set('mail.mailers.smtp.username', $settings->Mail ?? env('MAIL_USERNAME'));
@@ -60,7 +72,7 @@ class AppServiceProvider extends ServiceProvider
                         Config::set('mail.from.name', 
                             $settings->mail_from_name ?? ( $settings->title ?? env('MAIL_FROM_NAME', config('app.name')) )
                         );
-                    // }
+                    }
                 }
             } catch (\Exception $e) {
                 $settings = null;
@@ -75,7 +87,10 @@ class AppServiceProvider extends ServiceProvider
                 config('mail.mailers.smtp.password') ?? env('MAIL_PASSWORD')
             );
         });
-        view()->composer('*', function ($view) use ($settings) {
+        view()->composer('*', function ($view) use (&$settings) {
+            if (!$settings && Schema::hasTable('settings')) {
+                $settings = Settings::find(1);
+            }
             $profile_completed = true;
             $company_completed = true;
             if (session()->has('locale')) {
@@ -122,6 +137,50 @@ class AppServiceProvider extends ServiceProvider
                 $platformName = $platformName ?? config('app.name');
             }
             $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'platformName' => $platformName, 'is_profile_completed' => $profile_completed, 'is_company_completed' => $company_completed]);
+        });
+
+        view()->composer('partials.menu', function ($view) {
+            $pendingRequestsCount = 0;
+            if (auth()->check()) {
+                $_user = auth()->user();
+                if ($_user->hasRole('serviceProvider')) {
+                    if ($_user->service_provider) {
+                        $provider_id = $_user->service_provider->id;
+                        $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
+                            ->whereHas('service', function ($q) use ($provider_id) {
+                                $q->where('service_provider_id', $provider_id);
+                            })->count();
+                    } else {
+                        $orgIds = $_user->organizations_ids;
+                        $pendingRequestsCount = \App\ServicesRequests::whereNull('approved')
+                            ->whereHas('service', function ($q) use ($orgIds) {
+                                $q->whereExists(function ($sub) use ($orgIds) {
+                                    $sub->select(\DB::raw(1))
+                                        ->from('organization_service')
+                                        ->whereColumn('organization_service.service_id', 'services.id')
+                                        ->whereIn('organization_service.organization_id', $orgIds);
+                                });
+                            })->count();
+                    }
+                }
+            }
+            $view->with('pendingRequestsCount', $pendingRequestsCount);
+        });
+
+        // Breadcrumb view composer
+        view()->composer('components.breadcrumbs', function ($view) {
+            if (auth()->check() && !request()->is('api/*') && !request()->expectsJson()) {
+                $breadcrumbService = app(BreadcrumbService::class);
+                $view->with([
+                    'breadcrumbs' => $breadcrumbService->getTrail(),
+                    'backUrl' => $breadcrumbService->getPreviousUrl(),
+                ]);
+            } else {
+                $view->with([
+                    'breadcrumbs' => [],
+                    'backUrl' => null,
+                ]);
+            }
         });
 
 

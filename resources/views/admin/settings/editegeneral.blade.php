@@ -20,7 +20,7 @@ $title = $l == 'en' ? 'Settings' : 'الإعدادات';
 $tabs = collect([
   ['general', 'ti-settings', __('settings.General Settings')],
   ['analysis', 'ti-graph', __('settings.Analysis Settings')],
-  ['SMTP', 'ti-mail', __('settings.SMTP Configuration')],
+  ['SMTP', 'ti-mail', __('settings.Email Configuration')],
   ['app-identity', 'ti-id-badge', __('settings.Application Identity')],
   ['Notification', 'ti-bell', __('settings.Push Notification Settings')],
   ['NotificationChannels', 'ti-bell-ringing', __('settings.Notification Channels')],
@@ -36,9 +36,9 @@ $tabs = collect([
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
     <!-- Alert -->
     @if (session()->has('message'))
     <div class="alert alert-success alert-dismissible" role="alert">

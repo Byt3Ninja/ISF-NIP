@@ -10,9 +10,12 @@ use App\QuestionsBank;
 use App\SurveyQuestions;
 use App\SurveyResponses;
 use App\OrgQuestionsBank;
+use App\MentorshipRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class surveysController extends Controller
 {
@@ -29,12 +32,117 @@ class surveysController extends Controller
 	public function index()
 	{
 		$user = auth()->user();
+		if($user->hasAnyRole('admin|subadmin|organizationmanager')){
 		$orgIds = $user->organizations_ids;
 		$surveys = Surveys::with('organization')
 			->when(!$user->hasRole('admin') && !empty($orgIds), function ($query) use ($orgIds) {
 				return $query->whereIn('organization_id', $orgIds);
 			})
 			->get();
+		}
+		
+			if($user->hasAnyRole('Mentor|Registered')){
+				$availableSurveys = SurveyResponses::where('user_id', $user->id)
+					->where('triggered_on', 'mentorship')
+					->with('survey_scope')
+					->orderBy('created_at', 'desc')
+					->when($user->hasRole('Registered'), function ($query) use ($user) {
+						$query->where('cycle_id', $user->company?->cycle);
+					})
+					->get();
+						$surveyQuestionsCount = SurveyQuestions::whereIn(
+						'survey_id',
+						$availableSurveys->pluck('survey_id')
+					)
+					->select('survey_id', DB::raw('count(*) as total'))
+					->groupBy('survey_id')
+					->pluck('total', 'survey_id');
+
+					if($user->hasRole('Mentor')){
+					$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
+					->with('user.company')
+					->orderBy('zoom_date', 'desc')
+					->get();
+					}else{
+						$mentorshipRequests = MentorshipRequest::where('user_id', $user->id)
+					->with('user.company')
+					->orderBy('zoom_date', 'desc')
+					->get();
+					}
+					
+						//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
+					$surveys = $availableSurveys->map(function ($survey) use (
+					$mentorshipRequests,
+					$surveyQuestionsCount,
+					$user
+				) {
+					$responses = json_decode($survey->responses, true) ?? [];
+					$totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
+					$completedQuestions = count($responses);
+					$mentorship = $mentorshipRequests
+						->where('zoom_date', '<=', $survey->created_at)
+						->first();
+						if($user->hasRole('Mentor')){
+							$mentorship_user_id = $mentorship?->user?->id;
+							$mentorship_user_name = trim( $mentorship?->user?->first_name_en . ' ' . $mentorship?->user?->last_name_en );
+							$mentorship_user_image = $mentorship?->user?->image_url ? $mentorship?->user?->image_url : '/icons/account.svg';
+							$mentorship_user_company_id = optional($mentorship?->user?->company)->id;
+							$mentorship_user_company_name = optional($mentorship?->user?->company)->name_en;
+							$mentorship_user_company_logo = optional($mentorship?->user?->company)->logo ? asset($mentorship?->user?->company?->logo) : '/images/logo-placeholder.png';
+						}else{
+							$mentorship_user_id = $mentorship?->mentor?->id;
+							$mentorship_user_name = trim( $mentorship?->mentor?->first_name_en . ' ' . $mentorship?->mentor?->last_name_en );
+							$mentorship_user_image = $mentorship?->mentor?->image_url ? $mentorship?->mentor?->image_url : '/icons/account.svg';
+							$mentorship_user_company_id = null;
+							$mentorship_user_company_name = null;
+							$mentorship_user_company_logo = null;
+						}
+						
+					return (object) [
+						'id' => $survey->id,
+						'title' => $survey->survey->title ?? '',
+						'created_at' => $survey->created_at->format('Y-m-d H:i'),
+						// 'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
+						'status' => $completedQuestions === 0
+							? 'Pending'
+							: ($completedQuestions < $totalQuestions ? 'Pending' : 'Completed'),
+						'survey_type' => ucfirst($survey->triggered_on),
+						'total_questions' => $totalQuestions,
+						'completed_questions' => $completedQuestions,
+						'is_required' => (bool) $survey->survey->is_required,
+						'user' => $mentorship
+							? (object)[
+								'id' => $mentorship_user_id,
+								'name' => $mentorship_user_name,
+								'image_url' => $mentorship_user_image,
+
+								'company' => (object)[
+									'id' => $mentorship_user_company_id,
+									'name' => $mentorship_user_company_name,
+									'logo_url' => $mentorship_user_company_logo,
+								],
+							]
+							: null,
+						'session' => $mentorship
+							? (object)[
+								'id' => $mentorship->id,
+								'zoom_date' => $mentorship->zoom_date->format('Y-m-d H:i'),
+							]
+							: null,
+					];
+				});
+						
+				$surveys = $surveys->sortBy(function($survey) {
+					$statusPriority = [
+						'Pending' => 1,
+						'Completed' => 2,
+					];
+					return $statusPriority[$survey->status] ?? 999;
+				});
+
+				$surveys = collect($surveys)->sortByDesc('created_at')->values();
+			}
+		
 		return view('admin.surveys.index', compact('surveys'));
 	}
 
@@ -71,7 +179,7 @@ class surveysController extends Controller
 		$survey->title = $request->title;
 		$survey->organization_id = $request->organization_id;
 		$survey->description = $request->description;
-		$survey->is_required = $request->is_required;
+		$survey->is_required = $request->is_required ?1 : 0;
 		$survey->save();
 
 		$questions_ids = $request->input('selected_questions', []);
@@ -134,7 +242,7 @@ class surveysController extends Controller
 		$survey->title = $request->title;
 		$survey->organization_id = $request->organization_id;
 		$survey->description = $request->description;
-		$survey->is_required = $request->is_required;
+		$survey->is_required = $request->is_required ? 1 : 0;
 		$survey->save();
 
 		$questions_ids = $request->input('selected_questions', []);
@@ -213,11 +321,23 @@ class surveysController extends Controller
 
 	public function survey_taking($id)
 	{
+		$user = auth()->user();
 		// Store the previous URL before displaying the survey
 		$previousUrl = url()->previous();
 		session(['previous_url' => $previousUrl]);
-
-		$responses = SurveyResponses::where('user_id', Auth::id())->with(['survey'])->find($id);
+		if($user->hasRole('admin')){
+			$responses = SurveyResponses::with(['survey'])->find($id);
+			
+		}elseif($user->hasAnyRole(['subadmin','organizationmanager'])){
+			$orgIds = $user->organizations_ids;
+			$responses = SurveyResponses::with(['survey'])->whereHas('survey', function ($query) use ($orgIds) {
+				$query->whereIn('organization_id', $orgIds);
+			})->find($id)->first();
+			
+		}else{
+			$responses = SurveyResponses::where('user_id', Auth::id())->with(['survey'])->find($id);
+		}
+		
 		if (empty($responses)) {
 			abort(404);
 		} else {
@@ -236,7 +356,8 @@ class surveysController extends Controller
 				$type = $oneQuestion->survey_type;
 				$answers = $oneQuestion->answers;
 
-				$check = $my_responses->where('id', $id)->first();
+				// تحقق إذا السؤال موجود مسبقًا
+				$check = $my_responses->where('id', $question_id)->first();
 				if (empty($check)) {
 					$my_responses->push([
 						'id' => $question_id,
@@ -247,7 +368,25 @@ class surveysController extends Controller
 					]);
 				}
 			}
-			return view('admin.clients.survey_taking', compact('responses', 'survey', 'my_responses', 'is_responded'));
+			if($is_responded == true){
+			$collection = collect($my_responses)->unique('id')->values();
+			$page = request()->get('page', 1);
+			$perPage = 9;
+
+			$my_responses = new LengthAwarePaginator(
+				$collection->forPage($page, $perPage),
+				$collection->count(),
+				$perPage,
+				$page,
+				['path' => request()->url(), 'query' => request()->query()]
+			);
+			}else{
+				$my_responses = collect($my_responses)->unique('id')->values();
+			}
+			$survey_Title = $responses?->cycle?->title;
+			$survey_cohort = $responses?->cycle?->cohort;
+
+			return view('admin.clients.survey_taking', compact('responses', 'survey', 'my_responses', 'is_responded', 'survey_Title', 'survey_cohort'));
 		}
 	}
 
@@ -292,12 +431,14 @@ class surveysController extends Controller
 				$responses->responses = $answers;
 				$responses->save();
 
-				$previousUrl = session('previous_url', route('core.dashboard_view'));
+				//$previousUrl = session('previous_url', route('core.dashboard_view'));
+				$previousUrl = session('previous_url', route('surveys.index'));
 				// Redirect based on the previous URL
 				if (str_contains($previousUrl, 'dashboard/mentor/mentorshipSessions')) {
 					return redirect()->route('mentorships.sessions_list_detailed')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
 				} elseif (str_contains($previousUrl, 'dashboard')) {
-					return redirect()->route('core.dashboard_view')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
+					//return redirect()->route('core.dashboard_view')->with(['msg' => 'surveySubmitSuccess', 'class' => 'success']);
+					return redirect()->route('surveys.index')->with(['success' => 'surveySubmitSuccess', 'class' => 'success']);
 				}
 			}
 		}

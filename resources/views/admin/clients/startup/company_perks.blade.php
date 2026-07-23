@@ -1,27 +1,25 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="w-100 h-100" id="iframe-container">
-      <iframe
-        id="perks-iframe"
-        src="https://www.2.perks-marketplace.com/home-growthlabs"
-        class="w-100 h-100 rounded"
-        frameborder="0">
-      </iframe>
-    </div>
+<div class="w-100 h-100 flex-grow-1">
+  <div class="w-100 h-100" id="iframe-container">
+    <iframe
+      id="perks-iframe"
+      src="https://www.2.perks-marketplace.com/home-growthlabs"
+      class="w-100 h-100 rounded"
+      frameborder="0">
+    </iframe>
+  </div>
 
-    @php
-      $message = 
-        $l == 'en' 
-          ? 'Perks & Discounts is currently unavailable. Please try again later.'
-          : 'خدمة العروض والخصومات غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً';
-    @endphp
+  @php
+    $message = 
+      $l == 'en' 
+        ? 'Perks & Discounts is currently unavailable. Please try again later.'
+        : 'خدمة العروض والخصومات غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً';
+  @endphp
 
-    <div id="error-message" class="d-none">
-      @include('includes.no-result', ['message' => $message]);
-    </div>
+  <div id="error-message" class="d-none">
+    @include('includes.no-result', ['message' => $message]);
   </div>
 </div>
 @endsection

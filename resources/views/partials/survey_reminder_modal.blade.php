@@ -1,32 +1,52 @@
 {{-- Survey Reminder Modal Partial --}}
 
 @php
-  $survey_data = []; // Initialize as empty array
 
-  if (Auth::check() && Auth::user()->hasAnyRole('Registered|Mentor')) {
+
+  $survey_data = []; // Initialize as empty array
+  if (Auth::check() && Auth::user()->hasAnyRole(['Registered','Mentor'])) {
     $user_id = Auth::id();     
+   
       $completed_survey_ids = \App\SurveyResponses::where('user_id', $user_id)
         ->whereNotNull('responses')
+        ->where('user_id', $user_id)
+        ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
+						$query->where('cycle_id', $_user->company?->cycle);
+					})
         ->pluck('survey_id')
         ->toArray();
-        
+      
+      
       $incomplete_responses = \App\SurveyResponses::where('user_id', $user_id)
         ->whereNull('responses')
+        ->where('user_id', $user_id)
+        ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
+						$query->where('cycle_id', $_user->company?->cycle);
+					})
         ->whereHas('survey', function($query) {
           $query->where('is_required', 1);
         })
         ->with('survey')
         ->get();
-       
-        if(Auth::check() && Auth::user()->hasAnyRole('Registered')){
-          $existsInTraining = \DB::table('attendance_training_offline')->whereIn('training_session_id', $incomplete_responses->pluck('triggered_at'))->where('user_id', $user_id)->exists();
+     foreach ($incomplete_responses as $key => $response) {
 
-          if (!( $existsInTraining)) {
-            $survey_data = [];
-            return;
+          // لو trigger_on == training فقط
+          if ($response->triggered_on === 'training') {
+
+              if (Auth::check() && Auth::user()->hasAnyRole('Registered')) {
+                  $existsInTraining = \DB::table('attendance_training_offline')
+                      ->where('training_session_id', $response->triggered_at)
+                      ->where('user_id', $user_id)
+                      ->exists();
+
+                  // لو مش موجود في الحضور، نصفي الرد من الـ collection
+                  if (!$existsInTraining) {
+                      $incomplete_responses->forget($key);
+                  }
+              }
           }
-        }
-
+      }
+       
       // تجهيز البيانات
       $survey_data = [];
       foreach ($incomplete_responses as $response) {
@@ -45,7 +65,7 @@
 @endphp
 
 {{-- Only show the modal if there are pending surveys and user is not on the survey taking page --}}
-@if(auth()->user()->hasAnyRole('Registered|Mentor') && Route::currentRouteName() !== 'surveys.take')
+@if(auth()->user()->hasAnyRole(['Registered','Mentor']) && Route::currentRouteName() !== 'surveys.take')
   <!-- Survey Reminder Modal -->
   <div class="modal fade" id="surveyReminderModal" tabindex="-1" aria-labelledby="surveyReminderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-simple">
@@ -100,7 +120,7 @@
 @endif
 
 @push('scripts')
- @if(auth()->user()->hasAnyRole('Registered|Mentor') && count($survey_data) > 0)
+ @if(auth()->user()->hasAnyRole(['Registered','Mentor']) && count($survey_data) > 0)
   <script>
     // Survey reminder modal - show every 10 minutes
     function showSurveyReminder() {

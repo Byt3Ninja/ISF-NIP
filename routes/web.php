@@ -8,8 +8,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GeminiController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\ImporterController;
-use App\Http\Controllers\ActivityControlller;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ClientCompanyController;
 use App\Http\Controllers\HackathonController;
 use App\Http\Controllers\Mentor\MentorProgramController;
@@ -19,16 +18,16 @@ use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
 use App\Http\Controllers\TasksController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
-Route::get('def-permission', function() {
+Route::get('def-permission', function () {
     $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
     $dataRole = json_decode($jsonRole, true);
-    $dataRole = collect( $dataRole )->flatMap(function($role) {
+    $dataRole = collect($dataRole)->flatMap(function ($role) {
         return $role['permissions'];
     });
-    $judges = $dataRole->filter(function($permission) {
+    $judges = $dataRole->filter(function ($permission) {
         return in_array('judger', $permission['default_for']);
     })->values();
-    dd( $judges->pluck('name')->toArray() );
+    dd($judges->pluck('name')->toArray());
 });
 Route::get('test', function () {
     $user = User::find(1);
@@ -122,7 +121,14 @@ Route::get('/magic-login/{user}/{token}', 'Auth\MagicLoginController@login')->mi
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
+// Public share tracking routes (no authentication required)
+Route::post('hackathon/track-share', [App\Http\Controllers\HackathonController::class, 'trackShare'])->name('hackathon.trackShare');
+Route::post('hackathon/track-program-share', [App\Http\Controllers\HackathonController::class, 'trackProgramShare'])->name('hackathon.trackProgramShare');
+
+// InviteMentor attachments (public access)
+
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa']], function () {
+    Route::get('uploads/InviteMentor/{path}', 'InvitationController@showAttachment')->where('path', '.*')->name('invite_mentor.attachment');
     ####################### Overall System Admin Routes ###############
     // All Logged users
     Route::get('/', 'HomeController@index')->name('core.admin_access');
@@ -203,12 +209,33 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::get('hackathon/details/{id}', [HackathonController::class, 'show']);
     Route::post('hackathon/likeProject', [HackathonController::class, 'likeProject']);
+    Route::get('hackathon/{hackathonId}/solution/{solutionId}', [HackathonController::class, 'showSolution'])->name('hackathon.solution.show');
 
     // Service Providers
 
     Route::resource('services_providers', 'serviceProviderController');
-    Route::get('services-providers/requests', 'serviceProviderController@requests')->name('services_providers.requests');
+    Route::get('services-providers/requests/{status?}', 'serviceProviderController@requests')->name('services_providers.requests');
     Route::post('services-providers/requests/take-action', 'serviceProviderController@takeAction')->name('services_providers.takeAction');
+    Route::post('services-providers/profile/step1', 'serviceProviderController@storeStep1')->name('services_providers.step1.store');
+    Route::post('services-providers/profile/step2', 'serviceProviderController@storeStep2')->name('services_providers.step2.store');
+    Route::post('services-providers/profile/step3', 'serviceProviderController@storeStep3')->name('services_providers.step3.store');
+    Route::post('services-providers/profile/step4', 'serviceProviderController@storeStep4')->name('services_providers.step4.store');
+    Route::get('services_providers/{id}/edit-profile', 'serviceProviderController@editProfile')->where('id', '[0-9]+')->name('services_providers.edit_profile');
+    Route::post('services-providers/{id}/clients', 'serviceProviderController@storeClient')->where('id', '[0-9]+')->name('services_providers.clients.store');
+    Route::post('services-providers/{id}/clients/{clientId}', 'serviceProviderController@updateClient')->where(['id' => '[0-9]+', 'clientId' => '[0-9]+'])->name('services_providers.clients.update');
+    Route::delete('services-providers/{id}/clients/{clientId}', 'serviceProviderController@destroyClient')->where(['id' => '[0-9]+', 'clientId' => '[0-9]+'])->name('services_providers.clients.destroy');
+    Route::post('services-providers/{id}/clients-visibility', 'serviceProviderController@updateClientsVisibility')->where('id', '[0-9]+')->name('services_providers.clients.visibility');
+
+    // Service Provider Dashboard
+    Route::get('service-provider/requests-inbox', 'ServiceProviderDashboardController@requestsInbox')->name('service_provider_dashboard.requests_inbox');
+    Route::post('service-provider/quick-action', 'ServiceProviderDashboardController@quickAction')->name('service_provider_request.quick_action');
+    Route::post('service-provider/bulk-action', 'ServiceProviderDashboardController@bulkAction')->name('service_provider_request.bulk_action');
+    Route::get('service-provider/activity', 'ServiceProviderDashboardController@recentActivity')->name('service_provider_dashboard.activity');
+    Route::get('service-provider/refresh', 'ServiceProviderDashboardController@refresh')->name('service_provider_dashboard.refresh');
+
+    // Service Provider Public Profile
+    Route::get('service-provider/{id}/profile', 'ServiceProviderProfileController@show')->where('id', '[0-9]+')->name('service_provider.profile');
+    Route::get('service-provider/{id}/reviews', 'ServiceProviderProfileController@reviews')->where('id', '[0-9]+')->name('service_provider.reviews');
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
@@ -305,6 +332,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::put('/{id}/step3', 'OrganizationWizardController@updateStep3')->name('update.step3');
         Route::get('/{id}/managers', 'OrganizationWizardController@getManagers')->name('managers.list');
         Route::post('/{id}/managers', 'OrganizationWizardController@createManager')->name('managers.create');
+        // Standalone Landing Page Management
+        Route::get('/{id}/landing-page', 'OrganizationWizardController@editLandingPage')->name('landing');
         // Step 4: Landing Page
         Route::put('/{id}/step4', 'OrganizationWizardController@updateStep4')->name('update.step4');
         Route::get('/{id}/preview', 'OrganizationWizardController@previewLandingPage')->name('preview');
@@ -314,6 +343,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::put('/{id}/step5', 'OrganizationWizardController@updateStep5')->name('update.step5');
         Route::post('/{id}/step5/reorder', 'OrganizationWizardController@reorderStep5Sections')->name('step5.reorder');
         Route::delete('/{id}/step5/{sectionId}', 'OrganizationWizardController@deleteStep5Section')->name('step5.delete');
+        // Programs on Landing Page
+        Route::post('/{id}/programs/{cycleId}/landing', 'OrganizationWizardController@updateProgramLanding')->name('programs.landing.update');
+        Route::post('/{id}/programs/reorder', 'OrganizationWizardController@reorderPrograms')->name('programs.reorder');
         Route::post('/draft', 'OrganizationWizardController@saveDraft')->name('draft');
         Route::put('/{id}/draft', 'OrganizationWizardController@saveDraft')->name('draft.update');
         Route::post('/{id}/publish', 'OrganizationWizardController@publish')->name('publish');
@@ -322,18 +354,27 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //services categories Manager routes
     Route::resource('serviceCategories', 'ServiceCategoryController');
     //Services Manager routes
-    
+
     Route::resource('services', 'ServiceController');
+    Route::get('/export-services-excel', 'ServiceController@exportExcel')->name('services.export_excel');
+    Route::get('/import-services-csv', 'ServiceController@exportCSV')->name('services.export_csv');
     // Services requests
     Route::get('requests/all', 'ServiceController@requests')->name('service_requests.list_all');
     Route::get('requests/old', 'ServiceController@oldrequests')->name('service_requests.list_archived');
     Route::post('requests/take_action', 'ServiceController@serviceAction')->name('service_requests.take_action');
     Route::get('requests/mine', 'ServiceController@myRequests')->name('service_requests.list_mine');
+    Route::get('requests/{id}/timeline', 'ServiceController@timeline')->name('service_requests.timeline');
+    Route::post('requests/mark-complete', 'ServiceController@markComplete')->name('service_requests.mark_complete');
+    // Service Request Messages
+    Route::get('requests/{id}/messages', 'ServiceController@getMessages')->name('service_requests.messages');
+    Route::post('requests/send-message', 'ServiceController@sendMessage')->name('service_requests.send_message');
+    Route::get('requests/message/{messageId}/attachment', 'ServiceController@downloadMessageAttachment')->name('service_requests.download_attachment');
 
     // Services Directory
     Route::get('directory', 'ServiceController@availableServices')->name('users.directory_view');
     Route::post('directory/{id}', 'ServiceController@details');
     Route::post('directory/{id}/rate', 'ServiceController@rate');
+    Route::post('service-review/submit', 'ServiceController@submitReview')->name('service_review.submit');
     Route::post('service/request', 'ServiceController@book_service')->name('services.request_service');
 
     //Types Manager routes
@@ -351,7 +392,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/myProfile/bio', 'ClientProfileController@Updatebio')->name('user.profile_update_bio');
     Route::post('/myProfile/password', 'ClientProfileController@updatePassword')->name('user.account_update_password');
     Route::post('/myProfile/notification-settings', 'ClientProfileController@updateNotificationSettings')->name('user.notification_settings_update');
-    Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMintorprofile')->name('mentors.profile_view');
+    Route::get('/show/UserProfile/{id}', 'ClientProfileController@showMentorProfile')->name('mentors.profile_view');
+    Route::get('/show/Profile/{id}', 'ClientProfileController@showClientProfile')->name('clients.profile_view');
     Route::get('/mentors', 'ClientProfileController@showMentors')->name('mentors.list');
 
     // Invitations
@@ -360,7 +402,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('File_Upload', 'InvitationController@updateFile')->name('invitations.upload');
         Route::post('DeleteFile_Upload', 'InvitationController@deleteFile')->name('invitations.DeleteAttachment');
     });
-    
+
     // lowercase alias for backward-compatibility / ease of testing
     Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
 
@@ -395,7 +437,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //Assessments
     Route::get('/question-assessment', 'AssessmentController@assessment')->name('assessments.take');
-    Route::get('/assessment-create', 'AssessmentController@MakeAssessment')->name('assessments.assign');
+    Route::post('/assessment-create', 'AssessmentController@MakeAssessment')->name('assessments.assign');
     Route::get('/analysis-assessment', 'AssessmentController@analysisAssessment')->name('assessments.results_analysis_view');
     Route::get('/history-assessment', 'AssessmentController@historyAssessment')->name('assessments.results_history_view');
     Route::get('/category-assessment', 'CatigoriesController@index')->name('assessments.results_by_category_view');
@@ -420,7 +462,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Route::resource('answerOption', 'AnswerOptionController');
 
     //Company profile
-    Route::get('/companyProfile/{id}', 'ClientCompanyController@show')->name('company.profile_view');
+    Route::get('/companyProfile/{id?}', 'ClientCompanyController@show')->name('company.profile_view');
     Route::get('/myCompany/{id?}', 'ClientCompanyController@editOrCreate')->name('company.profile_view_mine');
     Route::post('/myCompany/{id?}', 'ClientCompanyController@updateOrStore')->name('company.profile_update_mine');
     Route::post('/AddCompanyTeams/{id?}', 'ClientCompanyController@AddTeams')->name('company.profile_teams_add');
@@ -432,15 +474,23 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/delete-document', 'ClientCompanyController@deleteDocument')->name('company.profile_documents_delete');
     Route::post('/delete-image/{id?}', 'ClientCompanyController@deleteImage')->name('company.profile_images_delete');
 
+    Route::post('/save-statistics/{id?}', 'ClientCompanyController@saveStatistics')->name('company.employees_statistics');
+
+    Route::get('/company/{id}/financial-projection/realtime', [ClientCompanyController::class, 'getFinancialProjectionRealtime'])->name('company.financial_projection.realtime');
+    Route::post('/company/{id}/financial-projection/save', [ClientCompanyController::class, 'saveFinancialProjection'])->name('company.financial_projection.save');
+
     // startup growth
 
     Route::post('/startupGrowth/add', 'startupCustomerGrowthController@addRecord');
+    Route::post('/startupGrowth/update', 'startupCustomerGrowthController@updateRecord');
+    Route::delete('/startupGrowth/delete/{id}', 'startupCustomerGrowthController@deleteRecord');
+    Route::get('/startupGrowth/export/{company_id}', 'startupCustomerGrowthController@exportRecords');
 
     // Company Alumni
     Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
 
     // Company Perks
-    Route::get('perks', [ClientCompanyController::class, 'companyPerks']);
+    Route::get('perks', [ClientCompanyController::class, 'companyPerks'])->name('company.perks_view');
 
     // Company Profile Employees
     Route::get('/employees/{id}', 'ClientCompanyController@getEmployees')->name('company.getEmployees');
@@ -450,7 +500,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Almuni 
     Route::post('/AddCompanyalumni/{id}', 'ClientCompanyController@addCompanyAlumni')->name('company.addCompanyAlumni');
-    
+    Route::post('/AddCompanyalumniBulk', 'ClientCompanyController@addCompanyAlumniBulk')->name('company.addCompanyAlumniBulk');
+
 
 
     //Industry
@@ -482,9 +533,31 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/companies', 'ClientCompanyController@companies')->name('users.view_companies');
     // Export startups (CSV / Excel) - preserves current filters passed as query params
     Route::get('/companies/export', 'CompanyExportController@export')->name('users.companies_export');
-    //Cities
+    // Cities (API for cascade dropdowns)
     Route::resource('cities', 'CityController');
     Route::get('get_states', 'CityController@states')->name('utils.locations_list_states_by_country');
+
+    // Location Management (Countries → States → Cities)
+    Route::get('/country-management', 'CountryManagementController@index')->name('country-management.index');
+    Route::get('/country-management/create', 'CountryManagementController@create')->name('country-management.create');
+    Route::post('/country-management', 'CountryManagementController@store')->name('country-management.store');
+    Route::get('/country-management/{country}/edit', 'CountryManagementController@edit')->name('country-management.edit');
+    Route::put('/country-management/{country}', 'CountryManagementController@update')->name('country-management.update');
+    Route::delete('/country-management/{country}', 'CountryManagementController@destroy')->name('country-management.destroy');
+
+    Route::get('/country-management/{country}/states', 'StateManagementController@index')->name('state-management.index');
+    Route::get('/country-management/{country}/states/create', 'StateManagementController@create')->name('state-management.create');
+    Route::post('/country-management/{country}/states', 'StateManagementController@store')->name('state-management.store');
+    Route::get('/state-management/{state}/edit', 'StateManagementController@edit')->name('state-management.edit');
+    Route::put('/state-management/{state}', 'StateManagementController@update')->name('state-management.update');
+    Route::delete('/state-management/{state}', 'StateManagementController@destroy')->name('state-management.destroy');
+
+    Route::get('/state-management/{state}/cities', 'CityController@adminIndex')->name('city-management.index');
+    Route::get('/state-management/{state}/cities/create', 'CityController@adminCreate')->name('city-management.create');
+    Route::post('/state-management/{state}/cities', 'CityController@adminStore')->name('city-management.store');
+    Route::get('/city-management/{city}/edit', 'CityController@adminEdit')->name('city-management.edit');
+    Route::put('/city-management/{city}', 'CityController@adminUpdate')->name('city-management.update');
+    Route::delete('/city-management/{city}', 'CityController@adminDestroy')->name('city-management.destroy');
 
     //FileManager
     Route::get('/myFiles', 'FilemanagerController@index')->name('my_files.list');
@@ -551,6 +624,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Tasks
     Route::get('tasks/assignees/{program_id}', [TasksController::class, 'getAssignees'])->name('tasks.get_assignees');
     Route::get('tasks/titles', [TasksController::class, 'getTaskTitles'])->name('tasks.get_titles');
+    Route::patch('tasks/{taskId}/move-task/{status}', [TasksController::class, 'moveTask'])->name('tasks.move');
+    Route::post('tasks/{taskId}/add-feedback', [TasksController::class, 'addFeedback'])->name('tasks.add_feedback');
+    Route::get('tasks/{taskId}/download/{filename}', [TasksController::class, 'downloadAttachment'])->name('tasks.download_attachment')->where('filename', '.*');
+    Route::delete('tasks/{taskId}/attachments/{filename}', [TasksController::class, 'deleteAttachment'])->name('tasks.delete_attachment')->where('filename', '.*');
+    Route::post('tasks/{taskId}/attachments', [TasksController::class, 'uploadAttachment'])->name('tasks.upload_attachment');
+    Route::post('tasks/{taskId}/add-comment', [TasksController::class, 'addComment'])->name('tasks.add_comment');
     Route::resource('tasks', 'TasksController');
 
     // Forms
@@ -575,6 +654,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('submit-form', 'FormBuilderController@handleFormRequest')->name('forms.submissions_create');
     Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
     Route::delete('form/{id}/delete', 'FormBuilderController@deleteForm')->name('forms.delete');
+    Route::post('form/{id}/reorder-sections', 'FormBuilderController@reorderSections')->name('forms.reorder_sections');
+    Route::post('form/{id}/reorder-questions', 'FormBuilderController@reorderQuestions')->name('forms.reorder_questions');
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
@@ -608,14 +689,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //Screening
     Route::get('screening', 'ScreeningController@index')->name('screening.index');
-    Route::get('screening/{id?}', 'ScreeningController@show');
+    Route::get('screening/{id?}', 'ScreeningController@show')->name('screening.manage');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
     Route::post('screening/update', 'ScreeningController@update');
     Route::post('screening/add-judging-panels', 'ScreeningController@addJudgingPanels')->name('screening.add_judging_panels');
     Route::post('screening/delete-judging-panel', 'ScreeningController@deleteJudgingPanel')->name('screening.delete_judging_panel');
+    Route::post('screening/update-step-form', 'ScreeningController@updateStepForm')->name('screening.update_step_form');
     Route::post('screening/save', 'ScreeningController@save');
     Route::post('screening/add', 'ScreeningController@add');
-    Route::get('screening/results/{id?}', 'ScreeningController@results');
+    Route::get('screening/results/{id?}', 'ScreeningController@results')->name('screening.results');
     Route::get('screening/resultsReport', 'ScreeningController@resultsReport')->name('screening.results_report');
     Route::get('{id?}/screening', 'ScreeningController@index');
     Route::get('screening/{fid}/{cid}', 'ScreeningController@view')->name('screening.view');
@@ -625,6 +707,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('screening/evaluation/save_draft', 'ScreeningController@save_evaluation_draft')->name('screening.evaluation_save_draft');
     Route::post('screening/evaluation/publish', 'ScreeningController@publish_evaluation')->name('screening.evaluation_publish');
     Route::post('screening/evaluation/results', 'ScreeningController@get_results')->name('screening.evaluation_results');
+
+    // Screening Export Routes
+    Route::get('screening/results/{id}/export', 'ScreeningController@exportResults')->name('screening.export_results');
+    Route::get('screening/results/{id}/export/{company_id}', 'ScreeningController@exportCompanyResults')->name('screening.export_company_results');
 
     //ZOOM
     Route::get('zoom/all', 'MeetingController@showall');
@@ -646,6 +732,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::get('program/show', 'Mentor\MentorProgramController@show');
 
+    Route::get('mentor/surveys', 'MentorsController@surveys');
+    Route::get('mentor/sessions', 'MentorsController@mentorshipSessions')->name('mentorships.sessions');
     Route::post('mentors/modify', 'MentorsController@modify')->name('mentors.settings_modify');
     Route::post('mentorship/add', 'MentorsController@add')->name('mentors.add');
     Route::get('mentorship/assign/{id?}', 'MentorsController@list')->name('mentorships.requests_list');
@@ -689,7 +777,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/EditTR/{id}', 'TrainingController@editTR')->name('trainings.records_edit');
     Route::get('training/viewCourse/{id}', 'TrainingController@showCourse')->name('trainings.course_view');
     Route::get('quizResults', 'quizzesController@quizResults')->name('quizzes.quiz_Results_view');
-    Route::get('quizResults/{id}', 'quizzesController@quizResultsdetails')->name('quizzes.quiz_results_view_details');
+    Route::get('quizResults/{id}', 'quizzesController@quizResultsDetails')->name('quizzes.quiz_results_view_details');
     Route::post('/track-duration', 'TrainingController@timeTracking')->name('trainings.time_tracking');
 
 
@@ -698,6 +786,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('training/sessions/{id?}', 'TrainingController@sessions')->name('trainings.sessions_list');
     Route::get('training/sessionsReport', 'TrainingController@sessionsReport')->name('trainings.sessions_report');
     Route::get('/sessions/join/{session}', 'TrainingController@join')->name('trainings.sessions_join');
+    Route::get('/mentorship/join/{id}', 'MentorsController@joinSession')->name('mentorship.join');
 
 
     Route::post('training/addsession', 'TrainingController@addsession')->name('trainings.sessions_create');
@@ -723,7 +812,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('training/session-reports-data', 'TrainingController@getSessionReportsData')->name('trainings.session_reports_data');
 
 
-    Route::get('/Totalsurveys', 'MentorsController@total_surveys')->name('surveys.dashboard_count_view');
+    Route::get('/surveys/results', 'MentorsController@total_surveys')->name('surveys.dashboard_count_view');
     // questions bank
     Route::resource('question-categories', 'QuestionCategoriesController');
     Route::resource('questions-bank', 'QuestionsBankController');
@@ -753,8 +842,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('bookings.review_upcoming_busy');
     Route::get('/oldReview', 'BookingController@oldReview')->name('bookings.review_past');
     //Final Screening
-    Route::get('final', 'FinalscreeningController@index');
-    Route::get('final/{id}', 'FinalscreeningController@show');
+    Route::get('final', 'FinalscreeningController@index')->name('screening.final');
+    Route::get('final/{id}', 'FinalscreeningController@show')->name('screening.manage_final');
     Route::get('{id?}/final', 'FinalscreeningController@index')->name('screening.show');
     Route::post('final/update', 'FinalscreeningController@update')->name('screening.update');
     Route::post('final/save', 'FinalscreeningController@save')->name('screening.store');
@@ -765,6 +854,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('final/{step_id}/{company_id}', 'FinalscreeningController@view')->name('screening.form_view');
     Route::get('final/get/{sid}/{pid}', 'FinalscreeningController@getusers')->name('screening.users_view_details');
     Route::post('final/delsession/{id}', 'FinalscreeningController@delsession')->name('screening.sessions_delete');
+
+    // Final Screening Export Routes
+    Route::get('final/results/{id}/export', 'FinalscreeningController@exportResults')->name('final.export_results');
+    Route::get('final/results/{id}/export/{company_id}', 'FinalscreeningController@exportCompanyResults')->name('final.export_company_results');
+
     Route::get('/send-whatsapp', 'CyclesController@testSend')->name('whatsapp.send');
 
     //Program List
@@ -773,7 +867,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('programlist/edit/{id}', 'ProgramController@edit')->name('programs.edit');
     Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
     Route::get('programlist/{id}/custom-pages', 'ProgramController@customPages');
-    
+
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
     Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
@@ -878,15 +972,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
 
     /* Start of Activities Routes */
-    Route::get('/activities', [ActivityControlller::class, 'index'])->name('activities.index');
-    Route::post('/log-activity', [ActivityControlller::class, 'logActivity'])->name('activity.log');
-    Route::delete('/activities/{id}', [ActivityControlller::class, 'destroy'])->name('activities.destroy');
+    Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
+    Route::post('/log-activity', [ActivityController::class, 'logActivity'])->name('activity.log');
+    Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
 
     // Security actions for suspicious logins
-    Route::post('/activities/force-logout', [ActivityControlller::class, 'forceLogout'])->name('activities.force-logout');
-    Route::post('/activities/reset-password', [ActivityControlller::class, 'resetPassword'])->name('activities.reset-password');
-    Route::post('/activities/block-ip', [ActivityControlller::class, 'blockIp'])->name('activities.block-ip');
-    Route::get('/activities/load-more', [ActivityControlller::class, 'loadMoreActivities'])->name('activities.load-more');
+    Route::post('/activities/force-logout', [ActivityController::class, 'forceLogout'])->name('activities.force-logout');
+    Route::post('/activities/reset-password', [ActivityController::class, 'resetPassword'])->name('activities.reset-password');
+    Route::post('/activities/block-ip', [ActivityController::class, 'blockIp'])->name('activities.block-ip');
+    Route::get('/activities/load-more', [ActivityController::class, 'loadMoreActivities'])->name('activities.load-more');
     /* End of Activities Routes */
 
 
@@ -902,10 +996,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('reports/show-survey/{id}', 'ReportController@surveyReport');
     //================> End Reports <============
 
-    Route::get('/importer', [ImporterController::class, 'index'])->name('importer.index');
-    Route::post('/importer/upload', [ImporterController::class, 'upload'])->name('importer.upload');
-    Route::post('/importer/import', [ImporterController::class, 'import'])->name('importer.import');
-    Route::get('/importer/organizations', [ImporterController::class, 'getOrganizations'])->name('importer.organizations');
+    // Legacy importer routes removed in PR 7 cutover. New routes live below
+    // under prefix dashboard/importer (see Importer\ImporterController group).
 
 
     Route::post('/notifications/mark-all-read', function () {
@@ -926,6 +1018,30 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         }
     });
 });
+
+Route::middleware(['auth'])->prefix('dashboard/importer')->name('importer.')->group(function () {
+    Route::get('/',                                       [\App\Http\Controllers\Importer\ImporterController::class, 'showWizard'])->name('index');
+    Route::get('/template',                               [\App\Http\Controllers\Importer\ImporterController::class, 'downloadTemplate'])->name('template');
+    Route::get('/schema',                                 [\App\Http\Controllers\Importer\ImporterController::class, 'schema'])->name('schema');
+    Route::get('/organizations',                          [\App\Http\Controllers\Importer\ImporterController::class, 'organizations'])->name('organizations');
+
+    Route::middleware('throttle:importer-general')->group(function () {
+        Route::post('/sessions',                          [\App\Http\Controllers\Importer\ImporterController::class, 'createSession'])->name('sessions.create');
+        Route::get('/sessions/{uuid}',                    [\App\Http\Controllers\Importer\ImporterController::class, 'showSession'])->name('sessions.show');
+        Route::delete('/sessions/{uuid}',                 [\App\Http\Controllers\Importer\ImporterController::class, 'discardSession'])->name('sessions.discard');
+        Route::delete('/sessions/{uuid}/file',            [\App\Http\Controllers\Importer\ImporterController::class, 'deleteFile'])->name('sessions.file.delete');
+        Route::post('/sessions/{uuid}/automap',           [\App\Http\Controllers\Importer\ImporterController::class, 'autoMap'])->name('sessions.automap');
+        Route::post('/sessions/{uuid}/validate',          [\App\Http\Controllers\Importer\ImporterController::class, 'validateRows'])->name('sessions.validate');
+        Route::post('/sessions/{uuid}/conflicts',         [\App\Http\Controllers\Importer\ImporterController::class, 'detectConflicts'])->name('sessions.conflicts');
+        Route::get('/sessions/{uuid}/preview',            [\App\Http\Controllers\Importer\ImporterController::class, 'preview'])->name('sessions.preview');
+        Route::post('/sessions/{uuid}/execute',           [\App\Http\Controllers\Importer\ImporterController::class, 'execute'])->name('sessions.execute');
+    });
+
+    Route::middleware('throttle:importer-upload')->group(function () {
+        Route::post('/sessions/{uuid}/file',              [\App\Http\Controllers\Importer\ImporterController::class, 'uploadFile'])->name('sessions.file.upload');
+    });
+});
+
 Route::get('cycle-custom-pages/{cycle_id}/{filename}', 'CycleCustomPagesController@serveImage')->name('cycle.custom_pages.image');
 Route::get('screening-guidelines/{step_id}/{filename}', 'FinalscreeningController@serveImage')->name('screening.guidelines.image');
 

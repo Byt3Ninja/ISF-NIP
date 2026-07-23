@@ -17,7 +17,7 @@
           </div>
         </div>
         {{-- Alumni Badge --}}
-        @if ($company->alumni == '1' || $company->alumni == 1)
+        @if ($company->alumni == '1' || $company->alumni == 1 || $company->alumni == true)
           <span class="badge bg-label-danger" style="height: fit-content;">
             <i class="ti ti-pennant ti-xs me-1"></i>
             {{ __('startup.alumni') }}
@@ -56,7 +56,7 @@
           <span class="fw-semibold">{{ __('cycles.Step') }}</span>
           <span class="badge bg-label-warning">
             <i class="ti ti-stairs ti-xs me-1"></i>
-            {{ $company->stepdata->title }}
+            {{ $company?->stepdata?->title ?? '-' }}
           </span>
         </div>
       </div>

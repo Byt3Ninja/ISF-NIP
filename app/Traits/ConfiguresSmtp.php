@@ -18,19 +18,17 @@ trait ConfiguresSmtp
     {
         $mailConfig = [];
         
-        if ($smtpSettings && $smtpSettings->smtp_host) {
+        if ($smtpSettings && ($smtpSettings->smtp_host || $smtpSettings->email_provider === 'resend')) {
             try {
-                // Get SMTP configuration
+                // Get mail configuration (SMTP or Resend)
                 $mailConfig = $this->getSmtpConfig($smtpSettings);
-                
+
                 if ($mailConfig) {
-                    // Clear any cached mail config
-                    \Illuminate\Support\Facades\Config::set('mail', config('mail'));
-                    
-                    // Set new SMTP config
+                    // Set new mail config (forgetMailers() is called inside MailConfig::set())
                     MailConfig::set($mailConfig);
-                    
-                    \Log::info('SMTP configuration applied:', [
+
+                    \Log::info('Mail configuration applied:', [
+                        'transport' => $mailConfig['transport'] ?? 'smtp',
                         'host' => $mailConfig['host'] ?? null,
                         'port' => $mailConfig['port'] ?? null,
                         'username' => $mailConfig['username'] ?? null,
@@ -38,7 +36,7 @@ trait ConfiguresSmtp
                     ]);
                 }
             } catch (\Exception $e) {
-                \Log::error('Failed to configure SMTP:', [
+                \Log::error('Failed to configure mail:', [
                     'error' => $e->getMessage(),
                     'organization_id' => $smtpSettings->organization_id ?? null
                 ]);
@@ -57,8 +55,8 @@ trait ConfiguresSmtp
                 'password' => $setting->Mailpassword,
                 'timeout' => 30,
                 'auth_mode' => null,
-                'from_name' => $setting->mail_from_name,
-                'from_address' => $setting->mail_from_address,
+                'from_name' => $setting->mail_from_name ?? $setting->Platform_Name ?? config('app.name'),
+                'from_address' => $setting->mail_from_address ?? $setting->Mail,
             ];
             MailConfig::set($mailConfig);
         }
@@ -73,12 +71,34 @@ trait ConfiguresSmtp
      */
     protected function getSmtpConfig($smtpSettings)
     {
-        // If no SMTP settings provided, return null to use default mail config
-        if (!$smtpSettings || !$smtpSettings->smtp_host) {
+        if (!$smtpSettings) {
             return null;
         }
 
         try {
+            // Resend provider
+            if ($smtpSettings->email_provider === 'resend' && $smtpSettings->resend_api_key) {
+                $fromAddress = $smtpSettings->smtp_from_address ?? config('mail.from.address', 'noreply@trsana.net');
+                $fromName = $smtpSettings->smtp_from_name ?? config('app.name');
+
+                \Log::info('Using organization Resend configuration:', [
+                    'from_address' => $fromAddress,
+                    'from_name' => $fromName,
+                    'organization_id' => $smtpSettings->organization_id ?? null
+                ]);
+
+                return [
+                    'transport' => 'resend',
+                    'api_key' => $smtpSettings->resend_api_key,
+                    'from_address' => $fromAddress,
+                    'from_name' => $fromName,
+                ];
+            }
+
+            // SMTP provider — if no host, return null to use default
+            if (!$smtpSettings->smtp_host) {
+                return null;
+            }
             // Get the from address that matches the SMTP username to avoid authentication issues
             // Use SMTP username as from address to ensure authentication compatibility
             // Only use custom from_address if it matches the username domain (some servers allow this)
@@ -172,12 +192,35 @@ trait ConfiguresSmtp
         $fromName = $setting ? ( $setting->mail_from_name ?? ( $setting->Platform_Name ?? $app_name ) ) : $app_name;
         
         // Default values from config
-        $fromAddress = $setting ? ( $setting->mail_from_address ?? $app_address ) : $app_address;
+        $fromAddress = $setting ? ( $setting->mail_from_address ?? $setting->Mail ?? $app_address ) : $app_address;
         
 
         // If we have valid settings, use them
         if ($smtpSettings) {
-            // Use SMTP username as from address to ensure authentication compatibility
+            // For Resend, use from_address directly (domain verification is Resend's responsibility)
+            if ($smtpSettings->email_provider === 'resend') {
+                if (!empty($smtpSettings->smtp_from_address)) {
+                    $fromAddress = $smtpSettings->smtp_from_address;
+                }
+                if (!empty($smtpSettings->smtp_from_name)) {
+                    $fromName = $smtpSettings->smtp_from_name;
+                } elseif (!empty($smtpSettings->organization->name)) {
+                    $fromName = $smtpSettings->organization->name;
+                }
+
+                \Log::info('Sending email from (Resend):', [
+                    'address' => $fromAddress,
+                    'name' => $fromName,
+                    'organization_id' => $smtpSettings->organization_id ?? null
+                ]);
+
+                return [
+                    'address' => $fromAddress,
+                    'name' => $fromName
+                ];
+            }
+
+            // SMTP: Use SMTP username as from address to ensure authentication compatibility
             // Only use custom from_address if it matches the username domain
             $smtpUsername = $smtpSettings->smtp_username;
             $customFromAddress = $smtpSettings->smtp_from_address ?? null;

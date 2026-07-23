@@ -1,0 +1,16 @@
+Program Name,Program Type,Program Start Date,Program End Date,Founder First Name,Founder Last Name,Founder Email,Founder Gender,Founder Phone,Country Code,Founder Working Commitment,Founder Educational Status,Co-Founder Name,Co-Founder Email,Co-Founder Phone Number,Co-Founder Working Commitment,Co-Founder Educational Status,Startup Name,Country
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Alex,Morgan,enum.alex@example.com,Male,1020001001,20,Full-time,Graduate,,,,,,Acme Robotics,Egypt
+Accelerator Alpha,general_program,4/1/2026,7/31/2026,Sara,Hassan,enum.sara@example.com,female,1020001002,20,part-time,student,,,,,,BlueWave Labs,Egypt
+Accelerator Alpha,GENERAL_PROGRAM,4/1/2026,7/31/2026,Omar,Khaled,enum.omar@example.com,MALE,1020001003,20,FULL-TIME,GRADUATE,,,,,,Pyramid Cloud,Egypt
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Mona,Adel,enum.mona@example.com,feMALE,1020001004,20,Full-Time,grAdUate,,,,,,Nile Energy,Egypt
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Karim,Nabil,enum.karim@example.com,male,1020001005,20,full-Time,STUDENT,Cofound One,enum.co1@example.com,9990001005,part-Time,graduate,Desert Foods,Egypt
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Hana,Reda,enum.hana@example.com,Female,1020001006,20,Part-time,Student,Cofound Two,enum.co2@example.com,9990001006,FULL-TIME,STUDENT,Oasis Mobility,Egypt
+Hackathon Beta,Hackathon,6/1/2026,6/15/2026,Yusuf,Tarek,enum.yusuf@example.com,Male,1020001007,20,Full-time,Graduate,Cofound Three,enum.co3@example.com,9990001007,Part-time,Student,Cairo Analytics,Egypt
+Hackathon Beta,hackathon,6/1/2026,6/15/2026,Tamer,Fouad,enum.tamer@example.com,male,1020001008,20,part-time,student,Cofound Four,enum.co4@example.com,9990001008,full-time,graduate,Phoenix Drinks,Egypt
+Hackathon Beta,HACKATHON,6/1/2026,6/15/2026,Salma,Magdy,enum.salma@example.com,FEMALE,1020001009,20,FULL-TIME,STUDENT,Cofound Five,enum.co5@example.com,9990001009,PART-TIME,GRADUATE,Verdant Farms,Egypt
+Hackathon Beta,HaCkAtHoN,6/1/2026,6/15/2026,Nour,Saad,enum.nour@example.com,FeMaLe,1020001010,20,fUlL-tImE,gRaDuAtE,Cofound Six,enum.co6@example.com,9990001010,PaRt-TiMe,sTuDeNt,Sphinx Studio,Egypt
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Layla,Samir,enum.layla@example.com,Other,1020001011,20,Full-time,Graduate,,,,,,Sahara Foods,Egypt
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Selim,Awad,enum.selim@example.com,Male,1020001012,20,Full-time,Diploma,,,,,,Atlas Robotics,Egypt
+Accelerator Alpha,workshop,4/1/2026,7/31/2026,Dina,Wahba,enum.dina@example.com,Female,1020001013,20,Full-time,Graduate,,,,,,Helios Tech,Egypt
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Maya,Hany,enum.maya@example.com,Female,1020001014,20,Contractor,Graduate,,,,,,Sigma Trade,Egypt
+Accelerator Alpha,General_Program,4/1/2026,7/31/2026,Rana,Fares,enum.rana@example.com,F,1020001015,20,Full-time,Graduate,,,,,,Delta Print,Egypt

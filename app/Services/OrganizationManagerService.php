@@ -47,6 +47,7 @@ class OrganizationManagerService
             });
         }
 
+        $query = $query->orderBy('created_at', 'desc');
         // Get assigned manager IDs for this organization
         $assignedManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
 
@@ -133,9 +134,9 @@ class OrganizationManagerService
         try {
             $this->syncManagersToOrganization($organization, $managerIds);
 
-            // Update wizard step if moving forward
-            if ($organization->wizard_step < 4) {
-                $organization->wizard_step = 4;
+            // Update wizard step if moving forward (max 3 steps in wizard)
+            if ($organization->wizard_step < 3) {
+                $organization->wizard_step = 3;
             }
 
             $organization->save();

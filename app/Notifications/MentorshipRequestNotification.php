@@ -10,11 +10,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Services\GlobalNotificationSettingsService;
+use App\Traits\ConfiguresSmtp;
 use Throwable;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ConfiguresSmtp;
 
     /**
      * The number of times the job may be attempted.
@@ -111,15 +112,17 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         if($this->reminder == 'Reminder'){
             return (new MailMessage)
             ->subject( __('emails.mentorship_request_reminder.subject', ['startup' => $this->data['company_name']]))
-            ->markdown('emails.mentorship_request_reminder', ['data' => $this->data]);
+            ->markdown('emails.mentorship_request_reminder', array_merge(['data' => $this->data], $orgData));
            Log::info('Mail data:', ['company_name' => $this->data['company_name']]);
         }else{
             return (new MailMessage)
             ->subject(__('admin.mentorship_request_subject', ['startup' => $this->data['company_name']]))
-            ->markdown('emails.mentorship_request', ['data' => $this->data]);
+            ->markdown('emails.mentorship_request', array_merge(['data' => $this->data], $orgData));
         }
     }
 

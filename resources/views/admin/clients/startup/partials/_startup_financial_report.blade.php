@@ -69,14 +69,21 @@
               {{ __('startup.financial.executive_summary') }}
               <span id="summary-period-label">({{ $periods ? reset($periods)['label'] : '' }})</span>
             </h5>
-            <!-- <div class="d-flex align-items-center gap-2 mt-2">
-              <span class="text-muted small">{{ __('startup.financial.valuation_date') }}:</span>
-              <select class="form-select form-select-sm w-auto" onchange="window.location.href='?valuation_date='+this.value">
-                @foreach($availableValuationDates as $date)
-                  <option value="{{ $date }}" {{ $valuationDate == $date ? 'selected' : '' }}>{{ $date }}</option>
-                @endforeach
-              </select>
-            </div> -->
+            @php
+              $valuationDate =  request()->get('valuation_date') ?? $valuation_date ?? $valuationDate;
+              $historicalDates = $historicalValuationDates ?? [];
+            @endphp
+
+            @if (count($historicalDates) > 0)
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <span class="text-muted small">{{ __('startup.financial.valuation_date') }}:</span>
+                <select class="form-select form-select-sm w-auto" onchange="window.location.href='?valuation_date='+this.value">
+                  @foreach($historicalDates as $date)
+                    <option value="{{ $date }}" {{ $valuationDate == $date ? 'selected' : '' }}>{{ $date }}</option>
+                  @endforeach
+                </select>
+              </div> 
+            @endif
           </div>
 
           @if ($periods && count($periods) > 1)
@@ -142,6 +149,43 @@
       @endforeach
     </div>
     <!--/ KPIs -->
+
+    <!-- Additional KPIs -->
+    @php
+      $additionalKpis = [
+        ['title' => __('startup.financial.operating_profit'), 'id' => 'kpi-operating-profit'],
+        ['title' => __('startup.financial.net_profit'), 'id' => 'kpi-net-profit'],
+        ['title' => __('startup.financial.total_expenses'), 'id' => 'kpi-total-expenses'],
+      ];
+      $additionalKpiIcons = ['fa-chart-bar', 'fa-coins', 'fa-receipt'];
+      $additionalKpiColors = ['success', 'primary', 'warning'];
+    @endphp
+
+    <div class="row g-6 mb-6">
+      @foreach ($additionalKpis as $key => $kpi)
+      <div class="col-md-4">
+        <div class="card h-100 card-border-shadow-{{ $additionalKpiColors[$key] }}">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-secondary fw-medium small mb-1">
+                {{ $kpi['title'] }}
+              </div>
+              <h3 class="mb-0 fw-semibold text-dark">
+                <span id="{{ $kpi['id'] }}">--</span>
+              </h3>
+            </div>
+
+            <div class="avatar avatar-md h-px-40 ms-4">
+              <div class="avatar-initial rounded bg-label-{{ $additionalKpiColors[$key] }}">
+                <i class="fa-solid {{ $additionalKpiIcons[$key] }}"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      @endforeach
+    </div>
+    <!--/ Additional KPIs -->
 
     <!-- Growth & Revenue -->
     <h5 class="fw-semibold text-dark mb-3">{{ __('startup.financial.growth_revenue') }}</h5>
@@ -456,6 +500,7 @@
       update('kpi-fcf', fmt.currency(d.fcf));
       update('kpi-ebitda-margin', fmt.percent(d.ebitda, d.revenue));
       update('kpi-debt-ebitda', d.ebitda != 0 ? (d.totalDebt / d.ebitda).toFixed(2) : '0.00');
+      update('kpi2-gro', fmt.percent(d.grossProfit, d.revenue));
       update('d-gross-val', gm);
       update('kpi2-gro', gm);
       update('kpi2-ebi', fmt.percent(d.ebitda, d.revenue));
@@ -464,17 +509,26 @@
       update('kpi-total-debt', fmt.currency(d.totalDebt));
       update('kpi-interest-cov', d.interest != 0 ? (d.ebit / d.interest).toFixed(2) : '0.00');
       update('kpi-fcf-margin', fmt.percent(d.fcf, d.revenue));
+
+      // Update additional KPIs
+      const operatingProfit = d.revenue - d.cogs - d.salaries - d.opex - d.da;
+      const totalExpenses = d.cogs + d.salaries + d.opex + d.da + d.interest + d.taxes;
+      const netProfit = d.revenue - totalExpenses;
+      update('kpi-operating-profit', fmt.currency(operatingProfit));
+      update('kpi-net-profit', fmt.currency(netProfit));
+      update('kpi-total-expenses', fmt.currency(totalExpenses));
   
       // Update charts
       if(charts.revenue) {
           charts.revenue.data.datasets[0].pointRadius = [0,1,2,3].map(i => i === idx ? 6 : 3);
           charts.revenue.update();
       }
-  
-      if(charts.grossMargin) {
+
+       if(charts.grossMargin) {
           charts.grossMargin.data.datasets[0].data = [gm, 100 - gm];
           charts.grossMargin.update();
       }
+
   
       if(charts.marginTrend) {
           charts.marginTrend.data.datasets.forEach(ds => ds.pointRadius = [0,1,2,3].map(i => i === idx ? 6 : 3));

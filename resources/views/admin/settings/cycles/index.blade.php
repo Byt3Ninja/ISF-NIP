@@ -11,7 +11,15 @@
 <style>
 
   .daterangepicker {
-    margin-top: 8rem !important;
+    margin-top: 2rem !important;
+  }
+
+  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
+     stays fully visible no matter where in the list the row sits. */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
   }
 
   /* Edit-step picker is positioned via JS using viewport-fixed coords so it
@@ -38,8 +46,8 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-overlay"></div>
     <div class="content-body">
       @if (count($cycles) > 0)
@@ -122,7 +130,7 @@
                         @if ($selectedCycle && $selectedCycle->type === 'Hackathon' && $_user->hasAnyRole(['Admin', 'organizationManager']))
                             <option value="6">{{ __('admin.Team Formation') }}</option>
                         @endif
-                        <option value="7">{{ __('admin.Almuni') }}</option>
+                        {{-- <option value="7">{{ __('admin.Almuni') }}</option> --}}
                       </select>
                     </div>
                   </div>
@@ -187,7 +195,7 @@
                         </div>
 
                         <div class="d-flex align-items-center" id="mob">
-                          <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }})" id="{{ $step->id }}"
+                          <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }},{{ \App\Formdata::where('step_id', $step->id)->distinct('company_id')->count('company_id') }})" id="{{ $step->id }}"
                             title="{{ __('cycles.Edit Title and dates') }}">
                             <span class="btn btn-icon btn-label-info rounded-circle">
                               <i class="ti ti-edit text-info"></i></span>
@@ -459,7 +467,7 @@
 <!--Modify custom form step Modal -->
 <div class="modal fade" id="ModifyStepForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
   aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
         autocomplete="off" id="editStepForm">
@@ -471,12 +479,13 @@
 
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
+          <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
           <input type="hidden" name="type" id="type7" value="8">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
             <div class="form-group mb-4">
-              <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
+              <select class="select form-control" id="mFormSelect" name="mFormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
                 {{-- @endforeach --}}
@@ -622,10 +631,7 @@
   }
 
   // Check for conditional required fields based on step type
-  if ((stepType.value === '1' || stepType.value === '5') && formSelect && formSelect.hasAttribute('required') && !formSelect.value) {
-    showError(formSelect, currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار نموذج.');
-    return false;
-  }
+  // Form is optional: a step may intentionally have no form ("— No form —").
 
   if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
     showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
@@ -667,12 +673,42 @@ if (addStepForm) {
 }
 
 if (editStepForm) {
+  // Tracks the form value the dialog was opened with, so we only warn when the
+  // manager actually changed the selected form.
+  let editStepOriginalFormId = null;
+  $('#ModifyStepForm').on('shown.bs.modal', function () {
+    editStepOriginalFormId = $('#mFormSelect').val();
+    $('#confirm_form_change').val('0');
+  });
+
   editStepForm.addEventListener('submit', function (event) {
     event.preventDefault();
-    if (validateStepForm(editStepForm, 'edit')) {
-      disableFormWithLoading(editStepForm);
-      editStepForm.submit();
+    if (!validateStepForm(editStepForm, 'edit')) {
+      return;
     }
+
+    const mFormSelect = document.getElementById('mFormSelect');
+    const stepHasSubmissions = $('#ModifyStepForm').data('has-submissions') ? Number($('#ModifyStepForm').data('has-submissions')) : 0;
+    const formChanged = mFormSelect && editStepOriginalFormId !== null && mFormSelect.value !== editStepOriginalFormId;
+
+    if (formChanged && stepHasSubmissions > 0 && $('#confirm_form_change').val() !== '1') {
+      releaseWarningAlert({
+        title: '{{ __("admin.step_form_change_warning_title") }}',
+        message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', stepHasSubmissions),
+        confirmText: '{{ __("admin.Yes") }}',
+        cancelText: '{{ __("admin.cancel") }}',
+        confirmColor: 'danger',
+        onConfirm: function () {
+          $('#confirm_form_change').val('1');
+          disableFormWithLoading(editStepForm);
+          editStepForm.submit();
+        }
+      });
+      return;
+    }
+
+    disableFormWithLoading(editStepForm);
+    editStepForm.submit();
   });
 }
 function clearValidationOnChange(form, mode = 'add') {
@@ -753,8 +789,8 @@ if (editStepForm) {
     // });
     // $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
     //   format: 'Y-m-d',
-    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start ? $ccycle->start->format('Y/m/d') : null : now()->format('Y/m/d') }}',
+    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end ? $ccycle->end->format('Y/m/d') : null : now()->addDays(15)->format('Y/m/d') }}',
     //   timepicker: false
     // });
     $(document).ready(function() {
@@ -950,7 +986,7 @@ if (editStepForm) {
       }
     }
 
-    function ModifyStep(set, id) {
+    function ModifyStep(set, id, submissionsCount) {
       var cycle = $('#ccycle').find(":selected").val();
       $.ajaxSetup({
         headers: {
@@ -995,12 +1031,15 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty();
+                    const $mFormSelect = $('#mFormSelect').empty();
+                    $mFormSelect.append($('<option>').val('').text('{{ __('admin.no_form_option') }}'));
                     let appends = '';
                     response.data.forEach(function(form) {
                       appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
                     });
-                    $('#mFormSelect').append(appends);
+                    $mFormSelect.append(appends);
+                    if (!sData) { $mFormSelect.val(''); }
+                    $mFormSelect.trigger('change.select2');
                     menu.show();
                   },
                   error: function(error) {
@@ -1015,12 +1054,15 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty();
+                    const $mFormSelect = $('#mFormSelect').empty();
+                    $mFormSelect.append($('<option>').val('').text('{{ __('admin.no_form_option') }}'));
                     let appends = '';
                     response.data.forEach(function(form) {
                       appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
                     });
-                    $('#mFormSelect').append(appends);
+                    $mFormSelect.append(appends);
+                    if (!sData) { $mFormSelect.val(''); }
+                    $mFormSelect.trigger('change.select2');
                     $('#mmenu1').show();
                   },
                   error: function(error) {
@@ -1050,6 +1092,7 @@ if (editStepForm) {
 
               // $('#mfromDate').val(response.from);
               // $('#mtoDate').val(response.to);
+              $('#ModifyStepForm').attr('data-has-submissions', submissionsCount || 0);
               $('#ModifyStepForm').modal('show');
             },
             error: function(error) {

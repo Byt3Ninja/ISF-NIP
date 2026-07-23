@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Spatie\Permission\PermissionRegistrar;
@@ -14,6 +15,7 @@ class Permissions
     public $exceptNames = [
         'auth.magic-login',
         'core.dashboard_view',
+        'clients.profile_view',
         'cycle.custom_pages.image',
         'cycle.custom_pages.upload_image',
         'screening.guidelines.upload_image',
@@ -29,6 +31,7 @@ class Permissions
         'organization.wizard.update.step3',
         'organization.wizard.update.step4',
         'organization.wizard.update.step5',
+        'organization.wizard.landing',
         'organization.wizard.step5.reorder',
         'organization.wizard.step5.delete',
         'organization.wizard.preview',
@@ -36,10 +39,13 @@ class Permissions
         'organization.wizard.generate.slug',
         'organization.wizard.managers.list',
         'organization.wizard.managers.create',
+        'organization.wizard.programs.landing.update',
+        'organization.wizard.programs.reorder',
         'organization.wizard.draft',
         'organization.wizard.draft.update',
         'organization.wizard.publish',
         'provider-registration',
+        'hackathon.trackShare',
         'filemanager*',
         'dashboard',
         'dashboard/dashboard',
@@ -61,6 +67,9 @@ class Permissions
         'users/search',
         'cycles.completion_status_check',
         'trainings.time_tracking',
+        'screening.update_step_form',
+        'services_providers.edit_profile',
+        'services_providers.clients.*',
     ];
 
     public $exceptControllers = [
@@ -92,6 +101,26 @@ class Permissions
         {
             $route = $request->route();
             $permission = $route->getName();
+
+            // Block unapproved service providers from accessing non-dashboard routes
+            if ($user->hasRole('serviceProvider') && $this->match($route)) {
+                $spRegistration = DB::table('service_provider_registration')
+                    ->where('user_id', $user->id)
+                    ->first(['status']);
+
+                if ( /*!$spRegistration ||*/ ( $spRegistration && $spRegistration->status != 1 )) {
+                    $routeName = $permission ?? '';
+                    $allowedForUnapproved = Str::startsWith($routeName, 'service_provider_dashboard.')
+                        || Str::startsWith($routeName, 'service_provider_request.');
+
+                    if (!$allowedForUnapproved) {
+                        if ($request->expectsJson()) {
+                            return response()->json(['status' => false, 'message' => 'Not found'], 404);
+                        }
+                        abort(404);
+                    }
+                }
+            }
 
             if( !trim( $permission ) || in_array( $permission, ['web', 'admin', 'dashboard']) ) { return $next($request); }
             else

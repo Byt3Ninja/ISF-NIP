@@ -2,21 +2,23 @@
 
 namespace App\Jobs;
 
-use App\User;
+use App\Events\MentorshipSessionUpdated;
+use App\Events\RequestMentorship;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
-use Illuminate\Bus\Queueable;
-use App\Events\RequestMentorship;
-use Illuminate\Support\Facades\Log;
-use App\Notifications\TemplateEmail;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Queue\SerializesModels;
-use App\Events\MentorshipSessionUpdated;
+use App\Services\FileManagerService;
+use App\Notifications\MentorshipRequestNotification;
 use App\Notifications\MentorshipSession;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\MentorshipSessionMentor;
+use App\Notifications\TemplateEmail;
+use App\User;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Notifications\MentorshipRequestNotification;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Notifications\MentorNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipApprovalNotification;
@@ -62,7 +64,14 @@ class SendMentorshipRequestJob implements ShouldQueue
             try {
                 // ======> notify Mentor <=================
                 $locale = app()->getLocale() ?? 'en';
-                $session = MentorshipRequest::with(['user', 'mentor', 'user.company'])->findOrFail($this->id);
+                $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
+                $session->attachments = $session->fileurl ? [
+                    [
+                        'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
+                        'name' => basename($session->fileurl),
+                        'path' => $session->fileurl
+                    ]
+                ] : [];
 
                 $mentor = $session->mentor;
                 $startup = $session->user;
@@ -189,6 +198,7 @@ class SendMentorshipRequestJob implements ShouldQueue
 
         if ($this->action == 'modifySession') {
             /// Notify Mentor
+            $locale = app()->getLocale() ?? 'en';
             $session = MentorshipRequest::findOrFail($this->id);
             $rName = User::findOrFail($session->mentor_id);
             $rName_usr = User::findOrFail($session->user_id);
@@ -197,17 +207,29 @@ class SendMentorshipRequestJob implements ShouldQueue
             $user->id = $rName->id;
             $rFullName = $rName->name;
             $rFullName_usr = $rName_usr->name;
-            $message = [
-                "New Mentorship session - VI portal",
-                "Dear " . $rFullName . ",",
-                "Kindly note you have a new mentorship session with '" . $rFullName_usr . "', Session will start:" . $this->date . ", Check your account to join the session ",
-                "/dashboard",
-                'Kindly note you have a new mentorship session with "' . $rFullName_usr . ', Session will start: ' . $this->date,
+            $mentorMessage =[
+                'subject' => __('messages.New_mentorship_session', [], $locale) . $session->user->company->name_en,
+                'title' => __('messages.mentorship_session_subject: ', [], $locale) . $session->user->company->name_en,
+                'mentorName' => $rFullName,
+                'startupOwnerName' => $rFullName_usr,
+                'startupName' => $session->user->company->name_en ?? '',
+                'sessionDate' => $session->zoom_date,
+                'duration' => $session->period ?? '60 min',
+                'sessionType' => $session->session_type ?? 'Online',
+                'meetingLink' => $session->start_url ?? '',
+                'meetingPass' => $session->zoom_passcode ?? '',
+                'location' => $session->orgnization->google_map_url ?? '',
+                'notes' => $session->comment ?? '',
+                'attachments' => $session->fileurl ? [['url' => env('APP_URL').'/dashboard/uploads/InviteMentor/'.$session->fileurl, 'name' => basename($session->fileurl), 'path' => $session->fileurl]] : [],
+                'status' => $session->approved ?? '',
+                'action' => 'modifySession',
+                'user' => 'mentor',
+                'lang' => $locale,
             ];
-            $MSG = new TemplateEmail($message);
+            $MSGM = new MentorshipSessionMentor($mentorMessage);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $user->notify($MSG);
+                    $rName->notify($MSGM);
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 1: ' . $th->getMessage());
@@ -226,16 +248,28 @@ class SendMentorshipRequestJob implements ShouldQueue
             $user->email = $rName_usr->email;
             $user->id = $rName_usr->id;
             $message = [
-                "New Mentorship session - VI portal",
-                "Dear " . $rFullName_usr . ",",
-                "Kindly note you have a new mentorship session with '" . $rFullName . "', Session will start:" . $this->date . ", Check your account to join the session ",
-                "/dashboard",
-                'Kindly note you have a new mentorship session with ' . $rFullName . ', Session will start: ' . $this->date,
+                'subject' => __('messages.New_mentorship_session', [], $locale) . $session->user->company->name_en,
+                'title' => __('messages.mentorship_session_subject:'.$session->user->company->name_en.'', [], $locale),
+                'mentorName' => $rFullName,
+                'startupOwnerName' => $rFullName_usr,
+                'startupName' => $session->user->company->name_en ?? '',
+                'sessionDate' => $session->zoom_date,
+                'duration' => $session->period ?? '60 min',
+                'sessionType' => $session->session_type ?? 'Online',
+                'meetingLink' => $session->start_url ?? '',
+                'meetingPass' => $session->zoom_passcode ?? '',
+                'location' => $session->orgnization->google_map_url ?? '',
+                'notes' => $session->comment ?? '',
+                'attachments' => $session->fileurl ? [['url' => env('APP_URL').'/dashboard/uploads/InviteMentor/'.$session->fileurl, 'name' => basename($session->fileurl), 'path' => $session->fileurl]] : [],
+                'status' => $session->approved ?? '',
+                'action' => 'modifySession',
+                'user' => 'user',
+                'lang' => $locale,
             ];
-            $MSG = new TemplateEmail($message);
+            $MSG = new MentorshipSession($message);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $user->notify($MSG);
+                    $rName_usr->notify($MSG);
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 2: ' . $th->getMessage());
@@ -252,7 +286,14 @@ class SendMentorshipRequestJob implements ShouldQueue
         }
         if ($this->action == 'modify') {
             $locale = app()->getLocale() ?? 'en';
-            $session = MentorshipRequest::with(['user', 'mentor', 'user.company'])->findOrFail($this->id);
+            $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
+            $session->attachments = $session->fileurl ? [
+                [
+                    'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
+                    'name' => basename($session->fileurl),
+                    'path' => $session->fileurl
+                ]
+            ] : [];
             $mentor_user = $session->mentor;
             $startup_user = $session->user;
 

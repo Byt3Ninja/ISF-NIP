@@ -96,7 +96,10 @@ class MessengerController extends Controller
             } else {
                 $orgIds = $user->organizations_ids;
                 $cycles = Cycle::whereIn('organization_id', $orgIds)->select('id', 'title')->get();
-                $users = Company::whereIn('organization_id', $orgIds)->get();
+                $users = Company::with(['user'])->whereHas('user', function ($query) use ($orgIds) {
+                    $query->whereIn('organization_id', $orgIds);
+                })
+                ->get();
                 $organizations = Organization::whereIn('id', $orgIds)->get();
             }
             // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
@@ -904,30 +907,36 @@ class MessengerController extends Controller
             if (!$request->organizations || !is_array($request->organizations)) {
                 return redirect('/dashboard/messages')->with(['msg' => 'MessageError: No organizations selected', 'class' => 'danger']);
             }
-            foreach ($request->organizations as $orgId) {
-                $organization = Organization::find($orgId);
-                if (!$organization) {
-                    return response()->json(['error' => __('admin.Selected organization does not exist')]);
-                }
-                $orgUsers = User::where('organization_id', $orgId)->get();
-                foreach ($orgUsers as $user) {
-                    try {
-                        $draft = new MessageDraft();
-                        $draft->sender = $cuser->id;
-                        $draft->receiver = $user->id;
-                        $draft->subject = $request->subject;
-                        $draft->message = $request->message;
-                        $draft->drafts = $drafts;
-                        $draft->type = $request->type;
-                        $draft->save(); // Save to DB
 
-                    } catch (\Exception $e) {
-                        Log::error(' Error: ' . $e->getMessage());
-                        return response()->json(['error' => 'Database error: ' . $e->getMessage() ]);
-                    }
-                }
+            $organizations = Organization::whereIn('id', $request->organizations)->pluck('id');
+            $missingOrgId = collect($request->organizations)->first(fn ($orgId) => !$organizations->contains($orgId));
+            if ($missingOrgId !== null) {
+                return response()->json(['error' => __('admin.Selected organization does not exist')]);
             }
-        } 
+
+            $orgUsers = User::whereIn('organization_id', $request->organizations)->get();
+
+            try {
+                $now = now();
+                $rows = $orgUsers->map(fn ($user) => [
+                    'sender' => $cuser->id,
+                    'receiver' => $user->id,
+                    'subject' => $request->subject,
+                    'message' => $request->message,
+                    'drafts' => $drafts,
+                    'type' => $request->type,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ])->all();
+
+                if (!empty($rows)) {
+                    MessageDraft::insert($rows);
+                }
+            } catch (\Exception $e) {
+                Log::error(' Error: ' . $e->getMessage());
+                return response()->json(['error' => 'Database error: ' . $e->getMessage() ]);
+            }
+        }
         
         return response()->json([
             'success' => __('admin.MessageDraftSuccessfully'),

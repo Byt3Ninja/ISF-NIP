@@ -66,9 +66,24 @@ class Almuni extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
     public function cycle()
     {
         return $this->belongsTo(Cycle::class);
+    }
+
+    public function getScreeningDataAttribute()
+    {
+        return collect(  $this->screening );
+    }
+
+    public function getFinalScreeningDataAttribute()
+    {
+        return collect(  $this->final_screening  );
     }
     
 }

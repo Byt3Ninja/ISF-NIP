@@ -44,9 +44,14 @@ return [
     ],
 
     'task' => [
-        'broadcast' => 'تحديث مهمة: :message',
-        'whatsapp'  => 'تحديث مهمة: :message',
-        'subject'   => 'تحديث مهمة',
+        'broadcast'          => 'تحديث مهمة: :message',
+        'whatsapp'           => 'تحديث مهمة: :message',
+        'subject'            => 'تحديث مهمة',
+        'subject_add'        => 'تمت إضافة مهمة',
+        'subject_update'     => 'تم تحديث المهمة',
+        'subject_archive'    => 'تمت أرشفة المهمة',
+        'subject_reopen'     => 'تمت إعادة فتح المهمة',
+        'subject_feedback'   => 'تحديث مراجعة المهمة',
     ],
 
     'mentorship_session' => [
@@ -54,6 +59,7 @@ return [
         'whatsapp'  => ':greeting :line',
         'database' => 'إشعار جلسة إرشاد جديدة',
         'subject' => 'تحديث جلسة الإرشاد',
+        'founder_booking' => 'لديك جلسة إرشاد جديدة مع :mentor_name بتاريخ :session_date في :start_time – :end_time (AM/PM).',
     ],
 
     'custom_email' => [

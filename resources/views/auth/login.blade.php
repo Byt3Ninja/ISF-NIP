@@ -231,7 +231,7 @@
                   <div class="form-check mb-0 ms-2">
                     <input class="form-check-input" type="checkbox" id="remember-me"
                       {{ old('remember') ? 'checked' : '' }} name="remember" />
-                    <label class="form-check-label" for="remember-me">{{ __('auth.Remember') }}</label>
+                    <label class="form-check-label" for="remember-me">{{ __('auth.stay_logged') }}</label>
                   </div>
                   <a href="{{ route('password.request') }}">
                     <p class="mb-0">{{ __('Forgot Password?') }}</p>

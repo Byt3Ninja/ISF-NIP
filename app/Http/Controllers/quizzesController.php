@@ -140,7 +140,7 @@ class quizzesController extends Controller
 			$organizations = $organizations->whereIn('id', $orgIds);
 		}
 		$organizations = $organizations->get();
-		$trainings = Training::get();
+		$trainings = Training::visibleToUser()->get();
 		return view('admin.quizzes.create', compact('organizations', 'trainings'));
 	}
 
@@ -202,7 +202,7 @@ class quizzesController extends Controller
 				$organizations = $organizations->whereIn('id', $orgIds);
 			}
 			$organizations = $organizations->get();
-			$trainings = Training::get();
+			$trainings = Training::visibleToUser()->get();
 			return view('admin.quizzes.edit', compact('quiz', 'organizations', 'trainings'));
 		}
 	}
@@ -333,21 +333,21 @@ class quizzesController extends Controller
 	{
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {
-			if (!$user->HaveCompany) {
-				return redirect()->route('user.profile_view')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
-			}
-			if (!$user->company) {
-				return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
-			}
+			// if (!$user->HaveCompany) {
+			// 	return redirect()->route('user.profile_Edit')->with(['msg' => 'You need to enable Have a company first', 'class' => 'danger']);
+			// }
+			// if (!$user->company) {
+			// 	return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
+			// }
 
-			$company = $user->company;
-			$cycleData = $company->cycledata;
+			$company = $user?->company;
+			$cycleData = $company?->cycledata;
 
 			// if( empty( $cycleData ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 			// if( empty( $cycleData->organization_id ) ) { return redirect()->route('core.dashboard_view')->with(['msg' => 'You need to join program first.', 'class' => 'danger']); }
 
 			QuizResults::refresh_my_attempts();
-			if (!empty($cycleData->organization_id))
+			if (!empty($cycleData?->organization_id))
 			{
 				$organization_id = $cycleData->organization_id;
 				$get_step = Step::where('stype', 4)->where('cycle_id', $cycleData->id)->get();
@@ -729,62 +729,66 @@ class quizzesController extends Controller
 	public function quizResults(Request $request)
 	{
 		$user = auth()->user();
+		$orgIds = $user->organizations_ids;
+
 		if ($user->hasAnyRole(['Registered'])) {
 			return abort(401);
 		}
-		$quizzesResults_q = "SELECT 
-		qr.id AS qr_result_id,
-		qr.user_id AS qr_id,
-		qr.quiz_id AS qr_quiz_id,
-		qr.score AS qr_result_score,
-		qr.status AS qr_result_status,
-		qr.started_at AS qr_result_started_at,
-		qr.ended_at AS qr_result_ended_at,
-		q.id AS q_quiz_id,
-		q.title AS q_quiz_title,
-		q.organization_id AS q_quiz_organization_id,
-		q.training_id AS q_quiz_training_id,
-		q.description AS q_quiz_description,
-		q.start AS q_quiz_start,
-		q.end AS q_quiz_end,
-		q.time_limit AS q_quiz_time_limit, 
-		q.attempts AS q_quiz_attempts, 
-		q.retry_after AS q_quiz_retry_after, 
-		q.passing_criteria AS q_quiz_passing_criteria, 
-		q.shuffle AS q_quiz_shuffle, 
-		q.status AS q_quiz_status, 
-		q.created_at AS q_quiz_created_at, 
-		q.updated_at AS q_quiz_updated_at,
-		t.id as t_training_id,
-		t.title as t_training_title,
-		t.dsc as t_training_description,
-		o.id as o_org_id,
-		o.name_ar as o_org_name_ar,
-		o.name_en as o_org_name_en,
-		u.id as u_user_id,
-		u.first_name_en as u_user_first_name_en,
-		u.first_name_ar as u_user_first_name_ar,
-		u.last_name_en as u_user_last_name_en,
-		u.last_name_ar as u_user_last_name_ar,
-		u.img_url as u_user_img_url,
-		c.id as c_company_id,
-		c.name_en as c_company_name_en,
-		c.name_ar as c_company_name_ar,
-		c.logo as c_company_logo
-			FROM quiz_results qr
-			LEFT JOIN quizzes q ON qr.quiz_id = q.id
-			LEFT JOIN trainings t ON t.id = q.training_id
-			LEFT JOIN organizations o ON o.id = q.organization_id
-			LEFT JOIN users u ON u.id = qr.user_id
-			LEFT JOIN companies c ON c.id = u.company_id
-			WHERE 1=1 ";
 
-		$quizzesResults = collect(DB::select($quizzesResults_q));
+		$quizzesResults = DB::table('quiz_results AS qr')
+			->select([
+				'qr.id AS qr_result_id',
+				'qr.user_id AS qr_id',
+				'qr.quiz_id AS qr_quiz_id',
+				'qr.score AS qr_result_score',
+				'qr.status AS qr_result_status',
+				'qr.started_at AS qr_result_started_at',
+				'qr.ended_at AS qr_result_ended_at',
+				'q.id AS q_quiz_id',
+				'q.title AS q_quiz_title',
+				'q.organization_id AS q_quiz_organization_id',
+				'q.training_id AS q_quiz_training_id',
+				'q.description AS q_quiz_description',
+				'q.start AS q_quiz_start',
+				'q.end AS q_quiz_end',
+				'q.time_limit AS q_quiz_time_limit',
+				'q.attempts AS q_quiz_attempts',
+				'q.retry_after AS q_quiz_retry_after',
+				'q.passing_criteria AS q_quiz_passing_criteria',
+				'q.shuffle AS q_quiz_shuffle',
+				'q.status AS q_quiz_status',
+				'q.created_at AS q_quiz_created_at',
+				'q.updated_at AS q_quiz_updated_at',
+				't.id as t_training_id',
+				't.title as t_training_title',
+				't.dsc as t_training_description',
+				'o.id as o_org_id',
+				'o.name_ar as o_org_name_ar',
+				'o.name_en as o_org_name_en',
+				'u.id as u_user_id',
+				'u.first_name_en as u_user_first_name_en',
+				'u.first_name_ar as u_user_first_name_ar',
+				'u.last_name_en as u_user_last_name_en',
+				'u.last_name_ar as u_user_last_name_ar',
+				'u.img_url as u_user_img_url',
+				'c.id as c_company_id',
+				'c.name_en as c_company_name_en',
+				'c.name_ar as c_company_name_ar',
+				'c.logo as c_company_logo',
+			])
+			->leftJoin('quizzes AS q', 'qr.quiz_id', '=', 'q.id')
+			->leftJoin('trainings AS t', 't.id', '=', 'q.training_id')
+			->leftJoin('organizations AS o', 'o.id', '=', 'q.organization_id')
+			->leftJoin('users AS u', 'u.id', '=', 'qr.user_id')
+			->leftJoin('companies AS c', 'c.id', '=', 'u.company_id')
+			->when(!$user->hasRole('admin') && !empty($orgIds), function ($query) use ($orgIds) {
+				$query->whereIn('q.organization_id', $orgIds);
+			})
+			->get();
 
 		return view('admin.clients.quiz.quiz_results', compact('quizzesResults'));
-
 	}
-	public function quizResultsdetails($id)
+	public function quizResultsDetails($id)
 	{
 		$user = auth()->user();
 		if ($user->hasAnyRole(['Registered'])) {

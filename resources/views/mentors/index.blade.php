@@ -34,8 +34,8 @@ $tabs = [
 </div>
 @endif
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-body">
       @if (session()->has('msg'))
         <x-alert 
@@ -45,20 +45,8 @@ $tabs = [
       @endif
 
       {{-- Tabs Navigation --}}
-      @if ($_user->hasAnyRole('Admin|organizationManager'))
-        <ul class="nav nav-pills mb-6">
-          @foreach($tabs as $tab)
-            <li class="nav-item">
-              <a 
-                class="nav-link {{ $currentRoute === $tab['route'] ? 'active' : '' }}" 
-                href="{{ route($tab['route']) }}"
-              >
-                <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-                {{ $tab['title'] }}
-              </a>
-            </li>
-          @endforeach
-        </ul>
+      @if ($_user->hasAnyRole('Admin|organizationManager|subadmin'))
+        <x-navigation-pills :tabs="$tabs" />
       @endif
 
       @include('mentors.partials.header')
@@ -69,34 +57,4 @@ $tabs = [
 </div>
 
 @include('mentors.partials.filter-modal')
-@stop
-
-@section('pagescripts')
-<script>
-$(function () {
-  // Debounce helper
-  const debounce = (fn, delay = 1000) => {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), delay);
-    };
-  };
-
-  // Create debounced handler ONCE
-  const handleSearch = debounce((value) => {
-    const url = new URL(window.location);
-      value
-      ? url.searchParams.set('search', value)
-      : url.searchParams.delete('search');
-
-      window.location.href = url.href;
-    }, 1000);
-
-  // Bind event
-  $('#searchInput').on('keyup', function () {
-    handleSearch(this.value.toLowerCase());
-  });
-});
-</script>
 @stop

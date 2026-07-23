@@ -7,7 +7,7 @@ $achievemenLabels = [
 
 $unlockHints = [
   __('startup.badges.not_graduated_yet'),
-  __('startup.badges.participate_in_hackathon_to_unlock'),
+  __('startup.badges.participate_in_hackathon_to_unlock'),  // Index 1: winner/hackathon badge
   __('startup.badges.complete_profile_to_unlock'),
   __('startup.badges.create_join_team'),
   __('startup.badges.reach_growth_milestones'),
@@ -28,6 +28,10 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
     <!-- Achievement Badges -->
     <div class="row gy-6">
       @foreach ($achievements as $key => $item)
+        {{-- Skip the hackathon/winner badge (index 1) --}}
+        @if ($loop->index === 1 || $loop->index === 3)
+          @continue
+        @endif
         <div class="col-md-4">
           @php
             $badgeData = [
@@ -42,6 +46,7 @@ $badgeColors = ['primary', 'secondary', 'info', 'warning', 'danger', 'success'];
               'criteriaMet' => !$item['locked'] ? ($key === 'alumni' ? __('startup.badges.graduated_from_program', ['program' => isset($item['title']) ? $item['title'] : __('startup.badges.incubator_program')]) : (isset($item['count']) ? __($achievemenLabels[$key], ['count' => $item['count']]) : ($key === 'profile_complete' ? __('startup.badges.100_profile_complete') : ''))) : '',
             ];
           @endphp
+          
           <div class="card h-100 border-2 border-{{ $item['locked'] ? 'light' : $badgeColors[$loop->index] }} opacity-{{ $item['locked'] ? '50' : '100' }} shadow-sm badge-card"
             {{-- Tooltip Logic: Only show tooltip if locked --}}
             @if($item['locked'])

@@ -5,14 +5,16 @@ namespace App;
 use App\Like;
 
 use App\Traits\Auditable;
+use App\Traits\HasFileCleanup;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Organization extends Model
 {
-	use Auditable,SoftDeletes;
+	use HasFactory, Auditable, SoftDeletes, HasFileCleanup;
 	public static $module = 'Organizations';
 	protected $fillable = [
 		'name_ar',
@@ -23,10 +25,22 @@ class Organization extends Model
 		'bio',
 		'user_id',
 		'status',
+		'max_concurrent_sessions',
 		'api_token',
 		'created_at',
 		'updated_at',
 		'img_url',
+		'meeting_platform',
+		'zoom_client_id',
+		'zoom_client_secret',
+		'zoom_account_id',
+		'microsoft_client_id',
+		'microsoft_client_secret_value',
+		'microsoft_tenant_id',
+		'microsoft_client_secret_id',
+		'microsoft_app_email',
+		'microsoft_redirect_uri',
+		'time_zone',
 		'organization_type_id',
 		'is_draft',
 		'wizard_step',
@@ -41,12 +55,17 @@ class Organization extends Model
 		'address',
 		'google_map_url',
 		// Step 2: Social Media
+		'website_url',
 		'linkedin_company_url',
 		'twitter_handle',
 		'facebook_page_url',
 		'instagram_profile_url',
 		'youtube_channel_url',
 		'tiktok_url',
+	];
+
+	protected array $fileFields = [
+		'img_url' => 'organizations',
 	];
 
 	protected $casts = [
@@ -78,18 +97,11 @@ class Organization extends Model
 			return '/images/logo-placeholder.png';
 		}
 
-		// Check if it's an old path (starts with 'organizations/')
 		if (str_starts_with($image, 'organizations/')) {
 			return asset($image);
 		}
 
-		// Check if it's a full URL or starts with /
-		if (str_starts_with($image, 'http') || str_starts_with($image, '/')) {
-			return $image;
-		}
-
-		// New storage path - return route to serve from storage
-		return route('organizations.logo', $image);
+		return app(\App\Services\FileManagerService::class)->getUrl($image, 'organizations');
 	}
 
 	/**

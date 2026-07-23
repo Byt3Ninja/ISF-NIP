@@ -224,6 +224,60 @@ if (! function_exists('route_exists')) {
     }
 }
 
+if (! function_exists('stepManageUrl')) {
+    /**
+     * Resolve the "manage" URL for a startup's current step, by step type (GV-3841).
+     *
+     * The screening / final-screening reports show every startup that belongs to a
+     * step's evaluation even after it has advanced to a step of a DIFFERENT type, so
+     * the step chip can point at any of the six step types. Each type has its own
+     * manage page, gated by its own permission, and — critically — each route's {id}
+     * parameter means a different thing:
+     *
+     *   1 Custom Form    -> forms.render_view          {id} = BuilderForm id (step->form_id ?: step->data)
+     *   2 Screening      -> screening.manage           {id} = Step id  (controller requires stype 2)
+     *   3 Mentorship     -> mentorships.requests_list  {id} = Cycle id
+     *   4 Training       -> trainings.sessions_list    {id} = Step id  (controller requires stype 4)
+     *   5 Final          -> screening.manage_final     {id} = Step id  (controller requires stype 5)
+     *   6 Team Formation -> (no manage page)           -> null
+     *
+     * Passing the wrong id (e.g. a step id where a form/cycle id is expected) is what
+     * produced the 404s. Returns null when the user lacks the page's permission or the
+     * type has no manage page, so the caller renders a plain, non-clickable badge.
+     *
+     * @param  mixed  $stepInfo    A Step model (needs stype, id, form_id, data, cycle_id).
+     * @param  mixed  $user        The acting user ($_user); ableTo() is used for gating.
+     * @param  array  $permissions The resolved permissions array passed to ableTo().
+     * @return string|null
+     */
+    function stepManageUrl($stepInfo, $user, array $permissions = []) {
+        if (! $stepInfo || ! $user) {
+            return null;
+        }
+
+        switch ((int) $stepInfo->stype) {
+            case 1: // Custom Form
+                $formId = $stepInfo->form_id ?: ($stepInfo->data ?: null);
+                return ($formId && $user->ableTo('forms.render_view', $permissions))
+                    ? route('forms.render_view', $formId) : null;
+            case 2: // Screening
+                return $user->ableTo('screening.show', $permissions)
+                    ? route('screening.manage', $stepInfo->id) : null;
+            case 3: // Mentorship
+                return ($stepInfo->cycle_id && $user->ableTo('mentorships.requests_list', $permissions))
+                    ? route('mentorships.requests_list', $stepInfo->cycle_id) : null;
+            case 4: // Training
+                return $user->ableTo('trainings.sessions_list', $permissions)
+                    ? route('trainings.sessions_list', $stepInfo->id) : null;
+            case 5: // Final Screening
+                return $user->ableTo('screening.show', $permissions)
+                    ? route('screening.manage_final', $stepInfo->id) : null;
+            default: // Team Formation (6) and anything else: no manage page
+                return null;
+        }
+    }
+}
+
 if( !function_exists('URLSlug') )
 {
 	function URLSlug( $url )
@@ -232,36 +286,6 @@ if( !function_exists('URLSlug') )
 	}
 }
 
-if( !function_exists('uploader') )
-{
-	function uploader( $disk, $file, $target, $get_path = false )
-	{
-        $original_name = $file->getClientOriginalName();
-        $file_extension = $file->getClientOriginalExtension();
-		$location = trim( $target ) ? $target . '/' .  $original_name : $original_name;
-        $check_file = Storage::disk($disk)->missing( $location );
-		if( !$check_file )
-		{
-			$counter = 1;
-			do {
-				$file_name = str_replace( '.' . $file_extension, '', $original_name ) . '-' . $counter++ . '.' . $file_extension;
-				$file_location = trim( $target ) ? $target . '/' .  $file_name : $file_name;
-				$check_file = Storage::disk($disk)->missing( $file_location );
-			} while ( !$check_file );
-		} else { $file_name = $original_name; }
-		$raw_name = str_replace( '.' . $file_extension, '', $file_name );
-		$file_name = URLSlug( $file_name );
-		$file_name = strtolower( $file_name );
-		$path = Storage::disk($disk)->putFileAs($target, $file, $file_name);
-		if( $get_path === true )
-		{
-			$url = str_replace( '/index.php', '', URL::to("provider-registration/files/$path") );
-			$url = strtolower( $url );
-			return ['url' => $url, 'raw' => $raw_name, 'file' => $file_name ];
-		}
-		return $file_name;
-	}
-}
 
 /**
  * Get section background CSS value for landing pages.
@@ -381,5 +405,16 @@ if (!function_exists('getIndustryIcon')) {
         }
 
         return 'ti-tag'; // Default icon
+    }
+
+    if (!function_exists('active')) {
+        function active(...$patterns) {
+            foreach ($patterns as $pattern) {
+                if (request()->is($pattern)) {
+                    return 'active';
+                }
+            }
+            return '';
+        }
     }
 }

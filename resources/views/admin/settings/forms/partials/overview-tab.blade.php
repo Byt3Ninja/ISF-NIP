@@ -1,8 +1,8 @@
 <!-- Overview Pane -->
-<div class="tab-pane fade show active" id="overview-pane" role="tabpanel">
+<div class="tab-pane fade {{ $activeTab == 'overview' ? 'show active' : '' }}" id="overview-pane" role="tabpanel">
 
   <!-- KPI Cards -->
-  <div class="row mb-4">
+  <div class="row g-6 mb-4">
     @foreach($kpis as $key => $item)
       <div class="col-xl-3">
         <div class="card card-border-shadow-{{ $colors[$key] }}">

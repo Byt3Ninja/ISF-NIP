@@ -47,13 +47,13 @@
 							<div class="position-relative">
 								<input
 									type="text"
-									id="company-search"
+									id="final-screening-company-search"
 									class="form-control"
 									placeholder="{{ __('cycles.Search by company name, user name, or category...') }}"
 									style="padding-left: 2rem; padding-right: 2rem; min-width: 300px;"
 								>
 								<i class="ti ti-search ti-16px position-absolute top-50 translate-middle-y mx-2 text-muted" style="left: 0;"></i>
-								<button id="clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
+								<button id="final-screening-clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
 									<i class="ti ti-x ti-14px text-muted"></i>
 								</button>
 							</div>
@@ -67,7 +67,7 @@
 							<ul class="dropdown-menu">
 								@foreach(['csv', 'excel'] as $key => $option)
 									<li>
-										<a class="dropdown-item text-uppercase cursor-pointer" id="export-{{$option}}">
+										<a class="dropdown-item text-uppercase cursor-pointer" id="final-screening-export-{{$option}}">
 											{{$option}}
 										</a>
 									</li>
@@ -94,7 +94,7 @@
 						<select id="final-screening-step-filter" class="form-select">
 							<option value="">{{ __('cycles.AllـSteps') }}</option>
 							@foreach ($steps as $step)
-								<option value="{{ $step->id }}">{{ $step->title }} [id: #{{ $step->id }}]</option>
+								<option value="{{ $step->id }}">{{ $step->title }}</option>
 							@endforeach
 						</select>
 					</div>
@@ -133,7 +133,7 @@
 
 					<!-- Clear Filters Button -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<button id="clear-filters" class="btn btn-outline-secondary d-none">
+						<button id="final-screening-clear-filters" class="btn btn-outline-secondary d-none">
 							<i class="ti ti-x me-1"></i>
 							{{ __('cycles.Clear') }}
 						</button>
@@ -231,7 +231,7 @@
               })->values();
             @endphp
             
-            <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
+            <div class="col-xl-4 col-lg-6 col-md-12 final-screening-company-card" 
                   data-company-name="{{ strtolower($company->name ?? '') }}"
                   data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
                   data-category="{{ strtolower($categoryString ?? '') }}"
@@ -240,13 +240,13 @@
                   data-evaluation-statuses="{{ implode(',', array_filter($evaluationStatuses)) }}"
                   data-judge-ids="{{ implode(',', array_filter($companyJudgeIds)) }}"
                   data-cycle-id="{{ $company->company_cycle_id }}"
-                  data-step-id="{{ $company->company_step_id }}">
+                  data-step-id="{{ $company->evaluation_step_id ?? $company->company_step_id }}">
               <div class="card border rounded-3 h-100">
                 <!-- Company Header -->
                 <div class="card-header bg-transparent border-0 pb-2">
                   <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
-                      <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
+                      @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                         <div class="company-avatar me-3">
                           <img
                             src="{{ $company->logo_url }}"
@@ -256,11 +256,11 @@
                             width="50"
                           />
                         </div>
-                      </a>
+                      @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                       <div>
-                        <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
+                        @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                           <h6 class="mb-1 fw-bold text-dark">{{ Str::limit($company->name, 20) }}</h6>
-                        </a>
+                        @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                         <small class="text-muted line-clamp-1">
                           @php
                             $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
@@ -304,7 +304,7 @@
                   <!-- User Information -->
                   <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                     <div class="d-flex align-items-center">
-                      <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
+                      @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                         <img
                           src="{{ $company?->user?->image_url ?? '/icons/account.svg' }}"
                           alt="img"
@@ -312,12 +312,12 @@
                           height="40"
                           width="40"
                         />
-                      </a>
+                      @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                       <div class="flex-grow-1">
-                        <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
+                        @if( $_user->ableTo('company.profile_view', $permissions) )  <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                           <h6 class="mb-0 fw-semibold text-dark">{{ $company?->user?->name }}</h6>
                           <small class="text-muted">{{ $company?->user?->title ?: __('cycles.No title') }}</small>
-                        </a>
+                        @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                       </div>
                     </div>
                   </div>
@@ -325,28 +325,43 @@
 									<!-- Program and Step Information -->
 									<div class="mt-2 mb-4">
 										<div class="d-flex flex-wrap gap-1">
-											@if($company->stepdata && $company->stepdata->cycle)
-												<small class="badge bg-label-info text-info rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Program') }}: {{ $company->stepdata->cycle->title }}"
+											@php
+												$cycleForChip = ($company->stepdata && $company->stepdata->cycle) ? $company->stepdata->cycle : ($company->cycledata ?? null);
+												$programUrl = ($cycleForChip && isset($_user) && $_user->ableTo('programs.view', $permissions ?? []))
+													? url('dashboard/programlist/show/'.$cycleForChip->id) : null;
+											@endphp
+											@if($cycleForChip)
+												<{{ $programUrl ? 'a' : 'small' }} @if($programUrl) href="{{ $programUrl }}" @endif
+															class="badge bg-label-info text-info rounded-pill px-2 py-1 small text-decoration-none"
+															title="{{ __('cycles.Program') }}: {{ $cycleForChip->title }}"
 															data-bs-toggle="tooltip" data-bs-placement="top">
 													<i class="ti ti-components ti-16px me-1"></i>
-													{{ Str::limit($company->stepdata->cycle->title, 23) }}
-												</small>
-											@elseif($company->cycledata)
-												<small class="badge bg-label-info text-info rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Program') }}: {{ $company->cycledata->title }}"
-															data-bs-toggle="tooltip" data-bs-placement="top">
-													<i class="ti ti-components ti-16px me-1"></i>
-													{{ Str::limit($company->cycledata->title, 23) }}
-												</small>
+													{{ Str::limit($cycleForChip->title, 23) }}
+												</{{ $programUrl ? 'a' : 'small' }}>
 											@endif
 											@if($company->stepInfo)
-												<small class="badge bg-label-primary text-primary rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Step') }}: {{ $company->stepInfo->title }}"
+												@php
+													// Final-screening report: green when the startup is currently on a
+													// final step (stype 5), red otherwise. Every step type links to its
+													// own manage page, each gated by that page's own permission. The {id}
+													// each route expects differs by type — screening, training and final
+													// take the STEP id; the custom form takes the step's BUILDER FORM id;
+													// mentorship assignment takes the CYCLE id — so passing the wrong id
+													// would 404 (GV-3841). Types with no manage page fall through to a
+													// plain non-clickable badge.
+													$stepInfo = $company->stepInfo;
+													$stype = (int) $stepInfo->stype;
+													$onStage = $stype === 5;
+													$stepChipClass = $onStage ? 'bg-label-success text-success' : 'bg-label-danger text-danger';
+													$stepUrl = stepManageUrl($stepInfo, $_user ?? null, $permissions ?? []);
+												@endphp
+												<{{ $stepUrl ? 'a' : 'small' }} @if($stepUrl) href="{{ $stepUrl }}" @endif
+															class="badge {{ $stepChipClass }} rounded-pill px-2 py-1 small text-decoration-none"
+															title="{{ __('cycles.Step') }}: {{ $stepInfo->title }}"
 															data-bs-toggle="tooltip" data-bs-placement="top">
 													<i class="ti ti-step-into ti-16px me-1"></i>
-													{{ Str::limit($company->stepInfo->title, 18) }}
-												</small>
+													{{ Str::limit($stepInfo->title, 18) }}
+												</{{ $stepUrl ? 'a' : 'small' }}>
 											@endif
 										</div>
 									</div>
@@ -403,9 +418,9 @@
                 <div class="card-footer bg-transparent border-0 pt-0">
                   <div class="d-grid gap-2">
                     <button
-                      class="show-company-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
+                      class="final-screening-show-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
                       data-company="{{ $company->id }}"
-                      data-step="{{ $company->company_step_id }}"
+                      data-step="{{ $company->evaluation_step_id ?? $company->company_step_id }}"
                     >
                       <i class="ti ti-eye me-2"></i>
                       {{ __('cycles.View Complete Evaluation') }}
@@ -430,17 +445,17 @@
 </div>
 
 <!-- Evaluation Modal -->
-<div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+<div class="modal fade" id="finalScreeningEvaluationModal" tabindex="-1" aria-labelledby="finalScreeningEvaluationModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title fw-bold" id="evaluationModalLabel">
+				<h5 class="modal-title fw-bold" id="finalScreeningEvaluationModalLabel">
 					<i class="ti ti-clipboard-check me-2"></i>
 					{{ __('cycles.Company Evaluation Details') }}
 				</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
-			<div class="modal-body" id="evaluationModalBody">
+			<div class="modal-body" id="finalScreeningEvaluationModalBody">
 				<!-- Content will be loaded dynamically -->
 			</div>
 			<div class="modal-footer">
@@ -474,7 +489,7 @@
 		// Only initialize if not already initialized
 		if (finalScreeningCompanyCards.length === 0) {
 			// Initialize company cards array
-			finalScreeningCompanyCards = $('.company-card').toArray();
+			finalScreeningCompanyCards = $('.final-screening-company-card').toArray();
 			
 			// Initialize search and filter functionality
 			if (typeof initializeFinalScreeningSearchAndFilters === 'function') {
@@ -501,8 +516,8 @@
 				console.log('=== Final Screening Filters Debug ===');
 				console.log('Current Filters:', finalScreeningCurrentFilters);
 				console.log('Total Cards:', finalScreeningCompanyCards.length);
-				console.log('Visible Cards:', $('.company-card:visible').length);
-				console.log('Hidden Cards:', $('.company-card:hidden').length);
+				console.log('Visible Cards:', $('.final-screening-company-card:visible').length);
+				console.log('Hidden Cards:', $('.final-screening-company-card:hidden').length);
 				
 				// Test each filter
 				finalScreeningCompanyCards.forEach((card, index) => {
@@ -526,15 +541,15 @@
 		window.initializeFinalScreeningSearchAndFilters = function() {
 			// Search input handler with debounce
 			let searchTimeout;
-			$('#company-search').on('input', function() {
+			$('#final-screening-company-search').on('input', function() {
 				clearTimeout(searchTimeout);
 				const searchValue = $(this).val().trim();
 				
 				// Show/hide clear search button
 				if (searchValue) {
-					$('#clear-search').removeClass('d-none');
+					$('#final-screening-clear-search').removeClass('d-none');
 				} else {
-					$('#clear-search').addClass('d-none');
+					$('#final-screening-clear-search').addClass('d-none');
 				}
 				
 				searchTimeout = setTimeout(() => {
@@ -552,7 +567,7 @@
 			});
 
 			// Clear filters button
-			$('#clear-filters, #clear-search').on('click', function() {
+			$('#final-screening-clear-filters, #final-screening-clear-search').on('click', function() {
 				clearAllFinalScreeningFilters();
 			});
 		};
@@ -658,9 +673,9 @@
 		// Show/hide clear filters button and update filter indicators
 		const hasActiveFilters = finalScreeningCurrentFilters.search || finalScreeningCurrentFilters.cycle || finalScreeningCurrentFilters.step || finalScreeningCurrentFilters.judge || finalScreeningCurrentFilters.score || finalScreeningCurrentFilters.status;
 		if (hasActiveFilters) {
-			$('#clear-filters').removeClass('d-none');
+			$('#final-screening-clear-filters').removeClass('d-none');
 		} else {
-			$('#clear-filters').addClass('d-none');
+			$('#final-screening-clear-filters').addClass('d-none');
 		}
 		
 		// Update filter indicators
@@ -672,7 +687,7 @@
 		window.updateFinalScreeningDisplay = function(filteredCards) {
 			const $grid = $('#final-screening-companies-grid');
 			const $noResults = $('#final-screening-no-results-state');		// Hide all cards first
-		$('.company-card').hide();
+		$('.final-screening-company-card').hide();
 		
 		if (filteredCards.length > 0) {
 			// Show filtered cards
@@ -715,7 +730,7 @@
 			});
 			
 			// Handle search input
-			const $search = $('#company-search');
+			const $search = $('#final-screening-company-search');
 			if (finalScreeningCurrentFilters.search) {
 				$search.addClass('border-primary');
 			} else {
@@ -727,11 +742,11 @@
 	if (typeof clearAllFinalScreeningFilters === 'undefined') {
 		window.clearAllFinalScreeningFilters = function() {
 			// Reset form inputs
-			$('#company-search').val('');
+			$('#final-screening-company-search').val('');
 			$('#final-screening-cycle-filter, #final-screening-step-filter, #final-screening-judge-filter, #final-screening-score-filter, #final-screening-status-filter').val('');
 			
 			// Hide clear search button
-			$('#clear-search').addClass('d-none');
+			$('#final-screening-clear-search').addClass('d-none');
 			
 			// Reset current filters
 			finalScreeningCurrentFilters = {
@@ -751,16 +766,16 @@
 	// Show Company Evaluation Modal (only bind if not already bound)
 	if (!$(document).data('final-screening-evaluation-handler-bound')) {
 		$(document).data('final-screening-evaluation-handler-bound', true);
-		$(document).on('click', '.show-company-evaluation', function(e) {
+		$(document).on('click', '.final-screening-show-evaluation', function(e) {
 		e.preventDefault();
 		const company = parseInt($(this).data('company'));
 		const step = parseInt($(this).data('step'));
 		
 		// Show modal
-		$('#evaluationModal').modal('show');
+		$('#finalScreeningEvaluationModal').modal('show');
 		
 		// Reset modal body
-		$('#evaluationModalBody').html(`
+		$('#finalScreeningEvaluationModalBody').html(`
 			<div class="text-center p-5">
 				<div class="spinner-border text-primary" role="status">
 					<span class="visually-hidden">Loading...</span>
@@ -778,10 +793,10 @@
 				step: step,
 			},
 			success: function(response) {
-				buildEvaluationModal(response);
+				buildFinalScreeningEvaluationModal(response);
 			}, 
 			error: function (error) { 
-				$('#evaluationModalBody').html(`
+				$('#finalScreeningEvaluationModalBody').html(`
 					<div class="alert alert-danger m-4">
 						<i class="ti ti-alert-circle me-2"></i>
 						Error loading evaluation details. Please try again.
@@ -792,8 +807,8 @@
 		});
 	}
 
-	if (typeof buildEvaluationModal === 'undefined') {
-		window.buildEvaluationModal = function(data) {
+	if (typeof buildFinalScreeningEvaluationModal === 'undefined') {
+		window.buildFinalScreeningEvaluationModal = function(data) {
 		const totalScore = (data.total * 100).toFixed(1);
 		
 		let modalContent = `
@@ -893,7 +908,7 @@
 									<div class="row g-3">`;
 
 				subCriterion.details.forEach(judgeDetail => {
-					const judgeScore = (judgeDetail.score * 100).toFixed(1);
+					const judgeScore = (judgeDetail.value * 100).toFixed(1);
 					const statusClass = judgeDetail.status === 'Published' ? 'success' : judgeDetail.status === 'Draft' ? 'warning' : 'danger';
 					
 					modalContent += `<div class="col-md-6">
@@ -1041,7 +1056,7 @@
 				</div>
 			</div>`;
 
-		$('#evaluationModalBody').html(modalContent);
+		$('#finalScreeningEvaluationModalBody').html(modalContent);
 		};
 	}
 
@@ -1059,8 +1074,8 @@
 				// Show all - filters are already cleared
 				break;
 			case 'not-assigned':
-				screeningCurrentFilters.status = 'not-assigned';
-				$('#screening-status-filter').val('not-assigned');
+				finalScreeningCurrentFilters.status = 'not-assigned';
+				$('#final-screening-status-filter').val('not-assigned');
 				break;
 			case 'not-evaluated':
 				finalScreeningCurrentFilters.status = 'not-evaluated';
@@ -1101,8 +1116,8 @@
 	// Export functionality (only bind if not already bound)
 	if (!$(document).data('final-screening-export-handler-bound')) {
 		$(document).data('final-screening-export-handler-bound', true);
-		$('#export-csv, #export-excel').on('click', function() {
-			const format = $(this).attr('id') === 'export-csv' ? 'csv' : 'excel';
+		$('#final-screening-export-csv, #final-screening-export-excel').on('click', function() {
+			const format = $(this).attr('id') === 'final-screening-export-csv' ? 'csv' : 'excel';
 			const button = $(this);
 			const originalText = button.html();
 			

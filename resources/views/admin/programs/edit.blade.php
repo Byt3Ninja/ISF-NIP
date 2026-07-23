@@ -56,10 +56,10 @@
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+    <div class="">
         <div class="row">
-            <h4 class="fw-bold mb-4">
+            <h4 class="mb-4">
                 {{ __('cycles.program_setup') }}
             </h4>
             @if (session()->has('message'))
@@ -328,6 +328,11 @@
                                         <i class="ti ti-arrow-{{$l == 'en' ? 'left' : 'right'}} me-2"></i>
                                         {{ __('cycles.Previous') }}
                                         </button>
+                                    @else 
+                                        <a href="{{ route('programlist.index') }}" type="button" class="btn btn-label-secondary">
+                                            <i class="ti ti-arrow-{{$l == 'en' ? 'left' : 'right'}} me-2"></i>
+                                            {{ __('cycles.Back') }}
+                                        </a>
                                     @endif
                                     </div>
                                     
@@ -473,7 +478,7 @@
                             }
                         },
                         error: function(error) {
-                            console.log(error);
+                            // console.log(error);
                             Swal.fire({
                                 icon: 'error',
                                 title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
@@ -507,7 +512,7 @@
                         cycleid: cycleId
                     },
                     success: function(response) {
-                        console.log(response);
+                        // console.log(response);
                         $('#date-range-picker').daterangepicker({
                             opens: isRtl ? 'left' : 'right',
                             drops: 'up',

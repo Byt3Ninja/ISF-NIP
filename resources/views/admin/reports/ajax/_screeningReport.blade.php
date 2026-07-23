@@ -1,115 +1,115 @@
 <div class="col-12">
-  <div class="d-flex flex-wrap justify-content-center gap-6 mb-8">
-    @foreach ($kpiData as $key => $item)
-      <div>
-        <button 
-          type="button"
-          class="card card-border-shadow-{{ $item['color'] }} h-100 text-dark screening-kpi-filter-card btn p-0 border-0"
-          @if($key == 0)
-            data-filter-type="judges"
-            onclick="window.location.href='{{ route('users.judger') }}'"
-            title="{{ __('cycles.Go to judges page') }}"
-          @else
-            title="{{ __('cycles.Filter by') . ' ' . __('admin.' . $item['label']) }}"
-            data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-assigned' : ($key == 3 ? 'not-evaluated' : ( $key == 4 ? 'draft' : 'published' ))) }}"
-            onclick="filterByScreeningKPI(this)"
-          @endif
-        >
-          <div class="card-body py-2" style="display: grid; place-items: center;">
-            <div class="d-flex align-items-center mb-2">
-              <div class="avatar me-4">
-                <span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
-                  <i class="ti ti-{{ $item['icon'] }} ti-20px"></i>
-                </span>
-              </div>
-              <h5 class="mb-0">{{ $key == 0 ? $judgers : $item['value'] }}</h5>
-            </div>
-            <small class="text-center">{{ __('admin.' . $item['label']) }}</small>
-          </div>
-        </button>
-      </div>
-    @endforeach
-  </div>
+<div class="d-flex flex-wrap justify-content-center gap-6 mb-8">
+	@foreach ($kpiData as $key => $item)
+	<div>
+		<button 
+		type="button"
+		class="card card-border-shadow-{{ $item['color'] }} h-100 text-dark screening-kpi-filter-card btn p-0 border-0"
+		@if($key == 0)
+			data-filter-type="judges"
+			onclick="window.location.href='{{ route('users.judger') }}'"
+			title="{{ __('cycles.Go to judges page') }}"
+		@else
+			title="{{ __('cycles.Filter by') . ' ' . __('admin.' . $item['label']) }}"
+			data-filter-type="{{ $key == 1 ? 'total' : ($key == 2 ? 'not-assigned' : ($key == 3 ? 'not-evaluated' : ( $key == 4 ? 'draft' : 'published' ))) }}"
+			onclick="filterByScreeningKPI(this)"
+		@endif
+		>
+		<div class="card-body py-2" style="display: grid; place-items: center;">
+			<div class="d-flex align-items-center mb-2">
+			<div class="avatar me-4">
+				<span class="avatar-initial rounded bg-label-{{ $item['color'] }}">
+				<i class="ti ti-{{ $item['icon'] }} ti-20px"></i>
+				</span>
+			</div>
+			<h5 class="mb-0">{{ $key == 0 ? $judgers : $item['value'] }}</h5>
+			</div>
+			<small class="text-center">{{ __('admin.' . $item['label']) }}</small>
+		</div>
+		</button>
+	</div>
+	@endforeach
+</div>
 </div>
 
 <!-- Companies Results Section -->
 <div class="row">
-  <div class="col-12">
-    <div class="card border">
-      <div class="card-header overflow-hidden">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
-          <div>
-            <h5 class="card-title mb-1">
-              {{ __('cycles.Screening results') }}
-              @if(request('program_id'))
-                <span class="badge bg-label-primary ms-2">
-                  @php
-                    $selectedProgram = $cycles->firstWhere('id', request('program_id'));
-                    echo $selectedProgram ? $selectedProgram->title : '';
-                  @endphp
-                </span>
-              @endif
-            </h5>
-            @if(request('program_id'))
-              <p class="text-muted mb-0 small">{{ $l == 'en' ? 'Viewing screening results for selected program' : 'عرض نتائج الفحص للبرنامج المحدد' }}</p>
-            @endif
-          </div>
-          <div class="d-flex flex-wrap gap-2 align-items-center">            
-            <!-- Search Input -->
-            <div class="search-wrapper position-relative">
-              <div class="position-relative">
-                <input
-                  type="text"
-                  id="company-search"
-                  class="form-control"
-                  placeholder="{{ __('cycles.Search by company name, user name, or category...') }}"
-                  style="padding-left: 2rem; padding-right: 2rem; min-width: 300px;"
-                >
-                <i class="ti ti-search ti-16px position-absolute top-50 translate-middle-y mx-2 text-muted" style="left: 0;"></i>
-                <button id="clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
-                  <i class="ti ti-x ti-14px text-muted"></i>
-                </button>
-              </div>
-            </div>
+	<div class="col-12">
+		<div class="card border">
+			<div class="card-header overflow-hidden">
+				<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-6">
+					<div>
+						<h5 class="card-title mb-1">
+						{{ __('cycles.Screening results') }}
+						@if(request('program_id') && trim( strtolower( request('program_id') ) ) != 'all')
+							<span class="badge bg-label-primary ms-2">
+							@php
+								$selectedProgram = $cycles->firstWhere('id', request('program_id'));
+								echo $selectedProgram ? $selectedProgram->title : '';
+							@endphp
+							</span>
+						@endif
+						</h5>
+						@if(request('program_id'))
+						<p class="text-muted mb-0 small">{{ $l == 'en' ? 'Viewing screening results for selected program' : 'عرض نتائج الفحص للبرنامج المحدد' }}</p>
+						@endif
+					</div>
+					<div class="d-flex flex-wrap gap-2 align-items-center">            
+						<!-- Search Input -->
+						<div class="search-wrapper position-relative">
+						<div class="position-relative">
+							<input
+							type="text"
+							id="screening-company-search"
+							class="form-control"
+							placeholder="{{ __('cycles.Search by company name, user name, or category...') }}"
+							style="padding-left: 2rem; padding-right: 2rem; min-width: 300px;"
+							>
+							<i class="ti ti-search ti-16px position-absolute top-50 translate-middle-y mx-2 text-muted" style="left: 0;"></i>
+							<button id="screening-clear-search" class="btn btn-sm position-absolute top-50 translate-middle-y d-none" style="right: 5px; border: none; background: none; padding: 2px;">
+							<i class="ti ti-x ti-14px text-muted"></i>
+							</button>
+						</div>
+						</div>
 
-            <!-- Export Buttons -->
-            <div class="btn-group">
+						<!-- Export Buttons -->
+						<div class="btn-group">
 							<button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
 								<i class="ti ti-file-export me-2"></i>{{ __('settings.Export') }}
 							</button>
 							<ul class="dropdown-menu">
 								@foreach(['csv', 'excel'] as $key => $option)
 									<li>
-										<a class="dropdown-item text-uppercase cursor-pointer" id="export-{{$option}}">
+										<a class="dropdown-item text-uppercase cursor-pointer" id="screening-export-{{$option}}">
 											{{$option}}
 										</a>
 									</li>
 								@endforeach
 							</ul>
 						</div>
-          </div>
-        </div>
+					</div>
+				</div>
 
-        <!-- Enhanced Filter Section -->
+				<!-- Enhanced Filter Section -->
 				<div class="row g-2 align-items-center mb-4 pb-3 border-bottom">
-					        <!-- Program Filter -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <select id="screening-cycle-filter" class="form-select">
-            <option value="">{{ __('cycles.All_Cycles') }}</option>
-            @foreach ($cycles as $cycle)
-              <option value="{{ $cycle->id }}" {{ request('program_id') == $cycle->id ? 'selected' : '' }}>
-                {{ $cycle->title }}
-              </option>
-            @endforeach
-          </select>
-        </div>
+					<!-- Program Filter -->
+					<div class="col-lg-2 col-md-4 col-sm-6">
+						<select id="screening-cycle-filter" class="form-select">
+							<option value="">{{ __('cycles.All_Cycles') }}</option>
+							@foreach ($cycles as $cycle)
+							<option value="{{ $cycle->id }}" {{ request('program_id') == $cycle->id ? 'selected' : '' }}>
+								{{ $cycle->title }}
+							</option>
+							@endforeach
+						</select>
+					</div>
 
 					<!-- Step Filter -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
 						<select id="screening-step-filter" class="form-select">
 							<option value="">{{ __('cycles.AllـSteps') }}</option>
 							@foreach ($steps as $step)
-								<option value="{{ $step->id }}">{{ $step->title }} [id: #{{ $step->id }}]</option>
+								<option value="{{ $step->id }}">{{ $step->title }}</option>
 							@endforeach
 						</select>
 					</div>
@@ -148,14 +148,14 @@
 
 					<!-- Clear Filters Button -->
 					<div class="col-lg-2 col-md-4 col-sm-6">
-						<button id="clear-filters" class="btn btn-outline-secondary d-none">
+						<button id="screening-clear-filters" class="btn btn-outline-secondary d-none">
 							<i class="ti ti-x me-1"></i>
 							{{ __('cycles.Clear') }}
 						</button>
 					</div>
 				</div>
-      </div>
-      <div class="card-body">
+			</div>
+			<div class="card-body">
 				@if($startups->count() == 0)
 					<!-- No Startups Available -->
 					<div class="col-12">
@@ -164,300 +164,313 @@
 						</div>
 					</div>
 				@else
-        <!-- Company Cards Grid -->
-        <div id="screening-companies-grid" class="row g-4">
-          @foreach ($startups as $company)
-            @php
-              // Get the evaluation status from judges
-              $evaluationStatuses = [];
-              $hasPublished = false;
-              $hasDraft = false;
-              $hasNotEvaluated = false;
-              
-              foreach ($judges as $judge) {
-                // Check if the judge has evaluated this company
-                $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
-                if ($scoped_company) {
-                  $status = strtolower($scoped_company->status ?? 'not-evaluated');
-                  $evaluationStatuses[] = $status;
-                  
-                  if ($status === 'published') $hasPublished = true;
-                  elseif ($status === 'draft') $hasDraft = true;
-                  else $hasNotEvaluated = true;
-                }
-              }
-              
-              // Determine primary status for filtering - use the actual company status from database
-              $primaryStatus = strtolower(str_replace(' ', '-', $company->status ?? 'not-evaluated'));
-              // Create searchable category string
-              $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
-              $categoryString = is_array($categories) ? implode(' ', array_filter($categories ?? [])) : ($company->business_categories ?? '');
-              $categoryString = str_replace(['/', ','], ' ', $categoryString ?? '');
-              
-              // Calculate average score from judge evaluations
-              $totalScore = 0;
-              $publishedEvaluations = 0;
-              $averageScore = $company?->score ?? 0;
-              
-              // Calculate average score for display (published only)
-              foreach ($judges as $judge) {
-                $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
-                if ($scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score)) {
-                  $totalScore += (float) $scoped_company->score;
-                  $publishedEvaluations++;
-                }
-              }
-              
-              // if ($publishedEvaluations > 0) {
-              //  $averageScore = round($totalScore / $publishedEvaluations, 1);
-              // }
-              
-              // Calculate filter score (includes published AND draft with scores)
-              $filterTotalScore = 0;
-              $filterEvaluationsCount = 0;
-              $filterScore = 0;
-              
-              foreach ($judges as $judge) {
-                $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
-                if ($scoped_company && isset($scoped_company->score) && $scoped_company->score !== null && 
-                    (strtolower($scoped_company->status) === 'published' || strtolower($scoped_company->status) === 'draft')) {
-                  $filterTotalScore += (float) $scoped_company->score;
-                  $filterEvaluationsCount++;
-                }
-              }
-              
-              if ($filterEvaluationsCount > 0) {
-                $filterScore = round($filterTotalScore / $filterEvaluationsCount, 1);
-              }
-              
-              // Get judge IDs for this company
-              $companyJudgeIds = [];
-              // foreach ($judges as $judge) {
-              //   // Check if the judge has evaluated this company
-              //   $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
-              //   if ($scoped_company) {
-              //     $companyJudgeIds[] = $judge->id;
-              //   }
-              // }
-			  $companyJudgeIds = $company->judges->pluck('id')->toArray();
-              $scoped_judges = $judges->filter(function($judge) use ($company) {
-                return collect($judge->companies)->where('id', $company->id)->isNotEmpty();
-              })->values();
-              
-              // Ensure data consistency
-              $evaluationStatuses = array_filter($evaluationStatuses);
-            @endphp
-            
-            <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
-                  data-company-name="{{ strtolower($company->name ?? '') }}"
-                  data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
-                  data-category="{{ strtolower($categoryString ?? '') }}"
-                  data-score="{{ $averageScore ?? 0 }}"
-                  data-status="{{ $primaryStatus ?? 'not-evaluated' }}"
-                  data-evaluation-statuses="{{ implode(',', array_filter($evaluationStatuses)) }}"
-                  data-judge-ids="{{ implode(',', array_filter($companyJudgeIds)) }}"
-                  data-cycle-id="{{ $company->company_cycle_id }}"
-                  data-step-id="{{ $company->company_step_id }}">
-              <div class="card border rounded-3 h-100">
-                <!-- Company Header -->
-                <div class="card-header bg-transparent border-0 pb-2">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                      <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
-                        <div class="company-avatar me-3">
-                          <img
-                            src="{{ $company->logo_url }}"
-                            alt="logo"
-                            class="rounded-3 shadow-sm w-px-50 h-px-50"
-                            height="50"
-                            width="50"
-                          />
-                        </div>
-                      </a>
-                      <div>
-                        <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
-                          <h6 class="mb-1 fw-bold text-dark">{{ Str::limit($company->name, 20) }}</h6>
-                        </a>
-                        <small class="text-muted line-clamp-1">
-                          @php
-                            $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
-                            $categoryList = is_array($categories) ? implode(', ', array_filter($categories)) : ($company->business_categories ?? '');
-                            $categoryList = str_replace('/', ', ', $categoryList);
-                          @endphp
-                          {{ $categoryList }}
-                        </small>
-                      </div>
-                    </div>
-                    <!-- Average Score Badge with better styling -->
-                    <div class="text-end">
-                      <div class="ms-3">
-                        <div
-                          class="circular-progress position-relative d-inline-flex align-items-center justify-content-center"
-                          style="width: 44px; height: 44px"
-                        >
-                          <div
-                            class="progress-circle position-absolute w-100 h-100"
-                            style="
-                              background: conic-gradient(
-                                {{ $averageScore >= 75 ? 'var(--bs-success)' : ($averageScore >= 50 ? 'var(--bs-info)' : ($averageScore >= 25 ? 'var(--bs-warning)' : 'var(--bs-danger)')) }}
-                                  {{ $averageScore * 3.6 }}deg,
-                                #e9ecef {{ $averageScore * 3.6 }}deg
-                              );
-                              border-radius: 50%;
-                            "
-                          ></div>
-                          <span class="fw-bold text-dark position-relative" style="font-size: 0.875rem">
-														{{ number_format($averageScore, 1) }} %
-                          </span>
-                        </div>
-                        <div class="small text-muted text-nowrap">{{ __('cycles.Avg Score') }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+					<!-- Company Cards Grid -->
+					<div id="screening-companies-grid" class="row g-4">
+						@foreach ($startups as $company)
+							@php
+							// Get the evaluation status from judges
+							$evaluationStatuses = [];
+							$hasPublished = false;
+							$hasDraft = false;
+							$hasNotEvaluated = false;
+							
+							foreach ($judges as $judge) {
+								// Check if the judge has evaluated this company
+								$scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+								if ($scoped_company) {
+								$status = strtolower($scoped_company->status ?? 'not-evaluated');
+								$evaluationStatuses[] = $status;
+								
+								if ($status === 'published') $hasPublished = true;
+								elseif ($status === 'draft') $hasDraft = true;
+								else $hasNotEvaluated = true;
+								}
+							}
+							
+							// Determine primary status for filtering - use the actual company status from database
+							$primaryStatus = strtolower(str_replace(' ', '-', $company->status ?? 'not-evaluated'));
+							// Create searchable category string
+							$categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
+							$categoryString = is_array($categories) ? implode(' ', array_filter($categories ?? [])) : ($company->business_categories ?? '');
+							$categoryString = str_replace(['/', ','], ' ', $categoryString ?? '');
+							
+							// Calculate average score from judge evaluations
+							$totalScore = 0;
+							$publishedEvaluations = 0;
+							$averageScore = $company?->score ?? 0;
+							
+							// Calculate average score for display (published only)
+							foreach ($judges as $judge) {
+								$scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+								if ($scoped_company && strtolower($scoped_company->status) === 'published' && isset($scoped_company->score)) {
+								$totalScore += (float) $scoped_company->score;
+								$publishedEvaluations++;
+								}
+							}
+							
+							// if ($publishedEvaluations > 0) {
+							//  $averageScore = round($totalScore / $publishedEvaluations, 1);
+							// }
+							
+							// Calculate filter score (includes published AND draft with scores)
+							$filterTotalScore = 0;
+							$filterEvaluationsCount = 0;
+							$filterScore = 0;
+							
+							foreach ($judges as $judge) {
+								$scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+								if ($scoped_company && isset($scoped_company->score) && $scoped_company->score !== null && 
+									(strtolower($scoped_company->status) === 'published' || strtolower($scoped_company->status) === 'draft')) {
+								$filterTotalScore += (float) $scoped_company->score;
+								$filterEvaluationsCount++;
+								}
+							}
+							
+							if ($filterEvaluationsCount > 0) {
+								$filterScore = round($filterTotalScore / $filterEvaluationsCount, 1);
+							}
+							
+							// Get judge IDs for this company
+							$companyJudgeIds = [];
+							// foreach ($judges as $judge) {
+							//   // Check if the judge has evaluated this company
+							//   $scoped_company = collect($judge->companies)->where('id', $company->id)->first();
+							//   if ($scoped_company) {
+							//     $companyJudgeIds[] = $judge->id;
+							//   }
+							// }
+							$companyJudgeIds = $company->judges->pluck('id')->toArray();
+							$scoped_judges = $judges->filter(function($judge) use ($company) {
+								return collect($judge->companies)->where('id', $company->id)->isNotEmpty();
+							})->values();
+							
+							// Ensure data consistency
+							$evaluationStatuses = array_filter($evaluationStatuses);
+							@endphp
+							
+							<div class="col-xl-4 col-lg-6 col-md-12 screening-company-card" 
+								data-company-name="{{ strtolower($company->name ?? '') }}"
+								data-user-name="{{ strtolower($company?->user?->name ?? '') }}"
+								data-category="{{ strtolower($categoryString ?? '') }}"
+								data-score="{{ $averageScore ?? 0 }}"
+								data-status="{{ $primaryStatus ?? 'not-evaluated' }}"
+								data-evaluation-statuses="{{ implode(',', array_filter($evaluationStatuses)) }}"
+								data-judge-ids="{{ implode(',', array_filter($companyJudgeIds)) }}"
+								data-cycle-id="{{ $company->company_cycle_id }}"
+								data-step-id="{{ $company->evaluation_step_id ?? $company->company_step_id }}">
+								<div class="card border rounded-3 h-100">
+								<!-- Company Header -->
+								<div class="card-header bg-transparent border-0 pb-2">
+									<div class="d-flex align-items-center justify-content-between">
+										<div class="d-flex align-items-center">
+											@if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+												<div class="company-avatar me-3">
+													<img
+														src="{{ $company->logo_url }}"
+														alt="logo"
+														class="rounded-3 shadow-sm w-px-50 h-px-50"
+														height="50"
+														width="50"
+													/>
+												</div>
+											@if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
+											<div>
+												@if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+													<h6 class="mb-1 fw-bold text-dark">{{ Str::limit($company->name, 20) }}</h6>
+												@if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
+												<small class="text-muted line-clamp-1">
+													@php
+														$categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
+														$categoryList = is_array($categories) ? implode(', ', array_filter($categories)) : ($company->business_categories ?? '');
+														$categoryList = str_replace('/', ', ', $categoryList);
+													@endphp
+													{{ $categoryList }}
+												</small>
+											</div>
+										</div>
+										<!-- Average Score Badge with better styling -->
+										<div class="text-end">
+											<div class="ms-3">
+												<div
+													class="circular-progress position-relative d-inline-flex align-items-center justify-content-center"
+													style="width: 44px; height: 44px"
+												>
+													<div
+														class="progress-circle position-absolute w-100 h-100"
+														style="
+															background: conic-gradient(
+															{{ $averageScore >= 75 ? 'var(--bs-success)' : ($averageScore >= 50 ? 'var(--bs-info)' : ($averageScore >= 25 ? 'var(--bs-warning)' : 'var(--bs-danger)')) }}
+															{{ $averageScore * 3.6 }}deg,
+															#e9ecef {{ $averageScore * 3.6 }}deg
+															);
+															border-radius: 50%;
+														"
+													></div>
+													<span class="fw-bold text-dark position-relative" style="font-size: 0.875rem"> {{ number_format($averageScore, 1) }} % </span>
+												</div>
+												<div class="small text-muted text-nowrap">{{ __('cycles.Avg Score') }}</div>
+											</div>
+										</div>
+									</div>
+								</div>
 
-                <!-- Company Body -->
-                <div class="card-body px-3">
-                  <!-- User Information -->
-                  <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
-                    <div class="d-flex align-items-center">
-                      <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
-                        <img
-                          src="{{ $company?->user?->image_url ?? '/icons/account.svg' }}"
-                          alt="img"
-                          class="rounded-circle me-3 shadow-sm"
-                          height="40"
-                          width="40"
-                        />
-                      </a>
-                      <div class="flex-grow-1">
-                        <a href="/dashboard/users/{{ $company?->user?->id }}/edit" class="text-decoration-none">
-                          <h6 class="mb-0 fw-semibold text-dark">{{ $company?->user?->name }}</h6>
-                          <small class="text-muted">{{ $company?->user?->title ?: __('cycles.No title') }}</small>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+								<!-- Company Body -->
+								<div class="card-body px-3">
+								<!-- User Information -->
+									<div class="user-info bg-label-light border rounded-3 p-2 mb-4">
+										<div class="d-flex align-items-center">
+											@if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+												<img
+													src="{{ $company?->user?->image_url ?? '/icons/account.svg' }}"
+													alt="img"
+													class="rounded-circle me-3 shadow-sm"
+													height="40"
+													width="40"
+												/>
+											@if( $_user->ableTo('company.profile_view', $permissions) )</a> @endif
+											<div class="flex-grow-1">
+												@if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+													<h6 class="mb-0 fw-semibold text-dark">{{ $company?->user?->name }}</h6>
+													<small class="text-muted">{{ $company?->user?->title ?: __('cycles.No title') }}</small>
+												@if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
+											</div>
+										</div>
+									</div>
 
 									<!-- Program and Step Information -->
 									<div class="mt-2 mb-4">
 										<div class="d-flex flex-wrap gap-1">
-											@if($company->stepdata && $company->stepdata->cycle)
-												<small class="badge bg-label-info text-info rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Program') }}: {{ $company->stepdata->cycle->title }}"
+											@php
+												$cycleForChip = ($company->stepdata && $company->stepdata->cycle) ? $company->stepdata->cycle : ($company->cycledata ?? null);
+												$programUrl = ($cycleForChip && isset($_user) && $_user->ableTo('programs.view', $permissions ?? []))
+													? url('dashboard/programlist/show/'.$cycleForChip->id) : null;
+											@endphp
+											@if($cycleForChip)
+												<{{ $programUrl ? 'a' : 'small' }} @if($programUrl) href="{{ $programUrl }}" @endif
+															class="badge bg-label-info text-info rounded-pill px-2 py-1 small text-decoration-none"
+															title="{{ __('cycles.Program') }}: {{ $cycleForChip->title }}"
 															data-bs-toggle="tooltip" data-bs-placement="top">
 													<i class="ti ti-components ti-16px me-1"></i>
-													{{ Str::limit($company->stepdata->cycle->title, 23) }}
-												</small>
-											@elseif($company->cycledata)
-												<small class="badge bg-label-info text-info rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Program') }}: {{ $company->cycledata->title }}"
-															data-bs-toggle="tooltip" data-bs-placement="top">
-													<i class="ti ti-components ti-16px me-1"></i>
-													{{ Str::limit($company->cycledata->title, 23) }}
-												</small>
+													{{ Str::limit($cycleForChip->title, 23) }}
+												</{{ $programUrl ? 'a' : 'small' }}>
 											@endif
 											@if($company->stepInfo)
-												<small class="badge bg-label-primary text-primary rounded-pill px-2 py-1 small" 
-															title="{{ __('cycles.Step') }}: {{ $company->stepInfo->title }}"
+												@php
+													// Screening report: green when the startup is currently on an
+													// initial screening step (stype 2), red otherwise. Every step type
+													// links to its own manage page, each gated by that page's own
+													// permission. The {id} each route expects differs by type — screening,
+													// training and final take the STEP id; the custom form takes the
+													// step's BUILDER FORM id; mentorship assignment takes the CYCLE id —
+													// so passing the wrong id would 404 (GV-3841). Types with no manage
+													// page fall through to a plain non-clickable badge.
+													$stepInfo = $company->stepInfo;
+													$stype = (int) $stepInfo->stype;
+													$onStage = $stype === 2;
+													$stepChipClass = $onStage ? 'bg-label-success text-success' : 'bg-label-danger text-danger';
+													$stepUrl = stepManageUrl($stepInfo, $_user ?? null, $permissions ?? []);
+												@endphp
+												<{{ $stepUrl ? 'a' : 'small' }} @if($stepUrl) href="{{ $stepUrl }}" @endif
+															class="badge {{ $stepChipClass }} rounded-pill px-2 py-1 small text-decoration-none"
+															title="{{ __('cycles.Step') }}: {{ $stepInfo->title }}"
 															data-bs-toggle="tooltip" data-bs-placement="top">
 													<i class="ti ti-step-into ti-16px me-1"></i>
-													{{ Str::limit($company->stepInfo->title, 18) }}
-												</small>
+													{{ Str::limit($stepInfo->title, 18) }}
+												</{{ $stepUrl ? 'a' : 'small' }}>
 											@endif
 										</div>
 									</div>
 
-                  <!-- Judges Evaluation -->
-                  <div class="judges-evaluation">
-                    <h6 class="fw-semibold mb-3 text-dark d-flex align-items-center">
-                      <i class="ti ti-users me-2 text-primary"></i>
-                      <span>{{ __('cycles.Judges Evaluation') }}</span>
-                      <span class="badge bg-label-primary bg-opacity-10 text-primary ms-2 rounded-pill">
-                        {{ $company->judges->count() }}
-                      </span>
-                    </h6>
-                    <div class="judges-list">
-                      @foreach ($company->judges->take(3) as $judge)
-                        @php($scoped_company = collect($judge->companies)->where('id', $company->id)->first())
-                        @if( $scoped_company ) {{-- Check if judge has evaluated this company --}}
-                          <div class="judge-evaluation-item bg-transparent rounded-3 border px-2 py-1 mb-2">
-                            <div class="d-flex align-items-center justify-content-between">
-                              <div class="d-flex align-items-center">
-                                <div class="status-icon me-2">
-                                  @if( $scoped_company->status == 'Published' )
-                                    <i class="ti ti-circle-check text-success fs-5" title="Published"></i>
-                                  @elseif ($scoped_company->status == 'Draft')
-                                    <i class="ti ti-clock text-warning fs-5" title="Draft"></i>
-                                  @else
-                                    <i class="ti ti-circle-x text-danger fs-5" title="Not Evaluated"></i>
-                                  @endif
-                                </div>
-                                <div>
-                                  <span class="fw-medium text-dark">{{ Str::limit($judge->name, 15) }}</span>
-                                  <div class="small text-muted">{{ __('cycles.' . $scoped_company->status) }}</div>
-                                </div>
-                              </div>
-                              <div class="evaluation-score text-end">
-                                <div class="score-badge badge {{ $scoped_company->score >= 75 ? 'border-success bg-label-success' : ($scoped_company->score >= 50 ? 'border-info bg-label-info' : ($scoped_company->score >= 25 ? 'border-warning bg-label-warning' : 'border-danger bg-label-danger')) }} px-2 py-1 border">
-                                  {{ $scoped_company->score }}%
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        @endif
-                      @endforeach
-                      @if( $company->judges->count() > 3 )
-                        <div class="text-center">
-                          <small class="text-muted">+{{ $company->judges->count() - 3 }} {{ __('cycles.more judges') }}</small>
-                        </div>
-                      @endif
-                    </div>
-                  </div>
-                </div>
+								<!-- Judges Evaluation -->
+								<div class="judges-evaluation">
+									<h6 class="fw-semibold mb-3 text-dark d-flex align-items-center">
+									<i class="ti ti-users me-2 text-primary"></i>
+									<span>{{ __('cycles.Judges Evaluation') }}</span>
+									<span class="badge bg-label-primary bg-opacity-10 text-primary ms-2 rounded-pill">
+										{{ $company->judges->count() }}
+									</span>
+									</h6>
+									<div class="judges-list">
+									@foreach ($company->judges->take(3) as $judge)
+										@php($scoped_company = collect($judge->companies)->where('id', $company->id)->first())
+										@if( $scoped_company ) {{-- Check if judge has evaluated this company --}}
+										<div class="judge-evaluation-item bg-transparent rounded-3 border px-2 py-1 mb-2">
+											<div class="d-flex align-items-center justify-content-between">
+											<div class="d-flex align-items-center">
+												<div class="status-icon me-2">
+												@if( $scoped_company->status == 'Published' )
+													<i class="ti ti-circle-check text-success fs-5" title="Published"></i>
+												@elseif ($scoped_company->status == 'Draft')
+													<i class="ti ti-clock text-warning fs-5" title="Draft"></i>
+												@else
+													<i class="ti ti-circle-x text-danger fs-5" title="Not Evaluated"></i>
+												@endif
+												</div>
+												<div>
+												<span class="fw-medium text-dark">{{ Str::limit($judge->name, 15) }}</span>
+												<div class="small text-muted">{{ __('cycles.' . $scoped_company->status) }}</div>
+												</div>
+											</div>
+											<div class="evaluation-score text-end">
+												<div class="score-badge badge {{ $scoped_company->score >= 75 ? 'border-success bg-label-success' : ($scoped_company->score >= 50 ? 'border-info bg-label-info' : ($scoped_company->score >= 25 ? 'border-warning bg-label-warning' : 'border-danger bg-label-danger')) }} px-2 py-1 border">
+												{{ $scoped_company->score }}%
+												</div>
+											</div>
+											</div>
+										</div>
+										@endif
+									@endforeach
+									@if( $company->judges->count() > 3 )
+										<div class="text-center">
+										<small class="text-muted">+{{ $company->judges->count() - 3 }} {{ __('cycles.more judges') }}</small>
+										</div>
+									@endif
+									</div>
+								</div>
+								</div>
 
-                <!-- Company Footer -->
-                <div class="card-footer bg-transparent border-0 pt-0">
-                  <div class="d-grid gap-2">
-                    <button
-                      class="show-company-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
-                      data-company="{{ $company->id }}"
-                      data-step="{{ $company->company_step_id }}"
-                    >
-                      <i class="ti ti-eye me-2"></i>
-                      {{ __('cycles.View Complete Evaluation') }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          @endforeach
-        </div>
-        
-				<!-- No Results State (Hidden by default, shown via JavaScript when filters don't match) -->
-        <div id="screening-no-results-state" class="d-none">
-          <div class="text-center py-5">
-            <p class="text-muted">{{ __('cycles.No_Startups_Match_Filters') }}</p>
-          </div>
-        </div>
+								<!-- Company Footer -->
+								<div class="card-footer bg-transparent border-0 pt-0">
+								<div class="d-grid gap-2">
+									<button
+									class="screening-show-evaluation btn btn-primary btn-sm rounded-pill shadow-sm"
+									data-company="{{ $company->id }}"
+									data-step="{{ $company->evaluation_step_id ?? $company->company_step_id }}"
+									>
+									<i class="ti ti-eye me-2"></i>
+									{{ __('cycles.View Complete Evaluation') }}
+									</button>
+								</div>
+								</div>
+							</div>
+							</div>
+						@endforeach
+					</div>
+
+					<!-- No Results State (Hidden by default, shown via JavaScript when filters do not match) -->
+					<div id="screening-no-results-state" class="d-none">
+						<div class="text-center py-5">
+							<p class="text-muted">{{ __('cycles.No_Startups_Match_Filters') }}</p>
+						</div>
+					</div>
 				@endif
-      </div>
-    </div>
-  </div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Evaluation Modal -->
-<div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+<div class="modal fade" id="screeningEvaluationModal" tabindex="-1" aria-labelledby="screeningEvaluationModalLabel" aria-hidden="true">
 	<div class="modal-dialog modal-xl modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title fw-bold" id="evaluationModalLabel">
+				<h5 class="modal-title fw-bold" id="screeningEvaluationModalLabel">
 					<i class="ti ti-clipboard-check me-2"></i>
 					{{ __('cycles.Company Evaluation Details') }}
 				</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
-			<div class="modal-body" id="evaluationModalBody">
+			<div class="modal-body" id="screeningEvaluationModalBody">
 				<!-- Content will be loaded dynamically -->
 			</div>
 			<div class="modal-footer">
@@ -491,7 +504,7 @@
 		// Only initialize if not already initialized
 		if (screeningCompanyCards.length === 0) {
 			// Initialize company cards array
-			screeningCompanyCards = $('.company-card').toArray();
+			screeningCompanyCards = $('.screening-company-card').toArray();
 			
 			// Initialize search and filter functionality
 			if (typeof initializeScreeningSearchAndFilters === 'function') {
@@ -526,7 +539,7 @@
 				console.log('=== Screening Filter Debug Info ===');
 				console.log('Total company cards:', screeningCompanyCards.length);
 				console.log('Current filters:', screeningCurrentFilters);
-				console.log('Visible cards:', $('.company-card:visible').length);
+				console.log('Visible cards:', $('.screening-company-card:visible').length);
 				
 				// Sample data from first few cards
 				screeningCompanyCards.slice(0, 5).forEach((card, index) => {
@@ -559,15 +572,15 @@
 		window.initializeScreeningSearchAndFilters = function() {
 			// Search input handler with debounce
 			let searchTimeout;
-			$('#company-search').on('input', function() {
+			$('#screening-company-search').on('input', function() {
 				clearTimeout(searchTimeout);
 				const searchValue = $(this).val().trim();
 				
 				// Show/hide clear search button
 				if (searchValue) {
-					$('#clear-search').removeClass('d-none');
+					$('#screening-clear-search').removeClass('d-none');
 				} else {
-					$('#clear-search').addClass('d-none');
+					$('#screening-clear-search').addClass('d-none');
 				}
 				
 				searchTimeout = setTimeout(() => {
@@ -585,7 +598,7 @@
 			});
 
 			// Clear filters button
-			$('#clear-filters, #clear-search').on('click', function() {
+			$('#screening-clear-filters, #screening-clear-search').on('click', function() {
 				clearAllScreeningFilters();
 			});
 		};
@@ -694,9 +707,9 @@
 			// Show/hide clear filters button and update filter indicators
 			const hasActiveFilters = screeningCurrentFilters.search || screeningCurrentFilters.cycle || screeningCurrentFilters.step || screeningCurrentFilters.judge || screeningCurrentFilters.score || screeningCurrentFilters.status;
 			if (hasActiveFilters) {
-				$('#clear-filters').removeClass('d-none');
+				$('#screening-clear-filters').removeClass('d-none');
 			} else {
-				$('#clear-filters').addClass('d-none');
+				$('#screening-clear-filters').addClass('d-none');
 			}
 			
 			// Update filter indicators
@@ -710,7 +723,7 @@
 			const $noResults = $('#screening-no-results-state');
 			
 			// Hide all cards first
-			$('.company-card').hide();
+			$('.screening-company-card').hide();
 			
 			if (filteredCards.length > 0) {
 				// Show filtered cards
@@ -751,7 +764,7 @@
 			});
 			
 			// Handle search input
-			const $search = $('#company-search');
+			const $search = $('#screening-company-search');
 			if (screeningCurrentFilters.search) {
 				$search.addClass('border-primary');
 			} else {
@@ -761,11 +774,11 @@
 	}	if (typeof clearAllScreeningFilters === 'undefined') {
 		window.clearAllScreeningFilters = function() {
 			// Reset form inputs
-			$('#company-search').val('');
+			$('#screening-company-search').val('');
 			$('#screening-cycle-filter, #screening-step-filter, #screening-judge-filter, #screening-score-filter, #screening-status-filter').val('');
 			
 			// Hide clear search button
-			$('#clear-search').addClass('d-none');
+			$('#screening-clear-search').addClass('d-none');
 			
 			// Reset current filters
 			screeningCurrentFilters = {
@@ -785,16 +798,16 @@
 	// Show Company Evaluation Modal (only bind if not already bound)
 	if (!$(document).data('screening-evaluation-handler-bound')) {
 		$(document).data('screening-evaluation-handler-bound', true);
-		$(document).on('click', '.show-company-evaluation', function(e) {
+		$(document).on('click', '.screening-show-evaluation', function(e) {
 		e.preventDefault();
 		const company = parseInt($(this).data('company'));
 		const step = parseInt($(this).data('step'));
 		
 		// Show modal
-		$('#evaluationModal').modal('show');
+		$('#screeningEvaluationModal').modal('show');
 		
 		// Reset modal body
-		$('#evaluationModalBody').html(`
+		$('#screeningEvaluationModalBody').html(`
 			<div class="text-center p-5">
 				<div class="spinner-border text-primary" role="status">
 					<span class="visually-hidden">Loading...</span>
@@ -812,10 +825,10 @@
 				step: step,
 			},
 			success: function(response) {
-				buildEvaluationModal(response);
+				buildScreeningEvaluationModal(response);
 			}, 
 			error: function (error) { 
-				$('#evaluationModalBody').html(`
+				$('#screeningEvaluationModalBody').html(`
 					<div class="alert alert-danger m-4">
 						<i class="ti ti-alert-circle me-2"></i>
 						Error loading evaluation details. Please try again.
@@ -826,8 +839,8 @@
 		});
 	}
 
-	if (typeof buildEvaluationModal === 'undefined') {
-		window.buildEvaluationModal = function(data) {
+	if (typeof buildScreeningEvaluationModal === 'undefined') {
+		window.buildScreeningEvaluationModal = function(data) {
 		const totalScore = (data.total * 100).toFixed(1);
 		
 		let modalContent = `
@@ -927,7 +940,7 @@
 									<div class="row g-3">`;
 
 				subCriterion.details.forEach(judgeDetail => {
-					const judgeScore = (judgeDetail.score * 100).toFixed(1);
+					const judgeScore = (judgeDetail.value * 100).toFixed(1);
 					const statusClass = judgeDetail.status === 'Published' ? 'success' : judgeDetail.status === 'Draft' ? 'warning' : 'danger';
 					
 					modalContent += `<div class="col-md-6">
@@ -1075,7 +1088,7 @@
 				</div>
 			</div>`;
 
-		$('#evaluationModalBody').html(modalContent);
+		$('#screeningEvaluationModalBody').html(modalContent);
 		};
 	}
 
@@ -1136,8 +1149,8 @@
 	// Export functionality (only bind if not already bound)
 	if (!$(document).data('screening-export-handler-bound')) {
 		$(document).data('screening-export-handler-bound', true);
-		$('#export-csv, #export-excel').on('click', function() {
-			const format = $(this).attr('id') === 'export-csv' ? 'csv' : 'excel';
+		$('#screening-export-csv, #screening-export-excel').on('click', function() {
+			const format = $(this).attr('id') === 'screening-export-csv' ? 'csv' : 'excel';
 			const button = $(this);
 			const originalText = button.html();
 			
@@ -1194,16 +1207,16 @@
 			}, 2000);
 		});
 	}
-  // Update program filter and reload the page with the selected program
-  function updateProgramFilter(programId) {
-    const url = new URL(window.location.href);
-    if (programId) {
-      url.searchParams.set('program_id', programId);
-    } else {
-      url.searchParams.delete('program_id');
-    }
-    // Also clear any step filter when changing programs
-    url.searchParams.delete('step_id');
-    window.location.href = url.toString();
-  }
+	// Update program filter and reload the page with the selected program
+	function updateProgramFilter(programId) {
+		const url = new URL(window.location.href);
+		if (programId) {
+			url.searchParams.set('program_id', programId);
+		} else {
+			url.searchParams.delete('program_id');
+		}
+		// Also clear any step filter when changing programs
+		url.searchParams.delete('step_id');
+		window.location.href = url.toString();
+	}
 </script>

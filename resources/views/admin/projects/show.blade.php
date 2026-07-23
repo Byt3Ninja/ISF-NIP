@@ -9,8 +9,8 @@
 
 @section('content')
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="w-100 d-flex justify-content-between align-items-center mt-4 mb-6">
       <h4 class="mb-0 fw-bold">{{ $project?->name }}</h4>
       <div class="d-flex align-items-center gap-3">

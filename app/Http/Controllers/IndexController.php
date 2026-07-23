@@ -400,12 +400,14 @@ class IndexController extends Controller
     {
         $l = app()->getLocale();
         $mentorshipRequests = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])->where('approved', 'Yes')->get();
-        
+        $cycleIds = $mentorshipRequests->pluck('cycle.id')->filter()->unique();
+        $schedulesByCycle = MentorshipSchedule::whereIn('cycle_id', $cycleIds)->get()->groupBy('cycle_id');
+
         foreach ($mentorshipRequests as $request) {
             if (!$request->cycle) {
                 continue;
             }
-            $schedules = MentorshipSchedule::where('cycle_id', $request->cycle->id)->get();
+            $schedules = $schedulesByCycle->get($request->cycle->id, collect());
             foreach ($schedules as $schedule) {
                 $hours = $schedule->value; 
                 

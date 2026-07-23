@@ -218,7 +218,7 @@ class FormController extends Controller
 				$output->user_id = $item->FD_user_id;
 				$output->name = $item->{'user_name_' . $l};
 				$output->label = $item->FD_question;
-				$output->value = $value;
+				$output->value = $this->parse_answer( $value );
 
 				return $output;
 			})->groupBy('user_id')->values();
@@ -226,7 +226,7 @@ class FormController extends Controller
 			return $submission;
 		})->values()->all(); // remove collection keys (numeric indexing)
 		
-		$data = array_values($data);
+		$data = array_values($data); 	
 		// return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $data], 200);
 		return view('admin.settings.forms.form-submissions.show', compact('data', 'id'));
 	}
@@ -324,7 +324,7 @@ class FormController extends Controller
 					$output->user_id = $item->FD_user_id;
 					$output->name = $item->{'user_name_' . $l};
 					$output->label = $item->FD_question;
-					$output->value = $value;
+					$output->value = $this->parse_answer( $value );
 					return $output;
 				})->unique('id')->groupBy('user_id')->values()->flatten();
 
@@ -354,5 +354,18 @@ class FormController extends Controller
 
 		$date = date('Y_m_d_H_i_s');
 		return Excel::download(new SubmissionDetailsExport( $data ), 'form_submission_details_' . $date . '.' . $tail);
+	}
+
+	private function parse_answer( $answer )
+	{
+		if( is_numeric( $answer ) ) { return $answer; }
+		if( is_array( $answer ) ) { return $answer; }
+		$decoded = json_decode( $answer, true );
+		if( JSON_ERROR_NONE === json_last_error() )
+		{
+			$decoded = collect( $decoded )->implode(' , ');
+			return $decoded;
+		}
+		return $answer;
 	}
 }

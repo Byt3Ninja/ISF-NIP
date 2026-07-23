@@ -44,9 +44,14 @@ return [
     ],
 
     'task' => [
-        'broadcast' => 'Task update: :message',
-        'whatsapp'  => 'Task update: :message',
-        'subject'   => 'Task Update',
+        'broadcast'          => 'Task added: :message',
+        'whatsapp'           => 'Task added: :message',
+        'subject'            => 'Task Added',
+        'subject_add'        => 'Task Added',
+        'subject_update'     => 'Task Updated',
+        'subject_archive'    => 'Task Archived',
+        'subject_reopen'     => 'Task Reopened',
+        'subject_feedback'   => 'Task Review Update',
     ],
 
     'mentorship_session' => [
@@ -54,6 +59,7 @@ return [
         'whatsapp'  => ':greeting :line',
         'database' => 'New mentorship session notification',
         'subject' => 'Mentorship Session Update',
+        'founder_booking' => 'You have a new mentorship session with :mentor_name on :session_date at :start_time – :end_time (AM/PM).',
     ],
 
     'confirm_email_update' => [

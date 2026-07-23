@@ -5,8 +5,8 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     @if(session()->has('msg'))
     <div class="row mb-6">
       <div class="col-md-12">
@@ -34,49 +34,45 @@
                   </a>
                 </div>
               </div>
-              <div class="card-content">
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table zero-configuration" id="rooms-list-datatable" style="font-size: 0.92rem; text-align: center;">
-                      <thead class="table-light">
-                        <tr>
-                          <th>#</th>
-                          <th>{{__('Room')}}</th>
-                          <th>{{__('Type')}}</th>
-                          <th>{{__('Price')}}</th>
-                          <th>{{__('Discount')}}</th>
-                          <th>{{__('published')}}</th>
-                          <th>{{__('User added')}}</th>
-                          <th>{{__('Manage images')}}</th>
-                          <th>{{__('Delete')}}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($rooms as $room)
-                        <tr>
-                          <td><a href="{{route('rooms.edit', ['room' => $room->id])}}">{{$room->id}}</a></td>
-                          <td style="font-size: small;"><a href="{{route('rooms.edit', ['room' => $room->id])}}"> {{$room->{'name_'.$l} }}</a></td>
-                          <td style="font-size: small;">{{$room->type_trans}}</td>
-                          <td style="font-size: small;">{{$room->price}}</td>
-                          <td style="font-size: small;">{{$room->discount}}</td>
-                          <td style="font-size: small;">{{ __(''.$room->published?'Yes':'No')}}</td>
-                          <td style="font-size: small;">{{$room->User->{'first_name_'.$l}.' '.$room->User->{'last_name_'.$l} }}</td>
-                          <td style="font-size: small;">
-                            @if( $_user->ableTo('delete_user', $permissions) )
-                              <a href="{{route('rooms.images_manage', ['id' => $room->id])}}" class="btn btn-outline-warning btn-sm"><i class="bx bx-image"></i></a>
-                            @endif
-                          </td>
-                          <td style="padding: 0px;font-size: small;">
-                            @if( $_user->ableTo('delete_user', $permissions) )
-                              <button class="btn btn-outline-danger btn-sm delete-room-action" data-id="{{$room->id}}" data-url="{{route('rooms.destroy', ['room' => $room->id])}}"><i class="ti ti-trash text-danger"></i></button>
-                            @endif
-                          </td>
-                        </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              <div class="card-datatable table-responsive">
+                <table class="table zero-configuration" id="rooms-list-datatable" style="font-size: 0.92rem; text-align: center;">
+                  <thead class="table-light">
+                    <tr>
+                      <th>#</th>
+                      <th>{{__('Room')}}</th>
+                      <th>{{__('Type')}}</th>
+                      <th>{{__('Price')}}</th>
+                      <th>{{__('Discount')}}</th>
+                      <th>{{__('published')}}</th>
+                      <th>{{__('User added')}}</th>
+                      <th>{{__('Manage images')}}</th>
+                      <th>{{__('Delete')}}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach ($rooms as $room)
+                    <tr>
+                      <td><a href="{{route('rooms.edit', ['room' => $room->id])}}">{{$room->id}}</a></td>
+                      <td style="font-size: small;"><a href="{{route('rooms.edit', ['room' => $room->id])}}"> {{$room->{'name_'.$l} }}</a></td>
+                      <td style="font-size: small;">{{$room->type_trans}}</td>
+                      <td style="font-size: small;">{{$room->price}}</td>
+                      <td style="font-size: small;">{{$room->discount}}</td>
+                      <td style="font-size: small;">{{ __(''.$room->published?'Yes':'No')}}</td>
+                      <td style="font-size: small;">{{$room->User->{'first_name_'.$l}.' '.$room->User->{'last_name_'.$l} }}</td>
+                      <td style="font-size: small;">
+                        @if( $_user->ableTo('delete_user', $permissions) )
+                          <a href="{{route('rooms.images_manage', ['id' => $room->id])}}" class="btn btn-outline-warning btn-sm"><i class="bx bx-image"></i></a>
+                        @endif
+                      </td>
+                      <td style="padding: 0px;font-size: small;">
+                        @if( $_user->ableTo('delete_user', $permissions) )
+                          <button class="btn btn-outline-danger btn-sm delete-room-action" data-id="{{$room->id}}" data-url="{{route('rooms.destroy', ['room' => $room->id])}}"><i class="ti ti-trash text-danger"></i></button>
+                        @endif
+                      </td>
+                    </tr>
+                    @endforeach
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

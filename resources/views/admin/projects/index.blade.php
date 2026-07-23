@@ -11,8 +11,8 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     @if(session()->has('message'))
     <div class="alert alert-success alert-dismissible mt-2" role="alert">
       {{ __('admin.'.session()->get('message')) }} {{ Session::forget('message') }}

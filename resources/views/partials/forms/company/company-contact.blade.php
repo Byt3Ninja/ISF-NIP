@@ -87,7 +87,7 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">{{ __('admin.Twitter') }}</label>
+                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">X</label>
                 <div class="input-group input-group-merge">
                   <input 
                     type="url" 
@@ -336,7 +336,7 @@
       const country = countryData.find(country => `+${country.dialCode}` === dialCode);
 
       if (country) {
-        console.log("Country Code Found: " + country.iso2);
+        // console.log("Country Code Found: " + country.iso2);
         return country.iso2;
       }
       return "eg";

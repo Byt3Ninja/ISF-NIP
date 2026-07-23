@@ -3,7 +3,9 @@ namespace App\Services;
 
 use App\User;
 use App\Company;
+use App\Cycle;
 use App\Traits\ApiResponder;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\ProgramRepository;
 use Illuminate\Support\Facades\Storage;
@@ -160,5 +162,84 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
 
     return $query->paginate($limit, ['*'], 'page', $page);
 }
+
+    /**
+     * Idempotent program resolver for the importer.
+     *
+     * Resolution rules:
+     *   1. Search cycles by (title ci, type) across ALL orgs reachable to the user.
+     *   2. Exact match (same title+type+start+end) in any reachable org → reuse it
+     *      (the row's program implicitly determines the target org).
+     *   3. Title+type match exists but different dates:
+     *      - one match in a reachable org → create new cycle in that match's org
+     *        (treats the match as the org-anchor; new cohort, same program family).
+     *      - multiple matches across reachable orgs → create new cycle in $fallbackOrgId.
+     *   4. No match anywhere → create new cycle in $fallbackOrgId.
+     *
+     * $data: ['title'=>string,'type'=>string,'start'=>'Y-m-d','end'=>'Y-m-d']
+     * $fallbackOrgId: dropdown selection — used only when row can't self-resolve.
+     * $reachableOrgIds: orgs the user is allowed to write to (Admin: all → null/[]).
+     */
+    public function findOrCreateForImport(int $fallbackOrgId, array $data, ?array $reachableOrgIds = null): Cycle
+    {
+        $title = trim($data['title']);
+        $type  = trim($data['type']);
+        $start = $data['start'];
+        $end   = $data['end'];
+
+        $q = Cycle::query()
+            ->whereRaw('LOWER(title) = ?', [mb_strtolower($title, 'UTF-8')])
+            ->where('type', $type);
+
+        // null = no scoping (Admin); [] would match nothing → don't apply.
+        if (is_array($reachableOrgIds) && !empty($reachableOrgIds)) {
+            $q->whereIn('organization_id', $reachableOrgIds);
+        }
+
+        $existing = $q->get();
+
+        // Exact-date reuse first.
+        foreach ($existing as $cyc) {
+            $cs = $cyc->start ? Carbon::parse($cyc->start)->toDateString() : null;
+            $ce = $cyc->end   ? Carbon::parse($cyc->end)->toDateString()   : null;
+            if ($cs === $start && $ce === $end) {
+                return $cyc;
+            }
+        }
+
+        // No exact match → create new cycle in the fallback (dropdown-selected) org.
+        // Different-dates matches in other orgs are treated as different cohorts,
+        // not as anchors for org resolution (they're a different program family).
+        $cycle = Cycle::create([
+            'title'           => $title,
+            'type'            => $type,
+            'start'           => $start,
+            'end'             => $end,
+            'organization_id' => $fallbackOrgId,
+        ]);
+
+        // Hackathon enrollment (HackathonEnrollmentService::resolveStepId) requires
+        // a step on the cycle. The UI cycle-builder asks the admin to create a
+        // Team Formation step (stype=6) before founders can join; the importer
+        // can't pause for that, so seed a minimal one here.
+        if ($type === 'Hackathon') {
+            $now = Carbon::now();
+            DB::table('steps')->insert([
+                'cycle_id'          => $cycle->id,
+                'title'             => 'Team Formation',
+                'description'       => 'Team Formation',
+                'stype'             => 6,
+                'data'              => null,
+                'arr'               => 1,
+                'from'              => $start,
+                'to'                => $end,
+                'count_team_number' => 100,
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ]);
+        }
+
+        return $cycle;
+    }
 
 }

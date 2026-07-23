@@ -24,10 +24,12 @@ class UpdateServiceRequest extends FormRequest
      */
     public function rules()
     {
+      
         $rules = [
             'name_en' => 'required',
             'description_en' => 'required',
-            'status' => 'required|boolean',
+            'price' => 'nullable|numeric|min:0|max:9999999.99|regex:/^\d{1,7}(\.\d{1,2})?$/',
+            'status' => 'nullable|boolean',
             'service_category_id' => 'required|exists:service_categories,id',
             'vendor_name' => 'nullable|string|max:50',
             'vendor_email' => [
@@ -37,7 +39,7 @@ class UpdateServiceRequest extends FormRequest
                 Rule::unique('services', 'vendor_email')->ignore($this->route('service')),
             ],
             'vendor_phone' => 'nullable|string|max:11',
-            'organization_ids' => 'nullable|array',
+            'organization_ids' => 'required|array',
             'organization_ids.*' => 'exists:organizations,id',
         ];
         if( auth()->check() )

@@ -40,4 +40,7 @@ return [
     'forms' => 'Forms',
     'loading' => 'Loading',
     'close' => 'Close',
+    'preview' => 'Preview',
+    'delete' => 'Delete',
+    'edit' => 'Edit',
 ];

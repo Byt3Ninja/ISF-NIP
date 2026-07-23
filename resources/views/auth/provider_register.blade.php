@@ -57,10 +57,10 @@
 	<link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
 	<style>
-		div[data-validator] {
+		/* div[data-validator] {
 			width: 100% !important;
 			text-align: {{ $l == 'ar' ? 'end' : 'start' }} !important;
-		}
+		} */
 
 		#switcher-container {
 			position: absolute;
@@ -69,12 +69,13 @@
 		}
 
 		.iti__country-list {
+			direction: ltr !important;
+      text-align: left !important;
 			position: absolute;
 			left: 1rem;
 			/* right: 0; */
 			z-index: 9999;
 			list-style: none;
-			text-align: left;
 			padding: 0;
 			margin: 0 0 0 -1px;
 			box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
@@ -249,7 +250,7 @@
 											@endif
 
 											{{--  <div class="col-12 mb-6">
-												<label class="form-label fs-6 fw-bold d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
+												<label class="form-label fs-6 mb-2 d-block text-{{ $l == 'ar' ? 'end' : 'start' }}">
 													{{ $l == 'en' ? 'Profile photo' : 'الصورة الشخصية' }}
 												</label>
 												<div id="uploader" class="uploader" tabindex="0">
@@ -289,45 +290,45 @@
 											</div>  --}}
 
 											<div class="col-12 mb-3">
-												<label for="company_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.companyName') }}</label>
+												<label for="company_name" class="form-label fs-6 mb-2 w-100">{{ __('auth.companyName') }}</label>
 												<div class="input-group input-group-merge">
-													<input name="company_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="company_name" placeholder="{{ __('auth.enterCompanyName') }}" required autofocus />
+													<input name="company_name" type="text" class="form-control" id="company_name" placeholder="{{ __('auth.enterCompanyName') }}" required autofocus />
 													@error('company_name')
-														<div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+														<div class="invalid-feedback">{{ $message }}</div>
 													@enderror
 												</div>
 											</div>
 
 											<div class="col-12 mb-3">
-												<label for="contact_name" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __("auth.contactName") }}</label>
+												<label for="contact_name" class="form-label fs-6 mb-2 w-100">{{ __("auth.contactName") }}</label>
 												<div class="input-group input-group-merge">
-													<input name="contact_name" type="text" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" id="contact_name" placeholder="{{ __('auth.enterContactName') }}" required />
+													<input name="contact_name" type="text" class="form-control" id="contact_name" placeholder="{{ __('auth.enterContactName') }}" required />
 												</div>
 												@error('contact_name')
-													<div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+													<div class="invalid-feedback">{{ $message }}</div>
 												@enderror
 											</div>
 
 											<div class="col-12 mb-3">
-												<label for="email" class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ __('auth.E-Mail') }}</label>
+												<label for="email" class="form-label fs-6 mb-2 w-100">{{ __('auth.E-Mail') }}</label>
 												<div class="input-group input-group-merge">
-													<input name="email" type="email" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.E-Mail') }}" required />
+													<input name="email" type="email" class="form-control" placeholder="{{ __('auth.E-Mail') }}" required />
 												</div>
 												@error('email')
-													<div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+													<div class="invalid-feedback">{{ $message }}</div>
 												@enderror
 											</div>
 
 											<div class="col-12 mb-4 d-grid">
-												<label class="form-label fs-6 fw-bold w-100 text-{{ $l == 'ar' ? 'end' : 'start' }}" for="phone">{{ __('auth.Phone') }}</label>
-												<input id="phone" type="tel" class="form-control text-{{ $l == 'ar' ? 'end' : 'start' }}" placeholder="{{ __('auth.Phone') }}" name="phone" required />
+												<label class="form-label fs-6 mb-2 w-100" for="phone">{{ __('auth.Phone') }}</label>
+												<input id="phone" type="tel" class="form-control" placeholder="{{ __('auth.Phone') }}" name="phone" required />
 												<small class="text-danger mt-1" id="phone-error" style="display: none;"></small>
 												<input type="hidden" name="country_code" id="phone_code" value="20">
 												@error('phone')
-													<div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+													<div class="invalid-feedback">{{ $message }}</div>
 												@enderror
 												@error('country_code')
-													<div class="invalid-feedback text-{{ $l == 'ar' ? 'end' : 'start' }}">{{ $message }}</div>
+													<div class="invalid-feedback">{{ $message }}</div>
 												@enderror
 											</div>
 

@@ -4,8 +4,8 @@
 @section('subTitle', __('admin.Services directory'))
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
 
     <div class="card">
       <div class="card-content">
@@ -127,9 +127,9 @@
             <label class="form-check-label me-1" for="checkboxGlow1">{{ __('admin.Add comment') }}</label>
           </div>
           <fieldset class="form-label-group" style="display: none;" id="textarea">
-            <label class="form-label" for="mycomment">{{ __('admin.Add your note') }}</label>
+            <label class="form-label" for="mycomment">{{ __('admin.Add your notes') }}</label>
             <textarea id="mycomment" class="form-control" rows="3"
-              placeholder="{{ __('admin.Add your note') }}"></textarea>
+              placeholder="{{ __('admin.Add your notes') }}"></textarea>
           </fieldset>
         </div>
         <div class="content-right">
@@ -168,12 +168,12 @@
       buttons: [
         {
           extend: 'excel',
-          title: isArabic ? 'الخدمات' : 'Services directory',
+          title: isArabic ? 'الخدمات' : 'Services',
           exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
         },
         {
           extend: 'csv',
-          title: isArabic ? 'الخدمات' : 'Services directory',
+          title: isArabic ? 'الخدمات' : 'Services',
           exportOptions: { columns: [0, 1, 2, 3, 4, 5] }
         },
       ],

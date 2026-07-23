@@ -2,17 +2,14 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Lang;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
-class ResetPassword extends Notification implements ShouldQueue
+class ResetPassword extends Notification
 {
-    use Queueable;
+    use ConfiguresSmtp;
 
     /**
      * The password reset token.
@@ -59,17 +56,24 @@ class ResetPassword extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         try {
+            $org = $notifiable->organization;
+            $smtpSettings = $org?->organizationSettings;
+
+            $this->configureSmtp($smtpSettings);
+            $from = $this->getFromAddress($smtpSettings);
+            $orgData = $this->buildEmailOrganizationData($org);
+
             $resetUrl = $this->resetUrl($notifiable);
             $expire = config('auth.passwords.'.config('auth.defaults.passwords').'.expire');
 
             return (new MailMessage)
                 ->subject('Reset Your Password')
-                ->view('emails.password-reset', [
+                ->view('emails.password-reset', array_merge([
                     'resetUrl' => $resetUrl,
                     'expire' => $expire,
                     'user' => $notifiable,
-                ]);
-                
+                ], $orgData));
+
         } catch (\Exception $e) {
             // Log the error with context
             \Log::error('Failed to send password reset email', [
@@ -78,7 +82,7 @@ class ResetPassword extends Notification implements ShouldQueue
                 'email' => $notifiable->email ?? null,
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             // Re-throw the exception to let Laravel handle it
             throw $e;
         }

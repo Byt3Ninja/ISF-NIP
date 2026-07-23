@@ -44,48 +44,13 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
     {
         $org = $this->user?->organization;
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Configure SMTP if settings exist
         $this->configureSmtp($smtpSettings);
 
         // This notification is sent to a new email via AnonymousNotifiable,
         // so only the mail channel is applicable.
         return ['mail'];
-        
-        // Organization channel toggles (default to true when not configured)
-        $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
-        $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
-        $orgAcceptPusher = $smtpSettings?->accept_pusher ?? true;
-
-        $channels = [];
-
-        // WhatsApp if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isWhatsAppEnabled() 
-            && $orgAcceptWhatsapp 
-            && $notifiable->accept_whatsapp) {
-            $channels[] = WhatsAppChannel::class;
-        }
-
-        // Pusher (broadcast) if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isPusherEnabled() 
-            && $orgAcceptPusher 
-            && $notifiable->accept_pusher) {
-            $channels[] = 'broadcast';
-        }
-
-        // Email if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isEmailEnabled() 
-            && $orgAcceptEmail 
-            && $notifiable->accept_email) {
-            $channels[] = 'mail';
-        }
-
-        // Always store in database for audit/history if any channels are active
-        if (!empty($channels)) {
-            $channels[] = 'database';
-        }
-
-        return $channels;
     }
 
     /**
@@ -98,11 +63,13 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject(__('notifications.confirm_email_update.subject'))
-            ->view('admin.emails.updateEmail', [
+            ->view('admin.emails.updateEmail', array_merge([
                 'url' => $this->url,
-            ]);
+            ], $orgData));
     }
 
     public function toWhatsapp(object $notifiable): string

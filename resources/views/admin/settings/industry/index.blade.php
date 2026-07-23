@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="wrap">
       <!-- Navigation Pills -->
       @php
@@ -78,7 +78,8 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
+        {{-- Default name field (used for sectors & technologies) --}}
+        <div class="mb-3" id="defaultNameContainer">
           <label for="editInput" class="form-label">{{ __('settings.Name') }} *</label>
           <input type="text" class="form-control" id="editInput" placeholder="{{ __('settings.Enter_Name') }}" required>
           <div class="invalid-feedback" data-error="required">
@@ -86,6 +87,24 @@
           </div>
           <div class="invalid-feedback" data-error="maxlength" style="display: none;">
             {{ __('settings.Name_Max_50') }}
+          </div>
+        </div>
+        {{-- Industry bilingual name fields --}}
+        <div id="industryNameContainer" style="display: none;">
+          <div class="mb-3">
+            <label for="editInputEn" class="form-label">{{ __('settings.Name') }} ({{ __('admin.English') }}) *</label>
+            <input type="text" class="form-control" id="editInputEn" placeholder="{{ __('settings.Enter_Name') }} ({{ __('admin.English') }})" required>
+            <div class="invalid-feedback" data-error="required">
+              {{ __('settings.Name_Required') }}
+            </div>
+            <div class="invalid-feedback" data-error="maxlength" style="display: none;">
+              {{ __('settings.Name_Max_50') }}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editInputAr" class="form-label">{{ __('settings.Name') }} ({{ __('admin.Arabic') }})</label>
+            <input type="text" class="form-control" id="editInputAr" dir="rtl" placeholder="{{ __('settings.Enter_Name') }} ({{ __('admin.Arabic') }})">
+            <small class="text-muted">{{ __('admin.Optional') }} — {{ $l == 'en' ? 'Falls back to English name if empty' : 'يستخدم الاسم الإنجليزي في حال تركه فارغاً' }}</small>
           </div>
         </div>
         <div class="mb-3" id="industrySelectContainer" style="display: none;">
@@ -318,6 +337,10 @@ const elements = {
   editModal: $('#editModal'),
   editModalLabel: $('#editModalLabel'),
   editInput: $('#editInput'),
+  editInputEn: $('#editInputEn'),
+  editInputAr: $('#editInputAr'),
+  defaultNameContainer: $('#defaultNameContainer'),
+  industryNameContainer: $('#industryNameContainer'),
   editIndustrySelect: $('#editIndustrySelect'),
   industrySelectContainer: $('#industrySelectContainer'),
   confirmActionBtn: $('#confirmAction'),
@@ -502,15 +525,30 @@ function openEditModal(action, type, id, name, industryId = null) {
     elements.editModalLabel.text(action === 'add' ? '{{ __('settings.Add_Industry') }}' : '{{ __('settings.Edit_Industry') }}');
     elements.confirmActionBtn.text(action === 'add' ? '{{ __('settings.Add_Industry') }}' : '{{ __('settings.Save') }}');
     elements.industrySelectContainer.hide();
+    elements.defaultNameContainer.hide();
+    elements.industryNameContainer.show();
+
+    if (action === 'edit') {
+      const ind = findIndustryById(id);
+      elements.editInputEn.val(ind ? ind.name_en : '');
+      elements.editInputAr.val(ind && ind.name_ar !== ind.name_en ? ind.name_ar : '');
+    } else {
+      elements.editInputEn.val('');
+      elements.editInputAr.val('');
+    }
   } else if (type === 'sector') {
     elements.editModalLabel.text(action === 'add' ? '{{ __('settings.Add_Sector') }}' : '{{ __('settings.Edit_Sector') }}');
     elements.confirmActionBtn.text(action === 'add' ? '{{ __('settings.Add_Sector') }}' : '{{ __('settings.Save') }}');
     elements.industrySelectContainer.show();
+    elements.defaultNameContainer.show();
+    elements.industryNameContainer.hide();
     elements.editIndustrySelect.html(DATA.map((d) => `<option value="${d.id}" ${d.id === industryId ? 'selected' : ''}>${d.industry}</option>`).join(''));
   } else {
     elements.editModalLabel.text(action === 'add' ? '{{ __('settings.Add_Technology') }}' : '{{ __('settings.Edit_Technology') }}');
     elements.confirmActionBtn.text(action === 'add' ? '{{ __('settings.Add_Technology') }}' : '{{ __('settings.Save') }}');
     elements.industrySelectContainer.hide();
+    elements.defaultNameContainer.show();
+    elements.industryNameContainer.hide();
   }
 
   elements.editInput.val(name || '');
@@ -518,23 +556,28 @@ function openEditModal(action, type, id, name, industryId = null) {
 }
 
 // Input change handlers
-elements.editInput.on('input', function() {
-  const value = $(this).val().trim();
-  const maxLengthFeedback = $(this).siblings('.invalid-feedback[data-error="maxlength"]');
-  const requiredFeedback = $(this).siblings('.invalid-feedback[data-error="required"]');
-  
-  $(this).removeClass('is-invalid');
-  maxLengthFeedback.hide();
-  requiredFeedback.hide();
-  
-  if (!value) {
-    $(this).addClass('is-invalid');
-    requiredFeedback.show();
-  } else if (value.length > 50) {
-    $(this).addClass('is-invalid');
-    maxLengthFeedback.show();
-  }
-});
+function bindNameInputValidation(inputEl) {
+  inputEl.on('input', function() {
+    const value = $(this).val().trim();
+    const maxLengthFeedback = $(this).siblings('.invalid-feedback[data-error="maxlength"]');
+    const requiredFeedback = $(this).siblings('.invalid-feedback[data-error="required"]');
+
+    $(this).removeClass('is-invalid');
+    maxLengthFeedback.hide();
+    requiredFeedback.hide();
+
+    if (!value) {
+      $(this).addClass('is-invalid');
+      requiredFeedback.show();
+    } else if (value.length > 50) {
+      $(this).addClass('is-invalid');
+      maxLengthFeedback.show();
+    }
+  });
+}
+
+bindNameInputValidation(elements.editInput);
+bindNameInputValidation(elements.editInputEn);
 
 elements.editIndustrySelect.on('change', function() {
   const value = $(this).val();
@@ -545,54 +588,60 @@ elements.editIndustrySelect.on('change', function() {
 
 elements.editModal.on('show.bs.modal', function() {
   elements.editInput.removeClass('is-invalid').siblings('.invalid-feedback').hide();
+  elements.editInputEn.removeClass('is-invalid').siblings('.invalid-feedback').hide();
+  elements.editInputAr.removeClass('is-invalid');
   elements.editIndustrySelect.removeClass('is-invalid');
 });
 
 elements.confirmActionBtn.on('click', function () {
-  const newName = elements.editInput.val().trim();
+  const isIndustry = currentModalType === 'industry';
+  const newName = isIndustry ? elements.editInputEn.val().trim() : elements.editInput.val().trim();
+  const newNameAr = isIndustry ? elements.editInputAr.val().trim() : '';
   const selectedIndustryId = currentModalType === 'sector' ? parseInt(elements.editIndustrySelect.val()) : null;
-  
+
+  // Reset validation state
   elements.editInput.removeClass('is-invalid').siblings('.invalid-feedback').hide();
+  elements.editInputEn.removeClass('is-invalid').siblings('.invalid-feedback').hide();
   elements.editIndustrySelect.removeClass('is-invalid');
-  
+
   let isValid = true;
-  
+  const nameInput = isIndustry ? elements.editInputEn : elements.editInput;
+
   if (!newName) {
-    elements.editInput.addClass('is-invalid');
-    elements.editInput.siblings('.invalid-feedback[data-error="required"]').show();
+    nameInput.addClass('is-invalid');
+    nameInput.siblings('.invalid-feedback[data-error="required"]').show();
     isValid = false;
   } else if (newName.length > 50) {
-    elements.editInput.addClass('is-invalid');
-    elements.editInput.siblings('.invalid-feedback[data-error="maxlength"]').show();
+    nameInput.addClass('is-invalid');
+    nameInput.siblings('.invalid-feedback[data-error="maxlength"]').show();
     isValid = false;
   }
-  
+
   if (currentModalType === 'sector' && !selectedIndustryId) {
     elements.editIndustrySelect.addClass('is-invalid');
     isValid = false;
   }
-  
+
   if (!isValid) return;
-  
+
   elements.editModal.modal('hide');
 
   if (currentModalAction === 'add') {
-    handleAddAction(currentModalType, newName, selectedIndustryId);
+    handleAddAction(currentModalType, newName, selectedIndustryId, newNameAr);
   } else if (currentModalAction === 'edit') {
-    if (newName === currentModalName && (currentModalType !== 'sector' || selectedIndustryId === currentModalIndustryId)) return;
-    handleEditAction(currentModalType, currentModalId, currentModalName, newName, selectedIndustryId);
+    handleEditAction(currentModalType, currentModalId, currentModalName, newName, selectedIndustryId, newNameAr);
   }
 });
 
-function handleAddAction(type, newName, industryId) {
+function handleAddAction(type, newName, industryId, newNameAr = '') {
   const actionMap = {
     'industry': 'add-industry',
-    'sector': 'add-sector', 
+    'sector': 'add-sector',
     'tech': 'add-technology'
   };
 
   const params = {
-    industry: { name: newName },
+    industry: { name_en: newName, name_ar: newNameAr || '' },
     sector: { name: newName, industryId: industryId || parseInt(elements.selIndustrySector.value) },
     tech: { name: newName }
   };
@@ -602,7 +651,8 @@ function handleAddAction(type, newName, industryId) {
       switch (type) {
         case 'industry':
           const newIndustryId = result.response?.id || nextIndustryId++;
-          DATA.push({ id: newIndustryId, industry: newName, sectors: [{ id: 1, name: 'Other', created_at: new Date().toISOString() }], created_at: new Date().toISOString() });
+          const displayName = '{{ $l }}' === 'ar' && newNameAr ? newNameAr : newName;
+          DATA.push({ id: newIndustryId, industry: displayName, name_en: newName, name_ar: newNameAr || newName, sectors: [{ id: 1, name: 'Other', created_at: new Date().toISOString() }], created_at: new Date().toISOString() });
           renderIndustries();
           break;
         case 'sector':
@@ -631,8 +681,12 @@ function handleAddAction(type, newName, industryId) {
   });
 }
 
-function handleEditAction(type, id, oldName, newName, industryId) {
+function handleEditAction(type, id, oldName, newName, industryId, newNameAr = '') {
   const params = { type, id, oldName, newName };
+  if (type === 'industry') {
+    params.newNameEn = newName;
+    params.newNameAr = newNameAr || '';
+  }
   if (type === 'sector') {
     params.industryId = industryId;
     params.oldIndustryId = currentModalIndustryId;
@@ -644,7 +698,9 @@ function handleEditAction(type, id, oldName, newName, industryId) {
         case 'industry':
           const industry = findIndustryById(id);
           if (industry) {
-            industry.industry = newName;
+            industry.name_en = newName;
+            industry.name_ar = newNameAr || newName;
+            industry.industry = '{{ $l }}' === 'ar' && newNameAr ? newNameAr : newName;
             renderIndustries();
           }
           break;

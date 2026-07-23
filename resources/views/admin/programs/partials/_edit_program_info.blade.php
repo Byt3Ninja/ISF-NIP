@@ -124,7 +124,7 @@
   <div class="col-md-6">
     <div class="form-group mb-4">
       <label class="form-label fs-6 fw-semibold">
-        {{ $l == 'en' ? 'Program logo' : 'شعار البرنامج' }}
+        {{ $l == 'en' ? 'Program Logo' : 'شعار البرنامج' }}
       </label>
       <input 
         class="form-control" 
@@ -142,7 +142,7 @@
   <div class="col-md-6">
     <div class="form-group mb-4">
       <label class="form-label fs-6 fw-semibold">
-        {{ $l == 'en' ? 'Program cover' : 'غلاف البرنامج' }}
+        {{ $l == 'en' ? 'Program Cover' : 'غلاف البرنامج' }}
       </label>
       <input 
         class="form-control" 

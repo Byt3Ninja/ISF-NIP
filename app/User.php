@@ -19,16 +19,19 @@ use Namu\WireChat\Enums\ConversationType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Namu\WireChat\Models\Message as WireChatMessage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
+use App\Traits\HasFileCleanup;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, HasLocalePreference
 {
     // use Auditable;
-    use Notifiable ,HasRoles,HasApiTokens, Chatable;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens, Chatable, HasFileCleanup;
     // use SoftDeletes;
     public static $module = 'Users';
 
@@ -98,6 +101,10 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 	}
 
+    protected array $fileFields = [
+        'img_url' => 'public_uploads',
+    ];
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -123,7 +130,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $token = Str::random(64);
         $this->magic_login_token = $token;
         $this->magic_login_sent_at = now();
-        $this->must_change_password = true;
+        $this->must_change_password = false;
         $this->save();
 
         return \Illuminate\Support\Facades\URL::temporarySignedRoute(
@@ -136,14 +143,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function image_handler( $img )
     {
         if( !$img ) { return "/images/placeholder.jpg"; }
-        if( $img && !str_starts_with($img, 'https://') ) { return "/191014/" . $img; }
-        return $img;
+        return app(\App\Services\FileManagerService::class)->getUrl($img, 'public_uploads');
     }
     // ==========> Attributes <=====================
     public function getImageUrlAttribute()
     {
-        $image = $this->img_url;
-        return self::image_handler( $image );
+        return self::image_handler($this->img_url);
     }
     public function getFirstNameAttribute()
     {
@@ -220,6 +225,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Expertise::class, 'mentor_expertise', 'mentor_id', 'expertise_id');
     }
 
+    public function preferredLocale(): string
+    {
+        return $this->language ?? 'en';
+    }
+
     // ===============>  Organization Manager Relations < =========================
     public function organization(){
         return $this->belongsTo(Organization::class)->withTrashed();
@@ -231,6 +241,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function organizations()
     {
         return $this->belongsToMany(Organization::class, 'user_organizations')->withTimestamps();
+    }
+
+    public function user_organizations() {
+        $ids = $this->getOrganizationsIdsAttribute();
+        return Organization::whereIn('id', $ids)->get();
     }
 
     public function inviteMentors()
@@ -249,19 +264,41 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getOrganizationsIdsAttribute(): array
     {
+        if (isset($this->attributes['_cached_organizations_ids'])) {
+            return $this->attributes['_cached_organizations_ids'];
+        }
+
         if ($this->hasRole('admin')) {
-            return Organization::pluck('id')->toArray();
+            $result = Organization::pluck('id')->toArray();
+        } elseif ($this->hasRole('subadmin')) {
+            $result = $this->organizations()->pluck('organizations.id')->toArray();
+        } elseif ($this->organization_id) {
+            $result = [$this->organization_id];
+        } elseif( $this->hasRole('registered') ) {
+            $orgId = $this->company?->cycledata?->organization_id ?? null;
+            $result = $orgId ? [$orgId] : [];
+        } elseif( $this->hasRole('serviceProvider') ) {
+            $serviceProviderId = $this->service_provider?->id;
+            $result = $serviceProviderId
+                ? DB::table('organization_service')
+                    ->join('services', 'services.id', '=', 'organization_service.service_id')
+                    ->where('services.service_provider_id', $serviceProviderId)
+                    ->pluck('organization_service.organization_id')
+                    ->unique()
+                    ->values()
+                    ->toArray()
+                : [];
+        } else {
+            $result = [];
+            // check for user organizations table
+            if ($this->organizations()->count() > 0) {
+                $result = $this->organizations()->pluck('organizations.id')->toArray();
+            }
         }
 
-        if ($this->hasRole('subadmin')) {
-            return $this->organizations()->pluck('organizations.id')->toArray();
-        }
+        $this->attributes['_cached_organizations_ids'] = $result;
 
-        if ($this->organization_id) {
-            return [$this->organization_id];
-        }
-
-        return [];
+        return $result;
     }
 
     /**

@@ -21,12 +21,19 @@ class UpdateServiceCategoryRequest extends FormRequest
      *
      * @return array
      */
+    protected function prepareForValidation()
+    {
+        if ($this->organization_id === 'all') {
+            $this->merge(['organization_id' => null]);
+        }
+    }
+
     public function rules()
     {
         return [
             'name_en' => 'required',
             'name_ar' => 'required',
-            'organization_id' => 'required|exists:organizations,id',
+            'organization_id' => 'nullable|exists:organizations,id',
         ];
     }
 }

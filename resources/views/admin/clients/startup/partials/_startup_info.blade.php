@@ -25,7 +25,7 @@
                         <h5 class="mb-0 fw-bold text-heading">{{ $company->{'name_' . $l} }}</h5>
                       </a>
                       @else
-                        <h5 class="mb-0 fw-bold text-heading">{{ $company->{'name_' . $l} }}</h5>
+                        <h5 class="mb-0 text-heading">{{ $company->{'name_' . $l} }}</h5>
                       @endif
                     </div>
                   </div>
@@ -152,76 +152,6 @@
                   <div>
                     <h6 class="mb-0">{{ __('admin.Description') }}</h6>
                     <small class="mb-0 text-secondary">{{ $company->info_company }}</small>
-                  </div>
-                </div>
-                @endif
-                
-                <!-- Industry, Sectors, Technologies Row -->
-                @if(!empty($industry) || (!empty($sectors) && $sectors->count() > 0) || (!empty($technologies) && $technologies->count() > 0))
-                <div class="row mb-4">
-                  @if(!empty($industry) || (!empty($sectors) && $sectors->count() > 0))
-                  <div class="col-12 col-lg-6 mb-3 mb-lg-0">
-                    <div>
-                      <h6 class="mb-2">
-                        {{ $l == 'en' ? 'Industry' : 'الصناعة' }}
-                        @if(!empty($sectors) && $sectors->count() > 0)
-                          {{ $l == 'en' ? ' & Sectors' : ' والقطاعات' }}
-                        @endif
-                      </h6>
-                      <div class="d-flex flex-wrap gap-2">
-                        @if(!empty($industry))
-                          <div class="badge bg-label-primary rounded-pill">{{ $industry->{'name_' . $l} ?? $industry->name_en ?? $industry->name ?? 'N/A' }}</div>
-                        @endif
-                        @if(!empty($sectors) && $sectors->count() > 0)
-                          @php
-                            $maxSectors = 6;
-                            $visibleSectors = $sectors->take($maxSectors);
-                            $remainingSectors = $sectors->skip($maxSectors);
-                          @endphp
-                          @foreach($visibleSectors as $sector)
-                            <div class="badge bg-label-secondary rounded-pill">
-                              {{ $sector->{'name_' . $l} ?? $sector->name_en ?? $sector->name ?? 'N/A' }}
-                            </div>
-                          @endforeach
-                          @if($remainingSectors->count() > 0)
-                            <div class="badge bg-label-info rounded-pill" 
-                                 style="cursor: pointer;" 
-                                 data-bs-toggle="modal" 
-                                 data-bs-target="#sectorsModal">
-                              +{{ $remainingSectors->count() }}
-                            </div>
-                          @endif
-                        @endif
-                      </div>
-                    </div>
-                  </div>
-                  @endif
-                  
-                  @if(!empty($technologies) && $technologies->count() > 0)
-                  <div class="col-12 col-lg-6 mb-3 mb-lg-0">
-                    <div>
-                      <h6 class="mb-2">{{ $l == 'en' ? 'Technologies' : 'التقنيات' }}</h6>
-                      <div class="d-flex flex-wrap gap-2">
-                        @foreach($technologies as $technology)
-                          <div class="badge bg-label-secondary rounded-pill">
-                            {{ $technology->name }}
-                          </div>
-                        @endforeach
-                      </div>
-                    </div>
-                  </div>
-                  @endif
-                </div>
-                @endif
-                
-                <!-- Technologies Used -->
-                @if($company->technologies_used)
-                <div class="mb-4">
-                  <h6 class="mb-2">{{ __('Technologies Used') }}</h6>
-                  <div class="d-flex flex-wrap gap-2">
-                    @foreach(explode(',', $company->technologies_used) as $tech)
-                      <span class="badge bg-label-primary rounded-pill">{{ trim($tech) }}</span>
-                    @endforeach
                   </div>
                 </div>
                 @endif

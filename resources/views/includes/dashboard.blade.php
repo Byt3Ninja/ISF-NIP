@@ -29,20 +29,40 @@
 	'danger']) !!}</div>
 @endif
 <!-- Content wrapper -->
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
-		@if( $_user->hasAnyRole('Registered', 'Admin') )
-		@php
+<div class="">
+	<div class="">
 		
-		@endphp
-		@if(Auth::user()->hasRole('Registered') || Auth::user()->hasRole('Mentor'))
-			@if( isset($newhackathon) && $newhackathon )
-			{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
-			@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
-			<br>
-					@endif
+		@if($_user->hasRole('Registered'))
+			@if($_user->company?->cycle == null)
+				@if( isset($newhackathon) && $newhackathon )
+					{{-- @if(now()->diffInDays($newhackathon->created_at) < 300) --}}
+					@include('admin.includes.banner_header', ['newhackathon' => $newhackathon])
+					<br>
+				@endif
+			@endif
 		@endif
+
+		@if (Auth::user()->hasRole('serviceProvider'))
+			<div class="alert alert-primary alert-dismissible fade show d-flex align-items-center" role="alert">
+				<p> {{ __('admin.Congratulation_You_Are_Waiting_Approval_From_Admin') }} </p>
+			</div>
 		@endif
+		{{-- @if (Auth::user()->hasRole('Mentor'))
+			<div class="alert alert-primary alert-dismissible fade show d-flex align-items-center" role="alert">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clipboard-check-fill flex-shrink-0 me-3" viewBox="0 0 16 16">
+						<path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/>
+						<path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/>
+				</svg>
+				<div class="flex-grow-1">
+					<strong>{{ __('admin.Reminder') }}:</strong> {{ __('admin.survey_reminder_message') }}
+					<a href="/dashboard/mentor/surveys" class="btn btn-sm btn-primary ms-2">
+						{{ __('admin.view_surveys') }} <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ti-xs ms-1"></i>
+					</a>
+				</div>
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		@endif --}}
+
 		<div class="content-body">
 			@if( session()->has('success') )
 			<div class="row">
@@ -319,7 +339,7 @@
 									</div>
 									<div class="d-flex align-items-center mt-3">
 										@if( !is_null( $organization ) )
-										<img src="{{ $organization->image_url }}" alt="avatar" class="rounded-circle" height="35"
+										<img src="{{ route('organizations.logo', $organization->img_url ?? '') }}" alt="avatar" class="rounded-circle" height="35"
 											width="35">
 										@else
 										<img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
@@ -327,7 +347,28 @@
 										<span class="mx-3 text-secondary">{{ $organization->name }}</span>
 									</div>
 								</div>
-								<div class="card-datatable table-responsive text-nowrap">
+								@if(!$_user->hasCompletedStartup())
+								<div class="alert alert-info alert-dismissible p-3 rounded m-4 mb-0 position-relative">
+									<ul class="list-unstyled mb-0 d-flex flex-wrap gap-2">
+										<li class="pre-request-item">
+											<a href="{{ route('company.profile_view_mine') }}?action=complete-profile"
+												class="btn btn-sm btn-outline-info d-flex align-items-center gap-2" role="button"
+												aria-label="{{ __('admin.Complete Startup/Idea') }}">
+												<i class="ti ti-external-link"></i>
+												<span>{{ __('admin.Complete Startup/Idea') }}</span>
+											</a>
+										</li>
+									</ul>
+									<p class="text-muted small mt-2 mb-0">
+										<i class="ti ti-lightbulb me-1"></i>
+										{{ __('dashboard.Setting up your profile properly will ensure you have access to all program features.') }}
+									</p>
+									<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+										style="position: absolute; top: 0; {{ $l == 'en' ? 'right' : 'left' }}: 0.15rem;">
+									</button>
+								</div>
+								@endif
+								<div class="card-datatable table-responsive text-nowrap mt-4">
 									<table class="table">
 										<thead class="table-light">
 											<tr>
@@ -367,11 +408,28 @@
 												<td>
 													@if( $step->stype == 1 || $step->stype == 5 )
 													@if( $step->status_flag == 'ongoing' )
-														<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-primary"
-															title="{{ __('admin.Submit') }}"> 
-															{{ __('admin.Submit') }} 
-															<i class="ti ti-send ms-2 ti-16px"></i>
-														</a>
+														@php
+															// GV-2134: show "View" instead of "Submit" on steps
+															// the founder has already submitted, so the CTA
+															// matches the page that actually opens.
+															$alreadySubmitted = \DB::table('form_data')
+																->where('user_id', auth()->id())
+																->where('step_id', $step->id)
+																->exists();
+														@endphp
+														@if($alreadySubmitted)
+															<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-label-primary"
+																title="{{ __('admin.View') }}">
+																{{ __('admin.View') }}
+																<i class="ti ti-eye ms-2 ti-16px"></i>
+															</a>
+														@else
+															<a href="/dashboard/cycles/my/{{ $step->id }}" class="btn btn-sm btn-primary"
+																title="{{ __('admin.Submit') }}">
+																{{ __('admin.Submit') }}
+																<i class="ti ti-send ms-2 ti-16px"></i>
+															</a>
+														@endif
 													@endif
 													@endif
 													 @if($step->stype == 1 && isset($step->form) && $step->form)
@@ -409,12 +467,11 @@
 											<h4 class="primary">
 												<i class="bx bxs-bell"></i>
 												{{ $cycle->title }}
-											</h4>
-							
+											</h4>		
 											<div class="d-flex align-items-center mt-2">
 												<div class="media-left">
 													@if(!empty($cycle->organization->image_url))
-													<img src="{{ $cycle->organization->image_url }}" alt="{{ $cycle->organization->name }} avatar"
+													<img src="{{ route('organizations.logo', $cycle->organization->image_url ?? '') }}" alt="{{ $cycle->organization->name }} avatar"
 														class="rounded-circle" height="40" width="40">
 													@endif
 												</div>
@@ -426,8 +483,7 @@
 										<div class="card-body bg-rgba-light">
 											<p class="card-text mb-2">{{ $cycle->description }}</p>
 											@php $hasPreRequests = !empty($cycle->pre_requests) && count($cycle->pre_requests) > 0; @endphp
-							
-							
+
 											<div class="alert alert-info alert-dismissible p-3 rounded mb-4 position-relative"
 												style="display: {{ $hasPreRequests ? 'block' : 'none' }};">
 												<h6 class="d-flex align-items-center">
@@ -738,7 +794,7 @@
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
 									<div class="d-flex justify-content-between align-items-center">
-										<h5 class="card-title mb-0">{{ __("dashboard.UpcomingMentorsSession") }}</h5>
+										<h5 class="card-title mb-0">{{ __("dashboard.UpcomingMentorsSession") }} <small class="text-muted"> ( {{ __('dashboard.next_two_weeks') }} ) </small> </h5>
 										<a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
 											<i class="ti ti-eye me-2 ti-16px"></i>
 											{{__('cycles.showAll')}}
@@ -832,7 +888,7 @@
 															@if($now <= $end_time)
 																
 																<span class="warning">
-																	<a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+																	<a class="btn btn-sm btn-label-primary" href="{{ route('mentorship.join', $session->id) }}" target="_blank">
 																		<i class="ti ti-brand-zoom me-2"></i>
 																		{{ __('dashboard.Join now') }}
 																	</a>
@@ -850,6 +906,9 @@
 															<i class="ti ti-map me-2"></i>
 															{{ __('admin.Location') }}
 														</a>
+														<div class="mt-3">
+															<small> <i class="fas fa-map-marker-alt"></i> {{ $session->organization->address }} </small>
+														</div>
 													</span>
 													@endif
 													@elseif($session->approved == 'No')
@@ -933,7 +992,7 @@
 										@endphp
 										@if($schedules->isNotEmpty())
 											<button
-												onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $mentor->cycle_id }}, {{ auth()->user()->company->cycledata->organization_id }}); }"
+												onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $mentor->id }}, {{ $cycle_id }}, {{ auth()->user()->company->cycledata->organization_id }}); }"
 												{{-- onclick="request({{ $mentor->id }},'{{ $mentor->name }}', {{ $mentor->organization_id }}, {{ $mentor->cycle_id }})" --}}
 												title="{{ __('cycles.Request_Mentorship') }}"
 												type="button"
@@ -1025,10 +1084,14 @@
 			@if( array_intersect(['dashboard.widgets_tables.my_next_mentorship_sessions_view'], $permissions) )
 			<div class="col-12">
 				<div class="card mb-6">
-					<div class="card-header">
+					<div class="card-header d-flex justify-content-between align-items-center">
 						<h5 class="card-title mb-0 text-capitalize">
 							{{ __("dashboard.My next mentorship sessions") }}
 						</h5>
+						<a href="/dashboard/mentor/sessions" class="btn btn-primary">
+							<i class="ti ti-calendar-event me-2"></i>
+							{{ __("admin.view_all_sessions") }}
+						</a>
 					</div>
 					<div class="card-datatable table-responsive">
 						<table class="table">
@@ -1084,21 +1147,21 @@
 												@if( $now >= $start_time )
 													@if( $now <= $end_time )
 													
-														<a href="{{ $session->start_url }}" target="_blank">
+														<a href="{{ route('mentorship.join', $session->id) }}" target="_blank">
 															<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
-																<i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+																<i class="ti ti-link me-2"></i> {{ __('admin.Join Meeting') }}
 															</button>
 														</a>
 														@if( !empty( $session->passcode ) )
 															| <button title="Show Passcode" type="button" data-passcode="{{ $session->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
-																<i class="ti ti-key"></i>
+																<i class="ti ti-key me-2"></i>
 															</button>
 														@endif
 													@else
 														<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
 													@endif
 												@else
-													<i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+													<i class="ti ti-alarm me-2"></i> {{ __('admin.Meeting_will_start_at_time') }}
 												@endif
 											@else
 											
@@ -1107,6 +1170,9 @@
 														<i class="ti ti-map me-2"></i>
 														{{ __('admin.Location') }}
 													</a>
+													<div class="mt-3">
+														<small> <i class="fas fa-map-marker-alt"></i> {{ $session->organization->address }} </small>
+													</div>
 												</span>
 											@endif
 										
@@ -1128,48 +1194,52 @@
 
 			@if( array_intersect(['dashboard.widgets_tables_my_judging_list_view'], $permissions) )
 			<div class="col-12">
-				<div class="card">
-					<section>
-						<div class="row">
-							<div class="col-md-12">
-								<div class="card mb-6">
-									<div class="card-header border-bottom">
-										<h5 class="card-title align-items-center">{{ __('dashboard.Your Judging List') }}</h5>
-									</div>
-									<div class="card-body">
-										@if( $initial_screening_steps->count() > 0)
-										@foreach( $initial_screening_steps as $step )
-										<div class="mt-6">
-											<div class="card-header bg-label-light p-3 mb-2">
-												<h5 class="mb-0">
-													<i class="ti ti-bell ti-24px"></i>
-													<span class="mx-2">
-													  {{ $step->title }} - ({{ $step->cycle->title }})
-													  - {{ __('dashboard.start from') }} {{ $step->from }}
-													  {{ __('dashboard.to') }} {{ $step->to }}
-													</span>
-												  </h5>
-											</div>
-											<div class="card-body">
-												<p class="card-text">{{ $step->description }}</p>
-												<small class="text-muted">
-													{{ __('dashboard.This Cycle Start from') }}
-													{{ $step->cycle->start }}
-													{{ __('dashboard.to') }}
-													{{ $step->cycle->end }}
-												</small>
-											</div>
-											<div class="table-responsive">
-												<table class="table">
-													<thead>
+				<section>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card mb-6">
+								<div class="card-header border-bottom">
+									<h5 class="card-title align-items-center">{{ __('dashboard.Your Judging List') }}</h5>
+								</div>
+								<div class="card-body">
+									@if( $initial_screening_steps->count() > 0)
+									@foreach( $initial_screening_steps as $step )
+									<div class="mt-6">
+										<div class="card-header bg-label-light p-3 mb-2">
+											<h5 class="mb-0">
+												<i class="ti ti-bell ti-24px"></i>
+												<span class="mx-2">
+												  {{ $step->title }} - ({{ $step->cycle->title }})
+												  - {{ __('dashboard.start from') }} {{ $step->from }}
+												  {{ __('dashboard.to') }} {{ $step->to }}
+												</span>
+											  </h5>
+										</div>
+										<div class="card-body">
+											<p class="card-text">{{ $step->description }}</p>
+											<small class="text-muted">
+												{{ __('dashboard.This Cycle Start from') }}
+												{{ $step->cycle->start }}
+												{{ __('dashboard.to') }}
+												{{ $step->cycle->end }}
+											</small>
+										</div>
+										<div class="table-responsive">
+											<table class="table">
+												<thead>
+													<tr>
+													  <th>{{ __('dashboard.Company') }}</th>
+													  <th>{{ __('dashboard.User/Title') }}</th>
+													  <th>{{ __('dashboard.Screening completed') }}</th>
+													  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
+													</tr>
+												  </thead>
+												  <tbody>
+													@if( $step->companies->count() == 0 )
 														<tr>
-														  <th>{{ __('dashboard.Company') }}</th>
-														  <th>{{ __('dashboard.User/Title') }}</th>
-														  <th>{{ __('dashboard.Screening completed') }}</th>
-														  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
+															<td class="text-center" colspan="4">{{ __('cycles.No data available in table') }}</td>
 														</tr>
-													  </thead>
-													  <tbody>
+													@else
 														@foreach( $step->companies as $company )
 														<tr>
 															<td>
@@ -1214,37 +1284,40 @@
 															</td>
 														</tr>
 														@endforeach
-													  </tbody>
-												</table>
-											</div>
+													@endif
+												  </tbody>
+											</table>
 										</div>
-										@endforeach
-										@else
-										<div class="d-flex flex-column justify-content-center align-items-center p-5">
-											<img src="/icons/not-found.svg" width="130" height="130" alt="No screening started yet">
-											<h6 class="text-center text-secondary mt-3">{{ __('dashboard.No screening started yet') }}</h6>
-										</div>
-										@endif
 									</div>
+									@endforeach
+									@else
+									<div class="d-flex flex-column justify-content-center align-items-center p-5">
+										<img src="/icons/not-found.svg" width="130" height="130" alt="{{ __('dashboard.No screening started yet') }}">
+										<h6 class="text-center text-secondary mt-3">{{ __('dashboard.No screening started yet') }}</h6>
+									</div>
+									@endif
 								</div>
 							</div>
 						</div>
-					</section>
-				</div>
+					</div>
+				</section>
 			</div>
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_program_final_screening_view'], $permissions) )
 			<div class="col-12">
-				<div class="card">
-					<section>
-						<div class="row">
-							<div class="col-md-12">
-								<div class="card mb-6">
-									<div class="card-header border-bottom">
-										<h5 class="card-title mb-0"></h5>
-									</div>
-									<div class="card-body">
+				<section>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card mb-6">
+								<div class="card-header border-bottom">
+									<h5 class="card-title mb-0">
+										<i class="ti ti-calendar-stats ti-24px"></i>
+										<span class="mx-2">{{ __('dashboard.Cycle final screening') }}</span>
+									</h5>
+								</div>
+								<div class="card-body">
+									@if( $final_screening_steps->count() > 0)
 										@foreach( $final_screening_steps as $step )
 										<div class="card mt-4">
 											<div class="card-header bg-label-light p-3 mb-4">
@@ -1267,92 +1340,103 @@
 													<table class="table">
 														<thead>
 															<tr>
-															<th>{{ __('dashboard.Company') }}</th>
-															<th>{{ __('dashboard.User/Title') }}</th>
-															<th>{{ __('dashboard.Screening completed') }}</th>
-															<th>{{ __('dashboard.Meeting') }}</th>
-															<th>{{ __('dashboard.Actions') }}</th>
+																<th>{{ __('dashboard.Company') }}</th>
+																<th>{{ __('dashboard.User/Title') }}</th>
+																<th>{{ __('dashboard.Screening completed') }}</th>
+																<th>{{ __('dashboard.Meeting') }}</th>
+																<th>{{ __('dashboard.Actions') }}</th>
 															</tr>
 														</thead>
 														<tbody>
-															@foreach( $step->companies as $company )
+															@if( $step->companies->count() == 0 )
 																<tr>
-																	<td>
-																		<div class="d-flex align-items-center">
-																			<img src="{{ $company->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
-																			@if( $_user->ableTo('screening.show', $permissions) )<a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
-																			{{ $company->name }}
-																			@if( $_user->ableTo('screening.show', $permissions) ) </a> @endif
-																		</div>
-																	</td>
-																	<td>
-																		<div class="d-flex align-items-center">
-																			@if( $company->users->count() )
-																				@foreach( $company->users as $company_user )
-																					<img src="{{ $company_user->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
-																					<div>
-																						<h6 class="mb-0">{{ $company_user->name }}</h6>
-																						<small class="text-muted">{{ $company_user->title }}</small>
-																					</div>
-																				@endforeach
-																			@else
-																			-
-																			@endif
-																		</div>
-																	</td>
-																	<td>
-																		@if( $company->evaluation_status == 'not_started' )
-																		<span class="badge bg-label-warning">
-																			<i class="ti ti-clock me-2"></i> {{ __('dashboard.evaluation_not_started') }}
-																		</span>
-																		@elseif( $company->evaluation_status == 'in_progress' )
-																		<span class="badge bg-label-info">
-																			<i class="ti ti-clock-bolt me-2"></i> {{ __('dashboard.evaluation_in_progress') }}
-																		</span>
-																		@elseif( $company->evaluation_status == 'evaluated' )
-																		<span class="badge bg-label-success">
-																			<i class="ti ti-circle-check me-2"></i> {{ __('dashboard.evaluation_completed') }}
-																		</span>
-																		@elseif( $company->evaluation_status == 'not_evaluated' )
-																		<span class="badge bg-label-danger">
-																			<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
-																		</span>
-																		@endif
-																	</td>
-																	<td> {{ $company->datetime ?? __('dashboard.Not added yet') }} </td>
-																	<td>
-																		@if( $company->join_url )
-																			<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
-																				<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
-																			</a>
-																			@if( !empty( $company->passcode ) )
-																				 | <button title="Show Passcode" type="button" data-passcode="{{ $company->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
-																					<i class="ti ti-key"></i>
-																				</button>
-																			@endif
-																			{{--  @if( $_user->ableTo('screening.form_view', $permissions) )
-																			<a href="/dashboard/final/{{ $step->id }}/{{ $company->id }}" target="_blank" class="btn btn-success btn-sm">
-																				<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
-																			</a>
-																			@endif  --}}
-																		@else
-																			{{ __('dashboard.Not started') }}
-																		@endif
-																	</td>
+																	<td class="text-center" colspan="5">{{ __('cycles.No data available in table') }}</td>
 																</tr>
-															@endforeach
+															@else
+																@foreach( $step->companies as $company )
+																	<tr>
+																		<td>
+																			<div class="d-flex align-items-center">
+																				<img src="{{ $company->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																				@if( $_user->ableTo('screening.show', $permissions) )<a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
+																				{{ $company->name }}
+																				@if( $_user->ableTo('screening.show', $permissions) ) </a> @endif
+																			</div>
+																		</td>
+																		<td>
+																			<div class="d-flex align-items-center">
+																				@if( $company->users->count() )
+																					@foreach( $company->users as $company_user )
+																						<img src="{{ $company_user->logo }}" alt="avatar" class="rounded-circle me-2" height="40" width="40">
+																						<div>
+																							<h6 class="mb-0">{{ $company_user->name }}</h6>
+																							<small class="text-muted">{{ $company_user->title }}</small>
+																						</div>
+																					@endforeach
+																				@else
+																				-
+																				@endif
+																			</div>
+																		</td>
+																		<td>
+																			@if( $company->evaluation_status == 'not_started' )
+																			<span class="badge bg-label-warning">
+																				<i class="ti ti-clock me-2"></i> {{ __('dashboard.evaluation_not_started') }}
+																			</span>
+																			@elseif( $company->evaluation_status == 'in_progress' )
+																			<span class="badge bg-label-info">
+																				<i class="ti ti-clock-bolt me-2"></i> {{ __('dashboard.evaluation_in_progress') }}
+																			</span>
+																			@elseif( $company->evaluation_status == 'evaluated' )
+																			<span class="badge bg-label-success">
+																				<i class="ti ti-circle-check me-2"></i> {{ __('dashboard.evaluation_completed') }}
+																			</span>
+																			@elseif( $company->evaluation_status == 'not_evaluated' )
+																			<span class="badge bg-label-danger">
+																				<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
+																			</span>
+																			@endif
+																		</td>
+																		<td> {{ $company->datetime ?? __('dashboard.Not added yet') }} </td>
+																		<td>
+																			@if( $company->join_url )
+																				<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
+																					<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
+																				</a>
+																				@if( !empty( $company->passcode ) )
+																						| <button title="Show Passcode" type="button" data-passcode="{{ $company->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																						<i class="ti ti-key"></i>
+																					</button>
+																				@endif
+																				{{--  @if( $_user->ableTo('screening.form_view', $permissions) )
+																				<a href="/dashboard/final/{{ $step->id }}/{{ $company->id }}" target="_blank" class="btn btn-success btn-sm">
+																					<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
+																				</a>
+																				@endif  --}}
+																			@else
+																				{{ __('dashboard.Not started') }}
+																			@endif
+																		</td>
+																	</tr>
+																@endforeach
+															@endif
 														</tbody>
 													</table>
 												</div>
 											</div>
 										</div>
 										@endforeach
-									</div>
+									@else
+										<div class="d-flex flex-column justify-content-center align-items-center p-5">
+											<img src="/icons/not-found.svg" width="130" height="130" alt="{{ __('dashboard.No Final screening started yet') }}">
+											<h6 class="text-center text-secondary mt-3">{{ __('dashboard.No Final screening started yet') }}</h6>
+										</div>
+									@endif
 								</div>
 							</div>
 						</div>
-					</section>
-				</div>
+					</div>
+				</section>
 			</div>
 			@endif
 		</div>
@@ -1540,7 +1624,7 @@
 									<!-- Vertical line -->
 									<div class="bg-light ms-2" style="position:absolute; top:0; bottom:0; start:10px; width:2px;"></div>
 									@foreach ($milestones as $milestone)
-										<div class="d-{{ $milestone->visibility === 'private' ? 'none' : 'flex' }} mb-4 position-relative ps-8">
+										<div class="d-flex mb-4 position-relative ps-8">
 											<div class="position-absolute top-0 start-0 me-3">
 												<div class="rounded-circle w-px-20 h-px-20 d-flex justify-content-center align-items-center
 														{{
@@ -1563,27 +1647,27 @@
 											</div>
 
 											<div class="flex-grow-1">
-												<div class="d-flex justify-content-between">
-													<h6 class="fw-semibold mb-1">{{ $milestone->name }}</h6>
-													<span class="text-muted">{{ $milestone->milestone_date }}</span>
-												</div>
-				
+												<!-- Title -->
+												<h6 class="fw-semibold mb-2">{{ $milestone->name }}</h6>
+												
+												<!-- Category and Status -->
 												<div class="mb-2">
 													<span class="badge bg-label-secondary me-2">
-														{{ $milestone->category }}
+														{{ $milestone->category_name }}
 													</span>
 													<span class="badge bg-label-{{ $milestone->status === 'completed' ? 'success' : ( $milestone->status === 'in_progress' ? 'primary' : 'warning') }}">
-														@if ($milestone->status === 'completed')
-															{{ __('startup.completed') }}
-														@elseif ($milestone->status === 'in_progress')
-															{{ __('startup.in_progress') }}
-														@else
-															{{ __('startup.pending') }}
-														@endif
+														{{ $milestone->status_label }}
 													</span>
 												</div>
-												<div class="w-75">
-													<small class="text-muted line-clamp-2">{{ $milestone->description }}</small>
+												
+												<!-- Description excerpt -->
+												<div class="mb-2">
+													<small class="text-muted">{{ Str::limit($milestone->description, 100) }}</small>
+												</div>
+												
+												<!-- Milestone Date -->
+												<div class="text-muted">
+													<small><i class="ti ti-calendar me-1"></i>{{ $milestone->milestone_date }}</small>
 												</div>
 											</div>
 										</div>
@@ -1789,6 +1873,7 @@ document.addEventListener('DOMContentLoaded', function() {
 @endif
 <script>
 	let completionCheckInterval = null;
+	let activeCycleId = null;
 
 	// -------------------------------------------------------
 	// MAIN JOIN BUTTON HANDLER
@@ -1796,6 +1881,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	window.handleJoinClick = function(button) {
 		const hasPreRequests = button.getAttribute('data-has-pre');
 		const preRequests = JSON.parse(button.getAttribute('data-pre-requests') || '[]');
+		activeCycleId = button.getAttribute('data-cycle-id');
 
 		if (hasPreRequests === 'true') {
 			populatePrerequisiteModal(preRequests);
@@ -1853,7 +1939,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	// SINGLE CHECKER FUNCTION
 	// -------------------------------------------------------
 	function checkCompletionStatus() {
-		return fetch('{{ route('cycles.completion_status_check') }}', {
+		let url = '{{ route('cycles.completion_status_check') }}';
+		if (activeCycleId) {
+			url += '?cycle_id=' + activeCycleId;
+		}
+		return fetch(url, {
 			method: 'GET',
 			headers: {
 				'X-Requested-With': 'XMLHttpRequest',
@@ -1882,43 +1972,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const hasPreRequests = data.has_pre_requests;
     const preRequests = data.pre_requests || [];
 
-    // Update Join buttons
-    const joinButtons = document.querySelectorAll('button[onclick*="handleJoinClick"]');
-    joinButtons.forEach(joinButton => {
-        joinButton.className = 'btn btn-primary';
-        joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
+    // Only update the active cycle's button, not all buttons
+    if (activeCycleId) {
+        const joinButton = document.querySelector('button[data-cycle-id="' + activeCycleId + '"]');
+        if (joinButton) {
+            joinButton.className = 'btn btn-primary';
+            joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
 
-        joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-        joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-            url: `${pr.url}?action=complete-profile`,
-            label: pr.label,
-        }))));
-    });
+            joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+            joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+                url: `${pr.url}?action=complete-profile`,
+                label: pr.label,
+            }))));
 
-    // Update alert boxes
-    const alertDivs = document.querySelectorAll('.alert.alert-info');
-    alertDivs.forEach(alertDiv => {
-        if (hasPreRequests) {
-            const listElement = alertDiv.querySelector('.list-unstyled');
-            if (listElement) {
-                listElement.innerHTML = '';
-                preRequests.forEach(pr => {
-                    const li = document.createElement('li');
-                    li.className = 'pre-request-item';
-                    li.innerHTML = `
-                        <a href="${pr.url}?action=complete-profile"
-                           class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
-                           <i class="ti ti-external-link"></i>
-                           <span>${pr.label}</span>
-                        </a>`;
-                    listElement.appendChild(li);
-                });
+            // Update the alert box for this cycle's card only
+            const card = joinButton.closest('.card') || joinButton.closest('[class*="cycle"]') || joinButton.parentElement.parentElement;
+            if (card) {
+                const alertDiv = card.querySelector('.alert.alert-info');
+                if (alertDiv) {
+                    if (hasPreRequests) {
+                        const listElement = alertDiv.querySelector('.list-unstyled');
+                        if (listElement) {
+                            listElement.innerHTML = '';
+                            preRequests.forEach(pr => {
+                                const li = document.createElement('li');
+                                li.className = 'pre-request-item';
+                                li.innerHTML = `
+                                    <a href="${pr.url}?action=complete-profile"
+                                       class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
+                                       <i class="ti ti-external-link"></i>
+                                       <span>${pr.label}</span>
+                                    </a>`;
+                                listElement.appendChild(li);
+                            });
+                        }
+                        alertDiv.style.display = 'block';
+                    } else {
+                        alertDiv.style.display = 'none';
+                    }
+                }
             }
-            alertDiv.style.display = 'block';
-        } else {
-            alertDiv.style.display = 'none';
         }
-    });
+    }
 	}
 
 	// -------------------------------------------------------

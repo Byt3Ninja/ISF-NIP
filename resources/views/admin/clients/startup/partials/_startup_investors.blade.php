@@ -1,10 +1,10 @@
 <div class="col-md-4">
-  <div class="card shadow-sm" style="height: 300px; overflow-y: hidden;">
+  <div class="card shadow-sm" style="height: 320px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-3">{{ __('admin.investors') }} ( {{count($Shareholders)}} )</h5>
+      <h5 class="card-title mb-2">{{ __('admin.investors') }} ( {{count($Investors)}} )</h5>
       @if (count($Investors) > 0)
       <div class="row" style="position: relative; height: 90%;">
-        @if (count($Investors) > 2)
+        @if (count($Investors) > 4)
         <button id="investor-prev" class="btn btn-sm btn-icon btn-white rounded-circle shadow border d-none"
           style="position: absolute; left: -1rem; top: 46%; transform: translateY(-50%); z-index: 1;">
           <i class="ti ti-chevron-left"></i>
@@ -48,6 +48,7 @@
   </div>
 </div>
 
+@push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const investorCols = document.querySelectorAll('.investor-col');
@@ -69,7 +70,7 @@
     }
 
     let currentIndex = 0;
-    const itemsPerPage = 2; // Number of items to show at a time
+    const itemsPerPage = 4; // Number of items to show at a time
 
     function updateVisibility() {
       investorCols.forEach((col, index) => {
@@ -106,3 +107,4 @@
     updateVisibility(); // Initial state on page load
   });
 </script>
+@endpush

@@ -2,9 +2,9 @@
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
     @include('judger.screening.partials.screening-header-card')
     
     <!-- Screening Table -->
@@ -80,6 +80,8 @@ const translations = {
     notstarted: 'Not Started',
     inprogress: 'In Progress',
     completed: 'Completed',
+    criteriaNotConfiguredTitle: "{{ __('admin.criteria_not_configured_title') }}",
+    criteriaNotConfiguredMessage: "{{ __('admin.criteria_not_configured_message') }}",
   },
   ar: {
     screeningList: 'قائمة الفحص',
@@ -110,6 +112,8 @@ const translations = {
     notstarted: 'لم تبدأ',
     inprogress: 'قيد التنفيذ',
     completed: 'مكتمل',
+    criteriaNotConfiguredTitle: "{{ __('admin.criteria_not_configured_title') }}",
+    criteriaNotConfiguredMessage: "{{ __('admin.criteria_not_configured_message') }}",
   }
 };
 
@@ -131,7 +135,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
           startup_logo: "{{ $company->logo ?? '/images/logo-placeholder.png' }}",
           status: "{{ $company->status }}",
           company_id: "{{ $company->id }}",
-          icon: "{{ $company->icon ?? '' }}"
+          icon: "{{ $company->icon ?? '' }}",
+          evaluatable: {{ ($company->evaluatable ?? false) ? 'true' : 'false' }}
         },
         @endforeach
       ];
@@ -170,8 +175,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
               
               // Normalize status for translation lookup
               const normalizedStatus = data.toLowerCase().replace(/[-_\s]/g, '');
+              // When the evaluation form isn't ready (not published or no
+              // criteria) show a clickable warning icon instead of the gavel.
+              const iconHtml = full.evaluatable
+                ? `<i class="${full.icon} me-2"></i>`
+                : `<i class="${full.icon} me-2 criteria-warning text-warning" role="button" title="${t.criteriaNotConfiguredTitle}"></i>`;
               return `<span class=" badge ${badgeClass}">
-                        <i class="${full.icon} me-2"></i> ${t[normalizedStatus] || data}
+                        ${iconHtml} ${t[normalizedStatus] || data}
                       </span>`;
             }
           },
@@ -306,6 +316,16 @@ document.addEventListener('DOMContentLoaded', function (e) {
         }
       });
 
+
+      // Warning icon: inform the judge the criteria aren't configured yet.
+      $('.datatables-screening tbody').on('click', '.criteria-warning', function () {
+        if (typeof window.releaseWarningAlert === 'function') {
+          window.releaseWarningAlert({
+            title: t.criteriaNotConfiguredTitle,
+            message: t.criteriaNotConfiguredMessage,
+          });
+        }
+      });
 
       // Export button handlers
       $('#exportExcel').on('click', () => dt_screening.button('.buttons-excel').trigger());

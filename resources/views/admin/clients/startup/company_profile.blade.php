@@ -162,8 +162,8 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
   @include('admin.clients.startup.partials._startup_screening_canvas')
 @endif
 
-<div class="content-wrapper position-relative">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="position-relative">
+  <div class="">
     <div class="row">
 			@if( session()->has('success') )
 			<div class="col-md-12 mb-2">
@@ -182,57 +182,52 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
 			</div>
 			@endif
 		</div>
-    @if($_user->hasRole('Judger'))
-      <div class="d-flex align-items-center gap-3 mb-6">
-        <a id="save-screening-btn" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
-          <i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-md text-dark"></i>
-        </a>
-        <a id="save-screening-btn" class="d-flex align-items-center gap-2 text-capitalize">
-          <i class="ti ti-gavel fs-4 text-primary"></i>
-          <strong class="text-dark">{{ __('admin.Screening') }}</strong>
-        </a>
-        <i class="ti ti-chevrons-{{ $l== 'en' ? 'right' : 'left' }}"></i>
-        <div class="d-flex align-items-center gap-2 text-capitalize">
-          <i class="ti ti ti-file-text fs-4 text-primary"></i>
-          <strong class="text-dark">{{ __('admin.Company profile') }}</strong>
-        </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-md-center mb-4">
+      <div class="d-flex align-items-center mb-3 mb-md-0">
+        <h4 class="mb-0">{{ __('startup.startup_profile_heading') }}</h4>
+        <h6 class="mb-0 ms-2">
+          ( {{ $company && $company->CreatedTax == '1' ? __('startup.registered') : __('startup.not_registered') }} )
+        </h6>
       </div>
-    @else
-      <div class="d-flex flex-wrap justify-content-between align-items-md-center mb-4">
-        <div class="d-flex align-items-center mb-3 mb-md-0">
-          <h4 class="fw-bold mb-0">{{ __('startup.startup_profile_heading') }}</h4>
-          <h6 class="mb-0 ms-2">
-            ( {{ $company && $company->CreatedTax == '1' ? __('startup.registered') : __('startup.not_registered') }} )
-          </h6>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-          @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
-            <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-white text-primary shadow-sm border">
-              {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
-            </a>
-          @else
-            <button data-bs-toggle="modal" data-bs-target="#MessageModal" class="btn btn-label-primary">
-              {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
-            </button>
-          @endif
-        </div>
+      <div class="d-flex align-items-center gap-3">
+        @if( $_user->hasAnyRole('Admin') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
+          <a href="/dashboard/myCompany/{{ $company->id }}" class="btn btn-outline-primary">
+            {{ __('startup.edit_info') }} <i class="ti ti-settings ms-2"></i>
+          </a>
+        @else
+          <button data-bs-toggle="modal" data-bs-target="#MessageModal" class="btn btn-label-primary">
+            {{ __('admin.Contact') }} <i class="ti ti-message ms-2"></i>
+          </button>
+        @endif
+        @php $mvpLink = trim((string) ($company->mvp_prototype_link ?? '')); @endphp
+        @if ($mvpLink !== '')
+        <a href="{{ $mvpLink }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary shadow-sm border">
+          {{ __('startup.view_prototype') }} <i class="ti ti-eye ms-2"></i>
+        </a>
+        @endif
       </div>
-    @endif
+    </div>
 
     @include('admin.clients.startup.partials._startup_info')
+
+    @php
+      $activeKey = request()->has('valuation_date') ? 5 : 0;
+    @endphp
     
     <nav class="nav-align-top mb-8">
-      <ul class="nav nav-pills flex-column flex-md-row gap-2 gap-lg-0" role="tablist">
+      <ul class="nav nav-pills flex-column flex-lg-row flex-lg-nowrap overflow-x-auto gap-2 gap-lg-0" role="tablist">
         @foreach ($pills as $key => $pill)
           <li class="nav-item">
-            <a href="#{{ $pill }}" 
-              class="nav-link {{$key == 0 ? 'active' : ''}}" 
+            <a
+              href="#{{ $pill }}"
+              class="nav-link px-4 {{ $key === $activeKey ? 'active' : '' }}"
               data-bs-toggle="tab"
-              role="tab" 
-              aria-controls="{{ $pill }}" 
-              aria-selected="true" 
+              role="tab"
+              aria-controls="{{ $pill }}"
+              aria-selected="true"
             >
-              <i class="ti-sm ti ti-{{ $pillsIcons[$key] }} me-1_5"></i>
+              <i class="ti-sm ti ti-{{ $pillsIcons[$key] }} me-1"></i>
               {{ __('startup.' . $pill) }}
             </a>
           </li>
@@ -242,18 +237,88 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
 
     <div class="tab-content p-0 rounded mb-6">
       <!-- Overview Section -->
-      <section class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+      <section class="tab-pane fade {{ $activeKey == 0 ? 'show active' : '' }}" id="overview" role="tabpanel" aria-labelledby="overview-tab">
         @include('admin.clients.startup.partials._startup_overview')
-        @include('admin.clients.startup.partials._startup_about')
       </section>
       
       <!-- Milestones Section -->
       <section class="tab-pane fade" id="milestones" role="tabpanel" aria-labelledby="milestones-tab">
         @include('admin.clients.startup.partials._startup_milestones')
       </section>
-      
+
       <!-- Team Section -->
       <section class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
+        <h5 class="mb-4">{{ __('startup.employees_statistics') }}</h5>
+        <div class="row g-6 mb-6">
+          @foreach ($employeesKpis as $kpi)
+            <div class="col-md-4">
+              <div class="card h-100 card-border-shadow-{{ $kpi['color'] }}">
+                <div class="card-body">
+
+                  {{-- Header: icon + value --}}
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-4">
+                      <span class="avatar-initial rounded bg-label-{{ $kpi['color'] }}">
+                        <i class="ti {{ $kpi['icon'] }} ti-28px"></i>
+                      </span>
+                    </div>
+                    <h4 class="mb-0">{{ $kpi['value'] }}</h4>
+                  </div>
+
+                  {{-- Label --}}
+                  <p class="mb-1">{{ $kpi['title'] }}</p>
+
+                  {{-- Sub-row: split (total) or percentage (male/female) --}}
+                  @if ($kpi['type'] === 'split')
+                    @if ($kpi['show_bar'])
+                      <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        @if ($kpi['has_male'])
+                          <span class="badge bg-label-primary">
+                            <i class="ti ti-gender-male me-1"></i>{{ $kpi['male_value'] }}M
+                          </span>
+                        @endif
+                        @if ($kpi['has_female'])
+                          <span class="badge bg-label-info">
+                            <i class="ti ti-gender-female me-1"></i>{{ $kpi['female_value'] }}F
+                          </span>
+                        @endif
+                        <small class="text-muted">
+                          @if ($kpi['has_male'] && $kpi['has_female'])
+                            {{ $kpi['male_pct'] }}% / {{ $kpi['female_pct'] }}%
+                          @elseif ($kpi['has_male'])
+                            {{ $kpi['male_pct'] }}%
+                          @else
+                            {{ $kpi['female_pct'] }}%
+                          @endif
+                        </small>
+                      </div>
+                      <div class="progress" style="height: 5px;">
+                        @if ($kpi['has_male'])
+                          <div class="progress-bar bg-primary" style="width: {{ $kpi['male_pct'] }}%"></div>
+                        @endif
+                        @if ($kpi['has_female'])
+                          <div class="progress-bar bg-info" style="width: {{ $kpi['female_pct'] }}%"></div>
+                        @endif
+                      </div>
+                    @endif
+                  @else
+                    @if (!$kpi['na'])
+                      <p class="mb-2">
+                        <span class="badge bg-label-{{ $kpi['color'] }}">{{ $kpi['pct'] }}%</span>
+                        <small class="text-muted ms-1">{{ __('startup.of_total') }}</small>
+                      </p>
+                      <div class="progress" style="height: 3px;">
+                        <div class="progress-bar bg-{{ $kpi['color'] }}" style="width: {{ $kpi['pct'] }}%"></div>
+                      </div>
+                    @endif
+                  @endif
+
+                </div>
+              </div>
+            </div>
+          @endforeach
+        </div>
+
         <div class="row">
           @include('admin.clients.startup.partials._startup_founders')
           @include('admin.clients.startup.partials._startup_shareholders')
@@ -279,7 +344,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
       </section>
       
       <!-- Financial Section -->
-      <section class="tab-pane fade" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
+      <section class="tab-pane fade {{ $activeKey == 5 ? 'show active' : '' }}" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
         @include('admin.clients.startup.partials._startup_financial_report')
       </section>
     </div>
@@ -538,9 +603,9 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
   </script>
 
   <script>
-    $('#save-screening-btn').on('click', function() {
-      $('#warningModal').modal('show');
-    });
+    // $('#save-screening-btn').on('click', function() {
+    //   $('#warningModal').modal('show');
+    // });
   </script>
 
   @if( $_user->hasRole('Judger') && !is_null( $evaluationForm ) && !empty( $evaluationForm ) && $evaluationForm->isPublished == false )
@@ -607,6 +672,8 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         if (type === 'publish') {
           let missingScores = false;
           const scoreSelects = document.querySelectorAll('.score-select');
+          const finalComments = document.getElementById('final_comments');
+
           scoreSelects.forEach(select => {
             if (!select.value || select.value === '') {
               missingScores = true;
@@ -617,10 +684,24 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
           });
 
           if (missingScores) {
-            alert('{{ __("admin.please_select_score") }}');
-            // Navigate to the criteria tab if not already there
+            releaseWarningAlert({
+              title: '{{ __("admin.required_evaluation_scores_message") }}',
+            });
+            // Navigate to the criteria tab 
             document.getElementById('pills-screening-criteria-tab').click();
             return;
+          }
+
+          if (finalComments && finalComments.value.trim() === '') {
+            finalComments.classList.add('is-invalid');
+            releaseWarningAlert({
+              title: '{{ __("admin.required_evaluation_comment_message") }}',
+            });
+            // Navigate to the final comments tab
+            document.getElementById('pills-final-comments-tab').click();
+            return;
+          } else if (finalComments) {
+            finalComments.classList.remove('is-invalid');
           }
         }
 
@@ -643,40 +724,43 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
           url: url,
           data: result,
           success: function(response) {
-            // Reset buttons
+            // Reset buttons only on draft; on successful publish keep disabled until reload
             if (type === 'draft') {
               saveBtn.innerHTML = originalSaveBtnHtml;
               saveBtn.disabled = false;
-            } else {
+            } else if (!response.status) {
               publishBtn.innerHTML = originalPublishBtnHtml;
               publishBtn.disabled = false;
             }
-            
+
             // Update evaluation view with latest data
             if (typeof updateEvaluationView === 'function') {
               updateEvaluationView();
             }
-            
+
             // Navigate to the evaluation tab to show the results
             document.getElementById('pills-view-evaluation-tab').click();
-            
+
             // Show success message
-            const successMsg = type === 'publish' 
-              ? '{{ __("admin.Evaluation published successfully") }}' 
+            const successMsg = type === 'publish'
+              ? '{{ __("admin.Evaluation published successfully") }}'
               : '{{ __("admin.Evaluation saved successfully") }}';
 
-            if (!response.status) {
+            if( response.status ) {
+              releaseSuccessAlert({
+                title: '{{ __("admin.Success") }}',
+                message: successMsg,
+              });
+              if (type === 'publish') {
+                setTimeout(function() { window.location.reload(); }, 2500);
+              }
+            } else {
               releaseFailureAlert({
                 title: '{{ __("admin.Error") }}',
                 message: response.message || '{{ __("admin.unexpected_error") }}',
               });
               return;
             }
-            
-            releaseSuccessAlert({
-              title: '{{ __("admin.Success") }}',
-              message: successMsg,
-            });
           },
           error: function(xhr, status, error) {
             const errorMsg = xhr?.responseJSON?.message || error?.message || '{{ __("admin.unexpected_error") }}';
@@ -698,521 +782,6 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         });
       }
     </script>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Handle dropdown selection for sub-criteria
-        const subcriteriaSelects = document.querySelectorAll('.subcriteria-select');
-        subcriteriaSelects.forEach(select => {
-          select.addEventListener('change', function() {
-            const target = this.value;
-            const tabElement = document.querySelector(target);
-            const tabLink = document.querySelector(`[data-bs-target="${target}"]`);
-            
-            if (tabElement && tabLink) {
-              // Deactivate all tabs
-              const allTabs = document.querySelectorAll(`.subcriteria-tabs .nav-link[data-bs-target^="#tab${select.dataset.criteriaKey}_"]`);
-              allTabs.forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-              });
-              
-              // Deactivate all panes
-              const allPanes = document.querySelectorAll(`.tab-pane[id^="tab${select.dataset.criteriaKey}_"]`);
-              allPanes.forEach(pane => {
-                pane.classList.remove('show', 'active');
-              });
-              
-              // Activate the selected tab
-              tabLink.classList.add('active');
-              tabLink.setAttribute('aria-selected', 'true');
-              
-              // Activate the selected pane
-              tabElement.classList.add('show', 'active');
-            }
-          });
-        });
-        
-        // Auto-switch to dropdown mode when there are more than 4 sub-criteria
-        document.querySelectorAll('.subcriteria-container').forEach(container => {
-          const tabs = container.querySelectorAll('.nav-item');
-          if (tabs.length > 4) {
-            // Add class for many criteria to apply specific styles
-            container.classList.add('many-criteria');
-            
-            const dropdownContainer = container.querySelector('.subcriteria-dropdown');
-            const tabsContainer = container.querySelector('.subcriteria-tabs');
-            
-            // On mobile, show the dropdown (handled by CSS)
-            
-            // On desktop, make tabs scrollable
-            if (window.innerWidth > 992) {
-              // Add visual indicator if there are more tabs to scroll
-              const tabsNav = container.querySelector('.nav-tabs');
-              if (tabsNav) {
-                tabsNav.addEventListener('scroll', function() {
-                  checkScrollIndicators(tabsNav);
-                });
-                
-                // Initial check
-                setTimeout(() => checkScrollIndicators(tabsNav), 100);
-              }
-            }
-          }
-        });
-        
-        // Helper function to check if scroll indicators are needed
-        function checkScrollIndicators(element) {
-          const isScrollable = element.scrollWidth > element.clientWidth;
-          const isScrolledToEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
-          const isScrolledToStart = element.scrollLeft <= 10;
-          
-          element.classList.toggle('has-more-right', isScrollable && !isScrolledToEnd);
-          element.classList.toggle('has-more-left', isScrollable && !isScrolledToStart);
-        }
-        
-        // Sync tab changes with dropdown
-        document.querySelectorAll('.subcriteria-tabs .nav-link').forEach(tab => {
-          tab.addEventListener('shown.bs.tab', function(event) {
-            const targetId = event.target.dataset.bsTarget;
-            const criteriaKey = targetId.split('_')[0].replace('#tab', '');
-            const dropdown = document.getElementById('subcriteria-select-' + criteriaKey);
-            
-            if (dropdown) {
-              dropdown.value = targetId;
-            }
-          });
-        });
-
-        // Initialize real-time evaluation tab update
-        initializeEvaluationUpdater();
-      });
-
-      // Initialize real-time evaluation update functionality
-      function initializeEvaluationUpdater() {
-        // Get all form elements that need to be monitored
-        const scoreSelects = document.querySelectorAll('.score-select');
-        const commentTextareas = document.querySelectorAll('textarea[id^="comment_"]');
-        const finalCommentsTextarea = document.getElementById('final_comments');
-
-        // Add event listeners for real-time updates
-        scoreSelects.forEach(select => {
-          select.addEventListener('change', updateEvaluationTab);
-        });
-
-        commentTextareas.forEach(textarea => {
-          textarea.addEventListener('input', debounce(updateEvaluationTab, 500));
-          textarea.addEventListener('blur', updateEvaluationTab);
-        });
-
-        if (finalCommentsTextarea) {
-          finalCommentsTextarea.addEventListener('input', debounce(updateEvaluationTab, 500));
-          finalCommentsTextarea.addEventListener('blur', updateEvaluationTab);
-        }
-
-        // Initial update of evaluation tab
-        updateEvaluationTab();
-      }
-
-      // Debounce function to prevent excessive updates while typing
-      function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-          const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-          };
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-        };
-      }
-
-      // Main function to update the evaluation tab
-      function updateEvaluationTab() {
-        updateCategoryPercentages();
-        updateEvaluationComments();
-        updateFinalCommentsDisplay();
-      }
-
-      // Update category percentage scores in real-time
-      function updateCategoryPercentages() {
-        // Get all categories from the evaluation form
-        const evaluationCategories = document.querySelectorAll('#pills-view-evaluation .row.mb-6 .col-3');
-        
-        evaluationCategories.forEach((categoryElement, categoryIndex) => {
-          const categoryTitle = categoryElement.querySelector('h6');
-          if (!categoryTitle) return;
-          
-          const categoryName = categoryTitle.textContent.trim();
-          
-          // Find all score inputs for this category
-          let totalScore = 0;
-          let scoreCount = 0;
-          
-          // Get all criteria containers
-          const criteriaContainers = document.querySelectorAll('.content');
-          
-          criteriaContainers.forEach(container => {
-            const containerCategoryName = container.querySelector('.content-header h6');
-            if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
-              // Find all score selects within this criteria container
-              const scoreSelects = container.querySelectorAll('.score-select');
-              scoreSelects.forEach(select => {
-                if (select.value && select.value !== '') {
-                  totalScore += parseInt(select.value);
-                  scoreCount++;
-                }
-              });
-            }
-          });
-          
-          // Calculate percentage
-          const percentage = scoreCount > 0 ? ((totalScore / (scoreCount * 5)) * 100) : 0;
-          
-          // Update the display
-          const percentageDisplay = categoryElement.querySelector('.fs-5.fw-bold.text-dark');
-          if (percentageDisplay) {
-            percentageDisplay.textContent = percentage.toFixed(2);
-          }
-        });
-      }
-
-      // Update evaluation comments section in real-time
-      function updateEvaluationComments() {
-        const commentSections = document.querySelectorAll('#pills-view-evaluation .col-12.mb-5.border-bottom');
-        
-        commentSections.forEach(section => {
-          const categoryHeader = section.querySelector('h5');
-          if (!categoryHeader) return;
-          
-          const categoryName = categoryHeader.textContent.replace(' {{ __("admin.Comments") }}', '').trim();
-          const commentItems = section.querySelectorAll('.d-flex.flex-column.mb-4');
-          
-          commentItems.forEach((item, index) => {
-            const subcriteriaNameElement = item.querySelector('.fs-5.mb-0.text-dark');
-            if (!subcriteriaNameElement) return;
-            
-            const subcriteriaName = subcriteriaNameElement.textContent.trim();
-            
-            // Find the corresponding comment textarea
-            let matchingComment = '{{ __("admin.No comment provided") }}';
-            
-            // Look through all criteria containers
-            const criteriaContainers = document.querySelectorAll('.content');
-            
-            criteriaContainers.forEach(container => {
-              const containerCategoryName = container.querySelector('.content-header h6');
-              if (containerCategoryName && containerCategoryName.textContent.trim() === categoryName) {
-                // Find the subcriteria tabs
-                const subcriteriaButtons = container.querySelectorAll('.nav-link');
-                subcriteriaButtons.forEach(button => {
-                  const buttonText = button.textContent.trim();
-                  if (buttonText === subcriteriaName) {
-                    // Get the target tab ID
-                    const targetId = button.getAttribute('data-bs-target');
-                    if (targetId) {
-                      const targetTab = document.querySelector(targetId);
-                      if (targetTab) {
-                        const textarea = targetTab.querySelector('textarea[id^="comment_"]');
-                        if (textarea && textarea.value.trim()) {
-                          matchingComment = textarea.value.trim();
-                        }
-                      }
-                    }
-                  }
-                });
-              }
-            });
-            
-            // Update the comment display
-            const commentDisplay = item.querySelector('.text-light.line-clamp-3');
-            if (commentDisplay) {
-              commentDisplay.textContent = matchingComment;
-            }
-          });
-        });
-      }
-
-      // Update final comments display in real-time
-      function updateFinalCommentsDisplay() {
-        return;
-        const finalCommentsTextarea = document.getElementById('final_comments');
-        const finalCommentsDisplay = document.querySelector('#pills-view-evaluation .col-12:last-child .text-light.line-clamp-3');
-        
-        if (finalCommentsTextarea && finalCommentsDisplay) {
-          const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-          finalCommentsDisplay.textContent = finalCommentText;
-        }
-        
-        // Alternative selector in case the first one doesn't work
-        if (finalCommentsTextarea && !finalCommentsDisplay) {
-          const alternativeDisplay = document.querySelector('#pills-view-evaluation h5:contains("{{ __("admin.Final Comments")}}") + small');
-          if (alternativeDisplay) {
-            const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-            alternativeDisplay.textContent = finalCommentText;
-          }
-        }
-        
-        // Most reliable approach - find by the heading text
-        if (finalCommentsTextarea) {
-          const headings = document.querySelectorAll('#pills-view-evaluation h5');
-          headings.forEach(heading => {
-            if (heading.textContent.includes('{{ __("admin.Final Comments") }}')) {
-              const commentDisplay = heading.nextElementSibling;
-              if (commentDisplay && commentDisplay.tagName === 'SMALL') {
-                const finalCommentText = finalCommentsTextarea.value.trim() || '{{ __("admin.No final comments provided") }}';
-                commentDisplay.textContent = finalCommentText;
-              }
-            }
-          });
-        }
-      }
-    </script>
-
-    <script>
-      function saveScreening() {
-        // Go back
-        window.history.back();
-      }
-    </script>
-
-    {{-- <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initial update of the evaluation view with existing data
-        updateEvaluationView();
-        
-        // Update evaluation view when score or comment changes
-        const scoreSelects = document.querySelectorAll('.score-select');
-        const commentAreas = document.querySelectorAll('textarea[id^="comment_"]');
-        const finalCommentArea = document.getElementById('final_comments');
-        const nextButtons = document.querySelectorAll('.btn-next');
-        const tabLinks = document.querySelectorAll('[data-bs-toggle="pill"]');
-        
-        // Add event listeners
-        scoreSelects.forEach(select => {
-          select.addEventListener('change', updateEvaluationView);
-        });
-        
-        commentAreas.forEach(textarea => {
-          textarea.addEventListener('blur', updateEvaluationView);
-        });
-        
-        if (finalCommentArea) {
-          finalCommentArea.addEventListener('blur', updateEvaluationView);
-        }
-        
-        nextButtons.forEach(button => {
-          button.addEventListener('click', updateEvaluationView);
-        });
-        
-        // Previous buttons should also update the view
-        const prevButtons = document.querySelectorAll('.btn-prev');
-        prevButtons.forEach(button => {
-          button.addEventListener('click', updateEvaluationView);
-        });
-        
-        // View Evaluation button in wizard
-        const viewEvalButtons = document.querySelectorAll('.view-evaluation-btn');
-        viewEvalButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            updateEvaluationView();
-            document.getElementById('pills-view-evaluation-tab').click();
-          });
-        });
-        
-        tabLinks.forEach(tab => {
-          tab.addEventListener('click', function(e) {
-            if (e.target.getAttribute('data-bs-target') === '#pills-view-evaluation') {
-              updateEvaluationView();
-            }
-          });
-        });
-        
-        // Save and Publish buttons trigger evaluation update
-        const saveBtn = document.getElementById('save_screening_btn');
-        const publishBtn = document.getElementById('publish_screening_btn');
-        
-        if (saveBtn) {
-          saveBtn.addEventListener('click', updateEvaluationView);
-        }
-        
-        if (publishBtn) {
-          publishBtn.addEventListener('click', updateEvaluationView);
-        }
-      });
-                                
-      function updateEvaluationView() {
-        // Collect all evaluation data
-        const scoreSelects = document.querySelectorAll('.score-select');
-        const commentAreas = document.querySelectorAll('textarea[id^="comment_"]');
-        const finalCommentArea = document.getElementById('final_comments');
-        
-        // Get container elements
-        const evaluationSummaryContainer = document.getElementById('evaluation-summary-container');
-        const finalCommentsDisplay = document.getElementById('final-comments-display');
-        const noEvaluationsMessage = document.getElementById('no-evaluations-message');
-        const noFinalComment = document.getElementById('no-final-comment');
-        
-        // Summary statistics
-        const totalScoreElement = document.getElementById('total-score');
-        const totalCategoriesElement = document.getElementById('total-categories');
-        const totalCriteriaElement = document.getElementById('total-criteria');
-        
-        // Collect data from the form
-        let hasEvaluations = false;
-        let totalScore = 0;
-        let scoredCriteria = 0;
-        
-        // Create a comprehensive data structure for evaluations
-        const evaluationsData = {};
-        const categories = new Set();
-        
-        // Process scores and comments together to build a combined data structure
-        scoreSelects.forEach(select => {
-          const criteriaId = select.id.split('_')[1];
-          const criteriaName = select.closest('.tab-pane').querySelector('.nav-link.active').textContent.trim();
-          const categoryName = select.closest('.content').querySelector('.content-header h6').textContent.trim();
-          
-          // Initialize category and criteria in the data structure if they don't exist
-          if (!evaluationsData[categoryName]) {
-            evaluationsData[categoryName] = {};
-          }
-          
-          if (!evaluationsData[categoryName][criteriaName]) {
-            evaluationsData[categoryName][criteriaName] = {
-              criteriaId,
-              score: '',
-              comment: ''
-            };
-          }
-          
-          // Add score if it exists
-          if (select.value) {
-            hasEvaluations = true;
-            totalScore += parseInt(select.value);
-            scoredCriteria++;
-            categories.add(categoryName);
-            evaluationsData[categoryName][criteriaName].score = select.value;
-          }
-        });
-        
-        // Process comments
-        commentAreas.forEach(textarea => {
-          const criteriaId = textarea.id.split('_')[1];
-          const criteriaName = textarea.closest('.tab-pane').querySelector('.nav-link.active').textContent.trim();
-          const categoryName = textarea.closest('.content').querySelector('.content-header h6').textContent.trim();
-          
-          // Initialize category and criteria in the data structure if they don't exist
-          if (!evaluationsData[categoryName]) {
-            evaluationsData[categoryName] = {};
-          }
-          
-          if (!evaluationsData[categoryName][criteriaName]) {
-            evaluationsData[categoryName][criteriaName] = {
-              criteriaId,
-              score: '',
-              comment: ''
-            };
-          }
-          
-          // Add comment if it exists
-          if (textarea.value.trim()) {
-            hasEvaluations = true;
-            evaluationsData[categoryName][criteriaName].comment = textarea.value.trim();
-          }
-        });
-        
-        // Update evaluation summary section - combined scores and comments
-        if (hasEvaluations) {
-          if (noEvaluationsMessage) noEvaluationsMessage.style.display = 'none';
-          let evalHTML = '';
-          
-          // For each category
-          Object.keys(evaluationsData).forEach(categoryName => {
-            // Calculate category total score
-            let categoryTotalScore = 0;
-            let categoryScoreCount = 0;
-            Object.values(evaluationsData[categoryName]).forEach(criteria => {
-              if (criteria.score) {
-                categoryTotalScore += parseInt(criteria.score);
-                categoryScoreCount++;
-              }
-            });
-            
-            // Create category header with total score
-            evalHTML += `
-              <div class="card mb-4">
-                <div class="card-header bg-light">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-primary">${categoryName}</h5>
-                    ${categoryScoreCount > 0 ? 
-                      `<div class="d-flex align-items-center gap-2">
-                        <span class="text-secondary">{{ __('admin.Category Score') }}:</span>
-                        <span class="badge bg-primary rounded-pill fs-6">${categoryTotalScore}/${categoryScoreCount * 5}</span>
-                      </div>` : ''}
-                  </div>
-                </div>
-                <div class="card-body">
-            `;
-            
-            // For each criteria in this category
-            Object.keys(evaluationsData[categoryName]).forEach(criteriaName => {
-              const criteria = evaluationsData[categoryName][criteriaName];
-              
-              evalHTML += `
-                <div class="border-bottom pb-3 mb-3">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0 fw-bold">${criteriaName}</h6>
-                    ${criteria.score ? 
-                      `<span class="badge bg-primary rounded-pill">${criteria.score}/5</span>` : 
-                      `<span class="badge bg-label-secondary">{{ __('admin.No Score') }}</span>`}
-                  </div>
-              `;
-              
-              // Add comment if it exists
-              if (criteria.comment) {
-                evalHTML += `
-                  <div class="mt-2">
-                    <p class="mb-0 text-dark">${criteria.comment}</p>
-                  </div>
-                `;
-              } else {
-                evalHTML += `
-                  <div class="mt-2">
-                    <em class="text-muted">{{ __('admin.No comment provided') }}</em>
-                  </div>
-                `;
-              }
-              
-              evalHTML += `</div>`;
-            });
-            
-            evalHTML += `
-                </div>
-              </div>
-            `;
-          });
-          
-          evaluationSummaryContainer.innerHTML = evalHTML;
-        } else {
-          if (noEvaluationsMessage) noEvaluationsMessage.style.display = 'block';
-        }
-        
-        // Update final comments
-        if (finalCommentArea && finalCommentArea.value.trim()) {
-          if (noFinalComment) noFinalComment.style.display = 'none';
-          finalCommentsDisplay.innerHTML = finalCommentArea.value.trim();
-        } else {
-          if (noFinalComment) noFinalComment.style.display = 'block';
-        }
-        
-        // Update summary statistics
-        if (totalScoreElement) totalScoreElement.textContent = totalScore;
-        if (totalCategoriesElement) totalCategoriesElement.textContent = categories.size;
-        if (totalCriteriaElement) totalCriteriaElement.textContent = scoredCriteria;
-      }
-    </script> --}}
-
   @endif
 
   <script>

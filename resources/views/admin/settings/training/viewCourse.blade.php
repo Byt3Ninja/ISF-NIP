@@ -6,8 +6,8 @@
 @section('content')
 
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-header">
         <h5 class="content-header-title mb-4">{{ __('cycles.all courses') }}</h5>
       </div>

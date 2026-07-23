@@ -55,6 +55,41 @@ class JudgerScreeningController extends Controller
             $companies = collect(DB::select($companies_q, $bindings));
         }
 
+        // Keep only startups the judge is actually assigned to AT their CURRENT
+        // step. The query above matches any assigned company whose current step
+        // is one the judge screens *somewhere*, which leaked startups the judge
+        // screened in an earlier step but no longer judges after they advanced
+        // (e.g. screened in Initial, moved to Final under different judges). For
+        // an initial step (stype 2) the judge must be in screenings.users for
+        // that exact step; for a final step (stype 5) the judge must be in the
+        // finalscreenings.judges array for (step, company). This mirrors the
+        // judger dashboard, which already scopes by current-step assignment.
+        $screeningsByStep = $screenings->groupBy('step_id');
+        $finalAssignedByStep = \App\Finalscreening::whereIn('step_id', $companies->pluck('step_id')->unique()->filter()->toArray())
+            ->get()
+            ->filter(function ($f) use ($user_id) {
+                $judges = is_array($f->judges) ? $f->judges : (json_decode($f->judges, true) ?: []);
+                return in_array((int) $user_id, array_map('intval', $judges), true);
+            })
+            ->groupBy('step_id');
+
+        $companies = $companies->filter(function ($c) use ($screeningsByStep, $finalAssignedByStep, $user_id) {
+            $stepId = (int) $c->step_id;
+            if ((int) $c->step_type === 2) {
+                $assignedIds = ($screeningsByStep->get($stepId) ?? collect())
+                    ->pluck('users')
+                    ->map(fn ($u) => is_array($u) ? $u : (json_decode($u, true) ?: []))
+                    ->flatten()->map(fn ($i) => (int) $i)->all();
+                return in_array((int) $c->company_id, $assignedIds, true);
+            }
+            if ((int) $c->step_type === 5) {
+                $assignedCompanyIds = ($finalAssignedByStep->get($stepId) ?? collect())
+                    ->pluck('company_id')->map(fn ($i) => (int) $i)->all();
+                return in_array((int) $c->company_id, $assignedCompanyIds, true);
+            }
+            return false;
+        })->values();
+
         $l = app()->getLocale();
         $companies = $companies->map(function( $c ) use ( $l ) {
             $company = new stdClass;
@@ -161,13 +196,24 @@ class JudgerScreeningController extends Controller
             ],
         ]); */
 
+        // Show EVERY assigned startup regardless of the evaluation form state.
+        // A startup is "evaluatable" only when its evaluation form is published
+        // AND has at least one criterion configured. When it is not evaluatable
+        // (no evaluation record, still draft, or zero criteria) we keep the
+        // startup in the list but swap the gavel for a warning icon, which opens
+        // a popup explaining that evaluation cannot be performed yet. (GV-3786)
         $companies = $companies->map(function( $company ) {
             $step_id = $company->step->id;
-            $company->evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
+            $evaluation = ScreeningEvaluation::getEvaluationData( $step_id );
+            $company->evaluation = $evaluation;
+
+            $status = trim( strtolower( $evaluation?->status ?? 'draft' ) );
+            $criteriaCount = $evaluation?->categories ? $evaluation->categories->count() : 0;
+            $company->evaluatable = ( $status == 'published' && $criteriaCount > 0 );
+
+            if( ! $company->evaluatable ) { $company->icon = 'ti ti-alert-triangle'; }
+
             return $company;
-        })->filter(function( $company ) {
-            $status = trim( strtolower( $company?->evaluation?->status ) ) ?? 'draft';
-            return $status == 'published' ? true : false;
         })->values();
 
         $statusCounts = $companies->groupBy('status')->map->count();
@@ -196,6 +242,8 @@ class JudgerScreeningController extends Controller
     {
         $user = auth()->user();
         $user_id = $user->id;
+
+        $successMsg = $type === 'publish' ? __('admin.Evaluation published successfully') : __('admin.Evaluation saved successfully');
         if( $type == $request->type )
         {
             $company = Company::find( $request->program );
@@ -278,7 +326,7 @@ class JudgerScreeningController extends Controller
                         }
                         if( count( $toCreate ) ) { ScreeningEvaluationResults::insert( $toCreate ); }
                         if( count( $commentToCreate ) ) { FormDataJudgesComments::insert( $commentToCreate ); }
-                        return response()->json(['status' => true, 'title' => 'Success', 'message' => 'Evaluation form saved successfully'], 200);
+                        return response()->json(['status' => true, 'title' => __('admin.success'), 'message' => $successMsg], 200);
                     }
                 } else { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'Evaluation form is not published'], 200); }
             } else { return response()->json(['status' => false, 'title' => 'Error', 'message' => 'Unsupported evaluation form detected'], 200); }

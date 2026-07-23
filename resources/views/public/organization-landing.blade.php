@@ -58,6 +58,13 @@
     html {
       direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};
     }
+    .card-hover {
+      transition: box-shadow 0.25s ease, transform 0.25s ease;
+    }
+    .card-hover:hover {
+      box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08) !important;
+      transform: translateY(-2px);
+    }
   </style>
 
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
@@ -83,26 +90,27 @@
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="/vuexy/assets/js/front-config.js"></script>
 </head>
-
+ 
 @php
- $sections = [
-   ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
-   ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
-   ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
-   ['id' => 'partners', 'label' => __('admin.Partners'), 'visible' => $landingPage->partners_enabled && !empty($partnersWithUrls)],
-  ];
+$sections = [
+  ['id' => 'programs', 'label' => __('admin.Programs'), 'visible' => $landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0],
+  ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
+  ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
+  ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
+  ['id' => 'partners', 'label' => __('admin.Partners'), 'visible' => $landingPage->partners_enabled && !empty($partnersWithUrls)],
+];
 
-  if (!empty($customSections)) {
-    foreach ($customSections as $customSection) {
-      $sections[] = [
-        'id' => 'custom-' . $customSection->id,
-        'label' => $customSection->title,
-        'visible' => !empty($customSection->content),
-      ];
-    }
+if (!empty($customSections)) {
+  foreach ($customSections as $customSection) {
+    $sections[] = [
+      'id' => 'custom-' . $customSection->id,
+      'label' => $customSection->title,
+      'visible' => !empty($customSection->content),
+    ];
   }
+}
 
-  $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
+$colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
 @endphp
 
 <body>
@@ -133,9 +141,9 @@
             <!-- Brand -->
             <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center">
               @if($organization->img_url)
-                <img src="{{ $organization->imageUrl }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
+                <img src="{{ route('organizations.logo', $organization->img_url ?? '') }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded" />
               @endif
-              <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 10) }}</span>
+              <span class="app-brand-text text-dark fw-bold">{{ Str::limit($isRtl ? $organization->name_ar : $organization->name_en, 20) }}</span>
             </a>
           </div>
 
@@ -251,7 +259,7 @@
               <div class="me-6">
                 @if($organization->img_url)
                   <img 
-                    src="{{ $organization->imageUrl }}" 
+                    src="{{ route('organizations.logo', $organization->img_url ?? '') }}" 
                     alt="{{ $organization->name_en }}" 
                     width="50" 
                     height="50" 
@@ -274,14 +282,14 @@
             </div>
 
             <!-- Headline -->
-            <h1 class="fw-bold display-4 mb-3 text-dark">
+            {{-- <h1 class="fw-bold display-4 mb-3 text-dark">
               {{ __('admin.org_landing_heading') }}
-            </h1>
+            </h1> --}}
             
             <!-- Description -->
-            <h2 class="hero-sub-title h5 mb-6 mb-md-12 line-clamp-3">
-              {{ $organization->bio }}
-            </h2>
+            <h4 class="hero-sub-title mb-6 mb-md-12 text-break">
+              {{ Str::limit($organization->bio, 300) }}
+            </h4>
 
             <!-- Industries -->
             @if($organization->industries && $organization->industries->count() > 0)
@@ -293,26 +301,26 @@
                 @endforeach
               </div>
             @endif
-
+            
             <!-- CTA + Social -->
-            <div class="d-flex align-items-center flex-wrap">
-              <button class="btn btn-xl btn-primary mb-8 mb-md-4">
-                {{ __('admin.explore_programs') }}
-              </button>
-
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+              @if($landingPrograms->count() > 0)
+                <a href="#programs" class="btn btn-xl btn-primary mb-8 mb-md-4">
+                  {{ __('admin.explore_programs') }}
+                </a>
+              @endif
               @php
-                $socialLinks = [
-                  'x' => $organization->twitter_handle,
-                  'linkedin' => $organization->linkedin_company_url,
-                  'facebook' => $organization->facebook_page_url,
-                  'instagram' => $organization->instagram_profile_url,
-                  'tiktok' => $organization->tiktok_url,
-                  'youtube' => $organization->youtube_channel_url
-                ]
+$socialLinks = [
+  'x' => $organization->twitter_handle,
+  'linkedin' => $organization->linkedin_company_url,
+  'facebook' => $organization->facebook_page_url,
+  'instagram' => $organization->instagram_profile_url,
+  'tiktok' => $organization->tiktok_url,
+  'youtube' => $organization->youtube_channel_url
+]
               @endphp
-
               @if(array_filter($socialLinks))
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 m{{ $isRtl ? 'e' : 's' }}-lg-auto">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
                   <span class="text-dark me-2 d-block">{{ __('admin.follow_us') }}</span>
                   <div class="d-flex align-items-center gap-2">
                     @foreach ($socialLinks as $icon => $link)
@@ -351,7 +359,7 @@
                     aria-selected="{{ $loop->first ? 'true' : 'false' }}"
                   >
                     {{-- <i class="ti ti-{{ $tab['icon'] }} me-1"></i> --}}
-                    {{ $tab['label'] }}
+                    {{ Str::limit($tab['label'], 50) }}
                   </a>
                 </li>
               @endif
@@ -362,6 +370,234 @@
     </div>
   </div>
   <!--/ Navigation Pills -->
+
+  <!-- Programs Section -->
+  @if(isset($landingPage) && $landingPage->programs_enabled)
+  <section id="programs" class="section-py">
+    <div class="container">
+      @if($landingPage->programs_subtitle)
+        <div class="text-center mb-4">
+          <span class="badge bg-label-primary">{{ $landingPage->programs_subtitle }}</span>
+        </div>
+      @endif
+      @if($landingPage->programs_title)
+        <h4 class="text-center mb-1">
+          <span class="position-relative fw-extrabold z-1">
+            {{ $landingPage->programs_title }}
+            <img
+              src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+              alt="laptop charging"
+              class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+          </span>
+        </h4>
+      @endif
+      @if($landingPage->programs_description)
+        <p class="text-center mb-12">
+          {{ $landingPage->programs_description }}
+        </p>
+      @endif
+      
+      @if(isset($landingPrograms) && $landingPrograms->count() > 0)
+        <div class="swiper-programs-carousel overflow-hidden">
+          <div class="swiper" id="swiper-programs">
+            <div class="swiper-wrapper">
+              @foreach($landingPrograms as $program)
+                <div class="swiper-slide h-100">
+                  <div class="card h-100 border shadow-none mb-12" style="width: calc(100% - 24px); margin-inline-end: 24px;">
+                    <div class="card-body d-flex flex-column p-4">
+
+                      {{-- Logo + Type badge --}}
+                      @if($program->logo || $program->type)
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                          @if($program->logo)
+                            <div class="rounded-3 border bg-body-secondary d-flex align-items-center justify-content-center p-1"
+                                style="width: 56px; height: 56px; flex-shrink: 0;">
+                              <img src="{{ $program->logo }}"
+                                  alt="{{ $program->title }}"
+                                  style="width: 40px; height: 40px; object-fit: contain;" />
+                            </div>
+                          @endif
+                          @if($program->type)
+                            <span class="badge bg-label-secondary rounded-pill">
+                              {{ __('cycles.' . $program->type) }}
+                            </span>
+                          @endif
+                        </div>
+                      @endif
+
+                      {{-- Title --}}
+                      @if($program->title)
+                        <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35;">
+                          {{ $program->title }}
+                        </h5>
+                      @endif
+
+                      {{-- Description --}}
+                      @if($program->description)
+                        <p class="line-clamp-3 mb-0">
+                          {{ $program->description }}
+                        </p>
+                      @endif
+
+                      {{-- Push everything below to bottom --}}
+                      <div class="mt-auto">
+                        <hr class="opacity-25 my-3">
+
+                        {{-- Date + Location --}}
+                        @if($program->start || $program->location)
+                          <div class="d-flex flex-wrap gap-3 mb-4">
+                            @if($program->start)
+                              <div class="d-flex align-items-center gap-2">
+                                <div class="avatar">
+                                  <div class="avatar-initial rounded">
+                                    <i class="ti ti-calendar text-dark"></i>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div class="small text-secondary">
+                                    {{ __('admin.Program Duration') }}
+                                  </div>
+                                  <div class="fw-semibold">
+                                    {{ \Carbon\Carbon::parse($program->start)->format('M d') }}
+                                    @if($program->end)
+                                      – {{ \Carbon\Carbon::parse($program->end)->format('M d, Y') }}
+                                    @else
+                                      , {{ \Carbon\Carbon::parse($program->start)->format('Y') }}
+                                    @endif
+                                  </div>
+                                </div>
+                              </div>
+                            @endif
+
+                            @if($program->location)
+                              <div class="d-flex align-items-center gap-2">
+                                <div class="avatar">
+                                  <div class="avatar-initial rounded">
+                                    <i class="ti ti-map-pin text-dark"></i>
+                                  </div>
+                                </div>
+                                <div>
+                                  <div class="small text-secondary">
+                                    {{ __('admin.Location') }}
+                                  </div>
+                                  <div class="fw-semibold">
+                                    {{ $program->location }}
+                                  </div>
+                                </div>
+                              </div>
+                            @endif
+                          </div>
+                        @endif
+
+                        {{-- Application status + CTA --}}
+                        @php
+      $firstFormStep = $program->steps()->where('stype', 1)->orderBy('arr', 'asc')->first();
+
+      if ($firstFormStep) {
+        $stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
+        $stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
+
+        $now = now();
+
+        $isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+        $isUpcoming = $stepStart !== null && $now->lt($stepStart);
+        $isClosed = $stepEnd !== null && $now->gt($stepEnd);
+      } else {
+        $isOpen = false;
+        $isUpcoming = false;
+        $isClosed = true;
+        $stepStart = null;
+        $stepEnd = null;
+      }
+
+      if ($isOpen) {
+        $statusClass = 'bg-label-success';
+        $dotColor = 'success';
+        $statusIcon = 'hourglass';
+        $statusLabel = $l == 'ar'
+          ? "مفتوح حتى " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . "."
+          : "Open Till " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . ".";
+        $btnText = $l == 'ar' ? 'تقدم الآن.' : 'Apply Now.';
+      } elseif ($isUpcoming) {
+        $statusClass = 'bg-label-warning';
+        $dotColor = 'warning';
+        $statusIcon = 'hourglass-empty';
+        $statusLabel = $l == 'ar'
+          ? "سيفتح في " . ($stepStart ? $stepStart->format('Y-m-d') : '') . "."
+          : "Will open in " . ($stepStart ? $stepStart->format('Y-m-d') : '') . ".";
+        $btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications Open Soon';
+      } else {
+        $statusClass = 'bg-label-danger';
+        $dotColor = 'danger';
+        $statusIcon = 'lock';
+        $statusLabel = $l == 'ar' ? "مغلق." : "Closed.";
+        $btnText = $l == 'ar' ? 'التقديم مغلق.' : 'Applications Closed.';
+      }
+                        @endphp
+
+                        <div class="d-flex align-items-center gap-2 mb-6">
+                          <div class="avatar">
+                            <div class="avatar-initial rounded">
+                              <i class="ti ti-{{ $statusIcon }} text-dark"></i>
+                            </div>
+                          </div>
+                          <div>
+                            <div class="small text-secondary">
+                              {{ __('admin.application_status') }}
+                            </div>
+                            <div class="fw-semibold">
+                              {{ $statusLabel }}
+                            </div>
+                          </div>
+                        </div>
+
+                        @if($isOpen && $program->public_slug)
+                          <a href="/{{ $organization->short_code ?? $organization->slug }}/program/{{ $program->public_slug }}"
+                            class="btn btn-primary w-100 fw-semibold"
+                            style="border-radius: 10px; padding: 10px;">
+                            {{ $btnText }}
+                            <i class="ti ti-arrow-narrow-{{ $isRtl ? 'left' : 'right' }} ms-2"></i>
+                          </a>
+                        @elseif($isUpcoming)
+                          <button class="btn btn-label-warning w-100 fw-semibold" disabled>
+                            {{ $btnText }}
+                          </button>
+                        @else
+                          <button class="btn btn-label-secondary w-100 fw-semibold" disabled>
+                            {{ $btnText }}
+                          </button>
+                        @endif
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              @endforeach
+            </div>
+            <!-- Pagination -->
+            <div class="swiper-pagination pt-4"></div>
+          </div>
+        </div>
+    
+        <!-- Navigation Controls -->
+        <div class="programs-nav-controls text-center pt-4" id="programs-nav-controls">
+          <button id="programs-previous-btn" class="btn btn-label-primary programs-btn programs-previous-btn me-4 scaleX-n1-rtl" type="button">
+            <i class="ti ti-chevron-left ti-md"></i>
+          </button>
+          <button id="programs-next-btn" class="btn btn-label-primary programs-btn programs-next-btn scaleX-n1-rtl" type="button">
+            <i class="ti ti-chevron-right ti-md"></i>
+          </button>
+        </div>
+      @else
+        <div class="text-center py-8">
+          <h5 class="text-muted mb-0">
+            {{ $l == 'ar' ? 'لا توجد برامج متاحة حالياً.' : 'No programs are available right now.' }}
+          </h5>
+        </div>
+      @endif
+    </div>
+  </section>
+  @endif
 
   <!-- How It Works Section -->
   @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
@@ -598,7 +834,7 @@
             <div class="swiper" id="swiper-partners">
               <div class="swiper-wrapper">
                 @foreach($partnersWithUrls as $partner)
-                  <div class="swiper-slide">
+                  <div class="swiper-slide me-4">
                     <div class="card h-100">
                       <div class="card-body text-center d-flex flex-column justify-content-between h-100">
                         <div class="mb-4">
@@ -677,9 +913,9 @@
   <section id="landingContact" class="section-py bg-body landing-contact">
     <div class="container">
       <div class="text-center mb-4">
-        <span class="badge bg-label-primary">{{ __('admin.Contact us') }}</span>
+        <span class="badge bg-label-primary">{{ __('admin.Contact') }}</span>
       </div>
-      <h4 class="text-center mb-1">
+      <h4 class="text-center mb-12">
         <span class="position-relative fw-extrabold z-1"
           >{{ __('admin.get_in_touch') }}
           <img
@@ -688,8 +924,76 @@
             class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
         </span>
       </h4>
-      <p class="text-center mb-12 pb-md-4">{{ __('admin.org_landing_contact_description') }}</p>
-      <div class="row g-6">
+      <div class="row g-6 align-items-stretch">
+        <div class="col-lg-6 d-flex flex-column gap-4">
+          @if($organization->contact_email)
+            <a class="card border shadow-none card-hover transition-shadow" href="mailto:{{ $organization->contact_email }}">
+              <div class="card-body d-flex align-items-center gap-4">
+                <div class="avatar avatar-lg flex-shrink-0">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    <i class="ti ti-mail ti-lg text-primary"></i>
+                  </div>
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="text-muted small fw-medium mb-1">{{ __('admin.Email') }}</span>
+                  <h6 class="mb-0 fw-semibold">{{ $organization->contact_email }}</h6>
+                </div>
+              </div>
+            </a>
+          @endif
+          @if($organization->contact_phone)
+            <a class="card border shadow-none card-hover transition-shadow" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
+              <div class="card-body d-flex align-items-center gap-4">
+                <div class="avatar avatar-lg flex-shrink-0">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    <i class="ti ti-phone ti-lg text-primary"></i>
+                  </div>
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="text-muted small fw-medium mb-1">{{ __('admin.Phone') }}</span>
+                  <h6 class="mb-0 fw-semibold">{{ $organization->country_code }}{{ $organization->contact_phone }}</h6>
+                </div>
+              </div>
+            </a>
+          @endif
+          @if($organization->address)
+            <a class="card border shadow-none card-hover transition-shadow" href="{{ $organization->google_map_url ?: '#' }}" target="{{ $organization->google_map_url ? '_blank' : '_self' }}">
+              <div class="card-body d-flex align-items-center gap-4">
+                <div class="avatar avatar-lg flex-shrink-0">
+                  <div class="avatar-initial rounded-circle bg-label-primary">
+                    <i class="ti ti-map-pin ti-lg text-primary"></i>
+                  </div>
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="text-muted small fw-medium mb-1">{{ __('admin.Location') }}</span>
+                  <h6 class="mb-0 fw-semibold">{{ $organization->address }}</h6>
+                </div>
+              </div>
+            </a>
+          @endif
+        </div>
+        <div class="col-lg-6 d-flex">
+          @php
+            $mapQuery = $organization->address ?: $organization->name_en;
+            $mapEmbedUrl = 'https://www.google.com/maps?q=' . urlencode($mapQuery) . '&output=embed&z=14';
+          @endphp
+          @if($organization->google_map_url || $organization->address)
+            <div class="card border shadow-none w-100 overflow-hidden">
+              <iframe
+                src="{{ $mapEmbedUrl }}"
+                width="100%"
+                height="100%"
+                style="border:0; min-height: 350px; display: block;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+          @endif
+        </div>
+      </div>
+      {{-- <p class="text-center mb-12 pb-md-4">{{ __('admin.org_landing_contact_description') }}</p> --}}
+      {{-- <div class="row g-6">
         <div class="col-lg-5">
           <div class="contact-img-box position-relative border p-2 h-100">
             <img
@@ -724,12 +1028,12 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6 col-lg-12 col-xl-6">
+                <div class="col-md-6 col-lg-12">
                   <div class="d-flex align-items-center">
                     <div class="badge bg-label-warning rounded p-1_5 me-3"><i class="ti ti-map-pin ti-lg"></i></div>
                     <div>
                       <p class="mb-0">{{ __('admin.Address') }}</p>
-                      <h6 class="mb-0">{{ $organization->address }}</h6>
+                      <h6 class="mb-0 line-clamp-2">{{ $organization->address }}</h6>
                     </div>
                   </div>
                 </div>
@@ -787,7 +1091,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> --}}
     </div>
   </section>
   <!-- Contact Us: End -->
@@ -802,7 +1106,7 @@
           <div class="col-lg-5">
             <a href="javascript:void(0);" class="app-brand-link d-flex align-items-center mb-6">
 
-              <img src="{{ $organization->image_url }}" alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded">
+              <img src="{{ route('organizations.logo', $organization->img_url ?? '') }}"  alt="Logo" width="32" height="32" class="me-2 object-fit-contain rounded">
               <span class="app-brand-text footer-text fw-bold ms-2 ps-1">
                 {{ $isRtl ? $organization->name_ar : $organization->name_en }}
               </span>
@@ -818,45 +1122,51 @@
               <p class="d-block w-break-word text-break mt-2">{{ $organization->address }}</p>
             </div>
           </div>
-          <div class="col-lg-2 col-md-4 col-sm-6">
+          <div class="col-lg-3 col-md-4 col-sm-6">
             <h6 class="footer-title mb-6">{{ __('admin.quick_links') }}</h6>
             <ul class="navbar-nav list-unstyled">
               @foreach($sections as $section)
-                <li class="nav-item mb-4">
-                  <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
-                </li>
+                @if(!str_contains($section['id'], 'custom'))
+                  <li class="nav-item mb-4">
+                    <a href="#{{ $section['id'] }}" class="footer-link">{{ $section['label'] }}</a>
+                  </li>
+                @endif
               @endforeach
             </ul>
           </div>
-          <div class="col-lg-2 col-md-4">
-            <h6 class="footer-title mb-6">{{ __('admin.Contact us') }}</h6>
-            <ul class="list-unstyled">
-              @if($organization->contact_email)
-                <li class="mb-2 text-nowrap">
-                  <i class="ti ti-mail me-1 text-white"></i>
-                  <a class="footer-link" href="mailto:{{ $organization->contact_email }}">{{ $organization->contact_email }}</a>
-                </li>
-              @endif
-              @if($organization->contact_phone)
-                <li class="mb-2 text-nowrap">
-                  <i class="ti ti-phone me12 text-white"></i>
-                  <a class="footer-link" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
-                    {{ $organization->country_code }} {{ $organization->contact_phone }}
-                  </a>
-                </li>
-              @endif
-            </ul>
-          </div>
-          <div class="col-lg-3 col-md-4">
-            <h6 class="footer-title mb-6">{{ __('admin.follow_us') }}</h6>
+          <div class="col-lg-4 col-md-6">
+            <div class="d-flex flex-column">
+              <div class="mb-6">
+                <h6 class="footer-title mb-3">{{ __('admin.Contact us') }}</h6>
+                <ul class="list-unstyled">
+                  @if($organization->contact_email)
+                    <li class="mb-2 text-nowrap">
+                      <i class="ti ti-mail me-1 text-white"></i>
+                      <a class="footer-link" href="mailto:{{ $organization->contact_email }}">{{ $organization->contact_email }}</a>
+                    </li>
+                  @endif
+                  @if($organization->contact_phone)
+                    <li class="mb-2 text-nowrap">
+                      <i class="ti ti-phone me12 text-white"></i>
+                      <a class="footer-link" href="tel:{{ $organization->country_code }}{{ $organization->contact_phone }}">
+                        {{ $organization->country_code }} {{ $organization->contact_phone }}
+                      </a>
+                    </li>
+                  @endif
+                </ul>
+              </div>  
+            </div>
             <div>
-              @if(array_filter($socialLinks))
-                @foreach($socialLinks as $icon => $link)
-                  <a href="{{ $link }}" class="me-3 text-white" target="_blank">
-                    <i class="ti ti-brand-{{ $icon }} ti-lg"></i>
-                  </a>
-                @endforeach
-              @endif
+              <h6 class="footer-title mb-3">{{ __('admin.follow_us') }}</h6>
+              <div>
+                @if(array_filter($socialLinks))
+                  @foreach($socialLinks as $icon => $link)
+                    <a href="{{ $link }}" class="me-3 text-white" target="_blank">
+                      <i class="ti ti-brand-{{ $icon }} ti-lg"></i>
+                    </a>
+                  @endforeach
+                @endif
+              </div>
             </div>
           </div>
         </div>
@@ -896,10 +1206,50 @@
       const nav = document.querySelector('.layout-navbar'),
         animationImg = document.querySelectorAll('.hero-dashboard-img'),
         swiperLogos = document.getElementById('swiper-partners-logos'),
-        swiperPartners = document.getElementById('swiper-partners');
+        swiperPartners = document.getElementById('swiper-partners'),
+        swiperPrograms = document.getElementById('swiper-programs');
+        
+      // -----------------------------------
+      // Programs carousel
+      // -----------------------------------
+      if (swiperPrograms) {
+        var programSlideCount = swiperPrograms.querySelectorAll('.swiper-slide').length;
+        new Swiper(swiperPrograms, {
+          slidesPerView: 1,
+          spaceBetween: 24,
+          grabCursor: true,
+          loop: programSlideCount > 3,
+          navigation: {
+            nextEl: '#programs-next-btn',
+            prevEl: '#programs-previous-btn'
+          },
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true
+          },
+          breakpoints: {
+            1200: {
+              slidesPerView: 3
+            },
+            992: {
+              slidesPerView: 2
+            }
+          }
+        });
 
-      // swiper carousel
-      // Customers reviews
+        // Hide nav controls when all cards fit
+        function toggleProgramsNav() {
+          var controls = document.getElementById('programs-nav-controls');
+          if (!controls) return;
+          var w = window.innerWidth;
+          var visible = programSlideCount > (w >= 1200 ? 3 : (w >= 992 ? 2 : 1));
+          controls.style.display = visible ? '' : 'none';
+        }
+        toggleProgramsNav();
+        window.addEventListener('resize', toggleProgramsNav);
+      }
+
+      // Partners carousel
       // -----------------------------------
       if (swiperPartners) {
         new Swiper(swiperPartners, {
@@ -926,8 +1276,6 @@
           }
         });
       }
-
-
 
       // Review client logo
       // -----------------------------------

@@ -19,8 +19,8 @@
 @endphp
 
 @section('content')
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <!-- Alert -->
       @if (session()->has('message'))
         <div class="alert alert-success alert-dismissible" role="alert">
@@ -113,9 +113,12 @@
                 </div>
                 <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
                   @if (!$assessment_user)
-                    <a href="{{ route('assessments.assign') }}" class="btn btn-sm btn-primary">
+                  <form action="{{ route('assessments.assign') }}" method="post">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-primary">
                       {{ __('admin.Make_a_new_assessment') }}
-                    </a>
+                    </button>
+                  </form>
                   @endif
 
                   @if ($assessment && $assessment->end_date)

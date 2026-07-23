@@ -6,6 +6,8 @@
 @section('vendorstyle')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
+<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 @endsection
 
 @section('style')
@@ -62,8 +64,8 @@
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center mb-6 border-bottom">
         <h5 class="card-title mb-0 text-capitalize">{{ __('admin.Edit user') }}</h5>
@@ -282,14 +284,14 @@
                 </div>
                 <div class="col-md-4">
                   <div class="form-group mb-4">
-                    <label for="city_id" class="form-label">{{ __('admin.City')}}</label>
-                    <select 
-                      class="form-select select2" 
-                      id="city_id" 
+                    <label for="city_id" class="form-label">{{ __('admin.District')}}</label>
+                    <select
+                      class="form-select select2"
+                      id="city_id"
                       name='city_id'
-                      data-placeholder="{{ __('admin.City')}}"
+                      data-placeholder="{{ __('admin.Select District')}}"
                     >
-                      <option value="0">{{ __('admin.City')}}</option>
+                      <option value="0">{{ __('admin.District')}}</option>
                       @php $name = 'name_'.$l; @endphp
                       @if($user->city_id)
                       <option value="{{$user->city_id}}" selected>{{$user->city->{'name_'.$l} }}</option>
@@ -409,7 +411,10 @@
                 </div>
               </div>
               <div class="col-12 d-flex justify-content-end align-items-center gap-4 mt-8">
-                <a href="{{ route('users.index') }}" class="btn btn-label-secondary">{{ __('admin.Cancel') }}</a>
+                <a id="back-button" href="#" role="button" aria-label="Go back" class="btn btn-label-secondary">
+                  <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
+                  {{ __('admin.Back') }}
+                </a>
                 <button type="submit" class="btn btn-primary">{{ __('admin.Update') }}</button>
               </div>
             </form>
@@ -429,10 +434,15 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @endsection
 
 @section('pagescripts')
 <script>
+	alertify.defaults.transition = 'zoom';
+	alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
+	alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
+	alertify.defaults.theme.input = 'form-control';
   const translations = {!! json_encode(__('auth')) !!};
 
   // Initialize the phone input
@@ -768,7 +778,7 @@
                   selected = '';
               }
               $state.append('<option value="' + id + '" ' + selected + '>' + value + '</option>');
-              $('#city_id').html('<option value="" >{{ __('admin.City')}}</option>');
+              $('#city_id').html('<option value="" >{{ __('admin.District')}}</option>');
           });
           $('#state').show(150);
         }
@@ -785,7 +795,7 @@
             state_id: state_id
         },
         success: function(data) {
-            $city.html('<option value="" >{{ __('admin.City')}}</option>');
+            $city.html('<option value="" >{{ __('admin.District')}}</option>');
             $.each(data, function(id, value) {
                 if(currentCity == id){
                     selected = 'selected';

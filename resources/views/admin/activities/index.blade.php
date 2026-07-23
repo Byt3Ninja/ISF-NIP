@@ -2,377 +2,116 @@
 
 @section('title', __('admin.Activities'))
 
-@section('styles')
+@section('style')
 <style>
-  .chart-container {
-    position: relative;
-    height: 400px;
-    width: 100%;
-  }
-
-  /* Style for the colored top border on stat cards */
-  .stat-card-border-top {
-    border-top: 4px solid;
-  }
+  .dataTables_paginate, .dataTables_info { padding: 0 2rem; }
 </style>
 @endsection
 
+@php
+  $stats = [
+    ['key' => 'Total_Logins', 'value' => $totalLogins],
+    ['key' => 'Total_Logins_Today', 'value' => $totalLoginsToday],
+    ['key' => 'Total_Logins_Week', 'value' => $totalLoginsWeek],
+    ['key' => 'Total_Logins_Month', 'value' => $totalLoginsMonth],
+  ];
+
+  $statColors = ['primary', 'success', 'info', 'warning'];
+  $statIcons = ['calendar-check', 'calendar-time', 'calendar-event', 'calendar'];
+
+  $charts = [
+    ['id' => 'topDevicesChart', 'title' => 'Top_Devices'],
+    ['id' => 'topBrowsersChart', 'title' => 'Top_Browsers'],
+    ['id' => 'loginsByCountryChart', 'title' => 'Logins_by_Country'],
+    ['id' => 'peakHoursChart', 'title' => 'Peak_Login_Hours'],
+  ];
+  $chartIcons = ['device-desktop', 'world', 'flag', 'clock'];
+@endphp
+
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
 
     {{-- Alerts --}}
     @if (session('success'))
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="@lang('admin.Close')"></button>
-      </div>
+      <x-alert type="success" message="{{ session('success') }}" />
     @endif
 
     @if (session('error'))
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="@lang('admin.Close')"></button>
-      </div>
+      <x-alert type="danger" message="{{ session('error') }}" />
     @endif
 
-    <h4 class="fw-bold mb-4">@lang('admin.Activities_Dashboard')</h4>
+    {{-- Header Title --}}
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <i class="ti ti-dashboard ti-28px"></i>
+      <h4 class="mb-0">@lang('admin.Activities_Dashboard')</h4>
+    </div>
 
     {{-- Enhanced Statistics Cards --}}
-    <div class="row g-3 mb-4">
-      @foreach ([
-        [
-            'label' => 'Total_Logins_Today', 
-            'value' => $totalLoginsToday, 
-            'color' => '#7367f0', // Blue
-            'icon' => 'ti-calendar-event'
-        ],
-        [
-            'label' => 'Total_Logins_Week', 
-            'value' => $totalLoginsWeek, 
-            'color' => '#10b981', // Green
-            'icon' => 'ti-calendar-time'
-        ],
-        [
-            'label' => 'Total_Logins_Month', 
-            'value' => $totalLoginsMonth, 
-            'color' => '#f59e0b', // Amber
-            'icon' => 'ti-calendar'
-        ],
-      ] as $stat)
-      <div class="col-md-4">
-        <div class="card shadow-sm stat-card-border-top" style="border-color: {{ $stat['color'] }};">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="fw-bold mb-0">@lang('admin.' . $stat['label'])</h5>
-                <div class="display-4 fw-bold" style="color: {{ $stat['color'] }};">{{ $stat['value'] }}</div>
-              </div>
-              <div class="avatar avatar-lg d-flex align-items-center justify-content-center rounded" style="background-color: {{ $stat['color'] }}1a;">
-                <i class="ti {{ $stat['icon'] }} fs-2" style="color: {{ $stat['color'] }};"></i>
+    <div class="row mb-4">
+      @foreach ($stats as $key => $stat)
+        <div class="col-xl-3">
+          <div class="card card-border-shadow-{{ $statColors[$key] }}">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="mb-0">@lang('admin.' . $stat['key'])</h6>
+                  <h4 class="mb-0">{{ $stat['value'] ?? 0 }}</h4>
+                </div>
+                <div class="avatar">
+                  <span class="avatar-initial rounded bg-label-{{ $statColors[$key] }}">
+                    <i class="ti ti-{{ $statIcons[$key] }} ti-lg"></i>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
       @endforeach
     </div>
 
     {{-- Charts for Device, Browser, Country Stats & Peak Hours --}}
     <div class="row g-4 mb-4">
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h6 class="mb-3 text-primary"><i class="ti ti-device-desktop me-1"></i> @lang('admin.Top_Devices')</h6>
-            <div class="chart-container">
-              <canvas id="topDevicesChart"></canvas>
+      @foreach ($charts as $key => $chart)
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-title mb-3"><i class="ti ti-{{ $chartIcons[$key] }} me-1"></i> @lang('admin.' . $chart['title'])</h6>
+              <div class="w-100 h-px-200 position-relative">
+                <canvas id="{{ $chart['id'] }}"></canvas>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h6 class="mb-3 text-primary"><i class="ti ti-world me-1"></i> @lang('admin.Top_Browsers')</h6>
-            <div class="chart-container">
-              <canvas id="topBrowsersChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h6 class="mb-3 text-primary"><i class="ti ti-flag me-1"></i> @lang('admin.Logins_by_Country')</h6>
-            <div class="chart-container">
-              <canvas id="loginsByCountryChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h6 class="mb-3 text-primary"><i class="ti ti-clock me-1"></i> @lang('admin.Peak_Login_Hours')</h6>
-            <div class="chart-container">
-              <canvas id="peakHoursChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
+      @endforeach
     </div>
 
-    {{-- Suspicious Logins --}}
-    <div class="row g-4 mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex align-items-center justify-content-between bg-white">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="ti ti-alert-triangle text-danger"></i>
-                        <h5 class="mb-0">@lang('admin.Suspicious_Logins')</h5>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <input type="search" class="form-control form-control-sm" id="searchSuspiciousUsers" placeholder="@lang('admin.Search')" style="max-width: 200px;" />
-                        <div class="btn-group">
-                            <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                <i class="ti ti-download me-1"></i> @lang('admin.Export')
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportSuspiciousLogins('csv')"><i class="ti ti-file-type-csv me-2"></i>CSV</a></li>
-                                {{-- <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportSuspiciousLogins('excel')"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li> --}}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+    @php
+      $tabs = [
+        ['title' => __('admin.Suspicious_Logins'), 'id' => 'Suspicious_Logins', 'icon' => 'alert-triangle'],
+        ['title' => __('admin.Users_Activities'), 'id' => 'Users_Activities', 'icon' => 'list-details'],
+      ];
+    @endphp
 
-                @if ($suspiciousLogins->isNotEmpty())
-                <div class="list-group list-group-flush" id="suspiciousUsersList">
-                    @foreach ($suspiciousLogins as $login)
-                    <div class="list-group-item suspicious-user-card" data-user="{{ strtolower($login->user->first_name_en . ' ' . $login->user->last_name_en . ' ' . $login->user->email) }}">
-                        <div class="p-3 d-flex flex-wrap align-items-center justify-content-between">
-                            <a
-                              href="/dashboard/show/UserProfile/{{ $login->user->id }}"
-                              class="d-flex align-items-center gap-3"
-                            >
-                                <div class="avatar avatar-lg">
-                                    @if($login->user->img_url ?? false)
-                                        <img src="{{ asset("191014/{$login->user->img_url}") }}" alt="avatar" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
-                                    @else
-                                        <div class="avatar avatar-lg avatar-initial rounded-circle bg-label-primary">
-                                            {{ strtoupper(substr($login->user->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr($login->user->last_name_en ?? 'U', 0, 1)) }}
-                                        </div>
-                                    @endif
-                                </div>
-                                <div>
-                                    <div class="fw-bold text-dark">{{ $login->user->first_name_en }} {{ $login->user->last_name_en }}</div>
-                                    <div class="text-muted small">{{ $login->user->email }}</div>
-                                </div>
-                            </a>
+    {{-- Navigation Pills --}}
+    <x-navigation-pills :tabs="$tabs" />
 
-                            <div class="d-flex flex-wrap gap-4">
-                                <div class="text-muted small"><strong class="text-dark">{{ $login->login_count }}</strong> @lang('admin.Logins')</div>
-                                <div class="text-muted small"><strong class="text-dark">{{ $login->location_count }}</strong> @lang('admin.Locations')</div>
-                                <div class="text-muted small">@lang('admin.Last') <strong class="text-dark">{{ \Carbon\Carbon::parse($login->last_login)->format('d M Y, H:i') }}</strong></div>
-                                <span class="badge 
-                                    @if($login->risk_level == 'high') bg-label-danger 
-                                    @elseif($login->risk_level == 'medium') bg-label-warning 
-                                    @else bg-label-success 
-                                    @endif
-                                    align-self-center fw-semibold">
-                                    @if($login->risk_level == 'high') @lang('admin.High_Risk')
-                                    @elseif($login->risk_level == 'medium') @lang('admin.Medium_Risk')
-                                    @else @lang('admin.Low_Risk')
-                                    @endif
-                                </span>
-                            </div>
+    <div class="tab-content p-0 shadow-none" id="activitiesTabContent">
+      {{-- Suspicious Logins Tab --}}
+      @include('admin.activities.partials.suspicious-logins')
 
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-icon btn-outline-danger btn-sm" onclick="forceLogout({{ $login->user_id }})" title="@lang('admin.Force_Logout')" data-bs-toggle="tooltip" data-bs-placement="top">
-                                    <i class="ti ti-power"></i>
-                                </button>
-                                <button class="btn btn-icon btn-outline-warning btn-sm" onclick="resetPassword({{ $login->user_id }})" title="@lang('admin.Reset_Password')" data-bs-toggle="tooltip" data-bs-placement="top">
-                                    <i class="ti ti-shield-lock"></i>
-                                </button>
-                                <button class="btn btn-icon btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#u{{ $login->user_id }}Details" title="@lang('admin.View_Details')" data-bs-placement="top">
-                                    <i class="ti ti-list"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Country summary -->
-                        <div class="px-3 pb-3">
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach($login->location_counts as $location => $count)
-                                    @if($location && $location !== 'Unknown' && $location !== '')
-                                        <small class="badge bg-label-light text-dark py-1">
-                                            <i class="ti ti-xs ti-map-pin me-1"></i>{{ $location }} ({{ $count }})
-                                        </small>
-                                    @endif
-                                @endforeach
-                                @if(isset($login->location_counts['Unknown']) || isset($login->location_counts['']) || in_array('Unknown', $login->unique_locations))
-                                    <small class="badge bg-label-warning text-dark py-1">
-                                        <i class="ti ti-xs ti-help me-1"></i>@lang('admin.Unknown') 
-                                        ({{ $login->location_counts['Unknown'] ?? $login->location_counts[''] ?? 1 }})
-                                    </small>
-                                @endif
-                           </div>
-                        </div>
-
-                        <!-- Details Table -->
-                        <div class="collapse" id="u{{ $login->user_id }}Details">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>@lang('admin.Date_Time')</th>
-                                            <th>@lang('admin.location')</th>
-                                            <th>@lang('admin.IP_Address')</th>
-                                            <th>@lang('admin.browser')</th>
-                                            <th>@lang('admin.device')</th>
-                                            <th>@lang('admin.Actions')</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($login->recent_activities as $activity)
-                                        <tr>
-                                            <td class="text-nowrap">{{ $activity->activity_time->format('d M Y, H:i') }}</td>
-                                            <td>
-                                                @if($activity->location && $activity->location !== 'Unknown')
-                                                    <i class="ti ti-map-pin me-1 text-primary"></i>{{ $activity->location }}
-                                                @else
-                                                    <i class="ti ti-help text-warning me-1"></i>@lang('admin.Unknown')
-                                                @endif
-                                            </td>
-                                            <td class="text-nowrap">{{ $activity->ip_address ?: '—' }}</td>
-                                            <td class="text-nowrap">{{ $activity->browser }}</td>
-                                            <td class="text-nowrap">{{ $activity->device }}</td>
-                                            <td>
-                                                @if($activity->ip_address)
-                                                <button class="btn btn-icon btn-outline-danger btn-sm" onclick="blockIp('{{ $activity->ip_address }}')" title="@lang('admin.Block_IP')" data-bs-toggle="tooltip" data-bs-placement="top">
-                                                    <i class="ti ti-ban"></i>
-                                                </button>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                            @if($login->has_more_activities ?? false)
-                            <div class="p-3 border-top text-center">
-                                <button class="btn btn-light btn-sm" onclick="loadMoreActivities({{ $login->user_id }})">
-                                    <i class="ti ti-refresh me-1"></i>@lang('admin.Load_more')
-                                </button>
-                                <small class="text-muted d-block mt-1">
-                                    @lang('admin.showing') {{ $login->recent_activities->count() }} @lang('admin.of') {{ $login->total_activities_count ?? 0 }} @lang('admin.Activities')
-                                </small>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-                @else
-                <div class="card-body text-center py-5">
-                    <div class="avatar avatar-xl mx-auto mb-3">
-                        <div class="avatar avatar-xl avatar-initial rounded-circle bg-label-success">
-                            <i class="ti ti-shield-check" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
-                    <h6 class="mb-1">@lang('admin.No_suspicious_logins')</h6>
-                    <p class="text-muted mb-0">@lang('admin.All_user_activities_appear_normal')</p>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-
-
-    {{-- Activities Table --}}
-    <div class="card">
-      <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-          <h6 class="mb-0"><i class="ti ti-list-details me-1"></i> @lang('admin.Users_Activities')</h6>
-          <div class="btn-group">
-            <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" id="projectsExportBtn">
-              <i class="bi bi-download me-1"></i> {{ $l == 'ar' ? 'تصدير' : 'Export' }}
-            </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportTable('activities-datatable', 'csv')"><i class="bi bi-filetype-csv me-2"></i>{{ $l == 'ar' ? 'تصدير CSV' : 'Export CSV' }}</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0);" onclick="exportTable('activities-datatable', 'excel')"><i class="bi bi-file-earmark-excel me-2"></i>{{ $l == 'ar' ? 'تصدير Excel' : 'Export Excel' }}</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table id="activities-datatable" class="table align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>@lang('admin.User')</th>
-                <th>@lang('admin.browser')</th>
-                <th>@lang('admin.device')</th>
-                <th>@lang('admin.platform')</th>
-                <th>@lang('admin.IP_Address')</th>
-                <th>@lang('admin.location')</th>
-                <th>@lang('admin.Login_Time')</th>
-                <th>@lang('admin.Actions')</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($activities as $activity)
-              <tr>
-                <td>
-                  <div class="d-flex align-items-center">
-                    <div class="avatar avatar-sm me-3">
-                      @if($activity->user->img_url ?? false)
-                        <img src="{{ asset("191014/{$activity->user->img_url}") }}" alt="{{ $activity->user->first_name_en }}" class="rounded-circle border shadow-xs" onerror="this.onerror=null; this.src='/icons/account.svg';">
-                      @else
-                        <div class="avatar avatar-sm avatar-initial rounded-circle bg-label-primary">
-                          {{ strtoupper(substr($activity->user->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr($activity->user->last_name_en ?? 'U', 0, 1)) }}
-                        </div>
-                      @endif
-                    </div>
-                    <div class="d-flex flex-column">
-                      <h6 class="mb-0 text-sm">{{ $activity->user->first_name_en . ' ' . $activity->user->last_name_en }}</h6>
-                      <small class="text-muted">{{ $activity->user->email }}</small>
-                    </div>
-                  </div>
-                </td>
-                <td class="text-nowrap">{{ $activity->browser }}</td>
-                <td class="text-nowrap">{{ $activity->device }}</td>
-                <td class="text-nowrap">{{ $activity->platform }}</td>
-                <td class="text-nowrap">{{ $activity->ip_address }}</td>
-                <td class="text-nowrap">{{ $activity->location }}</td>
-                <td class="text-nowrap">{{ $activity->activity_time->format('d M Y, H:i') }}</td>
-                <td>
-                  <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" class="d-inline delete-form">
-                    @csrf
-                    @method('DELETE')
-                    <button
-                      type="submit"
-                      class="btn btn-sm btn-icon btn-label-danger"
-                      title="@lang('admin.Delete')"
-                    >
-                      <i class="ti ti-trash"></i>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {{-- Activities Tab --}}
+      @include('admin.activities.partials.user-activities')
     </div>
   </div>
 </div>
 @endsection
 
-
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{-- Use Chart.js from CDN with version pinning for reliability --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+{{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> --}}
 <script>
   // Initialize Date Picker
   flatpickr(".datepicker", {
@@ -437,7 +176,7 @@
       order: [[6, 'desc']], // Changed to column 6 (Login_Time) since we removed email column
       pageLength: 10,
       lengthMenu: [10, 25, 50, 100],
-      dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6"f>><"row mb-3"<"col-12"<"filter-row">>>rtip<"d-none"B>', // Add filter-row container
+      dom: '<"row mb-2 px-8"<"col-sm-6"l><"col-sm-6"f>><"row mb-3"<"col-12"<"filter-row px-4">>>rtip<"d-none"B>', // Add filter-row container
       buttons: [
         {
           extend: 'csv',
@@ -571,7 +310,7 @@
                 labels: topDevicesData.map(d => d.device),
                 datasets: [{
                     data: topDevicesData.map(d => d.count),
-                    backgroundColor: ['#7c3aed', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'],
+                    backgroundColor: ['#7367f0', '#ff9f43', '#28c76f', '#00bad1', '#ff4c51'],
                 }]
             },
             options: {
@@ -589,7 +328,7 @@
                 labels: topBrowsersData.map(b => b.browser),
                 datasets: [{
                     data: topBrowsersData.map(b => b.count),
-                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#7c3aed'],
+                    backgroundColor: ['#00bad1', '#28c76f', '#ff9f43', '#ff4c51', '#7367f0'],
                 }]
             },
             options: {
@@ -608,7 +347,7 @@
                 datasets: [{
                     label: 'Logins',
                     data: loginsByCountryData.map(c => c.count),
-                    backgroundColor: '#10b981',
+                    backgroundColor: '#28c76f',
                 }]
             },
             options: {
@@ -632,7 +371,7 @@
                 datasets: [{
                     label: 'Logins',
                     data: peakHoursData.map(h => h.count),
-                    borderColor: '#3b82f6',
+                    borderColor: '#00bad1',
                     tension: 0.4,
                     fill: false
                 }]

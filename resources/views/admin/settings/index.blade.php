@@ -5,12 +5,14 @@
 $icons = [
   'general' => 'ti-adjustments',
   'roles_permissions' => 'ti-shield-lock',
+  'organization_types' => 'ti ti-building' ,
   'importer_tool' => 'ti-package-import',
   'currencies' => 'ti-coins',
   'tags' => 'ti-tag',
   'categories' => 'ti-layout-grid',
   'subcategories' => 'ti-layout-board-split',
   'stages' => 'ti-packages',
+  'countries' => 'ti-flag',
   'labels' => 'ti-bookmark',
   'queue_jobs' => 'ti-brand-google-big-query',
   'industry' => 'ti-building-factory',
@@ -21,8 +23,8 @@ $icons = [
 ];
 @endphp
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="mb-5">
       <h4 class="mb-1">{{ __('settings.title') }}</h4>
       <p class="mb-0">{{ __('settings.description') }}</p>

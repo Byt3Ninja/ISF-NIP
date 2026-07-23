@@ -73,26 +73,8 @@
 @section('subTitle', __('admin.surveysList'))
 
 @section('content')
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
-			<!-- Enhanced Breadcrumb -->
-			<div class="d-flex align-items-center gap-3 mb-6">
-				<a href="javascript:history.back()" class="btn btn-sm btn-icon shadow btn-white rounded-circle">
-					<i class="ti ti-chevron-{{ $l == 'en' ? 'left' : 'right' }} ti-md text-dark"></i>
-				</a>
-				<a href="{{ route('mentorships.requests_view',['id' => $cycle->id]) }}" class="d-flex align-items-center gap-2 text-decoration-none">
-					<i class="ti ti-users fs-4 text-primary"></i>
-					<strong class="text-dark">{{ __('admin.Mentorships') }}</strong>
-				</a>
-				<div class="d-flex align-items-center gap-1">
-					<i class="ti ti-chevron-{{ $l == 'en' ? 'right' : 'left' }} ti-xs text-muted"></i>
-					<div class="d-flex align-items-center gap-2">
-						<i class="ti ti-clipboard-list fs-4 text-primary"></i>
-						<strong class="text-dark">{{ __('admin.mentorshipSurveys') }}</strong>
-					</div>
-				</div>
-			</div>
-
+	<div class="">
+		<div class="">
 			<!-- Enhanced Program Overview -->
 			<div class="row mb-4">
 				<div class="col-12">
@@ -255,7 +237,7 @@
 
 			<!-- Enhanced Surveys Management Section -->
 			<div class="card">
-					<div class="card-header d-flex justify-content-between align-items-center">
+					<div class="card-header d-flex flex-column flex-md-row gap-4 justify-content-between align-items-md-center">
 							<div>
 									<h5 class="mb-0">
 											<i class="ti ti-clipboard-list me-2 text-primary"></i>{{ __('admin.mentorshipSurveys') }}
@@ -266,166 +248,164 @@
 									<i class="ti ti-plus me-1"></i>{{ __('admin.AddNewSurvey') }}
 							</button>
 					</div>
-					<div class="card-body">
-							<div class="table-responsive">
-									<table id="surveys-list-datatable" class="table table-hover">
-											<thead class="table-light">
+					<div class="card-datatable table-responsive">
+							<table id="surveys-list-datatable" class="table">
+									<thead class="table-light">
+											<tr>
+													<th class="text-center" style="width: 50px;">#</th>
+													<th>{{ __('admin.surveyTitle') }}</th>
+													<th class="text-center">{{ __('admin.Organization') }}</th>
+													<th class="text-center">{{ __('admin.Type') }}</th>
+													<th class="text-center">{{ __('admin.Triggers') }}</th>
+													<th class="text-center">{{ __('admin.engagementRate') }}</th>
+													<th class="text-center" style="width: 120px;">{{ __('admin.Actions') }}</th>
+											</tr>
+									</thead>
+									<tbody>
+											@forelse($surveys as $index => $survey_scope)
+													@php $survey = $survey_scope->survey; @endphp
 													<tr>
-															<th class="text-center" style="width: 50px;">#</th>
-															<th>{{ __('admin.surveyTitle') }}</th>
-															<th class="text-center">{{ __('admin.Organization') }}</th>
-															<th class="text-center">{{ __('admin.Type') }}</th>
-															<th class="text-center">{{ __('admin.Triggers') }}</th>
-															<th class="text-center">{{ __('admin.engagementRate') }}</th>
-															<th class="text-center" style="width: 120px;">{{ __('admin.Actions') }}</th>
-													</tr>
-											</thead>
-											<tbody>
-													@forelse($surveys as $index => $survey_scope)
-															@php $survey = $survey_scope->survey; @endphp
-															<tr>
-																	<td class="text-center">
-																			<span class="badge bg-light text-dark">{{ $index + 1 }}</span>
-																	</td>
-																	<td>
-																			<div class="d-flex align-items-center">
-																					<div class="flex-grow-1">
-																							<h6 class="mb-0">
-																									<a
-																											href="{{ URL::to('dashboard/surveys/' . $survey->id . '/edit') }}"
-																											class="text-decoration-none"
-																									>
-																											{!! $survey->title !!}
-																									</a>
-																							</h6>
-																							<small class="text-muted">
-																									{{ __('admin.Survey ID') }}: {{ $survey->id }}
-																							</small>
-																					</div>
+															<td class="text-center">
+																	<span class="badge bg-light text-dark">{{ $index + 1 }}</span>
+															</td>
+															<td>
+																	<div class="d-flex align-items-center">
+																			<div class="flex-grow-1">
+																					<h6 class="mb-0">
+																							<a
+																									href="{{ URL::to('dashboard/surveys/' . $survey->id . '/edit') }}"
+																									class="text-decoration-none"
+																							>
+																									{!! $survey->title !!}
+																							</a>
+																					</h6>
+																					<small class="text-muted">
+																							{{ __('admin.Survey ID') }}: {{ $survey->id }}
+																					</small>
 																			</div>
-																	</td>
-																	<td class="text-center">
-																			<a
-																					href="{{ URL::to('dashboard/organizations/' . $survey->organization->id . '/edit') }}"
-																					class="text-decoration-none"
-																			>
-																					<span class="badge bg-info">
-																							{{ $survey->organization->{'name_'.$l} }}
-																					</span>
-																			</a>
-																	</td>
-																	<td class="text-center">
-																			<span class="survey-type-badge">
-																					<i class="ti ti-{{ $survey_scope->type == 'mentor' ? 'user-star' : ($survey_scope->type == 'startup' ? 'rocket' : 'users') }} me-1"></i>
-																					{{ ucfirst($survey_scope->type) }}
+																	</div>
+															</td>
+															<td class="text-center">
+																	<a
+																			href="{{ URL::to('dashboard/organizations/' . $survey->organization->id . '/edit') }}"
+																			class="text-decoration-none"
+																	>
+																			<span class="badge bg-label-info">
+																					{{ $survey->organization->{'name_'.$l} }}
 																			</span>
-																	</td>
-																	<td class="text-center">
-																			<div class="d-flex flex-column gap-1">
-																					@if($survey_scope->trigger_by_session)
-																							<span class="trigger-status bg-success text-white">
-																									<i class="ti ti-video me-1"></i>{{ __('admin.Session') }}
-																							</span>
-																					@endif
-																					@if($survey_scope->trigger_by_due)
-																							<span class="trigger-status bg-warning text-dark">
-																									<i class="ti ti-calendar-due me-1"></i>{{ __('admin.Cycle End') }}
-																							</span>
-																					@endif
-																					@if(!$survey_scope->trigger_by_session && !$survey_scope->trigger_by_due)
-																							<span class="trigger-status bg-secondary text-white">
-																									<i class="ti ti-x me-1"></i>{{ __('admin.No Triggers') }}
-																							</span>
-																					@endif
+																	</a>
+															</td>
+															<td class="text-center">
+																	<span class="survey-type-badge">
+																			<i class="ti ti-{{ $survey_scope->type == 'mentor' ? 'user-star' : ($survey_scope->type == 'startup' ? 'rocket' : 'users') }} me-1"></i>
+																			{{ ucfirst($survey_scope->type) }}
+																	</span>
+															</td>
+															<td class="text-center">
+																	<div class="d-flex flex-column gap-1">
+																			@if($survey_scope->trigger_by_session)
+																					<span class="trigger-status bg-lalbel-success">
+																							<i class="ti ti-video me-2"></i>{{ __('admin.Session') }}
+																					</span>
+																			@endif
+																			@if($survey_scope->trigger_by_due)
+																					<span class="trigger-status bg-label-warning">
+																							<i class="ti ti-calendar-due me-2"></i>{{ __('admin.Cycle End') }}
+																					</span>
+																			@endif
+																			@if(!$survey_scope->trigger_by_session && !$survey_scope->trigger_by_due)
+																					<span class="trigger-status bg-label-secondary">
+																							<i class="ti ti-x me-1"></i>{{ __('admin.No Triggers') }}
+																					</span>
+																			@endif
+																	</div>
+															</td>
+															<td class="text-center">
+																	<div class="engagement-info">
+																			<div
+																					class="engagement-badge bg-label-primary text-white"
+																					data-bs-toggle="tooltip"
+																					data-bs-placement="top"
+																					title="{{ __('admin.total') }}: {{ $survey_scope->eligibleUsers ?? 0 }} | {{ __('admin.engaged') }}: {{ $survey_scope->engagedUsers ?? 0 }} | {{ __('admin.notEngaged') }}: {{ $survey_scope->notEngagedUsers ?? 0 }}"
+																			>
+																					<i class="ti ti-chart-pie me-1"></i>
+																					{{ ($survey_scope->engagementRate ?? '0.00') . '%' }}
 																			</div>
-																	</td>
-																	<td class="text-center">
-																			<div class="engagement-info">
-																					<div
-																							class="engagement-badge bg-primary text-white"
-																							data-bs-toggle="tooltip"
-																							data-bs-placement="top"
-																							title="{{ __('admin.total') }}: {{ $survey_scope->eligibleUsers ?? 0 }} | {{ __('admin.engaged') }}: {{ $survey_scope->engagedUsers ?? 0 }} | {{ __('admin.notEngaged') }}: {{ $survey_scope->notEngagedUsers ?? 0 }}"
-																					>
-																							<i class="ti ti-chart-pie me-1"></i>
-																							{{ ($survey_scope->engagementRate ?? '0.00') . '%' }}
-																					</div>
-																			</div>
-																	</td>
-																	<td class="text-center">
-																			<div class="dropdown action-dropdown">
-																					<button
-																							class="btn btn-outline-secondary btn-sm dropdown-toggle"
-																							type="button"
-																							data-bs-toggle="dropdown"
-																							aria-expanded="false"
-																					>
-																							<i class="ti ti-dots-vertical"></i>
-																					</button>
-																					<ul class="dropdown-menu">
-																							<li>
-																									<a
-																											href="{{ route('surveys.questions_manage', ['survey' => $survey->id]) }}"
-																											target="_blank"
-																											class="dropdown-item"
-																									>
-																											<i class="ti ti-list-check me-2"></i>{{ __('admin.manageQuestions') }}
-																									</a>
-																							</li>
-																							<li>
-																									<a
-																											href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target=mentorship"
-																											target="_blank"
-																											class="dropdown-item"
-																									>
-																											<i class="ti ti-chart-bar me-2"></i>{{ __('admin.surveyResults') }}
-																									</a>
-																							</li>
-																							<li><hr class="dropdown-divider" /></li>
-																							<li>
-																									<a
-																											href="{{ route('mentorships.surveys_edit', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}"
-																											class="dropdown-item"
-																									>
-																											<i class="ti ti-edit me-2"></i>{{ __('admin.Edit') }}
-																									</a>
-																							</li>
-																							<li>
-																									<a
-																											id="deleteAction"
-																											data-id="{{ $survey_scope->id }}"
-																											data-url="{{ route('mentorships.surveys_delete', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}"
-																											href="#"
-																											class="dropdown-item text-danger"
-																									>
-																											<i class="ti ti-trash me-2"></i>{{ __('admin.Delete') }}
-																									</a>
-																							</li>
-																					</ul>
-																			</div>
-																	</td>
-															</tr>
-													@empty
-															<tr>
-																	<td colspan="7" class="text-center py-5">
-																			<div class="empty-state">
-																					<i class="ti ti-clipboard-off display-4 text-muted"></i>
-																					<h5 class="mt-3 text-muted">{{ __('admin.No surveys found') }}</h5>
-																					<p class="text-muted">{{ __('admin.Start by adding your first survey') }}</p>
-																					<button
-																							class="btn btn-primary"
-																							data-bs-toggle="modal"
-																							data-bs-target="#createSurveyModal"
-																					>
-																							<i class="ti ti-plus me-1"></i>{{ __('admin.AddNewSurvey') }}
-																					</button>
-																			</div>
-																	</td>
-															</tr>
-													@endforelse
-											</tbody>
-									</table>
-							</div>
+																	</div>
+															</td>
+															<td class="text-center">
+																	<div class="dropdown action-dropdown">
+																			<button
+																					class="btn btn-outline-secondary btn-sm dropdown-toggle"
+																					type="button"
+																					data-bs-toggle="dropdown"
+																					aria-expanded="false"
+																			>
+																					<i class="ti ti-dots-vertical"></i>
+																			</button>
+																			<ul class="dropdown-menu">
+																					<li>
+																							<a
+																									href="{{ route('surveys.questions_manage', ['survey' => $survey->id]) }}"
+																									target="_blank"
+																									class="dropdown-item"
+																							>
+																									<i class="ti ti-list-check me-2"></i>{{ __('admin.manageQuestions') }}
+																							</a>
+																					</li>
+																					<li>
+																							<a
+																									href="{{ route('surveys.results_view', ['survey' => $survey->id]) }}?target=mentorship"
+																									target="_blank"
+																									class="dropdown-item"
+																							>
+																									<i class="ti ti-chart-bar me-2"></i>{{ __('admin.surveyResults') }}
+																							</a>
+																					</li>
+																					<li><hr class="dropdown-divider" /></li>
+																					<li>
+																							<a
+																									href="{{ route('mentorships.surveys_edit', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}"
+																									class="dropdown-item"
+																							>
+																									<i class="ti ti-edit me-2"></i>{{ __('admin.Edit') }}
+																							</a>
+																					</li>
+																					<li>
+																							<a
+																									id="deleteAction"
+																									data-id="{{ $survey_scope->id }}"
+																									data-url="{{ route('mentorships.surveys_delete', ['id' => $cycle->id, 'survey' => $survey_scope->id]) }}"
+																									href="#"
+																									class="dropdown-item text-danger"
+																							>
+																									<i class="ti ti-trash me-2"></i>{{ __('admin.Delete') }}
+																							</a>
+																					</li>
+																			</ul>
+																	</div>
+															</td>
+													</tr>
+											@empty
+													<tr>
+															<td colspan="7" class="text-center py-5">
+																	<div class="empty-state">
+																			<i class="ti ti-clipboard-off display-4 text-muted"></i>
+																			<h5 class="mt-3 text-muted">{{ __('admin.No surveys found') }}</h5>
+																			<p class="text-muted">{{ __('admin.Start by adding your first survey') }}</p>
+																			<button
+																					class="btn btn-primary"
+																					data-bs-toggle="modal"
+																					data-bs-target="#createSurveyModal"
+																			>
+																					<i class="ti ti-plus me-1"></i>{{ __('admin.AddNewSurvey') }}
+																			</button>
+																	</div>
+															</td>
+													</tr>
+											@endforelse
+									</tbody>
+							</table>
 					</div>
 			</div>
 
@@ -488,7 +468,7 @@
 																	<label class="form-label">
 																			<i class="ti ti-settings me-1"></i>{{ __('admin.Survey Triggers') }}
 																	</label>
-																	<div class="card bg-light">
+																	<div class="card bg-light-subtle shadow-none border">
 																			<div class="card-body p-3">
 																					<div class="form-check mb-2">
 																							<input class="form-check-input" type="checkbox" id="triggerBySession" name="trigger_by_session" />
@@ -518,8 +498,10 @@
 											<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
 													<i class="ti ti-circle-x me-1"></i>{{ __('admin.Cancel') }}
 											</button>
-											<button type="submit" form="createSurveyForm" class="btn btn-primary">
-													<i class="ti ti-circle-check me-1"></i>{{ __('admin.Add Survey') }}
+											<button type="submit" form="createSurveyForm" class="btn btn-primary" id="createSurveySubmitBtn">
+													<span id="createSurveyBtnIcon"><i class="ti ti-circle-check me-2"></i></span>
+													<span id="createSurveyBtnSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+													{{ __('admin.Add Survey') }}
 											</button>
 									</div>
 							</div>
@@ -692,6 +674,12 @@
                 });
                 return false;
             }
+
+            // Show spinner and disable submit button
+            var $btn = $('#createSurveySubmitBtn');
+            $btn.prop('disabled', true);
+            $('#createSurveyBtnIcon').addClass('d-none');
+            $('#createSurveyBtnSpinner').removeClass('d-none');
         });
     </script>
 @endsection

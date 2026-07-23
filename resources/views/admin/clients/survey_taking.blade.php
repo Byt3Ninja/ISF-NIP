@@ -103,8 +103,8 @@
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 		<div class="content-overlay"></div>
 		<div class="content-header row">
 			{{-- <h2 class="content-header-title"> {{ __('dashboard.Survey') }}</h2> --}}
@@ -117,99 +117,175 @@
 		</div>
 		<div class="content-body" style="margin-bottom: 4rem;">
 			@if( $is_responded == false )
-			<div class="card">
-				<div class="card-header">
-					<h3 class="card-title"> {{ $survey->title }} </h3>
-					<small class="text-muted">{{ $survey->description }}</small>
-				</div>
-			</div>
-			<form id="submitQuestion" method="post" action="{{ route('surveys.submit', ['id' => $responses->id]) }}">
-				{!! csrf_field() !!}
-				@foreach( $my_responses as $question_index => $response )
-				<div class="card my-4 {{ in_array( 'question_' . $response['id'], $missingQuestions) ? 'block-danger' : '' }}"
-					id="survey-question-{{ $question_index }}">
-					<div class="card-body" style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }}">
-						<div class="d-flex align-items-center gap-3 pb-2 border-bottom">
-							<span class="badge bg-primary rounded-circle d-flex justify-content-center align-items-center"
-								style="width: 30px; height: 30px;">
-								{{ $question_index + 1 }}
-							</span>
-							<h5 class="fw-semibold mb-0">{{ $response['question'] }}</h5>
-						</div>
-						<div class="my-3">
-							@if( $response['type'] == 'stars' )
-								@php
-									$answers = $response['answers'];
-									for( $i = $answers->count(); $i < 5; $i++ ) { $answers->push(['text' => null]); }
-									foreach( $answers as $index => $answer ) { $answers[$index] = $answer['text'] ?? ''; }
-								@endphp
-								<div class="h-auto d-flex justify-content-center align-items-center py-4" style="width: fit-content;">
-									<div class='stars form-control bg-label-secondary d-flex justify-content-center align-items-center' id="review_stars_{{$question_index}}">
-										@for ($i = 5; $i > 0; $i--)
-											<input 
-												class="star star-{{ $i }}" 
-												id="star-{{ $question_index }}-{{ $i }}" 
-												type="radio"
-												name="question_{{ $response['id'] }}" 
-												value="{{ $i }}" 
-												data-text="{{ $answers[$i - 1] }}" 
-											/>
-											<label 
-												class="star star-{{ $i }}" 
-												for="star-{{ $question_index }}-{{ $i }}"
-											></label>
-										@endfor
-										<span class='float-end reviewFaceFeedBack text-nowrap ms-3'></span>
-									</div>
-								</div>
-								@elseif( $response['type'] == 'radio' )
-									@foreach( $response['answers'] as $index => $answer )
-										<div class="form-check mb-3">
-											<input 
-												type="radio" 
-												class="form-check-input survey-option" 
-												name="question_{{ $response['id'] }}"
-												id="question_{{ $question_index }}_answer_{{ $index }}" 
-												value="{{ $index }}"
-												autocomplete="off" 
-											/>
-											<label 
-												class="form-check-label survey-option-label"
-												for="question_{{ $question_index }}_answer_{{ $index }}"
-											>
-												{{ $answer['text'] }}
-											</label>
-										</div>
-									@endforeach
-								@elseif( $response['type'] == 'answers' )
-									<div class="row">
-										<div class="col-12 col-md-6">
-											<textarea 
-												name="question_{{ $response['id'] }}"
-												id="question_{{ $question_index }}_answer_1"
-												class="form-control">
-											</textarea>
-										</div>
-									</div>
-								@endif
-						</div>
-						<div class="text-danger survey-question-block">{{ __('dashboard.surveyQuestionRequired') }}</div>
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title"> {{ $survey->title }} </h3>
+						<small class="text-muted">{{ $survey->description }}</small>
 					</div>
 				</div>
-				@endforeach
-				
-				@if (count($my_responses) > 0)
-					<div class="form-group mt-6 mb-16 w-100 d-flex justify-content-end">
-						<button id="submitBtn" type="submit" class="btn btn-primary w-px-100"> {{__('admin.Save')}}</button>
+				<form id="submitQuestion" method="post" action="{{ route('surveys.submit', ['id' => $responses->id]) }}">
+					{!! csrf_field() !!}
+					@foreach( $my_responses as $question_index => $response )
+					<div class="card my-4 {{ in_array( 'question_' . $response['id'], $missingQuestions) ? 'block-danger' : '' }}"
+						id="survey-question-{{ $question_index }}">
+						<div class="card-body" style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }}">
+							<div class="d-flex align-items-center gap-3 pb-2 border-bottom">
+								<span class="badge bg-primary rounded-circle d-flex justify-content-center align-items-center"
+									style="width: 30px; height: 30px;">
+									{{ $question_index + 1 }}
+								</span>
+								<h5 class="fw-semibold mb-0">{{ $response['question'] }}</h5>
+							</div>
+							<div class="my-3">
+								@if( $response['type'] == 'stars' )
+									@php
+										$answers = $response['answers'];
+										for( $i = $answers->count(); $i < 5; $i++ ) { $answers->push(['text' => null]); }
+										foreach( $answers as $index => $answer ) { $answers[$index] = $answer['text'] ?? ''; }
+									@endphp
+									<div class="h-auto d-flex justify-content-center align-items-center py-4" style="width: fit-content;">
+										<div class='stars form-control bg-light-subtle d-flex justify-content-center align-items-center' id="review_stars_{{$question_index}}">
+											@for ($i = 5; $i > 0; $i--)
+												<input 
+													class="star star-{{ $i }}" 
+													id="star-{{ $question_index }}-{{ $i }}" 
+													type="radio"
+													name="question_{{ $response['id'] }}" 
+													value="{{ $i }}" 
+													data-text="{{ $answers[$i - 1] }}" 
+												/>
+												<label 
+													class="star star-{{ $i }}" 
+													for="star-{{ $question_index }}-{{ $i }}"
+												></label>
+											@endfor
+											<span class='float-end reviewFaceFeedBack text-nowrap ms-3'></span>
+										</div>
+									</div>
+									@elseif( $response['type'] == 'radio' )
+										@foreach( $response['answers'] as $index => $answer )
+											<div class="form-check mb-3">
+												<input 
+													type="radio" 
+													class="form-check-input survey-option" 
+													name="question_{{ $response['id'] }}"
+													id="question_{{ $question_index }}_answer_{{ $index }}" 
+													value="{{ $index }}"
+													autocomplete="off" 
+												/>
+												<label 
+													class="form-check-label survey-option-label"
+													for="question_{{ $question_index }}_answer_{{ $index }}"
+												>
+													{{ $answer['text'] }}
+												</label>
+											</div>
+										@endforeach
+									@elseif( $response['type'] == 'answers' )
+										<div class="row">
+											<div class="col-12 col-md-6">
+												<textarea 
+													name="question_{{ $response['id'] }}"
+													id="question_{{ $question_index }}_answer_1"
+													class="form-control">
+												</textarea>
+											</div>
+										</div>
+									@endif
+							</div>
+							<div class="text-danger survey-question-block">{{ __('dashboard.surveyQuestionRequired') }}</div>
+						</div>
 					</div>
-				@endif
-			</form>
+					@endforeach
+					
+					@if (count($my_responses) > 0)
+						<div class="form-group mt-6 mb-16 w-100 d-flex justify-content-end">
+							<button id="submitBtn" type="submit" class="btn btn-primary w-px-100"> {{__('admin.Save')}}</button>
+						</div>
+					@endif
+				</form>
 			@else
-			<div class="card">
-				<div class="card-header text-center">
-					<h3 class="card-title"> {{ __('dashboard.respondedAlready') }} </h3>
+				<div class="card">
+					<div class="card-header border-bottom mb-6">
+						<div class="d-flex justify-content-between align-items-center">
+							<h4 class="card-title mb-0">{{ $survey_Title }}</h4>
+
+							<div class="d-flex align-items-center gap-2">
+								@if( $survey_cohort != null )
+								<span class="badge bg-label-secondary">
+									{{ __('admin.Cohort') }} {{ $survey_cohort }}
+								</span>
+								@endif
+
+								<span class="badge bg-label-success">{{ __('admin.answered') }}</span>
+							</div>
+						</div>
+					</div>
+					
+					<div class="card-body">
+
+						<div class="text-center mb-4">
+							<h4 class="mb-1">{{ __('admin.already_responded') }}</h4>
+							<p class="text-muted mb-0">{{ __('admin.thank_you_for_submission') }}</p>
+						</div>
+
+						<h5 class="card-title mb-1">{{ $survey->title }}</h5>
+						<p class="text-muted">{{ $survey->description }}</p>
+
+						@foreach($my_responses as $question_index => $response)
+							<div class="card shadow-none mb-3 border rounded-3">
+								<div class="card-body">
+									<!-- Question -->
+									<div class="d-flex align-items-center mb-4">
+										<div class="badge bg-primary rounded-circle me-2 h-px-30 w-px-30 d-flex justify-content-center align-items-center">
+											{{ $question_index + 1 }}
+										</div>
+										<h5 class="card-title mb-0">{{ $response['question'] }}</h5>
+									</div>
+					
+									<!-- Answers -->
+									@if($response['type'] == 'stars')
+										<div class="d-flex align-items-center">
+											<span class="me-2">{{ __('admin.Rating') }}:</span>
+											@if ($response['answer'])
+												<span class="badge bg-light-subtle text-dark border">
+													<i class="ti ti-star-filled ti-sm text-warning me-1"></i>
+													{{ $response['answer'] . ' / 5'}}
+												</span>
+											@else
+												<span class="text-muted">{{ __('admin.No answer provided') }}</span>
+											@endif
+										</div>
+					
+									@elseif($response['type'] == 'radio')
+										<ul class="list-group list-group-flush">
+											@foreach($response['answers'] as $index => $answer)
+												<li class="list-group-item px-0 border-0 d-flex align-items-center">
+													@if(isset($response['answer']) && $response['answer'] == $index)
+														<span class="me-2">{{ __('admin.Selected') }}:</span>	
+													@endif
+													<span
+														class="{{ isset($response['answer']) && $response['answer'] == $index ? 'fw-semibold' : 'text-muted' }}">
+														{{ $answer['text'] ?? __('admin.No answer provided') }}
+													</span>
+												</li>
+												@endforeach
+										</ul>
+					
+									@elseif($response['type'] == 'answers')
+										<div class="badge bg-light-subtle text-dark mb-0">
+											{{ $response['answer'] ?? __('admin.No answer provided') }}
+										</div>
+									@endif
+								</div>
+							</div>
+						@endforeach
+					</div>
+
+					<div class="card-footer mt-8">
+						{{ $my_responses->links('pagination::bootstrap-5') }}
+					</div>
 				</div>
-			</div>
 			@endif
 		</div>
 	</div>

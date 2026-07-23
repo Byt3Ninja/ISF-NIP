@@ -7,8 +7,8 @@
 @stop
 
 @section('content')
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       
       {{-- Profile Header Section --}}
       <section class="row">
@@ -261,7 +261,7 @@
                       <i class="ti ti-flag ti-lg"></i>
                       <strong class="mx-2 text-nowrap">{{ $l == 'ar' ? 'الدولة:' : 'Country:' }}</strong>
                       <span>
-                        {{ $client->country_id ? $client->country->{'name_' . $l} : __('admin.Not_Available') }}
+                        {{ $client->country_id ? $client->country?->{'name_' . $l} : __('admin.Not_Available') }}
                       </span>
                     </li>
                     
