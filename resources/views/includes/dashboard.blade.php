@@ -1170,6 +1170,9 @@
 														<i class="ti ti-map me-2"></i>
 														{{ __('admin.Location') }}
 													</a>
+													<div class="mt-3">
+														<small> <i class="fas fa-map-marker-alt"></i> {{ $session->organization->address }} </small>
+													</div>
 												</span>
 											@endif
 										

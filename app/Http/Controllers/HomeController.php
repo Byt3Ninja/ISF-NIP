@@ -819,6 +819,9 @@ class HomeController extends Controller
                     c.name_ar AS `company_name_ar`,
                     c.name_en AS `company_name_en`,
                     o.google_map_url AS `google_map_url`,
+                    o.address AS `org_address`,
+                    cy.offline_location_address AS `offline_location_address`,
+                    cy.offline_location_map AS `offline_location_map`,
                     o.name_en AS `organization_name_en`,
                     o.name_ar AS `organization_name_ar`
                 FROM
@@ -827,6 +830,8 @@ class HomeController extends Controller
                     users u ON u.id = mr.user_id
                 LEFT JOIN
                     companies c ON c.id = u.company_id
+                LEFT JOIN
+                    cycles cy ON cy.id = mr.cycle_id
                 LEFT JOIN
                     organizations o ON o.id = mr.organization_id
                 WHERE   
@@ -876,7 +881,8 @@ class HomeController extends Controller
 
                 $organization = new stdClass;
                 $organization->id = $session->organization_id;
-                $organization->google_map_url = $session->google_map_url;
+                $organization->google_map_url = $session->offline_location_map ? $session->offline_location_map : $session->google_map_url;
+                $organization->address = $session->offline_location_address ? $session->offline_location_address : $session->org_address;
                 $organization->name = $session->{"organization_name_{$l}"};
                 $output->organization = $organization;
 

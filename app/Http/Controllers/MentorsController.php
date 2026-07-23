@@ -1209,7 +1209,12 @@ class MentorsController extends Controller
 
 	public function mine()
 	{
-		$sessions = MentorshipRequest::where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
+		$sessions = MentorshipRequest::with(['user', 'mentor', 'organization', 'cycle'])->where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
+		$sessions = $sessions->map(function ( $session ) {
+			$session->address = $session->cycle->offline_location_address ? $session->cycle->offline_location_address : $session->organization->address;
+			$session->google_map_url = $session->cycle->offline_location_map ? $session->cycle->offline_location_map : $session->organization->google_map_url;
+			return $session;
+		});
 		return view('admin.clients.mymentorships', compact('sessions'));
 	}
 

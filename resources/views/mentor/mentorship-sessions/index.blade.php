@@ -77,10 +77,6 @@
                       <div class="d-flex flex-column" style="width: 100%; min-width: 0;">
                         @if ($session->session_type == 'Offline')
                           <span class="badge bg-label-secondary" style="width: fit-content;">{{ __('mentor.offline') }}</span>
-                          <div class="d-flex align-items-center gap-1 mt-2">
-                            <i class="ti ti-map-pin ti-14px"></i>
-                            <small class="text-muted">{{ $session->location_address ?? '-' }}</small>
-                          </div>
                         @else
                           <span class="badge bg-label-info" style="width: fit-content;">{{ __('mentor.online') }}</span>
                         @endif
@@ -117,6 +113,10 @@
                           <i class="ti ti-map-pin me-1"></i>
                           {{ __('admin.map_link') }}
                         </a>
+                        <div class="d-flex align-items-center gap-1 mt-0">
+                          <i class="fas fa-map-marker-alt"></i>
+                          <small class="text-dark">{{ $session->location_address ?? '-' }}</small>
+                        </div>
                       @else
                         <span class="text-muted">-</span>
                       @endif
