@@ -35,6 +35,7 @@ return [
     'Mentors' => 'المرشدين',
     'MentorsSession' => 'جلسات المرشدين',
     'UpcomingMentorsSession' => 'جلسات المرشدين القادمة',
+    'next_two_weeks' => 'الأسبوعان المقبلان',
     'No Cycles started yet' => 'لا يوجد برامج جديدة حاليا',
     'Your next mentorship session with' => 'اجتماعك القادم سيكون مع',
     'will start' => 'سوف يبدأ',

@@ -794,7 +794,7 @@
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
 									<div class="d-flex justify-content-between align-items-center">
-										<h5 class="card-title mb-0">{{ __("dashboard.UpcomingMentorsSession") }}</h5>
+										<h5 class="card-title mb-0">{{ __("dashboard.UpcomingMentorsSession") }} <small class="text-muted"> ( {{ __('dashboard.next_two_weeks') }} ) </small> </h5>
 										<a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
 											<i class="ti ti-eye me-2 ti-16px"></i>
 											{{__('cycles.showAll')}}
@@ -906,6 +906,9 @@
 															<i class="ti ti-map me-2"></i>
 															{{ __('admin.Location') }}
 														</a>
+														<div class="mt-3">
+															<small> <i class="fas fa-map-marker-alt"></i> {{ $session->organization->address }} </small>
+														</div>
 													</span>
 													@endif
 													@elseif($session->approved == 'No')

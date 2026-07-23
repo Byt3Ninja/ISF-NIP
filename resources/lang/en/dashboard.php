@@ -35,6 +35,7 @@ return [
     'Mentors' => 'Mentors',
     'MentorsSession' => 'Mentors Sessions',
     'UpcomingMentorsSession' => 'Upcoming Mentors Sessions',
+    'next_two_weeks' => 'Next two weeks',
     'No Cycles started yet' => 'No Programs started yet',
     'Your next mentorship session with' => 'Your next mentorship session with',
     'will start' => 'will start',

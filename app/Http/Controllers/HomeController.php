@@ -1441,7 +1441,10 @@ class HomeController extends Controller
                 o.name_en AS `org_name_en`,
                 o.name_ar AS `org_name_ar`,
                 o.img_url AS `org_img_url`,
-                o.google_map_url AS `org_google_map_url`
+                o.google_map_url AS `org_google_map_url`,
+                o.address AS `org_address`,
+                cy.offline_location_address AS `offline_location_address`,
+                cy.offline_location_map AS `offline_location_map`
             FROM
                 mentorship_requests mr
             LEFT JOIN
@@ -1450,6 +1453,8 @@ class HomeController extends Controller
                 users u ON u.id = mr.user_id
             LEFT JOIN
                 companies c ON c.id = u.company_id
+            LEFT JOIN
+                cycles cy ON cy.id = mr.cycle_id
             LEFT JOIN
                mentorship_requests msr ON msr.mentor_id = m.id
             LEFT JOIN
@@ -1511,7 +1516,8 @@ class HomeController extends Controller
             $org->id = $_session->organization_id;
             $org->name = $_session->{'org_name_' . $l};
             $org->image_url = Organization::image_handler($_session->org_img_url);
-            $org->google_map_url = $_session->org_google_map_url;
+            $org->google_map_url = $_session->offline_location_map ? $_session->offline_location_map : $_session->org_google_map_url;
+            $org->address = $_session->offline_location_address ? $_session->offline_location_address : $_session->org_address;
             $session->organization = $org;
             return $session;
         })->values();
