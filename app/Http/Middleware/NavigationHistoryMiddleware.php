@@ -407,6 +407,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
             'logout',
             '_debugbar/*',
             'livewire/*',
+            'dashboard/notifications/*',
             // Static files and images
             '*/logo/*',
             'organizations/logo/*',
