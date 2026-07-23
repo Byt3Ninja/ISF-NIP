@@ -217,8 +217,7 @@ class AssessmentController extends Controller
 
     public function assessment(Request $request)
     {
-        if( Auth::user()->hasRole('Registered') )
-        {
+        if( Auth::user()->hasRole('Registered') ){
             $l = app()->getLocale();
             $userid = auth()->user()->id;
             $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();

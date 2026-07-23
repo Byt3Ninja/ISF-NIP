@@ -61,7 +61,7 @@
     <div class="card p-4 p-md-8">
       <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data" id="programForm">
         @csrf 
-        <input type="hidden" name="tab_id" value="1">
+        <input type="hidden" name="tab_id" value="{{ \App\Enums\CycleTabAction::CREATE_CYCLE }}">
         <input type="hidden" name="typecreate" id="type" value="1">
         <!-- Tabs (mobile) -->
         <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none pb-3">

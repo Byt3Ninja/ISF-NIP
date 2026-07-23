@@ -27,7 +27,7 @@
       <form id="edit-info-form" method="post" action="{{ route('company.profile_update_mine') }}" enctype="multipart/form-data">
     @endif
       {!! csrf_field() !!}
-      <input name="CompanyN" type="hidden" value="1">
+      <input name="CompanyN" type="hidden" value="{{ \App\Enums\CompanyFormStep::BasicInfo->value }}">
       <input name="locale" type="hidden" value="{{ app()->getLocale() }}">
 
       <div class="row">

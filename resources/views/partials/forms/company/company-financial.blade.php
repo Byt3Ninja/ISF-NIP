@@ -19,7 +19,7 @@
       enctype="multipart/form-data"
     >
       {!! csrf_field() !!}
-      <input type="hidden" value="4" name="CompanyN">
+      <input type="hidden" value="{{ \App\Enums\CompanyFormStep::FinancialInfo->value }}" name="CompanyN">
 
       {{-- Financial Overview --}}
       <div class="mb-4">

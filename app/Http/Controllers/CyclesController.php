@@ -736,12 +736,12 @@ class CyclesController extends Controller
                     'from' => Carbon::parse($request->fromDate),
                     'to' => Carbon::parse($request->toDate)
                 ];
-                if( $step8->stype == 1 )
+                if( $step8->stype == StepType::CUSTOM_FORM )
                 {
                     $counter = 0;
                     $organization_id = $step8->cycle->organization_id;
                     $cycles_ids = Cycle::where('organization_id', $organization_id)->pluck('id')->toArray();
-                    $slugs = Step::whereIn('cycle_id', $cycles_ids)->where('stype', 1)->pluck('public_slug')->unique()->filter(function($value) { return !empty($value); })->values()->toArray();
+                    $slugs = Step::whereIn('cycle_id', $cycles_ids)->where('stype', StepType::CUSTOM_FORM)->pluck('public_slug')->unique()->filter(function($value) { return !empty($value); })->values()->toArray();
 
                     $updatedArray['is_public'] = $request->is_public;
                     if( $updatedArray['is_public'] == 1 && ( empty( $request->public_slug ) || !trim( $request->public_slug ) ) )

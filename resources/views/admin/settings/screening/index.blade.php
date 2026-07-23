@@ -273,7 +273,7 @@
         <div class="modal-body">
 
           <input type="hidden" name="sid" id="step-id-value">
-          <input type="hidden" name="type" value="8">
+          <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
           <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Title') }}</label>
             <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
@@ -442,7 +442,7 @@
           url: "/dashboard/cycles/modify",
           data: {
             "stepid": stepId,
-            "type": 6,
+            "type": "{{ \App\Enums\CycleModifyAction::DELETE_STEP }}",
           },
           success: function(response) {
             $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();

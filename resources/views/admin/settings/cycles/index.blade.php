@@ -378,7 +378,7 @@
         </div>
         <div class="modal-body">
           <input type="hidden" name="cid" id="cid" value="{{ $id }}">
-          <input type="hidden" name="type" id="type5" value="5">
+          <input type="hidden" name="type" id="type5" value="{{ \App\Enums\CycleModifyAction::ADD_STEP }}">
           <input type="hidden" name="arr" id="sarr" value="{{ isset($step) ? $step->arr + 1 : 1 }}">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-4" id="menu1">
@@ -472,7 +472,7 @@
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
           <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
-          <input type="hidden" name="type" id="type7" value="8">
+          <input type="hidden" name="type" id="type7" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
@@ -752,6 +752,15 @@ if (editStepForm) {
 
 <script>
 
+  const CYCLE_MODIFY_ACTION = {
+    EDIT_CYCLE: '{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}',
+    SAVE_CYCLE_NOOP: '{{ \App\Enums\CycleModifyAction::SAVE_CYCLE_NOOP }}',
+    DELETE_CYCLE: '{{ \App\Enums\CycleModifyAction::DELETE_CYCLE }}',
+    ARRANGE_STEPS: '{{ \App\Enums\CycleModifyAction::ARRANGE_STEPS }}',
+    DELETE_STEP: '{{ \App\Enums\CycleModifyAction::DELETE_STEP }}',
+    FETCH_STEP: '{{ \App\Enums\CycleModifyAction::FETCH_STEP }}',
+  };
+
   // $('#count_team_number, #mcount_team_number').on('input', function () {
   //   let val = $(this).val();
   //   if (val < 1) {
@@ -805,7 +814,7 @@ if (editStepForm) {
           url: "/dashboard/cycles/modify",
           data: {
             "steps": ids,
-            "type": 4,
+            "type": CYCLE_MODIFY_ACTION.ARRANGE_STEPS,
           },
           success: function(response) {
             // console.log(response);
@@ -837,7 +846,7 @@ if (editStepForm) {
               $('#title').val(response.title);
               $('#description').val(response.description);
               $('#cycleid').val(cycle);
-              $('#type').val(1);
+              $('#type').val(CYCLE_MODIFY_ACTION.EDIT_CYCLE);
 
               var bsRangePickerBasic = $('#bs-rangepicker-basic');
               // $('#start').val(response.start);
@@ -872,7 +881,7 @@ if (editStepForm) {
           $('#title').val('');
           $('#description').val('');
           $('#cycleid').val('');
-          $('#type').val(2);
+          $('#type').val(CYCLE_MODIFY_ACTION.SAVE_CYCLE_NOOP);
 
           var bsRangePickerBasic = $('#bs-rangepicker-basic');
           // $('#start').val(response.start);
@@ -898,7 +907,7 @@ if (editStepForm) {
                 url: "/dashboard/cycles/modify",
                 data: {
                   "cycleid": cycle,
-                  "type": 3,
+                  "type": CYCLE_MODIFY_ACTION.DELETE_CYCLE,
                 },
                 success: function(response) {
                   // console.log(response);
@@ -991,7 +1000,7 @@ if (editStepForm) {
             type: "POST",
             url: "/dashboard/cycles/modify",
             data: {
-              "type": 7,
+              "type": CYCLE_MODIFY_ACTION.FETCH_STEP,
               "sid": id,
               "cycleid": 0,
             },
@@ -1116,7 +1125,7 @@ if (editStepForm) {
           data: {
             "stepid": id,
             "steps": ids,
-            "type": 6,
+            "type": CYCLE_MODIFY_ACTION.DELETE_STEP,
           },
           success: function(response) {
             // console.log(response);

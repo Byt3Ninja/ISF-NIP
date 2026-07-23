@@ -643,7 +643,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             url: "/dashboard/cycles/modify",
             data: {
               "stepid": stepId,
-              "type": 6,
+              "type": "{{ \App\Enums\CycleModifyAction::DELETE_STEP }}",
             },
             success: function(response) {
               $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();

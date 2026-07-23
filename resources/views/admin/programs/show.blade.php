@@ -1458,7 +1458,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
-          <input type="hidden" name="type" id="type7" value="8">
+          <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
 
           <fieldset class="row">
             <div class="col-12 form-group mb-3">
@@ -1993,518 +1993,102 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
 @stop
 
 @section('pagescripts')
-  @php($ccycle = \App\Cycle::find($cycle->id))
-
-  <script>
-    function copyToClipboard(text) {
-  // إنشاء عنصر مؤقت
-  const tempInput = document.createElement("input");
-  tempInput.value = text;
-  document.body.appendChild(tempInput);
-  tempInput.select();
-  tempInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
-  document.execCommand("copy");
-  document.body.removeChild(tempInput);
-  alert("{{ __('admin.Copied') }}");
-}
-    // Set Language
-    const lang = '{{ $l }}';
-
-    // document.addEventListener('DOMContentLoaded', () => {
-    //   console.log('loaded');
-    //   var bsRangePickerBasic = $('#bs-rangepicker-basic');
-    //   if (bsRangePickerBasic.length) {
-    //     bsRangePickerBasic.daterangepicker({
-    //       opens: isRtl ? 'left' : 'right'
-    //     });
-    //   }
-    // });
-
-    // const editValidFrom = document.querySelector('#edit-program-modal .valid-from');
-    // const editValidalidTo = document.querySelector('#edit-program-modal .valid-to');
-  
-    // const editFpTo = flatpickr(editValidalidTo, {
-    //   monthSelectorType: 'static',
-    //   dateFormat: 'Y-m-d',
-    //   minDate: 'today',
-    // });
-
-    // const editFpFrom = flatpickr(editValidFrom, {
-    //   monthSelectorType: 'static',
-    //   dateFormat: 'Y-m-d',
-    //   minDate: 'today',
-    // });
-
-    // Handle Append File
-    // const appendFile = (mode, file, conainerId) => {
-    //   console.log('file', file)
-    //   if (file) {
-    //     const fileName = file.split('/').pop();
-    //     const content = (`
-    //       <div class="d-flex align-items-center justify-content-between border p-2 rounded mb-2">
-    //         <div class="d-flex align-items-center gap-2">
-    //           <i class="ti ti-file fs-4 text-warning"></i>
-    //           <span class="text-truncate" style="max-width: 200px;">${fileName}</span>
-    //         </div> 
-    //         <a class="btn btn-label-primary btn-icon btn-sm" href="/storage/${file}" target="_blank" download="${file}">
-    //           <i class="ti ti-download fs-5"></i>
-    //         </a>
-    //       </div>`
-    //     );
-    //     $(`#${mode}-program-modal ${conainerId}`).append(content);
-    //   }
-    // };
-
-    // Initialize Quill Editor
-    // const editorConfig = { theme: 'snow' };
-    // const editGuidelineEditor = new Quill('#edit-program-modal #guideline-editor', editorConfig);
-    // const editFinancialEditor = new Quill('#edit-program-modal #financial-editor', editorConfig);
-    // const editLegalEditor = new Quill('#edit-program-modal #legal-editor', editorConfig);
-
-    // Clear Editor
-    // editGuidelineEditor.root.innerHTML = '';
-    // editFinancialEditor.root.innerHTML = '';
-    // editLegalEditor.root.innerHTML = '';
-
-    // Handle Editor Change
-    // const handleEditorChange = (editor, input) => {
-    //   editor.on('text-change', function() {
-    //     $(input).val(editor.root.innerHTML);
-    //   });
-    // };
-
-    // handleEditorChange(editGuidelineEditor, '#edit-program-modal #program_guideline');
-    // handleEditorChange(editFinancialEditor, '#edit-program-modal #financial_policy');
-    // handleEditorChange(editLegalEditor, '#edit-program-modal #legal_policy');
-
-    // Handle Edit Program
-    // const onEditProgramClick = (cycleId) => {
-    //   if(cycleId){
-    //     $('#edit-program-modal').modal('show');
-      
-    //     $.ajaxSetup({
-    //       headers: {
-    //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    //       }
-    //     });
-
-    //     $.ajax({
-    //       type: "POST",
-    //       url: "/dashboard/cycles/modify",
-    //       data: {"cycleid": cycleId },
-    //       success: function(response) {
-    //         console.log(response); 
-
-    //         $('#edit-program-modal #date-range-picker').daterangepicker({
-    //           opens: isRtl ? 'left' : 'right',
-    //           drops: 'up',
-    //           startDate: response?.start ? moment(response?.start) : '',
-    //           endDate: response?.end ? moment(response?.end) : '',
-    //         }).on('apply.daterangepicker', function(ev, picker) {
-    //           $('#edit-program-modal #start').val(picker.startDate.format('YYYY-MM-DD'));
-    //           $('#edit-program-modal #end').val(picker.endDate.format('YYYY-MM-DD'));
-    //         });
-
-    //         $('#edit-program-modal #title').val(response.title ?? '');
-    //         $('#edit-program-modal #description').val(response.description ?? '');
-    //         $('#edit-program-modal #cycleid').val(cycleId); 
-    //         $('#edit-program-modal #type').val(1);
-    //         // $('#edit-program-modal #start').val(response.start ?? '');
-    //         // $('#edit-program-modal #end').val(response.end ?? '');
-    //         $('#edit-program-modal #organization').val(response.organization_id ?? '');
-    //         $('#edit-program-modal #allow_non_company').prop('checked', response.allow_non_company == 1 ? true : false);
-    //         $('#edit-program-modal #auto-approve-mentorship-requests').prop('checked', response.auto_approve_mentorship_requests == 1 ? true : false);
-
-    //         if (response.private) {
-    //           $('#edit-program-modal #private').prop('checked', true);
-    //           $('#cyclelink').html('{{ __('cycles.Join URL') }}');
-    //           $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
-    //         }
-
-    //         if (editGuidelineEditor) {
-    //           editGuidelineEditor.root.innerHTML = response.program_guideline ?? '';
-    //         }
-
-    //         $('#edit-program-modal #program_guideline').val(response.program_guideline ?? '');
-
-    //         if (editFinancialEditor) {
-    //           editFinancialEditor.root.innerHTML = response.financial_guideline ?? '';
-    //         }
-    //         $('#edit-program-modal #financial_policy').val(response.financial_guideline ?? '');
-    //         $('#edit-program-modal #budget_allocation').val(response.budget_allocation ?? '');
-    //         $('#edit-program-modal #currency_type').val(response.currency_type ?? '');
-
-    //         if (editLegalEditor) {
-    //           editLegalEditor.root.innerHTML = response.legal_guideline ?? '';
-    //         }
-    //         $('#edit-program-modal #legal_policy').val(response.legal_guideline ?? '');
-    //         const guidelineFile = response?.program_guideline_file;
-    //         const financialFile = response.financial_guideline_file;
-    //         const legalFile = response?.legal_guideline_file;
-    //         const delegationFile = response.delegation_file;
-            
-    //         appendFile('edit', guidelineFile, '#guideline-file-container');
-    //         appendFile('edit', financialFile, '#financial-file-container');
-    //         appendFile('edit', legalFile, '#legal-file-container');
-
-    //         if (delegationFile) {
-    //           appendFile('edit', delegationFile, '#delegation-file-container');
-    //           $('#edit-program-modal delegation_option').prop('checked', true);
-    //         }
-    //       },
-    //       error: function(error) {
-    //         console.log(error);
-    //         resetValues();
-    //         alert("Error Occurred, Try again!");
-    //       }
-    //     });
-    //   }
-    // }; 
-  
-    // Initialize Quill editors
-    const quillEditors = document.querySelectorAll('#text-editor');
-    quillEditors.forEach(editor => {
-      new Quill(editor, {
-        theme: 'snow'
-      });
-    });
-  </script>
-
-  <script>
+@php($ccycle = \App\Cycle::find($cycle->id))
+<script>
     (() => {
-      console.log('loaded');
-      const flatpickerData = document.querySelectorAll('.flatpickr-date');
+        'use strict';
 
-      flatpickerData.forEach(flatpicker => {
-        flatpickr(flatpicker, {
-          altInput: true,
-          altFormat: 'F j, Y',
-          dateFormat: 'Y-m-d',
-          defaultDate: '{{ now()->format('Y-m-d') }}',
-          minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-          maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
-        });
-      });
-    })();
-  </script>
-
-{{-- <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const deleteButtons = document.querySelectorAll('#deleteButton');
-
-    deleteButtons.forEach(deleteButton => {
-      deleteButton.addEventListener('click', () => {
-        Swal.fire({
-          title: '{{ __('cycles.sure delete step') }}',
-          text: "You won't be able to revert this!",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: '{{ __('admin.DYes') }}',
-          cancelButtonText: '{{ __('admin.No') }}'
-        }).then(function (result) {
-          if (result.value) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Deleted!',
-              text: 'Step has been removed.',
-            });
-          }
-        });
-      });
-    });
-  });
-</script> --}}
-
-  <script>
-    // $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
-    //   format: 'Y-m-d',
-    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
-    //   timepicker: false
-    // });
-
-
-    $(document).ready(function() {
-      let drake = dragula([document.getElementById('basic-list-group')]);
-      drake.on('drop', function(el) {
-        let badges = document.getElementsByClassName('carr');
-        let ids = [];
-        for (let i = 0; i < badges.length - 1; ++i) {
-          badges[i].innerText = i + 1;
-          let id = badges[i].id.split('-');
-          ids.push(id[0]);
-        }
+        // ── CSRF header for all $.ajax calls ──────────────────────
         $.ajaxSetup({
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          }
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
-        $.ajax({
-          type: "POST",
-          url: "/dashboard/cycles/modify",
-          data: {
-            "steps": ids,
-            "type": 4,
-          },
-          success: function(response) {
-            console.log(response);
-          },
-          error: function(error) {
-            console.log(error);
-            alert("Error Occurred, arrange failed");
-          }
-        });
-      })
-    });
 
-    function DoChange(set) {
-      var cycle = $('#ccycle').find(":selected").val();
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-      });
-      switch (set) {
-        case 1:
-          $.ajax({
-            type: "POST",
-            url: "/dashboard/cycles/modify",
-            data: {
-              "cycleid": cycle,
-            },
-            success: function(response) {
-              $('#title').val(response.title);
-              $('#description').val(response.description);
-              $('#cycleid').val(cycle);
-              $('#type').val(1);
-              $('#start').val(response.start);
-              $('#end').val(response.end);
-              $('#organization_id').val(response.organization_id)
-              if (response.private) {
-                $('#customSwitch3').attr('checked', 'checked');
-                $('#cyclelink').html('{{ __('cycles.Join URL') }}');
-                $('#cyclelink').attr('href', '/dashboard/cycles/view/' + response.id + '?id=' + response.private);
-              }
-              $('#cycleForm').modal('show');
-            },
-            error: function(error) {
-              console.log(error);
-              alert("Error Occurred, Try again!");
-            }
-          });
-          break;
-        case 2:
-          $('#title').val('');
-          $('#description').val('');
-          $('#cycleid').val('');
-          $('#type').val(2);
-          $('#start').val('');
-          $('#end').val('');
-          $('#customSwitch3').removeAttr('checked');
-          $('#cycleForm').modal('show');
-          break;
-        case 3:
-          if (confirm('{{ __('cycles.sure delete cycle') }}?')) {
-            if (confirm('{{ __('cycles.cant undo') }}')) {
-              $.ajax({
-                type: "POST",
-                url: "/dashboard/cycles/modify",
-                data: {
-                  "cycleid": cycle,
-                  "type": 3,
-                },
-                success: function(response) {
-                  console.log(response);
-                  location.href = '/dashboard/cycles';
-                },
-                error: function(error) {
-                  console.log(error);
-                  alert("Error Occurred, Try again!");
-                }
-              });
-            }
-          }
-          break;
-        case 4:
-          let step = $('#StepSelect').find(":selected").val();
-          let steptxt = $('#StepSelect').find(":selected").text();
-          let menu = $('#menu' + step);
-          $('#menu1,#menu2').hide();
-          if (menu !== null) {
-            $.ajax({
-              url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle").val(),
-              success: function(response) {
-                $('#FormSelect').empty()
-                $('#FormSelect').append(response.appear)
-                menu.show();
-              },
-              error: function(error) {
-                console.log(error);
-                alert("Error Occurred, Try again!");
-              }
-            });
+        // ── Copy to clipboard ─────────────────────────────────────
+        window.copyToClipboard = function (text) {
+            (navigator.clipboard?.writeText(text) ?? Promise.reject())
+                .catch(() => {
+                    const el = Object.assign(document.createElement('input'), { value: text });
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                })
+                .then(() => alert("{{ __('admin.Copied') }}"));
+        };
 
-          }
-          if (step === '5') {
-            $.ajax({
-              url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected").data(
-                'organization'),
-              success: function(response) {
-                $('#FormSelect').empty()
-                $('#FormSelect').append(response.appear)
-                $('#menu1').show();
-              },
-              error: function(error) {
-                console.log(error);
-                alert("Error Occurred, Try again!");
-              }
-            });
-          }
-          $('#stype').val(step);
-          $('#formtitle').text(steptxt);
-          $('#stepForm').modal('show');
-          break;
-      }
-    }
+        // ── Delete step ───────────────────────────────────────────
+        window.deleteStep = function (id) {
+            if (!confirm('{{ __('cycles.sure delete step') }}?')) return;
 
-    function ModifyStep(set, id) {
-      var cycle = $('#ccycle').find(":selected").val();
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-      });
-      switch (set) {
-        case 1:
-          $.ajax({
-            type: "POST",
-            url: "/dashboard/cycles/modify",
-            data: {
-              "type": 7,
-              "sid": id,
-              "cycleid": 0,
-            },
-            success: function(response) {
-              console.log('response', response)
-              step = response.stype;
-              sData = response.data;
-              let menu = $('#mmenu' + step);
-              $('#mmenu1,#mmenu2').hide();
-              $('.public-data-form-fields').hide();
-              if( response.data !== null )
-              {
-                if( step == 1 )
-                {
-                  $('.public-data-form-fields').show();
-                  $('#is_public').val(response.is_public);
-                  $('#public_slug').val(response.public_slug);
-                  if( response.is_public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
-                }
-                if( step == 1 || step == 5 ) { $('#mFormSelect').val(response.data); }
-                if( step == 2 ) { $('#mScreeningSelect').val(response.data); }
-              }
-              if (menu !== null) {
-                $.ajax({
-                  url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
-                  success: function(response) {
-                    $('#mFormSelect').empty();
-                    let appends = '';
-                    response.data.forEach(function(form) {
-                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
+            $.post('/dashboard/cycles/modify', { stepid: id, type: '{{ \App\Enums\CycleModifyAction::DELETE_STEP }}' })
+                .done(() => location.reload())
+                .fail(() => alert('Error occurred. Please try again.'));
+        };
+
+        // ── Edit step modal ───────────────────────────────────────
+        window.ModifyStep = function (set, id) {
+            if (set !== 1) return;
+
+            $.post('/dashboard/cycles/modify', { type: '{{ \App\Enums\CycleModifyAction::FETCH_STEP }}', sid: id, cycleid: 0 })
+                .done(function (response) {
+                    const step  = response.stype;
+                    const sData = response.data;
+
+                    // Reset conditional panels
+                    $('#mmenu1, #mmenu2, .public-data-form-fields, #public_slug_div').hide();
+
+                    if (step === 1) {
+                        $('.public-data-form-fields').show();
+                        $('#is_public').val(response.is_public);
+                        $('#public_slug').val(response.public_slug);
+                        if (response.is_public == 1) $('#public_slug_div').show();
+                    }
+
+                    const orgId           = $('#ccycleOrg').val();
+                    const needsFormSelect = step === 1 || step === 5;
+                    const needsScreening  = step === 2;
+
+                    if (needsFormSelect) {
+                        $.get(`{{ url('dashboard/builder/organization') }}/${orgId}`)
+                            .done(function (res) {
+                                const opts = res.data.map(f =>
+                                    `<option value="${f.id}" ${f.id == sData ? 'selected' : ''}>${f.form_name}</option>`
+                                ).join('');
+                                $('#mFormSelect').html(opts);
+                                $('#mmenu1').show();
+                            });
+                    }
+
+                    if (needsScreening) {
+                        $('#mScreeningSelect').val(sData);
+                        $('#mmenu2').show();
+                    }
+
+                    // Populate fields
+                    $('#sid').val(response.id);
+                    $('#mtitle').val(response.title);
+                    $('#mdescription').val(response.description);
+
+                    $('#step-range-picker').daterangepicker({
+                        opens    : isRtl ? 'left' : 'right',
+                        drops    : 'up',
+                        startDate: response.from ? moment(response.from) : moment(),
+                        endDate  : response.to   ? moment(response.to)   : moment(),
+                    }).on('apply.daterangepicker', function (ev, picker) {
+                        $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+                        $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
                     });
-                    $('#mFormSelect').append(appends);
-                    menu.show();
-                  },
-                  error: function(error) {
-                    console.log(error);
-                    alert("Error Occurred, Try again!");
-                  }
-                });
 
-              }
-              if (step == 5) {
-                $.ajax({
-                  url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycleOrg").val(),
-                  success: function(response) {
-                    $('#mFormSelect').empty();
-                    let appends = '';
-                    response.data.forEach(function(form) {
-                      appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
-                    });
-                    $('#mFormSelect').append(appends);
-                    $('#mmenu1').show();
-                  },
-                  error: function(error) {
-                    console.log(error);
-                    alert("Error Occurred, Try again!");
-                  }
-                });
+                    $('#customStepModal').modal('show');
+                })
+                .fail(() => alert('Error occurred. Please try again.'));
+        };
 
-              }
-
-              $('#sid').val(response.id);
-              $('#mtitle').val(response.title);
-              $('#mdescription').val(response.description);
-
-              $('#step-range-picker').daterangepicker({
-                opens: isRtl ? 'left' : 'right',
-                drops: 'up',
-                startDate: response?.from ? moment(response?.from) : null,
-                endDate: response?.to ? moment(response?.to) : null,
-              }).on('apply.daterangepicker', function(ev, picker) {
-                $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
-                $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
-              });
-
-              // $('#mfromDate').val(response.from);
-              // $('#mtoDate').val(response.to);
-              $('#customStepModal').modal('show');
-            },
-            error: function(error) {
-              console.log(error);
-              alert("Error Occurred, Try again!");
-            }
-          });
-          break;
-      }
-    }
-
-    function deleteStep(id) {
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-      });
-      if (confirm('{{ __('cycles.sure delete step') }}?')) {
-        let badges = document.getElementsByClassName('carr');
-        let ids = [];
-        for (let a = 0; a < badges.length; ++a) {
-          badges[a].innerText = a + 1;
-          let id = badges[a].id.split('-');
-          ids.push(id[0]);
-        }
-        $.ajax({
-          type: "POST",
-          url: "/dashboard/cycles/modify",
-          data: {
-            "stepid": id,
-            "steps": ids,
-            "type": 6,
-          },
-          success: function(response) {
-            console.log(response);
-            location.href = '/dashboard/cycles/' + $('#ccycle').find(":selected").val();
-          },
-          error: function(error) {
-            console.log(error);
-            alert("Error Occurred, Try again!");
-          }
+        // ── Public-slug toggle ────────────────────────────────────
+        $(document).on('change', '#is_public', function () {
+            $('#public_slug_div').toggle($(this).val() === '1');
         });
-      }
-    }
-    $(document).on('change', '#is_public', function() {
-      let _public = $(this).val();
-      if( _public == 1 ) { $('#public_slug_div').show(); } else { $('#public_slug_div').hide(); }
-    });
+
+    })();
   </script>
 @stop
