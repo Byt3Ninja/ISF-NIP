@@ -2,10 +2,9 @@
 
 @section('content')
 @php
-// Define variables at the top to avoid undefined variable issues
-$leaderOrnot = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id);
-$maxMembers = $count_team;
-$members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
+// View-model comes from HackathonController@manage. $isLeader, $canInvite, $occupied,
+// $maxMembers, $remaining, $team, $teamLeaderRow, $joinRequests, $projectStatusMeta,
+// $sharedFiles, $todoItems are all prepared there.
 @endphp
 
 <!-- Main Content -->
@@ -29,7 +28,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   </h3>
                   <p class="mb-0 text-white-75">
                     {{ $l == 'en' ? 'Manage your team for' : 'إدارة فريقك لـ' }}
-                    <span class="fw-semibold">{{ $team_Formation_raw->first()->tf_name }}</span>
+                    <span class="fw-semibold">{{ $team->tf_name }}</span>
                   </p>
                 </div>
               </div>
@@ -90,13 +89,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 <h5 class="mb-1">
                   <i class="ti ti-users text-primary me-2"></i>
                   {{ $l == 'en' ? 'Team:' : 'فريق:' }}
-                  <span id="team-name-display" class="text-primary fw-bold">{{ $team_Formation_raw->first()->tf_name }}</span>
+                  <span id="team-name-display" class="text-primary fw-bold">{{ $team->tf_name }}</span>
                 </h5>
                 <small class="text-secondary">
                   {{ $l == 'en' ? 'Manage your team members and invitations' : 'إدارة أعضاء الفريق والدعوات' }}
                 </small>
               </div>
-              @if($leaderOrnot->count() > 0)
+              @if($isLeader)
               <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editTeamInfoModal"
                 data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Edit Team Information' : 'تعديل معلومات الفريق' }}">
                 <i class="ti ti-edit me-1"></i>
@@ -118,7 +117,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   <div>
                     <h6 class="mb-0">{{ $l == 'en' ? 'Members' : 'الأعضاء' }}</h6>
                     <small class="text-muted">
-                      <span id="member-count" class="fw-semibold">{{ $members }}</span>/{{ $maxMembers }}
+                      <span id="seat-counter" class="fw-semibold">{{ $occupied }}/{{ $maxMembers }}</span>
                     </small>
                   </div>
                 </div>
@@ -132,7 +131,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   </div>
                   <div>
                     <h6 class="mb-0">{{ $l == 'en' ? 'Pending' : 'معلق' }}</h6>
-                    <small class="text-muted">{{ $team_Pinding->count() }} {{ $l == 'en' ? 'invitations' : 'دعوات' }}</small>
+                    <small class="text-muted">{{ $team_Pending->count() }} {{ $l == 'en' ? 'invitations' : 'دعوات' }}</small>
                   </div>
                 </div>
               </div>
@@ -146,22 +145,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   <div>
                     <h6 class="mb-0">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع' }}</h6>
                     <small class="text-muted">
-                      @php
-                      $projectStatus = $team_Formation_raw->first()->tf_projectStatus;
-                      @endphp
-                      @if($projectStatus == 20)
-                        <span class="badge bg-label-primary">{{ __('admin.Idea + Team') }}</span>
-                      @elseif($projectStatus == 40)
-                        <span class="badge bg-label-info">{{ __('admin.Research') }}</span>
-                      @elseif($projectStatus == 60)
-                        <span class="badge bg-label-warning">{{ __('admin.Design & Build') }}</span>
-                      @elseif($projectStatus == 80)
-                        <span class="badge bg-label-success">{{ __('admin.Ready for Pitch') }}</span>
-                      @elseif($projectStatus == 100)
-                        <span class="badge bg-label-dark">{{ __('admin.Project Submitted') }}</span>
-                      @else
-                        <span class="badge bg-label-secondary">{{ $l == 'en' ? 'Not Set' : 'غير محدد' }}</span>
-                      @endif
+                      <span class="badge {{ $projectStatusMeta['class'] }}">{{ $projectStatusMeta['label'] }}</span>
                     </small>
                   </div>
                 </div>
@@ -175,10 +159,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 {{ $l == 'en' ? 'Team Members' : 'أعضاء الفريق' }}
               </h6>
             <ul class="list-group list-group-flush" id="team-members-list">
-              @php
-              $team_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->first();
-              $T = 0;
-              @endphp
+              @php $team_leader = $teamLeaderRow; $T = 0; @endphp
 
               @if($team_leader)
               <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
@@ -189,7 +170,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   </div>
                   <div>
                     <h6 class="mb-0">
-                      @if($leaderOrnot->count() > 0)
+                      @if($isLeader)
                       {{ $l == 'en' ? 'You (Team Leader)' : 'أنت (قائد الفريق)' }}
                       @else
                       {{ $l == 'en'
@@ -229,7 +210,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     <i class="ti ti-check me-1"></i>
                     {{ $l == 'en' ? 'Active' : 'نشط' }}
                   </span>
-                  @if($leaderOrnot->count() > 0)
+                  @if($isLeader)
                   <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip"
                     title="{{ $l == 'en' ? 'Remove Member (Leader only)' : 'إزالة العضو (متاح للقائد فقط)' }}"
                     onclick="confirmRemoveMember({{ $member->tm_id }}, '{{ $member->tm_name }}')">
@@ -239,8 +220,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
               </li>
               @endforeach
-              @if($leaderOrnot->count() > 0)
-              @foreach ($team_Pinding as $index => $pendingMember)
+              @if($isLeader)
+              @foreach ($team_Pending as $index => $pendingMember)
               <li id="pendingMember{{ $pendingMember->tm_id }}"
                 class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                 <div class="d-flex align-items-center">
@@ -261,8 +242,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     <i class="ti ti-clock me-1"></i>
                     {{ $l == 'en' ? 'Pending' : 'معلق' }}
                   </span>
-                  <input type="hidden" id="pendingMemberEmail" value="{{ $pendingMember->tm_id }}">
-                  @if($leaderOrnot->count() > 0)
+                  <input type="hidden" class="pendingMemberId" value="{{ $pendingMember->tm_id }}">
+                  @if($isLeader)
                   <button class="btn btn-sm btn-outline-danger" data-id="{{ $pendingMember->tm_id }}"
                     data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة' }}"
                     onclick="confirmCancelInvitation({{ $pendingMember->tm_id }}, '{{ $pendingMember->tm_email }}')">
@@ -276,7 +257,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             </ul>
             </div>
             <!-- Team Recruitment Section -->
-            @if($leaderOrnot->count() > 0 && $members < $maxMembers)
+            <div id="invite-new-members" @if(!$canInvite) style="display:none" @endif>
+            @if($isLeader)
             <div class="card bg-label-light border-0 mb-4">
               <div class="card-body">
                 <h6 class="mb-3">
@@ -292,7 +274,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     </button>
                   </div>
                 </div>
-                <form class="row g-3 align-items-end" method="POST" action="{{ route('hackathon.invitation') }}">
+                <form id="inviteByEmailForm" class="row g-3 align-items-end" method="POST" action="{{ route('hackathon.invitation') }}">
                   @csrf
                   <div class="col-md-8">
                     <label for="memberEmail" class="form-label small text-muted">
@@ -316,11 +298,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </form>
               </div>
             </div>
-            @elseif($members >= $maxMembers)
-            @php
-              // $deletemembers = $team_Formation_raw->whereIn('tm_acceptInvition', ['join', 'pending'])->delete();
-              $deletemembers = App\Team_member::whereIn('acceptInvition', ['join', 'pending'])->where('team_formation_id', $team_Formation_raw->first()->tf_id)->delete();
-            @endphp
+            @endif
+            </div>
+            <div id="team-complete-alert" @if($remaining > 0) style="display:none" @endif>
             <div class="alert alert-success d-flex align-items-center">
               <i class="ti ti-check-circle me-2"></i>
               <div>
@@ -328,13 +308,10 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 <div class="small">{{ $l == 'en' ? 'Your team has reached the maximum number of members.' : 'وصل فريقك إلى العدد الأقصى من الأعضاء.' }}</div>
               </div>
             </div>
-            @endif
+            </div>
             <!-- Join Requests Section -->
-            @if($leaderOrnot->count() > 0)
-            @php
-            $teamLeader = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition',
-            'join')->where('tm_team_formation_id', $team_Formation_raw->first()->tf_id);
-            @endphp
+            @if($isLeader)
+            @php $teamLeader = $joinRequests; @endphp
             
             <div class="card border-warning">
               <div class="card-header bg-label-warning">
@@ -410,20 +387,16 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 <div class="mb-3">
                   <div class="avatar avatar-xl mx-auto mb-3 position-relative">
                     @php
-                    $teamImage = $team_Formation_raw->first();
-                    $imageSrc = '/icons/team-default.svg';
-                    if ($teamImage && property_exists($teamImage, 'tf_img_team') && $teamImage->tf_img_team) {
-                        $imageSrc = '/' . $teamImage->tf_img_team . '?t=' . time();
-                    }
+                    $imageSrc = ($team && $team->tf_img_team) ? '/' . $team->tf_img_team . '?t=' . time() : '/icons/team-default.svg';
                     @endphp
-                    <img 
-                      src="{{ $imageSrc }}" 
-                      alt="{{ $team_Formation_raw->first()->tf_name }}" 
+                    <img
+                      src="{{ $imageSrc }}"
+                      alt="{{ $team->tf_name }}"
                       class="rounded-circle w-100 h-100 border-3 border-light shadow-sm"
                       onerror="this.onerror=null;this.src='/icons/team-default.svg';"
                       id="team-image-display"
                     >
-                    @if($leaderOrnot->count() > 0)
+                    @if($isLeader)
                     <div class="position-absolute bottom-0 end-0">
                       <button class="btn btn-sm btn-primary rounded-circle p-2" data-bs-toggle="modal" data-bs-target="#editTeamInfoModal"
                         data-bs-toggle="tooltip" title="{{ $l == 'en' ? 'Edit Team Image' : 'تعديل صورة الفريق' }}">
@@ -432,17 +405,17 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                     </div>
                     @endif
                   </div>
-                  <h5 class="mb-1">{{ $team_Formation_raw->first()->tf_name }}</h5>
-                  @if($team_Formation_raw->first()->tf_description)
-                  <p class="text-muted small mb-3">{{ $team_Formation_raw->first()->tf_description }}</p>
+                  <h5 class="mb-1">{{ $team->tf_name }}</h5>
+                  @if($team->tf_description)
+                  <p class="text-muted small mb-3">{{ $team->tf_description }}</p>
                   @endif
                   
-                  @if($leaderOrnot->count() > 0)
+                  @if($isLeader)
                     {{-- @if (app()->environment('local', 'dev', 'test'))
                       <form method="POST" action="/dashboard/hackathon/deleteTeamInfo" id="deleteTeamForm">
                         <div class="modal-body">
                           @csrf
-                          <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+                          <input type="hidden" name="team_formation_id" value="{{ $team->tf_id }}">
                           </div>
                           <button type="submit" class="btn btn-sm btn-danger"><i class="ti ti-trash me-1"></i>{{ $l == 'en' ? 'Delete Team' : 'حذف الفريق' }}</button>
                       </form>
@@ -454,7 +427,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   
                   @endif
                   <a 
-                    href="/dashboard/hackathon/team/{{ $team_Formation_raw->first()->tf_id }}"
+                    href="/dashboard/hackathon/team/{{ $team->tf_id }}"
                     class="btn btn-sm btn-outline-info"
                   >
                     <i class="ti ti-eye me-1"></i>
@@ -500,14 +473,14 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                       <label class="form-label small text-muted fw-semibold">
                         {{ $l == 'en' ? 'Project Name' : 'اسم المشروع' }}
                       </label>
-                      <h6 class="mb-0">{{ $team_Formation_raw->first()->tf_projectName_en }}</h6>
+                      <h6 class="mb-0">{{ $team->tf_projectName_en }}</h6>
                     </div>
 
                     <div class="mb-4">
                       <label class="form-label small text-muted fw-semibold">
                         {{ $l == 'en' ? 'Project Description' : 'وصف المشروع' }}
                       </label>
-                      <p class="small mb-0" id="team-project-idea">{{ $team_Formation_raw->first()->tf_projectDescription_en }}</p>
+                      <p class="small mb-0" id="team-project-idea">{{ $team->tf_projectDescription_en }}</p>
                     </div>
 
                     <button class="btn btn-outline-info btn-sm w-100 mb-3" data-bs-toggle="modal"
@@ -522,32 +495,18 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                         <label class="form-label small text-muted fw-semibold mb-0">
                           {{ $l == 'en' ? 'Project Progress' : 'تقدم المشروع' }}
                         </label>
-                        <span class="badge bg-primary">{{ $team_Formation_raw->first()->tf_projectStatus }}%</span>
+                        <span class="badge bg-primary">{{ $team->tf_projectStatus }}%</span>
                       </div>
                       <div class="progress mb-2" style="height: 8px;">
                         <div class="progress-bar bg-gradient-primary" role="progressbar"
-                          style="width:{{ $team_Formation_raw->first()->tf_projectStatus  }}%;"
-                          aria-valuenow="{{ $team_Formation_raw->first()->tf_projectStatus  }}" aria-valuemin="0"
+                          style="width:{{ $team->tf_projectStatus  }}%;"
+                          aria-valuenow="{{ $team->tf_projectStatus  }}" aria-valuemin="0"
                           aria-valuemax="100">
                         </div>
                       </div>
                       <small class="text-muted">
-                        @if($team_Formation_raw->first()->tf_projectStatus == 20)
-                        <strong>{{ __('admin.Idea + Team') }}</strong><br>
-                        {{ __('admin.Define the problem and form a team with clear roles.') }}
-                        @elseif($team_Formation_raw->first()->tf_projectStatus == 40)
-                        <strong>{{ __('admin.Research') }}</strong><br>
-                        {{ __('admin.Validate the idea, study users, and outline key features.') }}
-                        @elseif($team_Formation_raw->first()->tf_projectStatus == 60)
-                        <strong>{{ __('admin.Design & Build') }}</strong><br>
-                        {{ __('admin.Sketch UI, set up the project, and develop core functionality.') }}
-                        @elseif($team_Formation_raw->first()->tf_projectStatus == 80)
-                        <strong>{{ __('admin.Ready for Pitch') }}</strong><br>
-                        {{ __('admin.Prepare demo, finalize slides, and rehearse the presentation.') }}
-                        @elseif($team_Formation_raw->first()->tf_projectStatus == 100)
-                        <strong>{{ __('admin.Project Submitted') }}</strong><br>
-                        {{ __('admin.Submit code, share the demo, and complete documentation. story.') }}
-                        @endif
+                        <strong>{{ $projectStatusMeta['label'] }}</strong><br>
+                        {{ $projectStatusMeta['description'] ?? '' }}
                       </small>
                     </div>
                   </div>
@@ -564,33 +523,17 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
 
                     <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
                       <ul class="list-group list-group-flush" id="fileList">
-                        @if(isset($sharedFile) && $sharedFile->count() > 0)
-                          @foreach($sharedFile as $file)
-                            @php
-                              $user = Auth::user();
-                              $fullPath = $file->sf_file;
-                              $pathInfo = pathinfo($fullPath);
-                              $filename = $pathInfo['filename'];
-                              $extension = $pathInfo['extension'] ?? '';
-                              if (\Illuminate\Support\Facades\Storage::disk('hackathon_shared')->exists($fullPath)) {
-                                  $bytes = \Illuminate\Support\Facades\Storage::disk('hackathon_shared')->size($fullPath);
-                                  $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-                                  $factor = floor((strlen($bytes) - 1) / 3);
-                                  $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
-                              } else {
-                                  $sizeReadable = $l == 'en' ? 'File not found' : 'الملف غير موجود';
-                              }
-                            @endphp
-                            
+                        @if($sharedFiles->count() > 0)
+                          @foreach($sharedFiles as $file)
                             <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2">
                                 <div class="d-flex align-items-center" style="min-width: 0;">
                                     <i class="ti ti-file text-primary me-2"></i>
                                     <div class="flex-grow-1 me-2" style="min-width: 0;">
                                         <div class="small fw-medium text-truncate">
-                                            {{ $file->sf_original_name ?? ($filename.".".$extension) }}
+                                            {{ $file->display_name }}
                                         </div>
                                         <div class="text-muted small">
-                                            {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
+                                            {{ $file->size_readable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
                                         </div>
                                     </div>
                                 </div>
@@ -598,7 +541,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                     <a href="{{ route('hackathon.downloadSharedFile', $file->sf_id) }}" onclick="downloadFile(event, {{ $file->sf_id }})" class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
                                         <i class="ti ti-download"></i>
                                     </a>
-                                    @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
+                                    @if($file->sf_user_id == $_user->id || (isset($file->tf_user_id) && $file->tf_user_id == $_user->id))
                                         <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, {{ $file->sf_id }})" title="{{ $l == 'en' ? 'Delete' : 'حذف' }}">
                                             <i class="ti ti-trash"></i>
                                         </button>
@@ -628,34 +571,16 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
 
                     <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
                       <ul class="list-group list-group-flush" id="taskList">
-                        @if(isset($todoList) && $todoList->count() > 0)
-                        {{-- {{ dd($todoList) }} --}}
-                          @foreach($todoList as $task)
+                        @if($todoItems->count() > 0)
+                          @foreach($todoItems as $task)
                             <li class="list-group-item border-0 px-2 py-2" id="task-{{ $task->tl_id }}">
                               <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                   <div class="d-flex align-items-center mb-2">
                                     <span class="fw-medium me-2">{{ $task->tl_title }}</span>
-                                    @php
-                                      $statusClass = 'secondary';
-                                      $statusText = 'Todo';
-                                      $statusIcon = 'ti-circle';
-                                      
-                                      if($task->tl_status == 'DONE') {
-                                        $statusClass = 'success';
-                                        $statusText = $l == 'en' ? 'Done' : 'مكتملة';
-                                        $statusIcon = 'ti-check';
-                                      } elseif($task->tl_status == 'inprogress') {
-                                        $statusClass = 'warning';
-                                        $statusText = $l == 'en' ? 'In Progress' : 'قيد التنفيذ';
-                                        $statusIcon = 'ti-progress';
-                                      } else {
-                                        $statusText = $l == 'en' ? 'Todo' : 'مهمة';
-                                      }
-                                    @endphp
-                                    <span class="badge bg-label-{{ $statusClass }} rounded-pill py-1 px-2">
-                                      <i class="ti {{ $statusIcon }} ti-16px me-1"></i>
-                                      {{ $statusText }}
+                                    <span class="badge bg-label-{{ $task->status_meta['class'] }} rounded-pill py-1 px-2">
+                                      <i class="ti {{ $task->status_meta['icon'] }} ti-16px me-1"></i>
+                                      {{ $task->status_meta['text'] }}
                                     </span>
                                   </div>
                                   <small class="text-muted">
@@ -717,7 +642,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       <form method="POST" action="/dashboard/hackathon/EditTeamInfo" id="editTeamInfoForm" enctype="multipart/form-data">
         <div class="modal-body">
           @csrf
-          <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+          <input type="hidden" name="team_formation_id" value="{{ $team->tf_id }}">
           
           <!-- Team Image Section -->
           <div class="row">
@@ -725,15 +650,11 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               <div class="text-center mb-4">
                 <div class="avatar avatar-xl mx-auto mb-3 position-relative">
                   @php
-                  $teamImageModal = $team_Formation_raw->first();
-                  $imageSrcModal = '/icons/team-default.svg';
-                  if ($teamImageModal && property_exists($teamImageModal, 'tf_img_team') && $teamImageModal->tf_img_team) {
-                      $imageSrcModal = '/' . $teamImageModal->tf_img_team . '?t=' . time();
-                  }
+                  $imageSrcModal = ($team && $team->tf_img_team) ? '/' . $team->tf_img_team . '?t=' . time() : '/icons/team-default.svg';
                   @endphp
-                  <img 
-                    src="{{ $imageSrcModal }}" 
-                    alt="{{ $team_Formation_raw->first()->tf_name }}" 
+                  <img
+                    src="{{ $imageSrcModal }}"
+                    alt="{{ $team->tf_name }}"
                     class="rounded-circle w-100 h-100 border-3 border-light shadow"
                     onerror="this.onerror=null;this.src='/icons/team-default.svg';"
                     id="team-image-preview"
@@ -748,8 +669,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 </div>
                 
                 @php
-                $teamImageCheck = $team_Formation_raw->first();
-                $hasImage = $teamImageCheck && property_exists($teamImageCheck, 'tf_img_team') && $teamImageCheck->tf_img_team;
+                $hasImage = $team && $team->tf_img_team;
                 @endphp
                 @if($hasImage)
                 <div class="form-check mb-3">
@@ -790,7 +710,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   type="text" 
                   class="form-control" 
                   name="team_name"
-                  value="{{ $team_Formation_raw->first()->tf_name }}" 
+                  value="{{ $team->tf_name }}" 
                   id="team_name" 
                   required
                   maxlength="50"
@@ -810,7 +730,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                   rows="4"
                   maxlength="500"
                   placeholder="{{ $l == 'en' ? 'Brief description about your team...' : 'وصف مختصر عن فريقكم...' }}"
-                >{{ $team_Formation_raw->first()->tf_description ?? '' }}</textarea>
+                >{{ $team->tf_description ?? '' }}</textarea>
                 <div class="form-text">{{ $l == 'en' ? 'Maximum 500 characters' : 'حد أقصى 500 حرف' }}</div>
               </div>
             </div>
@@ -850,7 +770,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       <form method="POST" action="/dashboard/hackathon/EditProjectIdea" id="editProjectForm">
         <div class="modal-body">
           @csrf
-          <input type="hidden" name="team_formation_id" value="{{ $team_Formation_raw->first()->tf_id }}">
+          <input type="hidden" name="team_formation_id" value="{{ $team->tf_id }}">
           <div class="mb-3">
             <label for="Project_Name_en" class="form-label">
               {{ __('admin.Project_Name') }}
@@ -859,7 +779,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               type="text" 
               class="form-control" 
               name="Project_Name_en"
-              value="{{ $team_Formation_raw->first()->tf_projectName_en }}" 
+              value="{{ $team->tf_projectName_en }}" 
               id="Project_Name_en" 
               required
             >
@@ -874,26 +794,26 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
               name="Project_Description_en" 
               id="Project_Description_en"
               rows="2"
-            >{{ $team_Formation_raw->first()->tf_projectDescription_en }}</textarea>
+            >{{ $team->tf_projectDescription_en }}</textarea>
           </div>
 
           <div class="mb-3">
             <label for="Project_Status" class="form-label">{{ $l == 'en' ? 'Project Status' : 'حالة المشروع' }}</label>
             <select class="form-select" id="Project_Status" name="Project_Status">
               <option value="">{{ $l == 'en' ? 'Choose v...' : 'اختر الحالة...' }}</option>
-              <option value="20" {{ $team_Formation_raw->first()->tf_projectStatus == '20' ? 'selected' : '' }}>
+              <option value="20" {{ $team->tf_projectStatus == '20' ? 'selected' : '' }}>
                 {{ __('admin.Idea + Team') }}
               </option>
-              <option value="40" {{ $team_Formation_raw->first()->tf_projectStatus == '40' ? 'selected' : '' }}>
+              <option value="40" {{ $team->tf_projectStatus == '40' ? 'selected' : '' }}>
                 {{ __('admin.Research') }}
               </option>
-              <option value="60" {{ $team_Formation_raw->first()->tf_projectStatus == '60' ? 'selected' : '' }}>
+              <option value="60" {{ $team->tf_projectStatus == '60' ? 'selected' : '' }}>
                 {{ __('admin.Design & Build') }}
               </option>
-              <option value="80" {{ $team_Formation_raw->first()->tf_projectStatus == '80' ? 'selected' : '' }}>
+              <option value="80" {{ $team->tf_projectStatus == '80' ? 'selected' : '' }}>
                 {{ __('admin.Ready for Pitch') }}
               </option>
-              <option value="100" {{ $team_Formation_raw->first()->tf_projectStatus == '100' ? 'selected' : '' }}>
+              <option value="100" {{ $team->tf_projectStatus == '100' ? 'selected' : '' }}>
                 {{ __('admin.Project Submitted') }}
               </option>
             </select>
@@ -904,13 +824,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
             <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
             <select class="form-select" id="Region" name="Region">
               <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
-              <option value="AL_Madinah_AL_Munawwarah" {{ $team_Formation_raw->first()->tf_region == 'AL_Madinah_AL_Munawwarah' ? 'selected' : '' }}>
+              <option value="AL_Madinah_AL_Munawwarah" {{ $team->tf_region == 'AL_Madinah_AL_Munawwarah' ? 'selected' : '' }}>
                 {{ __('admin.AL_Madinah_AL_Munawwarah') }}
               </option>
-              <option value="Al_Ahsa" {{ $team_Formation_raw->first()->tf_region == 'Al_Ahsa' ? 'selected' : '' }}>
+              <option value="Al_Ahsa" {{ $team->tf_region == 'Al_Ahsa' ? 'selected' : '' }}>
                 {{ __('admin.Al_Ahsa') }}
               </option>
-              <option value="Asir" {{ $team_Formation_raw->first()->tf_region == 'Asir' ? 'selected' : '' }}>
+              <option value="Asir" {{ $team->tf_region == 'Asir' ? 'selected' : '' }}>
                 {{ __('admin.Asir') }}
               </option>
              
@@ -1270,8 +1190,84 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
 @section('pagescripts')
 <script>
   const HACKATHON_ID_TEAM_PAGE = new URLSearchParams(window.location.search).get('hackathonId') || '1';
-  const HACKATHON_NAME = "{{ $l == 'en' ? 'Future of AI Hackathon' : 'هاكثون مستقبل الذكاء الاصطناعي' }}"; 
-  const IS_TEAM_LEADER = true; 
+  const HACKATHON_NAME = "{{ $l == 'en' ? 'Future of AI Hackathon' : 'هاكثون مستقبل الذكاء الاصطناعي' }}";
+  const IS_TEAM_LEADER = true;
+
+  const inviteUrl = "{{ route('hackathon.invitation') }}";
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  const LANG = '{{ $l }}';
+
+  async function postInvitation(payload) {
+    const formData = new FormData();
+    formData.append('_token', csrfToken);
+    Object.keys(payload).forEach(k => formData.append(k, payload[k]));
+    const res = await fetch(inviteUrl, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+      body: formData
+    });
+    // Always read the JSON body, even on 422 (it carries success:false + code).
+    return res.json();
+  }
+
+  function updateSeatUI(data) {
+    if (typeof data.occupied === 'undefined') return;
+    const counter = document.getElementById('seat-counter');
+    if (counter) counter.textContent = data.occupied + '/' + data.max;
+    const inviteBox = document.getElementById('invite-new-members');
+    const completeBox = document.getElementById('team-complete-alert');
+    if (data.remaining <= 0) {
+      if (inviteBox) inviteBox.style.display = 'none';
+      if (completeBox) completeBox.style.display = '';
+    } else {
+      if (inviteBox) inviteBox.style.display = '';
+      if (completeBox) completeBox.style.display = 'none';
+    }
+  }
+
+  function appendPendingRow(member) {
+    const list = document.getElementById('team-members-list');
+    if (!list || document.getElementById('pendingMember' + member.id)) return;
+    const pendingText = LANG === 'en' ? 'Pending invitation' : 'دعوة معلقة';
+    const pendingBadge = LANG === 'en' ? 'Pending' : 'معلق';
+    const cancelTitle = LANG === 'en' ? 'Cancel Invitation' : 'إلغاء الدعوة';
+    const li = document.createElement('li');
+    li.id = 'pendingMember' + member.id;
+    li.className = 'list-group-item d-flex justify-content-between align-items-center border-0 px-0';
+    li.innerHTML =
+      '<div class="d-flex align-items-center">' +
+        '<div class="avatar avatar-sm me-3"><div class="avatar-initial bg-label-warning rounded-circle"><i class="ti ti-clock"></i></div></div>' +
+        '<div><h6 class="mb-0 text-muted"></h6><small class="text-muted">' + pendingText + '</small></div>' +
+      '</div>' +
+      '<div class="d-flex align-items-center">' +
+        '<span class="badge bg-label-warning rounded-pill me-2"><i class="ti ti-clock me-1"></i>' + pendingBadge + '</span>' +
+        '<input type="hidden" class="pendingMemberId" value="' + member.id + '">' +
+        '<button class="btn btn-sm btn-outline-danger" data-id="' + member.id + '" title="' + cancelTitle + '"><i class="ti ti-x"></i></button>' +
+      '</div>';
+    // Set email as text (avoid HTML injection via email string).
+    li.querySelector('h6').textContent = member.email;
+    li.querySelector('button').addEventListener('click', function () {
+      confirmCancelInvitation(member.id, member.email);
+    });
+    list.appendChild(li);
+  }
+
+  function applyInviteResult(data) {
+    if (data.member) appendPendingRow(data.member);
+    updateSeatUI(data);
+  }
+
+  function showInviteError(data) {
+    Swal.fire({
+      icon: data.code === 'already_invited' ? 'info' : 'error',
+      title: LANG === 'en' ? 'Notice' : 'تنبيه',
+      text: data.message || (LANG === 'en' ? 'There was an error sending the invitation.' : 'حدث خطأ أثناء إرسال الدعوة.'),
+      confirmButtonText: LANG === 'en' ? 'OK' : 'موافق',
+      customClass: { confirmButton: 'btn btn-primary' },
+      buttonsStyling: false,
+    });
+    updateSeatUI(data);
+  }
 
   $('.datepicker').flatpickr({
     monthSelectorType: 'static',
@@ -1308,54 +1304,39 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       $('#no-team-section').show();
     }
 
-    $('#inviteMemberForm').on('submit', function(e) {
+    $(document).on('submit', '#inviteByEmailForm', function (e) {
       e.preventDefault();
-      const email = $('#memberEmail').val();
-      const submitBtn = $('#sendInvitationBtn');
-      
-      if (email) {
-        // Show spinner and disable button
-        submitBtn.prop('disabled', true);
-        submitBtn.find('.btn-text').addClass('d-none');
-        submitBtn.find('.btn-spinner').removeClass('d-none');
+      const form = this;
+      const email = form.querySelector('#memberEmail').value.trim();
+      if (!email) return;
+      const btn = $('#sendInvitationBtn');
+      btn.prop('disabled', true);
+      btn.find('.btn-text').addClass('d-none');
+      btn.find('.btn-spinner').removeClass('d-none');
 
-        // Submit form
-        $.post($(this).attr('action'), $(this).serialize())
-          .done(function(response) {
+      postInvitation({ memberEmail: email })
+        .then(data => {
+          if (data.success) {
+            form.reset();
+            applyInviteResult(data);
             Swal.fire({
               icon: 'success',
-              title: '{{ $l == 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!' }}',
-              text: `{{ $l == 'en' ? 'Invitation sent to' : 'تم إرسال دعوة إلى' }} ${email}.`,
-              confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
-            }).then(() => {
-              window.location.reload();
-            });
-          })
-          .fail(function(error) {
-            Swal.fire({
-              icon: 'error',
-              title: '{{ $l == 'en' ? 'Error!' : 'خطأ!' }}',
-              text: '{{ $l == 'en' ? 'There was an error sending the invitation.' : 'حدث خطأ أثناء إرسال الدعوة.' }}',
-              confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
+              title: LANG === 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!',
+              text: data.message,
+              confirmButtonText: LANG === 'en' ? 'OK' : 'موافق',
+              customClass: { confirmButton: 'btn btn-primary' },
               buttonsStyling: false,
             });
-          })
-          .always(function() {
-            // Reset button state
-            submitBtn.prop('disabled', false);
-            submitBtn.find('.btn-text').removeClass('d-none');
-            submitBtn.find('.btn-spinner').addClass('d-none');
-          });
-      }
+          } else {
+            showInviteError(data);
+          }
+        })
+        .catch(() => showInviteError({}))
+        .finally(() => {
+          btn.prop('disabled', false);
+          btn.find('.btn-text').removeClass('d-none');
+          btn.find('.btn-spinner').addClass('d-none');
+        });
     });
 
     $('#editProjectForm').on('submit', function(e) {
@@ -1639,8 +1620,13 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
-          function(response) {
+        $.post(url, {'_method': 'POST' , '_token': token, 'id': id})
+          .done(function(data) {
+            if (data.success) {
+              const row = document.getElementById('pendingMember' + id);
+              if (row) row.remove();
+              updateSeatUI(data);
+            }
             Swal.fire({
               icon: 'success',
               title: '{{ $l == 'en' ? 'Invitation Cancelled!' : 'تم إلغاء الدعوة!' }}',
@@ -1652,10 +1638,8 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                 confirmButton: 'btn btn-primary',
               },
               buttonsStyling: false,
-            }).then(() => {
-              $('#pendingMember'+id).remove();
             });
-          }).fail(function(error) { 
+          }).fail(function(error) {
             console.log(error);
             releaseFailureAlert({
               title: "{{ __('admin.Error') }}!",
@@ -1815,62 +1799,40 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
     }).then((result) => {
       if (result.isConfirmed) {
         const button = $(`.invite-member-btn[data-member-id="${id}"]`);
-        
-        // Show spinner and disable button
         button.prop('disabled', true);
         button.find('.btn-text').addClass('d-none');
         button.find('.btn-spinner').removeClass('d-none');
 
-        const formData = new FormData();
-        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-        formData.append('user_id', id);
-        formData.append('memberEmail', email);
-
-        fetch("{{ route('hackathon.invitation') }}", {
-          method: "POST",
-          body: formData
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.text();
-        })
-        .then(data => {
-          Swal.fire({
-            icon: 'success',
-            title: '{{ $l == 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!' }}',
-            text: `{{ $l == 'en' ? 'Invitation sent to' : 'تم إرسال دعوة إلى' }} ${name}.`,
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
-          }).then(() => {
-            window.location.reload();
+        postInvitation({ user_id: id, memberEmail: email })
+          .then(data => {
+            if (data.success) {
+              // Flip the card button to "Invitation Sent".
+              button.removeClass('btn-primary').addClass('btn-warning');
+              button.find('.btn-text').html('<i class="ti ti-check me-1"></i>' +
+                (LANG === 'en' ? 'Invitation Sent' : 'تم إرسال الدعوة'));
+              applyInviteResult(data);
+              Swal.fire({
+                icon: 'success',
+                title: LANG === 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!',
+                text: `${LANG === 'en' ? 'Invitation sent to' : 'تم إرسال دعوة إلى'} ${name}.`,
+                confirmButtonText: LANG === 'en' ? 'OK' : 'موافق',
+                customClass: { confirmButton: 'btn btn-primary' },
+                buttonsStyling: false,
+              });
+              button.prop('disabled', true); // keep disabled after success
+            } else {
+              showInviteError(data);
+              button.prop('disabled', false);
+            }
+          })
+          .catch(() => {
+            showInviteError({});
+            button.prop('disabled', false);
+          })
+          .finally(() => {
+            button.find('.btn-spinner').addClass('d-none');
+            button.find('.btn-text').removeClass('d-none');
           });
-        })
-        .catch(error => {
-          Swal.fire({
-            icon: 'error',
-            title: '{{ $l == 'en' ? 'Error!' : 'خطأ!' }}',
-            text: '{{ $l == 'en' ? 'There was an error sending the invitation.' : 'حدث خطأ أثناء إرسال الدعوة.' }}',
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
-          });
-          console.error(error);
-        })
-        .finally(() => {
-          // Reset button state
-          button.prop('disabled', false);
-          button.find('.btn-text').removeClass('d-none');
-          button.find('.btn-spinner').addClass('d-none');
-        });
       }
     });
   }

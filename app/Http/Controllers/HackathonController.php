@@ -228,7 +228,7 @@ class HackathonController extends Controller
         if( $team_Formation_raw->isEmpty() ) { return redirect()->back()->with('error', 'Team Formation not found'); }
         $step = Step::whereIn('cycle_id', $team_Formation_raw->pluck('tf_cycle_id')->toArray())->where('stype', '6')->first();
         $count_team = $step ? $step->count_team_number : 0;
-        $team_Pinding = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
+        $team_Pending = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
         $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
 
         $team_Formation_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id)->first();
@@ -371,9 +371,79 @@ class HackathonController extends Controller
         ORDER BY sf.created_at DESC";
 
         $sharedFile = collect(DB::select($sharedFile_q, [$id]));
-        
 
-        return view('admin.hackathon.manage-team', compact('team_Formation_raw', 'team_Pinding', 'team_members', 'step', 'count_team', 'availableMembers', 'todoList', 'sharedFile', 'team_Formation_leader'));
+
+        // ---- View-model (all logic moved out of the Blade template) ----
+        $team = $team_Formation_raw->first();
+
+        $isLeader = $team_Formation_raw
+            ->where('tm_isTeamLeader', 1)
+            ->where('tm_user_id', $user->id)
+            ->isNotEmpty();
+
+        $teamLeaderRow = $team_Formation_raw->firstWhere('tm_isTeamLeader', 1);
+
+        // Seat data (same rule as invitation(): accepted + join + pending, incl. leader).
+        $occupied = Team_member::where('team_formation_id', $team->tf_id)
+            ->whereIn('acceptInvition', ['accepted', 'join', 'pending'])->count();
+        $maxMembers = $count_team; // steps.count_team_number for the stype=6 step
+        $remaining = max(0, $maxMembers - $occupied);
+        $canInvite = $isLeader && $remaining > 0;
+
+        // Join requests (was inline in Blade).
+        $joinRequests = $team_Formation_raw
+            ->where('tm_isTeamLeader', 0)
+            ->where('tm_acceptInvition', 'join')
+            ->where('tm_team_formation_id', $team->tf_id);
+
+        // Project-status badge mapping (was the @if chain in Blade).
+        $statusMap = [
+            20  => ['label' => __('admin.Idea + Team'), 'class' => 'bg-label-primary', 'description' => __('admin.Define the problem and form a team with clear roles.')],
+            40  => ['label' => __('admin.Research'), 'class' => 'bg-label-info', 'description' => __('admin.Validate the idea, study users, and outline key features.')],
+            60  => ['label' => __('admin.Design & Build'), 'class' => 'bg-label-warning', 'description' => __('admin.Sketch UI, set up the project, and develop core functionality.')],
+            80  => ['label' => __('admin.Ready for Pitch'), 'class' => 'bg-label-success', 'description' => __('admin.Prepare demo, finalize slides, and rehearse the presentation.')],
+            100 => ['label' => __('admin.Project Submitted'), 'class' => 'bg-label-dark', 'description' => __('admin.Submit code, share the demo, and complete documentation. story.')],
+        ];
+        $projectStatusMeta = $statusMap[$team->tf_projectStatus]
+            ?? ['label' => ($l == 'en' ? 'Not Set' : 'غير محدد'), 'class' => 'bg-label-secondary', 'description' => ''];
+
+        // Shared files: precompute human-readable size + display name (was Storage calc in Blade).
+        $sharedFiles = collect($sharedFile ?? [])->map(function ($file) use ($l) {
+            $fullPath = $file->sf_file;
+            $pathInfo = pathinfo($fullPath);
+            $displayName = $file->sf_original_name
+                ?? (($pathInfo['filename'] ?? 'file') . '.' . ($pathInfo['extension'] ?? ''));
+            if (\Illuminate\Support\Facades\Storage::disk('hackathon_shared')->exists($fullPath)) {
+                $bytes = \Illuminate\Support\Facades\Storage::disk('hackathon_shared')->size($fullPath);
+                $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                $factor = floor((strlen($bytes) - 1) / 3);
+                $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
+            } else {
+                $sizeReadable = $l == 'en' ? 'File not found' : 'الملف غير موجود';
+            }
+            $file->size_readable = $sizeReadable;
+            $file->display_name = $displayName;
+            return $file;
+        });
+
+        // Todo items: precompute status meta (was the @php status block in Blade).
+        $todoItems = collect($todoList ?? [])->map(function ($task) use ($l) {
+            if ($task->tl_status == 'DONE') {
+                $task->status_meta = ['class' => 'success', 'text' => ($l == 'en' ? 'Done' : 'مكتملة'), 'icon' => 'ti-check'];
+            } elseif ($task->tl_status == 'inprogress') {
+                $task->status_meta = ['class' => 'warning', 'text' => ($l == 'en' ? 'In Progress' : 'قيد التنفيذ'), 'icon' => 'ti-progress'];
+            } else {
+                $task->status_meta = ['class' => 'secondary', 'text' => ($l == 'en' ? 'Todo' : 'مهمة'), 'icon' => 'ti-circle'];
+            }
+            return $task;
+        });
+
+        return view('admin.hackathon.manage-team', compact(
+            'team_Formation_raw', 'team_Pending', 'team_members', 'step', 'count_team',
+            'availableMembers', 'todoList', 'sharedFile', 'team_Formation_leader',
+            'team', 'isLeader', 'teamLeaderRow', 'occupied', 'maxMembers', 'remaining',
+            'canInvite', 'joinRequests', 'projectStatusMeta', 'sharedFiles', 'todoItems'
+        ));
     }
 
     public function myTeam()
@@ -1536,19 +1606,52 @@ class HackathonController extends Controller
             'user_id' => 'nullable|exists:users,id',
         ]);
 
+        $wantsJson = $request->expectsJson() || $request->ajax();
+        // $ok=true -> HTTP 200 ; $ok=false -> HTTP 422 for AJAX callers.
+        $respond = function (bool $ok, string $message, array $extra = []) use ($wantsJson) {
+            if ($wantsJson) {
+                return response()->json(
+                    array_merge(['success' => $ok, 'message' => $message], $extra),
+                    $ok ? 200 : 422
+                );
+            }
+            return redirect()->back()->with($ok ? 'success' : 'error', $message);
+        };
+
         $email = $request->memberEmail;
         $user = Auth::user();
         $team_q = TeamFormation::where('user_id', $user->id)->first();
         if (!$team_q) {
-            return redirect()->back()->with('error', 'You are not authorized to send invitations.');
+            return $respond(false, __('admin.You are not authorized to send invitations.'));
         }
-        if($user->email == $email){
-            return redirect()->back()->with('error', 'You cannot invite yourself.');
+
+        // Seat check — mirrors RequestJoin(); counts accepted + join + pending (incl. leader).
+        $occupied = Team_member::where('team_formation_id', $team_q->id)
+            ->whereIn('acceptInvition', ['accepted', 'join', 'pending'])->count();
+        $max = optional(Step::where('cycle_id', $team_q->cycle_id)->where('stype', '6')->first())
+            ->count_team_number ?? 0;
+        if ($occupied >= $max) {
+            return $respond(false, __('admin.hackathon_team_full'), [
+                'code' => 'team_full', 'occupied' => $occupied, 'max' => $max, 'remaining' => 0,
+            ]);
         }
+
+        if ($user->email == $email) {
+            return $respond(false, __('admin.You cannot invite yourself.'));
+        }
+
         $haveTeam = Team_member::where('Email', $email)->where('acceptInvition', 'accepted')->first();
-        if($haveTeam){
-            return redirect()->back()->with('error', 'This user is already a member of another team.');
+        if ($haveTeam) {
+            return $respond(false, __('admin.This user is already a member of another team.'));
         }
+
+        // Block duplicate pending invite to the same email on this team.
+        $alreadyInvited = Team_member::where('team_formation_id', $team_q->id)
+            ->where('email', $email)->where('acceptInvition', 'pending')->exists();
+        if ($alreadyInvited) {
+            return $respond(false, __('admin.hackathon_already_invited'), ['code' => 'already_invited']);
+        }
+
         $user_q = User::where('email', $email)->where('id', $request->user_id)->first();
         if (!$user_q) {
             $teamMember = new Team_member();
@@ -1562,31 +1665,40 @@ class HackathonController extends Controller
             $teamMember->code = uniqid('inv_');
             $teamMember->expire_at = now()->addHours(24);
             $teamMember->save();
-            
-           Notification::route('mail', $email)->notify(new InviteToHackathon($user, $team_q, $teamMember));
-           
-            return redirect()->back()->with('success', 'Invitation sent successfully. Waiting for user to join.');
-        }else{
-     
-        $teamMember = new Team_member();
-        $teamMember->user_id = $request->user_id;
-        $teamMember->Name = $user_q->first_name . ' ' . $user_q->last_name;
-        $teamMember->TeamMember = 'hackathon';
-        $teamMember->isTeamLeader = 0;
-        $teamMember->team_formation_id = $team_q->id;
-        $teamMember->email = $email;
-        $teamMember->acceptInvition = 'pending';
-        $teamMember->Company_id = $user->company_id;
-        $teamMember->code = uniqid('inv_');
-        $teamMember->expire_at = now()->addHours(24);
-        $teamMember->save();
-        $user_q->notify(new InviteToHackathon($user, $team_q, $teamMember));
+
+            Notification::route('mail', $email)->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            $message = __('admin.Invitation sent successfully. Waiting for user to join.');
+        } else {
+            $teamMember = new Team_member();
+            $teamMember->user_id = $request->user_id;
+            $teamMember->Name = $user_q->first_name . ' ' . $user_q->last_name;
+            $teamMember->TeamMember = 'hackathon';
+            $teamMember->isTeamLeader = 0;
+            $teamMember->team_formation_id = $team_q->id;
+            $teamMember->email = $email;
+            $teamMember->acceptInvition = 'pending';
+            $teamMember->Company_id = $user->company_id;
+            $teamMember->code = uniqid('inv_');
+            $teamMember->expire_at = now()->addHours(24);
+            $teamMember->save();
+            $user_q->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            $message = __('admin.Invitation sent successfully.');
         }
-        
 
-        // Send invitation email logic here
+        $occupied++;
+        $remaining = max(0, $max - $occupied);
 
-        return redirect()->back()->with('success', 'Invitation sent successfully.');
+        return $respond(true, $message, [
+            'occupied' => $occupied,
+            'max' => $max,
+            'remaining' => $remaining,
+            'member' => [
+                'id' => $teamMember->id,
+                'email' => $teamMember->email,
+                'name' => $teamMember->Name,
+                'user_id' => $teamMember->user_id,
+            ],
+        ]);
     }
 
     public function deleteTeamInfo(Request $request)
@@ -1618,7 +1730,19 @@ class HackathonController extends Controller
         // Send cancel invitation email logic here
          $user->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'cancelled'));
 
-        return response()->json(['success' => true, 'message' => __("admin.Invitation_cancelled_successfully.")]);
+        $team_q = TeamFormation::find($teamMember->team_formation_id);
+        $occupied = $team_q ? Team_member::where('team_formation_id', $team_q->id)
+            ->whereIn('acceptInvition', ['accepted', 'join', 'pending'])->count() : 0;
+        $max = $team_q ? (optional(Step::where('cycle_id', $team_q->cycle_id)
+            ->where('stype', '6')->first())->count_team_number ?? 0) : 0;
+
+        return response()->json([
+            'success' => true,
+            'message' => __("admin.Invitation_cancelled_successfully."),
+            'occupied' => $occupied,
+            'max' => $max,
+            'remaining' => max(0, $max - $occupied),
+        ]);
     }
 
     public function acceptInvitation($id)

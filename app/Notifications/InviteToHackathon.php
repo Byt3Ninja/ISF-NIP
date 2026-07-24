@@ -59,6 +59,21 @@ class InviteToHackathon extends Notification implements ShouldQueue
         $this->teamMember = $teamMember;
     }
 
+    /**
+     * Resolve the organization for SMTP/branding without depending on
+     * user-only properties. Preserves prior behavior for real users
+     * (their own organization) and falls back to the team leader / cycle
+     * for AnonymousNotifiable email recipients.
+     */
+    private function resolveOrganization(object $notifiable)
+    {
+        if ($notifiable instanceof \App\User) {
+            return $notifiable->organization;
+        }
+        return $this->teamLeader->organization
+            ?? optional($this->team_q->cycle)->organization;
+    }
+
  /**
      * Get the notification's delivery channels.
      *
@@ -66,42 +81,47 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $isUser = $notifiable instanceof \App\User;
+
+        $org = $this->resolveOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Configure SMTP if settings exist
         $this->configureSmtp($smtpSettings);
-        
+
         // Organization channel toggles (default to true when not configured)
         $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
         $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
         $orgAcceptPusher = $smtpSettings?->accept_pusher ?? true;
 
+        // User-level prefs only apply to real users; an email-only recipient
+        // (AnonymousNotifiable) can receive mail only.
+        $userAcceptWhatsapp = $isUser ? ($notifiable->accept_whatsapp ?? true) : false;
+        $userAcceptPusher   = $isUser ? ($notifiable->accept_pusher ?? true) : false;
+        $userAcceptEmail    = $isUser ? ($notifiable->accept_email ?? true) : true;
+
         $channels = [];
 
-        // WhatsApp if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isWhatsAppEnabled() 
-            && $orgAcceptWhatsapp 
-            && $notifiable->accept_whatsapp) {
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled()
+            && $orgAcceptWhatsapp
+            && $userAcceptWhatsapp) {
             $channels[] = WhatsAppChannel::class;
         }
 
-        // Pusher (broadcast) if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isPusherEnabled() 
-            && $orgAcceptPusher 
-            && $notifiable->accept_pusher) {
+        if (GlobalNotificationSettingsService::isPusherEnabled()
+            && $orgAcceptPusher
+            && $userAcceptPusher) {
             $channels[] = 'broadcast';
         }
 
-        // Email if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isEmailEnabled() 
-            && $orgAcceptEmail 
-            && $notifiable->accept_email) {
+        if (GlobalNotificationSettingsService::isEmailEnabled()
+            && $orgAcceptEmail
+            && $userAcceptEmail) {
             $channels[] = 'mail';
         }
 
-        // Always store in database for audit/history if any channels are active
-        if (!empty($channels)) {
+        // Store in database only for real users (AnonymousNotifiable cannot).
+        if (!empty($channels) && $isUser) {
             $channels[] = 'database';
         }
 
@@ -113,9 +133,9 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
+        $org = $this->resolveOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
         // return (new MailMessage)
@@ -154,6 +174,24 @@ class InviteToHackathon extends Notification implements ShouldQueue
             'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q]),
             'time' => now()->toDateTimeString(),
         ]);
+    }
+
+    /**
+     * Database (stored) representation. Required because via() adds the
+     * 'database' channel for registered users; without this the queue job
+     * throws "Notification is missing toDatabase / toArray method".
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'subject' => __('admin.Invitation_to_Join_a_Hackathon_Team'),
+            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q]),
+            'team'    => $this->team_q->id ?? null,
+            'leader'  => $this->teamLeader->id ?? null,
+            'member'  => $this->teamMember->id ?? null,
+        ];
     }
 
     /**

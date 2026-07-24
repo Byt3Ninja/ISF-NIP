@@ -141,19 +141,24 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
      */
     public function toArray($notifiable): array
     {
+        // $userteam is null when the invitation targeted an email that has no
+        // registered user yet (placeholder Team_member with null user_id), so
+        // guard every id read to avoid "Attempt to read property id on null".
         return [
-            'user'   => $this->user->id,
-            'userteam'   => $this->userteam->id,
-            'member' => $this->teams->id,
+            'user'   => $this->user?->id,
+            'userteam'   => $this->userteam?->id,
+            'member' => $this->teams?->id,
             'status' => $this->status,
         ];
     }
 
     public function toWhatsapp(object $notifiable): string
     {
+        // $userteam is null for email invites with no registered user yet;
+        // guard the reads so an enabled WhatsApp channel does not crash.
         return __('notifications.hackathon_invite.whatsapp', [
             'leader' => ($this->teamLeader->first_name_en ?? '').' '.($this->teamLeader->last_name_en ?? ''),
-            'team' => $this->userteam->{'first_name_en'} . ' ' . $this->userteam->{'last_name_en'},
+            'team' => trim(($this->userteam->first_name_en ?? '') . ' ' . ($this->userteam->last_name_en ?? '')),
         ]);
     }
 
