@@ -1739,6 +1739,9 @@ class HackathonController extends Controller
         return response()->json([
             'success' => true,
             'message' => __("admin.Invitation_cancelled_successfully."),
+            // user_id of the cancelled invite (null for email-only invites) so the
+            // Available Members card button can be reset to "Send Invitation".
+            'member_id' => $teamMember->user_id,
             'occupied' => $occupied,
             'max' => $max,
             'remaining' => max(0, $max - $occupied),
