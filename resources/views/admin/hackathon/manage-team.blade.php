@@ -565,12 +565,11 @@
                                 </div>
                             </li>
                           @endforeach
-                        @else
-                          <li class="list-group-item border-0 text-center py-4">
-                            <i class="ti ti-folder-open text-muted mb-2 d-block" style="font-size: 2rem;"></i>
-                            <p class="text-muted mb-0">{{ $l == 'en' ? 'No files uploaded yet' : 'لم يتم رفع ملفات بعد' }}</p>
-                          </li>
                         @endif
+                        <li id="noFilesPlaceholder" class="list-group-item border-0 text-center py-4" @if($sharedFiles->count() > 0) style="display: none;" @endif>
+                          <i class="ti ti-folder-open text-muted mb-2 d-block" style="font-size: 2rem;"></i>
+                          <p class="text-muted mb-0">{{ $l == 'en' ? 'No files uploaded yet' : 'لم يتم رفع ملفات بعد' }}</p>
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -2092,13 +2091,6 @@
     formData.append('file', file);
     formData.append('description', fileDescription);
 
-    // URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const hackathonId = urlParams.get('hackathonId') || '1';
-    const teamId = urlParams.get('teamId') || '123';
-    formData.append('hackathon_id', hackathonId);
-    formData.append('team_id', teamId);
-
     // Add CSRF token
     formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
 
@@ -2140,6 +2132,10 @@
           </button>
         </div>`;
       fileList.prepend(newItem);
+
+      // Hide the "No files uploaded yet" placeholder now that a file exists
+      const placeholder = document.getElementById('noFilesPlaceholder');
+      if (placeholder) placeholder.style.display = 'none';
     };
 
     // Send request to the route
@@ -2226,9 +2222,16 @@
             const fileElement = buttonElement.closest('li');
             if (fileElement) fileElement.remove();
 
+            // Restore the "No files uploaded yet" placeholder if no real files remain
+            const fileList = document.getElementById('fileList');
+            const placeholder = document.getElementById('noFilesPlaceholder');
+            if (fileList && placeholder && !fileList.querySelector('li:not(#noFilesPlaceholder)')) {
+              placeholder.style.display = '';
+            }
+
             Swal.fire({
               title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-              text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
+              text: '{{ $l == "en" ? "File removed successfully." : "تم حذف الملف بنجاح." }}',
               icon: 'success',
               confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
               showCancelButton: false,
