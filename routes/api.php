@@ -70,7 +70,7 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::get('/me', [ProfileController::class, 'me']);
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
     Route::apiResource('users', UserController::class);
-    Route::get('users/companies', 'UserController@companies');
+    Route::get('users/companies', [UserController::class, 'companies']);
     Route::put('users/{user}/password', [UserController::class,'updatePassword']);
     Route::apiResource('roles',RoleController::class);
     Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
