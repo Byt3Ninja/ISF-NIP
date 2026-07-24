@@ -198,6 +198,12 @@ return [
             'visibility' => 'private',
         ],
 
+        'hackathon_shared' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/hackathon'),
+            'visibility' => 'private',
+        ],
+
         'importer' => [
             'driver' => 'local',
             'root' => storage_path('app/private/importer'),

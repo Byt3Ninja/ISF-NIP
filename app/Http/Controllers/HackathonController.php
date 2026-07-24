@@ -339,6 +339,7 @@ class HackathonController extends Controller
         $sharedFile_q = "SELECT 
                 sf.id as sf_id,
                 sf.file as sf_file,
+                sf.original_name as sf_original_name,
                 sf.user_id as sf_user_id,
                 sf.description as sf_description,
                 sf.created_at as sf_created_at,
@@ -448,6 +449,7 @@ class HackathonController extends Controller
         $sharedFile_q = "SELECT 
                 sf.id as sf_id,
                 sf.file as sf_file,
+                sf.original_name as sf_original_name,
                 sf.user_id as sf_user_id,
                 sf.description as sf_description,
                 sf.created_at as sf_created_at,

@@ -571,9 +571,9 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                               $fullPath = $file->sf_file;
                               $pathInfo = pathinfo($fullPath);
                               $filename = $pathInfo['filename'];
-                              $extension = $pathInfo['extension'];
-                              if (file_exists($fullPath)) {
-                                  $bytes = filesize($fullPath);
+                              $extension = $pathInfo['extension'] ?? '';
+                              if (\Illuminate\Support\Facades\Storage::disk('hackathon_shared')->exists($fullPath)) {
+                                  $bytes = \Illuminate\Support\Facades\Storage::disk('hackathon_shared')->size($fullPath);
                                   $units = ['B', 'KB', 'MB', 'GB', 'TB'];
                                   $factor = floor((strlen($bytes) - 1) / 3);
                                   $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
@@ -587,7 +587,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                     <i class="ti ti-file text-primary me-2"></i>
                                     <div class="flex-grow-1 me-2" style="min-width: 0;">
                                         <div class="small fw-medium text-truncate">
-                                            {{ $filename.".".$extension }}
+                                            {{ $file->sf_original_name ?? ($filename.".".$extension) }}
                                         </div>
                                         <div class="text-muted small">
                                             {{ $sizeReadable }} - {{ $l == 'en' ? 'by ' . $file->{"user_name_". $l} : 'بواسطة ' . $file->{"user_name_". $l} }}
@@ -595,7 +595,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
                                     </div>
                                 </div>
                                 <div class="btn-group btn-group-sm flex-shrink-0">
-                                    <a href="{{ asset($file->sf_file) }}" download class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
+                                    <a href="{{ route('hackathon.downloadSharedFile', $file->sf_id) }}" onclick="downloadFile(event, {{ $file->sf_id }})" class="btn btn-outline-primary btn-sm" title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
                                         <i class="ti ti-download"></i>
                                     </a>
                                     @if($file->sf_user_id == $user->id || (isset($file->tf_user_id) && $file->tf_user_id == $user->id))
@@ -1905,6 +1905,53 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
   });
 
   // File Upload Functions
+  function downloadFile(event, fileId) {
+    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+    const l = '{{ $l }}';
+
+    fetch(`/dashboard/hackathon/sharedFile/${fileId}/download`, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+      }
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('download-failed');
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const match = disposition.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+      const name = match ? decodeURIComponent(match[1].replace(/"/g, '')) : 'download';
+      return response.blob().then(blob => ({ blob, name }));
+    })
+    .then(({ blob, name }) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    })
+    .catch(() => {
+      if (typeof releaseFailureAlert === 'function') {
+        releaseFailureAlert({
+          title: l === 'en' ? 'Error' : 'خطأ',
+          message: l === 'en' ? 'File download failed. Please try again.' : 'فشل تحميل الملف. يرجى المحاولة مرة أخرى.',
+        });
+      } else if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'error',
+          title: l === 'en' ? 'Error' : 'خطأ',
+          text: l === 'en' ? 'File download failed. Please try again.' : 'فشل تحميل الملف. يرجى المحاولة مرة أخرى.',
+        });
+      }
+    });
+
+    return false;
+  }
+
   function uploadFile() {
     const fileInput = document.getElementById('fileInput');
     const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
@@ -1977,28 +2024,30 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
       return 'ti-file-text';
     };
 
-    const createListItem = (file) => {
+    const createListItem = (file, record) => {
       const fileList = document.getElementById('fileList');
       if (!fileList) return;
       const newItem = document.createElement('li');
       newItem.className = 'list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-2 file-list-item';
 
+      const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       const iconClass = getIconClass(file.name);
       const uploadedByText = l === 'en' ? 'by You' : 'بواسطة أنت';
+      const displayName = escapeHtml(record.original_name || file.name);
 
       newItem.innerHTML = `
         <div class="d-flex align-items-center">
           <i class="ti ${iconClass} me-2"></i>
           <div>
-            <div class="small fw-medium">${file.name}</div>
+            <div class="small fw-medium">${displayName}</div>
             <div class="text-muted small">${(file.size / 1024).toFixed(1)}KB - ${uploadedByText}</div>
           </div>
         </div>
         <div class="btn-group btn-group-sm">
-          <a href="#" class="btn btn-outline-primary btn-sm" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}">
+          <a href="/dashboard/hackathon/sharedFile/${record.id}/download" onclick="downloadFile(event, ${record.id})" class="btn btn-outline-primary btn-sm" title="${l === 'en' ? "Download" : "تنزيل"}">
             <i class="ti ti-download"></i>
           </a>
-          <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}">
+          <button class="btn btn-outline-danger btn-sm" onclick="deleteFile(this, ${record.id})" title="${l === 'en' ? "Delete" : "حذف"}">
             <i class="ti ti-trash"></i>
           </button>
         </div>`;
@@ -2021,7 +2070,7 @@ $members = $team_Formation_raw->where('tm_acceptInvition', 'accepted')->count();
           title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
           message: l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح.",
         });
-        createListItem(file);
+        createListItem(file, data);
       } else {
         releaseFailureAlert({
           title: l === 'en' ? "Error" : "خطأ",
