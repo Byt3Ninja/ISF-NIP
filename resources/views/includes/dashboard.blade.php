@@ -1695,6 +1695,119 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 <!-- Respond Invitation Modal -->
 @if($team_member->count() > 0)
+<style>
+	/* Scoped hackathon-invitation popup (hxi-*) — self-contained, theme-aware. */
+	.hxi-dialog { max-width: 430px; }
+	.hxi-content {
+		border: 0; border-radius: 20px; overflow: hidden;
+		box-shadow: 0 24px 60px -18px rgba(47, 43, 61, .38);
+		background: var(--bs-card-bg, #fff);
+	}
+	.hxi-body { padding: 0; max-height: 82vh; overflow-y: auto; }
+	.hxi-card + .hxi-card { border-top: 8px solid var(--bs-border-color, #ecebf1); }
+
+	.hxi-head {
+		position: relative; text-align: center; padding: 30px 28px 0;
+		background: radial-gradient(120% 120% at 50% -20%, rgba(115,103,240,.16), transparent 62%);
+	}
+	.hxi-medallion {
+		position: relative; width: 76px; height: 76px; margin: 0 auto;
+		border-radius: 22px; display: grid; place-items: center;
+		background: linear-gradient(145deg, #7367f0, #5a4fd6);
+		color: #fff; font-size: 30px; font-weight: 800;
+		box-shadow: 0 10px 22px -6px rgba(115,103,240,.55);
+	}
+	.hxi-medallion::after {
+		content: ""; position: absolute; inset: -5px; border-radius: 26px;
+		border: 2px solid #7367f0; opacity: .22;
+	}
+	.hxi-initial { position: relative; z-index: 0; }
+	/* An uploaded image overlays the initial; a broken one is caught by onerror. */
+	.hxi-medallion img {
+		position: absolute; inset: 0; z-index: 1;
+		width: 100%; height: 100%; object-fit: cover; border-radius: 22px;
+	}
+	/* Broken/missing file swapped to the app's default team SVG: drop the gradient
+	   so the grey icon reads on a light surface, matching the manage-team page. */
+	.hxi-medallion--fallback {
+		background: var(--bs-secondary-bg, #f1f0f7);
+		box-shadow: 0 8px 18px -8px rgba(47,43,61,.25);
+	}
+	.hxi-medallion--fallback::after { opacity: .12; }
+	.hxi-medallion--fallback img { object-fit: contain; padding: 16px; }
+
+	.hxi-eyebrow {
+		margin: 16px 0 0; font-size: 11.5px; font-weight: 700;
+		letter-spacing: .12em; text-transform: uppercase; color: #7367f0;
+	}
+	.hxi-team {
+		margin: 5px 0 0; font-size: 23px; font-weight: 800; line-height: 1.2;
+		color: var(--bs-heading-color, #2f2b3d); text-wrap: balance;
+	}
+
+	.hxi-content-body { padding: 18px 28px 26px; text-align: center; }
+	.hxi-inviter {
+		display: inline-flex; align-items: center; gap: 8px;
+		padding: 6px 14px 6px 6px; border-radius: 999px;
+		background: var(--bs-tertiary-bg, #f8f7ff);
+		border: 1px solid var(--bs-border-color, #ecebf1);
+		font-size: 13.5px; color: var(--bs-secondary-color, #5d596c);
+	}
+	.hxi-who {
+		width: 24px; height: 24px; border-radius: 50%;
+		background: rgba(115,103,240,.14); color: #7367f0;
+		display: grid; place-items: center; font-weight: 800; font-size: 12px;
+	}
+	.hxi-inviter strong { color: var(--bs-heading-color, #2f2b3d); font-weight: 700; }
+
+	.hxi-lead {
+		margin: 16px 0 0; font-size: 15px; font-weight: 600;
+		color: var(--bs-heading-color, #2f2b3d);
+	}
+	.hxi-perks {
+		list-style: none; margin: 16px auto 0; padding: 0; max-width: 260px;
+		display: flex; flex-direction: column; gap: 9px; text-align: start;
+	}
+	.hxi-perks li {
+		display: flex; align-items: center; gap: 10px;
+		font-size: 13px; color: var(--bs-secondary-color, #5d596c);
+	}
+	.hxi-tick {
+		flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%;
+		background: rgba(40,199,111,.14); color: #28c76f;
+		display: grid; place-items: center; font-size: 11px; font-weight: 900;
+	}
+
+	.hxi-actions {
+		display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px;
+	}
+	.hxi-actions form { margin: 0; display: block; }
+	.hxi-btn {
+		width: 100%; height: 46px; border: 0; border-radius: 12px; cursor: pointer;
+		font-family: inherit; font-size: 14.5px; font-weight: 700;
+		display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+		transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+	}
+	.hxi-btn i { font-size: 18px; }
+	.hxi-btn-accept {
+		color: #fff; background: linear-gradient(145deg, #28c76f, #1f9d57);
+		box-shadow: 0 8px 18px -6px rgba(40,199,111,.6);
+	}
+	.hxi-btn-accept:hover { transform: translateY(-1px); box-shadow: 0 12px 22px -6px rgba(40,199,111,.7); }
+	.hxi-btn-reject {
+		color: #ea5455; background: rgba(234,84,85,.10);
+		box-shadow: inset 0 0 0 1px rgba(234,84,85,.24);
+	}
+	.hxi-btn-reject:hover { transform: translateY(-1px); background: rgba(234,84,85,.16); }
+	.hxi-btn:focus-visible { outline: 3px solid #7367f0; outline-offset: 2px; }
+
+	.hxi-expiry {
+		margin: 16px 0 0; font-size: 12px; color: var(--bs-tertiary-color, #a5a3ae);
+		display: inline-flex; align-items: center; gap: 6px;
+	}
+	@media (prefers-reduced-motion: reduce) { .hxi-btn { transition: none; } }
+	@media (max-width: 380px) { .hxi-actions { grid-template-columns: 1fr; } }
+</style>
 <div
 	class="modal fade"
 	id="teamInvitationModal"
@@ -1702,59 +1815,79 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 	aria-labelledby="teamInvitationLabel"
 	aria-modal="true"
 	role="dialog">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content overflow-hidden position-relative">
+	<div class="modal-dialog modal-dialog-centered hxi-dialog">
+		<div class="modal-content hxi-content">
 
-			<!-- Optional Background Gradient Overlay -->
-			<div
-				style="position: absolute; inset: 0; background: linear-gradient(135deg, #f5f7fa, #c3cfe2); opacity: 0.3;"
-			></div>
+			<!-- Static accessible name for the modal (per-invite titles below are not unique) -->
+			<h2 id="teamInvitationLabel" class="visually-hidden">{{ $l == 'en' ? 'Team Invitation' : 'دعوة الفريق' }}</h2>
 
-			<div class="modal-body position-relative text-center py-12 px-12">
+			<div class="modal-body hxi-body">
 				@foreach($team_member as $join)
-				<!-- Team & Inviter Avatar -->
-				<div class="position-relative d-inline-block mb-4">
-					<img
-						src="{{ $join->tf_img_team ? asset($join->tf_img_team) : 'https://placehold.co/400x200?text='.$join->tf_name }}"
-						alt="Team Avatar"
-						class="rounded-circle border-4 shadow"
-						style="width: 64px; height: 64px; object-fit: cover;"
-					/>
-				</div>
-				
-				<!-- Title -->
-				<h5 id="teamInvitationLabel" class="fw-bold mb-2">{{ $join->tf_name }}</h5>
+				@php
+					$hxiTeamName = trim($join->tf_name);
+					$hxiTeamInitial = mb_strtoupper(mb_substr($hxiTeamName, 0, 1));
+					$hxiInviter = trim($join->{'user_name_' . $l} ?? '');
+					$hxiInviterInitial = $hxiInviter !== '' ? mb_strtoupper(mb_substr($hxiInviter, 0, 1)) : '?';
+				@endphp
+				<div class="hxi-card">
 
-				<!-- Description -->
-				<p class="mb-2">
-					<strong>{{ $join->{'user_name_' . $l} }}</strong> {{ $l == 'en' ? 'invited you to join their team' : 'تم دعوتك للانضمام لفريقه' }}
-				</p>
-				<p class="fst-italic text-muted small">
-					{{ $l == 'en' ? 'Joining this team will allow you to collaborate on projects, share resources, and participate in discussions.' : 'الانضمام للفريق سوف تسمح لك بالتعاون في المشاريع، والمشاركة في الموارد، والتشارك في النقاشات.' }}
-				</p>
+					<!-- Header: team monogram medallion. Priority: uploaded team image ->
+					     (on broken/missing file) app's default team SVG -> branded team initial. -->
+					<div class="hxi-head">
+						<div class="hxi-medallion" aria-hidden="true">
+							<span class="hxi-initial">{{ $hxiTeamInitial }}</span>
+							@if($join->tf_img_team)
+								<img src="{{ asset($join->tf_img_team) }}" alt=""
+									onerror="this.onerror=null;this.src='/icons/team-default.svg';this.closest('.hxi-medallion').classList.add('hxi-medallion--fallback');">
+							@endif
+						</div>
+						<p class="hxi-eyebrow">{{ $l == 'en' ? 'Team Invitation' : 'دعوة فريق' }}</p>
+						<h3 class="hxi-team">{{ $hxiTeamName }}</h3>
+					</div>
 
-				<!-- Buttons -->
-				<div class="d-flex flex-column flex-sm-row gap-2">
+					<div class="hxi-content-body">
+						<!-- Inviter chip: the relationship at a glance -->
+						<span class="hxi-inviter">
+							<span class="hxi-who" aria-hidden="true">{{ $hxiInviterInitial }}</span>
+							<span><strong>{{ $hxiInviter }}</strong> {{ $l == 'en' ? 'invited you' : 'قام بدعوتك' }}</span>
+						</span>
 
-					<form action="{{ route('hackathon.acceptInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
-						@csrf
-						@method('PATCH')
-						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
-						<button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
-							<i class="ti ti-users me-2 me-2"></i>
-							{{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
-						</button>
-					</form>
-					<form action="{{ route('hackathon.rejectInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
-						@csrf
-						@method('PATCH')
-						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
-						<button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
-							<i class="ti ti-users me-2 me-2"></i>
-							{{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
-						</button>
-                	</form>
+						<p class="hxi-lead">{{ $l == 'en' ? 'Join them to build together.' : 'انضم إليهم للبناء معًا.' }}</p>
 
+						<!-- What joining gives you -->
+						<ul class="hxi-perks">
+							<li><span class="hxi-tick" aria-hidden="true">✓</span>{{ $l == 'en' ? "Collaborate on the team's project" : 'التعاون في مشروع الفريق' }}</li>
+							<li><span class="hxi-tick" aria-hidden="true">✓</span>{{ $l == 'en' ? 'Share files and resources' : 'مشاركة الملفات والموارد' }}</li>
+							<li><span class="hxi-tick" aria-hidden="true">✓</span>{{ $l == 'en' ? 'Join the team discussion' : 'الانضمام إلى نقاش الفريق' }}</li>
+						</ul>
+
+						<!-- Actions: equal-width, accept leads, decline recedes. Forms unchanged. -->
+						<div class="hxi-actions">
+							<form action="{{ route('hackathon.acceptInvitation', $join->tm_id) }}" method="post">
+								@csrf
+								@method('PATCH')
+								<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
+								<button type="submit" class="hxi-btn hxi-btn-accept">
+									<i class="ti ti-check"></i>
+									{{ $l == 'en' ? 'Accept' : 'قبول' }}
+								</button>
+							</form>
+							<form action="{{ route('hackathon.rejectInvitation', $join->tm_id) }}" method="post">
+								@csrf
+								@method('PATCH')
+								<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
+								<button type="submit" class="hxi-btn hxi-btn-reject">
+									<i class="ti ti-x"></i>
+									{{ $l == 'en' ? 'Decline' : 'رفض' }}
+								</button>
+							</form>
+						</div>
+
+						<p class="hxi-expiry">
+							<i class="ti ti-clock"></i>
+							{{ $l == 'en' ? 'This invitation expires in 24 hours' : 'تنتهي صلاحية هذه الدعوة خلال 24 ساعة' }}
+						</p>
+					</div>
 				</div>
 				@endforeach
 			</div>
@@ -1818,40 +1951,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	$('#teamInvitationModal').modal('show');
-
-	$('#acceptInvitationBtn').on('click', function() {
-		var btn = $(this);
-		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Accepting...');
-		// Simulate AJAX request
-		setTimeout(function() {
-			btn.prop('disabled', false).html('<i class="ti ti-circle-check"></i> Accept Invitation');
-			$('#teamInvitationModal').modal('hide');
-			$('body').prepend(`
-				<div class="alert alert-success alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
-					<i class="ti ti-check-circle me-2"></i>
-					Invitation accepted! You have joined the team.
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-				</div>
-			`);
-		}, 1200);
-	});
-
-	$('#declineInvitationBtn').on('click', function() {
-		var btn = $(this);
-		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Declining...');
-		// Simulate AJAX request
-		setTimeout(function() {
-			btn.prop('disabled', false).html('<i class="ti ti-circle-x"></i> Decline');
-			$('#teamInvitationModal').modal('hide');
-			$('body').prepend(`
-				<div class="alert alert-warning alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
-					<i class="ti ti-info-circle me-2"></i>
-					Invitation declined. The team organizer has been notified.
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-				</div>
-			`);
-		}, 1200);
-	});
 });
 </script>
 

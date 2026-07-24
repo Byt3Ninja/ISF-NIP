@@ -145,6 +145,8 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
         // registered user yet (placeholder Team_member with null user_id), so
         // guard every id read to avoid "Attempt to read property id on null".
         return [
+            'subject' => __('admin.Status_Invitation'),
+            'message' => __('admin.Status_Invitation'),
             'user'   => $this->user?->id,
             'userteam'   => $this->userteam?->id,
             'member' => $this->teams?->id,
@@ -169,7 +171,7 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
     {
         return new BroadcastMessage([
             'subject' => __('admin.Status_Invitation'),
-            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->userteam]),
+            'message' => __('notifications.hackathon_invite.broadcast', ['team' => optional($this->userteam)->name ?? '']),
             'time' => now()->toDateTimeString(),
         ]);
     }

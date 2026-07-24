@@ -52,11 +52,19 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public $teamMember;
 
+    /**
+     * Team member row id (for marking the invite failed on worker failure).
+     *
+     * @var int|null
+     */
+    public $teamMemberId;
+
     public function __construct($teamLeader, $team_q, $teamMember)
     {
         $this->teamLeader = $teamLeader;
         $this->team_q = $team_q;
         $this->teamMember = $teamMember;
+        $this->teamMemberId = $teamMember->id ?? null;
     }
 
     /**
@@ -160,7 +168,7 @@ class InviteToHackathon extends Notification implements ShouldQueue
     {
         return __('notifications.hackathon_invite.whatsapp', [
             'leader' => ($this->teamLeader->first_name_en ?? '').' '.($this->teamLeader->last_name_en ?? ''),
-            'team' => $this->team_q,
+            'team' => $this->team_q->name ?? '',
         ]);
     }
 
@@ -171,7 +179,7 @@ class InviteToHackathon extends Notification implements ShouldQueue
     {
         return new BroadcastMessage([
             'subject' => __('admin.Invitation_to_Join_a_Hackathon_Team'),
-            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q]),
+            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q->name ?? '']),
             'time' => now()->toDateTimeString(),
         ]);
     }
@@ -187,7 +195,7 @@ class InviteToHackathon extends Notification implements ShouldQueue
     {
         return [
             'subject' => __('admin.Invitation_to_Join_a_Hackathon_Team'),
-            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q]),
+            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q->name ?? '']),
             'team'    => $this->team_q->id ?? null,
             'leader'  => $this->teamLeader->id ?? null,
             'member'  => $this->teamMember->id ?? null,
@@ -202,6 +210,12 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
+        if ($this->teamMemberId) {
+            \App\Team_member::where('id', $this->teamMemberId)
+                ->where('acceptInvition', 'pending')
+                ->update(['acceptInvition' => 'failed']);
+        }
+
         Log::error('InviteToHackathon notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
