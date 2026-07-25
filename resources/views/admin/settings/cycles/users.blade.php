@@ -149,9 +149,11 @@
               id="bulkChangeStepBtn" disabled>
               <i class="ti ti-pencil me-2"></i>{{ __('cycles.change_step') }}
             </button>
-            <button type="button" class="btn btn-primary" id="bulkMarkAlumniBtn" disabled>
-              <i class="ti ti-pennant me-2"></i>{{ __('startup.mark_alumni') }}
-            </button>
+            <span id="bulkMarkAlumniWrapper" class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="">
+              <button type="button" class="btn btn-primary" id="bulkMarkAlumniBtn" disabled>
+                <i class="ti ti-pennant me-2"></i>{{ __('startup.mark_alumni') }}
+              </button>
+            </span>
           </div>
         </div>
 
@@ -456,7 +458,9 @@
         programDeleted: '{{ __("cycles.program_delete_success") }}',
         yesDelete: '{{ __("admin.DYes") }}',
         noCancel: '{{ __("admin.DNo") }}',
-        unexpectedError: '{{ __("admin.unexpected_error") }}'
+        unexpectedError: '{{ __("admin.unexpected_error") }}',
+        alreadyAlumniBtn: '{{ __("startup.already_alumni_btn") }}',
+        someNotFinalScreening: '{{ __("startup.some_not_final_screening") }}'
       }
     };
   </script>

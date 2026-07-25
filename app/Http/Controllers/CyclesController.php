@@ -259,9 +259,9 @@ class CyclesController extends Controller
         $getSteps = Step::where('stype', '!=', '7')->get();
         $companies = $companies->map(function ($company) use ($alumniCompanyIds, $l, $getSteps) {
             $company->isAlumni = $alumniCompanyIds->contains($company->id);
-            $goAlumni = $getSteps->where('cycle_id', $company->cycle)
-                            ->where('stype', '=', '5')
-                            ->sortByDesc('arr')
+            $finalScreeningSteps = $getSteps->where('cycle_id', $company->cycle)
+                            ->where('stype', '=', '5');
+            $goAlumni = $finalScreeningSteps->sortByDesc('arr')
                             ->first();
 
             $currentStepTitle = $getSteps->where('cycle_id', $company->cycle)
@@ -271,7 +271,7 @@ class CyclesController extends Controller
                             ->implode(', ');
 
             $company->goAlumni         = $goAlumni;
-            $company->atAlumniStep     = $goAlumni && $company->step == $goAlumni->id;
+            $company->atAlumniStep     = $finalScreeningSteps->pluck('id')->contains($company->step);
             $company->currentStepTitle = $currentStepTitle;
             $company->userName         = trim(($company->user->{'first_name_'.$l} ?? '').' '.($company->user->{'last_name_'.$l} ?? ''));
             $company->companyName      = $company->{'name_'.$l};

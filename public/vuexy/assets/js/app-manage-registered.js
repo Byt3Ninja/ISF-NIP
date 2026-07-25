@@ -66,6 +66,7 @@ function updateSelectedTags() {
   
   // Requirement: enabled only when ALL selected are on Final Screening step
   const allEligible = count > 0 && selectedValues.every(d => d.atAlumniStep && !d.isAlumni);
+  const allAlreadyAlumni = count > 0 && selectedValues.every(d => d.isAlumni);
 
   $('#selected-count').text(count);
   $('#selectedCount').text(count);
@@ -84,21 +85,35 @@ function updateSelectedTags() {
       );
     });
 
-    $('#bulkChangeStepBtn').prop('disabled', false);
+    $('#bulkChangeStepBtn').prop('disabled', allAlreadyAlumni);
     
     const alumniBtn = $('#bulkMarkAlumniBtn');
+    const alumniWrapper = $('#bulkMarkAlumniWrapper');
     alumniBtn.prop('disabled', !allEligible);
     
-    // Tooltip logic
-    if (count > 0 && !allEligible) {
-      alumniBtn.attr('title', i18n.notOnFinalScreeningTooltip || 'Only startups on Final Screening step can be graduated.');
+    // Check if all selected are already alumni
+    if (allAlreadyAlumni) {
+      alumniBtn.html(`<i class="ti ti-pennant me-2"></i>${i18n.alreadyAlumniBtn || 'Already Alumni'}`);
+      alumniWrapper.removeAttr('title');
+      alumniBtn.css('pointer-events', 'none');
       if (typeof $.fn.tooltip === 'function') {
-        alumniBtn.tooltip('dispose').tooltip();
+        alumniWrapper.tooltip('dispose');
       }
     } else {
-      alumniBtn.removeAttr('title');
-      if (typeof $.fn.tooltip === 'function') {
-        alumniBtn.tooltip('dispose');
+      alumniBtn.html(`<i class="ti ti-pennant me-2"></i>${i18n.markAlumniTitle}`);
+      // Tooltip logic for non-eligible startups
+      if (!allEligible) {
+        alumniWrapper.attr('title', i18n.someNotFinalScreening || 'Some startups are on the final screening step.');
+        alumniBtn.css('pointer-events', 'none');
+        if (typeof $.fn.tooltip === 'function') {
+          alumniWrapper.tooltip('dispose').tooltip();
+        }
+      } else {
+        alumniWrapper.removeAttr('title');
+        alumniBtn.css('pointer-events', 'auto');
+        if (typeof $.fn.tooltip === 'function') {
+          alumniWrapper.tooltip('dispose');
+        }
       }
     }
   } else {
@@ -108,6 +123,12 @@ function updateSelectedTags() {
     );
     $('#bulkChangeStepBtn').prop('disabled', true);
     $('#bulkMarkAlumniBtn').prop('disabled', true);
+    $('#bulkMarkAlumniBtn').html(`<i class="ti ti-pennant me-2"></i>${i18n.markAlumniTitle || 'Mark as Alumni'}`);
+    $('#bulkMarkAlumniWrapper').removeAttr('title');
+    $('#bulkMarkAlumniBtn').css('pointer-events', 'auto');
+    if (typeof $.fn.tooltip === 'function') {
+      $('#bulkMarkAlumniWrapper').tooltip('dispose');
+    }
   }
 }
 
@@ -133,6 +154,22 @@ function bindSelectionEvents() {
       }
     });
     updateSelectedTags();
+  });
+
+  // Restore checked states on pagination/draw
+  table.on('draw', function() {
+    $('.chboxcyclesReg').each(function() {
+      const id = $(this).data('company-id');
+      if (selectedStartups[id]) {
+        $(this).prop('checked', true);
+      } else {
+        $(this).prop('checked', false);
+      }
+    });
+
+    const allOnPage = $('.chboxcyclesReg').length;
+    const checkedOnPage = $('.chboxcyclesReg:checked').length;
+    $('.checkAll').prop('checked', allOnPage > 0 && allOnPage === checkedOnPage);
   });
 
   // Individual rows
