@@ -135,4 +135,168 @@ class StartupCustomerGrowthTest extends TestCase
             'notes' => 'Some notes here',
         ]);
     }
+
+    /**
+     * Test updating past record and recalculating growth percentages
+     */
+    public function test_updates_record_successfully_and_recalculates_growth()
+    {
+        list($user, $company) = $this->createUserAndCompany();
+        $this->actingAs($user, 'web');
+
+        $record1 = new StartupCustomerGrowth();
+        $record1->company_id = $company->id;
+        $record1->year = 2025;
+        $record1->month = 1;
+        $record1->total_customers = 100;
+        $record1->new_customers = 10;
+        $record1->segment = 'b2c';
+        $record1->save();
+
+        $record2 = new StartupCustomerGrowth();
+        $record2->company_id = $company->id;
+        $record2->year = 2025;
+        $record2->month = 2;
+        $record2->total_customers = 130;
+        $record2->new_customers = 30;
+        $record2->segment = 'b2c';
+        $record2->save();
+
+        // Initial records calculation: record2 MoM should be +30%
+        $initialData = StartupCustomerGrowth::records($company->id);
+        $this->assertEquals('+30%', $initialData['records'][1]->MoM);
+
+        // Update record1 total_customers from 100 to 110
+        $response = $this->post('/dashboard/startupGrowth/update', [
+            'record_id' => $record1->id,
+            'company_id' => $company->id,
+            'add_growth_year' => 2025,
+            'add_growth_month' => 1,
+            'add_growth_total_customers' => 110,
+            'add_growth_new_customers' => 10,
+            'add_growth_segment' => 'b2c',
+            'add_growth_notes' => 'Updated notes',
+        ]);
+
+        $response->assertSessionHas('success', __('startup.customer_growth_record_updated'));
+
+        // Recalculated MoM for record2 should now be (130 - 110) / 110 * 100 = +18%
+        $updatedData = StartupCustomerGrowth::records($company->id);
+        $this->assertEquals(110, $updatedData['records'][0]->total);
+        $this->assertEquals('+18%', $updatedData['records'][1]->MoM);
+    }
+
+    /**
+     * Test deleting past record and recalculating growth percentages
+     */
+    public function test_deletes_record_successfully_and_recalculates_growth()
+    {
+        list($user, $company) = $this->createUserAndCompany();
+        $this->actingAs($user, 'web');
+
+        $record1 = new StartupCustomerGrowth();
+        $record1->company_id = $company->id;
+        $record1->year = 2025;
+        $record1->month = 1;
+        $record1->total_customers = 100;
+        $record1->new_customers = 10;
+        $record1->segment = 'b2b';
+        $record1->save();
+
+        $record2 = new StartupCustomerGrowth();
+        $record2->company_id = $company->id;
+        $record2->year = 2025;
+        $record2->month = 2;
+        $record2->total_customers = 120;
+        $record2->new_customers = 20;
+        $record2->segment = 'b2b';
+        $record2->save();
+
+        $response = $this->delete('/dashboard/startupGrowth/delete/' . $record1->id);
+        $response->assertSessionHas('msg', 'customer_growth_record_deleted');
+
+        $this->assertDatabaseMissing('startup_customer_growth', ['id' => $record1->id]);
+
+        // After deleting record1, record2 is now the first record, so MoM should be 'Not available'
+        $remainingData = StartupCustomerGrowth::records($company->id);
+        $this->assertCount(1, $remainingData['records']);
+        $this->assertEquals(__('startup.growth_not_available'), $remainingData['records'][0]->MoM);
+    }
+
+    /**
+     * Test adding and viewing yearly entries (month 0)
+     */
+    public function test_supports_yearly_entries()
+    {
+        list($user, $company) = $this->createUserAndCompany();
+        $this->actingAs($user, 'web');
+
+        $response = $this->post('/dashboard/startupGrowth/add', [
+            'company_id' => $company->id,
+            'add_growth_year' => 2024,
+            'add_growth_month' => 0,
+            'add_growth_total_customers' => 500,
+            'add_growth_new_customers' => 100,
+            'add_growth_segment' => 'enterprise',
+        ]);
+
+        $response->assertSessionHas('success', __('startup.customer_growth_record_added'));
+
+        $this->assertDatabaseHas('startup_customer_growth', [
+            'company_id' => $company->id,
+            'year' => 2024,
+            'month' => 0,
+            'total_customers' => 500,
+            'segment' => 'enterprise',
+        ]);
+    }
+
+    /**
+     * Test exporting CSV with year and segment filters
+     */
+    public function test_exports_csv_with_filters()
+    {
+        list($user, $company) = $this->createUserAndCompany();
+        $this->actingAs($user, 'web');
+
+        $record1 = new StartupCustomerGrowth();
+        $record1->company_id = $company->id;
+        $record1->year = 2024;
+        $record1->month = 5;
+        $record1->total_customers = 200;
+        $record1->new_customers = 50;
+        $record1->segment = 'b2c';
+        $record1->save();
+
+        $record2 = new StartupCustomerGrowth();
+        $record2->company_id = $company->id;
+        $record2->year = 2025;
+        $record2->month = 6;
+        $record2->total_customers = 400;
+        $record2->new_customers = 100;
+        $record2->segment = 'enterprise';
+        $record2->save();
+
+        // Export with year filter 2025
+        $response = $this->get('/dashboard/startupGrowth/export/' . $company->id . '?year=2025');
+        $response->assertStatus(200);
+        
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+
+        $this->assertStringContainsString('2025', $content);
+        $this->assertStringNotContainsString('2024', $content);
+
+        // Export with segment filter enterprise
+        $response2 = $this->get('/dashboard/startupGrowth/export/' . $company->id . '?segment=b2c');
+        $response2->assertStatus(200);
+
+        ob_start();
+        $response2->sendContent();
+        $content2 = ob_get_clean();
+
+        $this->assertStringContainsString('B2C', $content2);
+        $this->assertStringNotContainsString('ENTERPRISE', $content2);
+    }
 }

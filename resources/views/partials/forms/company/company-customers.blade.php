@@ -22,7 +22,7 @@
       <div class="col-md-4">
         <label class="form-label fw-bold" for="filter_segment">{{ __('startup.Segment') }}</label>
         <select id="filter_segment" class="form-select">
-          <option value="">{{ __('startup.Please_select_a_category') }}</option>
+          <option value="">{{ __('startup.all_segments') }}</option>
           <option value="MIXED">{{ __('startup.mixed') }}</option>
           <option value="B2C">B2C</option>
           <option value="B2B">B2B</option>
@@ -52,10 +52,10 @@
     <tbody>
       @foreach( $growth_records as $record )
         <tr>
-          <td>{{ $record->year }}</td>
-          <td>{{ $record->month ? __('startup.mini_month_' . $record->month) : __('startup.Yearly') }}</td>
-          <td>{{ $record->total }}</td>
-          <td>{{ $record->newly }}</td>
+          <td data-order="{{ $record->year }}">{{ $record->year }}</td>
+          <td data-order="{{ $record->month ?? 0 }}">{{ $record->month ? __('startup.mini_month_' . $record->month) : __('startup.Yearly') }}</td>
+          <td data-order="{{ $record->total }}">{{ $record->total }}</td>
+          <td data-order="{{ $record->newly }}">{{ $record->newly }}</td>
           <td>{{ $record->MoM }}</td>
           <td>{{ $record->YearCumulative }}</td>
           <td>{{ strtoupper( $record->segment ) }}</td>
@@ -112,6 +112,7 @@
             <div class="col-md-6 col-lg-6 col-sm-12 mb-6">
               <label for="add_growth_month" class="form-label">{{ __('startup.Month') }}</label>
               <select class="form-select" name="add_growth_month" id="add_growth_month" aria-label="Month">
+                <option value="0">{{ __('startup.Yearly') }}</option>
                 @for( $i = 1; $i <= 12; $i++ )
                   <option value="{{ $i }}" {{ $i == date('m') ? 'selected' : '' }}>{{ __('startup.month_' . $i) }}</option>
                 @endfor
@@ -258,15 +259,18 @@
 
   function deleteRecord(event, button) {
     event.preventDefault();
-    
-    releaseWarningAlert({
-      title: '{{ __("admin.Confirm") }}',
-      message: "{{ __('startup.delete_customer_growth_confirm') }}",
-      confirmText: '{{ __("admin.Yes") }}',
-      cancelText: '{{ __("admin.cancel") }}',
-      confirmColor: 'danger',
-      onConfirm: function () { $(button).parent().submit(); }
-    });
+    if (typeof releaseWarningAlert === 'function') {
+      releaseWarningAlert({
+        title: '{{ __("admin.Confirm") }}',
+        message: "{{ __('startup.delete_customer_growth_confirm') }}",
+        confirmText: '{{ __("admin.Yes") }}',
+        cancelText: '{{ __("admin.cancel") }}',
+        confirmColor: 'danger',
+        onConfirm: function () { $(button).parent().submit(); }
+      });
+    } else if (confirm("{{ __('startup.delete_customer_growth_confirm') }}")) {
+      $(button).parent().submit();
+    }
   }
 </script>
 @endpush
