@@ -166,6 +166,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('chat/groups/{groupId}/messages', 'ChatController@sendMessage')->name('chat.send_group_message');
     Route::delete('chat/messages/{messageId}', 'ChatController@deleteMessage')->name('chat.delete_message');
     Route::post('chat/typing', 'ChatController@typing')->name('chat.typing');
+    Route::post('chat/ping', 'ChatController@ping')->name('chat.ping');
     Route::get('chat/users/search', 'ChatController@searchUser')->name('chat.search_users');
 
     // Hackathon Routes

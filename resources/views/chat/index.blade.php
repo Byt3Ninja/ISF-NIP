@@ -76,6 +76,208 @@
     .app-chat .app-chat-history .chat-history-body .chat-history {
       min-height: 0;
     }
+
+    /* Initials avatar: same footprint as the photo it replaces, so photo<->initials never shifts layout. */
+    .chat-avatar-initial {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      border-radius: 50%;
+    }
+    .app-chat .avatar img.rounded-circle { object-fit: cover; }
+    /* Overlapping member avatars on a team row. */
+    .chat-avatar-group { display: inline-flex; align-items: center; }
+    .chat-avatar-group > .avatar,
+    .chat-avatar-group > .chat-avatar-presence,
+    .chat-avatar-group > .chat-avatar-leader { margin-inline-start: -0.5rem; }
+    .chat-avatar-group > :first-child { margin-inline-start: 0; }
+    .chat-avatar-group .avatar img,
+    .chat-avatar-group .chat-avatar-initial,
+    .chat-avatar-group .chat-avatar-leader .avatar img,
+    .chat-avatar-group .chat-avatar-leader .chat-avatar-initial { box-shadow: 0 0 0 2px var(--bs-card-bg, #fff); }
+    .chat-avatar-group .chat-avatar-more {
+      margin-inline-start: -0.5rem;
+      font-size: 0.75rem;
+    }
+    .chat-avatar-leader { position: relative; display: inline-flex; }
+    /* Leader sits ABOVE its neighbors so the crown is never covered by the next
+       overlapping avatar (B2). Rendered first + raised z-index + a touch of
+       trailing room so the negative margin of the next avatar can't clip the badge. */
+    .chat-avatar-group > .chat-avatar-leader { z-index: 3; padding-inline-end: 3px; }
+    .chat-avatar-leader-icon {
+      position: absolute;
+      top: -6px;
+      /* Crown centered over the top of the avatar so an overlapping neighbor
+         (which encroaches from the trailing side) can never hide it. */
+      inset-inline-start: 50%;
+      transform: translateX(-50%);
+      font-size: 0.62rem;
+      color: #ffab00; /* amber/gold — theme warning tint */
+      background: var(--bs-card-bg, #fff);
+      box-shadow: 0 0 0 1.5px var(--bs-card-bg, #fff);
+      border-radius: 50%;
+      line-height: 1;
+      padding: 1.5px;
+      z-index: 4;
+    }
+    /* Inline leader crown in the header participant subline (B2). */
+    .chat-leader-crown {
+      font-size: 0.72rem;
+      color: #ffab00;
+      margin-inline-start: 0.15rem;
+      vertical-align: baseline;
+    }
+
+    /* ============================================================
+       Chat sidebar redesign — conversation rows as cards (theme-consistent).
+       One accent (primary) drives hover + active; everything else is quiet.
+       All logical properties for RTL safety.
+       ============================================================ */
+
+    /* Section eyebrow: "Team" / "Users" as an uppercase, letter-spaced label.
+       ISSUE 3: label + count pill share one baseline via inline-flex so the pill is
+       vertically centered against the (smaller) uppercase label. */
+    .app-chat-contacts .chat-contact-list-item-title h5 {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--bs-secondary-color, #6c757d) !important;
+    }
+    /* ISSUE 3: even, consistent rhythm above/below each section header. */
+    .app-chat-contacts .chat-contact-list-item-title { margin-top: 1rem; margin-bottom: 0.25rem; }
+    .app-chat-contacts .chat-contact-list-item-title:first-child { margin-top: 0.25rem; }
+    /* Keep the Users count pill readable against the muted eyebrow. The inline-flex
+       gap replaces ms-2, so zero out its inline margin to stay centered. */
+    .app-chat-contacts .chat-contact-list-item-title h5 .badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-inline-start: 0 !important;
+    }
+
+    /* The tappable card. ISSUE 3: identical padding on active + inactive so text
+       never shifts on selection (the active fill lives on this same <a>). */
+    .app-chat-contacts .chat-contact-list-item:not(.chat-contact-list-item-title) > a {
+      padding: 0.625rem 0.75rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    /* ISSUE 3: consistent vertical gap between rows. Override Bootstrap's mb-1 with a
+       single tuned rhythm value so rows breathe evenly regardless of utility drift. */
+    .app-chat-contacts .chat-contact-list-item:not(.chat-contact-list-item-title) {
+      margin-bottom: 0.25rem;
+    }
+    /* ISSUE 3: the presence dot and leader crown are positioned OUTSIDE the avatar
+       circle; the row's truncation uses overflow:hidden which would clip them. Let the
+       avatar wrapper + contact info render overflow so the dot/crown are never cut off,
+       while text truncation still works on the inner .text-truncate elements. */
+    .app-chat-contacts .chat-contact-list-item .chat-avatar-presence,
+    .app-chat-contacts .chat-contact-list-item .chat-avatar-leader,
+    .app-chat-contacts .chat-contact-list-item .chat-avatar-group,
+    .app-chat-contacts .chat-contact-list-item .flex-shrink-0 { overflow: visible; }
+    /* ISSUE 3: give the stacked member avatars breathing room from the preview line
+       above so the preview text and the avatar-stack never collide/overlap. */
+    .app-chat-contacts .chat-contact-info .chat-avatar-group { margin-top: 0.375rem; }
+    .app-chat-contacts .chat-contact-list-item:not(.chat-contact-list-item-title) > a:hover {
+      background-color: var(--bs-primary-bg-subtle, rgba(105, 108, 255, 0.08));
+    }
+    .app-chat-contacts .chat-contact-name {
+      font-weight: 500;
+      font-size: 0.9375rem;
+      color: var(--bs-heading-color, var(--bs-body-color));
+    }
+    .app-chat-contacts .chat-contact-status {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--bs-secondary-color, #8592a3);
+    }
+    .app-chat-contacts .chat-contact-meta { align-self: center; }
+
+    /* ----- Active state with GUARANTEED contrast (B4): solid primary + white.
+       ISSUE 1: Vuexy's own theme styles `.chat-contact-list li.active` (app-chat.css
+       ~L244) with its own color + a purple box-shadow directly on the <li>. Layered
+       under our inner-<a> primary fill + shadow, that reads as a doubled/inner outline
+       ("border inside the border"). Neutralize the theme's <li> surface so ONLY our
+       inner <a> renders as a single clean rounded primary card. We match/raise the
+       theme's 5-class + style-context selector so this wins the cascade. */
+    .light-style .app-chat .app-chat-contacts .sidebar-body .chat-contact-list .chat-contact-list-item.active,
+    .light-style .app-chat .app-chat-contacts .sidebar-body .chat-contact-list .chat-contact-list-item.active:hover,
+    .dark-style .app-chat .app-chat-contacts .sidebar-body .chat-contact-list .chat-contact-list-item.active,
+    .dark-style .app-chat .app-chat-contacts .sidebar-body .chat-contact-list .chat-contact-list-item.active:hover,
+    .app-chat .app-chat-contacts .sidebar-body .chat-contact-list .chat-contact-list-item.active,
+    .app-chat .app-chat-contacts .sidebar-body .chat-contact-list .chat-contact-list-item.active:hover {
+      background-color: transparent !important;
+      box-shadow: none !important;
+    }
+    .app-chat-contacts .chat-contact-list-item.active > a,
+    .app-chat-contacts .chat-contact-list-item.active > a:hover {
+      background-color: var(--bs-primary, #696cff);
+      /* Soft, tinted lift (not a crisp dark edge) so the active card reads as one
+         raised surface rather than an outlined box. */
+      box-shadow: 0 2px 8px rgba(105, 108, 255, 0.28);
+    }
+    .app-chat-contacts .chat-contact-list-item.active .chat-contact-name,
+    .app-chat-contacts .chat-contact-list-item.active .chat-contact-status {
+      color: #fff !important;
+    }
+    /* Initials circle on the active row: readable on primary. */
+    .app-chat-contacts .chat-contact-list-item.active .chat-avatar-initial {
+      background-color: rgba(255, 255, 255, 0.24) !important;
+      color: #fff !important;
+    }
+    /* Unread pill stays legible on the active (primary) surface. */
+    .app-chat-contacts .chat-contact-list-item.active .badge.bg-danger {
+      background-color: #fff !important;
+      color: var(--bs-primary, #696cff) !important;
+    }
+    /* Stacked-avatar rings pick up the primary surface when active. */
+    .app-chat-contacts .chat-contact-list-item.active .chat-avatar-group .avatar img,
+    .app-chat-contacts .chat-contact-list-item.active .chat-avatar-group .chat-avatar-initial {
+      box-shadow: 0 0 0 2px var(--bs-primary, #696cff);
+    }
+
+    /* ----- Presence dot (B5): small circle at the avatar's bottom-trailing corner. */
+    .chat-presence-dot {
+      position: absolute;
+      bottom: 0;
+      inset-inline-end: 0;
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--bs-card-bg, #fff);
+    }
+    .chat-presence-dot.is-active { background-color: var(--bs-success, #71dd37); }
+    .chat-presence-dot.is-offline { background-color: var(--bs-secondary, #a8b1bb); }
+    /* Smaller dot on the tiny stacked team-member avatars. */
+    .chat-avatar-group .chat-presence-dot { width: 0.45rem; height: 0.45rem; box-shadow: 0 0 0 1.5px var(--bs-card-bg, #fff); }
+    /* Wrapper that positions the dot over an avatar without disturbing layout. */
+    .chat-avatar-presence { position: relative; display: inline-flex; }
+    /* On the active row, the presence ring matches the primary surface. */
+    .app-chat-contacts .chat-contact-list-item.active .chat-presence-dot {
+      box-shadow: 0 0 0 2px var(--bs-primary, #696cff);
+    }
+
+    /* Header presence dot sizing (larger avatar in the header). */
+    .chat-history-header .chat-presence-dot { width: 0.7rem; height: 0.7rem; }
+
+    /* Neutral pre-selection header placeholder (B6): icon-in-a-circle, not a person photo. */
+    .chat-header-placeholder {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.375rem;
+      height: 2.375rem;
+      border-radius: 50%;
+      font-size: 1.25rem;
+    }
   </style>
 @stop
 
@@ -186,17 +388,17 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
             <!-- Users -->
             <ul class="list-unstyled chat-contact-list py-2 mb-0" id="user-list">
               <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-                <h5 class="text-primary mb-0">Users</h5>
+                <h5 class="text-primary mb-0">{{ __('admin.chat_users') }}</h5>
               </li>
               <li class="chat-contact-list-item chat-list-item-0">
-                <h6 class="text-muted mb-0">Loading users...</h6>
+                <h6 class="text-muted mb-0">{{ __('admin.chat_loading_users') }}</h6>
               </li>
             </ul>
-            
+
             <!-- User Search Results -->
             <ul class="list-unstyled chat-contact-list mb-0 py-2" id="search-results" style="display: none;">
               <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-                <h5 class="text-primary mb-0">Search Results</h5>
+                <h5 class="text-primary mb-0">{{ __('admin.chat_search_results') }}</h5>
               </li>
             </ul>
           </div>
@@ -211,13 +413,15 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
                 <div class="d-flex overflow-hidden align-items-center">
                   <i class="ti ti-menu-2 ti-lg cursor-pointer d-lg-none d-block me-4" data-bs-toggle="sidebar"
                     data-overlay data-target="#app-chat-contacts"></i>
-                  <div class="flex-shrink-0 avatar avatar-online">
-                    <img src="/vuexy/assets/img/avatars/4.png" alt="Avatar" class="rounded-circle"
-                      data-bs-toggle="sidebar" data-overlay data-target="#app-chat-sidebar-right" />
+                  <div class="flex-shrink-0 avatar chat-header-avatar-slot">
+                    <span class="chat-header-placeholder bg-label-secondary" data-bs-toggle="sidebar" data-overlay
+                      data-target="#app-chat-sidebar-right">
+                      <i class="ti ti-messages"></i>
+                    </span>
                   </div>
                   <div class="chat-contact-info flex-grow-1 ms-4">
-                    <h6 class="m-0 fw-normal">Select a conversation</h6>
-                    <small class="user-status text-body">Start chatting by searching for users</small>
+                    <h6 class="m-0 fw-normal">{{ __('admin.chat_select_conversation') }}</h6>
+                    <small class="user-status text-body">{{ __('admin.chat_start_chatting') }}</small>
                   </div>
                 </div>
                 {{-- <div class="d-flex align-items-center">
@@ -248,7 +452,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
               <ul class="list-unstyled chat-history" id="chat-messages">
                 <!-- Messages will be loaded dynamically -->
                 <li class="text-center p-4">
-                  <small class="text-muted">Select a conversation to start chatting</small>
+                  <small class="text-muted">{{ __('admin.chat_select_to_start') }}</small>
                 </li>
               </ul>
             </div>
@@ -360,6 +564,25 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
   <script>
     window.CHAT_I18N = {
       teamChatWaiting: @json(__('admin.team_chat_waiting')),
+      others: @json(__('admin.chat_others')),
+      teamMembers: @json(__('admin.chat_team_members')),
+      noMessagesYet: @json(__('admin.chat_no_messages_yet')),
+      users: @json(__('admin.chat_users')),
+      chats: @json(__('admin.chat_chats')),
+      team: @json(__('admin.chat_team')),
+      searchResults: @json(__('admin.chat_search_results')),
+      noUsersAvailable: @json(__('admin.chat_no_users_available')),
+      noUsersFound: @json(__('admin.chat_no_users_found')),
+      noConversations: @json(__('admin.chat_no_conversations')),
+      noMessagesInConversation: @json(__('admin.chat_no_messages_in_conversation')),
+      online: @json(__('admin.chat_online')),
+      active: @json(__('admin.chat_active')),
+      offline: @json(__('admin.chat_offline')),
+      teamChat: @json(__('admin.chat_team_chat')),
+      messageNotSent: @json(__('admin.chat_message_not_sent')),
+      isTyping: @json(__('admin.chat_is_typing')),
+      areTyping: @json(__('admin.chat_are_typing')),
+      and: @json(__('admin.chat_and')),
     };
     window.CHAT_HAS_TEAMMATES = false; // set true once users load
 
@@ -372,14 +595,11 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     let subscribedConversationIds = new Set(); // conversation channels we're already subscribed to
     let lastMessageByUserId = {};
     let broadcastingEnabled = false;
-    let lastReadByConversation = {};
-    let unreadCounts = {};
+    let unreadByConversation = {}; // server-authored unread counts, keyed by conversation id
     let conversationByUserId = {};
     let teamGroups = []; // team group conversations returned by /dashboard/chat/groups
     const LS_KEYS = {
-      lastConversationId: 'chat.lastConversationId',
-      lastRead: 'chat.lastReadByConversation',
-      unread: 'chat.unreadCounts'
+      lastConversationId: 'chat.lastConversationId'
     };
 
     // Get CSRF token for API requests
@@ -400,75 +620,24 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       // You can implement a toast notification here
     }
 
-    function loadPersistedState() {
-      try {
-        const lr = localStorage.getItem(LS_KEYS.lastRead);
-        lastReadByConversation = lr ? JSON.parse(lr) : {};
-      } catch (e) { lastReadByConversation = {}; }
-      try {
-        const uc = localStorage.getItem(LS_KEYS.unread);
-        unreadCounts = uc ? JSON.parse(uc) : {};
-      } catch (e) { unreadCounts = {}; }
-    }
-
-    function persistState() {
-      try { localStorage.setItem(LS_KEYS.lastRead, JSON.stringify(lastReadByConversation)); } catch(e) {}
-      try { localStorage.setItem(LS_KEYS.unread, JSON.stringify(unreadCounts)); } catch(e) {}
-    }
-
-    function setLastRead(conversationId, dateStr) {
-      if (!conversationId) return;
-      lastReadByConversation[conversationId] = dateStr || new Date().toISOString();
-      persistState();
-    }
-
-    function incrementUnread(conversationId) {
-      if (!conversationId) return;
-      unreadCounts[conversationId] = (unreadCounts[conversationId] || 0) + 1;
-      persistState();
-      // Update badges without refetching
-      refreshUserListUnreadBadges();
-    }
-
-    function clearUnread(conversationId) {
-      if (!conversationId) return;
-      unreadCounts[conversationId] = 0;
-      persistState();
-      refreshUserListUnreadBadges();
-    }
-
-    function refreshUserListUnreadBadges() {
-      const items = document.querySelectorAll('#user-list .chat-contact-list-item a');
-      items.forEach(a => {
-        const onclick = a.getAttribute('onclick') || '';
-        const match = onclick.match(/startConversationWithUser\((\d+),/);
-        const userId = match ? parseInt(match[1]) : null;
-        if (!userId) return;
-        const convId = conversationByUserId[userId];
-        const count = convId ? (unreadCounts[convId] || 0) : 0;
-        const meta = a.querySelector('.chat-contact-meta');
-        if (meta) {
-          if (count > 0) {
-            meta.innerHTML = `<span class="badge bg-danger rounded-pill">${count}</span>`;
-          } else {
-            meta.innerHTML = '<i class="ti ti-message-circle-plus text-primary"></i>';
-          }
-        }
-      });
-    }
-
     // Update the "last message" preview text under each user in the sidebar (live).
     function refreshUserListPreviews() {
       const items = document.querySelectorAll('#user-list .chat-contact-list-item a');
       items.forEach(a => {
         const onclick = a.getAttribute('onclick') || '';
-        const match = onclick.match(/startConversationWithUser\((\d+),/);
+        const match = onclick.match(/startConversationWithUser\((\d+)\)/);
         const userId = match ? parseInt(match[1]) : null;
         if (!userId) return;
         const status = a.querySelector('.chat-contact-status');
         if (status) {
-          const preview = lastMessageByUserId[userId]?.body || 'No messages yet';
+          const preview = lastMessageByUserId[userId]?.body || (window.CHAT_I18N?.noMessagesYet || 'No messages yet');
           status.textContent = preview;
+        }
+        const convId = conversationByUserId[userId];
+        const count = convId ? (unreadByConversation[convId] || 0) : 0;
+        const meta = a.querySelector('.chat-contact-meta');
+        if (meta) {
+          meta.innerHTML = count > 0 ? `<span class="badge bg-danger rounded-pill">${count > 99 ? '99+' : count}</span>` : '';
         }
       });
     }
@@ -494,11 +663,76 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       return await response.json();
     }
 
+    // ---- Presence heartbeat ----------------------------------------------------
+    // "Active" means the user has the chat OPEN and in the FOREGROUND. A person
+    // reading the conversation is present even without clicking, so we can't rely on
+    // discrete interactions alone — we send a heartbeat on a timer WHILE the tab is
+    // visible. When the tab is hidden/backgrounded we stop, so a truly-away user
+    // decays to "Offline" after the server's 5-minute window. The ping only advances
+    // the current user's own last_active_at (server-side, auth-scoped), never a
+    // background poll — so presence reflects real foreground presence, not polling.
+    let lastPresencePing = 0;
+    let presenceHeartbeatInterval = null;
+    const PRESENCE_PING_THROTTLE = 60000; // don't hit the server more than once/min
+
+    function pingPresence(force = false) {
+      // Only count as present when the tab is actually visible/foreground.
+      if (document.visibilityState !== 'visible') return;
+      const now = Date.now();
+      if (!force && now - lastPresencePing < PRESENCE_PING_THROTTLE) return;
+      lastPresencePing = now;
+      makeApiCall('/dashboard/chat/ping', { method: 'POST', body: JSON.stringify({}) })
+        .catch(() => { /* best-effort */ });
+    }
+
+    function startPresenceHeartbeat() {
+      if (presenceHeartbeatInterval) return;
+      // Heartbeat well inside the server's 5-min window so an open, watched tab
+      // never lapses to offline. Throttle in pingPresence() prevents duplicates.
+      presenceHeartbeatInterval = setInterval(() => pingPresence(), 60000);
+    }
+    function stopPresenceHeartbeat() {
+      if (presenceHeartbeatInterval) { clearInterval(presenceHeartbeatInterval); presenceHeartbeatInterval = null; }
+    }
+
+    // Bound once from init.
+    function setupPresenceHeartbeat() {
+      // Immediate interactions refresh presence right away (bypass throttle a bit).
+      const onActivity = () => pingPresence();
+      document.addEventListener('keydown', onActivity, { passive: true });
+      document.addEventListener('click', onActivity, { passive: true });
+      // Foreground <-> background: ping + run the heartbeat only while visible.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          pingPresence(true);        // came back to the tab -> immediately present
+          startPresenceHeartbeat();
+        } else {
+          stopPresenceHeartbeat();   // tab hidden -> stop; decay to offline
+        }
+      });
+      window.addEventListener('focus', () => pingPresence(true));
+      // Start now (the chat page is open and visible).
+      pingPresence(true);
+      startPresenceHeartbeat();
+    }
+
     // Fetch current user info
     async function fetchCurrentUser() {
       try {
         const data = await makeApiCall('/dashboard/chat/messages');
-        currentUser = { id: data.user_id };
+        currentUser = { id: data.user_id, avatar_url: null, initials: 'ME' };
+        // Try to enrich self from any conversation participant that is me.
+        (data.conversations || []).some(c =>
+          (c.participants || []).some(p => {
+            if (p.participantable_id === data.user_id && p.participantable) {
+              currentUser.avatar_url = p.participantable.avatar_url || null;
+              currentUser.initials   = p.participantable.initials || 'ME';
+              currentUser.name       = p.participantable.name;
+              return true;
+            }
+            return false;
+          })
+        );
         return currentUser;
       } catch (error) {
         showError('Failed to fetch user information');
@@ -532,23 +766,10 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
           }
         });
 
-        // Reconcile unread counts with last read timestamps
-        (data.conversations || []).forEach(conversation => {
-          const last = (conversation.messages || [])[0];
-          if (!last) return;
-          const lastRead = lastReadByConversation[conversation.id];
-          if (lastRead) {
-            const msgTime = new Date(last.created_at).getTime();
-            const readTime = new Date(lastRead).getTime();
-            if (msgTime <= readTime) {
-              unreadCounts[conversation.id] = 0;
-            }
-          }
-        });
-        persistState();
+        (data.conversations || []).forEach(c => { unreadByConversation[c.id] = c.unread_count || 0; });
+        // DM rows read their badge from unreadByConversation via conversationByUserId (see displayUsers).
 
         displayConversations(data.conversations);
-        refreshUserListUnreadBadges();
         refreshUserListPreviews();
         return data.conversations;
       } catch (error) {
@@ -558,18 +779,19 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     }
 
     // Fetch and display users list
-    async function fetchUsers() {
+    // background=true skips the loading spinner (used by the 15s poll so the sidebar
+    // presence dots refresh live without flashing "Loading..." every tick).
+    async function fetchUsers(background = false) {
       try {
         const userList = document.getElementById('user-list');
-        showLoading(userList);
+        if (!background) { showLoading(userList); }
 
         const data = await makeApiCall('/dashboard/chat/users');
-        console.log('Fetched users:', data);
 
         displayUsers(data.users);
         return data.users;
       } catch (error) {
-        showError('Failed to fetch users');
+        if (!background) { showError('Failed to fetch users'); }
         console.error('Error fetching users:', error);
       }
     }
@@ -588,10 +810,10 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (!users || users.length === 0) {
         userList.innerHTML = `
           <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-            <h5 class="text-primary mb-0">Users</h5>
+            <h5 class="text-primary mb-0">${escapeHtml(window.CHAT_I18N?.users || 'Users')}</h5>
           </li>
           <li class="chat-contact-list-item chat-list-item-0">
-            <h6 class="text-muted mb-0">No users available</h6>
+            <h6 class="text-muted mb-0">${escapeHtml(window.CHAT_I18N?.noUsersAvailable || 'No users available')}</h6>
           </li>
         `;
         renderTeamGroupsSection();
@@ -600,28 +822,27 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
       let html = `
         <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-          <h5 class="text-primary mb-0">Users <span class="badge bg-primary ms-2">${users.length}</span></h5>
+          <h5 class="text-primary mb-0">${escapeHtml(window.CHAT_I18N?.users || 'Users')} <span class="badge bg-primary ms-2">${users.length}</span></h5>
         </li>
       `;
 
       users.forEach(user => {
         const avatarUrl = resolveAvatarUrl(user);
-        const lastMsg = lastMessageByUserId[user.id]?.body || 'No messages yet';
+        const lastMsg = lastMessageByUserId[user.id]?.body || (window.CHAT_I18N?.noMessagesYet || 'No messages yet');
 
         const convId = conversationByUserId[user.id];
-        const count = convId ? (unreadCounts[convId] || 0) : 0;
+        const count = convId ? (unreadByConversation[convId] || 0) : 0;
+        const isActive = convId && currentConversationId === convId;
         html += `
-          <li class="chat-contact-list-item mb-1">
-            <a class="d-flex align-items-center" href="#" onclick="startConversationWithUser(${user.id}, '${escapeHtml(user.name || '')}', '${avatarUrl}')">
-              <div class="flex-shrink-0 avatar">
-                <img src="${avatarUrl}" alt="Avatar" class="rounded-circle" onerror="this.onerror=null;this.src='/vuexy/assets/img/avatars/${(user.id % 12) + 1}.png'" />
-              </div>
+          <li class="chat-contact-list-item mb-1 ${isActive ? 'active' : ''}">
+            <a class="d-flex align-items-center" href="#" onclick="startConversationWithUser(${user.id})">
+              <div class="flex-shrink-0">${avatarWithPresence(user)}</div>
               <div class="chat-contact-info flex-grow-1 ms-4">
-                <h6 class="chat-contact-name text-truncate m-0 fw-normal">${escapeHtml(user.name || '')}</h6>
+                <h6 class="chat-contact-name text-truncate m-0">${escapeHtml(user.name || '')}</h6>
                 <small class="chat-contact-status text-truncate">${escapeHtml(lastMsg)}</small>
               </div>
               <div class="chat-contact-meta">
-                ${count > 0 ? `<span class="badge bg-danger rounded-pill">${count}</span>` : `<i class="ti ti-message-circle-plus text-primary"></i>`}
+                ${count > 0 ? `<span class="badge bg-danger rounded-pill">${count > 99 ? '99+' : count}</span>` : ''}
               </div>
             </a>
           </li>
@@ -632,6 +853,11 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
       // Re-inject the team group section on top (displayUsers replaced the list).
       renderTeamGroupsSection();
+
+      // The initial isActive computed above uses conversationByUserId, which may not
+      // have been populated on first render; re-apply once the list is in the DOM so a
+      // DM row highlights even if the map became available later (ISSUE 2).
+      applyActiveConversation(currentConversationId);
     }
 
     function setChatInputEnabled(enabled) {
@@ -676,10 +902,10 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (!conversations || conversations.length === 0) {
         chatList.innerHTML = `
           <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-            <h5 class="text-primary mb-0">Chats</h5>
+            <h5 class="text-primary mb-0">${escapeHtml(window.CHAT_I18N?.chats || 'Chats')}</h5>
           </li>
           <li class="chat-contact-list-item chat-list-item-0">
-            <h6 class="text-muted mb-0">No Conversations Found</h6>
+            <h6 class="text-muted mb-0">${escapeHtml(window.CHAT_I18N?.noConversations || 'No Conversations Found')}</h6>
           </li>
         `;
         return;
@@ -687,7 +913,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
       let html = `
         <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-          <h5 class="text-primary mb-0">Chats</h5>
+          <h5 class="text-primary mb-0">${escapeHtml(window.CHAT_I18N?.chats || 'Chats')}</h5>
         </li>
       `;
 
@@ -708,7 +934,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         }
           
         const lastMessage = conversation.messages?.[0];
-        const messageBody = lastMessage?.body || 'No messages yet';
+        const messageBody = lastMessage?.body || (window.CHAT_I18N?.noMessagesYet || 'No messages yet');
         const timeAgo = lastMessage ? formatTimeAgo(lastMessage.created_at) : '';
         const isActive = currentConversationId === conversation.id;
         
@@ -753,21 +979,47 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
       let html = `
         <li class="chat-contact-list-item chat-contact-list-item-title mt-0" data-team-group-section="1">
-          <h5 class="text-primary mb-0">Team</h5>
+          <h5 class="text-primary mb-0">${escapeHtml(window.CHAT_I18N?.team || 'Team')}</h5>
         </li>
       `;
       teamGroups.forEach(group => {
-        const groupName = group.name || `Team Chat (${group.id})`;
+        // B1: use the REAL team name from the backend; only fall back to a
+        // generic localized label if the name is truly empty.
+        const groupName = (group.name && group.name.trim())
+          ? group.name
+          : (window.CHAT_I18N?.teamChat || 'Team Chat');
         const isActive = currentConversationId === group.id;
+        const preview = group.last_message || (window.CHAT_I18N?.noMessagesYet || 'No messages yet');
+        const unread = group.unread_count || 0;
+
+        // Stacked participant avatars (cap 3, then +N). Leader is always shown first.
+        const members = Array.isArray(group.participants) ? group.participants : [];
+        const ordered = members.slice().sort((a, b) => (b.is_leader ? 1 : 0) - (a.is_leader ? 1 : 0));
+        const CAP = 3;
+        let stack = '<div class="chat-avatar-group">';
+        ordered.slice(0, CAP).forEach(m => {
+          // Each teammate avatar carries a presence dot (B5); the leader also gets the crown (B2).
+          stack += m.is_leader
+            ? `<span class="chat-avatar-leader">${avatarWithPresence(m, 'avatar-xs')}<i class="ti ti-crown chat-avatar-leader-icon" title="Team leader"></i></span>`
+            : avatarWithPresence(m, 'avatar-xs');
+        });
+        const extra = (group.participants_count || ordered.length) - CAP;
+        if (extra > 0) {
+          stack += `<span class="avatar avatar-xs chat-avatar-more"><span class="chat-avatar-initial bg-label-secondary">+${extra}</span></span>`;
+        }
+        stack += '</div>';
+
         html += `
           <li class="chat-contact-list-item mb-1 ${isActive ? 'active' : ''}" data-team-group-section="1">
             <a class="d-flex align-items-center" href="#" onclick="loadConversation(${group.id}); return false;">
-              <div class="flex-shrink-0 avatar">
-                <span class="avatar-initial rounded-circle bg-label-primary"><i class="ti ti-users"></i></span>
-              </div>
+              <div class="flex-shrink-0">${avatarMarkup({ id: group.id, name: groupName, avatar_url: group.avatar_url, initials: group.initials })}</div>
               <div class="chat-contact-info flex-grow-1 ms-4">
-                <h6 class="chat-contact-name text-truncate m-0 fw-normal">${escapeHtml(groupName)}</h6>
-                <small class="chat-contact-status text-truncate">Team group chat</small>
+                <h6 class="chat-contact-name text-truncate m-0">${escapeHtml(groupName)}</h6>
+                <small class="chat-contact-status text-truncate">${escapeHtml(preview)}</small>
+                ${stack}
+              </div>
+              <div class="chat-contact-meta text-end">
+                ${unread > 0 ? `<span class="badge bg-danger rounded-pill">${unread > 99 ? '99+' : unread}</span>` : ''}
               </div>
             </a>
           </li>
@@ -775,6 +1027,10 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       });
       // Prepend so the Team section sits above the "Users" title.
       userList.insertAdjacentHTML('afterbegin', html);
+
+      // This re-render dropped .active from the team rows it just replaced; re-apply
+      // the highlight so the open conversation stays selected (ISSUE 2).
+      applyActiveConversation(currentConversationId);
     }
 
     // Load conversation messages
@@ -813,11 +1069,14 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         
         // Display messages
         displayConversationMessages(messages);
-        // Mark as read, clear unread, persist last open conversation
-        setLastRead(conversationId, new Date().toISOString());
-        clearUnread(conversationId);
+        // Server marked the conversation read in getConversationMessages; refresh sidebar badges.
         try { localStorage.setItem(LS_KEYS.lastConversationId, String(conversationId)); } catch(e) {}
-        
+        await fetchMessages();
+        await fetchGroups();
+        // fetchMessages/fetchGroups re-render the sidebar lists (dropping .active);
+        // re-apply the highlight as the LAST step so it survives (ISSUE 2).
+        applyActiveConversation(currentConversationId);
+
       } catch (error) {
         showError('Failed to load conversation');
         console.error('Error loading conversation:', error);
@@ -862,7 +1121,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (!messages || messages.length === 0) {
         messagesContainer.innerHTML = `
           <li class="text-center p-4">
-            <small class="text-muted">No messages in this conversation yet</small>
+            <small class="text-muted">${escapeHtml(window.CHAT_I18N?.noMessagesInConversation || 'No messages in this conversation yet')}</small>
           </li>
         `;
         return;
@@ -873,38 +1132,24 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       messages.forEach(message => {
         const isCurrentUser = message.sendable_id === currentUser?.id;
         const messageClass = isCurrentUser ? 'chat-message-right' : '';
-        const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
-        const senderName = isCurrentUser ? 'You' : getDisplayName(message.sendable || {});
+        const senderEntity = isCurrentUser
+          ? { id: currentUser?.id, name: 'You', avatar_url: currentUser?.avatar_url || null, initials: currentUser?.initials || 'ME' }
+          : { id: message.sendable_id, name: message.sender_name || getDisplayName(message.sendable || {}), avatar_url: message.sender_avatar_url || null, initials: message.sender_initials || getInitials(message.sender_name || getDisplayName(message.sendable || {})) };
         const timeFormatted = formatMessageTime(message.created_at);
-        
+        const avatarHtml = `<div class="user-avatar flex-shrink-0 ${isCurrentUser ? 'ms-4' : 'me-4'}">${avatarMarkup(senderEntity, 'avatar-sm')}</div>`;
+
         html += `
           <li class="chat-message ${messageClass}" data-message-id="${message.id}">
             <div class="d-flex overflow-hidden">
-              ${!isCurrentUser ? `
-                <div class="user-avatar flex-shrink-0 me-4">
-                  <div class="avatar avatar-sm">
-                    <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
-                  </div>
-                </div>
-              ` : ''}
-              
+              ${!isCurrentUser ? avatarHtml : ''}
               <div class="chat-message-wrapper flex-grow-1">
-                <div class="chat-message-text">
-                  <p class="mb-0">${escapeHtml(message.body)}</p>
-                </div>
+                <div class="chat-message-text"><p class="mb-0">${escapeHtml(message.body)}</p></div>
                 <div class="${isCurrentUser ? 'text-end' : ''} text-muted mt-1">
                   ${isCurrentUser ? '<i class="ti ti-checks ti-16px text-success me-1"></i>' : ''}
                   <small>${timeFormatted}</small>
                 </div>
               </div>
-              
-              ${isCurrentUser ? `
-                <div class="user-avatar flex-shrink-0 ms-4">
-                  <div class="avatar avatar-sm">
-                    <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
-                  </div>
-                </div>
-              ` : ''}
+              ${isCurrentUser ? avatarHtml : ''}
             </div>
           </li>
         `;
@@ -935,9 +1180,13 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
     // Escape HTML to prevent XSS
     function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+      if (text === null || text === undefined) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     // Scroll to bottom of messages
@@ -960,37 +1209,24 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       }
       const isCurrentUser = message.sendable_id === currentUser?.id;
       const messageClass = isCurrentUser ? 'chat-message-right' : '';
-      const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
+      const senderEntity = isCurrentUser
+        ? { id: currentUser?.id, name: 'You', avatar_url: currentUser?.avatar_url || null, initials: currentUser?.initials || 'ME' }
+        : { id: message.sendable_id, name: message.sender_name || getDisplayName(message.sendable || {}), avatar_url: message.sender_avatar_url || null, initials: message.sender_initials || getInitials(message.sender_name || getDisplayName(message.sendable || {})) };
       const timeFormatted = formatMessageTime(message.created_at);
+      const avatarHtml = `<div class="user-avatar flex-shrink-0 ${isCurrentUser ? 'ms-4' : 'me-4'}">${avatarMarkup(senderEntity, 'avatar-sm')}</div>`;
 
       const messageHtml = `
         <li class="chat-message ${messageClass}" data-message-id="${message.id}">
           <div class="d-flex overflow-hidden">
-            ${!isCurrentUser ? `
-              <div class="user-avatar flex-shrink-0 me-4">
-                <div class="avatar avatar-sm">
-                  <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
-                </div>
-              </div>
-            ` : ''}
-            
+            ${!isCurrentUser ? avatarHtml : ''}
             <div class="chat-message-wrapper flex-grow-1">
-              <div class="chat-message-text">
-                <p class="mb-0">${escapeHtml(message.body)}</p>
-              </div>
+              <div class="chat-message-text"><p class="mb-0">${escapeHtml(message.body)}</p></div>
               <div class="${isCurrentUser ? 'text-end' : ''} text-muted mt-1">
                 ${isCurrentUser ? '<i class="ti ti-checks ti-16px text-success me-1"></i>' : ''}
                 <small>${timeFormatted}</small>
               </div>
             </div>
-            
-            ${isCurrentUser ? `
-              <div class="user-avatar flex-shrink-0 ms-4">
-                <div class="avatar avatar-sm">
-                  <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
-                </div>
-              </div>
-            ` : ''}
+            ${isCurrentUser ? avatarHtml : ''}
           </div>
         </li>
       `;
@@ -1007,7 +1243,37 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         chatHeader.textContent = `Conversation ${conversationId}`;
       }
       if (chatStatus) {
-        chatStatus.textContent = 'Online';
+        chatStatus.textContent = (window.CHAT_I18N?.online || 'Online');
+      }
+    }
+
+    // Header for a team group: team name + participant names subline + team avatar.
+    function updateChatHeaderForGroup(group) {
+      const header = document.querySelector('.chat-history-header .chat-contact-info h6');
+      const status = document.querySelector('.chat-history-header .user-status');
+      const avatarWrap = document.querySelector('.chat-history-header .chat-header-avatar-slot');
+      // B1: real team name; only fall back to a generic label if truly empty.
+      const groupName = (group.name && group.name.trim())
+        ? group.name
+        : (window.CHAT_I18N?.teamChat || 'Team Chat');
+      if (header) header.textContent = groupName;
+      if (status) {
+        const parts = (group.participants || []).slice().sort((a, b) => (b.is_leader ? 1 : 0) - (a.is_leader ? 1 : 0));
+        const CAP = 3;
+        const shown = parts.slice(0, CAP).map(p => {
+          const nm = escapeHtml(p.name || '');
+          // B2: refined inline gold crown marker next to the leader's name.
+          return p.is_leader ? `${nm}<i class="ti ti-crown chat-leader-crown" title="Team leader"></i>` : nm;
+        });
+        let html = shown.join(', ');
+        if (parts.length > CAP) html += ` +${parts.length - CAP} ${escapeHtml(window.CHAT_I18N?.others || 'others')}`;
+        status.innerHTML = html || escapeHtml(window.CHAT_I18N?.teamMembers || 'Team members');
+      }
+      if (avatarWrap) {
+        // B3: pass the team name/initials so a logo-less team shows its initials circle.
+        // Keep the stable .chat-header-avatar-slot class; a group has no single presence (no dot).
+        avatarWrap.outerHTML = avatarMarkup({ id: group.id, name: groupName, avatar_url: group.avatar_url, initials: group.initials })
+          .replace('class="avatar"', 'class="flex-shrink-0 avatar chat-header-avatar-slot"');
       }
     }
 
@@ -1016,12 +1282,14 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (conversation.type === 'private') {
         const other = (conversation.participants || []).find(p => p.participantable_id !== currentUser?.id);
         const participant = other?.participantable || {};
-        const name = getDisplayName(participant);
-        const avatarUrl = resolveAvatarUrl({ id: participant.id, img_url: participant.img_url });
-        updateChatHeaderWithUser(name, avatarUrl);
+        updateChatHeaderWithUser(participant);
         return;
       }
-      updateChatHeader(conversation.id);
+      // group: prefer the enriched teamGroups entry (has participants/avatar), fall back to conversation.
+      const group = (teamGroups || []).find(g => g.id === conversation.id) || {
+        id: conversation.id, name: conversation.name, avatar_url: null, initials: getInitials(conversation.name), participants: []
+      };
+      updateChatHeaderForGroup(group);
     }
 
     // Send message
@@ -1104,7 +1372,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
           if (wrapper && !wrapper.querySelector('.chat-message-error')) {
             const err = document.createElement('div');
             err.className = 'chat-message-error text-danger mt-1';
-            err.innerHTML = '<small><i class="ti ti-alert-circle ti-14px me-1"></i>Message not sent. Please try again.</small>';
+            err.innerHTML = '<small><i class="ti ti-alert-circle ti-14px me-1"></i>' + escapeHtml(window.CHAT_I18N?.messageNotSent || 'Message not sent. Please try again.') + '</small>';
             wrapper.appendChild(err);
           }
         }
@@ -1151,10 +1419,10 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (!users || users.length === 0) {
         searchResults.innerHTML = `
           <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-            <h5 class="text-primary mb-0">Search Results</h5>
+            <h5 class="text-primary mb-0">${escapeHtml(window.CHAT_I18N?.searchResults || 'Search Results')}</h5>
           </li>
           <li class="chat-contact-list-item">
-            <h6 class="text-muted mb-0">No users found</h6>
+            <h6 class="text-muted mb-0">${escapeHtml(window.CHAT_I18N?.noUsersFound || 'No users found')}</h6>
           </li>
         `;
         searchResults.style.display = 'block';
@@ -1164,7 +1432,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
       let html = `
         <li class="chat-contact-list-item chat-contact-list-item-title mt-0">
-          <h5 class="text-primary mb-0">Search Results</h5>
+          <h5 class="text-primary mb-0">${escapeHtml(window.CHAT_I18N?.searchResults || 'Search Results')}</h5>
           <button class="btn btn-sm btn-text-secondary float-end" onclick="hideSearchResults()">
             <i class="ti ti-x"></i>
           </button>
@@ -1175,10 +1443,8 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         const avatarUrl = resolveAvatarUrl(user);
         html += `
           <li class="chat-contact-list-item mb-1">
-            <a class="d-flex align-items-center" href="#" onclick="startConversationWithUser(${user.id}, '${escapeHtml(user.name || '')}', '${avatarUrl}')">
-              <div class="flex-shrink-0 avatar">
-                <img src="${avatarUrl}" alt="Avatar" class="rounded-circle" onerror="this.onerror=null;this.src='/vuexy/assets/img/avatars/${(user.id % 12) + 1}.png'" />
-              </div>
+            <a class="d-flex align-items-center" href="#" onclick="startConversationWithUser(${user.id})">
+              <div class="flex-shrink-0">${avatarMarkup(user)}</div>
               <div class="chat-contact-info flex-grow-1 ms-4">
                 <h6 class="chat-contact-name text-truncate m-0 fw-normal">${escapeHtml(user.name || '')}</h6>
               </div>
@@ -1215,15 +1481,67 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
     }
 
-    function resolveAvatarUrl(user) {
-      if (user && user.img_url) {
-        if (user.img_url.startsWith('http://') || user.img_url.startsWith('https://')) {
-          return user.img_url;
-        }
-        return `/dashboard/uploads/photos/${user.id}/${encodeURIComponent(user.img_url)}`;
+    // Server is the single source of truth for avatar URLs. No path guessing.
+    function resolveAvatarUrl(entity) {
+      return (entity && entity.avatar_url) ? entity.avatar_url : null;
+    }
+
+    // Small presence dot for the bottom-trailing corner of an avatar (B5).
+    // Green when active, muted grey when offline. Driven by data, never hardcoded.
+    function presenceDot(presence) {
+      const cls = presence === 'active' ? 'is-active' : 'is-offline';
+      return `<span class="chat-presence-dot ${cls}"></span>`;
+    }
+
+    // Wrap avatar markup so a presence dot can be positioned over it.
+    function avatarWithPresence(entity, sizeClass) {
+      return `<span class="chat-avatar-presence">${avatarMarkup(entity, sizeClass)}${presenceDot(entity && entity.presence)}</span>`;
+    }
+
+    // Initials: "User Name" => "UN"; single token => first two letters; empty => "?".
+    function getInitials(name) {
+      const n = (name || '').trim();
+      if (!n) return '?';
+      const parts = n.split(/\s+/);
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    // Deterministic theme-tint color per entity id (stable across renders).
+    const AVATAR_COLORS = ['bg-label-primary','bg-label-info','bg-label-success','bg-label-warning','bg-label-danger','bg-label-secondary'];
+    function avatarColorClass(id) {
+      const i = Math.abs(parseInt(id) || 0) % AVATAR_COLORS.length;
+      return AVATAR_COLORS[i];
+    }
+
+    // Avatar markup: real photo (falling back to an initials circle on load error)
+    // or an initials circle directly. The onerror fallback is handled by a named
+    // function via data-* attributes so NO HTML is inlined into the onerror attribute
+    // (previous inline-HTML approach corrupted the DOM when the initials markup
+    // contained double quotes).
+    function avatarMarkup(entity, sizeClass) {
+      entity = entity || {};
+      const initials = entity.initials || getInitials(entity.name);
+      const colorClass = avatarColorClass(entity.id);
+      const cls = 'avatar' + (sizeClass ? ' ' + sizeClass : '');
+      const initialSpan = `<span class="chat-avatar-initial ${colorClass}">${escapeHtml(initials)}</span>`;
+      const url = resolveAvatarUrl(entity);
+      if (url) {
+        // On load error, onImgError() swaps the <img> for the initials circle using
+        // the data-* payload — never a stock/numbered photo, and no attribute-escaping hazard.
+        return `<div class="${cls}"><img src="${escapeHtml(url)}" alt="${escapeHtml(entity.name || '')}" class="rounded-circle" data-initials="${escapeHtml(initials)}" data-color="${escapeHtml(colorClass)}" onerror="onImgError(this)" /></div>`;
       }
-      const id = user && user.id ? user.id : 1;
-      return `/vuexy/assets/img/avatars/${(id % 12) + 1}.png`;
+      return `<div class="${cls}">${initialSpan}</div>`;
+    }
+
+    // Swap a broken avatar <img> for its initials circle (data-driven, no inline HTML in attributes).
+    function onImgError(img) {
+      if (!img || img.dataset.fallbackApplied) return;
+      img.dataset.fallbackApplied = '1';
+      const span = document.createElement('span');
+      span.className = 'chat-avatar-initial ' + (img.dataset.color || 'bg-label-secondary');
+      span.textContent = img.dataset.initials || '?';
+      img.replaceWith(span);
     }
 
     function getDisplayName(person) {
@@ -1240,44 +1558,22 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     }
 
     // Start conversation with a user
-    async function startConversationWithUser(userId, userName, avatarUrl) {
+    async function startConversationWithUser(userId) {
       try {
-        // Hide search results
         hideSearchResults();
-        
-        // Show loading in messages area
         const messagesContainer = document.getElementById('chat-messages');
         showLoading(messagesContainer);
-        
-        // Create or get conversation
         const conversation = await createOrGetConversation(userId);
-        
         if (conversation) {
-          // Update chat header
-          updateChatHeaderWithUser(userName, avatarUrl);
-          
-          // Load conversation messages
           currentConversationId = conversation.id;
-          
-          // Setup real-time listeners for this conversation (best-effort; must NOT block loading)
-          try {
-            setupConversationListeners(conversation.id);
-          } catch (e) {
-            console.warn('Real-time listeners unavailable; continuing without live updates:', e);
-          }
-
+          try { setupConversationListeners(conversation.id); } catch (e) {}
           const convoData = await loadConversationMessages(conversation.id);
           updateChatHeaderFromConversation(convoData?.conversation);
           displayConversationMessages(convoData?.messages || []);
-          setLastRead(conversation.id, new Date().toISOString());
-          clearUnread(conversation.id);
           try { localStorage.setItem(LS_KEYS.lastConversationId, String(conversation.id)); } catch(e) {}
-          
-          // Refresh conversations list
           await fetchMessages();
-          
-          // Update active state
-          updateActiveConversation(conversation.id);
+          // fetchMessages re-renders the user list; re-apply the DM highlight last (ISSUE 2).
+          applyActiveConversation(currentConversationId);
         }
       } catch (error) {
         showError('Failed to start conversation');
@@ -1285,34 +1581,54 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       }
     }
 
-    // Update chat header with user info
-    function updateChatHeaderWithUser(userName, avatarUrl) {
+    // Update chat header for a private conversation with a presented user entity.
+    function updateChatHeaderWithUser(entity) {
       const chatHeader = document.querySelector('.chat-history-header .chat-contact-info h6');
       const chatStatus = document.querySelector('.chat-history-header .user-status');
-      const headerAvatarImg = document.querySelector('.chat-history-header .avatar img');
-      
-      if (chatHeader) {
-        chatHeader.textContent = userName;
-      }
+      const avatarWrap = document.querySelector('.chat-history-header .chat-header-avatar-slot');
+      const name = getDisplayName(entity || {});
+      // B5: real presence — no hardcoded "Online"/avatar-online.
+      const isActive = (entity && entity.presence) === 'active';
+      if (chatHeader) chatHeader.textContent = name;
       if (chatStatus) {
-        chatStatus.textContent = 'Online';
+        chatStatus.textContent = isActive
+          ? (window.CHAT_I18N?.active || 'Active')
+          : (window.CHAT_I18N?.offline || 'Offline');
       }
-      if (headerAvatarImg && avatarUrl) {
-        headerAvatarImg.src = avatarUrl;
+      if (avatarWrap) {
+        // Rebuild the header avatar with a real presence dot (bottom-trailing corner).
+        // Keep the stable .chat-header-avatar-slot class so later header updates can find it.
+        const inner = avatarMarkup({ id: entity.id, name, avatar_url: entity.avatar_url, initials: entity.initials });
+        avatarWrap.outerHTML =
+          `<span class="flex-shrink-0 chat-avatar-presence chat-header-avatar-slot">${inner}${presenceDot(entity && entity.presence)}</span>`;
       }
     }
 
-    // Update active conversation in the list
-    function updateActiveConversation(conversationId) {
-      document.querySelectorAll('.chat-contact-list-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      
-      // Find and activate the conversation
-      const conversationElement = document.querySelector(`[onclick*="loadConversation(${conversationId})"]`);
-      if (conversationElement) {
-        conversationElement.closest('.chat-contact-list-item').classList.add('active');
+    // Single source of truth for the sidebar's active-row highlight (ISSUE 2).
+    // Works for BOTH row types:
+    //   - TEAM/group rows: onclick="loadConversation(id)"           (keyed by conversation id)
+    //   - DM/user rows:    onclick="startConversationWithUser(uid)" (keyed by USER id, not conv id)
+    // For DM rows we reverse-map the conversation id back to a user id via
+    // conversationByUserId (userId -> conversationId, populated in fetchMessages),
+    // then match that user's row. Called after every sidebar re-render so the class
+    // survives fetchMessages/fetchGroups redraws.
+    function applyActiveConversation(conversationId) {
+      document.querySelectorAll('#user-list .chat-contact-list-item').forEach(li => li.classList.remove('active'));
+      if (!conversationId) return;
+      // Team/group rows: onclick loadConversation(id)
+      const teamRow = document.querySelector(`#user-list [onclick*="loadConversation(${conversationId})"]`);
+      teamRow?.closest('.chat-contact-list-item')?.classList.add('active');
+      // DM rows: map conversationId back to a userId, then match startConversationWithUser(userId)
+      const userId = Object.keys(conversationByUserId).find(uid => conversationByUserId[uid] === conversationId);
+      if (userId) {
+        const dmRow = document.querySelector(`#user-list [onclick*="startConversationWithUser(${userId})"]`);
+        dmRow?.closest('.chat-contact-list-item')?.classList.add('active');
       }
+    }
+
+    // Back-compat shim: keep the old name as a thin wrapper over the single source of truth.
+    function updateActiveConversation(conversationId) {
+      applyActiveConversation(conversationId);
     }
 
     // Add user to group
@@ -1575,11 +1891,18 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         }
       }
       
-      // Update conversation list to show new message
+      // A message arrived. If it's not the focused conversation, the server unread_count
+      // will reflect it — just refresh the sidebar (DMs + team groups) to update badges.
       if (!currentConversationId || messageData.conversation_id != currentConversationId) {
-        incrementUnread(messageData.conversation_id);
+        fetchMessages();
+        fetchGroups();
+      } else {
+        fetchMessages();
+        // Keep the open conversation's header (presence/avatar) fresh on live activity.
+        loadConversationMessages(currentConversationId).then(d => {
+          if (d && d.conversation) updateChatHeaderFromConversation(d.conversation);
+        }).catch(() => {});
       }
-      fetchMessages();
     }
 
     // Handle message deletions
@@ -1643,10 +1966,11 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       // Check if there are any existing typing indicators
       const typingIndicators = document.querySelectorAll('.typing-indicator');
       let indicatorText = '';
+      const safeName = escapeHtml(user.name || '');
 
       if (typingIndicators.length === 0) {
         // First typing indicator
-        indicatorText = user.name + ' is typing...';
+        indicatorText = safeName + ' ' + (window.CHAT_I18N?.isTyping || 'is typing...');
       } else {
         // Multiple users typing - show combined indicator
         const typingUsers = [];
@@ -1656,20 +1980,20 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
             typingUsers.push(indicator.getAttribute('data-user-name'));
           }
         });
-        typingUsers.push(user.name);
+        typingUsers.push(safeName);
 
         if (typingUsers.length === 1) {
-          indicatorText = typingUsers[0] + ' is typing...';
+          indicatorText = typingUsers[0] + ' ' + (window.CHAT_I18N?.isTyping || 'is typing...');
         } else if (typingUsers.length === 2) {
-          indicatorText = typingUsers.join(' and ') + ' are typing...';
+          indicatorText = typingUsers.join(' ' + (window.CHAT_I18N?.and || 'and') + ' ') + ' ' + (window.CHAT_I18N?.areTyping || 'are typing...');
         } else {
-          indicatorText = typingUsers[0] + ' and ' + (typingUsers.length - 1) + ' others are typing...';
+          indicatorText = typingUsers[0] + ' ' + (window.CHAT_I18N?.and || 'and') + ' ' + (typingUsers.length - 1) + ' ' + (window.CHAT_I18N?.others || 'others') + ' ' + (window.CHAT_I18N?.areTyping || 'are typing...');
         }
       }
 
       // Add new typing indicator
       const typingHtml = `
-        <li class="chat-message typing-indicator" data-user-id="${user.id}" data-user-name="${user.name}">
+        <li class="chat-message typing-indicator" data-user-id="${user.id}" data-user-name="${escapeHtml(user.name || '')}">
           <div class="d-flex overflow-hidden">
             <div class="user-avatar flex-shrink-0 me-4">
               <div class="avatar avatar-sm">
@@ -1770,21 +2094,38 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     }
 
     // Auto-refresh messages periodically
-    function startMessagePolling(interval = 30000) {
+    function startMessagePolling(interval = 15000) {
       if (messagePollingInterval) {
         clearInterval(messagePollingInterval);
       }
-      
+
       messagePollingInterval = setInterval(async () => {
-        if (currentConversationId) {
-          try {
+        try {
+          // 1) Refresh the sidebar: unread counts + previews (fetchMessages),
+          //    team rows (fetchGroups), and USER ROWS with fresh presence dots
+          //    (fetchUsers re-renders displayUsers, which reads each user's live
+          //    `presence`). background=true skips the loading spinner so this is
+          //    silent. This is what makes online/offline update live, not just on refresh.
+          await fetchMessages();
+          await fetchGroups();
+          await fetchUsers(true);
+          // 2) Refresh the OPEN conversation: its messages AND its header (name/avatar/presence).
+          if (currentConversationId) {
             const data = await loadConversationMessages(currentConversationId);
             if (data && Array.isArray(data.messages)) {
               displayConversationMessages(data.messages);
             }
-          } catch (e) {
-            // silent — polling is best-effort
+            // Re-render the header from fresh conversation/participant data so online/offline + avatar update.
+            if (data && data.conversation) {
+              updateChatHeaderFromConversation(data.conversation);
+            }
+            // Keep the active-row highlight after fetchMessages/fetchGroups re-render the sidebar.
+            if (typeof applyActiveConversation === 'function') {
+              applyActiveConversation(currentConversationId);
+            }
           }
+        } catch (e) {
+          // silent — polling is best-effort
         }
       }, interval);
     }
@@ -1809,7 +2150,6 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
         // Fetch current user info
         await fetchCurrentUser();
-        loadPersistedState();
 
         // Load initial data
         const [conversations, groups] = await Promise.all([
@@ -1830,17 +2170,19 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         // Set up event listeners
         setupEventListeners();
 
-        // Start auto-refresh (reduce frequency if broadcasting is enabled)
+        // Presence: ping only on genuine user activity (not background polls).
+        setupPresenceHeartbeat();
+
+        // Start auto-refresh. Real-time broadcasting (Pusher) gives instant updates
+        // WHEN it delivers, but it has proven unreliable here — so the poll is the
+        // reliable floor for unread counts and presence and must stay reasonably tight
+        // regardless. Each tick is only a few light JSON calls, so 15s is a good balance
+        // between "feels live" and not over-fetching.
         broadcastingEnabled = initializeBroadcasting();
         if (broadcastingEnabled) {
-          console.log('Real-time broadcasting enabled - reduced polling frequency');
           setupRealTimeMessaging();
-          // Use longer intervals since we have real-time updates
-          startMessagePolling(60000); // Every minute instead of 30 seconds
-        } else {
-          console.log('Real-time broadcasting disabled - using polling');
-          startMessagePolling(30000); // Every 30 seconds
         }
+        startMessagePolling(15000); // Every 15s (unread + presence + open thread)
 
         console.log('Chat system initialized successfully');
 
@@ -1872,7 +2214,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
           ...subscribedConversationIds,
           currentConversationId,
         ].filter(Boolean));
-        startMessagePolling(60000);
+        startMessagePolling(15000);
       }
     });
 
@@ -2031,6 +2373,8 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     window.hideSearchResults = hideSearchResults;
     window.deleteGroup = deleteGroup;
     window.searchUsers = searchUsers;
+    window.onImgError = onImgError;
+    window.applyActiveConversation = applyActiveConversation;
 
 
   </script>
