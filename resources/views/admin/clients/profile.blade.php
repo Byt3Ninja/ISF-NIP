@@ -9,7 +9,13 @@
 @section('content')
   <div class="">
     <div class="">
-      
+
+      @if (session()->has('msg'))
+        <x-alert
+          type="{{ session()->get('class', 'success') }}"
+          message="{{ __('admin.' . session()->get('msg'), ['email' => session()->get('pending_email', '')]) }}" />
+      @endif
+
       {{-- Profile Header Section --}}
       <section class="row">
         <div class="col-12">
@@ -296,6 +302,18 @@
                       <strong class="mx-2 text-nowrap">{{ $l == 'ar' ? 'الايميل:' : 'Email:' }}</strong>
                       <span class="text-truncate">{{ $client->email }}</span>
                     </li>
+
+                    @if ($client->new_email)
+                      <li class="d-flex align-items-start mb-4">
+                        <i class="ti ti-mail-forward ti-lg"></i>
+                        <span class="mx-2">
+                          <span class="badge bg-label-warning">{{ __('admin.PendingEmailChange') }}</span>
+                          <span class="d-block small text-muted mt-1">
+                            {{ __('admin.PendingEmailChangeNotice', ['email' => $client->new_email]) }}
+                          </span>
+                        </span>
+                      </li>
+                    @endif
                     
                     <li class="d-flex align-items-center mb-4">
                       <i class="ti ti-briefcase ti-lg"></i>

@@ -62,6 +62,29 @@
             {{ __('admin.E-mail') }} <span class="text-danger">*</span>
           </label>
           <input value="{{ $client->email }}" name="email" type="email" class="form-control" id="email" style="direction: ltr;" placeholder="{{ __('admin.E-mail') }}" required autocomplete="email" oninput="this.value = this.value.trimStart()" />
+
+          @if ($client->new_email)
+            {{-- A change is staged: the address above stays active until the new one is confirmed. --}}
+            <div class="alert alert-warning d-flex flex-column gap-2 mt-3 mb-0 py-3" role="status">
+              <div>
+                <i class="ti ti-mail-forward me-1"></i>
+                <strong>{{ __('admin.PendingEmailChange') }}</strong>
+              </div>
+              <div class="small">
+                {{ __('admin.PendingEmailChangeNotice', ['email' => $client->new_email]) }}
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                {{-- These buttons submit the sibling forms rendered after this one; they
+                     cannot be nested here because forms may not contain forms. --}}
+                <button type="submit" form="resend-email-confirmation-form" class="btn btn-sm btn-outline-primary">
+                  {{ __('admin.ResendConfirmation') }}
+                </button>
+                <button type="submit" form="cancel-email-change-form" class="btn btn-sm btn-outline-secondary">
+                  {{ __('admin.CancelEmailChange') }}
+                </button>
+              </div>
+            </div>
+          @endif
         </div>
 
         <div class="mb-4 col-md-6">
@@ -243,4 +266,15 @@
 
     </div>
   </form>
+
+  @if ($client->new_email)
+    {{-- Targets of the buttons inside the pending-email banner above. Kept outside the
+         account form because nested forms are invalid HTML. --}}
+    <form id="resend-email-confirmation-form" method="post" action="{{ route('user.profile_email_resend') }}" class="d-none">
+      {!! csrf_field() !!}
+    </form>
+    <form id="cancel-email-change-form" method="post" action="{{ route('user.profile_email_cancel') }}" class="d-none">
+      {!! csrf_field() !!}
+    </form>
+  @endif
 </div>
