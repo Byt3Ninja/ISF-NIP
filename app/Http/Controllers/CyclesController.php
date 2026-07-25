@@ -1087,20 +1087,15 @@ class CyclesController extends Controller
             $id = $step->id;
 
             $the_form = BuilderForm::findOrFail( $step->data );
-            $fields = $the_form->fields()
-                ->withPivot('options')
-                ->orderBy('builder_fields.id', 'asc')
-                ->get();
-
-            /* $field_map_ids = Formfield::where('step_id', $id)
-                ->where('builder_forms_id', $step->data)
-                ->pluck('id')
-                ->toArray();
-
+            // Step-scoped pivot (`form_fields`), NOT the BuilderForm template
+            // pivot (`builder_fields`) — see the comment in my(). `form_data.
+            // field_id` holds a `form_fields.id`, so reading the template pivot
+            // yields ids from a different id space and the saved answers never
+            // match when one BuilderForm is shared across several steps.
             $fields = $step->fields()
                 ->where('builder_forms_id', $step->data)
                 ->orderBy('form_fields.id', 'asc')
-                ->get();  */
+                ->get();
 
             $field_map_ids = $fields->pluck('pivot.id')->toArray();
             // تجهيز البيانات بشكل منسق
@@ -1206,19 +1201,21 @@ class CyclesController extends Controller
         // if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
 
-        /* $get_fields = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->get();
-        $field_map_ids = $get_fields->pluck('id')->toArray();
-
-        // جلب كل الحقول الخاصة بالـ step
-        $fields = $step->fields()
-            ->where('builder_forms_id', $step->data)
-            ->orderBy('form_fields.id', 'asc')
-            ->get(); */
-
+        // Read the field list through the STEP pivot (`form_fields`), not the
+        // BuilderForm template pivot (`builder_fields`).
+        //
+        // `form_data.field_id` stores a `form_fields.id` — the step-scoped copy
+        // of the question. `$the_form->fields()` returns `builder_fields` rows,
+        // which belong to the template and are shared by every step using that
+        // form, so its pivot ids are a completely different id space. When a
+        // BuilderForm is assigned to more than one step, `whereIn('field_id',
+        // $field_map_ids)` below matched nothing: the saved answers never
+        // loaded, so the form rendered blank AND `$isReadOnly = $hasSubmission`
+        // stayed false, letting the founder submit the same form again.
         $the_form = BuilderForm::findOrFail( $step->data );
-        $fields = $the_form->fields()
-                ->withPivot('options')
-                ->orderBy('builder_fields.id', 'asc')
+        $fields = $step->fields()
+                ->where('builder_forms_id', $step->data)
+                ->orderBy('form_fields.id', 'asc')
                 ->get();
 
         $fields = $fields->map(function($field) {
@@ -1331,10 +1328,15 @@ class CyclesController extends Controller
 
         $field_map_ids = array_filter(array_map('intval', explode(",", $request->input('field_ids'))));
 
+        // Step-scoped pivot (`form_fields`), NOT the BuilderForm template pivot
+        // (`builder_fields`) — must match the id space the form posts and that
+        // `form_data.field_id` stores. See the comment in my(). Reading the
+        // template pivot here made every posted id look "unknown" to the
+        // hardening check below, so a shared BuilderForm aborted with a 422.
         $the_form = BuilderForm::findOrFail( $step->data );
-        $fields = $the_form->fields()
-            ->withPivot('options')
-            ->orderBy('builder_fields.id', 'asc')
+        $fields = $step->fields()
+            ->where('builder_forms_id', $step->data)
+            ->orderBy('form_fields.id', 'asc')
             ->get();
 
         $field_mapper = $fields->map(function ($field) {

@@ -151,10 +151,28 @@
                           // withInput() re-flashes the submission on a validation
                           // redirect. The value can be an array (POST of field_X[])
                           // or a JSON string (flashed DB answer) — normalize both.
+                          // Checkbox answers exist in TWO stored formats:
+                          //   * JSON array  — CyclesController@saveForm (json_encode)
+                          //   * comma list  — ExternalCyclesController@registerUser
+                          //                   (implode(',')), i.e. the public apply form
+                          // Try JSON first, then fall back to splitting on commas.
+                          // Reading a comma list as one opaque string made the whole
+                          // answer ("Option 1,taza taza") match no predefined option,
+                          // so it was misdetected as the "Other" free text and every
+                          // real selection was lost on render.
                           $checkboxAnswers = old($fieldName, []);
                           if (is_string($checkboxAnswers)) {
                               $decoded = json_decode($checkboxAnswers, true);
-                              $checkboxAnswers = is_array($decoded) ? $decoded : array_filter([$checkboxAnswers]);
+                              if (is_array($decoded)) {
+                                  $checkboxAnswers = $decoded;
+                              } elseif ($checkboxAnswers === '') {
+                                  $checkboxAnswers = [];
+                              } else {
+                                  $checkboxAnswers = array_values(array_filter(
+                                      array_map('trim', explode(',', $checkboxAnswers)),
+                                      fn($v) => $v !== ''
+                                  ));
+                              }
                           }
                           $checkboxAnswers = is_array($checkboxAnswers) ? $checkboxAnswers : [];
 

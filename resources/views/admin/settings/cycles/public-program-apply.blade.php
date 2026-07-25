@@ -499,8 +499,56 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 		// defined` ReferenceError on submit, which aborted the whole validation
 		// pass silently (nothing got validated).
 		const numericText = '{{ $l == "ar" ? "يرجى إدخال رقم صحيح." : "Please enter a valid number." }}';
+		// GV-3679: the message must describe the actual bound. "Please enter a
+		// valid positive number" is only true when the floor is 0 (the default);
+		// when an author sets min="5" it misleads, so fall back to a templated
+		// "no less than N". numberMinText mirrors the server's message verbatim
+		// for the min=0 case so both layers read identically.
 		const numberMinText = '{{ $l == "ar" ? "يرجى إدخال رقم موجب صحيح." : "Please enter a valid positive number." }}';
+		// NOTE: blade trims whitespace inside an echo tag, so a trailing space in
+		// the literal is lost. Concatenate the separator explicitly instead.
+		const numberMinTplText = '{{ $l == "ar" ? "يرجى إدخال رقم لا يقل عن" : "Please enter a number no less than" }}' + ' ';
+		const numberMaxTplText = '{{ $l == "ar" ? "يرجى إدخال رقم لا يتجاوز" : "Please enter a number no greater than" }}' + ' ';
 		const emailFormatText = '{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com)." : "Please enter a valid email address (e.g. name@example.com)." }}';
+		const urlFormatText = '{{ $l == "ar" ? "يرجى إدخال رابط صحيح (مثال: https://example.com)." : "Please enter a valid URL (e.g. https://example.com)." }}';
+		const requiredText = '{{ $l == "ar" ? "هذا الحقل مطلوب." : "This field is required." }}';
+		const chooseOneText = '{{ $l == "ar" ? "يرجى اختيار خيار واحد على الأقل." : "Please select at least one option." }}';
+
+		function numberMinMessage(min) {
+			return min === 0 ? numberMinText : numberMinTplText + min;
+		}
+
+		// ---------------------------------------------------------------------
+		// GV-3679: single-submit guard.
+		//
+		// Every action button here fires an AJAX request, so nothing stops a
+		// second click while the first is in flight — that produced duplicate
+		// registrations. lockButton() disables the button and swaps in a
+		// spinner; unlockButton() restores it. The `data-locked` flag is checked
+		// by the handlers themselves because `disabled` alone does not stop a
+		// delegated jQuery handler in every browser.
+		//
+		// The lock is released on failure and on validation rejection, but NOT
+		// on a success path that navigates away or advances the stepper —
+		// re-enabling there would just re-open the duplicate-submit window.
+		// ---------------------------------------------------------------------
+		function lockButton($btn) {
+			if ($btn.data('locked')) { return false; }
+			$btn.data('locked', true);
+			$btn.data('original-html', $btn.html());
+			$btn.prop('disabled', true).addClass('disabled');
+			$btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+				+ '{{ $l == "ar" ? "جارٍ المعالجة..." : "Processing..." }}');
+			return true;
+		}
+
+		function unlockButton($btn) {
+			if (!$btn.data('locked')) { return; }
+			$btn.data('locked', false);
+			$btn.prop('disabled', false).removeClass('disabled');
+			const html = $btn.data('original-html');
+			if (html !== undefined) { $btn.html(html); }
+		}
 		document.addEventListener('DOMContentLoaded', function() {
 			stepper = new Stepper(document.querySelector('#stepper-form'), {
 				linear: true,
@@ -528,6 +576,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 		$(document).on('click', '#check-email', function(e) {
 			e.preventDefault();
+			const $btn = $(this);
+			if ($btn.data('locked')) { return; }
 			let email = $('#initial-email').val();
 			if (email.trim() == '') {
 				$('#initial-email-feedback').html('{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صحيح." : "Please enter a valid email address." }}');
@@ -535,6 +585,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				return;
 			} else {
 				if (validateEmail(email)) {
+					lockButton($btn);
 					$.ajaxSetup({
 						headers: {
 							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -586,6 +637,46 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									// numericText/numberMinText/emailFormatText are declared once at the
 									// top-level script scope (near `var stepper`) so both this renderer
 									// and the separate #join_btn submit handler can see them.
+
+									// GV-3679 placeholders. The form builder has no author-supplied
+									// placeholder field, and echoing the label back into the box (the
+									// previous behaviour) is redundant with the label right above it.
+									// So typed fields get a hint describing the EXPECTED FORMAT, which
+									// is the actual guidance the ticket asks for; free-text fields,
+									// where only the label carries meaning, keep a label-derived
+									// prompt phrased as an instruction.
+									// Format examples are locale-independent by design — a date
+									// mask or a sample address reads the same either way.
+									const phEmail = 'name@example.com';
+									const phUrl = 'https://example.com';
+									const phDate = 'YYYY-MM-DD';
+									const phTime = 'HH:MM';
+									// Trailing/leading spaces are appended outside the echo tag —
+									// blade trims whitespace within it.
+									const phEnterTpl = '{{ $l == "ar" ? "أدخل" : "Enter" }}' + ' ';
+									const phNumberPlain = '{{ $l == "ar" ? "أدخل رقماً" : "Enter a number" }}';
+									const phNumberRangeTpl = '{{ $l == "ar" ? "أدخل رقماً بين" : "Enter a number between" }}' + ' ';
+									const phNumberMinTpl = '{{ $l == "ar" ? "أدخل رقماً لا يقل عن" : "Enter a number from" }}' + ' ';
+									const phAndText = ' ' + '{{ $l == "ar" ? "و" : "and" }}' + ' ';
+
+									// Free-text fields carry no format to hint at, so the label —
+									// the only thing that describes them — becomes an instruction.
+									// A label-less field has nothing to say, so leave the box bare
+									// rather than showing a dangling verb ("Enter").
+									function phText(label) {
+										return label ? phEnterTpl + label : '';
+									}
+									// Describe the accepted range so the bound is visible BEFORE the
+									// user trips the validation message, not only after.
+									function numberPlaceholder(options, minVal) {
+										var min = Number(minVal);
+										var hasMax = options && options.max !== undefined && options.max !== '';
+										if (hasMax) { return phNumberRangeTpl + min + phAndText + options.max; }
+										// Only worth stating when the floor is a real constraint;
+										// min <= 0 is the unremarkable default.
+										if (min > 0) { return phNumberMinTpl + min; }
+										return phNumberPlain;
+									}
 
 									// Free-text input revealed when the user picks the "Other" option.
 									// Hidden by default; toggled by the change handler; its value is
@@ -659,7 +750,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 												case 'paragraph':
 													var rows = (value.options && value.options.rows) ? value.options.rows : 3;
-													fieldsHtml += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${rows}" placeholder="${label}" ${requiredAttr}></textarea>`;
+													fieldsHtml += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${rows}" placeholder="${phText(label)}" ${requiredAttr}></textarea>`;
 													break;
 
 												case 'multiple_choice':
@@ -702,11 +793,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													break;
 
 												case 'date':
-													fieldsHtml += `<input type="text" class="form-control datepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="text" class="form-control datepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${phDate}" ${requiredAttr} />`;
 													break;
 
 												case 'time':
-													fieldsHtml += `<input type="text" class="form-control timepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="text" class="form-control timepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${phTime}" ${requiredAttr} />`;
 													break;
 
 												case 'file':
@@ -720,20 +811,26 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													var numMin = `min="${numMinVal}"`;
 													var numMax = (value.options && value.options.max !== undefined && value.options.max !== '') ? `max="${value.options.max}"` : '';
 													var numStep = (value.options && value.options.step !== undefined && value.options.step !== '') ? `step="${value.options.step}"` : '';
-													fieldsHtml += `<input type="number" inputmode="decimal" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${numMin} ${numMax} ${numStep} ${requiredAttr} />`;
+													// GV-3679: `type="number"` natively accepts "e"/"E" (scientific
+													// notation) plus "+"/"-". The keydown guard blocks them at entry
+													// and the paste guard strips them (keydown never fires on paste).
+													// A negative floor is still honoured: "-" is only blocked when
+													// the effective min is >= 0.
+													var allowNeg = Number(numMinVal) < 0 ? '1' : '0';
+													fieldsHtml += `<input type="number" inputmode="decimal" class="form-control number-field" data-allow-negative="${allowNeg}" id="${value.id_for}" name="${value.field_name}" placeholder="${numberPlaceholder(value.options, numMinVal)}" ${numMin} ${numMax} ${numStep} ${requiredAttr} />`;
 													break;
 
 												case 'email':
-													fieldsHtml += `<input type="email" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="email" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${phEmail}" ${requiredAttr} />`;
 													break;
 
 												case 'url':
-													fieldsHtml += `<input type="url" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="url" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${phUrl}" ${requiredAttr} />`;
 													break;
 
 												case 'short_answer':
 												default:
-													fieldsHtml += `<input type="text" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="text" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${phText(label)}" ${requiredAttr} />`;
 													break;
 											}
 
@@ -813,6 +910,12 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 								},
 								buttonsStyling: false,
 							});
+						},
+						// Always release the lock: this step advances the stepper on
+						// success, but "Previous" brings the user back to this button,
+						// so it must be usable again either way.
+						complete: function() {
+							unlockButton($btn);
 						}
 					});
 				} else {
@@ -825,6 +928,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 		$(document).on('click', '#login-btn', function(e) {
 			e.preventDefault();
+			const $btn = $(this);
+			if ($btn.data('locked')) { return; }
 			let email = $('#login-email').val();
 			let password = $('#login-password').val();
 
@@ -833,7 +938,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				$('#login-password').addClass('is-invalid');
 				return;
 			}
-			
+
+			lockButton($btn);
 			$.ajaxSetup({
 				headers: {
 					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -845,8 +951,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				data: { email: email, password: password },
 				success: function(response) {
 					if (response.status) {
+						// Navigating away — deliberately stay locked so the button
+						// cannot be re-fired during the page transition.
 						window.location.href = response.url;
 					} else {
+						unlockButton($btn);
 						Swal.fire({
 							title: '{{ $l == "ar" ? "خطأ" : "Authentication Failed" }}',
 							text: response.message,
@@ -863,7 +972,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				},
 				error: function(error) {
 					console.log(error);
-					Swal.fire({ 
+					unlockButton($btn);
+					Swal.fire({
 						title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
 					 	text: '{{ $l == "ar" ? "حدث خطأ أثناء المصادقة. يرجى المحاولة مرة أخرى." : "An error occurred during authentication. Please try again." }}',
 					  icon: 'error',
@@ -889,22 +999,247 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			return re.test(String(email).toLowerCase());
 		}
 
-		// Auto-clear the red validation state as soon as the user fills / changes a field.
-		$(document).on('input change', '#register-form input, #register-form select, #register-form textarea', function() {
-			const $field = $(this);
-			const type = $field.attr('type');
-			const name = $field.attr('name');
+		// ---------------------------------------------------------------------
+		// GV-3679: real-time validation.
+		//
+		// One `validateField` is the single source of truth for BOTH the live
+		// (input/change/blur) pass and the #join_btn submit pass. Keeping them
+		// as one function is the point: the earlier split meant submit could
+		// reject something the live pass had just cleared. It returns an error
+		// message string, or null when the field is acceptable.
+		//
+		// Live feedback is deliberately gentle-first: a field the user has not
+		// finished with yet is only marked once it has been blurred ("touched"),
+		// so errors do not flash on the very first keystroke of an empty box.
+		// Once a field is already marked invalid, it revalidates on every input
+		// so the red state clears the instant the value becomes good.
+		// ---------------------------------------------------------------------
+		function fieldFeedbackEl($field) {
+			// Every rendered field has a sibling .invalid-feedback; grouped
+			// (radio/checkbox) fields carry it after the .options-group wrapper.
+			const $group = $field.closest('.options-group');
+			if ($group.length) {
+				const $after = $group.nextAll('.invalid-feedback').first();
+				if ($after.length) { return $after; }
+			}
+			const $sibling = $field.nextAll('.invalid-feedback').first();
+			if ($sibling.length) { return $sibling; }
+			return $field.closest('.form-group').find('.invalid-feedback').first();
+		}
 
-			if (type === 'radio' || type === 'checkbox') {
-				// Clear the whole group (and its container marker) once any option is chosen.
-				if (name) {
-					$('#register-form').find(`input[name="${name}"]`).removeClass('is-invalid');
-				}
-				$field.closest('.options-group').find('.is-invalid').removeClass('is-invalid');
-			} else if ($field.val() && $field.val().toString().trim() !== '') {
+		function validateField($field) {
+			const el = $field[0];
+			if (!el) { return null; }
+			const type = ($field.attr('type') || '').toLowerCase();
+			const isRequired = $field.is('[required]');
+			const rawVal = $field.val();
+			const value = (rawVal === null || rawVal === undefined) ? '' : rawVal.toString();
+			const trimmed = value.trim();
+
+			if (type === 'file') {
+				if (isRequired && (!el.files || el.files.length === 0)) { return requiredText; }
+				return null;
+			}
+
+			// MUST precede the empty check: a number input holding un-parseable
+			// text (e.g. "12e", "--") reports value === "", which would otherwise
+			// be reported as "required" — or silently accepted when optional.
+			// badInput is the only signal that the box has junk in it.
+			if (type === 'number' && el.validity && el.validity.badInput) {
+				return numericText;
+			}
+
+			if (!trimmed) {
+				return isRequired ? requiredText : null;
+			}
+
+			if (type === 'number') {
+				const num = Number(trimmed);
+				if (isNaN(num)) { return numericText; }
+				const minAttr = $field.attr('min');
+				const maxAttr = $field.attr('max');
+				const min = (minAttr !== undefined && minAttr !== '') ? Number(minAttr) : 0;
+				const max = (maxAttr !== undefined && maxAttr !== '') ? Number(maxAttr) : null;
+				if (num < min) { return numberMinMessage(min); }
+				if (max !== null && num > max) { return numberMaxTplText + max; }
+				return null;
+			}
+
+			if (type === 'email') {
+				if (!/.+@.+\..+/.test(trimmed)) { return emailFormatText; }
+				return null;
+			}
+
+			if (type === 'url') {
+				// Mirror the browser's own `type="url"` verdict rather than
+				// inventing a second, stricter rule.
+				if (el.validity && el.validity.typeMismatch) { return urlFormatText; }
+				return null;
+			}
+
+			return null;
+		}
+
+		function applyFieldState($field, message) {
+			const $feedback = fieldFeedbackEl($field);
+			if (message) {
+				$field.addClass('is-invalid');
+				if ($feedback.length) { $feedback.html(message); }
+			} else {
 				$field.removeClass('is-invalid');
-			} else if (type === 'file' && this.files && this.files.length > 0) {
-				$field.removeClass('is-invalid');
+			}
+			return !message;
+		}
+
+		// Required radio / checkbox groups: validated as a unit, marked on every
+		// option so the whole group reads as invalid.
+		function validateGroup($group) {
+			const isRequired = $group.data('required-group') === 1
+				|| $group.data('required-group') === '1'
+				|| $group.find('input[required]').length > 0;
+			if (!isRequired) { return true; }
+			const $inputs = $group.find('input[type="radio"], input[type="checkbox"]');
+			const ok = $inputs.filter(':checked').length > 0;
+			const $feedback = $group.nextAll('.invalid-feedback').first();
+			if (ok) {
+				$inputs.removeClass('is-invalid');
+			} else {
+				$inputs.addClass('is-invalid');
+				if ($feedback.length) { $feedback.html(chooseOneText); }
+			}
+			return ok;
+		}
+
+		// "Other" free-text is mandatory whenever its wrapper is visible.
+		function validateOtherWrapper($wrapper) {
+			const $input = $wrapper.find('.other-field');
+			if ($wrapper.hasClass('d-none')) {
+				$input.removeClass('is-invalid');
+				return true;
+			}
+			const val = ($input.val() || '').trim();
+			if (!val) {
+				$input.addClass('is-invalid');
+				return false;
+			}
+			$input.removeClass('is-invalid');
+			return true;
+		}
+
+		const TOUCHED = 'gv-touched';
+
+		function liveValidate($field) {
+			// Only speak up once the user has left the field, or if we are already
+			// showing an error on it (so corrections clear immediately).
+			if (!$field.data(TOUCHED) && !$field.hasClass('is-invalid')) { return; }
+			applyFieldState($field, validateField($field));
+		}
+
+		// Blur marks the field as "touched" and validates it for the first time.
+		$(document).on('blur', '#register-form input, #register-form select, #register-form textarea', function() {
+			const $field = $(this);
+			const type = ($field.attr('type') || '').toLowerCase();
+			if (type === 'radio' || type === 'checkbox') { return; }
+			$field.data(TOUCHED, true);
+			applyFieldState($field, validateField($field));
+		});
+
+		// Typing revalidates a touched/invalid field so the error disappears as
+		// soon as the value becomes valid.
+		$(document).on('input', '#register-form input, #register-form select, #register-form textarea', function() {
+			liveValidate($(this));
+		});
+
+		// Selecting an option validates immediately — there is no "still typing"
+		// state for a choice, so instant feedback is correct here.
+		$(document).on('change', '#register-form select', function() {
+			const $field = $(this);
+			$field.data(TOUCHED, true);
+			applyFieldState($field, validateField($field));
+		});
+
+		$(document).on('change', '#register-form input[type="radio"], #register-form input[type="checkbox"]', function() {
+			const $group = $(this).closest('.options-group');
+			if ($group.length) { validateGroup($group); }
+		});
+
+		$(document).on('change', '#register-form input[type="file"]', function() {
+			const $field = $(this);
+			$field.data(TOUCHED, true);
+			applyFieldState($field, validateField($field));
+		});
+
+		$(document).on('input blur', '#register-form .other-field', function() {
+			const $wrapper = $(this).closest('.other-wrapper');
+			if ($wrapper.length && ($(this).hasClass('is-invalid') || $(this).data(TOUCHED))) {
+				validateOtherWrapper($wrapper);
+			}
+		});
+		$(document).on('blur', '#register-form .other-field', function() {
+			$(this).data(TOUCHED, true);
+		});
+
+		// The two static base fields live outside the dynamic renderer but should
+		// behave identically.
+		$(document).on('blur', '#register-first-name, #register-last-name', function() {
+			$(this).data(TOUCHED, true);
+			applyFieldState($(this), validateField($(this)));
+		});
+
+		// -- Number input hygiene (GV-3679) -----------------------------------
+		// `type="number"` accepts "e"/"E" (scientific notation) and "+"/"-" by
+		// design. Block them on keydown; "-" only when the field's floor is >= 0.
+		$(document).on('keydown', '#register-form input[type="number"]', function(e) {
+			// Never swallow shortcuts (Ctrl+V, Ctrl+A, Cmd+C, Ctrl+E, ...) — the
+			// guard is only meant to stop literal character entry.
+			if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+
+			// Navigation / editing keys are always allowed. Anything with a
+			// multi-character e.key name (Backspace, ArrowUp, Tab, F5, Enter...)
+			// is a control key, never a typed character.
+			if (e.key === undefined || e.key.length !== 1) { return; }
+
+			// ALLOWLIST, not a denylist. `type="number"` silently discards every
+			// letter — the browser refuses it from .value but still PAINTS it in
+			// the box, so the user sees "abcdef" while the field reads "". A
+			// denylist of e/E/+/- left every other letter in that broken state
+			// (GV-3679 reopen). Permit only what can build a number and reject
+			// the rest outright, so nothing unusable ever appears.
+			const allowNeg = $(this).data('allow-negative') === 1 || $(this).data('allow-negative') === '1';
+			const isDigit = e.key >= '0' && e.key <= '9';
+			// "." only — a number input rejects a comma-containing value outright
+			// (it reads back as empty), so letting one be typed would blank the
+			// field silently. "-" is allowed only where the floor is negative.
+			const isSeparator = e.key === '.';
+			const isMinus = e.key === '-' && allowNeg;
+
+			if (!isDigit && !isSeparator && !isMinus) {
+				e.preventDefault();
+			}
+		});
+
+		// keydown never fires for a paste or a drop, so strip the same characters
+		// from pasted content instead of letting the browser blank the field.
+		$(document).on('paste drop', '#register-form input[type="number"]', function(e) {
+			const $field = $(this);
+			const allowNeg = $field.data('allow-negative') === 1 || $field.data('allow-negative') === '1';
+			const ev = e.originalEvent || e;
+			const clip = ev.clipboardData || ev.dataTransfer;
+			if (!clip) { return; }
+			const text = clip.getData('text') || '';
+			// Mirror the keydown allowlist: keep digits and the sign/decimal point
+			// only, so a pasted "12abc" cannot land the field in the same
+			// invisible-text state that plain typing used to produce.
+			//
+			// Commas are DROPPED rather than kept: a number input rejects
+			// "1,299.00" outright (its .value reads back empty), so preserving
+			// the comma would leave a silently blank box. Dropping it yields
+			// "1299.00", which is what a pasted thousands-separated figure means.
+			let cleaned = text.replace(/,/g, '').replace(/[^0-9.-]/g, '');
+			cleaned = allowNeg ? cleaned.replace(/(?!^)-/g, '') : cleaned.replace(/-/g, '');
+			if (cleaned !== text) {
+				e.preventDefault();
+				$field.val(cleaned).trigger('input');
 			}
 		});
 
@@ -938,110 +1273,44 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 		$(document).on('click', '#join_btn', function(e) {
 			e.preventDefault();
+			const $btn = $(this);
+			// Guard before any work: a second click while the first POST is in
+			// flight was creating duplicate registrations.
+			if ($btn.data('locked')) { return; }
 			let $form = $('#register-form');
 			let isValid = true;
 
 			$form.find('.is-invalid').removeClass('is-invalid');
 
-			// Track radio groups so each group is only validated once.
-			const validatedRadioGroups = {};
-
-			$form.find('[required]').each(function() {
+			// Submit runs the SAME per-field rules as the live pass (validateField),
+			// so the two layers can never disagree. Grouped inputs (radio /
+			// checkbox) and the "Other" free-text boxes are unit-validated
+			// separately, since neither maps onto a single input's value.
+			$form.find('input, select, textarea').each(function() {
 				const $field = $(this);
-				if (!$field.is(':visible') || $field.attr('required') === undefined) {
-					return;
-				}
+				const type = ($field.attr('type') || '').toLowerCase();
+				if (type === 'radio' || type === 'checkbox') { return; }
+				if ($field.is(':disabled') || !$field.is(':visible')) { return; }
+				if ($field.hasClass('other-field')) { return; }
 
-				const type = $field.attr('type');
-				const name = $field.attr('name');
-
-				if (type === 'radio') {
-					// Required radio group: at least one option in the group must be checked.
-					if (validatedRadioGroups[name]) { return; }
-					validatedRadioGroups[name] = true;
-					if ($form.find(`input[type="radio"][name="${name}"]:checked`).length === 0) {
-						$form.find(`input[type="radio"][name="${name}"]`).addClass('is-invalid');
-						isValid = false;
-					}
-				} else if (type === 'checkbox') {
-					if (!$field.is(':checked')) {
-						$field.addClass('is-invalid');
-						isValid = false;
-					}
-				} else if (type === 'file') {
-					if (this.files.length === 0) {
-						$field.addClass('is-invalid');
-						isValid = false;
-					}
-				} else {
-					const value = $field.val();
-					if (!value || value.trim() === '') {
-						$field.addClass('is-invalid');
-						isValid = false;
-					}
+				// Mark everything touched: after an attempted submit the user has
+				// "finished" with every field, so all errors should now be visible.
+				$field.data(TOUCHED, true);
+				if (!applyFieldState($field, validateField($field))) {
+					isValid = false;
 				}
 			});
 
-			// Required checkbox groups (rendered without a native `required` attribute):
-			// at least one box in the group must be checked.
-			$form.find('.options-group[data-required-group="1"]').each(function() {
+			// Required radio / checkbox groups: at least one option must be chosen.
+			$form.find('.options-group').each(function() {
 				const $group = $(this);
 				if (!$group.is(':visible')) { return; }
-				if ($group.find('input[type="checkbox"]:checked').length === 0) {
-					$group.find('input[type="checkbox"]').addClass('is-invalid');
-					isValid = false;
-				}
+				if (!validateGroup($group)) { isValid = false; }
 			});
 
 			// When "Other" is selected, its free-text input must be filled in.
-			$form.find('.other-wrapper:not(.d-none)').each(function() {
-				const $otherInput = $(this).find('.other-field');
-				if (!$otherInput.val() || $otherInput.val().trim() === '') {
-					$otherInput.addClass('is-invalid');
-					isValid = false;
-				}
-			});
-
-			// Number format/range check (GV-3831/GV-3453): reject non-numeric text
-			// and values below the field's min (defaults to 0 — see the 'number'
-			// render case above), respecting an authored max when present.
-			$form.find('input[type="number"]:not(:disabled)').each(function() {
-				const $field = $(this);
-				if (!$field.is(':visible')) { return; }
-				const value = $field.val();
-				if (value === '' || value === null) { return; }
-				const num = Number(value);
-				const min = $field.attr('min') !== undefined && $field.attr('min') !== '' ? Number($field.attr('min')) : 0;
-				const max = $field.attr('max') !== undefined && $field.attr('max') !== '' ? Number($field.attr('max')) : null;
-				let message = null;
-				if (isNaN(num)) {
-					message = numericText;
-				} else if (num < min) {
-					message = numberMinText;
-				} else if (max !== null && num > max) {
-					message = '{{ $l == "ar" ? "يرجى إدخال رقم لا يتجاوز " : "Please enter a number no greater than " }}' + max;
-				}
-				if (message) {
-					$field.addClass('is-invalid');
-					$field.next('.invalid-feedback').html(message);
-					isValid = false;
-				}
-			});
-
-			// Email format check (GV-3832): require a dotted domain (e.g. rejects
-			// "user@example") without a live DNS lookup. Skips #register-email —
-			// that field is disabled/pre-filled from the already-verified initial
-			// email step and is not one of the dynamic form fields.
-			$form.find('input[type="email"]:not(:disabled)').each(function() {
-				const $field = $(this);
-				if (!$field.is(':visible')) { return; }
-				const value = $field.val();
-				if (!value || value.trim() === '') { return; }
-				if (!/.+@.+\..+/.test(value.trim())) {
-					$field.addClass('is-invalid');
-					$field.next('.invalid-feedback').html(emailFormatText);
-					isValid = false;
-				}
+			$form.find('.other-wrapper').each(function() {
+				if (!validateOtherWrapper($(this))) { isValid = false; }
 			});
 
 			if (!isValid) {
@@ -1101,6 +1370,9 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				}
 			});
 			formData.append('register-email', $('#register-email').val());
+			// Lock only once the payload is built and validation has passed —
+			// a rejected submit above leaves the button usable.
+			lockButton($btn);
 			$.ajax({
 				type: "POST",
 				url: "/{{ $org_slug }}/program/{{ $program_slug }}/register",
@@ -1109,13 +1381,17 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				processData: false,
 				success: function(response) {
 					if (response.status) {
+						// Registration succeeded — stay locked. The stepper moves on
+						// (or we navigate away), and re-enabling would re-open the
+						// duplicate-registration window this guard exists to close.
 						@if($VFEmail)
 							stepper.next();
 						@else
 							window.location.href = response.url;
 						@endif
 					} else {
-						Swal.fire({ 
+						unlockButton($btn);
+						Swal.fire({
 							title: '{{ $l == "ar" ? "خطأ في التسجيل" : "Registration Error" }}',
 							text: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
 							icon: 'error',
@@ -1131,6 +1407,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				},
 				error: function(xhr, status, error) {
 					console.log(error);
+					// The request failed, so nothing was created — let the user retry.
+					unlockButton($btn);
 					if( xhr.status == 422 )
 					{
 						var response = xhr.responseJSON || {};
