@@ -28,7 +28,8 @@ class TeamFormation extends Model
         'project_status',
         'region',
         'winner_status',
-        'img_team'
+        'img_team',
+        'group_id_chat'
     ];
 
     public function cycle()

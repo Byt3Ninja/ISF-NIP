@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Team_member;
+use App\TeamFormation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Namu\WireChat\Enums\Actions;
 use Namu\WireChat\Models\Message;
@@ -109,6 +112,9 @@ class ChatController extends Controller
             ]);
 
             $conversation = Conversation::findOrFail($groupId);
+            if (!$this->callerIsGroupAdmin($conversation)) {
+                return response()->json(['error' => 'Access denied'], 403);
+            }
             $user = User::findOrFail($request->user_id);
 
             // Check if user is already a participant
@@ -146,6 +152,9 @@ class ChatController extends Controller
             ]);
 
             $conversation = Conversation::findOrFail($groupId);
+            if (!$this->callerIsGroupAdmin($conversation)) {
+                return response()->json(['error' => 'Access denied'], 403);
+            }
             $user = User::findOrFail($request->user_id);
             
             $participant = $conversation->participants()
@@ -194,7 +203,10 @@ class ChatController extends Controller
     public function deleteGroup($groupId)
     {
         $conversation = Conversation::findOrFail($groupId);
-        
+        if (!$this->callerIsGroupAdmin($conversation)) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
         $conversation->deleteFor(auth()->user());
 
         return response()->json(['message' => 'Group deleted']);
@@ -242,7 +254,8 @@ class ChatController extends Controller
                 $conversation = Conversation::find($conversationData['conversation']['id']);
             }
 
-            // Create the message
+            // SECURITY: sender identity is ALWAYS taken from auth()->user(); the
+            // client cannot supply/override sendable_id or sendable_type. Do not change.
             $message = Message::create([
                 'conversation_id' => $conversation->id,
                 'sendable_id' => $user->id,
@@ -254,22 +267,15 @@ class ChatController extends Controller
             // Load the message with sender information
             $message->load('sendable');
 
-            // Broadcast the message to conversation participants (real-time feature)
+            // Broadcast the message synchronously so real-time works without a queue worker.
+            // App\Events\MessageCreated is ShouldBroadcastNow (fires immediately to Pusher)
+            // on PrivateChannel('conversation.'.$id) with the full message payload.
             try {
-                Log::info('Attempting to dispatch BroadcastMessage job for message: ' . $message->id);
-                \Namu\WireChat\Jobs\BroadcastMessage::dispatch($message);
-                Log::info('BroadcastMessage job dispatched successfully for message: ' . $message->id);
+                broadcast(new \App\Events\MessageCreated($message));
+                Log::info('MessageCreated broadcast (sync) for message: ' . $message->id);
             } catch (\Exception $e) {
-                // Log broadcasting error but don't fail the message sending
+                // Never fail the send if broadcasting fails.
                 Log::error('Failed to broadcast message: ' . $e->getMessage());
-            }
-
-            // Fire the event for real-time listeners
-            try {
-                event(new \Namu\WireChat\Events\MessageCreated($message));
-                Log::info('MessageCreated event fired for message: ' . $message->id);
-            } catch (\Exception $e) {
-                Log::error('Failed to fire MessageCreated event: ' . $e->getMessage());
             }
 
             return response()->json([
@@ -290,8 +296,13 @@ class ChatController extends Controller
     {
         $message = Message::findOrFail($messageId);
 
+        // Authorization: only the original sender may delete their message.
+        if ((int) $message->sendable_id !== (int) auth()->id()
+            || $message->sendable_type !== get_class(auth()->user())) {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
         try {
-            // Fire the event for real-time listeners before deleting
             event(new \Namu\WireChat\Events\MessageDeleted($message));
             Log::info('MessageDeleted event fired for message: ' . $message->id);
         } catch (\Exception $e) {
@@ -303,42 +314,210 @@ class ChatController extends Controller
         return response()->json(['message' => 'Message deleted']);
     }
 
+    /**
+     * True if the current user is an admin-role participant of the conversation.
+     */
+    private function callerIsGroupAdmin(Conversation $conversation): bool
+    {
+        return $conversation->participants()
+            ->where('participantable_id', auth()->id())
+            ->where('participantable_type', get_class(auth()->user()))
+            ->where('role', 'admin')
+            ->exists();
+    }
+
+    /**
+     * Single source of truth for the current user's hackathon-team context.
+     *
+     * Returns, unioned across ALL teams the user is an ACCEPTED member of:
+     *  - teamFormationIds: ids of those teams
+     *  - teammateIds:      accepted co-members' user ids, excluding self
+     *  - teamFormations:   the TeamFormation models (for group get-or-create)
+     *
+     * Computed in 3 queries max, no N+1: id-only plucks + one whereIn hydrate.
+     */
+    private function currentUserTeamContext(): array
+    {
+        $currentUserId = auth()->id();
+
+        // Query 1: teams where I am an accepted member (ids only).
+        $teamFormationIds = Team_member::query()
+            ->where('user_id', $currentUserId)
+            ->where('acceptInvition', 'accepted')
+            ->pluck('team_formation_id')
+            ->unique()
+            ->values();
+
+        if ($teamFormationIds->isEmpty()) {
+            return [
+                'teamFormationIds' => collect(),
+                'teammateIds'      => collect(),
+                'teamFormations'   => collect(),
+            ];
+        }
+
+        // Query 2: accepted co-members across those teams (user ids only), minus self.
+        $teammateIds = Team_member::query()
+            ->whereIn('team_formation_id', $teamFormationIds)
+            ->where('acceptInvition', 'accepted')
+            ->where('user_id', '!=', $currentUserId)
+            ->whereNotNull('user_id')
+            ->pluck('user_id')
+            ->unique()
+            ->values();
+
+        // Query 3: hydrate the team rows once (for group get-or-create).
+        $teamFormations = TeamFormation::query()
+            ->whereIn('id', $teamFormationIds)
+            ->get(['id', 'name', 'group_id_chat']);
+
+        return [
+            'teamFormationIds' => $teamFormationIds,
+            'teammateIds'      => $teammateIds,
+            'teamFormations'   => $teamFormations,
+        ];
+    }
+
+    /**
+     * Get-or-create one WireChat group conversation per team the current user
+     * belongs to that has >= 2 accepted members. Persists the conversation id on
+     * team_formations.group_id_chat. Ensures all accepted teammates are participants.
+     *
+     * Batched: candidate conversations loaded in one whereIn; participants eager
+     * loaded; participant inserts batched. Creation guarded by a transaction +
+     * re-check to avoid duplicate groups under concurrent access.
+     */
+    private function ensureTeamGroups(): \Illuminate\Support\Collection
+    {
+        $currentUserId = auth()->id();
+        $context = $this->currentUserTeamContext();
+        /** @var \Illuminate\Support\Collection $teams */
+        $teams = $context['teamFormations'];
+
+        if ($teams->isEmpty()) {
+            return collect();
+        }
+
+        // Accepted members per team (one query, grouped) — used for the >=2 gate
+        // and to build participant sets without a query per team.
+        $membersByTeam = Team_member::query()
+            ->whereIn('team_formation_id', $teams->pluck('id'))
+            ->where('acceptInvition', 'accepted')
+            ->whereNotNull('user_id')
+            ->get(['team_formation_id', 'user_id'])
+            ->groupBy('team_formation_id')
+            ->map(fn ($rows) => $rows->pluck('user_id')->unique()->values());
+
+        // Batch-load existing conversations by their stored group ids (one query).
+        $existingIds = $teams->pluck('group_id_chat')->filter()->values();
+        $existingConversations = $existingIds->isNotEmpty()
+            ? Conversation::whereIn('id', $existingIds)->with('participants')->get()->keyBy('id')
+            : collect();
+
+        $result = collect();
+
+        foreach ($teams as $team) {
+            $memberIds = $membersByTeam->get($team->id, collect());
+            if ($memberIds->count() < 2) {
+                continue; // no group until a second member joins
+            }
+
+            $conversation = $team->group_id_chat
+                ? $existingConversations->get($team->group_id_chat)
+                : null;
+
+            // Create if missing or dangling, guarded against races.
+            if (!$conversation) {
+                $conversation = DB::transaction(function () use ($team, $memberIds) {
+                    // Re-read the team row under lock to re-check group_id_chat.
+                    $fresh = TeamFormation::whereKey($team->id)->lockForUpdate()->first(['id', 'name', 'group_id_chat']);
+                    if ($fresh->group_id_chat) {
+                        $existing = Conversation::with('participants')->find($fresh->group_id_chat);
+                        if ($existing) {
+                            return $existing;
+                        }
+                    }
+
+                    $conv = Conversation::create([
+                        'type' => 'group',
+                        'name' => $fresh->name ?: ('Team #' . $fresh->id),
+                    ]);
+
+                    TeamFormation::whereKey($fresh->id)->update(['group_id_chat' => $conv->id]);
+
+                    return $conv->load('participants');
+                });
+            }
+
+            // Ensure every accepted member is a participant (no query per member).
+            $existingParticipantIds = $conversation->participants
+                ->where('participantable_type', 'App\User')
+                ->pluck('participantable_id')
+                ->all();
+
+            $missing = $memberIds->reject(fn ($id) => in_array($id, $existingParticipantIds))->values();
+
+            if ($missing->isNotEmpty()) {
+                $rows = $missing->map(fn ($id) => [
+                    'participantable_id'   => $id,
+                    'participantable_type' => 'App\User',
+                    'role'                 => $id === $currentUserId ? 'admin' : 'participant',
+                ])->all();
+
+                $conversation->participants()->createMany($rows); // single batched insert via Eloquent
+                $conversation->load('participants');               // refresh once
+            }
+
+            $result->push($conversation);
+        }
+
+        return $result;
+    }
+
     // Get list of users that can be chatted with
     public function getUsers(Request $request)
     {
         try {
-            $currentUserId = auth()->id();
-            $limit = $request->get('limit', 50);
+            $context     = $this->currentUserTeamContext();
+            $teammateIds = $context['teammateIds'];
+            $hasTeam     = $context['teamFormationIds']->isNotEmpty();
 
-            // Get users that can be chatted with (exclude current user and optionally blocked users)
-            $users = User::where('id', '!=', $currentUserId)
+            if ($teammateIds->isEmpty()) {
+                return response()->json(['users' => [], 'total' => 0, 'has_team' => $hasTeam]);
+            }
+
+            $users = User::whereIn('id', $teammateIds)
                 ->select('id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'email', 'img_url')
-                ->limit($limit)
                 ->get()
-                ->map(function($user) {
-                    // Create a combined name field
-                    $user->name = trim(($user->first_name_en ?: $user->first_name_ar) . ' ' . ($user->last_name_en ?: $user->last_name_ar)) ?: $user->email;
+                ->map(function ($user) {
+                    $user->name = trim(($user->first_name_en ?: $user->first_name_ar) . ' ' .
+                        ($user->last_name_en ?: $user->last_name_ar)) ?: $user->email;
                     return $user;
                 });
 
             return response()->json([
-                'users' => $users,
-                'total' => $users->count()
+                'users'    => $users,
+                'total'    => $users->count(),
+                'has_team' => $hasTeam,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error fetching users: ' . $e->getMessage(),
-                'users' => []
-            ], 500);
+            return response()->json(['error' => 'Error fetching users: ' . $e->getMessage(), 'users' => []], 500);
         }
     }
 
     public function searchUser(Request $request)
     {
         try {
-            $q = $request->get('q', '');
-            $currentUserId = auth()->id();
-            $query = User::where('id', '!=', $currentUserId);
+            $q           = $request->get('q', '');
+            $context     = $this->currentUserTeamContext();
+            $teammateIds = $context['teammateIds'];
+            $hasTeam     = $context['teamFormationIds']->isNotEmpty();
+
+            if ($teammateIds->isEmpty()) {
+                return response()->json(['users' => [], 'total' => 0, 'has_team' => $hasTeam]);
+            }
+
+            $query = User::whereIn('id', $teammateIds);
             if ($q !== '') {
                 $query->where(function ($builder) use ($q) {
                     $builder->where('first_name_en', 'like', '%' . $q . '%')
@@ -348,22 +527,18 @@ class ChatController extends Controller
                         ->orWhere('email', 'like', '%' . $q . '%');
                 });
             }
+
             $users = $query->select('id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'email', 'img_url')
-                ->limit(50)
                 ->get()
                 ->map(function ($user) {
-                    $user->name = trim(($user->first_name_en ?: $user->first_name_ar) . ' ' . ($user->last_name_en ?: $user->last_name_ar)) ?: $user->email;
+                    $user->name = trim(($user->first_name_en ?: $user->first_name_ar) . ' ' .
+                        ($user->last_name_en ?: $user->last_name_ar)) ?: $user->email;
                     return $user;
                 });
-            return response()->json([
-                'users' => $users,
-                'total' => $users->count()
-            ]);
+
+            return response()->json(['users' => $users, 'total' => $users->count(), 'has_team' => $hasTeam]);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error searching users: ' . $e->getMessage(),
-                'users' => []
-            ], 500);
+            return response()->json(['error' => 'Error searching users: ' . $e->getMessage(), 'users' => []], 500);
         }
     }
 
@@ -377,13 +552,11 @@ class ChatController extends Controller
                 ], 401);
             }
 
-            // Get groups using the Chatable trait method
-            $user = auth()->user();
-            $groups = $user->groups ?? collect();
+            $teamGroups = $this->ensureTeamGroups();
 
             return response()->json([
-                'groups' => $groups,
-                'user_id' => auth()->id()
+                'groups'  => $teamGroups->values(),
+                'user_id' => auth()->id(),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -485,6 +658,15 @@ class ChatController extends Controller
                 return response()->json([
                     'error' => 'Cannot create conversation with yourself'
                 ], 400);
+            }
+
+            // SECURITY (GV-3813): private DMs are restricted to accepted teammates.
+            // Prevents crafting a DM with an arbitrary platform user by posting a raw user_id.
+            $teammateIds = $this->currentUserTeamContext()['teammateIds'];
+            if (!$teammateIds->contains((int) $otherUserId)) {
+                return response()->json([
+                    'error' => 'You can only chat with your team members'
+                ], 403);
             }
 
             if ($type === 'private') {
