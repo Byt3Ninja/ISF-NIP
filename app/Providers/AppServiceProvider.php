@@ -128,6 +128,19 @@ class AppServiceProvider extends ServiceProvider
 
                     if( $view->getName() === 'admin.clients.profile.editProfile' ) { $profile_completed = true; $company_completed = true; }
                     if( $view->getName() === 'admin.clients.company' ) { $profile_completed = true; $company_completed = true; }
+
+                    if( $user->company )
+                    {
+                        $program = $user->company->cycledata;
+                        if( $program )
+                        {
+                            if( $program->allow_non_company == 1 )
+                            {
+                                $profile_completed = true;
+                                $company_completed = true;
+                            }
+                        }
+                    }
                 }
             }
             $platformName = config('app.name');
