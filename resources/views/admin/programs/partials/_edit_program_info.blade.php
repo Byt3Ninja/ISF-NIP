@@ -138,7 +138,7 @@
     </div>
   </div>
 
-  <!-- Program Cover -->
+  {{--  <!-- Program Cover -->
   <div class="col-md-6">
     <div class="form-group mb-4">
       <label class="form-label fs-6 fw-semibold">
@@ -153,7 +153,7 @@
       <div class="invalid-feedback"></div>
       <small class="text-muted">{{ $l == 'en' ? 'Accepted formats: PNG, JPG, JPEG. Max size: 5MB' : 'الصيغ المقبولة: PNG, JPG, JPEG. الحد الأقصى: 5 ميجا' }}</small>
     </div>
-  </div>
+  </div>  --}}
 
   <!-- Program Step Type -->
   <div class="col-md-6">
