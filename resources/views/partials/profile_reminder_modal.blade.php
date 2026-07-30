@@ -73,6 +73,11 @@
     setInterval(function() {
       showProfileReminder();
     }, 300000);
+
+    $('#profileReminderModal').on('hidden.bs.modal', function () {
+      $('.modal-backdrop').remove();
+      $('body').removeClass('modal-open');
+    });
   </script>
 @endif
 @endpush
