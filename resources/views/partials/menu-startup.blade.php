@@ -29,7 +29,7 @@ $navigationIcons = [
   // Sidebar avatar
   $imageSrc =
     $_user->organization?->img_url
-      ? $_user->organization->imageUrl
+      ? route('organizations.logo', $_user->organization?->img_url ?? '')
       : ($setting->Logo
         ? "/images/logo/$setting->Logo"
         : "/images/background/logo.png");
