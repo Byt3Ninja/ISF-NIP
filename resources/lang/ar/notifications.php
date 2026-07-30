@@ -25,6 +25,16 @@ return [
         'whatsapp'  => 'مرحباً، :name! تم إعداد حسابك بنجاح.',
     ],
 
+    'organization_manager_welcome' => [
+        'database'  => 'مرحباً بك! تم إنشاء حسابك بصفتك مديراً للمنظمة :organization_name.',
+        'broadcast' => 'مرحباً بك! تم إنشاء حسابك بصفتك مديراً للمنظمة :organization_name.',
+    ],
+
+    'organization_assigned' => [
+        'database'  => 'لقد تم تعيينك في :organization_name.',
+        'broadcast' => 'لقد تم تعيينك في :organization_name.',
+    ],
+
     'mentorship_request' => [
         'whatsapp'  => 'لديك طلب إرشاد جديد من :startup.',
         'broadcast' => 'تم استلام طلب إرشاد جديد من :startup.',

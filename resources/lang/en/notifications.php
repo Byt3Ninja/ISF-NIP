@@ -25,6 +25,16 @@ return [
         'whatsapp'  => 'Welcome, :name! Your account has been set up successfully.',
     ],
 
+    'organization_manager_welcome' => [
+        'database'  => 'Welcome! Your account has been created as Organization Manager of :organization_name.',
+        'broadcast' => 'Welcome! Your account has been created as Organization Manager of :organization_name.',
+    ],
+
+    'organization_assigned' => [
+        'database'  => 'You have been assigned to :organization_name.',
+        'broadcast' => 'You have been assigned to :organization_name.',
+    ],
+
     'mentorship_request' => [
         'whatsapp'  => 'You have a new mentorship request from :startup.',
         'broadcast' => 'New mentorship request received from :startup.',
