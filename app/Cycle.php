@@ -54,8 +54,8 @@ class Cycle extends Model
             return app(\App\Services\FileManagerService::class)->getUrl($this->img_url, 'public_uploads');
         }
 
-        if ($this->organization && $this->organization->imageUrl) {
-            return $this->organization->imageUrl;
+        if ($this->organization && $this->organization->img_url) {
+            return route('organizations.logo', $this->organization->img_url ?? '');
         }
 
         return asset('/images/background/logo.png');
