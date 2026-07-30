@@ -90,35 +90,6 @@
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="/vuexy/assets/js/front-config.js"></script>
 </head>
- 
-@php
-$color_palette = ['#fff', '#ebebed'];
-$sections = [
-  ['id' => 'programs', 'label' => __('admin.Programs'), 'visible' => $landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0],
-  ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
-  ['id' => 'achievements', 'label' => __('admin.Achievements & Impact'), 'visible' => $landingPage->achievements_enabled && !empty($landingPage->metrics)],
-  ['id' => 'media', 'label' => __('admin.Media & Recognition'), 'visible' => $landingPage->media_enabled && !empty($articlesWithUrls)],
-  ['id' => 'partners', 'label' => __('admin.Partners'), 'visible' => $landingPage->partners_enabled && !empty($partnersWithUrls)],
-];
-
-if (!empty($customSections)) {
-  foreach ($customSections as $customSection) {
-    $sections[] = [
-      'id' => 'custom-' . $customSection->id,
-      'label' => $customSection->title,
-      'visible' => !empty($customSection->content),
-    ];
-  }
-}
-$sections = collect($sections)->filter(function ($section) {
-  return $section['visible'];
-})->values()->toArray();
-foreach ($sections as $index => $section) {
-  $sections[$index]['color'] = $color_palette[$index % count($color_palette)];
-}
-
-$colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
-@endphp
 
 <body>
   <script src="/vuexy/assets/vendor/js/dropdown-hover.js"></script>
@@ -316,17 +287,7 @@ $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark
                   {{ __('admin.explore_programs') }}
                 </a>
               @endif
-              @php
-$socialLinks = [
-  'x' => $organization->twitter_handle,
-  'linkedin' => $organization->linkedin_company_url,
-  'facebook' => $organization->facebook_page_url,
-  'instagram' => $organization->instagram_profile_url,
-  'tiktok' => $organization->tiktok_url,
-  'youtube' => $organization->youtube_channel_url
-]
-              @endphp
-              @if(array_filter($socialLinks))
+              @if( count($socialLinks) > 0 )
                 <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
                   <span class="text-dark me-2 d-block">{{ __('admin.follow_us') }}</span>
                   <div class="d-flex align-items-center gap-2">
@@ -496,56 +457,10 @@ $socialLinks = [
                           </div>
                         @endif
 
-                        {{-- Application status + CTA --}}
-                        @php
-      $firstFormStep = $program->steps()->where('stype', 1)->orderBy('arr', 'asc')->first();
-
-      if ($firstFormStep) {
-        $stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
-        $stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
-
-        $now = now();
-
-        $isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
-        $isUpcoming = $stepStart !== null && $now->lt($stepStart);
-        $isClosed = $stepEnd !== null && $now->gt($stepEnd);
-      } else {
-        $isOpen = false;
-        $isUpcoming = false;
-        $isClosed = true;
-        $stepStart = null;
-        $stepEnd = null;
-      }
-
-      if ($isOpen) {
-        $statusClass = 'bg-label-success';
-        $dotColor = 'success';
-        $statusIcon = 'hourglass';
-        $statusLabel = $l == 'ar'
-          ? "مفتوح حتى " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . "."
-          : "Open Till " . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . ".";
-        $btnText = $l == 'ar' ? 'تقدم الآن.' : 'Apply Now.';
-      } elseif ($isUpcoming) {
-        $statusClass = 'bg-label-warning';
-        $dotColor = 'warning';
-        $statusIcon = 'hourglass-empty';
-        $statusLabel = $l == 'ar'
-          ? "سيفتح في " . ($stepStart ? $stepStart->format('Y-m-d') : '') . "."
-          : "Will open in " . ($stepStart ? $stepStart->format('Y-m-d') : '') . ".";
-        $btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications Open Soon';
-      } else {
-        $statusClass = 'bg-label-danger';
-        $dotColor = 'danger';
-        $statusIcon = 'lock';
-        $statusLabel = $l == 'ar' ? "مغلق." : "Closed.";
-        $btnText = $l == 'ar' ? 'التقديم مغلق.' : 'Applications Closed.';
-      }
-                        @endphp
-
                         <div class="d-flex align-items-center gap-2 mb-6">
                           <div class="avatar">
                             <div class="avatar-initial rounded">
-                              <i class="ti ti-{{ $statusIcon }} text-dark"></i>
+                              <i class="ti ti-{{ $program->statusIcon }} text-dark"></i>
                             </div>
                           </div>
                           <div>
@@ -553,25 +468,25 @@ $socialLinks = [
                               {{ __('admin.application_status') }}
                             </div>
                             <div class="fw-semibold">
-                              {{ $statusLabel }}
+                              {{ $program->statusLabel }}
                             </div>
                           </div>
                         </div>
 
-                        @if($isOpen && $program->public_slug)
+                        @if($program->isOpen && $program->public_slug)
                           <a href="/{{ $organization->short_code ?? $organization->slug }}/program/{{ $program->public_slug }}"
                             class="btn btn-primary w-100 fw-semibold"
                             style="border-radius: 10px; padding: 10px;">
-                            {{ $btnText }}
+                            {{ $program->btnText }}
                             <i class="ti ti-arrow-narrow-{{ $isRtl ? 'left' : 'right' }} ms-2"></i>
                           </a>
-                        @elseif($isUpcoming)
+                        @elseif($program->isUpcoming)
                           <button class="btn btn-label-warning w-100 fw-semibold" disabled>
-                            {{ $btnText }}
+                            {{ $program->btnText }}
                           </button>
                         @else
                           <button class="btn btn-label-secondary w-100 fw-semibold" disabled>
-                            {{ $btnText }}
+                            {{ $program->btnText }}
                           </button>
                         @endif
                       </div>
@@ -980,10 +895,6 @@ $socialLinks = [
           @endif
         </div>
         <div class="col-lg-6 d-flex">
-          @php
-            $mapQuery = $organization->address ?: $organization->name_en;
-            $mapEmbedUrl = 'https://www.google.com/maps?q=' . urlencode($mapQuery) . '&output=embed&z=14';
-          @endphp
           @if($organization->google_map_url || $organization->address)
             <div class="card border shadow-none w-100 overflow-hidden">
               <iframe
