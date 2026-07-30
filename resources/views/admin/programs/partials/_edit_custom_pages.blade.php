@@ -185,9 +185,13 @@
             });
 
             // Initialize Summernote editors for custom pages with image upload
+            // Render the Link/Picture/Video dialogs in <body> instead of inside the
+            // editor. Nested in the Bootstrap 5 modal they inherit the modal's
+            // stacking context, so their z-index/backdrop can never sit above it.
             $('#custom-page-content').summernote({
                 placeholder: '{{ $l == 'ar' ? 'أدخل محتوى الصفحة' : 'Enter page content' }}',
                 height: 200,
+                dialogsInBody: true,
                 callbacks: {
                     onImageUpload: function(files) {
                         uploadSummernoteImage(files[0], $('#custom-page-content'));
@@ -197,11 +201,65 @@
             $('#edit-custom-page-content').summernote({
                 placeholder: '{{ $l == 'ar' ? 'أدخل محتوى الصفحة' : 'Enter page content' }}',
                 height: 200,
+                dialogsInBody: true,
                 callbacks: {
                     onImageUpload: function(files) {
                         uploadSummernoteImage(files[0], $('#edit-custom-page-content'));
                     }
                 }
+            });
+
+            /**
+             * Esc while a Link/Picture/Video dialog is open must close only that
+             * dialog. Summernote binds Esc on the dialog element itself, so it fires
+             * only when focus is inside it, and it does not stopPropagation - so the
+             * key otherwise reaches Bootstrap's document handler and closes the
+             * surrounding Create/Edit Page modal. Handle it in the capture phase,
+             * ahead of Bootstrap, and drive the dismissal explicitly.
+             */
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') {
+                    return;
+                }
+
+                var $dialog = $('.note-modal.open').last();
+                if (!$dialog.length) {
+                    return;
+                }
+
+                // Stop Bootstrap from closing the page modal underneath...
+                e.stopPropagation();
+                // ...and close the Summernote dialog ourselves. Summernote binds Esc on
+                // the dialog element, which only fires while focus is inside it, so we
+                // cannot rely on that listener here.
+                $dialog.find('.note-modal-header .close').trigger('click');
+            }, true);
+
+            /**
+             * Summernote only binds dismissal to its .close button - it has no
+             * click-outside-to-dismiss. Add it, and stop dialog clicks from reaching the
+             * Bootstrap 5 modal's click-outside handler, which would otherwise dismiss
+             * the Create/Edit Page modal underneath.
+             *
+             * This must bind on the dialog element itself, not delegated on document:
+             * delegated handlers run only after the event has bubbled past the page
+             * modal, far too late to stop it, while a capture-phase handler would run
+             * before Summernote's own delegated .close handler and break the X button.
+             * Dialogs are built lazily, so bind each one as it is first shown.
+             */
+            $('#custom-page-content, #edit-custom-page-content').on('summernote.dialog.shown', function() {
+                $('.note-modal').not('[data-outside-dismiss-bound]').each(function() {
+                    $(this)
+                        .attr('data-outside-dismiss-bound', '1')
+                        .on('click', function(e) {
+                            e.stopPropagation();
+
+                            // Only a click on the dialog shell counts as "outside".
+                            if (e.target === this) {
+                                $(this).find('.note-modal-header .close').trigger('click');
+                            }
+                        });
+                });
             });
 
             // Image upload handler function
