@@ -155,6 +155,7 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
             ->subject( __('email.mentor_notify_email.subject') . ' ' . $startupName )
             ->view('emails.mentorship_notify_mentor_email', array_merge([
                 'party'             => $notifiable,
+                'other_party'       => $mentorship_session?->user,
                 'startupName'       => $startupName,
                 'sessionType'       => $sessionType,
                 'sessionNotes'      => $mentorship_session?->comment ?? '-',
