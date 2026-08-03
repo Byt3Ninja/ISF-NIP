@@ -136,7 +136,7 @@
 													</div>
 
 													<div class="stat-item d-flex align-items-center justify-content-between">
-														<span class="stat-label opacity-90">{{ __('cycles.Active Cycle') }}</span>
+														<span class="stat-label opacity-90">{{ __('admin.Prorgam_name') }}</span>
 														<span class="stat-value fw-bold line-clamp-1" style="max-width: 300px" title="{{ $cstep->cycle->title }}">
 															{{ Str::limit($cstep->cycle->title, 100) }}
 														</span>
