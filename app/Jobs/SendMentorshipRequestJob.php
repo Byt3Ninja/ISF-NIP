@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Carbon\Carbon;
 use App\Events\MentorshipSessionUpdated;
 use App\Events\RequestMentorship;
 use App\Events\WebMessage;
@@ -85,6 +86,18 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $data['company_name'] = $startup->company->name_en;
                 // $mentor->notify(new MentorshipRequestNotification($data));
                 $startupFullName_user = $startup->name;
+
+                $session_date = strtotime($session->zoom_date);
+                $start = Carbon::parse($session->zoom_date);
+                $end = $start->copy()->addMinutes($session->period);
+                $sessionDate = date('Y-m-d', $session_date);
+                $sessionTime = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp);
+                if( $locale == 'ar' )
+                {
+                    $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
+                    $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
+                }
+
                 $mentorMessage = [
                     __("messages.mentorship_session_subject", [], $locale),
                     __("messages.dear", ['name' => $mentorFullName], $locale),
@@ -93,7 +106,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                         : __("messages.denied_message", ['other_party' => $startupFullName_user], $locale),
                     "/dashboard",
                     $this->stat == 'Yes'
-                        ? __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $startupFullName_user])
+                        ? __("messages.mentorship_session_notification_message", ['name' => $startupFullName_user, 'session_date' => $sessionDate, 'session_time' => $sessionTime], $locale)
                         : __("messages.mentorship_session_action", ['action' => __('messages.Rejected'), 'name' => $startupFullName_user]),
                 ];
                 $mentor->notify(
@@ -110,7 +123,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                     __("messages.dear", ['name' => $startupFullName_user], $locale),
                     __("messages.approved_message", ['other_party' => $mentorFullName], $locale),
                     "/dashboard",
-                    __("messages.mentorship_session_action", ['action' => __('messages.Approved'), 'name' => $mentorFullName]),
+                    __("messages.mentorship_session_notification_message", ['name' => $mentorFullName, 'session_date' => $sessionDate, 'session_time' => $sessionTime], $locale),
                 ];
                 $startup->notify(
                     new StartupNotifyMentorshipNotification(
