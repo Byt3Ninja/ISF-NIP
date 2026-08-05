@@ -4669,7 +4669,10 @@ class ClientCompanyController extends Controller
                     })->with(['assignees' => function ($q) use ($company) {
                         $q->where('company_id', $company->id);
                     }, 'creator', 'feedbacks' => function ($q) use ($company) {
-                        $q->where('company_id', $company->id)->orderBy('created_at', 'desc');
+                        $q->where(function($query) use ($company) {
+                            $query->where('company_id', $company->id)
+                                  ->orWhereNull('company_id');
+                        })->orderBy('created_at', 'desc');
                     }, 'feedbacks.user'])->get();
                 $MentorTasks = [];
                 foreach ($startup_ProgramTasks as $ProgramTask) {
