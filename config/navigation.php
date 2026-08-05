@@ -237,7 +237,7 @@ return function () {
       ],
     ],
   ];
-  if (app()->environment(['local', 'dev', 'test'])) {
+  if (app()->environment(['local', 'dev', 'test', 'beta'])) {
         $menu['services']['children'][] = [
             'title' => 'timesheets',
             'route' => 'TimeSheet.index',
