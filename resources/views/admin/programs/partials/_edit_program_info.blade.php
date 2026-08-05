@@ -74,6 +74,7 @@
         placeholder="{{ $l == 'en' ? 'Program Title in Arabic' : 'عنوان البرنامج باللغة العربية' }}"
         oninput="this.value = this.value.trimStart()" 
         value="{{ isset($ccycle) ? $ccycle->title_ar : '' }}"
+        maxlength="50"
       />
       <div class="invalid-feedback"></div>
     </div>
@@ -224,6 +225,7 @@
         name="description_ar" 
         placeholder="{{ $l == 'en' ? 'Description in Arabic' : 'وصف البرنامج باللغة العربية' }}"
         oninput="this.value = this.value.trimStart()" 
+        maxlength="250"
         rows="3">{{ isset($ccycle) ? $ccycle->description_ar : '' }}</textarea>
       <div class="invalid-feedback"></div>
     </div>

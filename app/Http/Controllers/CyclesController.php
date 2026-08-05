@@ -366,6 +366,8 @@ class CyclesController extends Controller
                 'public_slug.unique' => __('cycles.Public URL already exist'),
                 'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
+                'title_ar.required' => app()->getLocale() == 'ar' ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
+                'description_ar.required' => app()->getLocale() == 'ar' ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
             ]);
                 
             $cycle = Cycle::find($id);
@@ -820,6 +822,8 @@ class CyclesController extends Controller
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
                 'offline_location_address.max' => __('cycles.offline_location_address_max'),
                 'offline_location_map.max' => __('cycles.offline_location_map_max'),
+                'title_ar.required' => app()->getLocale() == 'ar' ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
+                'description_ar.required' => app()->getLocale() == 'ar' ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
             ]);
             
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();

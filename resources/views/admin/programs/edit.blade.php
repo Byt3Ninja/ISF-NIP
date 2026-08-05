@@ -526,7 +526,9 @@
                         $('#start').val(response.start ?? '');
                         $('#end').val(response.end ?? '');
                         $('#title').val(response.title ?? '');
+                        $('#title_ar').val(response.title_ar ?? '');
                         $('#description').val(response.description ?? '');
+                        $('#description_ar').val(response.description_ar ?? '');
                         $('#cycleid').val(cycleId);
                         $('#type').val(1);
                         $('#organization').val(response.organization_id ?? '').trigger('change');
@@ -687,6 +689,18 @@
                     isValid = false;
                 }
 
+                // Validate title_ar
+                const title_ar = $('#title_ar');
+                if (!title_ar.val().trim()) {
+                    title_ar.addClass('is-invalid');
+                    title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Program Title in Arabic is required." : "عنوان البرنامج باللغة العربية مطلوب." }}');
+                    isValid = false;
+                } else if (title_ar.val().length > 50) {
+                    title_ar.addClass('is-invalid');
+                    title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed 50 characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز 50 حرف." }}');
+                    isValid = false;
+                }
+
                 // Validate date range
                 const dateRange = $('#date-range-picker');
                 if (!dateRange.val()) {
@@ -704,6 +718,18 @@
                 } else if (description.val().trim().length < 10) {
                     description.addClass('is-invalid');
                     description.next('.invalid-feedback').text('{{ $l == "en" ? "Description must be at least 10 characters" : "الوصف يجب أن يكون 10 أحرف على الأقل" }}');
+                    isValid = false;
+                }
+
+                // Validate description_ar
+                const description_ar = $('#description_ar');
+                if (!description_ar.val().trim()) {
+                    description_ar.addClass('is-invalid');
+                    description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic is required." : "وصف البرنامج باللغة العربية مطلوب." }}');
+                    isValid = false;
+                } else if (description_ar.val().length > 250) {
+                    description_ar.addClass('is-invalid');
+                    description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic cannot exceed 250 characters." : "الوصف باللغة العربية لا يمكن أن يتجاوز 250 حرف." }}');
                     isValid = false;
                 }
 
