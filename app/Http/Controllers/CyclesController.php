@@ -340,7 +340,9 @@ class CyclesController extends Controller
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => ['required', 'string', 'max:250', Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
+                'title_ar' => 'required|string|max:50',
                 'description' => 'required|string|max:100',
+                'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
                 // 'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
                 'public_slug' => [
@@ -403,7 +405,9 @@ class CyclesController extends Controller
             $cycle->public_slug = $public_slug;
             $cycle->organization_id = $request->organization_id2;
             $cycle->title = $request->title;
+            $cycle->title_ar = $request->title_ar;
             $cycle->description = $request->description;
+            $cycle->description_ar = $request->description_ar;
             $cycle->start = Carbon::parse($request->start);
             $cycle->end = Carbon::parse($request->end);
             $cycle->private = $private;
@@ -793,7 +797,9 @@ class CyclesController extends Controller
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
+                'title_ar' => 'required|string|max:50',
                 'description' => 'required|string|max:100',
+                'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
                 'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9_-]+$/',
                 'start' => 'required|date|before:end',
@@ -859,7 +865,9 @@ class CyclesController extends Controller
                 $cycle->organization_id = $request->organization_id2;
                 $cycle->type = $request->program_type;
                 $cycle->title = $request->title;
+                $cycle->title_ar = $request->title_ar;
                 $cycle->description = $request->description;
+                $cycle->description_ar = $request->description_ar;
                 $cycle->start = Carbon::parse($request->start);
                 $cycle->end = Carbon::parse($request->end);
                 $cycle->private = $private;
