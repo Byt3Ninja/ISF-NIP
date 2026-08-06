@@ -4966,6 +4966,26 @@ class ClientCompanyController extends Controller
                 ], 403);
             }
 
+            if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+                $orgIds = $user->organizations_ids;
+                $cycles = \App\Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
+                $hasAccess = false;
+                foreach ($cycles as $cycle) {
+                    foreach ($cycle->companies as $company) {
+                        if ($company->id == $id) {
+                            $hasAccess = true;
+                            break 2;
+                        }
+                    }
+                }
+                if (!$hasAccess) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('admin.NoHavePermission'),
+                    ], 403);
+                }
+            }
+
             // ----------------------------------------------------------
             // 2. Resolve valuation date
             // ----------------------------------------------------------
@@ -5093,6 +5113,26 @@ class ClientCompanyController extends Controller
                     'success' => false,
                     'message' => __('admin.NoHavePermission'),
                 ], 403);
+            }
+
+            if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+                $orgIds = $user->organizations_ids;
+                $cycles = \App\Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
+                $hasAccess = false;
+                foreach ($cycles as $cycle) {
+                    foreach ($cycle->companies as $company) {
+                        if ($company->id == $id) {
+                            $hasAccess = true;
+                            break 2;
+                        }
+                    }
+                }
+                if (!$hasAccess) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('admin.NoHavePermission'),
+                    ], 403);
+                }
             }
 
             // ----------------------------------------------------------

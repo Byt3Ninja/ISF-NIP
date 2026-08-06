@@ -3701,7 +3701,7 @@ return [
 	'service_category' => 'Service Category',
 	'financial_projection_saved_successfully' => 'Financial Projection saved successfully',
 	'change_currency_warning' => 'Once the currency is changed, it cannot be changed again.',
-	'financial_data_saved' => 'Financial data saved successfully.',
+	'financial_data_saved' => 'Financial data edited successfully.',
 	'field_is_required' => 'This field is required.',
 	'error_loading_financial_data' => 'Error loading financial data. Please try again later.',
 	'unepxected_error' => 'An unexpected error occurred. Please try again later.',

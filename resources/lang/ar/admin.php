@@ -3751,7 +3751,7 @@ return [
 	'serviceProvider_desc' => 'قدّم خدماتك للشركات الناشئة',
 	'error_loading_financial_data' => 'حدث خطأ أثناء تحميل البيانات المالية. يرجى المحاولة مرة أخرى لاحقًا.',
 	'change_currency_warning' => 'بمجرد تغيير العملة، لا يمكن تعديلها مرة أخرى. ',
-	'financial_data_saved' => 'تم حفظ البيانات المالية بنجاح',
+	'financial_data_saved' => 'تم تعديل البيانات المالية بنجاح',
 	'field_is_required' => 'هذا الحقل مطلوب',
 	'financial_projection_saved_successfully' => 'تم حفظ التوقعات المالية بنجاح',
 	'metric_number_validation' => 'الرجاء إدخال رقم صحيح (مثلاً: 100، 100.5، 100+، مليون، 75%)',
