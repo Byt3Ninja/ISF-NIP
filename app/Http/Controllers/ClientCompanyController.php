@@ -1155,7 +1155,7 @@ class ClientCompanyController extends Controller
 
                 $valuation_date = Carbon::parse($valuation_date_full)->format('Y-m');
 
-                $getCurrancy = $filtered->first()?->currency;
+                $getCurrancy = $Historyfinancialprojection->whereNotNull('currency')->first()?->currency;
                 $is_currency_disabled = !is_null($getCurrancy);
             }
 
@@ -5004,10 +5004,10 @@ class ClientCompanyController extends Controller
                 return Carbon::parse($proj->valuation_date)->format('Y-m') === $valuationDateStr;
             })->keyBy('year');
 
-            // Detect locked currency (if any record already has one)
-            $firstRecord      = $projections->first();
-            $lockedCurrency   = $firstRecord?->currency ?? null;
-            $isCurrencyLocked = !is_null($lockedCurrency);
+            // Detect locked currency (if any record already has one globally for this company)
+            $firstRecordOverall = $allProjections->whereNotNull('currency')->first();
+            $lockedCurrency     = $firstRecordOverall?->currency ?? $user->company->Currency ?? $user->currency;
+            $isCurrencyLocked   = !is_null($firstRecordOverall?->currency);
 
             // ----------------------------------------------------------
             // 4. Build the 4-year payload
@@ -5116,9 +5116,6 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
             
-            if($user->company->Currency == $requestedCurrency){
-                         $requestedCurrency = null;
-                     }
                    
 
             // ----------------------------------------------------------
@@ -5262,7 +5259,7 @@ class ClientCompanyController extends Controller
 
             return response()->json([
                 'success'      => true,
-                'message'      => __('admin.financial_projection_saved_successfully'),
+                'message'      => __('admin.financial_data_saved'),
                 'recalculated' => $recalculated,
             ]);
 

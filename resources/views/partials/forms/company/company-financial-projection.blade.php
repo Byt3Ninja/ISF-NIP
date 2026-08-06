@@ -500,6 +500,8 @@ $(document).ready(function() {
 			// Update currency if locked
 			if (data.is_currency_locked && data.currency) {
 				$currency.val(data.currency);
+				$currency.prop('disabled', true);
+				$currency.data('original-value', data.currency);
 			}
 
 			// Populate fields
@@ -605,7 +607,7 @@ $(document).ready(function() {
 
 			releaseSuccessAlert({
 				title: '{{ __("admin.Success") }}',
-				message: data.message ?? '{{ __("admin.stored") }}'
+				message: data.message ?? '{{ __("admin.financial_data_saved") }}'
 			});
 
 			// Update original value and lock currency if changed
@@ -658,7 +660,13 @@ $(document).ready(function() {
 	$('.input-trigger').on('input', function() {
 		const val = $(this).val();
 		if (val.length > 15) $(this).val(val.slice(0, 15));
+		this.setCustomValidity(''); // Clear custom validation message on input
 		calculateAll();
+	});
+
+	// Set custom validation message on required fields
+	$('.input-trigger[required]').on('invalid', function() {
+		this.setCustomValidity('{{ __("admin.field_is_required") }}');
 	});
 
 	// History item click — warn before switching dates
