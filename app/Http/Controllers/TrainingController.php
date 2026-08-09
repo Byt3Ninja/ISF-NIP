@@ -705,8 +705,11 @@ class TrainingController extends Controller
 				$startDate = $request->datetime;
 				$startTime = $request->starttime;   // وقت البداية
 				$endTime = $request->endtime;   // وقت النهاية
-				$start_datetime = strtotime($startDate . ' ' . $startTime . ':00');
-				$end_datetime = strtotime($startDate . ' ' . $endTime . ':00');
+				$start_time_tailing = str_contains($startTime, 'AM') || str_contains($startTime, 'PM') ? '' : ':00';
+				$start_datetime = strtotime($startDate . ' ' . $startTime . $start_time_tailing);
+				
+				$end_time_tailing = str_contains($endTime, 'AM') || str_contains($endTime, 'PM') ? '' : ':00';
+				$end_datetime = strtotime($startDate . ' ' . $endTime . $end_time_tailing);
 			} else if ($type == 'online') {
 				[$startDate, $endDate] = explode(' - ', $dateRange);
 				$start_datetime = strtotime($startDate);
