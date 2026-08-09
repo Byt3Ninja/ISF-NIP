@@ -322,9 +322,24 @@ class HomeController extends Controller
             // The "Startups" card must count real startups only — i.e. companies with
             // a genuine registered founder — matching the filter already applied by
             // CompanyRepository::getCompanies() on the listing page this card links
-            // to (/dashboard/companies). Org scoping keys off the founder's own
-            // organization_id (not cycle->organization_id) so a company isn't dropped
-            // from its org's count just because it has no cycle (e.g. disapproved).
+            // to (/dashboard/companies). users.organization_id is never populated for
+            // founder accounts (only for org managers/subadmins), so for org-scoped
+            // viewers we key scoping off whether the company has ever applied to one
+            // of that org's programs (via form_data -> steps -> cycles), which is the
+            // only durable org link once a company's own cycle/step get nulled by
+            // disapproval. A company that registered but never applied to any program
+            // has no org affiliation yet, so it correctly won't show for a scoped org
+            // (only for the platform-wide admin view).
+            $startups_org_filter = '';
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $startups_org_filter = " AND EXISTS (
+                        SELECT 1 FROM form_data fd
+                        JOIN steps st ON st.id = fd.step_id
+                        JOIN cycles cyc ON cyc.id = st.cycle_id
+                        WHERE fd.company_id = s.id
+                        AND cyc.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")
+                    )";
+            }
             $companies_q = "SELECT
                     s.id,
                     c.organization_id
@@ -340,9 +355,6 @@ class HomeController extends Controller
                         JOIN roles r ON r.id = mhr.role_id
                         WHERE u.company_id = s.id
                         AND r.default_for = 'registered'
-                        " . (($has_org && !empty($organizations_ids) && !$user->hasRole('admin'))
-                            ? " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")"
-                            : "") . "
                     )
                     AND NOT EXISTS (
                         SELECT 1 FROM users u
@@ -351,6 +363,7 @@ class HomeController extends Controller
                         WHERE u.company_id = s.id
                         AND r.default_for IN ('admin', 'organizationmanager', 'subadmin')
                     )
+                    {$startups_org_filter}
             ";
             $companies = collect(DB::select($companies_q));
             $registeredUserFilter = function ($q) {
@@ -382,9 +395,14 @@ class HomeController extends Controller
                 // submits an application (ExternalCyclesController::registerUser(),
                 // CyclesController::saveForm()) and are never cleared on disapproval,
                 // so their existence is the durable signal of "this company applied".
-                $registered_user_org_filter = '';
+                $applied_form_data_org_filter = '';
                 if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-                    $registered_user_org_filter = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
+                    $applied_form_data_org_filter = " AND EXISTS (
+                            SELECT 1 FROM steps st
+                            JOIN cycles cyc ON cyc.id = st.cycle_id
+                            WHERE st.id = fd.step_id
+                            AND cyc.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")
+                        )";
                 }
                 $applied_companies_by_cycle_q = "SELECT
                         COUNT(comp.id) AS company_count
@@ -395,6 +413,7 @@ class HomeController extends Controller
                         AND EXISTS (
                             SELECT 1 FROM form_data fd
                             WHERE fd.company_id = comp.id
+                            {$applied_form_data_org_filter}
                         )
                         AND EXISTS (
                             SELECT 1 FROM users u
@@ -402,7 +421,6 @@ class HomeController extends Controller
                             JOIN roles r ON r.id = mhr.role_id
                             WHERE u.company_id = comp.id
                             AND r.default_for = 'registered'
-                            {$registered_user_org_filter}
                         )
                         AND NOT EXISTS (
                             SELECT 1 FROM users u
