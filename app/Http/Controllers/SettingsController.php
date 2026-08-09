@@ -870,8 +870,14 @@ class SettingsController extends Controller
         }
 
 		$ReminderLogs = $query->values();
+		$users = Role::whereIn('default_for', ['mentor', 'registered'])->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
+		$users = $users->flatMap(function ($role) {
+			return $role->users;
+		})->unique('id')->values();
 
-		return view('admin.organizations.reminder_logs', compact('ReminderLogs'));
+		$organizations = auth()->user()->user_organizations();
+		$programs = Cycle::WhereIn('id', $ReminderLogs->pluck('cycle_id'))->get();
+		return view('admin.organizations.reminder_logs', compact('ReminderLogs', 'users', 'organizations', 'programs'));
 	}
     public function generalSetting(Request $request)
     {
