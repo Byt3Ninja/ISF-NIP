@@ -1,8 +1,6 @@
 @extends('layouts.admin')
 @php
 	$l = app()->getLocale();
-	$startups = App\Company::all();
-	$founders = App\User::role('Registered')->get();
 @endphp
 
 @section('content')
