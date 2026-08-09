@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use App\Services\WhatsAppService;
+use App\Services\FormSectionStructurer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -166,31 +167,10 @@ class ExternalCyclesController extends Controller
 				if( $_step == 'register' )
 				{
 					$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-					$formFields = Formfield::where('step_id', $step->id)->get();
-					$fields_ids = $formFields->pluck('id')->toArray();
-					$fields = $step->fields()->orderBy('form_fields.id', 'asc')->get();
-					$builderFields = DB::table('builder_fields')->whereIn('builder_form_id', $formFields->pluck('builder_forms_id')->unique()->toArray())->get();
-					$fields = $fields->map(function( $field, $loop ) use ( $builderFields ) {
-						$options = $field->pivot->options ? json_decode($field->pivot->options) : null;
-						$label = trim( strtolower( $options?->label ?? '' ) );
-						$check = $builderFields->filter(function( $item ) use ( $label ) {
-							$_options = is_string( $item->options ) ? json_decode( $item->options ) : $item->options;
-							$_label = trim( strtolower( $_options?->label ?? '' ) );
-							return $label == $_label;
-						})->where('field_id', $field->pivot->field_id)->where('builder_form_id', $field->pivot->builder_forms_id)->first();
-						if( !empty( $check ) )
-						{
-							if( is_string( $check->options ) ) { $options = json_decode( $check->options ); }
-						}
-						$output = new stdClass;
-						$output->field_name = 'field_' . $field->pivot->id;
-						$output->type = $field->field_type;
-						$output->options = $options;
-						$output->id_for = 'input-fld-'. $loop;
-						return $output;
-					});
-				} else { $fields = null; $fields_ids = null; }
-				return response()->json(['status' => true, 'message' => __('cycles.email_checked_successfully'), 'step' => $_step, 'fields' => $fields, 'fields_ids' => $fields_ids]);
+					$formFields = Formfield::where('step_id', $step->id)->orderBy('id')->get();
+					$sections = FormSectionStructurer::structure($formFields);
+				} else { $sections = null; }
+				return response()->json(['status' => true, 'message' => __('cycles.email_checked_successfully'), 'step' => $_step, 'sections' => $sections]);
 			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
@@ -247,7 +227,19 @@ class ExternalCyclesController extends Controller
 				// creating any records, so a rejected submission never leaves an
 				// orphaned user/company.
 				$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-				$fields = Formfield::where('step_id', $step->id)->get();
+				$fields = Formfield::where('step_id', $step->id)->orderBy('id')->get();
+
+				// Recompute the visited section path SERVER-SIDE from the submitted
+				// answers (never trust a client-declared path) so that fields from
+				// sections the wizard never showed are neither required nor saved,
+				// even if a tampered request includes them.
+				$sections = FormSectionStructurer::structure($fields);
+				$visitedSectionIndexes = FormSectionStructurer::resolveVisitedPath(
+					$sections,
+					fn ($fieldName) => $request->input($fieldName)
+				);
+				$visitedFieldIds = collect(FormSectionStructurer::visitedFieldIds($sections, $visitedSectionIndexes));
+				$fields = $fields->whereIn('id', $visitedFieldIds->all())->values();
 
 				$l = app()->getLocale();
 				// GV-3679: "positive number" is only accurate when the floor is 0
