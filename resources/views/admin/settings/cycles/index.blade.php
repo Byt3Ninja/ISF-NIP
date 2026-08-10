@@ -14,14 +14,6 @@
     margin-top: 2rem !important;
   }
 
-  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
-     stays fully visible no matter where in the list the row sits. */
-  .daterangepicker.drp-viewport-fixed {
-    margin-top: 0 !important;
-    position: fixed !important;
-    z-index: 1080;
-  }
-
   #mob {
     display: flex;
     justify-content: flex-end;
@@ -1138,49 +1130,10 @@ if (editStepForm) {
         });
       }
     }
+    // Viewport-fixed positioning now lives in /js/daterangepicker-viewport.js
+    // (loaded globally by the admin layout) so every modal picker behaves the same.
     function positionStepRangePicker($input) {
-      const drp = $input.data('daterangepicker');
-      if (!drp) return;
-      const $picker = drp.container;
-      $picker.addClass('drp-viewport-fixed');
-
-      const reposition = function () {
-        if (!drp.isShowing) return;
-        const inputRect = $input[0].getBoundingClientRect();
-        const pickerHeight = $picker.outerHeight();
-        const pickerWidth = $picker.outerWidth();
-        const viewportH = window.innerHeight;
-        const viewportW = window.innerWidth;
-        const gap = 4;
-
-        let top = inputRect.bottom + gap;
-        if (top + pickerHeight > viewportH - gap) {
-          const above = inputRect.top - pickerHeight - gap;
-          top = above >= gap ? above : Math.max(gap, viewportH - pickerHeight - gap);
-        }
-
-        let left;
-        if (drp.opens === 'left') {
-          left = inputRect.right - pickerWidth;
-        } else if (drp.opens === 'center') {
-          left = inputRect.left + inputRect.width / 2 - pickerWidth / 2;
-        } else {
-          left = inputRect.left;
-        }
-        left = Math.max(gap, Math.min(left, viewportW - pickerWidth - gap));
-
-        $picker.css({ top: top + 'px', left: left + 'px', right: 'auto', bottom: 'auto' });
-      };
-
-      $input.off('show.daterangepicker.viewport').on('show.daterangepicker.viewport', function () {
-        setTimeout(reposition, 0);
-      });
-      const $modal = $('#ModifyStepForm');
-      $modal.off('scroll.drpViewport').on('scroll.drpViewport', reposition);
-      $modal.find('.modal-body, .modal-dialog').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
-      $(window).off('scroll.drpViewport resize.drpViewport').on('scroll.drpViewport resize.drpViewport', reposition);
-
-      if (drp.isShowing) reposition();
+      window.attachViewportDateRangePicker($input);
     }
 
     $(document).on('change', '#is_public', function() {

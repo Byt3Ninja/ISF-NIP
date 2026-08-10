@@ -583,6 +583,9 @@
       };
     </script>
 
+    <!-- Keeps bootstrap-daterangepicker dropdowns inside modals/offcanvas on screen -->
+    <script src="/js/daterangepicker-viewport.js"></script>
+
     <!-- BEGIN: Page JS-->
     @yield('pagescripts')
 

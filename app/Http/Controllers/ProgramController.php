@@ -8,12 +8,18 @@ use App\Cycle;
 use App\Stage;
 use App\Sector;
 use App\Company;
+use App\FinalData;
 use App\CompanyRelation;
 use App\UserScore;
 use App\Organization;
 use App\Finalscreening;
 use App\SurveyResponses;
+use App\CyclesMentors;
+use App\TrainingSession;
+use App\MentorshipRequest;
+use App\SessionReport;
 use App\ScreeningEvaluation;
+use App\Enums\CycleModifyAction;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleData;
 use Illuminate\Support\Facades\DB;
@@ -207,7 +213,155 @@ class ProgramController extends Controller
             ];
         }
 
-        return view('admin.programs.show', compact('cycle', 'steps', 'judges', 'stepsData'));
+        // --- Step aggregates ---
+        $totalSteps       = Step::where('cycle_id', $cycle->id)->count();
+        $totalStepsFinish = Step::where('cycle_id', $cycle->id)
+                                ->where('to', '>', now())->count();
+        $presSteps        = $totalSteps > 0
+                                ? round(($totalStepsFinish / $totalSteps) * 100, 2)
+                                : 0;
+
+        // --- Company / Mentor aggregates ---
+        $totalCompany = Company::where('cycle', $cycle->id)->count();
+        $mentors      = $cycle->mentors()->distinct()->get();
+
+        // --- Mentorship aggregates ---
+        $totalMentorRequest = MentorshipRequest::where('cycle_id', $cycle->id)->count();
+        $totalMentorMinutes = MentorshipRequest::where('cycle_id', $cycle->id)->sum('period');
+        $totalMentorperiod  = floor($totalMentorMinutes / 60) . ' h ' . ($totalMentorMinutes % 60) . ' m';
+
+        $mentorshipRequests  = MentorshipRequest::where('cycle_id', $cycle->id)->get();
+        $sessionReportsCount = SessionReport::whereIn(
+            'mentorship_request_id', $mentorshipRequests->pluck('id')
+        )->count();
+        $totalMentorrating = $mentorshipRequests->count() > 0
+            ? ($sessionReportsCount / $mentorshipRequests->count()) * 100
+            : 0;
+
+        // --- Training / evaluation aggregates (across all steps) ---
+        $totalStepsIdsCount   = 0;
+        $totalDurationMinutes = 0;
+        $answersTotal         = 0;
+        $answersPending       = 0;
+
+        foreach ($steps as $step) {
+            $totalStepsIdsCount   += TrainingSession::where('step_id', $step->id)->count();
+            $totalDurationMinutes += TrainingSession::where('step_id', $step->id)->sum('duration');
+            $answersTotal         += FinalData::where('step_id', $step->id)->count();
+            $answersPending       += FinalData::where('step_id', $step->id)->whereNull('answer')->count();
+        }
+
+        $totalDurationSum = floor($totalDurationMinutes / 60) . ' h ' . ($totalDurationMinutes % 60) . ' m';
+
+        // --- Summary stat cards ---
+        $summaryCards = [
+            [__('admin.Startups'),                             'building-skyscraper', $totalCompany,                              'primary'],
+            [__('cycles.steps'),                               'stack-2',             $totalSteps,                                'info'],
+            [__('admin.Mentors'),                              'user',                $mentors->count(),                          'secondary'],
+            [__('cycles.All requests'),                        'report',              $totalMentorRequest,                        'warning'],
+            [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5',        $totalMentorperiod,                         'success'],
+            [__('admin.Company_Attendance_Rate'),              'heart-rate-monitor',  number_format($totalMentorrating, 2) . '%', 'danger'],
+            [__('admin.Training sessions'),                    'layers-subtract',     $totalStepsIdsCount,                        'secondary'],
+            [__('admin.Startups_trainings_Hours'),             'clock-hour-5',        $totalDurationSum,                          'success'],
+            [__('admin.Traditional_Evaluation_pending'),       'transform',           $answersPending,                            'warning'],
+            [__('admin.Evaluation'),                           'presentation',        $answersTotal,                              'danger'],
+        ];
+
+        // --- Per-step aggregates (keyed by step id), computed in step order
+        // so that stype 5's cumulative judges list matches each step's position. ---
+        $stepsExtra    = [];
+        $judgesDetails = collect();
+
+        foreach ($steps as $step) {
+            switch ($step->stype) {
+                case 1:
+                    $stepsExtra[$step->id] = [
+                        'companiesInStep' => Company::where('step', $step->id)->count(),
+                    ];
+                    break;
+
+                case 2:
+                    $scopedJudges      = $judges->whereIn('id', json_decode($step->list, true) ?? []);
+                    $screenCompanies   = Company::where('step', $step->id)->get();
+                    $totalFiltration   = 0;
+                    $filtrationPending = 0;
+                    $filtrationDone    = 0;
+
+                    foreach ($screenCompanies as $company) {
+                        $base               = FinalData::where('step_id', $step->id)
+                                                        ->where('company_id', $company->id);
+                        $totalFiltration   += (clone $base)->count();
+                        $filtrationPending += (clone $base)->whereNull('answer')->count();
+                        $filtrationDone    += (clone $base)->whereNotNull('answer')->count();
+                    }
+
+                    $stepsExtra[$step->id] = compact(
+                        'scopedJudges', 'screenCompanies', 'totalFiltration', 'filtrationPending', 'filtrationDone'
+                    );
+                    break;
+
+                case 3:
+                    $stepsExtra[$step->id] = [
+                        'mentorCount'      => CyclesMentors::where('cycle_id', $step->cycle_id)->count(),
+                        'sessionMinutes'   => MentorshipRequest::where('cycle_id', $step->cycle_id)
+                                                    ->where('approved', 'Yes')->sum('period'),
+                        'doneSessions'     => MentorshipRequest::where('cycle_id', $step->cycle_id)
+                                                    ->whereNotNull('done')->count(),
+                        'allRequests'      => MentorshipRequest::where('cycle_id', $step->cycle_id)->count(),
+                        'newRequests'      => MentorshipRequest::where('cycle_id', $step->cycle_id)
+                                                    ->whereNull('approved')->count(),
+                        'approvedRequests' => MentorshipRequest::where('cycle_id', $step->cycle_id)
+                                                    ->where('approved', 'Yes')->count(),
+                        'rejectedRequests' => MentorshipRequest::where('cycle_id', $step->cycle_id)
+                                                    ->where('approved', 'No')->count(),
+                    ];
+                    break;
+
+                case 4:
+                    $stepsExtra[$step->id] = [
+                        'trainingCount'    => TrainingSession::where('step_id', $step->id)->count(),
+                        'trainingMinutes'  => TrainingSession::where('step_id', $step->id)->sum('duration'),
+                        'sessionTypeCount' => TrainingSession::where('step_id', $step->id)->where('type', 'sessions')->count(),
+                        'onlineCount'      => TrainingSession::where('step_id', $step->id)->where('type', 'online')->count(),
+                        'offlineCount'     => TrainingSession::where('step_id', $step->id)->where('type', 'offline')->count(),
+                    ];
+                    break;
+
+                case 5:
+                    $finalScreening    = Finalscreening::where('step_id', $step->id)->first();
+                    $finalCompanyCount = Finalscreening::where('step_id', $step->id)
+                                             ->distinct('company_id')->count('company_id');
+                    $finalAnswers      = FinalData::where('step_id', $step->id)
+                                             ->whereNotNull('answer')->count();
+                    $finalPending      = FinalData::where('step_id', $step->id)
+                                             ->whereNull('answer')->count();
+
+                    if ($finalScreening && !empty($finalScreening->judges)) {
+                        $judgeIds      = is_string($finalScreening->judges)
+                                             ? json_decode($finalScreening->judges, true)
+                                             : $finalScreening->judges;
+                        $stepJudges    = User::whereIn('id', $judgeIds)->get();
+                        $judgesDetails = $judgesDetails->merge($stepJudges)->unique('id');
+                    }
+
+                    $stepsExtra[$step->id] = compact(
+                        'finalCompanyCount', 'finalAnswers', 'finalPending'
+                    ) + ['judgesDetails' => $judgesDetails];
+                    break;
+            }
+        }
+
+        $updateStepAction = CycleModifyAction::UPDATE_STEP;
+        $deleteStepAction = CycleModifyAction::DELETE_STEP;
+        $fetchStepAction  = CycleModifyAction::FETCH_STEP;
+
+        return view('admin.programs.show', compact(
+            'cycle', 'steps', 'judges', 'stepsData',
+            'totalSteps', 'totalStepsFinish', 'presSteps',
+            'totalCompany', 'mentors',
+            'summaryCards', 'stepsExtra',
+            'updateStepAction', 'deleteStepAction', 'fetchStepAction'
+        ));
     }
 
     /**
