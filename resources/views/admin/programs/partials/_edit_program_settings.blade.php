@@ -8,11 +8,11 @@
       </label>
       <input class="form-check-input" type="checkbox" id="allow_non_company" name="allow_non_company" />
     </div>
-      <small class="text-muted">
-        {{ __('cycles.External_Participation_Helper_Text') }}
-      </small>
+    <small class="text-muted">
+      {{ __('cycles.External_Participation_Helper_Text') }}
+    </small>
   </div>
-    
+
   <!-- Private Link -->
   <div class="col-12 mb-4">
     <div class="form-check form-switch">
@@ -21,9 +21,9 @@
       </label>
       <input class="form-check-input" type="checkbox" id="private" name="private" />
     </div>
-     <small class="text-muted">
-        {{ __('cycles.Private_Link_Helper_Text') }}
-      </small>
+    <small class="text-muted">
+      {{ __('cycles.Private_Link_Helper_Text') }}
+    </small>
   </div>
 
   <hr class="my-6" />
@@ -71,21 +71,21 @@
         </div>
         @php
           $cycle = $ccycle;
-          
+
           $reminderoptional = DB::table('mentorship_schedules')
-                                ->where('cycle_id', $cycle->id)
-                                ->where('is_active', 1)
-                                ->orderBy('value', 'desc') // عشان يرجع 24 الأول، بعده 6، بعده 1
-                                ->get()
-                                ->map(function ($reminder) {
-                                    return $reminder->value . '_' . $reminder->unit . '_before';
-                                })
-                                ->toArray();
+            ->where('cycle_id', $cycle->id)
+            ->where('is_active', 1)
+            ->orderBy('value', 'desc') // عشان يرجع 24 الأول، بعده 6، بعده 1
+            ->get()
+            ->map(function ($reminder) {
+              return $reminder->value . '_' . $reminder->unit . '_before';
+            })
+            ->toArray();
           $reminderOptions = ['24_hours_before', '6_hours_before', '1_hour_before'];
         @endphp
         <div id="hours_reminder" style="display: none;">
           <div class="form-group d-flex align-items-center gap-6 mt-3">
-            
+
             {{-- Container where hidden inputs will be injected --}}
             <div id="reminder_times_container"></div>
 
@@ -201,6 +201,57 @@
   </div>
 </div>
 
+<hr class="my-6" />
+
+<!-- Branding Colors Settings -->
+<div class="col-12">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h5 class="mb-0">{{ __('cycles.Branding_Colors') }}</h5>
+    <button type="button" id="reset-brand-colors" class="btn btn-sm btn-outline-secondary" style="display: none;">
+      <i class="ti ti-refresh me-1"></i>
+      {{ __('cycles.Reset_To_Default') }}
+    </button>
+  </div>
+  <div class="row">
+    <div class="col-sm-4 col-lg-3 mb-3">
+      <p class="mb-2">{{ __('cycles.Gradient_Start_Color') }}</p>
+      <div id="start-color" class="brand-color-picker"></div>
+      <input type="hidden" name="start_color" id="start_color_input"
+        value="{{ $ccycle?->start_color ?? 'rgba(99, 102, 241, 0.08)' }}">
+    </div>
+    <div class="col-sm-4 col-lg-3 mb-3">
+      <p class="mb-2">{{ __('cycles.Gradient_End_Color') }}</p>
+      <div id="end-color" class="brand-color-picker"></div>
+      <input type="hidden" name="end_color" id="end_color_input"
+        value="{{ $ccycle?->end_color ?? 'rgba(8, 145, 178, 0.08)' }}">
+    </div>
+    <div class="col-sm-4 col-lg-3 mb-3">
+      <p class="mb-2">{{ __('cycles.Main_Color') }}</p>
+      <div id="main-color" class="brand-color-picker"></div>
+      <input type="hidden" name="main_color" id="main_color_input" value="{{ $ccycle?->main_color ?? '#7367f0' }}">
+    </div>
+  </div>
+
+  <!-- Live preview of the hero gradient built from the start/end colors above -->
+  <div class="row">
+    <div class="col-12">
+      <p class="mb-2">{{ __('cycles.Gradient_Preview') }}</p>
+      <div id="hero-gradient-preview"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #hero-gradient-preview {
+    height: 120px;
+    border-radius: .5rem;
+    border: 1px solid rgba(0, 0, 0, .1);
+    background:
+      radial-gradient(circle at 20% 30%, var(--hero-gradient-start, rgba(99, 102, 241, 0.08)) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, var(--hero-gradient-end, rgba(8, 145, 178, 0.08)) 0%, transparent 50%);
+  }
+</style>
+
 @push('scripts')
   <script>
     var validating = false;
@@ -209,9 +260,9 @@
     $(document).on('change', '#is_public', function() {
       let _public = $(this).val();
       if( _public == 1 ) { 
-        $('#public_slug_div').show(); 
-      } else { 
-        $('#public_slug_div').hide(); 
+        $('#public_slug_div').show();
+      } else {
+        $('#public_slug_div').hide();
         // Clear validation error when hiding
         $('#public_slug').removeClass('is-invalid');
         $('#public_slug').siblings('.invalid-feedback').text('');
@@ -278,8 +329,8 @@
                 let msg = response.message;
                 msg += `<ul>`;
                   $.each(response.slugs, function(key, value) {
-                    msg += `<li> <a class="use-suggested-slug text-danger" href="javascript:void(0);"> ${value} </a></li>`;
-                  });
+                  msg += `<li> <a class="use-suggested-slug text-danger" href="javascript:void(0);"> ${value} </a></li>`;
+                });
                 msg += `</ul>`;
                 setTimeout(function() {
                   $('#public_slug').siblings('.invalid-feedback').html(msg);
@@ -329,14 +380,14 @@
         // $('#hours_reminder_input').siblings('.invalid-feedback').text('');
       }
     });
-    
+
     // Real-time validation for hours reminder
     $(document).on('input', '#hours_reminder_input', function() {
       const value = $(this).val();
       const reminderEnabled = $('#reminder_enabled').is(':checked');
-      
+
       $(this).removeClass('is-invalid');
-      
+
       if (reminderEnabled && (!value || parseInt(value) < 1)) {
         $(this).addClass('is-invalid');
         $(this).siblings('.invalid-feedback').text('{{ $l == "en" ? "Hours reminder must be at least 1 hour" : "تذكير الساعات يجب أن يكون ساعة واحدة على الأقل" }}');
@@ -344,7 +395,7 @@
         $(this).siblings('.invalid-feedback').text('');
       }
     });
-    
+
     // Real-time validation for offline location address (max 250)
     $(document).on('input', '#offline_location_address', function() {
       const value = $(this).val();
@@ -377,9 +428,9 @@
     $(document).on('input', '#public_slug', function() {
       const value = $(this).val().trim();
       const isPublic = $('#is_public').val();
-      
+
       $(this).removeClass('is-invalid');
-      
+
       if (isPublic == '1' && !value) {
         $(this).addClass('is-invalid');
         $(this).siblings('.invalid-feedback').text('{{ $l == "en" ? "Public URL is required when program is set to public" : "الرابط العام مطلوب عندما يكون البرنامج عاماً" }}');
@@ -390,13 +441,13 @@
         $(this).siblings('.invalid-feedback').text('');
       }
     });
-    
+
     // Initialize visibility on page load
     $(document).ready(function() {
       // Initialize public slug visibility
       const isPublic = $('#is_public').val();
       // console.log('Initial is_public value:', isPublic); // Debug log
-      
+
       if (isPublic == '1') {
         $('#public_slug_div').show();
         // console.log('Showing public slug div'); // Debug log
@@ -424,6 +475,132 @@
 
       // run once on load (sync pre-checked)
       updateReminderTimes();
+    });
+
+    // Branding colors: pickers, defaults, reset button, hidden-input syncing, gradient preview
+    $(document).ready(function () {
+      // Start/end match the .hero-gradient CSS exactly (radial-gradient stops at 8% alpha).
+      // Main is a solid brand color, no alpha involved.
+      const BRAND_DEFAULTS = {
+        start: 'rgba(99, 102, 241, 0.08)',
+        end: 'rgba(8, 145, 178, 0.08)',
+        main: '#7367f0'
+      };
+
+      const $resetBtn = $('#reset-brand-colors');
+      const $preview = $('#hero-gradient-preview');
+
+      function normalize(value) {
+        return (value || '').toString().replace(/\s+/g, '').toLowerCase();
+      }
+
+      function checkForChanges() {
+        const startVal = normalize($('#start_color_input').val());
+        const endVal = normalize($('#end_color_input').val());
+        const mainVal = normalize($('#main_color_input').val());
+
+        const changed =
+          startVal !== normalize(BRAND_DEFAULTS.start) ||
+          endVal !== normalize(BRAND_DEFAULTS.end) ||
+          mainVal !== normalize(BRAND_DEFAULTS.main);
+
+        $resetBtn.toggle(changed);
+      }
+
+      function updatePreview() {
+        $preview.css('--hero-gradient-start', $('#start_color_input').val() || BRAND_DEFAULTS.start);
+        $preview.css('--hero-gradient-end', $('#end_color_input').val() || BRAND_DEFAULTS.end);
+      }
+
+      function initColorPicker(selector, defaultColor, hiddenInputSelector, useAlpha) {
+        const pickrInstance = pickr.create({
+          el: selector,
+          theme: 'classic',
+          default: defaultColor,
+          swatches: [
+            'rgba(102, 108, 232, 1)',
+            'rgba(40, 208, 148, 1)',
+            'rgba(255, 73, 97, 1)',
+            'rgba(255, 145, 73, 1)',
+            'rgba(30, 159, 242, 1)'
+          ],
+          components: {
+            preview: true,
+            opacity: true,
+            hue: true,
+            interaction: {
+              hex: true,
+              rgba: true,
+              hsla: true,
+              hsva: true,
+              cmyk: true,
+              input: true,
+              clear: true,
+              save: true
+            }
+          }
+        });
+
+        function syncValue(color) {
+          if (!color) return;
+          // Start/end need the alpha channel preserved to match the hero gradient; main is solid.
+          const value = useAlpha ? color.toRGBA().toString() : color.toHEXA().toString();
+          $(hiddenInputSelector).val(value);
+          updatePreview();
+          checkForChanges();
+        }
+
+        pickrInstance.on('change', syncValue);
+        pickrInstance.on('save', function (color) {
+          syncValue(color);
+          pickrInstance.hide();
+        });
+        pickrInstance.on('clear', function () {
+          $(hiddenInputSelector).val('');
+          updatePreview();
+          checkForChanges();
+        });
+
+        return pickrInstance;
+      }
+
+      const startPickr = initColorPicker(
+        '#start-color',
+        $('#start_color_input').val() || BRAND_DEFAULTS.start,
+        '#start_color_input',
+        true
+      );
+      const endPickr = initColorPicker(
+        '#end-color',
+        $('#end_color_input').val() || BRAND_DEFAULTS.end,
+        '#end_color_input',
+        true
+      );
+      const mainPickr = initColorPicker(
+        '#main-color',
+        $('#main_color_input').val() || BRAND_DEFAULTS.main,
+        '#main_color_input',
+        false
+      );
+
+      $resetBtn.on('click', function (e) {
+        e.preventDefault();
+
+        startPickr.setColor(BRAND_DEFAULTS.start);
+        endPickr.setColor(BRAND_DEFAULTS.end);
+        mainPickr.setColor(BRAND_DEFAULTS.main);
+
+        $('#start_color_input').val(BRAND_DEFAULTS.start);
+        $('#end_color_input').val(BRAND_DEFAULTS.end);
+        $('#main_color_input').val(BRAND_DEFAULTS.main);
+
+        updatePreview();
+        checkForChanges();
+      });
+
+      // Run once on load in case saved values differ from defaults (e.g. editing an existing cycle)
+      updatePreview();
+      checkForChanges();
     });
   </script>
 @endpush

@@ -681,4 +681,11 @@ return [
     'evaluation_subcriterion_name_too_long_named' => 'اسم :subcriterion ضمن :criterion طويل جدًا. يُرجى ألا يتجاوز 255 حرفًا.',
     'evaluation_subcriterion_weight_required_named' => 'يُرجى إدخال وزن لـ :subcriterion ضمن :criterion.',
     'evaluation_subcriterion_weight_range_named' => 'يجب أن يكون وزن :subcriterion ضمن :criterion نسبة مئوية بين 0 و100.',
+
+    'Branding_Colors' => 'ألوان العلامة التجارية',
+    'Gradient_Start_Color' => 'لون بداية التدرج',
+    'Gradient_End_Color' => 'لون نهاية التدرج',
+    'Main_Color' => 'اللون الرئيسي',
+    'Gradient_Preview' => 'معاينة التدرج',
+    'Reset_To_Default' => 'إعادة التعيين إلى الافتراضي',
 ];

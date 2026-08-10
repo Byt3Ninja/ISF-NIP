@@ -687,4 +687,11 @@ return [
     'evaluation_subcriterion_name_too_long_named' => 'The name of :subcriterion under :criterion is too long. Please keep it under 255 characters.',
     'evaluation_subcriterion_weight_required_named' => 'Please enter a weight for :subcriterion under :criterion.',
     'evaluation_subcriterion_weight_range_named' => 'The weight of :subcriterion under :criterion must be a percentage between 0 and 100.',
+    
+    'Branding_Colors' => 'Branding Colors',
+    'Gradient_Start_Color' => 'Gradient Start Color',
+    'Gradient_End_Color' => 'Gradient End Color',
+    'Main_Color' => 'Main Color',
+    'Gradient_Preview' => 'Gradient Preview',
+    'Reset_To_Default' => 'Rest to Default',
 ];

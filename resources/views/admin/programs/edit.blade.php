@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('style')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css">
 <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css">
 {{-- <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css"> --}}
@@ -370,6 +371,7 @@
     <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
     <!-- Summernote JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
+    <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 @stop
 
 @section('pagescripts')

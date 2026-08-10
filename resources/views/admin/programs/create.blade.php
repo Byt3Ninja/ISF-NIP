@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" /> 
+@stop
+
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
   <!-- Summernote CSS -->
@@ -24,19 +28,19 @@
 @stop
 
 @php
-  $ccycle = new \App\Cycle(); // Create a new empty Cycle instance for form initialization
+$ccycle = new \App\Cycle(); // Create a new empty Cycle instance for form initialization
 
-   $labels = [
-      'program_info' => $l == 'ar' ? 'معلومات البرنامج' : 'Program Info',
-      // 'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
-      'Program_Settings' => $l == 'ar' ? 'إعدادات البرنامج' : 'Program Settings',
-    ];
+$labels = [
+  'program_info' => $l == 'ar' ? 'معلومات البرنامج' : 'Program Info',
+  // 'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
+  'Program_Settings' => $l == 'ar' ? 'إعدادات البرنامج' : 'Program Settings',
+];
 
-  $tabs = [
-    ['id' => 'program_info', 'label' => $labels['program_info'], 'active' => true],
-    ['id' => 'program_settings', 'label' => $labels['Program_Settings'], 'active' => false],
-    // ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
-  ];
+$tabs = [
+  ['id' => 'program_info', 'label' => $labels['program_info'], 'active' => true],
+  ['id' => 'program_settings', 'label' => $labels['Program_Settings'], 'active' => false],
+  // ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
+];
 @endphp
 
 @section('content')
@@ -168,7 +172,8 @@
   <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
   <!-- Summernote JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
-
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+  
   <script>
     $(document).ready(function() {
       // Tab navigation state
