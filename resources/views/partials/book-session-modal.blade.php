@@ -126,6 +126,7 @@
       cycleId: null,
       organizationId: null,
       userId: null,
+      staleCheckTimer: null,
     };
 
     const SESSION_TYPES = {
@@ -289,14 +290,14 @@
 
     const isSlotBlocked = (slot, dateStr) => {
       if (!state.blocked_intervals?.length) return false;
-      const offset = '{{ date('P') }}';
+      const offset = '{{ \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('P') }}';
       const start = moment(`${dateStr} ${slot.start_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').unix();
       const end   = moment(`${dateStr} ${slot.end_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').unix();
       return state.blocked_intervals.some(i => start < i.end && end > i.start);
     };
 
     const isSlotPast = (slot, dateStr) => {
-      const offset = '{{ date('P') }}';
+      const offset = '{{ \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('P') }}';
       return moment(`${dateStr} ${slot.start_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').isSameOrBefore(moment());
     };
 
@@ -586,6 +587,21 @@
       initCalendar();
     };
 
+    // ─── Keep the slot list from going stale while the modal is open ──────────
+    const startStaleCheckTimer = () => {
+      stopStaleCheckTimer();
+      state.staleCheckTimer = setInterval(() => {
+        if (state.selectedDate) renderSlots(state.selectedDate);
+      }, 30000);
+    };
+
+    const stopStaleCheckTimer = () => {
+      if (state.staleCheckTimer) {
+        clearInterval(state.staleCheckTimer);
+        state.staleCheckTimer = null;
+      }
+    };
+
     const resetForm = () => {
       state.selectedSlot = null;
       state.selectedSlots = [];
@@ -661,6 +677,7 @@
 
         $('#bookingModal').modal('show');
         resetCalendar();
+        startStaleCheckTimer();
 
         if (state.offlineDisabled && $('#filter-buttons button[data-filter="all"]').length) {
           $('#filter-buttons button[data-filter="all"]').remove();
@@ -785,7 +802,10 @@
     });
 
     // ─── Reset on modal close ─────────────────────────────────────────────────
-    $('#bookingModal').on('hidden.bs.modal', resetForm);
+    $('#bookingModal').on('hidden.bs.modal', function () {
+      stopStaleCheckTimer();
+      resetForm();
+    });
 
   });
   </script>
