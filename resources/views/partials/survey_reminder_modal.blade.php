@@ -1,68 +1,5 @@
 {{-- Survey Reminder Modal Partial --}}
 
-@php
-
-
-  $survey_data = []; // Initialize as empty array
-  if (Auth::check() && Auth::user()->hasAnyRole(['Registered','Mentor'])) {
-    $user_id = Auth::id();     
-   
-      $completed_survey_ids = \App\SurveyResponses::where('user_id', $user_id)
-        ->whereNotNull('responses')
-        ->where('user_id', $user_id)
-        ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
-						$query->where('cycle_id', $_user->company?->cycle);
-					})
-        ->pluck('survey_id')
-        ->toArray();
-      
-      
-      $incomplete_responses = \App\SurveyResponses::where('user_id', $user_id)
-        ->whereNull('responses')
-        ->where('user_id', $user_id)
-        ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
-						$query->where('cycle_id', $_user->company?->cycle);
-					})
-        ->whereHas('survey', function($query) {
-          $query->where('is_required', 1);
-        })
-        ->with('survey')
-        ->get();
-     foreach ($incomplete_responses as $key => $response) {
-
-          // لو trigger_on == training فقط
-          if ($response->triggered_on === 'training') {
-
-              if (Auth::check() && Auth::user()->hasAnyRole('Registered')) {
-                  $existsInTraining = \DB::table('attendance_training_offline')
-                      ->where('training_session_id', $response->triggered_at)
-                      ->where('user_id', $user_id)
-                      ->exists();
-
-                  // لو مش موجود في الحضور، نصفي الرد من الـ collection
-                  if (!$existsInTraining) {
-                      $incomplete_responses->forget($key);
-                  }
-              }
-          }
-      }
-       
-      // تجهيز البيانات
-      $survey_data = [];
-      foreach ($incomplete_responses as $response) {
-        $survey_data[] = [
-          'id' => $response->id,
-          'survey_id' => $response->survey->id,
-          'title' => $response->survey->title,
-          'description' => $response->survey->description,
-          'is_required' => $response->survey->is_required,
-          'type' => $response->triggered_on,
-        ];
-      }
-      
-  }
-  
-@endphp
 
 {{-- Only show the modal if there are pending surveys and user is not on the survey taking page --}}
 @if(auth()->user()->hasAnyRole(['Registered','Mentor']) && Route::currentRouteName() !== 'surveys.take')
@@ -107,6 +44,25 @@
                         <i class="ti ti-clipboard-list me-1"></i> 
                         {{ $l == 'ar' ? 'ابدأ الاستبيان' : 'Start Survey' }}
                       </a>
+                    </div>
+                    <div class="row">
+                      <div class="col-12">
+                        @if( $survey['type'] == 'mentorship' )
+                          <div class="text-dark text-sm mb-0">
+                            @if( $survey['trigger_by'] == 'session' )
+                              {{ $l == 'ar' ? 'جلسة الإرشاد مع' : 'Mentorship session with' }} 
+                              {{ $_user->id == $survey['metadata']['mentor']->id ? $survey['metadata']['startup']->name : $survey['metadata']['mentor']->name }}
+                              | {{ __('mentor.' . strtolower( $survey['metadata']['session']->session_type ) ) }}
+                              | {{ date('Y-m-d h:i A', strtotime( $survey['metadata']['session']->zoom_date ) ) }}
+                            @elseif( $survey['trigger_by'] == 'due' )
+                              {{ $l == 'ar' ? 'الانتهاء من مرحلة الارشاد' : 'Completion of mentorship step' }} [{{ $survey['metadata']['step']->title }}]
+                            @elseif( $survey['trigger_by'] == 'quiz' )
+                            @endif
+                          </div>  
+                        @elseif( $survey['type'] == 'training' )
+                        @elseif( $survey['type'] == 'quiz' )
+                        @endif
+                      </div>
                     </div>
                   </div>
                 </div>

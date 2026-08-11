@@ -1594,10 +1594,13 @@ class HomeController extends Controller
             $cycle_idMentor = [];
         }
 
-        if ($cycle_id != 0 || $cycle_idMentor != 0) {
+        /* if( $cycle_id != 0 || $cycle_idMentor != 0 )
+        {
             $surveyEligible = [];
-            foreach ($steps as $step) {
-                if ((optional($step)->stype == 3 || optional($step)->stype == 4) && (now() > Carbon::parse($step->to)->format('Y-m-d H:i:s'))) {
+            foreach( $steps as $step )
+            {
+                if( (optional($step)->stype == 3 || optional($step)->stype == 4) && (now() > Carbon::parse($step->to)->format('Y-m-d H:i:s')) )
+                {
                     $surveyEligible[] = [
                         'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
                         'triggered_at' => $step->id,
@@ -1605,18 +1608,22 @@ class HomeController extends Controller
                     ];
                 }
             }
-            
-            if( $user->hasAnyRole(['mentor']) ){
-                
-                if (empty($cycle_idMentor)) {
+
+            if( $user->hasAnyRole(['mentor']) )
+            {
+                if( empty( $cycle_idMentor ) )
+                {
                     $my_mentorship_requests_q = "SELECT
                             mr.id,
                             mr.period,
                             mr.zoom_date,
                             mr.created_at
                         FROM mentorship_requests mr
-                        WHERE 1 = 0";
-                } else {
+                        WHERE 1 = 0
+                    ";
+                }
+                else
+                {
                     $my_mentorship_requests_q = "SELECT
                             mr.id,
                             mr.period,
@@ -1626,9 +1633,12 @@ class HomeController extends Controller
                         WHERE
                             mr.mentor_id = {$user->id}
                             AND mr.approved = 'Yes'
-                            AND mr.cycle_id IN ($cycle_idMentor)";
+                            AND mr.cycle_id IN ($cycle_idMentor)
+                    ";
                 }
-            }else{
+            }
+            else
+            {
                 $my_mentorship_requests_q = "SELECT
                         mr.id,
                         mr.period,
@@ -1647,7 +1657,7 @@ class HomeController extends Controller
                         AND mr.cycle_id = $cycle_id
                 ";
             }
-            
+
             $my_mentorship_requests = collect(DB::select($my_mentorship_requests_q))->map(function ($item) {
                 $item->end_at = Carbon::parse($item->zoom_date)->addMinutes($item->period)->format('Y-m-d H:i:s');
                 $item->added_at = $item->created_at;
@@ -1655,92 +1665,94 @@ class HomeController extends Controller
             })->filter(function ($item) {
                 return !empty($item->zoom_date) && !empty($item->period) && now() > $item->end_at;
             })->values();
-            
-            if( $user->hasAnyRole(['registered']) ){
-            $my_trainings_q = "SELECT
-                    ts.id,
-                    ts.type,
-                    ts.duration,
-                    ts.datetime,
-                    ts.created_at
-                FROM
-                    training_sessions ts
-                INNER JOIN
-                    steps s ON ts.step_id = s.id
-                INNER JOIN
-                    attendance_training_offline ato ON ato.training_session_id = ts.id
-                        AND ato.user_id = {$user->id}
-                        AND ato.attendance = 1
-                WHERE
-                    s.cycle_id = $cycle_id;
-            ";
-            $my_trainings = collect(DB::select($my_trainings_q))->map(function ($item) {
-                // Calculate end_at based on session type
-                $item->end_at = null;
-                $item->added_at = $item->created_at;
-                if ($item->type == 'sessions' && !empty($item->datetime) && !empty($item->duration)) {
-                    $sessionStart = Carbon::createFromTimestamp($item->datetime);
-                    $item->end_at = $sessionStart->copy()->addMinutes($item->duration)->format('Y-m-d H:i:s');
-                } elseif (in_array($item->type, ['online', 'offline']) && !empty($item->datetime)) {
-                    $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s');
-                }
-                return $item;
-            })->filter(function ($item) {
-                // Same logic as mentorship: must have end_at and session must have ended
-                return !empty($item->end_at) && now() > $item->end_at;
-            })->values();
-        
 
-            $my_quizzes_q = "SELECT
-                    q.id,
-                    q.end,
-                    q.attempts,
-                    q.passing_criteria AS criteria,
-                    qr.id AS attempt_id,
-                    qr.score AS attempt_score
-                FROM
-                    quizzes q
-                LEFT JOIN
-                    quiz_results qr ON qr.quiz_id = q.id AND qr.user_id = ?
-                WHERE
-                    q.status = 'published'
-                    ";
-                    if($organization_id != null){
-                        $my_quizzes_q .= " AND q.organization_id = $organization_id ";
+            if( $user->hasAnyRole(['registered']) )
+            {
+                $my_trainings_q = "SELECT
+                        ts.id,
+                        ts.type,
+                        ts.duration,
+                        ts.datetime,
+                        ts.created_at
+                    FROM
+                        training_sessions ts
+                    INNER JOIN
+                        steps s ON ts.step_id = s.id
+                    INNER JOIN
+                        attendance_training_offline ato ON ato.training_session_id = ts.id
+                            AND ato.user_id = {$user->id}
+                            AND ato.attendance = 1
+                    WHERE
+                        s.cycle_id = $cycle_id;
+                ";
+                $my_trainings = collect(DB::select($my_trainings_q))->map(function ($item) {
+                    // Calculate end_at based on session type
+                    $item->end_at = null;
+                    $item->added_at = $item->created_at;
+                    if( $item->type == 'sessions' && !empty($item->datetime) && !empty($item->duration) ) {
+                        $sessionStart = Carbon::createFromTimestamp($item->datetime);
+                        $item->end_at = $sessionStart->copy()->addMinutes($item->duration)->format('Y-m-d H:i:s');
+                    } elseif( in_array($item->type, ['online', 'offline']) && !empty($item->datetime) ) {
+                        $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s');
                     }
-            $my_quizzes = collect(DB::select($my_quizzes_q, [$user->id]))->groupBy('id')->map(function ($items) {
-                $item = $items->first();
-                $quiz = new stdClass;
-                $quiz->id = $item->id;
-                $quiz->criteria = $item->criteria;
-                $quiz->end = Carbon::parse($item->end)->format('Y-m-d H:i:s');
-                $quiz->trials = $item->attempts;
-                $quiz->attempts = $items->map(function ($result) {
-                    $attempt = new stdClass;
-                    $attempt->id = $result->attempt_id;
-                    $attempt->score = $result->attempt_score;
-                    return $attempt;
-                });
-                return $quiz;
-            })->values()->filter(function ($quiz) {
-                $attempts = $quiz->attempts;
-                if ($attempts->count() > 0) {
-                    if (
-                        $attempts->where('score', '>=', $quiz->criteria)->count() >= 1
-                        || $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
-                        || now()->format('Y-m-d H:i:s') > $quiz->end
-                    ) {
-                        return true;
+                    return $item;
+                })->filter(function ($item) {
+                    // Same logic as mentorship: must have end_at and session must have ended
+                    return !empty($item->end_at) && now() > $item->end_at;
+                })->values();
+
+                $my_quizzes_q = "SELECT
+                        q.id,
+                        q.end,
+                        q.attempts,
+                        q.passing_criteria AS criteria,
+                        qr.id AS attempt_id,
+                        qr.score AS attempt_score
+                    FROM
+                        quizzes q
+                    LEFT JOIN
+                        quiz_results qr ON qr.quiz_id = q.id AND qr.user_id = ?
+                    WHERE
+                        q.status = 'published'
+                ";
+                if($organization_id != null){
+                    $my_quizzes_q .= " AND q.organization_id = $organization_id ";
+                }
+                $my_quizzes = collect(DB::select($my_quizzes_q, [$user->id]))->groupBy('id')->map(function ($items) {
+                    $item = $items->first();
+                    $quiz = new stdClass;
+                    $quiz->id = $item->id;
+                    $quiz->criteria = $item->criteria;
+                    $quiz->end = Carbon::parse($item->end)->format('Y-m-d H:i:s');
+                    $quiz->trials = $item->attempts;
+                    $quiz->attempts = $items->map(function ($result) {
+                        $attempt = new stdClass;
+                        $attempt->id = $result->attempt_id;
+                        $attempt->score = $result->attempt_score;
+                        return $attempt;
+                    });
+                    return $quiz;
+                })->values()->filter(function ($quiz) {
+                    $attempts = $quiz->attempts;
+                    if( $attempts->count() > 0 )
+                    {
+                        if (
+                            $attempts->where('score', '>=', $quiz->criteria)->count() >= 1
+                            || $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
+                            || now()->format('Y-m-d H:i:s') > $quiz->end
+                        ) {
+                            return true;
+                        } else {
+                            return false;
+                        }
                     } else {
                         return false;
                     }
-                } else {
-                    return false;
-                }
-            })->values();
-        }
-        
-            foreach ($my_mentorship_requests as $mentorship) {
+                })->values();
+            }
+
+            foreach( $my_mentorship_requests as $mentorship )
+            {
                 $surveyEligible[] = [
                     'triggered_on' => 'mentorship',
                     'triggered_at' => $mentorship->id,
@@ -1750,98 +1762,88 @@ class HomeController extends Controller
                 ];
             }
             
-            if( $user->hasAnyRole(['registered']) ){
-            foreach ($my_trainings as $session) {
-                $surveyEligible[] = [
-                    'triggered_on' => 'training',
-                    'triggered_at' => $session->id,
-                    'triggered_by' => 'session',
-                    'added_at' => $session->added_at,
-                    'end_at' => $session->end_at
-                ];
+            if( $user->hasAnyRole(['registered']) )
+            {
+                foreach( $my_trainings as $session )
+                {
+                    $surveyEligible[] = [
+                        'triggered_on' => 'training',
+                        'triggered_at' => $session->id,
+                        'triggered_by' => 'session',
+                        'added_at' => $session->added_at,
+                        'end_at' => $session->end_at
+                    ];
+                }
+
+                foreach( $my_quizzes as $quiz )
+                {
+                    $surveyEligible[] = [
+                        'triggered_on' => 'training',
+                        'triggered_at' => $quiz->id,
+                        'triggered_by' => 'quiz'
+                    ];
+                }
             }
 
-            foreach ($my_quizzes as $quiz) {
-                $surveyEligible[] = [
-                    'triggered_on' => 'training',
-                    'triggered_at' => $quiz->id,
-                    'triggered_by' => 'quiz'
-                ];
-            }
-        }
-        
             $surveysToAdd = [];
-            if( $user->hasAnyRole(['mentor']) ){
+            if( $user->hasAnyRole(['mentor']) )
+            {
                 $surveys = SurveyScopes::whereIn('cycle_id', $user->mentorCycles->pluck('id'))
-                    ->where(function($query) {
-                        $query->whereIn('type', ['mentor', 'both'])
-                              ->orWhereNull('type');
-                    })
+                    ->where(function($query) { $query->whereIn('type', ['mentor', 'both'])->orWhereNull('type'); })
                     ->with(['myResponses'])
-                    ->get()
-                    ->unique('survey_id');
-            } else{
-                $surveys = SurveyScopes::where('cycle_id', $cycle_id)
-                    ->where(function($query) {
-                        $query->whereIn('type', ['startup', 'both'])
-                              ->orWhereNull('type');
-                    })
-                    ->with(['myResponses'])
-                    ->get()
-                    ->unique('survey_id');
+                ->get()->unique('survey_id');
             }
-            
+            else
+            {
+                $surveys = SurveyScopes::where('cycle_id', $cycle_id)
+                    ->where(function($query) { $query->whereIn('type', ['startup', 'both'])->orWhereNull('type'); })
+                    ->with(['myResponses'])
+                ->get()->unique('survey_id');
+            }
+
             // Query responses by survey_id (not scope_id) to prevent duplicates across cycles
             $responsesBySurvey = SurveyResponses::where('user_id', $user->id)
                 ->whereIn('survey_id', $surveys->pluck('survey_id')->unique())
-                ->get()
-                ->groupBy('survey_id');
+            ->get()->groupBy('survey_id');
 
-            foreach ($surveys as $survey_scope) {
+            foreach( $surveys as $survey_scope )
+            {
                 $my_responses = $responsesBySurvey->get($survey_scope->survey_id, collect());
 
                 // Initialize fresh collection for each survey to avoid overwriting issues
                 $mentorshipFiltered = collect($surveyEligible)->where('triggered_on', 'mentorship');
                 $trainingFiltered = collect($surveyEligible)->where('triggered_on', 'training');
-                
-                if ($survey_scope->scope == 'mentorship' && $mentorshipFiltered->isNotEmpty()) {
 
+                if( $survey_scope->scope == 'mentorship' && $mentorshipFiltered->isNotEmpty() )
+                {
                     $due = $survey_scope->trigger_by_due;
                     $session = $survey_scope->trigger_by_session;
                     $triggers = [];
-                    if ($due == true) {
-                        $triggers[] = 'due';
-                    }
-                    if ($session == true) {
-                        $triggers[] = 'session';
-                    }
+                    if( $due == true ) { $triggers[] = 'due'; }
+                    if( $session == true ) { $triggers[] = 'session'; }
 
                     $triggers = array_unique($triggers);
-                    if (count($triggers) == 0) {
+                    if( count( $triggers ) == 0)  {
                         $mentorshipFiltered = $mentorshipFiltered->where('triggered_at', null);
                     } else {
                         $mentorshipFiltered = $mentorshipFiltered->whereIn('triggered_by', $triggers);
                     }
-                    
+
                     // Filter sessions: must be added after survey creation AND session must have ended
                     $surveyCreatedAt = $survey_scope->created_at;
-                  
                     $mentorshipFiltered = $mentorshipFiltered->filter(function ($item) use ($surveyCreatedAt) {
                         // Session must be added to system after survey scope creation
-                        
-                        if (!empty($item['added_at']) && Carbon::parse($item['added_at']) <= Carbon::parse($surveyCreatedAt)) {
-                            return false;
-                        }
+                        if( !empty($item['added_at']) && Carbon::parse($item['added_at']) <= Carbon::parse($surveyCreatedAt) ) { return false; }
                         // Session must have ended
-                        if (!empty($item['end_at']) && now() <= Carbon::parse($item['end_at'])) {
-                            return false;
-                        }
+                        if( !empty($item['end_at']) && now() <= Carbon::parse($item['end_at']) ) { return false; }
                         return true;
                     })->values();
-                    
-                    foreach ($mentorshipFiltered as $conditions) {
+
+                    foreach( $mentorshipFiltered as $conditions )
+                    {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-                        if (empty($checkResponse)) {
+                        if( empty( $checkResponse ) )
+                        {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
                                 'survey_id' => $survey_scope->survey_id,
@@ -1854,23 +1856,18 @@ class HomeController extends Controller
                             ];
                         }
                     }
-
-                } elseif ($survey_scope->scope == 'training' && $trainingFiltered->isNotEmpty()) {
+                }
+                elseif( $survey_scope->scope == 'training' && $trainingFiltered->isNotEmpty() )
+                {
                     $due = $survey_scope->trigger_by_due;
                     $quiz = $survey_scope->trigger_by_quiz;
                     $session = $survey_scope->trigger_by_session;
                     $triggers = [];
-                    if ($due == true) {
-                        $triggers[] = 'due';
-                    }
-                    if ($quiz == true) {
-                        $triggers[] = 'quiz';
-                    }
-                    if ($session == true) {
-                        $triggers[] = 'session';
-                    }
+                    if( $due == true ) { $triggers[] = 'due'; }
+                    if( $quiz == true ) { $triggers[] = 'quiz'; }
+                    if( $session == true ) { $triggers[] = 'session'; }
                     $triggers = array_unique($triggers);
-                    if (count($triggers) == 0) {
+                    if( count( $triggers ) == 0 ) {
                         $trainingFiltered = $trainingFiltered->where('triggered_at', null);
                     } else {
                         $trainingFiltered = $trainingFiltered->whereIn('triggered_by', $triggers);
@@ -1879,18 +1876,16 @@ class HomeController extends Controller
                     $surveyCreatedAt = $survey_scope->created_at;
                     $trainingFiltered = $trainingFiltered->filter(function ($item) use ($surveyCreatedAt) {
                         // Session must be added to system after survey scope creation
-                        if (!empty($item['added_at']) && Carbon::parse($item['added_at']) <= Carbon::parse($surveyCreatedAt)) {
-                            return false;
-                        }
+                        if( !empty($item['added_at']) && Carbon::parse($item['added_at']) <= Carbon::parse($surveyCreatedAt) ) { return false; }
                         // Session must have ended
-                        if (!empty($item['end_at']) && now() <= Carbon::parse($item['end_at'])) {
-                            return false;
-                        }
+                        if( !empty($item['end_at']) && now() <= Carbon::parse($item['end_at']) ) { return false; }
                         return true;
                     })->values();
-                    foreach ($trainingFiltered as $conditions) {
+                    foreach( $trainingFiltered as $conditions )
+                    {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-                        if (empty($checkResponse)) {
+                        if( empty($checkResponse) )
+                        {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
                                 'survey_id' => $survey_scope->survey_id,
@@ -1905,17 +1900,15 @@ class HomeController extends Controller
                     }
                 }
             }
-            
-            if (!empty($surveysToAdd)) {
+
+            if( !empty( $surveysToAdd ) )
+            {
                 $surveysToAdd = collect($surveysToAdd)->unique(function ($item) {
                     return $item['user_id'].'-'.$item['survey_id'].'-'.$item['triggered_on'].'-'.$item['triggered_at'].'-'.$item['triggered_by'];
                 })->values()->toArray();
-                // dd($surveysToAdd);
-                
                 SurveyResponses::insert($surveysToAdd);
             }
-        }
-        
+        } */
         $available_surveys = SurveyResponses::where('user_id', $user->id)->where('cycle_id', $cycle_id)->whereNull('responses')->get();
         
         $available_surveys = $available_surveys->map(function ($item) {
