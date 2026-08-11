@@ -519,6 +519,8 @@ class ExternalCyclesController extends Controller
 				if( !empty( $form_step->from ) ) { $start = $form_step->from; }
 				if( !empty( $form_step->to ) ) { $end = $form_step->to; }
 			}
+			$program->registration_start = $start . ' 00:00:00';
+			$program->registration_end = $end . ' 23:59:59';
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
 			$program->ranges = date_ranges( $start, $end );
 		}
