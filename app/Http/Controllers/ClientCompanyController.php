@@ -569,34 +569,37 @@ class ClientCompanyController extends Controller
           //  ->keyBy('year');
 
         $periods = [];
-        $year = !empty($request->valuation_date)
-                    ? Carbon::parse($request->valuation_date)->year
-                    : (int) date('Y');
-
-                    $desc_valuation = FinancialProjection::where('company_id', $id)
+        $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
+        $desc_valuation = FinancialProjection::where('company_id', $id)
+            ->whereNotNull('valuation_date')
             ->orderBy('valuation_date', 'desc')
             ->first();
-        $valuation_dateSearch = date('Y-m');
-        if( !empty( $desc_valuation?->valuation_date ) )
-        {
-            $valuation_dateSearch = $request->valuation_date ?? Carbon::parse($desc_valuation->valuation_date)->format('Y-m') ?? date('Y-m');
+        if (empty($request->valuation_date) && !empty($desc_valuation?->valuation_date)) {
+            $valuation_dateSearch = Carbon::parse($desc_valuation->valuation_date)->format('Y-m');
         }
-       
-        $valuationYear = (int) date('Y', strtotime($valuation_dateSearch));
-        $yearsRange = range($year - 1, $year + 2);
-        $financialprojectionArray = [];
-        foreach ($yearsRange as $_year) {
-            $financialprojectionArray[$_year] = [];
-        }
+
+        $valuationYear = (int) Carbon::parse($valuation_dateSearch . '-01')->format('Y');
+
         $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
             ->orderBy('valuation_date', 'desc')
             ->get();
-            $availableValuationDates = $Historyfinancialprojection->pluck('valuation_date')->unique();
-            $financials = $Historyfinancialprojection->filter(fn($fp) => $fp->valuation_date->format('Y-m-d') === $valuation_dateSearch.'-01')->keyBy('year');
-            $historicalValuationDates = $availableValuationDates->map(function ($date) {
-                return Carbon::parse($date)->format('Y-m');
-            });
-            $valuationDate = $request->valuation_date ?? $valuation_dateSearch;
+        
+        $availableValuationDates = $Historyfinancialprojection->pluck('valuation_date')->unique();
+        $financials = $Historyfinancialprojection->filter(fn($fp) => $fp->valuation_date->format('Y-m-d') === $valuation_dateSearch.'-01')->keyBy('year');
+        
+        $historicalValuationDates = $availableValuationDates->map(function ($date) {
+            return Carbon::parse($date)->format('Y-m');
+        });
+        
+        $valuationDate = $request->valuation_date ?? $valuation_dateSearch;
+
+        $hasFinancials = !$financials->isEmpty() && $financials->count() === 4 && $financials->every(function ($fp) {
+            return !is_null($fp->revenues) && !is_null($fp->cogs) && !is_null($fp->salaries) && !is_null($fp->other_op_expenses);
+        });
+
+        $firstRecordOverall = $Historyfinancialprojection->whereNotNull('currency')->first();
+        $currencyCode = $firstRecordOverall?->currency ?? $company->Currency ?? 'USD';
+
         $map = function ($fp) {
             return [
                 'revenue'        => (float) ($fp->revenues ?? 0),
@@ -620,22 +623,26 @@ class ClientCompanyController extends Controller
             ];
         };
 
-        // We expect 4 years: Past (Year - 1), Year 1 (Year), Year 2 (Year + 1), Year 3 (Year + 2)
-        // But we should just iterate over what we have and label them relative to valuation year
-        
-        // Define the expected years based on valuation year
+        $v = Carbon::parse($valuationDate . '-01');
+        $dateRanges = [
+            'past' => $v->copy()->subYear()->format('m/Y') . ' – ' . $v->copy()->subDay()->format('m/Y'),
+            'year1' => $v->copy()->format('m/Y') . ' – ' . $v->copy()->addYear()->subDay()->format('m/Y'),
+            'year2' => $v->copy()->addYear()->format('m/Y') . ' – ' . $v->copy()->addYears(2)->subDay()->format('m/Y'),
+            'year3' => $v->copy()->addYears(2)->format('m/Y') . ' – ' . $v->copy()->addYears(3)->subDay()->format('m/Y'),
+        ];
+
         $expectedYears = [
-            $valuationYear - 1 => ['key' => 'past', 'label' => __('startup.financial.past_year')],
-            $valuationYear => ['key' => 'year1', 'label' => __('startup.financial.year_1')],
-            $valuationYear + 1 => ['key' => 'year2', 'label' => __('startup.financial.year_2')],
-            $valuationYear + 2 => ['key' => 'year3', 'label' => __('startup.financial.year_3')],
+            $valuationYear - 1 => ['key' => 'past', 'label' => __('startup.financial.past_year'), 'sub' => $dateRanges['past']],
+            $valuationYear => ['key' => 'year1', 'label' => __('startup.financial.year_1'), 'sub' => $dateRanges['year1']],
+            $valuationYear + 1 => ['key' => 'year2', 'label' => __('startup.financial.year_2'), 'sub' => $dateRanges['year2']],
+            $valuationYear + 2 => ['key' => 'year3', 'label' => __('startup.financial.year_3'), 'sub' => $dateRanges['year3']],
         ];
     
-        foreach ($expectedYears as $year => $meta) {
-            $data = isset($financials[$year]) ? $map($financials[$year]) : $map(new FinancialProjection());
+        foreach ($expectedYears as $_year => $meta) {
+            $data = isset($financials[$_year]) ? $map($financials[$_year]) : $map(new FinancialProjection());
             $periods[$meta['key']] = [
                 'label' => $meta['label'],
-                'sub'   => $year, // Just the year number
+                'sub'   => $meta['sub'],
                 'data'  => $data,
             ];
         }
@@ -826,6 +833,8 @@ class ClientCompanyController extends Controller
         'periods',
         'valuationDate',
         'historicalValuationDates',
+        'hasFinancials',
+        'currencyCode',
         'achievements'));
         // } catch (Exception $e) {
         //     //log what happend
