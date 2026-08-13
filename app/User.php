@@ -254,6 +254,18 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     }
 
     /**
+     * Per-instance memo for getOrganizationsIdsAttribute().
+     *
+     * Deliberately a plain property, NOT $this->attributes[]: writing a
+     * non-column key into the attributes array marks the model dirty and
+     * makes any later save() emit it in the SET clause, which fails with
+     * "Unknown column '_cached_organizations_ids'".
+     *
+     * @var array|null
+     */
+    protected $cachedOrganizationsIds = null;
+
+    /**
      * Get all accessible organization IDs for this user.
      * - Admin: returns all organization IDs
      * - Sub-Admin: returns assigned organization IDs from pivot table
@@ -264,8 +276,8 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
      */
     public function getOrganizationsIdsAttribute(): array
     {
-        if (isset($this->attributes['_cached_organizations_ids'])) {
-            return $this->attributes['_cached_organizations_ids'];
+        if ($this->cachedOrganizationsIds !== null) {
+            return $this->cachedOrganizationsIds;
         }
 
         if ($this->hasRole('admin')) {
@@ -296,7 +308,7 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
             }
         }
 
-        $this->attributes['_cached_organizations_ids'] = $result;
+        $this->cachedOrganizationsIds = $result;
 
         return $result;
     }
