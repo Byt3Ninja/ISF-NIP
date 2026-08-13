@@ -1482,7 +1482,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
               <input type="text" id="public_slug" name="public_slug" class="form-control" value="" placeholder="{{ __('cycles.Public URL placeholder') }}" >
             </div>
 
-            <div class="mb-2" id="mmenu2">
+            {{--  <div class="mb-2" id="mmenu2">
               <label class="form-label">{{ __('cycles.Choose screening type') }}: </label>
               <div>
                 <select class="select2 form-control" id="mScreeningSelect" name="mScreeningSelect" required>
@@ -1492,7 +1492,7 @@ $screeningTypes = ['assign-one-to-all-users', 'assign-group-to-all-users', 'assi
                   <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
                 </select>
               </div>
-            </div>
+            </div>  --}}
 
 
             <div class="col-12 form-group mb-3">

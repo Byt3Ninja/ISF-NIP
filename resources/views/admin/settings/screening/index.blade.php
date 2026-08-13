@@ -279,14 +279,14 @@
             <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
               class="form-control" required>
           </div>
-          <div class="form-group mb-3">
+          {{--  <div class="form-group mb-3">
             <label class="form-label" for="ScreeningSelect">{{ __('cycles.Choose screening type') }}:</label>
             <select class="form-control select2" id="ScreeningSelect" name="mScreeningSelect" required>
               <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
               <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
               <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
             </select>
-          </div>
+          </div>  --}}
           <input type="hidden" id="mfromDate" name="fromDate">
           <input type="hidden" id="mtoDate" name="toDate">
           <div class="form-group mb-3">
