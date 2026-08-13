@@ -96,9 +96,15 @@ class SurveyResponses extends Model
 		$cycle_idMentor = [];
 		$company = $user->company;
 		$steps = collect([]);
+		$organization_id = null;
 		if( $company && $company->cycledata )
 		{
 			$cycle_id = $company->cycle;
+			if( $company->cycledata )
+			{
+                $organization = $company->cycledata->organization;
+                if( !empty( $organization ) ) { $organization_id = $organization->id; }
+            }
 			$steps = DB::table('steps as s')
 				->select([
 					's.id',
