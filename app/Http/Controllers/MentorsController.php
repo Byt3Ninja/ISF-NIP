@@ -1213,6 +1213,7 @@ class MentorsController extends Controller
 		$sessions = $sessions->map(function ( $session ) {
 			$session->address = $session->cycle->offline_location_address ? $session->cycle->offline_location_address : $session->organization->address;
 			$session->google_map_url = $session->cycle->offline_location_map ? $session->cycle->offline_location_map : $session->organization->google_map_url;
+			$session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
 			return $session;
 		});
 		return view('admin.clients.mymentorships', compact('sessions'));

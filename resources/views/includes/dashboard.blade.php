@@ -874,32 +874,22 @@
 														{{ $session->session_type ?? __('admin.All') }}
 													</small>
 												</td>
-												<td> 
-													
-													@php
-														// zoom_date is stored as local wall-clock time (see book-session-modal.blade.php),
-														// not UTC (app.timezone), so "now" must be computed in the same timezone.
-														$now = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d H:i');
-														$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-														$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
-														@endphp
-														
+												<td>
+
 													@if ($session->approved == 'Yes')
 													@if( $session->session_type == 'Online' )
-														@if($now >= $start_time )
-															@if($now <= $end_time)
-																
+														@if($session->meeting_status === 'joinable')
+
 																<span class="warning">
 																	<a class="btn btn-sm btn-label-primary" href="{{ route('mentorship.join', $session->id) }}" target="_blank">
 																		<i class="ti ti-brand-zoom me-2"></i>
 																		{{ __('dashboard.Join now') }}
 																	</a>
 																</span>
-																
-															@else
+
+														@elseif($session->meeting_status === 'expired')
 																<span class="text-danger"> <i class="ti ti-alarm"></i> {{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }} </span>
-															@endif
-														@else 
+														@else
 															<span class="text-warning"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }} </span>
 														@endif
 													@else
@@ -1138,19 +1128,9 @@
 									</td>
 									<td> {{ $session->admin_comment ?? '...' }} </td>
 									<td>
-										@php
-											// zoom_date is stored as local wall-clock time (see book-session-modal.blade.php),
-											// not UTC (app.timezone), so "now" must be computed in the same timezone.
-											$now = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d H:i');
-											$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-											$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
-										@endphp
-										
-										
 											@if($session->session_type == 'Online')
-												@if( $now >= $start_time )
-													@if( $now <= $end_time )
-													
+												@if( $session->meeting_status === 'joinable' )
+
 														<a href="{{ route('mentorship.join', $session->id) }}" target="_blank">
 															<button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button" class="btn btn-label-primary rounded">
 																<i class="ti ti-link me-2"></i> {{ __('admin.Join Meeting') }}
@@ -1161,9 +1141,8 @@
 																<i class="ti ti-key me-2"></i>
 															</button>
 														@endif
-													@else
-														<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
-													@endif
+												@elseif( $session->meeting_status === 'expired' )
+													<span class="text-danger"> <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }} </span>
 												@else
 													<i class="ti ti-alarm me-2"></i> {{ __('admin.Meeting_will_start_at_time') }}
 												@endif

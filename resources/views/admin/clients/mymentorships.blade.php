@@ -92,21 +92,14 @@
                                   {{ $session->session_type ?? __('admin.All') }}
                                 </small>
                               </td>
-                              @php
-                                // zoom_date is stored as local wall-clock time (see book-session-modal.blade.php),
-                                // not UTC (app.timezone), so "now" must be computed in the same timezone.
-                                $now = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d H:i');
-                                $start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-                                $end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
-                              @endphp
                               <td>
                                 @if (isset($session->session_type) && $session->session_type == 'Online')
                                   @if ($session->approved === 'Yes')
-                                    @if ($now < $start_time)
+                                    @if ($session->meeting_status === 'before')
                                       <span class="text-warning">
                                           <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
                                       </span>
-                                    @elseif ($now > $end_time)
+                                    @elseif ($session->meeting_status === 'expired')
                                       <small class="text-danger">{{ __('admin.Meeting_Expired') }}</small>
                                     @else
                                       <a href="{{ $session?->join_url }}" target="_blank">
