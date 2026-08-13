@@ -582,8 +582,7 @@
                       {{ $session->admin_comment ?? '...' }}
                     </td>
                     <td>
-                      {{-- zoom_date is stored as local wall-clock time (see book-session-modal.blade.php), not UTC (app.timezone) --}}
-                      @if (\Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d') == date('Y-m-d', strtotime($session->zoom_date)))
+                      @if ($session->is_today)
                       <a href="{{ $session->start_url }}" target="_blank">
                         <button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button"
                           class="btn btn-label-primary rounded">
