@@ -98,8 +98,8 @@ class SurveyResponses extends Model
 		$steps = collect([]);
 		$organization_id = null;
 		$default_tz = env('APP_TIMEZONE', 'Africa/Cairo');
-		$app_tz = $user->timezone ? $user->timezone : $default_tz;
-		$now = Carbon::now()->timezone( $app_tz );
+		$user_tz = $user->timezone ? $user->timezone : $default_tz;
+		$now = Carbon::now()->timezone( $user_tz );
 		if( $company && $company->cycledata )
 		{
 			$cycle_id = $company->cycle;
@@ -139,7 +139,7 @@ class SurveyResponses extends Model
 			$surveyEligible = [];
 			foreach( $steps as $step )
 			{
-				if( ( optional($step)->stype == 3 || optional($step)->stype == 4 ) && ( $now > Carbon::parse($step->to)->timezone( $app_tz )->format('Y-m-d H:i:s') ) )
+				if( ( optional($step)->stype == 3 || optional($step)->stype == 4 ) && $now->gt( Carbon::parse($step->to)->timezone( $user_tz ) ) )
 				{
 					$surveyEligible[] = [
 						'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
@@ -199,12 +199,14 @@ class SurveyResponses extends Model
 				->get();
 			}
 
-			$my_mentorship_requests = $my_mentorship_requests->map(function ( $item ) use ( $now, $app_tz ) {
-				$item->end_at = Carbon::parse($item->zoom_date)->timezone( $app_tz )->addMinutes($item->period)->format('Y-m-d H:i:s');
+			$my_mentorship_requests = $my_mentorship_requests->map(function ( $item ) use ( $user_tz ) {
+				$item->end_at = ( !empty($item->zoom_date) && !empty($item->period) )
+					? Carbon::parse($item->zoom_date)->timezone( $user_tz )->addMinutes($item->period)
+					: null;
 				$item->added_at = $item->created_at;
 				return $item;
 			})->filter(function ($item) use ($now) {
-				return !empty($item->zoom_date) && !empty($item->period) && $now > $item->end_at;
+				return !empty($item->end_at) && $now->gt($item->end_at);
 			})->values();
 
 			if( $user->hasAnyRole(['registered']) )
@@ -226,18 +228,18 @@ class SurveyResponses extends Model
 					->where('s.cycle_id', $cycle_id)
 				->get();
 
-				$my_trainings = $my_trainings->map(function ( $item ) use ( $now, $app_tz ) {
+				$my_trainings = $my_trainings->map(function ( $item ) use ( $user_tz ) {
 					$item->end_at = null;
 					$item->added_at = $item->created_at;
 					if( $item->type == 'sessions' && !empty($item->datetime) && !empty($item->duration) ) {
-						$sessionStart = Carbon::createFromTimestamp($item->datetime)->timezone( $app_tz );
-						$item->end_at = $sessionStart->copy()->addMinutes($item->duration)->format('Y-m-d H:i:s');
+						$sessionStart = Carbon::createFromTimestamp($item->datetime)->timezone( $user_tz );
+						$item->end_at = $sessionStart->copy()->addMinutes($item->duration);
 					} elseif( in_array($item->type, ['online', 'offline']) && !empty($item->datetime) ) {
-						$item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s');
+						$item->end_at = Carbon::createFromTimestamp($item->datetime)->timezone( $user_tz );
 					}
 					return $item;
 				})->filter(function ($item) use ( $now ) {
-					return !empty($item->end_at) && $now > $item->end_at;
+					return !empty($item->end_at) && $now->gt($item->end_at);
 				})->values();
 
 				$my_quizzes = DB::table('quizzes as q')
@@ -259,12 +261,12 @@ class SurveyResponses extends Model
 					})
 				->get();
 
-				$my_quizzes = $my_quizzes->groupBy('id')->map(function ( $items ) use ( $now, $app_tz ) {
+				$my_quizzes = $my_quizzes->groupBy('id')->map(function ( $items ) use ( $user_tz ) {
 					$item = $items->first();
 					$quiz = new stdClass;
 					$quiz->id = $item->id;
 					$quiz->criteria = $item->criteria;
-					$quiz->end = Carbon::parse($item->end)->timezone( $app_tz )->format('Y-m-d H:i:s');
+					$quiz->end = Carbon::parse($item->end)->timezone( $user_tz );
 					$quiz->trials = $item->attempts;
 					$quiz->attempts = $items->map(function ($result) {
 						$attempt = new stdClass;
@@ -280,7 +282,7 @@ class SurveyResponses extends Model
 						if (
 							$attempts->where('score', '>=', $quiz->criteria)->count() >= 1
 							|| $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
-							|| $now->format('Y-m-d H:i:s') > $quiz->end
+							|| $now->gt($quiz->end)
 						) {
 							return true;
 						} else {
@@ -371,11 +373,11 @@ class SurveyResponses extends Model
 
 					// Filter sessions: must be added after survey creation AND session must have ended
 					$surveyCreatedAt = $survey_scope->created_at;
-					$mentorshipFiltered = $mentorshipFiltered->filter(function ($item) use ($surveyCreatedAt, $now, $app_tz) {
+					$mentorshipFiltered = $mentorshipFiltered->filter(function ($item) use ($surveyCreatedAt, $now, $user_tz) {
 						// Session must be added to system after survey scope creation
-						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->timezone( $app_tz ) <= Carbon::parse($surveyCreatedAt)->timezone( $app_tz ) ) { return false; }
+						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->timezone( $user_tz )->lte( Carbon::parse($surveyCreatedAt)->timezone( $user_tz ) ) ) { return false; }
 						// Session must have ended
-						if( !empty($item['end_at']) && $now <= Carbon::parse($item['end_at'])->timezone( $app_tz ) ) { return false; }
+						if( !empty($item['end_at']) && $now->lte( $item['end_at'] ) ) { return false; }
 						return true;
 					})->values();
 
@@ -414,11 +416,11 @@ class SurveyResponses extends Model
 					}
 					// Filter sessions: must be added after survey creation AND session must have ended
 					$surveyCreatedAt = $survey_scope->created_at;
-					$trainingFiltered = $trainingFiltered->filter(function ($item) use ($surveyCreatedAt, $now, $app_tz) {
+					$trainingFiltered = $trainingFiltered->filter(function ($item) use ($surveyCreatedAt, $now, $user_tz) {
 						// Session must be added to system after survey scope creation
-						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->timezone( $app_tz ) <= Carbon::parse($surveyCreatedAt)->timezone( $app_tz ) ) { return false; }
+						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->timezone( $user_tz )->lte( Carbon::parse($surveyCreatedAt)->timezone( $user_tz ) ) ) { return false; }
 						// Session must have ended
-						if( !empty($item['end_at']) && $now <= Carbon::parse($item['end_at'])->timezone( $app_tz ) ) { return false; }
+						if( !empty($item['end_at']) && $now->lte( $item['end_at'] ) ) { return false; }
 						return true;
 					})->values();
 					foreach ($trainingFiltered as $conditions)
