@@ -654,11 +654,11 @@
     $('#stepForm').on('submit', function (e) {
       const screeningType = $('#ScreeningSelect').val();
       console.log('Submitting screening type:', screeningType);
-      if (!screeningType) {
+      /* if (!screeningType) {
         e.preventDefault();
         alert('{{ __('Please select a screening type') }}');
         return false;
-      }
+      } */
     });
 
     // Handle screening guidelines form submission with AJAX
