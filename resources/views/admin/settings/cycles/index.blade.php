@@ -633,10 +633,10 @@
   // Check for conditional required fields based on step type
   // Form is optional: a step may intentionally have no form ("— No form —").
 
-  if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
+  /* if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
     showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
     return false;
-  }
+  } */
 
   if (stepType.value === '6' && teamNumberInput && (!teamNumberInput.value || teamNumberInput.value < 1)) {
     showError(teamNumberInput, errors.teamNumber);
