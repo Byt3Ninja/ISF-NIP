@@ -503,7 +503,7 @@
             <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
             <input type="text" id="public_slug" name="public_slug" class="form-control" value="" placeholder="{{ __('cycles.Public URL placeholder') }}" >
           </div>
-          <div class="mb-4" id="mmenu2">
+          {{--  <div class="mb-4" id="mmenu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div>
               <select class="form-select" id="mScreeningSelect" name="mScreeningSelect" required>
@@ -513,7 +513,7 @@
                 <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
               </select>
             </div>
-          </div>
+          </div>  --}}
           <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Form title') }}: </label>
           <div class="mb-4">
             <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
