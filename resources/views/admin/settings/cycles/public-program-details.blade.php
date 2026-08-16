@@ -11,7 +11,7 @@
 
 	<style>
 		:root {
-			--primary: #6366f1;
+			--primary: {{ $program->main_color }};
 			--on-primary: #ffffff;
 			--background: #f8fafc;
 			--surface: #ffffff;
@@ -21,6 +21,25 @@
 			--secondary: #0891b2;
 			--tertiary: #d97706;
 			--outline: #e2e8f0;
+		}
+
+		/* Override default theme purple/primary colors with the customized main color */
+		.text-primary {
+			color: var(--primary) !important;
+		}
+		.bg-primary {
+			background-color: var(--primary) !important;
+		}
+		.bg-label-primary {
+			background-color: color-mix(in srgb, var(--primary) 14%, transparent) !important;
+			color: var(--primary) !important;
+		}
+		.btn-primary {
+			background-color: var(--primary) !important;
+			border-color: var(--primary) !important;
+		}
+		.spinner-grow.text-primary {
+			color: var(--primary) !important;
 		}
 
 		body {
@@ -48,8 +67,8 @@
 		}
 
 		.hero-gradient {
-			background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-						radial-gradient(circle at 80% 70%, rgba(8, 145, 178, 0.08) 0%, transparent 50%);
+			background: radial-gradient(circle at 20% 30%, {{ $program->start_color }} 0%, transparent 50%),
+						radial-gradient(circle at 80% 70%, {{ $program->end_color }} 0%, transparent 50%);
 		}
 
 		.btn-primary-custom {
@@ -62,8 +81,9 @@
 			transition: all 0.3s ease;
 		}
 		.btn-primary-custom:hover {
-			background-color: #4f46e5;
-			box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+			background-color: var(--primary);
+			opacity: 0.9;
+			box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 			color: white;
 		}
 

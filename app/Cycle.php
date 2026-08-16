@@ -190,5 +190,18 @@ class Cycle extends Model
         return $hackathon;
     }
 
-   
+    public function getStartColorAttribute($value)
+    {
+        return $value ?: '#6366f114';
+    }
+
+    public function getEndColorAttribute($value)
+    {
+        return $value ?: '#0891b214';
+    }
+
+    public function getMainColorAttribute($value)
+    {
+        return $value ?: '#6366f1';
+    }
 }

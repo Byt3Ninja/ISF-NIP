@@ -503,6 +503,9 @@ class ExternalCyclesController extends Controller
 				'p.is_public',
 				'p.winners_announcement AS announced',
 				'p.winners_visibility AS visibility',
+				'p.start_color',
+				'p.end_color',
+				'p.main_color',
 				'o.slug AS org_slug',
 				'o.name_en AS en_org_name',
 				'o.name_ar AS ar_org_name',
@@ -537,6 +540,10 @@ class ExternalCyclesController extends Controller
 			$program->registration_end = $end . ' 23:59:59';
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
 			$program->ranges = date_ranges( $start, $end );
+
+			$program->start_color = preg_replace('/^#+/', '#', $program->start_color ?: '#6366f114');
+			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: '#0891b214');
+			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: '#6366f1');
 		}
 		return $program;
 	}

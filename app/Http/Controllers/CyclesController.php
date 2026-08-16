@@ -307,6 +307,16 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
+        if ($request->has('start_color')) {
+            $request->merge(['start_color' => preg_replace('/^#+/', '#', trim($request->start_color))]);
+        }
+        if ($request->has('end_color')) {
+            $request->merge(['end_color' => preg_replace('/^#+/', '#', trim($request->end_color))]);
+        }
+        if ($request->has('main_color')) {
+            $request->merge(['main_color' => preg_replace('/^#+/', '#', trim($request->main_color))]);
+        }
+
         $isEdit = false;
         $isCreate = false;
         if( $request->has('typeedit') && $request->has('id') && intval( $request->id ) > 0 ) { $isEdit = true; }
@@ -337,6 +347,7 @@ class CyclesController extends Controller
         if ($type == CycleModifyAction::EDIT_CYCLE || $isEdit == true)
         {
             /// Edit Cycle (to be moved to standalone controller)
+            $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => ['required', 'string', 'max:250', Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
@@ -361,13 +372,22 @@ class CyclesController extends Controller
                 'cohort' => 'required|string|max:250',
                 'offline_location_address' => 'nullable|string|max:250',
                 'offline_location_map' => 'nullable|string|max:500',
+                'start_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'end_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'main_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
                 'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
-                'title_ar.required' => app()->getLocale() == 'ar' ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
-                'description_ar.required' => app()->getLocale() == 'ar' ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
+                'title_ar.required' => $isAr ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
+                'description_ar.required' => $isAr ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
+                'start_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'start_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'end_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'end_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'main_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
+                'main_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
             ]);
                 
             $cycle = Cycle::find($id);
@@ -418,6 +438,9 @@ class CyclesController extends Controller
             $cycle->step_type = $request->program_step_type;
             $cycle->offline_location_address = $request->offline_location_address;
             $cycle->offline_location_map = $request->offline_location_map;
+            $cycle->start_color = $request->start_color;
+            $cycle->end_color = $request->end_color;
+            $cycle->main_color = $request->main_color;
 
 
             $fileManager = app(\App\Services\FileManagerService::class);
@@ -796,6 +819,7 @@ class CyclesController extends Controller
         elseif ($request->tab_id == CycleTabAction::CREATE_CYCLE)
         {
             // create new cycle (to be moved to standalone controller)
+            $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
@@ -814,7 +838,9 @@ class CyclesController extends Controller
                 'program_step_type' => ['required', 'in:cycle,time'],
                 'offline_location_address' => 'nullable|string|max:250',
                 'offline_location_map' => 'nullable|string|max:500',
-
+                'start_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'end_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'main_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
@@ -822,8 +848,14 @@ class CyclesController extends Controller
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
                 'offline_location_address.max' => __('cycles.offline_location_address_max'),
                 'offline_location_map.max' => __('cycles.offline_location_map_max'),
-                'title_ar.required' => app()->getLocale() == 'ar' ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
-                'description_ar.required' => app()->getLocale() == 'ar' ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
+                'title_ar.required' => $isAr ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
+                'description_ar.required' => $isAr ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
+                'start_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'start_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'end_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'end_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'main_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
+                'main_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
             ]);
             
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
@@ -880,6 +912,9 @@ class CyclesController extends Controller
                 $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
                 $cycle->offline_location_address = $request->offline_location_address;
                 $cycle->offline_location_map = $request->offline_location_map;
+                $cycle->start_color = $request->start_color;
+                $cycle->end_color = $request->end_color;
+                $cycle->main_color = $request->main_color;
                 // Check if file is uploaded
 
                 $fileManager = app(\App\Services\FileManagerService::class);

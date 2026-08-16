@@ -207,7 +207,7 @@
 <div class="col-12">
   <div class="d-flex align-items-center justify-content-between mb-4">
     <h5 class="mb-0">{{ __('cycles.Branding_Colors') }}</h5>
-    <button type="button" id="reset-brand-colors" class="btn btn-sm btn-outline-secondary" style="display: none;">
+    <button type="button" id="reset-brand-colors" class="btn btn-sm btn-outline-secondary">
       <i class="ti ti-refresh me-1"></i>
       {{ __('cycles.Reset_To_Default') }}
     </button>
@@ -217,18 +217,21 @@
       <p class="mb-2">{{ __('cycles.Gradient_Start_Color') }}</p>
       <div id="start-color" class="brand-color-picker"></div>
       <input type="hidden" name="start_color" id="start_color_input"
-        value="{{ $ccycle?->start_color ?? 'rgba(99, 102, 241, 0.08)' }}">
+        value="{{ $ccycle?->start_color }}">
+      <div class="invalid-feedback start-color-error" style="display: none;"></div>
     </div>
     <div class="col-sm-4 col-lg-3 mb-3">
       <p class="mb-2">{{ __('cycles.Gradient_End_Color') }}</p>
       <div id="end-color" class="brand-color-picker"></div>
       <input type="hidden" name="end_color" id="end_color_input"
-        value="{{ $ccycle?->end_color ?? 'rgba(8, 145, 178, 0.08)' }}">
+        value="{{ $ccycle?->end_color }}">
+      <div class="invalid-feedback end-color-error" style="display: none;"></div>
     </div>
     <div class="col-sm-4 col-lg-3 mb-3">
       <p class="mb-2">{{ __('cycles.Main_Color') }}</p>
       <div id="main-color" class="brand-color-picker"></div>
-      <input type="hidden" name="main_color" id="main_color_input" value="{{ $ccycle?->main_color ?? '#7367f0' }}">
+      <input type="hidden" name="main_color" id="main_color_input" value="{{ $ccycle?->main_color }}">
+      <div class="invalid-feedback main-color-error" style="display: none;"></div>
     </div>
   </div>
 
@@ -247,8 +250,8 @@
     border-radius: .5rem;
     border: 1px solid rgba(0, 0, 0, .1);
     background:
-      radial-gradient(circle at 20% 30%, var(--hero-gradient-start, rgba(99, 102, 241, 0.08)) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, var(--hero-gradient-end, rgba(8, 145, 178, 0.08)) 0%, transparent 50%);
+      radial-gradient(circle at 20% 30%, var(--hero-gradient-start, #6366f114) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, var(--hero-gradient-end, #0891b214) 0%, transparent 50%);
   }
 </style>
 
@@ -482,9 +485,15 @@
       // Start/end match the .hero-gradient CSS exactly (radial-gradient stops at 8% alpha).
       // Main is a solid brand color, no alpha involved.
       const BRAND_DEFAULTS = {
-        start: 'rgba(99, 102, 241, 0.08)',
-        end: 'rgba(8, 145, 178, 0.08)',
-        main: '#7367f0'
+        start: '#6366f114',
+        end: '#0891b214',
+        main: '#6366f1'
+      };
+
+      const RESET_DEFAULTS = {
+        start: '#6366f114',
+        end: '##0891b214',
+        main: '#6366f1'
       };
 
       const $resetBtn = $('#reset-brand-colors');
@@ -495,16 +504,7 @@
       }
 
       function checkForChanges() {
-        const startVal = normalize($('#start_color_input').val());
-        const endVal = normalize($('#end_color_input').val());
-        const mainVal = normalize($('#main_color_input').val());
-
-        const changed =
-          startVal !== normalize(BRAND_DEFAULTS.start) ||
-          endVal !== normalize(BRAND_DEFAULTS.end) ||
-          mainVal !== normalize(BRAND_DEFAULTS.main);
-
-        $resetBtn.toggle(changed);
+        // Keep Reset button visible as a static branding action
       }
 
       function updatePreview() {
@@ -512,17 +512,17 @@
         $preview.css('--hero-gradient-end', $('#end_color_input').val() || BRAND_DEFAULTS.end);
       }
 
-      function initColorPicker(selector, defaultColor, hiddenInputSelector, useAlpha) {
+      function initColorPicker(selector, defaultColor, hiddenInputSelector) {
         const pickrInstance = pickr.create({
           el: selector,
           theme: 'classic',
-          default: defaultColor,
+          default: defaultColor.replace(/^#+/, '#'),
           swatches: [
-            'rgba(102, 108, 232, 1)',
-            'rgba(40, 208, 148, 1)',
-            'rgba(255, 73, 97, 1)',
-            'rgba(255, 145, 73, 1)',
-            'rgba(30, 159, 242, 1)'
+            '#6366F114',
+            '#0891B214',
+            '#6366F1',
+            '#7367F0',
+            '#9C88FF'
           ],
           components: {
             preview: true,
@@ -543,9 +543,13 @@
 
         function syncValue(color) {
           if (!color) return;
-          // Start/end need the alpha channel preserved to match the hero gradient; main is solid.
-          const value = useAlpha ? color.toRGBA().toString() : color.toHEXA().toString();
+          // Use HEXA format for all inputs (with alpha preservation)
+          const value = color.toHEXA().toString();
           $(hiddenInputSelector).val(value);
+          
+          // Clear error messages in real-time on color change
+          $(hiddenInputSelector).siblings('.invalid-feedback').text('').hide();
+
           updatePreview();
           checkForChanges();
         }
@@ -567,32 +571,32 @@
       const startPickr = initColorPicker(
         '#start-color',
         $('#start_color_input').val() || BRAND_DEFAULTS.start,
-        '#start_color_input',
-        true
+        '#start_color_input'
       );
       const endPickr = initColorPicker(
         '#end-color',
         $('#end_color_input').val() || BRAND_DEFAULTS.end,
-        '#end_color_input',
-        true
+        '#end_color_input'
       );
       const mainPickr = initColorPicker(
         '#main-color',
         $('#main_color_input').val() || BRAND_DEFAULTS.main,
-        '#main_color_input',
-        false
+        '#main_color_input'
       );
 
       $resetBtn.on('click', function (e) {
         e.preventDefault();
 
-        startPickr.setColor(BRAND_DEFAULTS.start);
-        endPickr.setColor(BRAND_DEFAULTS.end);
-        mainPickr.setColor(BRAND_DEFAULTS.main);
+        startPickr.setColor(RESET_DEFAULTS.start);
+        endPickr.setColor(RESET_DEFAULTS.end.replace(/^#+/, '#'));
+        mainPickr.setColor(RESET_DEFAULTS.main);
 
-        $('#start_color_input').val(BRAND_DEFAULTS.start);
-        $('#end_color_input').val(BRAND_DEFAULTS.end);
-        $('#main_color_input').val(BRAND_DEFAULTS.main);
+        $('#start_color_input').val(RESET_DEFAULTS.start);
+        $('#end_color_input').val(RESET_DEFAULTS.end);
+        $('#main_color_input').val(RESET_DEFAULTS.main);
+
+        // Clear validation error when reset is clicked
+        $('.start-color-error, .end-color-error, .main-color-error').text('').hide();
 
         updatePreview();
         checkForChanges();

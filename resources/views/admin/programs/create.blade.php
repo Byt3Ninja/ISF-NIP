@@ -292,6 +292,7 @@ $tabs = [
           // Clear previous errors
           $('.form-control', '#pills-Program_Settings-edit').removeClass('is-invalid');
           $('.invalid-feedback', '#pills-Program_Settings-edit').text('');
+          $('.start-color-error, .end-color-error, .main-color-error').text('').hide();
           
           // Validate public URL when visibility is public
           const isPublic = $('#is_public').val();
@@ -316,6 +317,30 @@ $tabs = [
           if (reminderEnabled && (!hoursReminder || parseInt(hoursReminder) < 1)) {
             $('#hours_reminder_input').addClass('is-invalid');
             $('#hours_reminder_input').siblings('.invalid-feedback').text('{{ $l == "en" ? "Hours reminder must be at least 1 hour" : "تذكير الساعات يجب أن يكون ساعة واحدة على الأقل" }}');
+            isValid = false;
+          }
+
+          // Validate branding colors
+          const startColor = $('#start_color_input').val();
+          const endColor = $('#end_color_input').val();
+          const mainColor = $('#main_color_input').val();
+          const colorRegex = /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
+          // Start Color
+          if (!startColor || !colorRegex.test(startColor.replace(/^#+/, '#'))) {
+            $('.start-color-error').text('{{ $l == "en" ? "Please enter a valid start color." : "يرجى إدخال لون صالح." }}').show();
+            isValid = false;
+          }
+
+          // End Color
+          if (!endColor || !colorRegex.test(endColor.replace(/^#+/, '#'))) {
+            $('.end-color-error').text('{{ $l == "en" ? "Please enter a valid end color." : "يرجى إدخال لون صالح." }}').show();
+            isValid = false;
+          }
+
+          // Main Color
+          if (!mainColor || !colorRegex.test(mainColor.replace(/^#+/, '#'))) {
+            $('.main-color-error').text('{{ $l == "en" ? "Please enter a valid button color." : "يرجى إدخال لون صالح." }}').show();
             isValid = false;
           }
           
