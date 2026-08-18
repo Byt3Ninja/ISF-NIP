@@ -14,6 +14,22 @@
     margin-top: 2rem !important;
   }
 
+  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
+     stays fully visible no matter where in the list the row sits. */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
+  }
+
+  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
+     stays fully visible no matter where in the list the row sits. */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
+  }
+
   #mob {
     display: flex;
     justify-content: flex-end;

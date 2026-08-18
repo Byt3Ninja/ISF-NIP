@@ -21,9 +21,13 @@ $navigationIcons = [
 ];
 
   $setting = \App\Settings::where('id', 1)->first();
+  // Display-only: keep this in a local, never on $_user. `users` has no
+  // `organization` column, so assigning it marks the model dirty and makes
+  // any later save() fail with "Unknown column 'organization'".
+  $sidebarOrg = null;
   if( $_user->HaveCompany && $_user->company && $_user->company->cycledata && $_user->company->cycledata->organization)
   {
-    $_user->organization = $_user->company->cycledata->organization;
+    $sidebarOrg = $_user->company->cycledata->organization;
   }
 
   // Sidebar avatar
