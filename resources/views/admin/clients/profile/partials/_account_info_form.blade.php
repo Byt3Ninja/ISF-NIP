@@ -76,10 +76,10 @@
               <div class="d-flex gap-2 flex-wrap">
                 {{-- These buttons submit the sibling forms rendered after this one; they
                      cannot be nested here because forms may not contain forms. --}}
-                <button type="submit" form="resend-email-confirmation-form" class="btn btn-sm btn-outline-primary">
+                <button type="button" data-form="resend-email-confirmation-form" class="btn btn-sm btn-outline-primary change-email-cta-button">
                   {{ __('admin.ResendConfirmation') }}
                 </button>
-                <button type="submit" form="cancel-email-change-form" class="btn btn-sm btn-outline-secondary">
+                <button type="button" data-form="cancel-email-change-form" class="btn btn-sm btn-outline-secondary change-email-cta-button">
                   {{ __('admin.CancelEmailChange') }}
                 </button>
               </div>

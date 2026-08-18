@@ -70,6 +70,8 @@ class Permissions
         'screening.update_step_form',
         'services_providers.edit_profile',
         'services_providers.clients.*',
+        'user.profile_email_resend',
+        'user.profile_email_cancel',
     ];
 
     public $exceptControllers = [
