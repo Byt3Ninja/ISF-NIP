@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Like;
-
+use stdClass;
 use Carbon\Carbon;
 use App\Traits\Auditable;
 use Illuminate\Support\Facades\DB;
