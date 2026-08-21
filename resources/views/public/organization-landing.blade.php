@@ -92,6 +92,7 @@
 </head>
  
 @php
+$color_palette = ['#fff', '#ebebed'];
 $sections = [
   ['id' => 'programs', 'label' => __('admin.Programs'), 'visible' => $landingPage->programs_enabled && isset($landingPrograms) && $landingPrograms->count() > 0],
   ['id' => 'how-it-works', 'label' => __('admin.How It Works'), 'visible' => $landingPage->how_it_works_enabled && !empty($landingPage->process_steps)],
@@ -108,6 +109,12 @@ if (!empty($customSections)) {
       'visible' => !empty($customSection->content),
     ];
   }
+}
+$sections = collect($sections)->filter(function ($section) {
+  return $section['visible'];
+})->values()->toArray();
+foreach ($sections as $index => $section) {
+  $sections[$index]['color'] = $color_palette[$index % count($color_palette)];
 }
 
 $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
