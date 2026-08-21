@@ -167,7 +167,7 @@
                           <div class="quick-info mt-3 d-flex flex-wrap gap-3">
                             <div class="d-flex align-items-center text-muted">
                               <i class="ti ti-calendar-event me-2 text-primary"></i>
-                              <small class="fw-medium">Started: {{ $cstep->from->format('M d, Y') ?? '-' }}</small>
+                              <small class="fw-medium">{{ __('cycles.Started') }}: {{ $cstep->from->format('M d, Y') ?? '-' }}</small>
                             </div>
                             <div class="d-flex align-items-center text-muted">
                               <i class="ti ti-building me-2 text-success"></i>

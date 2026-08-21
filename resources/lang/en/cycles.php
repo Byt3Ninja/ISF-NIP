@@ -8,6 +8,7 @@ return [
     'Portal Cycles' => 'Portal Programs',
     'Select cycle from list' => 'Select program from list',
     'Start' => 'Start',
+    'Started' => 'Started',
     'Users' => 'Users',
     'Edit' => 'Edit',
     'New' => 'New',
