@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use stdClass;
+use App\Enums\StepType;
 
 class TeamFormation extends Model
 {
@@ -86,9 +87,16 @@ class TeamFormation extends Model
             ->leftJoin('team_members AS tm', 'tm.team_formation_id', '=', 'tf.id')
             ->leftJoin('users AS u', 'u.id', '=', 'tm.user_id')
             ->leftJoin('companies AS c', 'tm.Company_id', '=', 'c.id')
-            ->leftJoin('screening_evaluation_results AS ser', 'ser.company_id', '=', 'c.id')
-            ->leftJoin('screening_evaluation AS se', 'ser.evaluation_id', '=', 'se.id')
-            ->leftJoin('steps AS stp', 'stp.id', '=', 'se.step_id')
+            ->leftJoin('steps AS stp', function( $join ) use ( $cycleId ) {
+                $join->on('stp.id', '=', 'c.step')
+                     ->where('stp.stype', '=', StepType::FINAL_EVALUATION)
+                     ->where('stp.cycle_id', '=', $cycleId);
+            })
+            ->leftJoin('screening_evaluation AS se', 'se.step_id', '=', 'stp.id')
+            ->leftJoin('screening_evaluation_results AS ser', function( $join ) {
+                $join->on('ser.company_id', '=', 'c.id')
+                     ->on('ser.evaluation_id', '=', 'se.id');
+            })
             ->leftJoin('project_likes AS pl', 'pl.team_id', '=', 'tf.id')
             ->where('tf.cycle_id', $cycleId)
             ->where('tm.acceptInvition', 'accepted')
@@ -169,7 +177,6 @@ class TeamFormation extends Model
                 $company_id = $team->company->id;
                 $publishedEvaluations = 0;
                 $averageScore = 0;
-                $published = true;
 
                 foreach( $judges as $judge )
                 {
@@ -178,8 +185,7 @@ class TeamFormation extends Model
                         $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
                         if( $scoped_company )
                         {
-                            if( strtolower($scoped_company->status) != 'published' ) { $published = false; }
-                            if( $published == false ) { continue( 2 ); }
+                            if( strtolower($scoped_company->status) != 'published' ) { continue; }
                             if( strtolower($scoped_company->status) === 'published' && isset( $scoped_company->score ) )
                             {
                                 $scopedJudge = new stdClass;
@@ -200,13 +206,10 @@ class TeamFormation extends Model
                 if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
                 $scoped_teams[$index]->score = $averageScore;
                 $scoped_teams[$index]->judges = $teamJudges;
-                $scoped_teams[$index]->published = $published;
             }
             $output = $output->merge($scoped_teams);
         }
-        $output = $output->where('published', true)->filter(function($item) {
-            return count( $item->judges ) > 0;
-        })->values();
+        $output = $output->values();
         $winnersData = $output->map(function( $team ) {
             return [
                 'id' => $team->id,

@@ -176,6 +176,7 @@
           <th>{{ __('admin.Email') }}</th>
           <th>{{ __('admin.Phone') }}</th>
           <th>{{ __('admin.number_of_members') }}</th>
+          <th>{{ __('admin.current_step') }}</th>
           <th>{{ __('admin.creation_date') }}</th>
           <th>{{ __('admin.actions') }}</th>
         </tr>
@@ -189,6 +190,17 @@
           <td>{{ $team->email }}</td>
           <td>{{ $team->u_phone }}</td>
           <td>{{ $team->count_members }} / {{ $team->max_count_members }}</td>
+          <td>
+            @if($team->step_state === 'step')
+              <span class="badge bg-label-primary">{{ $team->company_step }}</span>
+            @elseif($team->step_state === 'disapproved')
+              <span class="badge bg-label-danger">{{ __('admin.disapproved') }}</span>
+            @elseif($team->step_state === 'alumni')
+              <span class="badge bg-label-success">{{ __('admin.alumni') }}</span>
+            @else
+              <span class="text-muted">&mdash;</span>
+            @endif
+          </td>
           <td>{{ $team->created_at }}</td>
           <td>
             <div class="d-flex align-items-center gap-2">

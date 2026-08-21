@@ -2315,13 +2315,21 @@ class HackathonController extends Controller
                 u.phone as u_phone,
                 u.img_url as u_img_url,
                 u.title_ar as u_title_ar,
-                u.title_en as u_title_en
-            FROM 
+                u.title_en as u_title_en,
+                c.id as c_id,
+                c.cycle as c_cycle,
+                c.step as c_step,
+                cstep.title as c_step_title
+            FROM
                 team_members as tm
             LEFT JOIN
                 team_formations as tf ON tm.team_formation_id = tf.id
             LEFT JOIN
                 users as u ON tm.user_id = u.id
+            LEFT JOIN
+                companies as c ON c.id = u.company_id
+            LEFT JOIN
+                steps as cstep ON cstep.id = c.step
             WHERE
                 tf.cycle_id = ?
             AND
@@ -2331,6 +2339,13 @@ class HackathonController extends Controller
         $teams = collect(DB::select($teams_q, [$id]));
         $step_q = "SELECT * FROM steps WHERE cycle_id = ?";
         $step = collect(DB::select($step_q, [$id]));
+
+        // Alumni for this cycle, keyed for O(1) lookup. Used to tell apart a team
+        // that graduated (has an alumni row) from one dismissed by disapproval when
+        // the leader's company is no longer attached to the cycle.
+        $cycleAlumni = DB::table('alumni')->where('cycle_id', $id)->get();
+        $alumniCompanyIds = $cycleAlumni->pluck('company_id')->filter()->unique()->flip();
+        $alumniUserIds = $cycleAlumni->pluck('user_id')->filter()->unique()->flip();
 
         $usersInTeams = $teams->pluck('u_id')->unique();
 
@@ -2360,7 +2375,7 @@ class HackathonController extends Controller
         $data['count_members'] = $allUsersInCycle->count();
         $data['all_teams'] = $teams
             ->filter(fn($member) => $member->tm_isTeamLeader == 1)
-            ->map(function ($leader) use ($teams, $l, $step) {
+            ->map(function ($leader) use ($teams, $l, $step, $alumniCompanyIds, $alumniUserIds) {
                 $teamMembers = $teams->where('tf_id', $leader->tf_id);
                 $team = new stdClass;
                 $team->id = $leader->tf_id;
@@ -2371,6 +2386,26 @@ class HackathonController extends Controller
                 $team->desc = $leader->tf_description;
                 $team->cycle_id = $leader->tf_cycle_id;
                 $team->step_id = $leader->tf_step_id;
+                // Where the leader's company currently sits, from companies.step — the
+                // same source the winners/final-screening pages use. When the company
+                // is still attached to this cycle we show its step title. When it is
+                // detached (cycle nulled), the team either graduated (an alumni row
+                // exists for this cycle) or was dismissed by disapproval — so we label
+                // 'alumni' vs 'disapproved' instead of a bare step. 'none' means no
+                // company/step at all (e.g. a stub that never entered the cycle).
+                if ( $leader->c_cycle == $leader->tf_cycle_id && !empty( $leader->c_step_title ) ) {
+                    $team->step_state = 'step';
+                    $team->company_step = $leader->c_step_title;
+                } elseif ( $alumniCompanyIds->has($leader->c_id) || $alumniUserIds->has($leader->u_id) ) {
+                    $team->step_state = 'alumni';
+                    $team->company_step = null;
+                } elseif ( empty( $leader->c_cycle ) && ( !empty( $leader->c_id ) ) ) {
+                    $team->step_state = 'disapproved';
+                    $team->company_step = null;
+                } else {
+                    $team->step_state = 'none';
+                    $team->company_step = null;
+                }
                 $team->photo = $leader->tf_img_team ?? null;
                 $team->count_members = $teamMembers->where('tm_acceptInvition', 'accepted')->count();
                 $team->created_at = $leader->tf_created_at;
