@@ -2,12 +2,14 @@
 
 namespace App\Notifications;
 
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 
@@ -15,13 +17,58 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
 {
     use Queueable, ConfiguresSmtp;
 
+    public $tries = 3;
+    public $backoff = 60;
+
     public $data;
+
     /**
      * Create a new notification instance.
+     *
+     * Accepts either a User model (as dispatched from UserService when an admin
+     * creates a judge) or an array payload (as dispatched from
+     * FinalscreeningController when judges are assigned to a screening step).
+     * Both are normalised to an array here so the mail/database/whatsapp/
+     * broadcast representations can rely on a single shape.
+     *
+     * @param \App\User|array $data
      */
     public function __construct($data)
     {
-        $this->data = $data;
+        $this->data = $this->normalize($data);
+    }
+
+    /**
+     * Normalise the constructor payload into a plain array.
+     *
+     * @param \App\User|array $data
+     * @return array
+     */
+    protected function normalize($data): array
+    {
+        if (is_array($data)) {
+            $normalized = $data;
+        } else {
+            $normalized = [
+                'role'   => 'Judger',
+                'name'   => trim(($data->first_name_en ?? '') . ' ' . ($data->last_name_en ?? '')),
+                'email'  => $data->email ?? null,
+                'gender' => $data->gender ?? null,
+            ];
+        }
+
+        // The judge is always a judge here — callers that omit the role would
+        // otherwise silently fall through to the generic welcome email.
+        $normalized['role'] = $normalized['role'] ?? 'Judger';
+
+        // "Assigned By" has no persisted column on users; capture the acting
+        // admin at dispatch time (these notifications are always raised from an
+        // authenticated admin request) so it survives being queued.
+        if (empty($normalized['assigned_by']) && Auth::check()) {
+            $normalized['assigned_by'] = Auth::user()->name;
+        }
+
+        return $normalized;
     }
 
     /**
@@ -53,7 +100,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
         return $channels;
     }
 
-    /** 
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
@@ -65,22 +112,41 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
         $from = $this->getFromAddress($smtpSettings);
         $orgData = $this->buildEmailOrganizationData($org);
 
-        $token = Password::getRepository()->create($notifiable);
+        $setting = Settings::first();
+        $platformName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
 
-        $resetUrl = url(route('password.reset', [
-        'token' => $token,
-        'email' => $notifiable->email,
-    ], false));
-        $this->data['reset_url'] = $resetUrl;
-            if ($this->data['role'] === 'Judger') {
-                return (new MailMessage)
-                    ->subject(__('notifications.welcome_judger.subject'))
-                    ->markdown('emails.welcome_judger', array_merge(['data' => $this->data], $orgData));
-            } else {
-                return (new MailMessage)
-                    ->subject(__('notifications.welcome.subject'))
-                    ->markdown('emails.welcome', array_merge(['data' => $this->data], $orgData));
-            }
+        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
+
+        if ($this->data['role'] !== 'Judger') {
+            // emails.welcome is shared with WelcomeUserNotification and expects
+            // $user (and optionally $magicLoginUrl) — not just $data.
+            return (new MailMessage)
+                ->from($from['address'], $from['name'])
+                ->subject(Lang::get('notifications.welcome.subject', [], $locale))
+                ->view('emails.welcome', array_merge([
+                    'data'          => $this->data,
+                    'user'          => $notifiable,
+                    'magicLoginUrl' => $notifiable->generateMagicLoginUrl(),
+                ], $orgData));
+        }
+
+        // Single-use, 24h signed link that logs the judge in and lands them on
+        // the profile page with a forced password change.
+        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
+            ->subject(Lang::get('email.judger_welcome_email.subject', [], $locale))
+            ->view('emails.welcome_judger', array_merge([
+                'data'          => $this->data,
+                'locale'        => $locale,
+                'platformName'  => $platformName,
+                'judgerName'    => $this->data['name'] ?? $notifiable->name,
+                'judgerEmail'   => $this->data['email'] ?? $notifiable->email,
+                'judgerGender'  => $this->data['gender'] ?? $notifiable->gender ?? null,
+                'assignedBy'    => $this->data['assigned_by'] ?? null,
+                'magicLoginUrl' => $magicLoginUrl,
+            ], $orgData));
     }
 
     /**
@@ -90,17 +156,15 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        if ($this->data['role'] === 'Judger') {
-            return [
-                'message' => __('notifications.welcome_judger.database'),
-                'user_id' => $notifiable->id,
-            ];
-        } else {
-            return [
-                'message' => __('notifications.welcome.database'),
-                'user_id' => $notifiable->id,
-            ];
-        }
+        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
+        $key = $this->data['role'] === 'Judger'
+            ? 'notifications.welcome_judger.database'
+            : 'notifications.welcome.database';
+
+        return [
+            'message' => Lang::get($key, [], $locale),
+            'user_id' => $notifiable->id,
+        ];
     }
 
     /**
@@ -108,14 +172,14 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
      */
     public function toWhatsapp(object $notifiable): string
     {
-        if ($this->data['role'] === 'Judger') {
-            return __('notifications.welcome_judger.whatsapp', [
-                'name' => $notifiable->first_name_en . ' ' . $notifiable->last_name_en,
-            ]);
-        }
-        return __('notifications.welcome.whatsapp', [
-            'name' => $notifiable->first_name_en . ' ' . $notifiable->last_name_en,
-        ]);
+        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
+        $key = $this->data['role'] === 'Judger'
+            ? 'notifications.welcome_judger.whatsapp'
+            : 'notifications.welcome.whatsapp';
+
+        return Lang::get($key, [
+            'name' => $this->data['name'] ?? trim(($notifiable->first_name_en ?? '') . ' ' . ($notifiable->last_name_en ?? '')),
+        ], $locale);
     }
 
     /**
@@ -123,16 +187,12 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        if ($this->data['role'] === 'Judger') {
-            return new BroadcastMessage([
-                'subject' => __('notifications.welcome_judger.subject'),
-                'message' => __('notifications.welcome_judger.broadcast'),
-                'time' => now()->toDateTimeString(),
-            ]);
-        }
+        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
+        $group = $this->data['role'] === 'Judger' ? 'welcome_judger' : 'welcome';
+
         return new BroadcastMessage([
-            'subject' => __('notifications.welcome.subject'),
-            'message' => __('notifications.welcome.broadcast'),
+            'subject' => Lang::get("notifications.{$group}.subject", [], $locale),
+            'message' => Lang::get("notifications.{$group}.broadcast", [], $locale),
             'time' => now()->toDateTimeString(),
         ]);
     }
