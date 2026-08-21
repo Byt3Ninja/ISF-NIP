@@ -330,6 +330,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
         'render_view_form' => app()->getLocale() == 'en' ? 'Form Details' : 'تفاصيل النموذج',
         'organization_manage_setting' => app()->getLocale() == 'en' ? 'Org Manage Settings' : 'إدارة إعدادات المؤسسة',
         'questions_manage_assessment' => app()->getLocale() == 'en' ? 'Manage Assessment' : 'إدارة التقييم',
+        'attendance_offline_view_training' => app()->getLocale() == 'en' ? 'Offline View Training' : 'حضور التدريب',
         
     ];
     if (isset($customReplacements[$cleanTitle])) {
