@@ -11,7 +11,7 @@
 
     <form id="expertiseForm" method="post" action="{{ route('company.profile_update_mine', $client->company->id ?? auth()->id()) }}">
       @csrf
-      <input name="CompanyN" type="hidden" value="16">
+      <input name="CompanyN" type="hidden" value="{{ \App\Enums\CompanyFormStep::ExpertiseTags->value }}">
 
       <div class="mb-4">
         <label class="form-label fw-semibold">

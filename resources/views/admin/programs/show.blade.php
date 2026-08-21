@@ -895,7 +895,7 @@
                   method="POST" autocomplete="off">
                 @csrf
                 <input type="hidden" name="sid"  id="sid">
-                <input type="hidden" name="type" value="8">
+                <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
 
                 <div class="modal-header">
                     <h5 class="modal-title">{{ __('cycles.Modify current step') }}</h5>
@@ -1022,7 +1022,7 @@
     window.deleteStep = function (id) {
         if (!confirm('{{ __('cycles.sure delete step') }}?')) return;
 
-        $.post('/dashboard/cycles/modify', { stepid: id, type: 6 })
+        $.post('/dashboard/cycles/modify', { stepid: id, type: '{{ \App\Enums\CycleModifyAction::DELETE_STEP }}' })
             .done(() => location.reload())
             .fail(() => alert('Error occurred. Please try again.'));
     };
@@ -1031,7 +1031,7 @@
     window.ModifyStep = function (set, id) {
         if (set !== 1) return;
 
-        $.post('/dashboard/cycles/modify', { type: 7, sid: id, cycleid: 0 })
+        $.post('/dashboard/cycles/modify', { type: '{{ \App\Enums\CycleModifyAction::FETCH_STEP }}', sid: id, cycleid: 0 })
             .done(function (response) {
                 const step  = response.stype;
                 const sData = response.data;

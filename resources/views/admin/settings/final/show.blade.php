@@ -375,7 +375,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         <input type="hidden" name="_token" value="">
         <div class="modal-body">
           <input type="hidden" name="sid" id="step-id-value">
-          <input type="hidden" name="type" value="8">
+          <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
           <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
           <div class="form-group mb-3">
             <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
@@ -647,7 +647,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             url: "/dashboard/cycles/modify",
             data: {
               "stepid": stepId,
-              "type": 6,
+              "type": "{{ \App\Enums\CycleModifyAction::DELETE_STEP }}",
             },
             success: function(response) {
               $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();

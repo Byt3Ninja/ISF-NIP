@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\City;
+use App\Enums\CompanyFormStep;
 use App\Like;
 use App\Step;
 use App\User;
@@ -1324,7 +1325,7 @@ class ClientCompanyController extends Controller
                 $msgtype = 'AddComp';
             }
     
-            if ($data['CompanyN'] == 1) {
+            if ($data['CompanyN'] == CompanyFormStep::BasicInfo->value) {
 
                 $l = $request->input('locale', app()->getLocale());
                 if ($l == 'en') {
@@ -1479,7 +1480,7 @@ class ClientCompanyController extends Controller
                 $result->company_registration_type = $data['company_registration_type'];
                 $result->products_services_description = $data['products_services_description'] ?? null;
             }
-            if ($data['CompanyN'] == 2) {
+            if ($data['CompanyN'] == CompanyFormStep::ContactInfo->value) {
                 $validatedData = $request->validate([
                     'phone' => 'required|numeric|digits_between:8,15',
                     'WhatsApp' => 'nullable',
@@ -1538,7 +1539,7 @@ class ClientCompanyController extends Controller
                 $result->instagram = $data['instagram'];
                 $result->tiktok = $data['tiktok'];
             }
-            if ($data['CompanyN'] == 3) {
+            if ($data['CompanyN'] == CompanyFormStep::AboutDescription->value) {
                 $validatedData = $request->validate([
                     'company_description' => 'nullable|string|max:500',
                     'Sustainable_development' => 'nullable|array',
@@ -1570,7 +1571,7 @@ class ClientCompanyController extends Controller
                 $result->why_this_startup = $data['why_this_startup'] ?? null;
                 $result->startup_expertise = $data['startup_expertise'] ?? null;
             }
-            if ($data['CompanyN'] == 4) {
+            if ($data['CompanyN'] == CompanyFormStep::FinancialInfo->value) {
                 $request->validate([
                     'Currency' => 'nullable',
                     'pre_money_valuation' => 'nullable|numeric|min:0',
@@ -1638,7 +1639,7 @@ class ClientCompanyController extends Controller
                     ? $data['average_annual_revenues']
                     : null;
             }
-            if ($data['CompanyN'] == 5) {
+            if ($data['CompanyN'] == CompanyFormStep::TeamInfo->value) {
                 $request->validate([
                     'team_num' => 'required|string',
                 ], [
@@ -1648,7 +1649,7 @@ class ClientCompanyController extends Controller
                 $result->team_num = $data['team_num'];
                 $result->working_team_summary = $data['working_team_summary'];
             }
-            if ($data['CompanyN'] == 6) {
+            if ($data['CompanyN'] == CompanyFormStep::PitchDeckInfo->value) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck_info' => 'nullable', // يجب أن يكون إما نعم أو لا
                     'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
@@ -1666,7 +1667,7 @@ class ClientCompanyController extends Controller
                 $result->problem = $data['problem_facing'];
                 $result->solution = $data['solution_problem'];
             }
-            if ($data['CompanyN'] == 8) {
+            if ($data['CompanyN'] == CompanyFormStep::SocialWebsite->value) {
                 $validator = Validator::make($request->all(), [
                     'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                     'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -1710,7 +1711,7 @@ class ClientCompanyController extends Controller
                 $result->instagram = $data['instagram'];
                 $result->tiktok = $data['tiktok'];
             }
-            if ($data['CompanyN'] == 9) {
+            if ($data['CompanyN'] == CompanyFormStep::PitchDeckFile->value) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                 ], [
@@ -1727,7 +1728,7 @@ class ClientCompanyController extends Controller
 
                 $result->pitch_deck = $pitch_deck;
             }
-            if ($data['CompanyN'] == 10) {
+            if ($data['CompanyN'] == CompanyFormStep::PitchDeckVideo->value) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck_video' => 'nullable', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
                 ]);
@@ -1737,7 +1738,7 @@ class ClientCompanyController extends Controller
                 }
                 $result->pitch_deck_video = $request->pitch_deck_video;
             }
-            if ($data['CompanyN'] == 11) {
+            if ($data['CompanyN'] == CompanyFormStep::SupplementaryDocuments->value) {
                 if ($request->hasFile('documents')) {
                     $files = $request->file('documents');
                     $oldDocs = json_decode($company->documents ?? '[]', true) ?? [];
@@ -1748,7 +1749,7 @@ class ClientCompanyController extends Controller
 
                 $result->documents = json_encode($uploadedFiles);
             }
-            if ($data['CompanyN'] == 12) {
+            if ($data['CompanyN'] == CompanyFormStep::AboutProblemLegacy->value) {
                 $request->validate([
                     'about_problem' => 'required',
                     'about_market_opportunity' => 'required',
@@ -1769,7 +1770,7 @@ class ClientCompanyController extends Controller
                 $result->about_monetize = $data['about_monetize'];
                 $result->about_challenges = $data['about_challenges'];
             }
-            if ($data['CompanyN'] == 13) {
+            if ($data['CompanyN'] == CompanyFormStep::BusinessModel->value) {
                 $request->validate([
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
@@ -1808,7 +1809,7 @@ class ClientCompanyController extends Controller
             }
             $result->save();
 
-            if ($data['CompanyN'] == 16) {
+            if ($data['CompanyN'] == CompanyFormStep::ExpertiseTags->value) {
                 $rawTags = $request->input('expertise_tags');
                 if (is_string($rawTags)) {
                     $decoded = json_decode($rawTags, true);
@@ -1860,7 +1861,7 @@ class ClientCompanyController extends Controller
                     ->with(['msg' => 'startup_profile_updated', 'class' => 'success']);
             }
 
-            if ($data['CompanyN'] == 14) {
+            if ($data['CompanyN'] == CompanyFormStep::Classification->value) {
                 // Set up debug logging using Laravel's Log facade
                 Log::debug('Starting company update process', [
                     'company_id' => $id,
@@ -2330,7 +2331,7 @@ class ClientCompanyController extends Controller
                         'industry_id' => $data['industry_id'] ?? null
                     ]);
 
-                    if ($data['CompanyN'] == 14 && $request->ajax()) {
+                    if ($data['CompanyN'] == CompanyFormStep::Classification->value && $request->ajax()) {
                         return response()->json([
                             'success' => false,
                             'message' => __('admin.error_updating_company_relations') . ': ' . $e->getMessage()
@@ -2343,7 +2344,7 @@ class ClientCompanyController extends Controller
                         ->withInput();
                 }
             }
-            if ($data['CompanyN'] == 15) {
+            if ($data['CompanyN'] == CompanyFormStep::FinancialProjection->value) {
                
                 if($data['valuation_date'] == null){
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
@@ -2431,7 +2432,7 @@ class ClientCompanyController extends Controller
                 if( !trim( $redirectId ) ) { $redirectId = $result->id; }
 
                 // Return JSON response for AJAX requests (CompanyN == 14 is classification form)
-                if ($data['CompanyN'] == 14 && $request->ajax()) {
+                if ($data['CompanyN'] == CompanyFormStep::Classification->value && $request->ajax()) {
                     return response()->json([
                         'success' => true,
                         'message' => __('admin.startup_info_updated')
@@ -2440,7 +2441,7 @@ class ClientCompanyController extends Controller
 
                 return redirect()->route('company.profile_view_mine', ['id' => $redirectId])->with(['msg' => __('startup_info_updated'), 'class' => 'success']);
             } else {
-                if ($data['CompanyN'] == 14 && $request->ajax()) {
+                if ($data['CompanyN'] == CompanyFormStep::Classification->value && $request->ajax()) {
                     return response()->json([
                         'success' => false,
                         'message' => __('admin.Startup_Info_Updated_Failed')
@@ -4521,25 +4522,25 @@ class ClientCompanyController extends Controller
                     //Final Screening
                 $cycle_id = $company->cycle;
                 $_stepFinal = Step::where('cycle_id', $cycle_id)->where('stype', 5)->get();
-               $screeningsEvaluations = ScreeningEvaluation::whereIn(
-                    'step_id',
-                    $_stepFinal->pluck('id')
-                )->get();
+                $screeningsEvaluations = ScreeningEvaluation::whereIn(
+                        'step_id',
+                        $_stepFinal->pluck('id')
+                    )->get();
 
-            $getCriteria = ScreeningEvaluationCriteria::whereIn(
-                    'evaluation_id',
-                    $screeningsEvaluations->pluck('id')
-                )
-                ->get()
-                ->map(function ($criterion) {
-                    $criterion->criteria_weight = 100;
-                    return $criterion;
-                });
+                $getCriteria = ScreeningEvaluationCriteria::whereIn(
+                        'evaluation_id',
+                        $screeningsEvaluations->pluck('id')
+                    )
+                    ->get()
+                    ->map(function ($criterion) {
+                        $criterion->criteria_weight = 100;
+                        return $criterion;
+                    });
 
-            $getResult = ScreeningEvaluationResults::whereIn(
-                    'evaluation_id',
-                    $screeningsEvaluations->pluck('id')
-                )->where('company_id', $company_id)->get();
+                $getResult = ScreeningEvaluationResults::whereIn(
+                        'evaluation_id',
+                        $screeningsEvaluations->pluck('id')
+                    )->where('company_id', $company_id)->get();
                
             $finalstepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult) {
                 $evaluationResults = $getResult->where('evaluation_id', $evaluation->id);
@@ -4588,7 +4589,7 @@ class ClientCompanyController extends Controller
 
 
                  // Training
-                 $steps = Step::where('cycle_id', $company->cycle)->get();
+                $steps = Step::where('cycle_id', $company->cycle)->get();
 
                 $startup_training = TrainingSession::whereIn('step_id', $steps->pluck('id'))
                     ->get();

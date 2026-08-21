@@ -11,7 +11,7 @@
   enctype="multipart/form-data">
 @endif
       {!! csrf_field() !!}
-      <input type="hidden" value="8" name="CompanyN">
+      <input type="hidden" value="{{ \App\Enums\CompanyFormStep::SocialWebsite->value }}" name="CompanyN">
       <div class="row">
         <!-- Upload Company Logo -->
         <div class="col-12 col-md-2 justify-content-center d-flex">

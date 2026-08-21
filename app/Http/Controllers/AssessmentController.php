@@ -26,28 +26,28 @@ class AssessmentController extends Controller
         $assessments = Assessment::with('user');
 
         // فلترة حسب startup_id
-    if ($request->startup_id && $request->startup_id != 0) {
-        $founder = User::where('company_id', $request->startup_id)->get();
-        $assessments->whereIn('user_id', $founder->pluck('id'));
-    }
+        if ($request->startup_id && $request->startup_id != 0) {
+            $founder = User::where('company_id', $request->startup_id)->get();
+            $assessments->whereIn('user_id', $founder->pluck('id'));
+        }
 
-    // فلترة حسب founder_id
-    if ($request->founder_id && $request->founder_id != 0) {
-        $assessments->where('user_id', $request->founder_id);
-    }
+        // فلترة حسب founder_id
+        if ($request->founder_id && $request->founder_id != 0) {
+            $assessments->where('user_id', $request->founder_id);
+        }
 
-    // فلترة حسب التاريخ (من)
-    if ($request->datefrom && !empty($request->datefrom)) {
-        $assessments->whereDate('created_at', '>=', $request->datefrom);
-    }
+        // فلترة حسب التاريخ (من)
+        if ($request->datefrom && !empty($request->datefrom)) {
+            $assessments->whereDate('created_at', '>=', $request->datefrom);
+        }
 
-    // فلترة حسب التاريخ (إلى)
-    if ($request->dateto && !empty($request->dateto)) {
-        $assessments->whereDate('created_at', '<=', $request->dateto);
-    }
+        // فلترة حسب التاريخ (إلى)
+        if ($request->dateto && !empty($request->dateto)) {
+            $assessments->whereDate('created_at', '<=', $request->dateto);
+        }
 
-    // الحصول على النتائج بعد التصفية
-    $assessments = $assessments->get();
+        // الحصول على النتائج بعد التصفية
+        $assessments = $assessments->get();
 
         $users = User::role('Registered');
         if( $_user->hasRole('organizationManager') )
@@ -213,8 +213,7 @@ class AssessmentController extends Controller
 
     public function assessment(Request $request)
     {
-        if( Auth::user()->hasRole('Registered') )
-        {
+        if( Auth::user()->hasRole('Registered') ){
             $l = app()->getLocale();
             $userid = auth()->user()->id;
             $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();

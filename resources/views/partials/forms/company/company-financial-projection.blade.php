@@ -101,7 +101,7 @@
 			<p class="mb-0 text-muted">{{ __('startup.enter_valuation_date_and_financial_data_to_generate_metrics') }}</p>
 		</div>
 
-		<input name="CompanyN" type="hidden" value="15">
+		<input name="CompanyN" type="hidden" value="{{ \App\Enums\CompanyFormStep::FinancialProjection->value }}">
 
 		<div class="card-body">
 			<div class="row g-6">

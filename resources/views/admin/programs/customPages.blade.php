@@ -56,10 +56,10 @@
         <div class="card p-4 p-md-8">
             <form id="modify-app-form" action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="tab_id" value="1">
+                <input type="hidden" name="tab_id" value="{{ \App\Enums\CycleTabAction::CREATE_CYCLE }}">
                 <input type="hidden" name="id" id="cycleid" value="{{ $id }}">
-                <input type="hidden" name="typeedit" id="type" value="1">
-                <input type="hidden" name="type" id="type" value="1">
+                <input type="hidden" name="typeedit" id="type" value="{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}">
+                <input type="hidden" name="type" id="type" value="{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}">
                 <input type="hidden" name="organization_id" value="{{ $ccycle->organization_id ?? 0 }}">
 
                 

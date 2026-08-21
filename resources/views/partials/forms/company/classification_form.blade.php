@@ -11,7 +11,7 @@
       novalidate
     >
       {!! csrf_field() !!}
-      <input name="CompanyN" type="hidden" value="14">
+      <input name="CompanyN" type="hidden" value="{{ \App\Enums\CompanyFormStep::Classification->value }}">
       <fieldset class="row">
         <div class="col-12">
           <div class="form-group mb-6">

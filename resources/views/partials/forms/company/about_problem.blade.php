@@ -12,7 +12,7 @@
   enctype="multipart/form-data">
 @endif
         {!! csrf_field() !!}
-        <input type="hidden" value="12" name="CompanyN">
+        <input type="hidden" value="{{ \App\Enums\CompanyFormStep::AboutProblemLegacy->value }}" name="CompanyN">
         <div class="row">
             <div class="col-md-6 col-12 mb-6">
                 <label for="about_problem"

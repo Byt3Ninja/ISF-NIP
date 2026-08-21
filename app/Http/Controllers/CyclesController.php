@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CycleModifyAction;
+use App\Enums\CycleTabAction;
+use App\Enums\StepType;
 use App\Country;
 use App\Sector;
 use App\Stage;
@@ -331,7 +334,7 @@ class CyclesController extends Controller
             ]);
         }
 
-        if ($type == 1 || $isEdit == true)
+        if ($type == CycleModifyAction::EDIT_CYCLE || $isEdit == true)
         {
             /// Edit Cycle (to be moved to standalone controller)
             $request->validate([
@@ -462,14 +465,14 @@ class CyclesController extends Controller
            
             return redirect()->back()->with('message', 'Saved');
         }
-        elseif ($type == 2) {
+        elseif ($type == CycleModifyAction::SAVE_CYCLE_NOOP) {
 
             /// Save Cycle
 
 
 
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($type == 3) {
+        } elseif ($type == CycleModifyAction::DELETE_CYCLE) {
             /// Delete Cycle steps contents
             $delsteps = Step::where('cycle_id', $id)->get();
             foreach ($delsteps as $onestep) {
@@ -485,14 +488,14 @@ class CyclesController extends Controller
             /// Delete Cycle
             Cycle::destroy($id);
             return Response()->json('Cycle deleted');
-        } elseif ($type == 4) {
+        } elseif ($type == CycleModifyAction::ARRANGE_STEPS) {
             /// arrange steps
             $i = 1;
             foreach ($request->steps as $id) {
                 Step::where('id', $id)->update(['arr' => $i++]);
             }
             return Response()->json('Arranged ');
-        } elseif ($type == 5) {
+        } elseif ($type == CycleModifyAction::ADD_STEP) {
             if (is_null($request->fromDate) || is_null($request->toDate)) {
                 return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
             }
@@ -501,7 +504,7 @@ class CyclesController extends Controller
             
             $data = null;
            
-            if ($stype == 1) {
+            if ($stype == StepType::CUSTOM_FORM) {
                 $data = $request->FormSelect;
                 $id = Step::insertGetId([
                     'cycle_id' => $request->cid,
@@ -529,7 +532,7 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
-            }elseif ($stype == 2) {
+            }elseif ($stype == StepType::SCREENING) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -544,7 +547,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            }elseif ($stype == 3) {
+            }elseif ($stype == StepType::MENTORSHIP) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -559,7 +562,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            }elseif ($stype == 4) {
+            }elseif ($stype == StepType::TRAINING) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -575,7 +578,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            }elseif ($stype == 5) {
+            }elseif ($stype == StepType::FINAL_EVALUATION) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -612,7 +615,7 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
-            }elseif ($stype == 6) {
+            }elseif ($stype == StepType::TEAM_FORMATION) {
                $validator = Validator::make($request->all(), [
                     'title' => 'required|string|max:100',
                     'description' => 'required|string|max:100',
@@ -644,7 +647,7 @@ class CyclesController extends Controller
                 'to' => $request->toDate,
                 'count_team_number' => $request->count_team_number ??0,
                 ]);
-            }elseif ($stype == 7) {
+            }elseif ($stype == StepType::GENERIC) {
                 
                 $validator = Validator::make($request->all(), [
                     'title' => 'required|string|max:100',
@@ -674,7 +677,7 @@ class CyclesController extends Controller
                 ]);
             }
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($type == 6) {
+        } elseif ($type == CycleModifyAction::DELETE_STEP) {
             /// Delete step
             $cid = $request->stepid;
             if ($request->steps) {
@@ -698,12 +701,12 @@ class CyclesController extends Controller
                 Step::where('id', $id)->update(['arr' => $i++]);
             }
             return Response()->json('Step deleted');
-        } elseif ($type == 7) {
+        } elseif ($type == CycleModifyAction::FETCH_STEP) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
 
             return response()->json($step);
-        } elseif ($type == 8) {
+        } elseif ($type == CycleModifyAction::UPDATE_STEP) {
             /// deleted saved data if type changed
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
@@ -733,12 +736,12 @@ class CyclesController extends Controller
                     'from' => Carbon::parse($request->fromDate),
                     'to' => Carbon::parse($request->toDate)
                 ];
-                if( $step8->stype == 1 )
+                if( $step8->stype == StepType::CUSTOM_FORM )
                 {
                     $counter = 0;
                     $organization_id = $step8->cycle->organization_id;
                     $cycles_ids = Cycle::where('organization_id', $organization_id)->pluck('id')->toArray();
-                    $slugs = Step::whereIn('cycle_id', $cycles_ids)->where('stype', 1)->pluck('public_slug')->unique()->filter(function($value) { return !empty($value); })->values()->toArray();
+                    $slugs = Step::whereIn('cycle_id', $cycles_ids)->where('stype', StepType::CUSTOM_FORM)->pluck('public_slug')->unique()->filter(function($value) { return !empty($value); })->values()->toArray();
 
                     $updatedArray['is_public'] = $request->is_public;
                     if( $updatedArray['is_public'] == 1 && ( empty( $request->public_slug ) || !trim( $request->public_slug ) ) )
@@ -784,7 +787,7 @@ class CyclesController extends Controller
             }
             return redirect()->back()->with('message', 'Saved');
         }
-        elseif ($request->tab_id == 1)
+        elseif ($request->tab_id == CycleTabAction::CREATE_CYCLE)
         {
             // create new cycle (to be moved to standalone controller)
             $request->validate([

@@ -12,7 +12,7 @@
           enctype="multipart/form-data">
     @endif
     {!! csrf_field() !!}
-    <input name="CompanyN" type="hidden" value="2">
+    <input name="CompanyN" type="hidden" value="{{ \App\Enums\CompanyFormStep::ContactInfo->value }}">
     <div class="row">
       <div class="border-bottom mb-4">
         <h5 class="card-title">{{ __('admin.Logo_Social') }} </h5>
