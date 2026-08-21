@@ -257,7 +257,7 @@
                       <li class="d-flex align-items-center mb-4">
                         <i class="ti ti-crown ti-lg"></i>
                         <strong class="mx-2 text-nowrap">
-                          {{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:
+                          {{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role' }}:
                         </strong>
                         <span class="text-nowrap">{{ $client->title_en }}</span>
                       </li>

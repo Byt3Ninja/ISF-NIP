@@ -297,7 +297,7 @@ if ($canRequestMentorship) {
 
                     <li class="d-flex align-items-center mb-4">
                       <i class="ti ti-crown ti-lg"></i>
-                      <strong class="mx-2">{{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:</strong>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role' }}:</strong>
                       <span>{{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
                     </li>
 
