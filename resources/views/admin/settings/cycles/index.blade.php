@@ -400,7 +400,7 @@
               </select>
             </div>
           </div>
-          <div class="mb-4" id="menu2">
+          {{--  <div class="mb-4" id="menu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div class="form-group mb-0">
               <select class="form-select" name="ScreeningSelect">
@@ -410,7 +410,7 @@
                 <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
               </select>
             </div>
-          </div>
+          </div>  --}}
           <div class="col-12 mb-4">
             <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="fromDate" name="fromDate" />
