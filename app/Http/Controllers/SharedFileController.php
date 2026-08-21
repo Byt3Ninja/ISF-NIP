@@ -171,6 +171,36 @@ class SharedFileController extends Controller
     }
 
     /**
+     * Whether $user may delete shared file $file.
+     * Allowed = the file's uploader (shared_files.user_id),
+     * the team leader (team_formations.user_id), or a full admin.
+     * Mirrors the delete-button visibility rule in the manage-team view.
+     */
+    private function canDeleteFile($user, SharedFile $file): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        // Uploader of this specific file.
+        if ($file->user_id == $user->id) {
+            return true;
+        }
+
+        // Full admin.
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Team leader (owner of the team formation this file belongs to).
+        $teamLeaderId = DB::table('team_formations')
+            ->where('id', $file->team_formation_id)
+            ->value('user_id');
+
+        return $teamLeaderId !== null && $teamLeaderId == $user->id;
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(string $id)
@@ -204,6 +234,13 @@ class SharedFileController extends Controller
         if (!$file) {
             return response()->json(['status' => 'error', 'message' => 'File not found'], 404);
         }
+
+        // Authorization: only the file's uploader, the team leader, or an admin may delete.
+        // Mirrors the delete button's visibility rule in manage-team.blade.php.
+        if (!$this->canDeleteFile(auth()->user(), $file)) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
+
         // Delete the physical file from the private disk
         if (Storage::disk('hackathon_shared')->exists($file->file)) {
             Storage::disk('hackathon_shared')->delete($file->file);
