@@ -250,13 +250,17 @@ class ExternalCyclesController extends Controller
 				$fields = Formfield::where('step_id', $step->id)->get();
 
 				$l = app()->getLocale();
+				// GV-3679: "positive number" is only accurate when the floor is 0
+				// (the default). When an author sets a non-zero min, state the
+				// actual bound instead. Mirrors numberMinMessage() on the client.
 				$number_min_msg = $l == 'ar' ? 'يرجى إدخال رقم موجب صحيح.' : 'Please enter a valid positive number.';
+				$number_min_msg_tpl = $l == 'ar' ? 'يرجى إدخال رقم لا يقل عن :min.' : 'Please enter a number no less than :min.';
 				$number_max_msg_tpl = $l == 'ar' ? 'يرجى إدخال رقم لا يتجاوز :max.' : 'Please enter a number no greater than :max.';
 				$numeric_msg = $l == 'ar' ? 'يرجى إدخال رقم صحيح.' : 'Please enter a valid number.';
 				$email_regex_msg = $l == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com).' : 'Please enter a valid email address (e.g. name@example.com).';
 				$dynamic_field_messages = [];
 
-				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields, &$dynamic_field_messages, $number_min_msg, $number_max_msg_tpl, $numeric_msg, $email_regex_msg ) {
+				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields, &$dynamic_field_messages, $number_min_msg, $number_min_msg_tpl, $number_max_msg_tpl, $numeric_msg, $email_regex_msg ) {
 					$field_options = $fields->where('id', $id)->first()->options;
 					$field_name = 'field_' . $id;
 					$required = isset($field_options->validation->required) && $field_options->validation->required == 1;
@@ -279,7 +283,9 @@ class ExternalCyclesController extends Controller
 						$rules[] = 'numeric';
 						$rules[] = 'min:' . $min;
 						$dynamic_field_messages[$field_name . '.numeric'] = $numeric_msg;
-						$dynamic_field_messages[$field_name . '.min'] = $number_min_msg;
+						$dynamic_field_messages[$field_name . '.min'] = ((float) $min == 0.0)
+							? $number_min_msg
+							: str_replace(':min', $min, $number_min_msg_tpl);
 						if (isset($field_options->max) && $field_options->max !== '') {
 							$rules[] = 'max:' . $field_options->max;
 							$dynamic_field_messages[$field_name . '.max'] = str_replace(':max', $field_options->max, $number_max_msg_tpl);
@@ -417,7 +423,15 @@ class ExternalCyclesController extends Controller
                 			'form_id' => $step->id,
                 			'step_id' => $step->id,
                 			'question' => $field_options->label,
-                			'answer' => is_array($request->{$field_name}) ? implode(',', $request->{$field_name}) : $request->{$field_name},
+                			// Store multi-value answers as JSON, matching
+                			// CyclesController@saveForm. implode(',') was lossy and
+                			// ambiguous: a checkbox answer came back as one opaque
+                			// string, so the portal's read-only view could not tell
+                			// the selected options apart from the "Other" free text
+                			// (it showed everything as Other), and any free text
+                			// containing a comma was silently truncated. The reader
+                			// still accepts the legacy comma format for existing rows.
+                			'answer' => is_array($request->{$field_name}) ? json_encode($request->{$field_name}) : $request->{$field_name},
                 			'screening' => '{}',
                 			'comments' => '{}',
                 			'created_at' => now(),

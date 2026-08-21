@@ -485,7 +485,7 @@
                     </div>
                   
                     <div class="col-12">
-                      <button type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
+                      <button id="register-submit-btn" type="submit" class="btn btn-primary w-100 mb-4"> {{ __('auth.Register') }}</button>
                     </div>
                   </div>
                 </form>
@@ -795,6 +795,37 @@ document.querySelectorAll('.role-input').forEach(input => {
 
   // init
   resetUploader();
+</script>
+
+<script>
+  // GV-3679: disable the Register button once the form is actually being
+  // submitted, so a second click cannot create a duplicate account.
+  // FormValidation (wired to #registerForm in pages-auth.js) blocks the native
+  // `submit` event until the form is valid, so a rejected form never leaves the
+  // button stuck in its disabled state.
+  document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('register-submit-btn');
+    if (!registerForm || !submitBtn) { return; }
+    const originalHtml = submitBtn.innerHTML;
+
+    registerForm.addEventListener('submit', function() {
+      if (submitBtn.disabled) { return; }
+      submitBtn.disabled = true;
+      submitBtn.classList.add('disabled');
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+        + '{{ $l == "ar" ? "جارٍ التسجيل..." : "Registering..." }}';
+    });
+
+    // A bfcache restore (browser Back) reuses the old DOM, which would
+    // otherwise leave the button permanently disabled.
+    window.addEventListener('pageshow', function(event) {
+      if (!event.persisted) { return; }
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('disabled');
+      submitBtn.innerHTML = originalHtml;
+    });
+  });
 </script>
 </body>
 </html>
