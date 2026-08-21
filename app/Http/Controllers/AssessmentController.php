@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Role;
 use App\Weight;
 use App\Company;
 use App\Category;
@@ -23,7 +24,7 @@ class AssessmentController extends Controller
     public function index(Request $request)
     {
         $_user = Auth::user();
-        $assessments = Assessment::with('user');
+        $assessments = Assessment::with(['user', 'user.company']);
 
         // فلترة حسب startup_id
         if ($request->startup_id && $request->startup_id != 0) {
@@ -49,21 +50,22 @@ class AssessmentController extends Controller
         // الحصول على النتائج بعد التصفية
         $assessments = $assessments->get();
 
-        $users = User::role('Registered');
-        if( $_user->hasRole('organizationManager') )
+        $users = Role::where('default_for', 'registered')->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
+        $users = $users->flatMap(function ($role) {
+            return $role->users;
+        })->values();
+        if( $_user->hasRole('organizationManager') || $_user->hasRole('subadmin') )
         {
             $OrgIds = $_user->organizations_ids;
-            $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
+            if( !is_array( $OrgIds ) ) { $OrgIds = [$OrgIds]; }
+            /* $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
                 $q->where('organization_id', $OrgIds);
-            });
-        }elseif( $_user->hasRole('subadmin') )
-        {
-            $OrgIds = $_user->organizations_ids;
-            $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
-                $q->whereIn('organization_id', $OrgIds);
-            });
+            }); */
+            $users = $users->filter(function ($user) use ($OrgIds) {
+                return array_intersect( $OrgIds, $user->organizations_ids );
+            })->values();
         }
-            $users = $users->get();
+
         return view('admin.Assessment.assessment', compact('assessments', 'users'));
     }
 
