@@ -151,6 +151,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 	$month = $monthMatch[0] ?? '';
 	$endDateForCountdown = trim($month . ' ' . $endDatePart);
 }
+$endDateForCountdown = $program->registration_end;
+$startDateForCountdown = $program->registration_start;
 @endphp
 
 <body>
@@ -288,11 +290,13 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 						</div>
 					</div>
 
+					@if( now()->gt( $program->registration_start ) && now()->lt( $program->registration_end ) )
 					<div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
 						<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" class="btn btn-primary-custom px-5 py-3 fs-5">
 							<i class="ti ti-send me-2"></i>{{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}
 						</a>
 					</div>
+					@endif
 				</div>
 			</section>
 
@@ -536,12 +540,18 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 		(function() {
 			var end = new Date("{{ $endDateForCountdown }}").getTime();
+			var start = new Date("{{ $startDateForCountdown }}").getTime();
 			function tick() {
 				var now = new Date().getTime();
 				var dist = end - now;
 				if (dist < 0) {
 					document.getElementById("countdown-timer").innerHTML =
 						'<span class="badge bg-label-secondary rounded-pill px-4 py-2 fs-6">{{ $l == 'en' ? 'The event has ended' : 'انتهى الحدث' }}</span>';
+					return;
+				}
+				if( now < start ) {
+					document.getElementById("countdown-timer").innerHTML =
+						'<span class="badge bg-label-secondary rounded-pill px-4 py-2 fs-6">{{ $l == 'en' ? 'Coming soon' : 'قريبا' }}</span>';
 					return;
 				}
 				document.getElementById("days").innerText = Math.floor(dist / 864e5).toString().padStart(2,'0');
