@@ -21,53 +21,55 @@ class AssessmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        $_user = Auth::user();
-        $assessments = Assessment::with(['user', 'user.company']);
+	public function index(Request $request)
+	{
+		$_user = Auth::user();
+		$assessments = Assessment::with(['user', 'user.company']);
 
-        // فلترة حسب startup_id
-        if ($request->startup_id && $request->startup_id != 0) {
-            $founder = User::where('company_id', $request->startup_id)->get();
-            $assessments->whereIn('user_id', $founder->pluck('id'));
-        }
+		// فلترة حسب startup_id
+		if ($request->startup_id && $request->startup_id != 0) {
+			$founder = User::where('company_id', $request->startup_id)->get();
+			$assessments->whereIn('user_id', $founder->pluck('id'));
+		}
 
-        // فلترة حسب founder_id
-        if ($request->founder_id && $request->founder_id != 0) {
-            $assessments->where('user_id', $request->founder_id);
-        }
+		// فلترة حسب founder_id
+		if ($request->founder_id && $request->founder_id != 0) {
+			$assessments->where('user_id', $request->founder_id);
+		}
 
-        // فلترة حسب التاريخ (من)
-        if ($request->datefrom && !empty($request->datefrom)) {
-            $assessments->whereDate('created_at', '>=', $request->datefrom);
-        }
+		// فلترة حسب التاريخ (من)
+		if ($request->datefrom && !empty($request->datefrom)) {
+			$assessments->whereDate('created_at', '>=', $request->datefrom);
+		}
 
-        // فلترة حسب التاريخ (إلى)
-        if ($request->dateto && !empty($request->dateto)) {
-            $assessments->whereDate('created_at', '<=', $request->dateto);
-        }
+		// فلترة حسب التاريخ (إلى)
+		if ($request->dateto && !empty($request->dateto)) {
+			$assessments->whereDate('created_at', '<=', $request->dateto);
+		}
 
-        // الحصول على النتائج بعد التصفية
-        $assessments = $assessments->get();
+		// الحصول على النتائج بعد التصفية
+		$assessments = $assessments->get();
 
-        $users = Role::where('default_for', 'registered')->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
-        $users = $users->flatMap(function ($role) {
-            return $role->users;
-        })->values();
-        if( $_user->hasRole('organizationManager') || $_user->hasRole('subadmin') )
-        {
-            $OrgIds = $_user->organizations_ids;
-            if( !is_array( $OrgIds ) ) { $OrgIds = [$OrgIds]; }
-            /* $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
-                $q->where('organization_id', $OrgIds);
-            }); */
-            $users = $users->filter(function ($user) use ($OrgIds) {
-                return array_intersect( $OrgIds, $user->organizations_ids );
-            })->values();
-        }
+		$users = Role::where('default_for', 'registered')->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
+		$users = $users->flatMap(function ($role) {
+			return $role->users;
+		})->values();
+		if( $_user->hasRole('organizationManager') || $_user->hasRole('subadmin') )
+		{
+			$OrgIds = $_user->organizations_ids;
+			if( !is_array( $OrgIds ) ) { $OrgIds = [$OrgIds]; }
+			/* $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
+				$q->where('organization_id', $OrgIds);
+			}); */
+			$users = $users->filter(function ($user) use ($OrgIds) {
+				return array_intersect( $OrgIds, $user->organizations_ids );
+			})->values();
+		}
 
-        return view('admin.Assessment.assessment', compact('assessments', 'users'));
-    }
+		$startups = Company::all();
+		$founders = $users;
+		return view('admin.Assessment.assessment', compact('assessments', 'users', 'startups', 'founders'));
+	}
 
     /**
      * Show the form for creating a new resource.
