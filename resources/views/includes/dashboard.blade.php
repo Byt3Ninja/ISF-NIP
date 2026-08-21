@@ -900,7 +900,9 @@
 												<td> 
 													
 													@php
-														$now = date('Y-m-d H:i');
+														// zoom_date is stored as local wall-clock time (see book-session-modal.blade.php),
+														// not UTC (app.timezone), so "now" must be computed in the same timezone.
+														$now = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d H:i');
 														$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 														$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
 														@endphp
@@ -1160,7 +1162,9 @@
 									<td> {{ $session->admin_comment ?? '...' }} </td>
 									<td>
 										@php
-											$now = date('Y-m-d H:i');
+											// zoom_date is stored as local wall-clock time (see book-session-modal.blade.php),
+											// not UTC (app.timezone), so "now" must be computed in the same timezone.
+											$now = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d H:i');
 											$start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
 											$end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
 										@endphp
