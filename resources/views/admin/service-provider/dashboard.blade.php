@@ -3,6 +3,10 @@
 @section('title', __('dashboard.sp_dashboard'))
 @section('subTitle', __('dashboard.sp_my_dashboard'))
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/spinkit/spinkit.css" />
+@endsection
+
 @section('content')
   <div class="row mb-4">
     <div class="col-6 d-flex align-items-center gap-2">
@@ -19,7 +23,7 @@
     <div class="col-6 d-flex justify-content-end align-items-center">
       {{-- REFRESH BUTTON --}}
       @if($_user->ableTo('service_provider_dashboard.refresh', $permissions))
-        <button id="btn-refresh" class="btn btn-outline-primary" style="height: fit-content;">
+        <button id="btn-refresh" class="btn btn-outline-primary btn-page-block" style="height: fit-content;">
           <i class="ti ti-refresh me-1"></i> {{ __('dashboard.sp_refresh') }}
         </button>
       @endif
@@ -325,8 +329,8 @@
               </div>
               <div style="width:1px;height:28px;background:rgba(0,0,0,0.08);"></div>
               <div class="text-center">
-                <div class="fw-medium" style="font-size:17px;color:{{ !empty( $topService ) ? $topService['color'] : '#000' }};">
-                  {{ $totalRequests > 0 ? ( round($topService['count'] / $totalRequests * 100) ) : 0 }}%
+                <div class="fw-medium" style="font-size:17px;color:{{ !empty($topService) ? $topService['color'] : '#000' }};">
+                  {{ $totalRequests > 0 ? (round($topService['count'] / $totalRequests * 100)) : 0 }}%
                 </div>
                 <div class="text-muted" style="font-size:11px;">{{ __('dashboard.sp_top_share') }}</div>
               </div>
@@ -443,7 +447,8 @@
 
 @section('scripts')
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-
+  <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
+  <script src="/vuexy/assets/js/extended-ui-blockui.js"></script>
   <script>
     (function () {
       'use strict';
@@ -737,7 +742,9 @@
 
       function doRefresh() {
         var $btn = $('#btn-refresh');
-        $btn.prop('disabled', true).find('i').addClass('ti-spin');
+        $btn
+          .prop('disabled', true)
+          .html('<i class="ti ti-loader-2 ti-spin me-1"></i>@lang("admin.refreshing")...')
 
         $.ajax({
           url: ROUTES.refresh,
@@ -745,7 +752,10 @@
           data: getFilterParams(),
           headers: { 'X-CSRF-TOKEN': CSRF_TOKEN },
           success: function (response) {
-            $btn.prop('disabled', false).find('i').removeClass('ti-spin');
+            $btn
+              .prop('disabled', false)
+              .html('<i class="ti ti-refresh me-1"></i> @lang("dashboard.sp_refresh")')
+
             if (response.summary) updateSummaryWidgets(response.summary);
             if (response.inbox) {
               currentInboxData = response.inbox;
@@ -757,7 +767,9 @@
             }
           },
           error: function () {
-            $btn.prop('disabled', false).find('i').removeClass('ti-spin');
+            $btn
+              .prop('disabled', false)
+              .html('<i class="ti ti-refresh me-1"></i> @lang("dashboard.sp_refresh")')
             Swal.fire({ icon: 'error', title: 'Error', text: LABELS.refreshError, timer: 3000 });
           }
         });

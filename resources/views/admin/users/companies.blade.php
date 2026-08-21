@@ -490,7 +490,7 @@
 <script>
   $(document).ready(function () {
     $('#sectors').select2({
-      placeholder: "{{ __('admin.Select Sectors') }}",
+      placeholder: "{{ __('admin.Select_Sectors') }}",
       allowClear: true,
       dropdownParent: $('#filterOffcanvas'),
       closeOnSelect: false,

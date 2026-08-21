@@ -150,6 +150,10 @@ class ClientProfileController extends Controller
     {
         $client = is_null( $id ) ? Auth::user() : User::find($id);
 
+        if (!$client) {
+            abort(404);
+        }
+
         $mentors = CyclesMentors::where('user_id', $client->id ?? 0)->get();
 
         $globalRoles = ['Admin', 'Organization Manager', 'subadmin'];

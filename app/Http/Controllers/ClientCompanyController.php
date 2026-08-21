@@ -283,18 +283,10 @@ class ClientCompanyController extends Controller
             }
 
             $startDate = $cycle->start ? Carbon::parse($cycle->start) : null;
-            $endDate = $cycle->end ? Carbon::parse($cycle->end) : null;
-            $cycleStatus = 'upcoming';
-            if ($startDate && $endDate) {
-                $now = Carbon::now();
-                if ($now->between($startDate, $endDate)) {
-                    $cycleStatus = 'ongoing';
-                } elseif ($now->greaterThan($endDate)) {
-                    $cycleStatus = 'completed';
-                }
-            } elseif ($startDate && Carbon::now()->greaterThanOrEqualTo($startDate)) {
-                $cycleStatus = 'ongoing';
-            }
+            // The company is still assigned to this cycle (hasn't moved to Almuni yet),
+            // so it can only be 'upcoming' or 'ongoing' here — never 'completed'.
+            // A cycle's calendar end date passing doesn't mean this company finished it.
+            $cycleStatus = ($startDate && Carbon::now()->lessThan($startDate)) ? 'upcoming' : 'ongoing';
 
             $custom_form = $cycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
             $submissions = Formdata::where('company_id', $company?->id)->where('step_id', $custom_form?->id)->orderBy('created_at', 'asc')->first();
@@ -1616,10 +1608,10 @@ class ClientCompanyController extends Controller
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
+                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company?->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
                     }
                 } else {
-                    $uploadedFile = $company->financial_plan;
+                    $uploadedFile = $company?->financial_plan;
                 }
 
                 $data['financial_plan_description'] = $data['financial_plan_description'] == null ? '0' : $data['financial_plan_description'];
@@ -3396,7 +3388,7 @@ class ClientCompanyController extends Controller
                 $founder->initials = $fInitials;
                 return $founder;
             });
-            $sustainable_array = json_decode($company->Sustainable_development ?? '[]');
+            $sustainable_array = json_decode($company->Sustainable_development ?: '[]') ?? [];
             foreach ($sustainable_array as $key => $Sustainable)
             {
                 $icon = $SustainableIcons->where('title', $Sustainable)->first();

@@ -70,7 +70,12 @@
   <div class="authentication-wrapper authentication-cover">
     <!-- Logo -->
     <a href="/dashboard" class="app-brand auth-cover-brand">
-      <img src="/images/logo/{{ $_settings->Logo }}" alt="avatar" height="50" width="150">
+      <img 
+        src="/images/logo/{{ $_settings->Logo }}" 
+        alt="logo"
+        class="object-fit-contain me-2 rounded-circle border p-1 bg-card"
+        style="width: 50px; height: 50px;"
+      />
       {{-- <span class="app-brand-logo demo">
         <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
       </span> --}}

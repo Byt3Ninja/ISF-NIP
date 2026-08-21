@@ -5,7 +5,7 @@ foreach ($alumni as $alumnus) {
     if (!$alumnus->program) {
         continue;
     }
-    $programsRaw = json_decode($alumnus->program, true);
+    $programsRaw = is_array($alumnus->program) ? $alumnus->program : json_decode($alumnus->program, true);
     if (!is_array($programsRaw)) {
         continue;
     }

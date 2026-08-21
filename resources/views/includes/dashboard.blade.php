@@ -164,114 +164,137 @@
 
 		<div class="row">
 			@if( array_intersect(['dashboard.widgets_tables_latest_services_view'], $permissions) )
-			@if( $_user->hasRole('Registered') )
-			@if($_user->company?->cycle != null)
-			<div class="col-sm-6 col-12 mb-6">
-				<div class="card">
-					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
-						<div class="d-flex align-items-center py-2">
-							<i class="ti ti-devices-question ti-24px"></i>
-							<h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest services') }}</h5>
-						</div>
-					</div>
-					<div class="card-body">
-						@if( count($latest_services) > 0 )
-						@foreach( $latest_services as $service )
-						<div class="d-flex justify-content-between align-items-center my-2">
-							<div class="widget-todo-title-area d-flex align-items-center">
-								<a href="/dashboard/directory?find={{ $service->{'name_' . $l} }}">
-									<span class="widget-todo-title ml-50 text-secondary">
-										<i class="ti ti-link"></i>
-										{{ $service->{'name_' . $l}  }}</span>
-								</a>
-							</div>
-							<div class="widget-todo-item-action d-flex align-items-center">
-								<div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-content-center"
-									style="width: 200px; height: 30px">
-									<a href="/dashboard/directory?type={{ $service->category->id }}">
-										{{ $service->category->{'name_' . $l}  }}
-									</a>
+				@if( $_user->hasRole('Registered') )
+					@if($_user->company?->cycle != null)
+					<div class="col-sm-6 col-12 mb-6">
+						<div class="card h-100">
+							<div class="card-header border-bottom">
+								<div class="d-flex align-items-center">
+									<i class="ti ti-devices-question ti-24px me-2"></i>
+									<h5 class="card-title mb-0">{{ __('dashboard.Latest services') }}</h5>
 								</div>
 							</div>
-						</div>
-						@endforeach
-						@else
-						<div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
-							<div class="widget-todo-title-area d-flex align-items-center">
-								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> 
-								{{ __('dashboard.No services added') }}.
-								</span>
+							<div class="card-body p-0">
+								@if( count($latest_services) > 0 )
+									<div id="latestServicesPages">
+										@foreach( $latest_services->chunk(7) as $pageIndex => $servicesChunk )
+										<div class="service-page list-group list-group-flush @if($pageIndex > 0) d-none @endif">
+											@foreach( $servicesChunk as $service )
+											<div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+												<a href="/dashboard/directory?find={{ $service->{'name_' . $l} }}"
+													class="d-flex align-items-center gap-2 text-body text-decoration-none text-truncate">
+													<i class="ti ti-link"></i>
+													<span class="text-truncate">{{ $service->{'name_' . $l}  }}</span>
+												</a>
+												<a href="/dashboard/directory?type={{ $service->category->id }}"
+													class="badge bg-label-primary rounded-pill text-decoration-none flex-shrink-0">
+													{{ $service->category->{'name_' . $l}  }}
+												</a>
+											</div>
+											@endforeach
+										</div>
+										@endforeach
+									</div>
+								@if( $latest_services->count() > 7 )
+									<div class="card-footer d-flex justify-content-between align-items-center border-top">
+										<button type="button" id="servicesPrevBtn" class="btn btn-outline-primary btn-sm" disabled>
+											<i class="ti ti-chevron-left"></i> {{ __('admin.Previous') }}
+										</button>
+										<button type="button" id="servicesNextBtn" class="btn btn-outline-primary btn-sm">
+											{{ __('admin.Next') }} <i class="ti ti-chevron-right"></i>
+										</button>
+									</div>
+								@endif
+								@else
+								<div>
+									@include('includes.no-result', ['message' => __('dashboard.No services added')])
+								</div>
+								@endif
 							</div>
 						</div>
-						@endif
 					</div>
-				</div>
-			</div>
-			@endif
-			@endif
+					@endif
+				@endif
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_available_surveys_view'], $permissions) )
-			@if( $_user->hasRole('Registered') )
-			@if($_user->company?->cycle != null)
-			<div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
-				<div class="card">
-					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
-						<div class="d-flex align-items-center py-2">
-							<i class="ti ti-user-question mr-1"></i>
-							<h5 class="card-title mb-0 mx-2">{{ __('dashboard.availableSurveysList') }}</h5>
-						</div>
-					</div>
-					<div class="card-body py-6">
-						<div class="container-fluid px-0">
-							@foreach( $available_surveys as $survey )
-							<div class="row border-bottom mb-2 pb-2 d-flex align-items-center">
-								<div class="col-9 py-1 line-clamp-1">
-									@if( $survey->triggered_on == 'mentorship' )
-									<i class="ti ti-bulb mx-1"></i>
-									@elseif( $survey->triggered_on == 'training' )
-									<i class="ti ti-presentation mx-1"></i>
-									@endif
-									{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on)
-									. ucFirst($survey->triggered_by) ) }}
-
-									@if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' .
-									ucFirst($survey->triggered_on) ) }} @endif
-									@if( $survey->triggered_on == 'mentorship' )
-									@if( $survey->triggered_by == 'session' )
-									{{ __('dashboard.with') }}
-									@php $mentor = $survey->middleware->mentor; @endphp
-									{{ $mentor->name ?? '' }}
-									@elseif( $survey->triggered_by == 'due' )
-									- {{ $survey->middleware->title }}
-									@else
-									-
-									@endif
-									@elseif( $survey->triggered_on == 'training' )
-									@if( $survey->triggered_by == 'session' )
-									{{ '(' . __('cycles.' . $survey->middleware->type ) . ')' }} {{ $survey->middleware->title }}
-									@elseif( $survey->triggered_by == 'due' )
-									- {{ $survey->middleware->title }}
-									@elseif( $survey->triggered_by == 'quiz' )
-									- {{ $survey->middleware->title }}
-									@else
-									-
-									@endif
-									@endif
+				@if( $_user->hasRole('Registered') )
+					@if( $_user->company?->cycle != null )
+						<div class="col-sm-6 col-12 mb-6">
+							<div class="card h-100">
+								<div class="card-header border-bottom">
+									<div class="d-flex align-items-center">
+										<i class="ti ti-user-question ti-24px me-2"></i>
+										<h5 class="card-title mb-0">{{ __('dashboard.availableSurveysList') }}</h5>
+									</div>
 								</div>
-								<div class="col-3 text-end">
-									<a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{
-										__('dashboard.startSurvey') }}</a>
+								<div class="card-body p-0">
+									@if( count( $available_surveys ) > 0 )
+										<div id="availableSurveysPages">
+											@foreach( $available_surveys->chunk(7) as $pageIndex => $surveysChunk )
+												<div class="survey-page list-group list-group-flush @if($pageIndex > 0) d-none @endif">
+													@foreach( $surveysChunk as $survey )
+														<div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+															<div class="text-truncate">
+																@if($survey->triggered_on == 'mentorship')
+																	<i class="ti ti-bulb mx-1"></i>
+																@elseif($survey->triggered_on == 'training')
+																	<i class="ti ti-presentation mx-1"></i>
+																@endif
+																{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on) . ucFirst($survey->triggered_by)) }}
+																@if($survey->triggered_by == 'due') {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on)) }} @endif
+																@if($survey->triggered_on == 'mentorship')
+																	@if($survey->triggered_by == 'session')
+																		{{ __('dashboard.with') }}
+																		@php $mentor = $survey->middleware->mentor; @endphp
+																		{{ $mentor->name ?? '' }}
+																	@elseif($survey->triggered_by == 'due')
+																		- {{ $survey->middleware->title }}
+																	@else
+																		-
+																	@endif
+																@elseif($survey->triggered_on == 'training')
+																	@if($survey->triggered_by == 'session')
+																		{{ '(' . __('cycles.' . $survey->middleware->type) . ')' }} {{ $survey->middleware->title }}
+																	@elseif($survey->triggered_by == 'due')
+																		- {{ $survey->middleware->title }}
+																	@elseif($survey->triggered_by == 'quiz')
+																		- {{ $survey->middleware->title }}
+																	@else
+																		-
+																	@endif
+																@endif
+															</div>
+															<a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-primary flex-shrink-0">
+																{{ __('dashboard.startSurvey') }}
+															</a>
+														</div>
+													@endforeach
+												</div>
+											@endforeach
+										</div>
+										@if( $available_surveys->count() > 7 )
+											<div class="card-footer d-flex justify-content-between align-items-center border-top">
+												<button type="button" id="surveysPrevBtn" class="btn btn-outline-primary btn-sm" disabled>
+													<i class="ti ti-chevron-left"></i> {{ __('admin.Previous') }}
+												</button>
+												<button type="button" id="surveysNextBtn" class="btn btn-outline-primary btn-sm">
+													{{ __('admin.Next') }} <i class="ti ti-chevron-right"></i>
+												</button>
+											</div>
+										@endif
+									@else
+										<div>
+											@include('includes.no-result', ['message' => __('admin.No surveys found')])
+										</div>
+									@endif
 								</div>
 							</div>
-							@endforeach
 						</div>
-					</div>
-				</div>
-			</div>
+					@endif
+				@endif
 			@endif
-			@endif
-			@endif
+
 			@if( array_intersect(['dashboard.widgets_tables_latest_events_view'], $permissions) )
 			@if( $_user->hasRole('Registered') )
 			@if($_user->company?->cycle != null)
@@ -1815,7 +1838,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 				<div class="hxi-card">
 
 					<!-- Header: team monogram medallion. Priority: uploaded team image ->
-					     (on broken/missing file) app's default team SVG -> branded team initial. -->
+						 (on broken/missing file) app's default team SVG -> branded team initial. -->
 					<div class="hxi-head">
 						<div class="hxi-medallion" aria-hidden="true">
 							<span class="hxi-initial">{{ $hxiTeamInitial }}</span>
@@ -1983,28 +2006,28 @@ document.addEventListener('DOMContentLoaded', function() {
 	// -------------------------------------------------------
 	function populatePrerequisiteModal(preRequests) {
 		console.log('Populating prerequisites modal with:', preRequests);
-    const list = document.getElementById('prerequisitesList');
-    list.innerHTML = '';
+	const list = document.getElementById('prerequisitesList');
+	list.innerHTML = '';
 
-    preRequests.forEach(pr => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex align-items-center';
-        li.innerHTML = `
-            <i class="ti ti-circle-check me-2 text-warning"></i>
-            <a href="${pr.url}?action=complete-profile" 
-               target="_blank" 
-               class="text-decoration-none flex-grow-1">
-               ${pr.label}
-            </a>`;
-        list.appendChild(li);
-    });
+	preRequests.forEach(pr => {
+		const li = document.createElement('li');
+		li.className = 'list-group-item d-flex align-items-center';
+		li.innerHTML = `
+			<i class="ti ti-circle-check me-2 text-warning"></i>
+			<a href="${pr.url}?action=complete-profile" 
+			   target="_blank" 
+			   class="text-decoration-none flex-grow-1">
+			   ${pr.label}
+			</a>`;
+		list.appendChild(li);
+	});
 
-    // ----------------------------------------
-    // Attach modal action button link
-    // ----------------------------------------
-    const modalBtn = document.getElementById('completePrerequisitesBtn');
+	// ----------------------------------------
+	// Attach modal action button link
+	// ----------------------------------------
+	const modalBtn = document.getElementById('completePrerequisitesBtn');
 
-    if (preRequests.length > 0) {
+	if (preRequests.length > 0) {
 			const firstUrl = `${preRequests[0].url}?action=complete-profile`;
 
 			modalBtn.setAttribute('href', firstUrl);
@@ -2013,7 +2036,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			modalBtn.onclick = function () {
 				localStorage.setItem('prerequisitesOpened', 'true');
 			};
-    }
+	}
 	}
 
 
@@ -2051,51 +2074,51 @@ document.addEventListener('DOMContentLoaded', function() {
 	// -------------------------------------------------------
 
 	function updateUIWithCompletionStatus(data) {
-    const hasPreRequests = data.has_pre_requests;
-    const preRequests = data.pre_requests || [];
+	const hasPreRequests = data.has_pre_requests;
+	const preRequests = data.pre_requests || [];
 
-    // Only update the active cycle's button, not all buttons
-    if (activeCycleId) {
-        const joinButton = document.querySelector('button[data-cycle-id="' + activeCycleId + '"]');
-        if (joinButton) {
-            joinButton.className = 'btn btn-primary';
-            joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
+	// Only update the active cycle's button, not all buttons
+	if (activeCycleId) {
+		const joinButton = document.querySelector('button[data-cycle-id="' + activeCycleId + '"]');
+		if (joinButton) {
+			joinButton.className = 'btn btn-primary';
+			joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
 
-            joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-            joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-                url: `${pr.url}?action=complete-profile`,
-                label: pr.label,
-            }))));
+			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+				url: `${pr.url}?action=complete-profile`,
+				label: pr.label,
+			}))));
 
-            // Update the alert box for this cycle's card only
-            const card = joinButton.closest('.card') || joinButton.closest('[class*="cycle"]') || joinButton.parentElement.parentElement;
-            if (card) {
-                const alertDiv = card.querySelector('.alert.alert-info');
-                if (alertDiv) {
-                    if (hasPreRequests) {
-                        const listElement = alertDiv.querySelector('.list-unstyled');
-                        if (listElement) {
-                            listElement.innerHTML = '';
-                            preRequests.forEach(pr => {
-                                const li = document.createElement('li');
-                                li.className = 'pre-request-item';
-                                li.innerHTML = `
-                                    <a href="${pr.url}?action=complete-profile"
-                                       class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
-                                       <i class="ti ti-external-link"></i>
-                                       <span>${pr.label}</span>
-                                    </a>`;
-                                listElement.appendChild(li);
-                            });
-                        }
-                        alertDiv.style.display = 'block';
-                    } else {
-                        alertDiv.style.display = 'none';
-                    }
-                }
-            }
-        }
-    }
+			// Update the alert box for this cycle's card only
+			const card = joinButton.closest('.card') || joinButton.closest('[class*="cycle"]') || joinButton.parentElement.parentElement;
+			if (card) {
+				const alertDiv = card.querySelector('.alert.alert-info');
+				if (alertDiv) {
+					if (hasPreRequests) {
+						const listElement = alertDiv.querySelector('.list-unstyled');
+						if (listElement) {
+							listElement.innerHTML = '';
+							preRequests.forEach(pr => {
+								const li = document.createElement('li');
+								li.className = 'pre-request-item';
+								li.innerHTML = `
+									<a href="${pr.url}?action=complete-profile"
+									   class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
+									   <i class="ti ti-external-link"></i>
+									   <span>${pr.label}</span>
+									</a>`;
+								listElement.appendChild(li);
+							});
+						}
+						alertDiv.style.display = 'block';
+					} else {
+						alertDiv.style.display = 'none';
+					}
+				}
+			}
+		}
+	}
 	}
 
 	// -------------------------------------------------------
@@ -2548,4 +2571,56 @@ document.addEventListener('DOMContentLoaded', function() {
 @endif
 @endif
 @endif
+
+<script>
+	(function () {
+		function initPagination(containerId, pageSelector, prevId, nextId) {
+			const container = document.getElementById(containerId);
+			if (!container) return;
+
+			const pages = container.querySelectorAll(pageSelector);
+			if (pages.length <= 1) return;
+
+			const prevBtn = document.getElementById(prevId);
+			const nextBtn = document.getElementById(nextId);
+			let current = 0;
+
+			function render() {
+				pages.forEach(function (page, index) {
+					page.classList.toggle('d-none', index !== current);
+				});
+				if (prevBtn) prevBtn.disabled = current === 0;
+				if (nextBtn) nextBtn.disabled = current === pages.length - 1;
+			}
+
+			if (prevBtn) {
+				prevBtn.addEventListener('click', function () {
+					if (current > 0) {
+						current--;
+						render();
+					}
+				});
+			}
+
+			if (nextBtn) {
+				nextBtn.addEventListener('click', function () {
+					if (current < pages.length - 1) {
+						current++;
+						render();
+					}
+				});
+			}
+
+			render();
+		}
+
+		@if(count($latest_services) > 0)
+			initPagination('latestServicesPages', '.service-page', 'servicesPrevBtn', 'servicesNextBtn');
+		@endif
+
+		@if(count($available_surveys) > 0)
+			initPagination('availableSurveysPages', '.survey-page', 'surveysPrevBtn', 'surveysNextBtn');
+		@endif
+	})();
+</script>
 @stop

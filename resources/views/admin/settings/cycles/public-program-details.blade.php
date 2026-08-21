@@ -259,7 +259,7 @@ $startDateForCountdown = $program->registration_start;
 							<i class="ti ti-calendar-event me-1"></i>{{ $program->ranges }}
 						</span>
 						<span class="badge bg-label-secondary rounded-pill px-3 py-2">
-							<i class="ti ti-map-pin me-1"></i>{{ $program->org }}
+							<i class="ti ti-building me-1"></i>{{ $program->org }}
 						</span>
 					</div>
 

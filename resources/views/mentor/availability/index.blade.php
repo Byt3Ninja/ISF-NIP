@@ -34,178 +34,178 @@
 
 @section('content')
 
-<div class="">
   <div class="">
-    <div class="min-vh-100 card mb-5">
-      <div class="card-header border-bottom mb-6">
-        <div class="d-flex justify-content-between align-items-center">
-          <h4 class="mb-0">{{ __('mentor.weekly_availability_slots') }}</h4>
-    
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availabilityModal">
-            <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability_slots') }}
-          </button>
+    <div class="">
+      <div class="min-vh-100 card mb-5">
+        <div class="card-header border-bottom mb-6">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">{{ __('mentor.weekly_availability_slots') }}</h4>
+
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#availabilityModal">
+              <i class="ti ti-plus me-1"></i> {{ __('mentor.add_availability_slots') }}
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="main-calendar"></div>
         </div>
       </div>
-      <div class="card-body">
-        <div id="main-calendar"></div>
-      </div>
     </div>
-  </div>
-  
-  <!-- ADD AVAILABILITY MODAL WITH CALENDAR -->
-  <div class="modal fade" id="availabilityModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <form onsubmit="return false;">  
-        <div class="modal-content">
-  
-          <div class="modal-header border-bottom pb-6">
-          <div class="d-flex justify-content-between align-items-center w-100">
-            <h5 class="modal-title d-flex align-items-center mb-0">
-              <i class="ti ti-plus me-2"></i> {{ __('mentor.add_availability_slots') }}
-            </h5>
-            <nav class="nav-align-end">
-              <ul class="nav nav-tabs">
-                <li class="nav-item">
-                  <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#calendar-tab">
-                    <i class="ti ti-calendar ti-sm me-1"></i>
-                    {{ __('mentor.calendar_view') }}
-                  </button>
-                </li>
-                <li class="nav-item">
-                  <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">
-                    <i class="ti ti-list ti-sm me-1"></i>
-                    {{ __('mentor.list_view') }}
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          </div>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-  
-          <div class="modal-body p-0">
-            <div class="tab-content">
-              <div class="tab-pane fade show active" id="calendar-tab" role="tabpanel">
-                <div class="row">
-                  <div class="col-lg-5 border-end ps-5 mb-6 mb-lg-0">
-                    <div id="availability-calendar"></div>
-                  </div>
-                  <div class="col-lg-7 ps-8">
-                    <div class="pe-4" style="max-height: 500px; overflow-y: auto;">
-    
-                      <div class="mb-4">
-                        <h6 class="mb-0" id="selected-date-display">
-                          {{ __('mentor.select_date_from_calendar') }}
-                        </h6>
-                        <small class="text-muted">{{ __('mentor.select_date_to_add_your_available_time_slots') }}</small>
+
+    <!-- ADD AVAILABILITY MODAL WITH CALENDAR -->
+    <div class="modal fade" id="availabilityModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <form onsubmit="return false;">  
+          <div class="modal-content">
+
+            <div class="modal-header border-bottom pb-6">
+            <div class="d-flex justify-content-between align-items-center w-100">
+              <h5 class="modal-title d-flex align-items-center mb-0">
+                <i class="ti ti-plus me-2"></i> {{ __('mentor.add_availability_slots') }}
+              </h5>
+              <nav class="nav-align-end">
+                <ul class="nav nav-tabs">
+                  <li class="nav-item">
+                    <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#calendar-tab">
+                      <i class="ti ti-calendar ti-sm me-1"></i>
+                      {{ __('mentor.calendar_view') }}
+                    </button>
+                  </li>
+                  <li class="nav-item">
+                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#list-tab">
+                      <i class="ti ti-list ti-sm me-1"></i>
+                      {{ __('mentor.list_view') }}
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-0">
+              <div class="tab-content">
+                <div class="tab-pane fade show active" id="calendar-tab" role="tabpanel">
+                  <div class="row">
+                    <div class="col-lg-5 border-end ps-5 mb-6 mb-lg-0">
+                      <div id="availability-calendar"></div>
+                    </div>
+                    <div class="col-lg-7 ps-8">
+                      <div class="pe-4">
+
+                        <div class="mb-4">
+                          <h6 class="mb-0" id="selected-date-display">
+                            {{ __('mentor.select_date_from_calendar') }}
+                          </h6>
+                          <small class="text-muted">{{ __('mentor.select_date_to_add_your_available_time_slots') }}</small>
+                        </div>
+
+                        <div class="border rounded p-4 bg-light-subtle mb-4" id="slot-form-box" style="display: none;">
+                          <div class="row mb-2">
+                            <div class="col-md-4 mb-3">
+                              <label class="form-label">{{ __('mentor.start_time') }}</label>
+                              <input type="text" id="slot-start-time" class="form-control bg-white border" placeholder="09:00 AM">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                              <label class="form-label">{{ __('mentor.end_time') }}</label>
+                              <input type="text" id="slot-end-time" class="form-control bg-white border" placeholder="05:00 PM">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                              <label class="form-label">{{ __('mentor.session_type') }}</label>
+                              <select id="slot-session-type" class="form-select bg-white border">
+                                <option value="Online">{{ __('mentor.online') }}</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-primary text-nowrap" id="add-single-slot">
+                              <i class="ti ti-plus ti-16px me-1"></i>
+                              {{ __('mentor.add_single_slot') }}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 text-nowrap" id="apply-to-weekday">
+                              <i class="ti ti-calendar-check ti-16px"></i>
+                              <span>{{ __('mentor.apply_to_all') }}</span>
+                              <span id="selected-weekday"></span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div id="slots-list-container" style="max-height: 280px; overflow-y: auto;">
+                          <h6 class="mb-3">{{ __('mentor.slots_for_selected_date') }}</h6>
+                          <div id="slots-list">
+                            <p class="text-muted">{{ __('mentor.no_slots_added') }}</p>
+                          </div>
+                        </div>
                       </div>
-      
-                      <div class="border rounded p-4 bg-light-subtle mb-4" id="slot-form-box" style="display: none;">
-                        <div class="row mb-2">
-                          <div class="col-md-4 mb-3">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tab-pane fade" id="list-tab" role="tabpanel">
+                  <div style="max-height: 500px; overflow-y: auto;">
+                    <div id="list-view-add-slot-form" style="display: none;">
+                      <div class="border rounded py-6 px-5 mb-4">
+                        <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
+                        <div class="row mb-3">
+                          <div class="col-md-6 col-lg-4 mb-3">
+                            <label class="form-label">{{ __('mentor.day') }}</label>
+                            <select id="list-view-day-select" class="form-select">
+                              <option value="Sunday">{{ __('mentor.sunday') }}</option>
+                              <option value="Monday">{{ __('mentor.monday') }}</option>
+                              <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
+                              <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
+                              <option value="Thursday">{{ __('mentor.thursday') }}</option>
+                              <option value="Friday">{{ __('mentor.friday') }}</option>
+                              <option value="Saturday">{{ __('mentor.saturday') }}</option>
+                            </select>
+                          </div>
+                          <div class="col-md-6 col-lg-3 mb-3">
                             <label class="form-label">{{ __('mentor.start_time') }}</label>
-                            <input type="text" id="slot-start-time" class="form-control bg-white border" placeholder="09:00 AM">
+                            <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00 AM">
                           </div>
-
-                          <div class="col-md-4 mb-3">
+                          <div class="col-md-6 col-lg-3 mb-3">
                             <label class="form-label">{{ __('mentor.end_time') }}</label>
-                            <input type="text" id="slot-end-time" class="form-control bg-white border" placeholder="05:00 PM">
+                            <input type="text" id="list-view-end-time" class="form-control" placeholder="05:00 PM">
                           </div>
-
-                          <div class="col-md-4 mb-3">
+                          <div class="col-md-6 col-lg-2 mb-3">
                             <label class="form-label">{{ __('mentor.session_type') }}</label>
-                            <select id="slot-session-type" class="form-select bg-white border">
+                            <select id="list-view-session-type" class="form-select">
                               <option value="Online">{{ __('mentor.online') }}</option>
                             </select>
                           </div>
                         </div>
-      
                         <div class="d-flex gap-2">
-                          <button type="button" class="btn btn-sm btn-primary text-nowrap" id="add-single-slot">
-                            <i class="ti ti-plus ti-16px me-1"></i>
-                            {{ __('mentor.add_single_slot') }}
+                          <button type="button" class="btn btn-primary" id="save-list-view-slot">
+                            <i class="ti ti-plus me-2"></i>
+                            {{ __('admin.Add_New') }}
                           </button>
-                          <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 text-nowrap" id="apply-to-weekday">
-                            <i class="ti ti-calendar-check ti-16px"></i>
-                            <span>{{ __('mentor.apply_to_all') }}</span>
-                            <span id="selected-weekday"></span>
+                          <button type="button" class="btn btn-outline-secondary" id="cancel-list-view-slot">
+                            <i class="ti ti-x me-2"></i>
+                            {{ __('mentor.cancel') }}
                           </button>
-                        </div>
-                      </div>
-      
-                      <div id="slots-list-container">
-                        <h6 class="mb-3">{{ __('mentor.slots_for_selected_date') }}</h6>
-                        <div id="slots-list">
-                          <p class="text-muted">{{ __('mentor.no_slots_added') }}</p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tab-pane fade" id="list-tab" role="tabpanel">
-                <div style="max-height: 500px; overflow-y: auto;">
-                  <div id="list-view-add-slot-form" style="display: none;">
-                    <div class="border rounded py-6 px-5 mb-4">
-                      <h6 class="mb-3">{{ __('mentor.add_new_slot') }}</h6>
-                      <div class="row mb-3">
-                        <div class="col-md-6 col-lg-4 mb-3">
-                          <label class="form-label">{{ __('mentor.day') }}</label>
-                          <select id="list-view-day-select" class="form-select">
-                            <option value="Sunday">{{ __('mentor.sunday') }}</option>
-                            <option value="Monday">{{ __('mentor.monday') }}</option>
-                            <option value="Tuesday">{{ __('mentor.tuesday') }}</option>
-                            <option value="Wednesday">{{ __('mentor.wednesday') }}</option>
-                            <option value="Thursday">{{ __('mentor.thursday') }}</option>
-                            <option value="Friday">{{ __('mentor.friday') }}</option>
-                            <option value="Saturday">{{ __('mentor.saturday') }}</option>
-                          </select>
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-3">
-                          <label class="form-label">{{ __('mentor.start_time') }}</label>
-                          <input type="text" id="list-view-start-time" class="form-control" placeholder="09:00 AM">
-                        </div>
-                        <div class="col-md-6 col-lg-3 mb-3">
-                          <label class="form-label">{{ __('mentor.end_time') }}</label>
-                          <input type="text" id="list-view-end-time" class="form-control" placeholder="05:00 PM">
-                        </div>
-                        <div class="col-md-6 col-lg-2 mb-3">
-                          <label class="form-label">{{ __('mentor.session_type') }}</label>
-                          <select id="list-view-session-type" class="form-select">
-                            <option value="Online">{{ __('mentor.online') }}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-primary" id="save-list-view-slot">
-                          <i class="ti ti-plus me-2"></i>
-                          {{ __('admin.Add_New') }}
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" id="cancel-list-view-slot">
-                          <i class="ti ti-x me-2"></i>
-                          {{ __('mentor.cancel') }}
-                        </button>
-                      </div>
+                    <div id="availability-list-view">
+                      <!-- List view content will be injected here -->
                     </div>
                   </div>
-                  <div id="availability-list-view">
-                    <!-- List view content will be injected here -->
-                  </div>
                 </div>
-              </div>
 
+              </div>
+            </div>
+
+            <div class="modal-footer border-top pt-6">
+              <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
             </div>
           </div>
-  
-          <div class="modal-footer border-top pt-6">
-            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.close') }}</button>
-          </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 @endsection
 
 @section('scripts')

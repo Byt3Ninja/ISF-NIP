@@ -16,6 +16,7 @@
             $ri = strtoupper(substr($r['name'], 0, 2));
             $attCount = count($task['attachments'] ?? []);
             $commentCount = count($task['comments'] ?? []);
+            $lastFeedback = !empty($task['feedbacks']) ? end($task['feedbacks']) : null;
           @endphp
           <div class="card shadow-sm border-0 cursor-grab kanban-item" data-task-id="{{ $task['id'] }}" data-search-text="{{ strtolower($task['title']) }}">
             <div class="card-body p-3">
@@ -37,6 +38,12 @@
               </div>
               <h6 class="mb-1 text-truncate">{{ $task['title'] }}</h6>
               <div class="text-muted small mb-2 line-clamp-2">{!! strip_tags($task['description']) !!}</div>
+              @if ($lastFeedback)
+                <span class="badge {{ $lastFeedback['decision'] === 'revision' ? 'bg-label-danger' : 'bg-label-success' }} rounded-pill mb-2" style="font-size: 0.7rem;">
+                  <i class="ti {{ $lastFeedback['decision'] === 'revision' ? 'ti-rotate' : 'ti-check' }} ti-xs me-1"></i>
+                  {{ $lastFeedback['decision'] === 'revision' ? __('admin.needs_revision') : __('admin.pass_task') }}
+                </span>
+              @endif
               <div class="d-flex align-items-center justify-content-between small text-muted mt-3">
                 <span class="d-flex align-items-center gap-2">
                   @if($attCount > 0)

@@ -8,6 +8,7 @@ return [
     'Portal Cycles' => 'برامج النظام',
     'Select cycle from list' => 'أختر برنامج من القائمة',
     'Start' => 'تبدأ',
+    'Started' => 'بدأ',
     'Users' => 'المستخدمين',
     'Edit' => 'تحرير',
     'New' => 'جديد',
