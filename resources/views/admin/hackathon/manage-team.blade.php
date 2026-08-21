@@ -835,7 +835,7 @@
           </div>
 
 
-          <div class="mb-3">
+          {{-- <div class="mb-3">
             <label for="Region" class="form-label">{{ $l == 'en' ? 'Region' : 'المنطقة' }}</label>
             <select class="form-select" id="Region" name="Region">
               <option value="">{{ $l == 'en' ? 'Choose Region...' : 'اختر المنطقة...' }}</option>
@@ -850,7 +850,7 @@
               </option>
              
             </select>
-          </div>
+          </div> --}}
 
 
         </div>

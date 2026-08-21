@@ -413,14 +413,14 @@
                 </div>
                 @endif
                 
-                @if($team->project->region)
+                {{-- @if($team->project->region)
                 <div class="col-md-4 mb-3">
                   <label class="form-label fw-semibold">{{ $l == 'ar' ? 'منطقة المشروع' : ' Project Region' }}</label>
                   <div>
                     <span class="badge bg-label-secondary fs-6">{{ __('admin.'.$team->project->region) }}</span>
                   </div>
                 </div>
-                @endif
+                @endif --}}
                 
                 <div class="col-md-4 mb-3">
                   <label class="form-label fw-semibold">{{ $l == 'ar' ? 'تاريخ الإنشاء' : 'Created Date' }}</label>
