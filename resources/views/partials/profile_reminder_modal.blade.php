@@ -13,7 +13,7 @@
           <h4 class="modal-title">
             {{ $l == 'ar' ?  'تذكير الملف الشخصي' : 'Profile Reminder' }}
           </h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" data-bs-target="#profileReminderModal" aria-label="Close"></button>
         </div>
         <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
           <div class="text-center mb-6">
