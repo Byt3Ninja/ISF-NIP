@@ -329,6 +329,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
         'list_mine_cycle' => app()->getLocale() == 'en' ? 'My Submission' : 'عرض مشاركتى',
         'render_view_form' => app()->getLocale() == 'en' ? 'Form Details' : 'تفاصيل النموذج',
         'organization_manage_setting' => app()->getLocale() == 'en' ? 'Org Manage Settings' : 'إدارة إعدادات المؤسسة',
+        'questions_manage_assessment' => app()->getLocale() == 'en' ? 'Manage Assessment' : 'إدارة التقييم',
         
     ];
     if (isset($customReplacements[$cleanTitle])) {
