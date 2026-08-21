@@ -20,18 +20,19 @@ class startupCustomerGrowthController extends Controller
 		$user = auth()->user();
 		$current_year = date('Y');
 		$years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
-		$months = range(1, 12);
+		$months = range(0, 12);
 		$this->validate($request, [
 			"add_growth_year" => "required|numeric|in:" . implode(',', $years),
 			"add_growth_month" => "required|numeric|in:" . implode(',', $months),
 			"add_growth_total_customers" => "required|integer|min:0",
-			"add_growth_new_customers" => "required|integer|min:0",
+			"add_growth_new_customers" => "required|integer|min:0|lte:add_growth_total_customers",
 			"add_growth_segment" => "required|in:mixed,b2c,b2b,enterprise",
 			"add_growth_notes" => "sometimes|nullable",
 			"company_id" => "required|numeric|exists:companies,id"
 		], [
 			"add_growth_total_customers.integer" => __('startup.please_enter_a_valid_whole_number'),
-			"add_growth_new_customers.integer" => __('startup.please_enter_a_valid_whole_number')
+			"add_growth_new_customers.integer" => __('startup.please_enter_a_valid_whole_number'),
+			"add_growth_new_customers.lte" => __('startup.New customers cannot exceed total customers')
 		]);
 
 		if( $user->hasRole('registered') )
@@ -65,16 +66,20 @@ class startupCustomerGrowthController extends Controller
 		$user = auth()->user();
 		$current_year = date('Y');
 		$years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
-		$months = range(1, 12);
+		$months = range(0, 12);
 		$this->validate($request, [
 			"record_id" => "required|numeric|exists:startup_customer_growth,id",
 			"add_growth_year" => "required|numeric|in:" . implode(',', $years),
 			"add_growth_month" => "required|numeric|in:" . implode(',', $months),
-			"add_growth_total_customers" => "required|numeric|min:0",
-			"add_growth_new_customers" => "required|numeric|min:0",
+			"add_growth_total_customers" => "required|integer|min:0",
+			"add_growth_new_customers" => "required|integer|min:0|lte:add_growth_total_customers",
 			"add_growth_segment" => "required|in:mixed,b2c,b2b,enterprise",
 			"add_growth_notes" => "sometimes|nullable",
 			"company_id" => "required|numeric|exists:companies,id"
+		], [
+			"add_growth_total_customers.integer" => __('startup.please_enter_a_valid_whole_number'),
+			"add_growth_new_customers.integer" => __('startup.please_enter_a_valid_whole_number'),
+			"add_growth_new_customers.lte" => __('startup.New customers cannot exceed total customers')
 		]);
 
 		$record = StartupCustomerGrowth::where('id', $request->record_id)
@@ -138,11 +143,11 @@ class startupCustomerGrowthController extends Controller
 		$records = collect($records_metadata['records']);
 
 		// Apply filters if passed
-		if ($request->has('year') && $request->year != '') {
-			$records = $records->where('year', $request->year);
+		if ($request->filled('year')) {
+			$records = $records->filter(fn($r) => (string)$r->year === (string)$request->year)->values();
 		}
-		if ($request->has('segment') && $request->segment != '') {
-			$records = $records->where('segment', strtolower($request->segment));
+		if ($request->filled('segment')) {
+			$records = $records->filter(fn($r) => strtolower($r->segment) === strtolower($request->segment))->values();
 		}
 
 		$headers = [
