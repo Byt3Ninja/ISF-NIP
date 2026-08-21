@@ -407,9 +407,11 @@
   </div>
   <!--/ Navigation Pills -->
 
+  @php $landingBg = false; @endphp
+
   <!-- Programs Section -->
   @if(isset($landingPage) && $landingPage->programs_enabled)
-  <section id="programs" class="section-py">
+  <section id="programs" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}">@php $landingBg = !$landingBg; @endphp
     <div class="container">
       @if($landingPage->programs_subtitle)
         <div class="text-center mb-4">
@@ -591,7 +593,7 @@
 
   <!-- How It Works Section -->
   @if($landingPage->how_it_works_enabled && !empty($landingPage->process_steps))
-    <section id="how-it-works" class="section-py">
+    <section id="how-it-works" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}">@php $landingBg = !$landingBg; @endphp
       <div class="container">
         @if($landingPage->how_it_works_subtitle)
           <div class="text-center mb-4">
@@ -645,7 +647,7 @@
 
   <!-- Achievements Section -->
   @if($landingPage->achievements_enabled && !empty($landingPage->metrics))
-  <section id="achievements" class="section-py bg-body landing-reviews">
+  <section id="achievements" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }} landing-reviews">@php $landingBg = !$landingBg; @endphp
     <div class="container">
       @if($landingPage->achievements_subtitle)
         <div class="text-center mb-4">
@@ -696,7 +698,7 @@
 
   <!-- Media & Recognition Section -->
   @if($landingPage->media_enabled && !empty($articlesWithUrls))
-  <section id="media" class="section-py">
+  <section id="media" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}">@php $landingBg = !$landingBg; @endphp
     <div class="container">
       @if($landingPage->media_subtitle)
         <div class="text-center mb-4">
@@ -780,7 +782,7 @@
   @endif
 
   @if($landingPage->partners_enabled && !empty($partnersWithUrls))
-  <section id="partners" class="section-py bg-body landing-reviews pb-0">
+  <section id="partners" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }} landing-reviews pb-0">@php $landingBg = !$landingBg; @endphp
     <!-- Partners logo marquee: Start -->
     <div class="container">
       <div class="text-center mb-12">
@@ -835,7 +837,7 @@
   @if(!empty($customSections))
     @foreach($customSections as $index => $customSection)
       @if(!empty($customSection->content))
-        <section id="custom-{{ $customSection->id }}" class="section-py bg-{{ $index % 2 == 0 ? 'card' : 'body' }} ">
+        <section id="custom-{{ $customSection->id }}" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}">@php $landingBg = !$landingBg; @endphp
           <div class="container d-flex flex-column align-items-center">
             <div class="mb-12">
               <span class="badge bg-label-primary">{{ $customSection->title }}</span>
@@ -850,7 +852,7 @@
   @endif
 
   <!-- Contact Us: Start -->
-  <section id="landingContact" class="section-py bg-body landing-contact">
+  <section id="landingContact" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }} landing-contact">
     <div class="container">
       <div class="text-center mb-4">
         <span class="badge bg-label-primary">{{ __('admin.Contact') }}</span>
