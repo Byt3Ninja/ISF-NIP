@@ -233,15 +233,31 @@
                   <div>
                     <h6 class="mb-0 text-muted">{{ $pendingMember->tm_email }}</h6>
                     <small class="text-muted">
-                      {{ $l == 'en' ? 'Pending invitation' : 'دعوة معلقة' }}
+                      @if($pendingMember->tm_acceptInvition === 'failed')
+                        {{ $l == 'en' ? 'Invitation email failed' : 'فشل إرسال بريد الدعوة' }}
+                      @else
+                        {{ $l == 'en' ? 'Pending invitation' : 'دعوة معلقة' }}
+                      @endif
                     </small>
                   </div>
                 </div>
                 <div class="d-flex align-items-center">
-                  <span class="badge bg-label-warning rounded-pill me-2">
+                  @if($pendingMember->tm_acceptInvition === 'failed')
+                  <span class="badge bg-label-danger rounded-pill me-2 pendingStatusBadge">
+                    <i class="ti ti-alert-triangle me-1"></i>
+                    {{ __('admin.invitation_failed_status') }}
+                  </span>
+                  <button class="btn btn-sm btn-outline-primary me-1 retryInviteBtn" data-id="{{ $pendingMember->tm_id }}"
+                    data-bs-toggle="tooltip" title="{{ __('admin.retry_invitation') }}"
+                    onclick="retryInvitation({{ $pendingMember->tm_id }})">
+                    <i class="ti ti-refresh"></i>
+                  </button>
+                  @else
+                  <span class="badge bg-label-warning rounded-pill me-2 pendingStatusBadge">
                     <i class="ti ti-clock me-1"></i>
                     {{ $l == 'en' ? 'Pending' : 'معلق' }}
                   </span>
+                  @endif
                   <input type="hidden" class="pendingMemberId" value="{{ $pendingMember->tm_id }}">
                   @if($isLeader)
                   <button class="btn btn-sm btn-outline-danger" data-id="{{ $pendingMember->tm_id }}"
@@ -1251,7 +1267,13 @@
   }
 
   function applyInviteResult(data) {
-    if (data.member) appendPendingRow(data.member);
+    if (data.member) {
+      appendPendingRow(data.member);
+      // Reflect the invited state on the matching Available Members card, so an
+      // invite sent via the email field also disables that member's card button
+      // (its user_id, when the email belongs to a registered member).
+      if (data.member.user_id) markInviteCard(data.member.user_id);
+    }
     updateSeatUI(data);
   }
 
@@ -1270,12 +1292,18 @@
     card.find('.invite-pending-badge').addClass('d-none');
   }
 
-  // Apply the invited-state visuals on a card (border + pending badge), the
-  // counterpart to resetInviteCard, so invite and cancel stay symmetric.
+  // Apply the invited state on a card (button + border + pending badge), the
+  // exact counterpart to resetInviteCard, so invite and cancel stay symmetric.
   function markInviteCard(memberId) {
     if (!memberId) return;
+    const button = $(`.invite-member-btn[data-member-id="${memberId}"]`);
+    if (button.length) {
+      button.removeClass('btn-primary').addClass('btn-warning').prop('disabled', true);
+      button.find('.btn-spinner').addClass('d-none');
+      button.find('.btn-text').removeClass('d-none').html('<i class="ti ti-check me-1"></i>' +
+        (LANG === 'en' ? 'Invitation Sent' : 'تم إرسال الدعوة'));
+    }
     const card = $(`.invite-member-card[data-member-card-id="${memberId}"]`);
-    if (!card.length) return;
     card.removeClass('border-light').addClass('border-warning');
     card.find('.invite-pending-badge').removeClass('d-none');
   }
@@ -1625,9 +1653,74 @@
     });
   }
 
+  function retryInvitation(id) {
+    var url = '{{ route('hackathon.retryInvitation') }}';
+    var token = '{{ csrf_token() }}';
+    var row = document.getElementById('pendingMember' + id);
+    var btn = row ? row.querySelector('.retryInviteBtn') : null;
+    // Dismiss the Retry button's hover tooltip so it doesn't linger after the click.
+    dismissTooltips(btn);
+    if (btn) { btn.disabled = true; }
+
+    $.post(url, {'_method': 'POST', '_token': token, 'id': id})
+      .done(function(data) {
+        if (data.success) {
+          if (row) {
+            var badge = row.querySelector('.pendingStatusBadge');
+            if (badge) {
+              badge.className = 'badge bg-label-warning rounded-pill me-2 pendingStatusBadge';
+              badge.innerHTML = '<i class="ti ti-clock me-1"></i>' + '{{ $l == 'en' ? 'Pending' : 'معلق' }}';
+            }
+            if (btn) { btn.remove(); }
+          }
+          Swal.fire({
+            icon: 'success',
+            title: '{{ $l == 'en' ? 'Invitation Resent!' : 'تم إعادة إرسال الدعوة!' }}',
+            text: data.message,
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            showCancelButton: false,
+            showConfirmButton: true,
+            customClass: {
+              confirmButton: 'btn btn-primary',
+            },
+            buttonsStyling: false,
+          });
+        } else {
+          if (btn) { btn.disabled = false; }
+          Swal.fire({
+            icon: 'error',
+            title: "{{ __('admin.Error') }}!",
+            text: data.message || "{{ __('admin.retry_invitation') }}",
+            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            customClass: { confirmButton: 'btn btn-primary' },
+            buttonsStyling: false,
+          });
+        }
+      }).fail(function(error) {
+        if (btn) { btn.disabled = false; }
+        releaseFailureAlert({
+          title: "{{ __('admin.Error') }}!",
+          message: error?.responseJSON?.message || "{{ __('admin.retry_invitation') }}",
+        });
+      });
+  }
+
+  // Bootstrap keeps a tooltip's popup on <body>; if the trigger loses hover to a
+  // SweetAlert dialog (or the trigger's row is later removed) the popup is
+  // orphaned and lingers on screen. Hide the active tooltip and sweep any strays.
+  function dismissTooltips(el) {
+    if (el) { try { $(el).tooltip('hide'); } catch (e) {} }
+    document.querySelectorAll('.tooltip.show, .bs-tooltip-auto, [id^="tooltip"]').forEach(function (t) {
+      if (t.classList.contains('tooltip')) t.remove();
+    });
+  }
+
   function confirmCancelInvitation(id, email) {
     var url = '{{ route('hackathon.Cancelinvitation') }}';
     var token = '{{ csrf_token() }}';
+
+    // Dismiss the Cancel button's hover tooltip before the dialog opens.
+    dismissTooltips(document.querySelector('#pendingMember' + id + ' [data-bs-toggle="tooltip"]'));
 
     Swal.fire({
       title: '{{ $l == 'en' ? 'Cancel Invitation?' : 'إلغاء الدعوة؟' }}',
@@ -1648,21 +1741,27 @@
             if (data.success) {
               const row = document.getElementById('pendingMember' + id);
               if (row) row.remove();
+              dismissTooltips(); // clear any tooltip orphaned by the removed row
               updateSeatUI(data);
               resetInviteCard(data.member_id);
+              Swal.fire({
+                icon: 'success',
+                title: '{{ $l == 'en' ? 'Invitation Cancelled!' : 'تم إلغاء الدعوة!' }}',
+                text: `{{ $l == 'en' ? 'The invitation to' : 'الدعوة إلى' }} ${email} {{ $l == 'en' ? 'has been cancelled.' : 'تم إلغاؤها.' }}`,
+                confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+                showCancelButton: false,
+                showConfirmButton: true,
+                customClass: {
+                  confirmButton: 'btn btn-primary',
+                },
+                buttonsStyling: false,
+              });
+            } else {
+              releaseFailureAlert({
+                title: "{{ __('admin.Error') }}!",
+                message: data.message || "{{ __('admin.CancelFailed') }}",
+              });
             }
-            Swal.fire({
-              icon: 'success',
-              title: '{{ $l == 'en' ? 'Invitation Cancelled!' : 'تم إلغاء الدعوة!' }}',
-              text: `{{ $l == 'en' ? 'The invitation to' : 'الدعوة إلى' }} ${email} {{ $l == 'en' ? 'has been cancelled.' : 'تم إلغاؤها.' }}`,
-              confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
-            });
           }).fail(function(error) {
             console.log(error);
             releaseFailureAlert({
@@ -1835,11 +1934,8 @@
         postInvitation({ user_id: id, memberEmail: email })
           .then(data => {
             if (data.success) {
-              // Flip the card button to "Invitation Sent".
-              button.removeClass('btn-primary').addClass('btn-warning');
-              button.find('.btn-text').html('<i class="ti ti-check me-1"></i>' +
-                (LANG === 'en' ? 'Invitation Sent' : 'تم إرسال الدعوة'));
-              markInviteCard(id);
+              // applyInviteResult() flips this card (button + border + badge) to
+              // the invited state via markInviteCard(data.member.user_id).
               applyInviteResult(data);
               Swal.fire({
                 icon: 'success',

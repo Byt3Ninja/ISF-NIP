@@ -228,13 +228,15 @@ class HackathonController extends Controller
         if( $team_Formation_raw->isEmpty() ) { return redirect()->back()->with('error', 'Team Formation not found'); }
         $step = Step::whereIn('cycle_id', $team_Formation_raw->pluck('tf_cycle_id')->toArray())->where('stype', '6')->first();
         $count_team = $step ? $step->count_team_number : 0;
-        $team_Pending = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'pending');
+        $team_Pending = $team_Formation_raw->where('tm_isTeamLeader', 0)
+            ->whereIn('tm_acceptInvition', ['pending', 'failed']);
         $team_members = $team_Formation_raw->where('tm_isTeamLeader', 0)->where('tm_acceptInvition', 'accepted');
 
         $team_Formation_leader = $team_Formation_raw->where('tm_isTeamLeader', 1)->where('tm_user_id', Auth::user()->id)->first();
 
         $existInTeam = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'accepted')->pluck('user_id')->toArray();
-        $pendingInvites = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'pending')->get();
+        $pendingInvites = Team_member::where('TeamMember', 'hackathon')
+            ->whereIn('acceptInvition', ['pending', 'join', 'failed'])->get();
         $placeholders = implode(',', array_fill(0, count($existInTeam), '?'));
 
         $viewMember_q = "SELECT
@@ -288,7 +290,9 @@ class HackathonController extends Controller
                 'city'      => $user->{'ci_city_'. $l} ?? 'N/A',
                 'state'     => $user->{'s_state_'. $l} ?? 'N/A',
                 'title'     => $user->{'u_title_'. $l} ?? '',
-                'isInvited' => $pendingInvites->where('user_id', $member->u_id)->where('team_formation_id', $id)->isNotEmpty() ? true : false,
+                'isInvited' => $pendingInvites
+                    ->where('team_formation_id', $id)
+                    ->contains(fn ($p) => mb_strtolower((string) $p->Email) === mb_strtolower((string) $member->u_email)),
             ];
         })->toArray();
 
@@ -1618,7 +1622,7 @@ class HackathonController extends Controller
             return redirect()->back()->with($ok ? 'success' : 'error', $message);
         };
 
-        $email = $request->memberEmail;
+        $email = mb_strtolower(trim($request->memberEmail));
         $user = Auth::user();
         $team_q = TeamFormation::where('user_id', $user->id)->first();
         if (!$team_q) {
@@ -1645,14 +1649,21 @@ class HackathonController extends Controller
             return $respond(false, __('admin.This user is already a member of another team.'));
         }
 
-        // Block duplicate pending invite to the same email on this team.
+        // Block re-inviting the same email on this team while an invite is
+        // still active (pending / join) or awaiting retry (failed).
         $alreadyInvited = Team_member::where('team_formation_id', $team_q->id)
-            ->where('email', $email)->where('acceptInvition', 'pending')->exists();
+            ->whereRaw('LOWER(Email) = ?', [$email])
+            ->whereIn('acceptInvition', ['pending', 'join', 'failed'])
+            ->exists();
         if ($alreadyInvited) {
             return $respond(false, __('admin.hackathon_already_invited'), ['code' => 'already_invited']);
         }
 
-        $user_q = User::where('email', $email)->where('id', $request->user_id)->first();
+        // Resolve the account by email regardless of whether the invite came
+        // from the "Available Members" card (sends user_id) or the email field
+        // (does not). This prevents a duplicate placeholder row for a user who
+        // is actually registered.
+        $user_q = User::whereRaw('LOWER(email) = ?', [$email])->first();
         if (!$user_q) {
             $teamMember = new Team_member();
             $teamMember->Name = 'Waiting for user';
@@ -1666,11 +1677,17 @@ class HackathonController extends Controller
             $teamMember->expire_at = now()->addHours(24);
             $teamMember->save();
 
-            Notification::route('mail', $email)->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            try {
+                Notification::route('mail', $email)->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            } catch (\Throwable $e) {
+                \Log::error('Hackathon invite dispatch failed', ['email' => $email, 'error' => $e->getMessage()]);
+                $teamMember->delete();
+                return $respond(false, __('admin.invitation_could_not_be_sent'), ['code' => 'send_failed']);
+            }
             $message = __('admin.Invitation sent successfully. Waiting for user to join.');
         } else {
             $teamMember = new Team_member();
-            $teamMember->user_id = $request->user_id;
+            $teamMember->user_id = $user_q->id;
             $teamMember->Name = $user_q->first_name . ' ' . $user_q->last_name;
             $teamMember->TeamMember = 'hackathon';
             $teamMember->isTeamLeader = 0;
@@ -1681,7 +1698,13 @@ class HackathonController extends Controller
             $teamMember->code = uniqid('inv_');
             $teamMember->expire_at = now()->addHours(24);
             $teamMember->save();
-            $user_q->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            try {
+                $user_q->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            } catch (\Throwable $e) {
+                \Log::error('Hackathon invite dispatch failed', ['email' => $email, 'error' => $e->getMessage()]);
+                $teamMember->delete();
+                return $respond(false, __('admin.invitation_could_not_be_sent'), ['code' => 'send_failed']);
+            }
             $message = __('admin.Invitation sent successfully.');
         }
 
@@ -1717,7 +1740,10 @@ class HackathonController extends Controller
     public function cancelInvitation(Request $request)
     {
         $user = Auth::user();
-        $teamMember = Team_member::where('id', $request->id)->where('acceptInvition', 'pending')->first();
+        // A leader may cancel an invite that is still pending OR one whose email
+        // failed to send (they can abandon it instead of retrying).
+        $teamMember = Team_member::where('id', $request->id)
+            ->whereIn('acceptInvition', ['pending', 'failed'])->first();
         if (!$teamMember) {
             return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")]);
         }
@@ -1745,6 +1771,55 @@ class HackathonController extends Controller
             'occupied' => $occupied,
             'max' => $max,
             'remaining' => max(0, $max - $occupied),
+        ]);
+    }
+
+    public function retryInvitation(Request $request)
+    {
+        $request->validate(['id' => 'required|exists:team_members,id']);
+
+        $user = Auth::user();
+        $team_q = TeamFormation::where('user_id', $user->id)->first();
+        if (!$team_q) {
+            return response()->json(['success' => false, 'message' => __('admin.You are not authorized to send invitations.')], 422);
+        }
+
+        // Only the leader's own failed invite can be retried.
+        $teamMember = Team_member::where('id', $request->id)
+            ->where('team_formation_id', $team_q->id)
+            ->where('acceptInvition', 'failed')
+            ->first();
+        if (!$teamMember) {
+            return response()->json(['success' => false, 'message' => __('admin.Invitation_not_found.')], 422);
+        }
+
+        // Reuse the same row: back to pending with a fresh 24h window.
+        $teamMember->acceptInvition = 'pending';
+        $teamMember->expire_at = now()->addHours(24);
+        $teamMember->save();
+
+        $email = mb_strtolower(trim((string) $teamMember->Email));
+        $user_q = $teamMember->user_id
+            ? User::find($teamMember->user_id)
+            : User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+        try {
+            if ($user_q) {
+                $user_q->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            } else {
+                Notification::route('mail', $email)->notify(new InviteToHackathon($user, $team_q, $teamMember));
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Hackathon invite retry dispatch failed', ['id' => $teamMember->id, 'error' => $e->getMessage()]);
+            $teamMember->acceptInvition = 'failed';
+            $teamMember->save();
+            return response()->json(['success' => false, 'message' => __('admin.invitation_could_not_be_sent')], 422);
+        }
+
+        return response()->json([
+            'success'   => true,
+            'message'   => __('admin.Invitation sent successfully.'),
+            'member_id' => $teamMember->id,
         ]);
     }
 
