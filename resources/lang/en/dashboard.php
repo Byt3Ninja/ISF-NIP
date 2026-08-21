@@ -121,7 +121,7 @@ return [
     'Time from' => 'Time from',
     'Add a Note' => 'Add a Note',
     'sure del schedule' => 'Are you sure, deleting this schedule?',
-    'IncubationList' => 'Programs :: List',
+    'IncubationList' => 'Programs List',
     'Join' => 'Join now',
   	'Join Now' => 'Join Now',
   	'Sorry your submitted data doesn\'t meet the Program requirements' => 'Sorry your submitted data doesn\'t meet the Program requirements',
