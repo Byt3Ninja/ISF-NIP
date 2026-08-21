@@ -128,6 +128,11 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
         $end = $start->copy()->addMinutes($mentorship_session->period);
         $sessionDate = date('Y-m-d', $session_date);
         $sessionTime = date('h:i A', $session_date) . ' - ' . date('h:i A', $end->timestamp);
+        if( app()->getLocale() == 'ar' )
+        {
+            $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
+            $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
+        }
         $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
         $location = $sessionType == 'offline' ? ($cycle->offline_location_address ?: optional($cycle->organization)->address ?: '-') : '-';
         $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: '-') : '-';

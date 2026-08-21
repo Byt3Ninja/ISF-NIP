@@ -18,8 +18,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 40px 40px 20px 40px; text-align: {{ $alignStart }}; direction: {{ $dirAttr }};">
-
-                        <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">{{ __('email.startup_mentorship_session_notify_email.rejection.subject') }}</p>
+                        {{--  <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">{{ __('email.startup_mentorship_session_notify_email.rejection.subject') }}</p>  --}}
                         <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ __('email.hello') . ' ' . trim($party->name) }},</h1>
 
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.rejection.thanking') }}</p>
