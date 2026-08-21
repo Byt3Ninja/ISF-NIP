@@ -148,8 +148,8 @@ $getSetting = App\Settings::find(1);
   <div class="app-brand demo bg-light-subtle border-bottom" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
       <img 
-        @if (!is_null($_user->organization) && isset($_user->organization->imageUrl))
-          src="{{ $_user->organization->imageUrl }}"
+        @if (!is_null($_user->organization) && isset($_user->organization->img_url))
+          src="{{ route('organizations.logo', $_user->organization?->img_url ?? '') }}"
         @elseif (!empty($getSetting->Logo))
           src="/images/logo/{{ $getSetting->Logo }}"
         @else

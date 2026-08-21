@@ -136,7 +136,7 @@ class AppServiceProvider extends ServiceProvider
                         {
                             if( $program->allow_non_company == 1 )
                             {
-                                $profile_completed = true;
+                                // $profile_completed = true;
                                 $company_completed = true;
                             }
                         }
