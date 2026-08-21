@@ -290,27 +290,6 @@ class HomeController extends Controller
         }
 
         if (array_intersect(['dashboard.widgets_cards_startups_view'], $permissions)) {
-            // The "Startups" card must count real startups only — i.e. companies with
-            // a genuine registered founder — matching the filter already applied by
-            // CompanyRepository::getCompanies() on the listing page this card links
-            // to (/dashboard/companies). users.organization_id is never populated for
-            // founder accounts (only for org managers/subadmins), so for org-scoped
-            // viewers we key scoping off whether the company has ever applied to one
-            // of that org's programs (via form_data -> steps -> cycles), which is the
-            // only durable org link once a company's own cycle/step get nulled by
-            // disapproval. A company that registered but never applied to any program
-            // has no org affiliation yet, so it correctly won't show for a scoped org
-            // (only for the platform-wide admin view).
-            $startups_org_filter = '';
-            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-                $startups_org_filter = " AND EXISTS (
-                        SELECT 1 FROM form_data fd
-                        JOIN steps st ON st.id = fd.step_id
-                        JOIN cycles cyc ON cyc.id = st.cycle_id
-                        WHERE fd.company_id = s.id
-                        AND cyc.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")
-                    )";
-            }
             $companies_q = "SELECT
                     s.id,
                     c.organization_id
@@ -320,22 +299,20 @@ class HomeController extends Controller
                     cycles c ON c.id = s.cycle
                 WHERE
                     s.deleted_at IS NULL
-                    AND EXISTS (
-                        SELECT 1 FROM users u
-                        JOIN model_has_roles mhr ON mhr.model_id = u.id
-                        JOIN roles r ON r.id = mhr.role_id
-                        WHERE u.company_id = s.id
-                        AND r.default_for = 'registered'
-                    )
-                    AND NOT EXISTS (
-                        SELECT 1 FROM users u
-                        JOIN model_has_roles mhr ON mhr.model_id = u.id
-                        JOIN roles r ON r.id = mhr.role_id
-                        WHERE u.company_id = s.id
-                        AND r.default_for IN ('admin', 'organizationmanager', 'subadmin')
-                    )
-                    {$startups_org_filter}
             ";
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                // Scoping via the company's CURRENT cycle misses founders who applied
+                // to this org's program but were later disapproved (which nulls
+                // companies.cycle) or moved on — so key off form_data instead, which
+                // is written at application time and never cleared afterward.
+                $companies_q .= " AND EXISTS (
+                        SELECT 1 FROM form_data fd
+                        JOIN steps st ON st.id = fd.step_id
+                        JOIN cycles cyc ON cyc.id = st.cycle_id
+                        WHERE fd.company_id = s.id
+                        AND cyc.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")
+                    )";
+            }
             $companies = collect(DB::select($companies_q));
             $registeredUserFilter = function ($q) {
                 $q->whereHas('roles', function ($rq) {
@@ -2238,7 +2215,7 @@ class HomeController extends Controller
             'color' => 'info',
             'href' => '/dashboard/companies',
             'icon' => 'ti-building',
-            'text' => 'Startups',
+            'text' => 'Founders',
             'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
             'count' => $companies->count(),
             'isRating' => false,
