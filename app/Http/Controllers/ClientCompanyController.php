@@ -283,18 +283,10 @@ class ClientCompanyController extends Controller
             }
 
             $startDate = $cycle->start ? Carbon::parse($cycle->start) : null;
-            $endDate = $cycle->end ? Carbon::parse($cycle->end) : null;
-            $cycleStatus = 'upcoming';
-            if ($startDate && $endDate) {
-                $now = Carbon::now();
-                if ($now->between($startDate, $endDate)) {
-                    $cycleStatus = 'ongoing';
-                } elseif ($now->greaterThan($endDate)) {
-                    $cycleStatus = 'completed';
-                }
-            } elseif ($startDate && Carbon::now()->greaterThanOrEqualTo($startDate)) {
-                $cycleStatus = 'ongoing';
-            }
+            // The company is still assigned to this cycle (hasn't moved to Almuni yet),
+            // so it can only be 'upcoming' or 'ongoing' here — never 'completed'.
+            // A cycle's calendar end date passing doesn't mean this company finished it.
+            $cycleStatus = ($startDate && Carbon::now()->lessThan($startDate)) ? 'upcoming' : 'ongoing';
 
             $custom_form = $cycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
             $submissions = Formdata::where('company_id', $company?->id)->where('step_id', $custom_form?->id)->orderBy('created_at', 'asc')->first();
