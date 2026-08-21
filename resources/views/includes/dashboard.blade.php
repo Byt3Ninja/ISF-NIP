@@ -206,7 +206,7 @@
 									</div>
 								@endif
 								@else
-								<div class="p-4">
+								<div>
 									@include('includes.no-result', ['message' => __('dashboard.No services added')])
 								</div>
 								@endif
@@ -284,7 +284,7 @@
 											</div>
 										@endif
 									@else
-										<div class="p-4">
+										<div>
 											@include('includes.no-result', ['message' => __('admin.No surveys found')])
 										</div>
 									@endif
