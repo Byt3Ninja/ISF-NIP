@@ -2851,6 +2851,12 @@ return [
 	'select_startups' => 'Select Startups',
 	'select_all' => 'Select All',
 	'deselect_all' => 'Deselect All',
+	'auto_select_range' => 'Auto Select Range',
+	'clear_range' => 'Clear Range',
+	'range_required' => 'Please enter a range.',
+	'range_numbers_only' => 'Range values accept numbers only.',
+	'range_invalid' => 'Invalid range. The start number must be less than or equal to the end number.',
+	'range_outside' => 'Range is outside the available startup list.',
 	'date_required' => 'Please enter a date.',
 	'start_time_required' => 'Please enter the start time.',
 	'end_time_required' => 'Please enter the end time.',
@@ -3898,4 +3904,5 @@ return [
   'chat_is_typing' => 'is typing...',
   'chat_are_typing' => 'are typing...',
   'chat_and' => 'and',
+  'company_assigned_other_panel' => 'This startup is already assigned to another screening panel. Are you sure you want to assign it to this panel as well?',
 ];
