@@ -196,6 +196,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
+    Route::get('hackathon/sharedFile/{id}/download', 'SharedFileController@download')->name('hackathon.downloadSharedFile');
     Route::post('hackathon/AddtodoList', 'TodoListController@store')->name('hackathon.AddtodoList');
     Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
     Route::post('hackathon/EdittodoListStatus', 'TodoListController@changeTodoStatus')->name('hackathon.EdittodoListStatus');

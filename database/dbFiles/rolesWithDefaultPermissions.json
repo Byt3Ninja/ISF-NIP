@@ -236,7 +236,7 @@
             },
             {
                 "name": "settings.create_technologies",
-                "description": " Create Technologies",
+                "description": "Create Technologies",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -245,7 +245,7 @@
             },
             {
                 "name": "settings.update_technologies",
-                "description": " Update Technologies",
+                "description": "Update Technologies",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -254,7 +254,7 @@
             },
             {
                 "name": "settings.delete_technologies",
-                "description": " Delete Technologies",
+                "description": "Delete Technologies",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -263,7 +263,7 @@
             },
             {
                 "name": "settings.create_industries",
-                "description": " Create Industries",
+                "description": "Create Industries",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -272,7 +272,7 @@
             },
             {
                 "name": "settings.update_industries",
-                "description": " Update Industries",
+                "description": "Update Industries",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -281,7 +281,7 @@
             },
             {
                 "name": "settings.delete_industries",
-                "description": " Delete Industries ",
+                "description": "Delete Industries ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -290,7 +290,7 @@
             },
             {
                 "name": "settings.create_sectors",
-                "description": " Create Sectors",
+                "description": "Create Sectors",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -299,7 +299,7 @@
             },
             {
                 "name": "settings.update_sectors",
-                "description": " Update Sectors ",
+                "description": "Update Sectors ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -308,7 +308,7 @@
             },
             {
                 "name": "settings.delete_sectors",
-                "description": " Delete Sectors",
+                "description": "Delete Sectors",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -1063,7 +1063,7 @@
             },
             {
                 "name": "services.export_excel",
-                "description": " Export Services to Excel File",
+                "description": "Export Services to Excel File",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -1074,7 +1074,7 @@
             },
             {
                 "name": "services.export_csv",
-                "description": " Export Services to CSV File ",
+                "description": "Export Services to CSV File ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -2566,7 +2566,7 @@
             },
             {
                 "name": "users.judger",
-                "description": " List All Judger ",
+                "description": "List All Judger ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3296,7 +3296,7 @@
             },
             {
                 "name": "hackathon.apply",
-                "description": " Apply for Hackathon",
+                "description": "Apply for Hackathon",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3343,7 +3343,7 @@
             },
             {
                 "name": "hackathon.invitation",
-                "description": " Invite Hackathon Participants",
+                "description": "Invite Hackathon Participants",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3355,7 +3355,7 @@
             },
             {
                 "name": "hackathon.acceptInvitation",
-                "description": " Accept Hackathon Invitation ",
+                "description": "Accept Hackathon Invitation ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3367,7 +3367,7 @@
             },
             {
                 "name": "hackathon.rejectInvitation",
-                "description": " Reject Hackathon Invitation ",
+                "description": "Reject Hackathon Invitation ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3379,7 +3379,7 @@
             },
             {
                 "name": "hackathon.Cancelinvitation",
-                "description": " Cancel Hackathon Invitation ",
+                "description": "Cancel Hackathon Invitation ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3391,7 +3391,7 @@
             },
             {
                 "name": "hackathon.manageTeam",
-                "description": " Manage Hackathon Team Members ",
+                "description": "Manage Hackathon Team Members ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3403,7 +3403,7 @@
             },
             {
                 "name": "hackathon.getOutTeam",
-                "description": " Remove Member from Hackathon Team ",
+                "description": "Remove Member from Hackathon Team ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3415,7 +3415,7 @@
             },
             {
                 "name": "hackathon.myTeam",
-                "description": " View My Hackathon Team Work Spice ",
+                "description": "View My Hackathon Team Work Spice ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3427,7 +3427,7 @@
             },
             {
                 "name": "hackathon.EditProjectIdea",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3439,7 +3439,7 @@
             },
             {
                 "name": "hackathon.RequestJoinTeam",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3451,7 +3451,7 @@
             },
             {
                 "name": "hackathon.ApprovedRequestJoinTeam",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3463,7 +3463,7 @@
             },
             {
                 "name": "hackathon.RejectedRequestJoin",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3475,7 +3475,7 @@
             },
             {
                 "name": "hackathon.ViewSubmission",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3486,7 +3486,7 @@
             },
             {
                 "name": "hackathon.viewAdminHackaton",
-                "description": " View Admin Dashboard Hackathon ",
+                "description": "View Admin Dashboard Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3497,7 +3497,19 @@
             },
             {
                 "name": "hackathon.addSharedFile",
-                "description": " Add Shared File Hackathon ",
+                "description": "Add Shared File Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.downloadSharedFile",
+                "description": "Download Shared File Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3509,7 +3521,7 @@
             },
             {
                 "name": "hackathon.deleteSharedFile",
-                "description": " Delete Shared File Hackathon ",
+                "description": "Delete Shared File Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3521,7 +3533,7 @@
             },
             {
                 "name": "hackathon.AddtodoList",
-                "description": " Add Todo List in Hackathon ",
+                "description": "Add Todo List in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3533,7 +3545,7 @@
             },
             {
                 "name": "hackathon.EdittodoList",
-                "description": " Edit Todo List in Hackathon ",
+                "description": "Edit Todo List in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3545,7 +3557,7 @@
             },
             {
                 "name": "hackathon.deleteTodoList",
-                "description": " Delete Todo in Hackathon ",
+                "description": "Delete Todo in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3557,7 +3569,7 @@
             },
             {
                 "name": "hackathon.EditTeamInfo",
-                "description": " Edit Team Info in Hackathon ",
+                "description": "Edit Team Info in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3569,7 +3581,7 @@
             },
             {
                 "name": "hackathon.EdittodoListStatus",
-                "description": " Edit Todo List Status in Hackathon ",
+                "description": "Edit Todo List Status in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3581,7 +3593,7 @@
             },
             {
                 "name": "hackathon.deleteTeamInfo",
-                "description": " Delete Team Info in Hackathon ",
+                "description": "Delete Team Info in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3593,7 +3605,7 @@
             },
             {
                 "name": "hackathon.hackathon_Summary",
-                "description": " View Finish Hackathon Summary ",
+                "description": "View Finish Hackathon Summary ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -4992,7 +5004,7 @@
             },
             {
                 "name": "company.getEmployees",
-                "description": " Get Company Employees",
+                "description": "Get Company Employees",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5004,7 +5016,7 @@
             },
             {
                 "name": "company.addCompanyAlumni",
-                "description": " Add Alumni to Company",
+                "description": "Add Alumni to Company",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5015,7 +5027,7 @@
             },
             {
                 "name": "company.addCompanyAlumniBulk",
-                "description": " Add Bulk Alumni to Company",
+                "description": "Add Bulk Alumni to Company",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5026,7 +5038,7 @@
             },
             {
                 "name": "company.alumni_view",
-                "description": " View company program details (alumni)",
+                "description": "View company program details (alumni)",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5038,7 +5050,7 @@
             },
             {
                 "name": "company.perks_view",
-                "description": " View company perks and discounts",
+                "description": "View company perks and discounts",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5466,7 +5478,7 @@
             },
             {
                 "name": "messages.send_team_message",
-                "description": " Send Team Message",
+                "description": "Send Team Message",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6091,7 +6103,7 @@
             },
             {
                 "name": "screening.export_results",
-                "description": " Export Screening Results",
+                "description": "Export Screening Results",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6102,7 +6114,7 @@
             },
             {
                 "name": "screening.export_company_results",
-                "description": " Export One Company Screening Results",
+                "description": "Export One Company Screening Results",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6113,7 +6125,7 @@
             },
             {
                 "name": "screening.results_report",
-                "description": " All Screening Results Report",
+                "description": "All Screening Results Report",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6827,7 +6839,7 @@
             },
             {
                 "name": "trainings.sessions_report",
-                "description": " View Trainings Sessions Report",
+                "description": "View Trainings Sessions Report",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7969,7 +7981,7 @@
             },
             {
                 "name": "mentorship.schedule_store",
-                "description": " Add Mentorship Schedule",
+                "description": "Add Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7980,7 +7992,7 @@
             },
             {
                 "name": "mentorship.schedule_update",
-                "description": " Update Mentorship Schedule",
+                "description": "Update Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7991,7 +8003,7 @@
             },
             {
                 "name": "mentorship.schedule_destroy",
-                "description": " Delete Mentorship Schedule",
+                "description": "Delete Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -8002,7 +8014,7 @@
             },
             {
                 "name": "organization.ReminderLogs",
-                "description": " Show Reminders Logs",
+                "description": "Show Reminders Logs",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -8013,7 +8025,7 @@
             },
             {
                 "name": "organization.destroyReminderLogs",
-                "description": " Delete Reminders Logs",
+                "description": "Delete Reminders Logs",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -9314,7 +9326,7 @@
             },
             {
                 "name": "trainings.sessions_join",
-                "description": " Attendance to Training Session",
+                "description": "Attendance to Training Session",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -9570,7 +9582,7 @@
             },
             {
                 "name": "invitations.upload",
-                "description": " Upload invitation file ",
+                "description": "Upload invitation file ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -9581,7 +9593,7 @@
             },
             {
                 "name": "invitations.DeleteAttachment",
-                "description": " Delete invitation attachment ",
+                "description": "Delete invitation attachment ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -9592,7 +9604,7 @@
             },
             {
                 "name": "invite_mentor.attachment",
-                "description": " Show attachment for invitation ",
+                "description": "Show attachment for invitation ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
