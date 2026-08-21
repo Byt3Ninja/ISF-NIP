@@ -73,7 +73,7 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $recipients = Role::where('default_for', 'registered')->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
 		$recipients = $recipients->flatMap(function ($role) {
 			return $role->users;
-		})->values();
+		})->where('email', $company_owner->email)->values();
     
         foreach ($recipients as $recipient) {
             try {
