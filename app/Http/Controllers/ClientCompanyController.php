@@ -1608,10 +1608,10 @@ class ClientCompanyController extends Controller
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
+                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company?->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
                     }
                 } else {
-                    $uploadedFile = $company->financial_plan;
+                    $uploadedFile = $company?->financial_plan;
                 }
 
                 $data['financial_plan_description'] = $data['financial_plan_description'] == null ? '0' : $data['financial_plan_description'];
