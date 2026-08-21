@@ -726,12 +726,12 @@ class CyclesController extends Controller
             } elseif ($request->has("mScreeningSelect") && $request->mScreeningSelect) {
                 Step::where('id', $request->sid)->update(['title' => $request->title, 'data' => $request->mScreeningSelect, 'description' => $request->description, 'from' => Carbon::parse($request->fromDate), 'to' => Carbon::parse($request->toDate)]);
             }
-            elseif ($request->has("mFormSelect"))
+            elseif ($request->has("mFormSelect") || !$request->has("mFormSelect"))
             {
                 $step8 = Step::find($request->sid);
                 $updatedArray = [
                     'title' => $request->title,
-                    'data' => $request->mFormSelect,
+                    'data' => $request->input('mFormSelect', null),
                     'description' => $request->description,
                     'from' => Carbon::parse($request->fromDate),
                     'to' => Carbon::parse($request->toDate)
@@ -772,7 +772,7 @@ class CyclesController extends Controller
                 unset($updatedArray['data']);
                 Step::where('id', $request->sid)->update($updatedArray);
 
-                $result = $this->applyFormToStep($step8->fresh(), $request->input('mFormSelect'), (bool) $request->boolean('confirm_form_change'));
+                $result = $this->applyFormToStep($step8->fresh(), $request->input('mFormSelect', null), (bool) $request->boolean('confirm_form_change'));
                 if ($result['status'] === 'needs_confirmation') {
                     // The flash partials render __('admin.' . $message2), so pass the
                     // bare key (not the already-translated string) — otherwise the
