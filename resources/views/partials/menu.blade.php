@@ -1,8 +1,12 @@
 @php
   $setting = \App\Settings::where('id', 1)->first();
+  // Display-only: keep this in a local, never on $_user. `users` has no
+  // `organization` column, so assigning it marks the model dirty and makes
+  // any later save() fail with "Unknown column 'organization'".
+  $sidebarOrg = $_user->organization;
   if( $_user->HaveCompany && $_user->company && $_user->company->cycledata && $_user->company->cycledata->organization)
   {
-    $_user->organization = $_user->company->cycledata->organization;
+    $sidebarOrg = $_user->company->cycledata->organization;
   }
 
   $spNotApproved = false;
@@ -18,9 +22,9 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
-      @if (!is_null($_user->organization))
+      @if (!is_null($sidebarOrg))
         @php
-          $imageUrl = $_user->organization->imageUrl;
+          $imageUrl = $sidebarOrg->imageUrl;
         @endphp
         <img
           src="{{ $imageUrl }}"
