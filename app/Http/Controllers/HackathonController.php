@@ -1173,6 +1173,25 @@ class HackathonController extends Controller
             $finishedHackathon['winners']= TeamFormation::winnersMapping($finishedHackathon['teams']);
         }
 
+        $hasSubmission = isset($answers) && $answers->isNotEmpty();
+        
+        $start = null;
+        if (isset($data_evi['start'])) {
+            $start = $data_evi['start'] instanceof \Carbon\Carbon 
+                ? $data_evi['start'] 
+                : \Carbon\Carbon::parse($data_evi['start']);
+        }
+        
+        $end = null;
+        if (isset($data_evi['end'])) {
+            $end = $data_evi['end'] instanceof \Carbon\Carbon 
+                ? $data_evi['end'] 
+                : \Carbon\Carbon::parse($data_evi['end']);
+        }
+        
+        $now = \Carbon\Carbon::now();
+        $isOpen = $start && $end && $now->between($start, $end);
+
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
             'currentHackathon',
@@ -1195,7 +1214,11 @@ class HackathonController extends Controller
             'steps_ids',
             'teamJoins',
             'winners',
-            'finishedHackathon'
+            'finishedHackathon',
+            'hasSubmission',
+            'start',
+            'end',
+            'isOpen'
         ));
     }
 
