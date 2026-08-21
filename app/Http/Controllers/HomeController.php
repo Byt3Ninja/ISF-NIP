@@ -2068,7 +2068,7 @@ class HomeController extends Controller
                     'count' => $my_mentors->count(),
                     'isRating' => false,
                 ];
-                $data['countCards'][] = [
+                /* $data['countCards'][] = [
                     'color' => 'danger',
                     'href' => '#',
                     'icon' => 'ti ti-star',
@@ -2076,7 +2076,7 @@ class HomeController extends Controller
                     'permissions' => ['dashboard.widgets_cards_rate_view'],
                     'count' => $my_rating,
                     'isRating' => true, // Only this card has the isRating key
-                ];
+                ]; */
             }
         }
         else
@@ -2117,7 +2117,7 @@ class HomeController extends Controller
                 'count' => $my_mentors->count(),
                 'isRating' => false,
             ];
-            $data['countCards'][] = [
+            /* $data['countCards'][] = [
                 'color' => 'danger',
                 'href' => '#',
                 'icon' => 'ti ti-star',
@@ -2125,7 +2125,7 @@ class HomeController extends Controller
                 'permissions' => ['dashboard.widgets_cards_rate_view'],
                 'count' => $my_rating,
                 'isRating' => true, // Only this card has the isRating key
-            ];
+            ]; */
         }
         $data['countCards'][] = [
             'color' => 'success',
@@ -2136,7 +2136,7 @@ class HomeController extends Controller
             'count' => $messenger->count(),
             'isRating' => false,
         ];
-        $data['countCards'][] = [
+        /* $data['countCards'][] = [
             'color' => 'danger',
             'href' => '/dashboard/mymsg',
             'icon' => 'ti-network',
@@ -2144,7 +2144,7 @@ class HomeController extends Controller
             'permissions' => ['messages.view', 'dashboard.widgets_cards_contact_us_view'],
             'count' => $messages->count(),
             'isRating' => false,
-        ];
+        ];*/
         $data['countCards'][] = [
             'color' => 'danger',
             'href' => '/dashboard/programlist',
