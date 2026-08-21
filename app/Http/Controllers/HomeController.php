@@ -2774,13 +2774,13 @@ class HomeController extends Controller
                 'id' => 'targetMarketChart',
                 'permissions' => ['dashboard.widgets_graphs_startups_target_markets_view']
             ],
-            [
-                'div-class' => 'col-12 col-md-6 mt-6',
-                'card-title' => __('admin.Project_Status_Over_Time'),
-                'type' => 'div',
-                'id' => 'projectStatusOverTimeChart',
-                'permissions' => ['dashboard.widgets_graphs_program_progress_view']
-            ],
+            // [
+            //     'div-class' => 'col-12 col-md-6 mt-6',
+            //     'card-title' => __('admin.Project_Status_Over_Time'),
+            //     'type' => 'div',
+            //     'id' => 'projectStatusOverTimeChart',
+            //     'permissions' => ['dashboard.widgets_graphs_program_progress_view']
+            // ],
         ];
 
         $dateRate = date("Y-m-d 23:59:59");
