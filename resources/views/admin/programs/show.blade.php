@@ -847,7 +847,7 @@
                     </div>
 
                     {{-- Screening type selector --}}
-                    <div id="mmenu2" class="mb-3" style="display:none;">
+                    {{--  <div id="mmenu2" class="mb-3" style="display:none;">
                         <label class="form-label" for="mScreeningSelect">
                             {{ __('cycles.Choose screening type') }}
                         </label>
@@ -857,7 +857,7 @@
                             <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
                             <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
                         </select>
-                    </div>
+                    </div>  --}}
 
                     {{-- Title --}}
                     <div class="mb-3">
