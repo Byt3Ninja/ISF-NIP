@@ -9,67 +9,6 @@
 @endsection
 
 {{-- ============================================================
-     PHP: pre-compute all view data
-============================================================ --}}
-@php
-    // --- Step aggregates ---
-    $totalSteps       = \App\Step::where('cycle_id', $cycle->id)->count();
-    $totalStepsFinish = \App\Step::where('cycle_id', $cycle->id)
-                            ->where('to', '>', now())->count();
-    $presSteps        = $totalSteps > 0
-                            ? round(($totalStepsFinish / $totalSteps) * 100, 2)
-                            : 0;
-
-    // --- Company / Mentor aggregates ---
-    $totalCompany = \App\Company::where('cycle', $cycle->id)->count();
-    $mentors      = $cycle->mentors()->distinct()->get();
-
-    // --- Mentorship aggregates ---
-    $totalMentorRequest = \App\MentorshipRequest::where('cycle_id', $cycle->id)->count();
-    $totalMentorMinutes = \App\MentorshipRequest::where('cycle_id', $cycle->id)->sum('period');
-    $totalMentorperiod  = floor($totalMentorMinutes / 60) . ' h ' . ($totalMentorMinutes % 60) . ' m';
-
-    $mentorshipRequests  = \App\MentorshipRequest::where('cycle_id', $cycle->id)->get();
-    $sessionReportsCount = \App\SessionReport::whereIn(
-        'mentorship_request_id', $mentorshipRequests->pluck('id')
-    )->count();
-    $totalMentorrating = $mentorshipRequests->count() > 0
-        ? ($sessionReportsCount / $mentorshipRequests->count()) * 100
-        : 0;
-
-    // --- Training / evaluation aggregates (across all steps) ---
-    $totalStepsIdsCount   = 0;
-    $totalDurationMinutes = 0;
-    $answersTotal         = 0;
-    $answersPending       = 0;
-
-    foreach ($steps as $step) {
-        $totalStepsIdsCount   += \App\TrainingSession::where('step_id', $step->id)->count();
-        $totalDurationMinutes += \App\TrainingSession::where('step_id', $step->id)->sum('duration');
-        $answersTotal         += \App\FinalData::where('step_id', $step->id)->count();
-        $answersPending       += \App\FinalData::where('step_id', $step->id)->whereNull('answer')->count();
-    }
-
-    $totalDurationSum = floor($totalDurationMinutes / 60) . ' h ' . ($totalDurationMinutes % 60) . ' m';
-
-    // --- Summary stat cards ---
-    $summaryCards = [
-        [__('admin.Startups'),                             'building-skyscraper', $totalCompany,                              'primary'],
-        [__('cycles.steps'),                               'stack-2',             $totalSteps,                                'info'],
-        [__('admin.Mentors'),                              'user',                $mentors->count(),                          'secondary'],
-        [__('cycles.All requests'),                        'report',              $totalMentorRequest,                        'warning'],
-        [__('admin.Mentorship_sessions_duration_(hours)'), 'clock-hour-5',        $totalMentorperiod,                         'success'],
-        [__('admin.Company_Attendance_Rate'),              'heart-rate-monitor',  number_format($totalMentorrating, 2) . '%', 'danger'],
-        [__('admin.Training sessions'),                    'layers-subtract',     $totalStepsIdsCount,                        'secondary'],
-        [__('admin.Startups_trainings_Hours'),             'clock-hour-5',        $totalDurationSum,                          'success'],
-        [__('admin.Traditional_Evaluation_pending'),       'transform',           $answersPending,                            'warning'],
-        [__('admin.Evaluation'),                           'presentation',        $answersTotal,                              'danger'],
-    ];
-
-    $judgesDetails = collect();
-@endphp
-
-{{-- ============================================================
      Page content
 ============================================================ --}}
 @section('content')
@@ -256,7 +195,7 @@
              [stype 1] Custom Form step
         ════════════════════════════════════════════════════════ --}}
         @if ($step->stype == 1)
-            @php $companiesInStep = \App\Company::where('step', $step->id)->count(); @endphp
+            @php $companiesInStep = $stepsExtra[$step->id]['companiesInStep']; @endphp
 
             <div class="card mb-4">
                 <div class="card-body">
@@ -333,19 +272,11 @@
         ════════════════════════════════════════════════════════ --}}
         @if ($step->stype == 2)
             @php
-                $scopedJudges      = $judges->whereIn('id', json_decode($step->list, true) ?? []);
-                $screenCompanies   = \App\Company::where('step', $step->id)->get();
-                $totalFiltration   = 0;
-                $filtrationPending = 0;
-                $filtrationDone    = 0;
-
-                foreach ($screenCompanies as $company) {
-                    $base               = \App\FinalData::where('step_id', $step->id)
-                                                         ->where('company_id', $company->id);
-                    $totalFiltration   += (clone $base)->count();
-                    $filtrationPending += (clone $base)->whereNull('answer')->count();
-                    $filtrationDone    += (clone $base)->whereNotNull('answer')->count();
-                }
+                $scopedJudges      = $stepsExtra[$step->id]['scopedJudges'];
+                $screenCompanies   = $stepsExtra[$step->id]['screenCompanies'];
+                $totalFiltration   = $stepsExtra[$step->id]['totalFiltration'];
+                $filtrationPending = $stepsExtra[$step->id]['filtrationPending'];
+                $filtrationDone    = $stepsExtra[$step->id]['filtrationDone'];
             @endphp
 
             <div class="card mb-4">
@@ -483,18 +414,13 @@
         ════════════════════════════════════════════════════════ --}}
         @if ($step->stype == 3)
             @php
-                $mentorCount      = \App\CyclesMentors::where('cycle_id', $step->cycle_id)->count();
-                $sessionMinutes   = \App\MentorshipRequest::where('cycle_id', $step->cycle_id)
-                                        ->where('approved', 'Yes')->sum('period');
-                $doneSessions     = \App\MentorshipRequest::where('cycle_id', $step->cycle_id)
-                                        ->whereNotNull('done')->count();
-                $allRequests      = \App\MentorshipRequest::where('cycle_id', $step->cycle_id)->count();
-                $newRequests      = \App\MentorshipRequest::where('cycle_id', $step->cycle_id)
-                                        ->whereNull('approved')->count();
-                $approvedRequests = \App\MentorshipRequest::where('cycle_id', $step->cycle_id)
-                                        ->where('approved', 'Yes')->count();
-                $rejectedRequests = \App\MentorshipRequest::where('cycle_id', $step->cycle_id)
-                                        ->where('approved', 'No')->count();
+                $mentorCount      = $stepsExtra[$step->id]['mentorCount'];
+                $sessionMinutes   = $stepsExtra[$step->id]['sessionMinutes'];
+                $doneSessions     = $stepsExtra[$step->id]['doneSessions'];
+                $allRequests      = $stepsExtra[$step->id]['allRequests'];
+                $newRequests      = $stepsExtra[$step->id]['newRequests'];
+                $approvedRequests = $stepsExtra[$step->id]['approvedRequests'];
+                $rejectedRequests = $stepsExtra[$step->id]['rejectedRequests'];
             @endphp
 
             <div class="card mb-4">
@@ -630,11 +556,11 @@
         ════════════════════════════════════════════════════════ --}}
         @if ($step->stype == 4)
             @php
-                $trainingCount    = \App\TrainingSession::where('step_id', $step->id)->count();
-                $trainingMinutes  = \App\TrainingSession::where('step_id', $step->id)->sum('duration');
-                $sessionTypeCount = \App\TrainingSession::where('step_id', $step->id)->where('type', 'sessions')->count();
-                $onlineCount      = \App\TrainingSession::where('step_id', $step->id)->where('type', 'online')->count();
-                $offlineCount     = \App\TrainingSession::where('step_id', $step->id)->where('type', 'offline')->count();
+                $trainingCount    = $stepsExtra[$step->id]['trainingCount'];
+                $trainingMinutes  = $stepsExtra[$step->id]['trainingMinutes'];
+                $sessionTypeCount = $stepsExtra[$step->id]['sessionTypeCount'];
+                $onlineCount      = $stepsExtra[$step->id]['onlineCount'];
+                $offlineCount     = $stepsExtra[$step->id]['offlineCount'];
             @endphp
 
             <div class="card mb-4">
@@ -739,21 +665,10 @@
         ════════════════════════════════════════════════════════ --}}
         @if ($step->stype == 5)
             @php
-                $finalScreening    = \App\Finalscreening::where('step_id', $step->id)->first();
-                $finalCompanyCount = \App\Finalscreening::where('step_id', $step->id)
-                                         ->distinct('company_id')->count('company_id');
-                $finalAnswers      = \App\FinalData::where('step_id', $step->id)
-                                         ->whereNotNull('answer')->count();
-                $finalPending      = \App\FinalData::where('step_id', $step->id)
-                                         ->whereNull('answer')->count();
-
-                if ($finalScreening && !empty($finalScreening->judges)) {
-                    $judgeIds      = is_string($finalScreening->judges)
-                                         ? json_decode($finalScreening->judges, true)
-                                         : $finalScreening->judges;
-                    $stepJudges    = \App\User::whereIn('id', $judgeIds)->get();
-                    $judgesDetails = $judgesDetails->merge($stepJudges)->unique('id');
-                }
+                $finalCompanyCount = $stepsExtra[$step->id]['finalCompanyCount'];
+                $finalAnswers      = $stepsExtra[$step->id]['finalAnswers'];
+                $finalPending      = $stepsExtra[$step->id]['finalPending'];
+                $judgesDetails     = $stepsExtra[$step->id]['judgesDetails'];
             @endphp
 
             <div class="card mb-4">
@@ -895,7 +810,7 @@
                   method="POST" autocomplete="off">
                 @csrf
                 <input type="hidden" name="sid"  id="sid">
-                <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
+                <input type="hidden" name="type" value="{{ $updateStepAction }}">
 
                 <div class="modal-header">
                     <h5 class="modal-title">{{ __('cycles.Modify current step') }}</h5>
@@ -995,7 +910,6 @@
 @endsection
 
 @section('pagescripts')
-@php($ccycle = \App\Cycle::find($cycle->id))
 <script>
 (() => {
     'use strict';
@@ -1022,7 +936,7 @@
     window.deleteStep = function (id) {
         if (!confirm('{{ __('cycles.sure delete step') }}?')) return;
 
-        $.post('/dashboard/cycles/modify', { stepid: id, type: '{{ \App\Enums\CycleModifyAction::DELETE_STEP }}' })
+        $.post('/dashboard/cycles/modify', { stepid: id, type: '{{ $deleteStepAction }}' })
             .done(() => location.reload())
             .fail(() => alert('Error occurred. Please try again.'));
     };
@@ -1031,7 +945,7 @@
     window.ModifyStep = function (set, id) {
         if (set !== 1) return;
 
-        $.post('/dashboard/cycles/modify', { type: '{{ \App\Enums\CycleModifyAction::FETCH_STEP }}', sid: id, cycleid: 0 })
+        $.post('/dashboard/cycles/modify', { type: '{{ $fetchStepAction }}', sid: id, cycleid: 0 })
             .done(function (response) {
                 const step  = response.stype;
                 const sData = response.data;
