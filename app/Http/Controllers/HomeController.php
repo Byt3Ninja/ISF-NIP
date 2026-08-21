@@ -290,7 +290,13 @@ class HomeController extends Controller
         }
 
         if (array_intersect(['dashboard.widgets_cards_startups_view'], $permissions)) {
-            $companies_q = "SELECT 
+            // The "Startups" card must count real startups only — i.e. companies with
+            // a genuine registered founder — matching the filter already applied by
+            // CompanyRepository::getCompanies() on the listing page this card links
+            // to (/dashboard/companies). Org scoping keys off the founder's own
+            // organization_id (not cycle->organization_id) so a company isn't dropped
+            // from its org's count just because it has no cycle (e.g. disapproved).
+            $companies_q = "SELECT
                     s.id,
                     c.organization_id
                 FROM
@@ -299,10 +305,24 @@ class HomeController extends Controller
                     cycles c ON c.id = s.cycle
                 WHERE
                     s.deleted_at IS NULL
+                    AND EXISTS (
+                        SELECT 1 FROM users u
+                        JOIN model_has_roles mhr ON mhr.model_id = u.id
+                        JOIN roles r ON r.id = mhr.role_id
+                        WHERE u.company_id = s.id
+                        AND r.default_for = 'registered'
+                        " . (($has_org && !empty($organizations_ids) && !$user->hasRole('admin'))
+                            ? " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")"
+                            : "") . "
+                    )
+                    AND NOT EXISTS (
+                        SELECT 1 FROM users u
+                        JOIN model_has_roles mhr ON mhr.model_id = u.id
+                        JOIN roles r ON r.id = mhr.role_id
+                        WHERE u.company_id = s.id
+                        AND r.default_for IN ('admin', 'organizationmanager', 'subadmin')
+                    )
             ";
-            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-                $companies_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-            }
             $companies = collect(DB::select($companies_q));
             $registeredUserFilter = function ($q) {
                 $q->whereHas('roles', function ($rq) {
@@ -324,26 +344,36 @@ class HomeController extends Controller
             }
 
             if ($organizations_ids != null || $user->hasRole('admin')) {
+                // "Applied Startups" counts every startup that has actually submitted
+                // an application to at least one program, ever — regardless of its
+                // current pipeline stage or approval status. Disapproval nulls out
+                // companies.cycle/step (ScreeningController::changestep()), so those
+                // columns can't tell "applied then rejected" apart from "registered,
+                // never applied". form_data rows are written the moment a founder
+                // submits an application (ExternalCyclesController::registerUser(),
+                // CyclesController::saveForm()) and are never cleared on disapproval,
+                // so their existence is the durable signal of "this company applied".
+                $registered_user_org_filter = '';
+                if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                    $registered_user_org_filter = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
+                }
                 $applied_companies_by_cycle_q = "SELECT
-                        comp.cycle,
-                        c.id AS cycle_id,
                         COUNT(comp.id) AS company_count
                     FROM
                         companies comp
-                    LEFT JOIN
-                        steps s ON s.id = comp.step AND s.stype = 1
-                    LEFT JOIN
-                        cycles c ON c.id = comp.cycle
                     WHERE
                         comp.deleted_at IS NULL
-                        AND comp.cycle IS NOT NULL
-                        AND s.id IS NOT NULL
+                        AND EXISTS (
+                            SELECT 1 FROM form_data fd
+                            WHERE fd.company_id = comp.id
+                        )
                         AND EXISTS (
                             SELECT 1 FROM users u
                             JOIN model_has_roles mhr ON mhr.model_id = u.id
                             JOIN roles r ON r.id = mhr.role_id
                             WHERE u.company_id = comp.id
                             AND r.default_for = 'registered'
+                            {$registered_user_org_filter}
                         )
                         AND NOT EXISTS (
                             SELECT 1 FROM users u
@@ -353,10 +383,6 @@ class HomeController extends Controller
                             AND r.default_for IN ('admin', 'organizationmanager', 'subadmin')
                         )
                 ";
-                if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-                    $applied_companies_by_cycle_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-                }
-                $applied_companies_by_cycle_q .= " GROUP BY comp.cycle, c.id";
 
                 $applied_companies_by_cycle = collect(DB::select($applied_companies_by_cycle_q));
                 $applied_company_count = $applied_companies_by_cycle->sum('company_count');

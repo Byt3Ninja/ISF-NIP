@@ -3396,7 +3396,7 @@ class ClientCompanyController extends Controller
                 $founder->initials = $fInitials;
                 return $founder;
             });
-            $sustainable_array = json_decode($company->Sustainable_development ?? '[]');
+            $sustainable_array = json_decode($company->Sustainable_development ?: '[]') ?? [];
             foreach ($sustainable_array as $key => $Sustainable)
             {
                 $icon = $SustainableIcons->where('title', $Sustainable)->first();
