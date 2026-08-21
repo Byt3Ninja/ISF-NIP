@@ -907,6 +907,8 @@ class HomeController extends Controller
                 $organization->name = $session->{"organization_name_{$l}"};
                 $output->organization = $organization;
 
+                $output->meeting_status = mentorshipMeetingStatus($output->zoom_date, $output->period);
+
                 return $output;
             });
         } else {
@@ -1546,6 +1548,7 @@ class HomeController extends Controller
             $org->google_map_url = $_session->offline_location_map ? $_session->offline_location_map : $_session->org_google_map_url;
             $org->address = $_session->offline_location_address ? $_session->offline_location_address : $_session->org_address;
             $session->organization = $org;
+            $session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
             return $session;
         })->values();
 
@@ -3695,7 +3698,12 @@ class HomeController extends Controller
         $data['services_count'] = Service::count();
         $data['service_requests_count'] = ServicesRequests::where('user_id', Auth::id())->count();
         $data['nm_count'] = Messenger::where('receiver', Auth::id())->whereNull('read')->count();
-        $data['mysessions'] = auth()->user()->mentorSessions()->where('zoom_date', '>=', date("Y-m-d 00:00:00"))->where('approved', 'Yes')->get();
+        $data['mysessions'] = auth()->user()->mentorSessions()->where('zoom_date', '>=', date("Y-m-d 00:00:00"))->where('approved', 'Yes')->get()
+            ->each(function ($session) {
+                // zoom_date is stored as local wall-clock time (see book-session-modal.blade.php), not UTC (app.timezone)
+                $today = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d');
+                $session->is_today = $today == date('Y-m-d', strtotime($session->zoom_date));
+            });
         $data['mycycles'] = auth()->user()->mentorCycles;
         $data['myschedules'] = Schedule::where('user_id', Auth::id())->get();
         if (auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', now()->format('Y-m-d'))->count()) {

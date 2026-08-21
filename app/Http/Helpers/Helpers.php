@@ -55,6 +55,21 @@ if (!function_exists('getPusherConfig')) {
     }
 }
 
+if (!function_exists('mentorshipMeetingStatus')) {
+    // zoom_date is stored as local wall-clock time (see book-session-modal.blade.php),
+    // not UTC (app.timezone), so "now" must be computed in the same timezone.
+    function mentorshipMeetingStatus($zoomDate, $period)
+    {
+        $now   = Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d H:i');
+        $start = date('Y-m-d H:i', strtotime($zoomDate . ' -15 minutes'));
+        $end   = date('Y-m-d H:i', strtotime($zoomDate . ' +' . $period . ' minutes'));
+
+        if ($now < $start) return 'before';
+        if ($now > $end) return 'expired';
+        return 'joinable';
+    }
+}
+
 if (!function_exists('FormatDate')) {
     function FormatDate($stamp, $format)
     {

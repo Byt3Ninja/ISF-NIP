@@ -19,7 +19,10 @@ class MentorProgramController extends Controller
 
       $upcomingSessions = MentorshipRequest::where('mentor_id', $mentor->id)
           ->where('zoom_date', '>', now())
-          ->get();
+          ->get()
+          ->each(function ($session) {
+              $session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
+          });
 
       foreach ($cycles as $cycle) {
           $steps = $cycle->steps;
