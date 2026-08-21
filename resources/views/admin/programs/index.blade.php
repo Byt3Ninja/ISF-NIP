@@ -104,6 +104,7 @@
                     <img 
                       src="{{ $cycle->logo }}"
                       alt="{{ __('admin.Logo') }}"
+                      onerror="this.src = '/images/logo-placeholder.png';"
                       class="img-fluid w-100 h-100 object-cover"
                     />
                   @else
