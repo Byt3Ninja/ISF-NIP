@@ -65,6 +65,74 @@
       box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08) !important;
       transform: translateY(-2px);
     }
+    .partners-marquee {
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+              mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    }
+    .partners-marquee-track {
+      display: flex;
+      align-items: center;
+      gap: 4rem;
+      width: max-content;
+      padding-block: 1rem;
+      animation: partners-marquee-scroll 30s linear infinite;
+    }
+    .partners-marquee:hover .partners-marquee-track {
+      animation-play-state: paused;
+    }
+    .partners-marquee-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .partners-marquee-logo {
+      max-height: 40px;
+      max-width: 160px;
+      width: auto;
+      object-fit: contain;
+      filter: grayscale(100%);
+      opacity: 0.7;
+      transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    }
+    .partners-marquee-item:hover .partners-marquee-logo {
+      filter: grayscale(0);
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    .partners-marquee-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #8592a3;
+      text-align: center;
+      white-space: nowrap;
+      transition: color 0.3s ease;
+    }
+    .partners-marquee-item:hover .partners-marquee-name {
+      color: #696cff;
+    }
+    [dir="rtl"] .partners-marquee-track {
+      animation-name: partners-marquee-scroll-rtl;
+    }
+    @keyframes partners-marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes partners-marquee-scroll-rtl {
+      from { transform: translateX(0); }
+      to   { transform: translateX(50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .partners-marquee-track {
+        animation: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+      }
+    }
   </style>
 
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
@@ -713,103 +781,53 @@
 
   @if($landingPage->partners_enabled && !empty($partnersWithUrls))
   <section id="partners" class="section-py bg-body landing-reviews pb-0">
-    <!-- Partners slider: Start -->
+    <!-- Partners logo marquee: Start -->
     <div class="container">
-      <div class="row align-items-center gx-0 gy-4 g-lg-5 mb-5 pb-md-5">
-        <div class="col-md-6 col-lg-5 col-xl-3">
-          @if($landingPage->partners_subtitle)
-            <div class="text-center mb-4">
-              <span class="badge bg-label-primary">{{ $landingPage->partners_subtitle }}</span>
-            </div>
-          @endif
-          @if($landingPage->partners_title)
-            <h4 class="text-center mb-1">
-              <span class="position-relative fw-extrabold z-1">
-                {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
-                <img
-                  src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
-                  alt="laptop charging"
-                  class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
-              </span>
-            </h4>
-          @endif
-          @if($landingPage->partners_description)
-            <p class="text-center mb-12">
-              {{ $landingPage->partners_description }}
-            </p>
-          @endif
+      <div class="text-center mb-12">
+        @if($landingPage->partners_subtitle)
+          <div class="mb-4">
+            <span class="badge bg-label-primary">{{ $landingPage->partners_subtitle }}</span>
+          </div>
+        @endif
+        @if($landingPage->partners_title)
+          <h4 class="mb-1">
+            <span class="position-relative fw-extrabold z-1">
+              {{ $landingPage->partners_title ?: ($isRtl ? 'شركاؤنا' : 'Our Partners') }}
+              <img
+                src="/vuexy/assets/img/front-pages/icons/section-title-icon.png"
+                alt="laptop charging"
+                class="section-title-img position-absolute object-fit-contain bottom-0 z-n1" />
+            </span>
+          </h4>
+        @endif
+        @if($landingPage->partners_description)
+          <p class="text-center mb-0">{{ $landingPage->partners_description }}</p>
+        @endif
+      </div>
 
-          <div class="landing-reviews-btns">
-            <button
-              id="reviews-previous-btn"
-              class="btn btn-label-primary reviews-btn reviews-previous-btn me-4 scaleX-n1-rtl"
-              type="button">
-              <i class="ti ti-chevron-left ti-md"></i>
-            </button>
-            <button id="reviews-next-btn" class="btn btn-label-primary reviews-btn reviews-next-btn scaleX-n1-rtl" type="button">
-              <i class="ti ti-chevron-right ti-md"></i>
-            </button>
-          </div>
-        </div>
-        <div class="col-md-6 col-lg-7 col-xl-9">
-          <div class="swiper-partners-carousel overflow-hidden">
-            <div class="swiper" id="swiper-partners">
-              <div class="swiper-wrapper">
-                @foreach($partnersWithUrls as $partner)
-                  <div class="swiper-slide me-4">
-                    <div class="card h-100">
-                      <div class="card-body text-center d-flex flex-column justify-content-between h-100">
-                        <div class="mb-4">
-                          @if(!empty($partner['logo_url']))
-                            <img
-                              src="{{ $partner['logo_url'] }}"
-                              alt="partner logo"
-                              class="w-px-50 h-px-50 img-fluid" 
-                            />
-                          @else
-                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
-                              <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
-                            </div>
-                          @endif
-                        </div>
-                        <h6 class="mb-0">{{ $partner['name'] }}</h6>
-                      </div>
-                    </div>
-                  </div>
-                @endforeach
-              </div>
+      <div class="partners-marquee">
+        <div class="partners-marquee-track">
+          @foreach($partnersWithUrls as $partner)
+            <div class="partners-marquee-item">
+              @if(!empty($partner['logo_url']))
+                <img src="{{ $partner['logo_url'] }}" alt="{{ $partner['name'] ?? '' }}" class="partners-marquee-logo" />
+              @endif
+              <span class="partners-marquee-name">{{ $partner['name'] ?? '' }}</span>
             </div>
-          </div>
+          @endforeach
+          @foreach($partnersWithUrls as $partner)
+            <div class="partners-marquee-item" aria-hidden="true">
+              @if(!empty($partner['logo_url']))
+                <img src="{{ $partner['logo_url'] }}" alt="" class="partners-marquee-logo" />
+              @endif
+              <span class="partners-marquee-name">{{ $partner['name'] ?? '' }}</span>
+            </div>
+          @endforeach
         </div>
       </div>
     </div>
-    <!-- Partners slider: End -->
+    <!-- Partners logo marquee: End -->
     <hr class="m-0 mt-6 mt-md-12" />
-    <!-- Logo slider: Start -->
-    <div class="container">
-      <div class="swiper-logo-carousel py-8">
-        <div class="swiper" id="swiper-partners-logos">
-          <div class="swiper-wrapper">
-            @foreach($partnersWithUrls as $partner)
-              <div class="swiper-slide">
-                @if(!empty($partner['logo_url']))
-                  <img
-                    src="{{ $partner['logo_url'] }}"
-                    alt="partner logo"
-                    class="client-logo"
-                  />
-                @else
-                  <div class="d-inline-flex align-items-center justify-content-center bg-light rounded px-4 py-3">
-                    <span class="fw-semibold text-muted">{{ $partner['name'] ?? '' }}</span>
-                  </div>
-                @endif
-              </div>
-            @endforeach
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Logo slider: End -->
   </section>
   @endif
 
@@ -1123,8 +1141,6 @@
 
       const nav = document.querySelector('.layout-navbar'),
         animationImg = document.querySelectorAll('.hero-dashboard-img'),
-        swiperLogos = document.getElementById('swiper-partners-logos'),
-        swiperPartners = document.getElementById('swiper-partners'),
         swiperPrograms = document.getElementById('swiper-programs');
         
       // -----------------------------------
@@ -1167,53 +1183,7 @@
         window.addEventListener('resize', toggleProgramsNav);
       }
 
-      // Partners carousel
-      // -----------------------------------
-      if (swiperPartners) {
-        new Swiper(swiperPartners, {
-          slidesPerView: 1,
-          spaceBetween: 0,
-          grabCursor: true,
-          autoplay: {
-            delay: 3000,
-            disableOnInteraction: false
-          },
-          loop: true,
-          loopAdditionalSlides: 1,
-          navigation: {
-            nextEl: '.reviews-next-btn',
-            prevEl: '.reviews-previous-btn'
-          },
-          breakpoints: {
-            1200: {
-              slidesPerView: 3
-            },
-            992: {
-              slidesPerView: 2
-            }
-          }
-        });
-      }
-
-      // Review client logo
-      // -----------------------------------
-      if (swiperLogos) {
-        new Swiper(swiperLogos, {
-          slidesPerView: 2,
-          autoplay: {
-            delay: 3000,
-            disableOnInteraction: false
-          },
-          breakpoints: {
-            992: {
-              slidesPerView: 5
-            },
-            768: {
-              slidesPerView: 3
-            }
-          }
-        });
-      }
+      // Partners logo marquee is a pure-CSS animation; no JS required.
     })();
   </script>
 </body>
