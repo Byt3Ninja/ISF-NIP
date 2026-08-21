@@ -157,7 +157,7 @@
 <tr>
 <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:30px;line-height:120%;text-align:center;mso-line-height-alt:36px;">
-<p style="margin: 0; word-break: break-word;"><span style="color:#2b303a;"><strong>Confirm Your Eamail</strong></span></p>
+<p style="margin: 0; word-break: break-word;"><span style="color:#2b303a;"><strong>{{ __('admin.Confirm_Your_Email') }}</strong></span></p>
 </div>
 </td>
 </tr>
@@ -166,12 +166,16 @@
 <tr>
 <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
 <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-<p style="margin: 0;">Dear Innovator,</p>
+<p style="margin: 0;">{{ __('admin.Email_Confirm_Greeting') }}</p>
 <p style="margin: 0;"> </p>
-<p style="margin: 0;">Conferm your email:</p>
-<p style="margin: 0;"><a href="{{ $url }}">{{ $url }}</a></p>
-<p style="margin: 0;">Warmest Regards,</p>
-<p style="margin: 0;">The GrowthLabs Team</p>
+<p style="margin: 0;">{{ __('admin.Email_Confirm_Body') }}</p>
+<p style="margin: 0;">
+  <a href="{{ $url }}" style="background-color:#1aa19c;color:#ffffff;display:inline-block;padding:12px 28px;border-radius:4px;text-decoration:none;font-weight:600;">{{ __('admin.Confirm_Your_Email') }}</a>
+</p>
+<p style="margin: 0;font-size:13px;color:#888888;padding-top:16px;">{{ __('admin.Email_Confirm_Expiry') }}</p>
+<p style="margin: 0;font-size:13px;color:#888888;word-break:break-all;padding-bottom:16px;"><a href="{{ $url }}" style="color:#1aa19c;">{{ $url }}</a></p>
+<p style="margin: 0;">{{ __('admin.Email_Confirm_Regards') }}</p>
+<p style="margin: 0;">{{ $platformName }}</p>
 </div>
 </td>
 </tr>

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Auth;
 
 class UpdateClientProfileRequest extends FormRequest
@@ -35,6 +36,10 @@ class UpdateClientProfileRequest extends FormRequest
                             'required',
                             'email',
                             'unique:users,email,' . $id,
+                            // Also reject an address another account has already staged as
+                            // its pending change, otherwise two users race for it and
+                            // whoever confirms last wins.
+                            Rule::unique('users', 'new_email')->ignore($id),
                             'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
                         ],
             'country_id' => 'required|integer|exists:countries,id',

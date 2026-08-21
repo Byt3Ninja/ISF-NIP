@@ -118,6 +118,12 @@ Auth::routes(['verify' => true]);
 
 Route::get('/magic-login/{user}/{token}', 'Auth\MagicLoginController@login')->middleware(['signed', 'throttle:6,1'])->name('auth.magic-login');
 
+// Email-change confirmation. Public + signed so the link works from any mail client or
+// device, without requiring an authenticated (or 2FA-satisfied) session on that device.
+Route::get('/confirm-email/{user}/{token}', 'ClientProfileController@confirmEmailUpdate')
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('user.profile_email_confirm');
+
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
@@ -406,8 +412,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('DeleteFile_Upload', 'InvitationController@deleteFile')->name('invitations.DeleteAttachment');
     });
 
-    // lowercase alias for backward-compatibility / ease of testing
-    Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
+    // Pending email-change management (requires the session; the confirm link itself is public)
+    Route::post('/myProfile/email/resend', 'ClientProfileController@resendEmailConfirmation')->name('user.profile_email_resend');
+    Route::post('/myProfile/email/cancel', 'ClientProfileController@cancelEmailUpdate')->name('user.profile_email_cancel');
 
     Route::group(['prefix' => '2fa'], function () {
         Route::get('/', 'ClientProfileController@show2faForm');
