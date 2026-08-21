@@ -321,11 +321,11 @@
                       
                       {{-- Social Media Links --}}
                       <div class="d-flex justify-content-center gap-2">
-                        @if($member->email)
+                        {{-- @if($member->email)
                         <a href="mailto:{{ $member->email }}" class="btn btn-sm btn-outline-primary rounded-pill">
                           <i class="ti ti-mail"></i>
                         </a>
-                        @endif
+                        @endif --}}
                         @if($member->linkedin)
                         <a href="{{ $member->linkedin }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
                           <i class="ti ti-brand-linkedin"></i>
