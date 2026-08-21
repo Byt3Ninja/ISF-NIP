@@ -883,22 +883,20 @@
           <div class="row g-4">
             @foreach($availableMembers as $member)
               <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border {{ $member['isInvited'] ? 'border-warning' : 'border-light' }} shadow-sm">
+                <div class="card h-100 border {{ $member['isInvited'] ? 'border-warning' : 'border-light' }} shadow-sm invite-member-card" data-member-card-id="{{ $member['id'] }}">
                   <div class="card-body text-center">
                     <div class="avatar avatar-xl mx-auto mb-3 position-relative">
-                      <img 
-                        src="{{ '/191014/'.$member['image'] ?? '/icons/account.svg' }}" 
+                      <img
+                        src="{{ '/191014/'.$member['image'] ?? '/icons/account.svg' }}"
                         onerror="if(this.src!='/icons/account.svg'){this.onerror=null;this.src='/icons/account.svg';}"
-                        alt="{{ $member['name'] }}" 
+                        alt="{{ $member['name'] }}"
                         class="rounded-circle w-100 h-100 border-2 border-light"
                       />
-                      @if($member['isInvited'])
-                      <div class="position-absolute top-0 end-0">
+                      <div class="position-absolute top-0 end-0 invite-pending-badge {{ $member['isInvited'] ? '' : 'd-none' }}">
                         <span class="badge bg-warning rounded-pill">
                           <i class="ti ti-clock"></i>
                         </span>
                       </div>
-                      @endif
                     </div>
                     <h6 class="card-title mb-2">{{ $member['name'] }}</h6>
                     
@@ -1255,6 +1253,31 @@
   function applyInviteResult(data) {
     if (data.member) appendPendingRow(data.member);
     updateSeatUI(data);
+  }
+
+  // Revert an Available Members card button back to "Send Invitation" (mirror
+  // of the flip in sendInvitationToMember) after its pending invite is cancelled.
+  function resetInviteCard(memberId) {
+    if (!memberId) return;
+    const button = $(`.invite-member-btn[data-member-id="${memberId}"]`);
+    if (!button.length) return;
+    button.removeClass('btn-warning').addClass('btn-primary').prop('disabled', false);
+    button.find('.btn-text').html('<i class="ti ti-send me-1"></i>' +
+      (LANG === 'en' ? 'Send Invitation' : 'إرسال دعوة'));
+    // Clear the invited-state visuals on the card (border + pending clock badge).
+    const card = $(`.invite-member-card[data-member-card-id="${memberId}"]`);
+    card.removeClass('border-warning').addClass('border-light');
+    card.find('.invite-pending-badge').addClass('d-none');
+  }
+
+  // Apply the invited-state visuals on a card (border + pending badge), the
+  // counterpart to resetInviteCard, so invite and cancel stay symmetric.
+  function markInviteCard(memberId) {
+    if (!memberId) return;
+    const card = $(`.invite-member-card[data-member-card-id="${memberId}"]`);
+    if (!card.length) return;
+    card.removeClass('border-light').addClass('border-warning');
+    card.find('.invite-pending-badge').removeClass('d-none');
   }
 
   function showInviteError(data) {
@@ -1626,6 +1649,7 @@
               const row = document.getElementById('pendingMember' + id);
               if (row) row.remove();
               updateSeatUI(data);
+              resetInviteCard(data.member_id);
             }
             Swal.fire({
               icon: 'success',
@@ -1768,7 +1792,12 @@
   }
 
   function sendInvitationToMember(email, name, id, isInvited = false) {
-    console.log('isInvited', isInvited)
+    // Prefer the button's live DOM state over the baked-in isInvited argument,
+    // so a card reset (after cancelling its invite) makes it invitable again.
+    const cardBtn = $(`.invite-member-btn[data-member-id="${id}"]`);
+    if (cardBtn.length) {
+      isInvited = cardBtn.hasClass('btn-warning') || cardBtn.prop('disabled');
+    }
 
     if (isInvited) {
       Swal.fire({
@@ -1810,6 +1839,7 @@
               button.removeClass('btn-primary').addClass('btn-warning');
               button.find('.btn-text').html('<i class="ti ti-check me-1"></i>' +
                 (LANG === 'en' ? 'Invitation Sent' : 'تم إرسال الدعوة'));
+              markInviteCard(id);
               applyInviteResult(data);
               Swal.fire({
                 icon: 'success',
