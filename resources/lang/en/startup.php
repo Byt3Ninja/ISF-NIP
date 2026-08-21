@@ -417,8 +417,10 @@ return [
   'mark_alumni' => 'Mark as Alumni',
   'already_alumni' => 'Already Alumni',
   'mark_alumni_confirmation' => 'This action is irreversible. The startup will be graduated, and a snapshot of its information and participation records will be saved permanently.',
-  'mark_alumni_success' => 'The selected startups marked as alumni.',
+  'mark_alumni_success' => 'Startups marked as alumni successfully.',
   'mark_alumni_error' => 'An error occurred while marking the startup as alumni.',
+  'already_alumni_btn' => 'Already Alumni',
+  'some_not_final_screening' => 'Some startups are on the final screening step.',
 
   'not_started' => 'Not Started',
   'in_progress' => 'In Progress',

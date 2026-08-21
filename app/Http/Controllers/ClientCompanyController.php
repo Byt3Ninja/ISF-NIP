@@ -4147,7 +4147,7 @@ class ClientCompanyController extends Controller
             Log::error('Bulk Alumni Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => __('admin.unexpected_error') . ' (Error: ' . $e->getMessage() . ')'
+                'message' => __('admin.unexpected_error') . ' (' . __('admin.Error') . ': ' . $e->getMessage() . ')'
             ], 500);
         }
     }
