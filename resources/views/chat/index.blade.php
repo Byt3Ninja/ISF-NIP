@@ -52,6 +52,30 @@
       max-height: calc(100vh - 75px);
       overflow-y: auto;
     }
+
+    /*
+     * Make the message history scrollable.
+     * Vuexy's app-chat.css sets `.app-chat .app-chat-history .chat-history-body { overflow: hidden }`
+     * (it expects a PerfectScrollbar JS instance that this custom page never initializes),
+     * so without overriding it the message list is clipped and cannot scroll.
+     * We match Vuexy's selector specificity (3 classes) and load after its stylesheet,
+     * so these rules win the cascade. We KEEP Vuexy's height for .chat-history-body and
+     * only flip overflow to native auto scrolling.
+     */
+    .app-chat .app-chat-history .chat-history-body {
+      overflow-y: auto !important;
+      overflow-x: hidden;
+    }
+    /* A message that failed to send: dim it and show the inline error note. */
+    .chat-message.chat-message-failed .chat-message-text {
+      opacity: 0.6;
+    }
+    .chat-message-error {
+      font-size: 0.75rem;
+    }
+    .app-chat .app-chat-history .chat-history-body .chat-history {
+      min-height: 0;
+    }
   </style>
 @stop
 
@@ -334,17 +358,24 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
   <!-- Custom chat implementation - removed conflicting app-chat.js -->
 
   <script>
+    window.CHAT_I18N = {
+      teamChatWaiting: @json(__('admin.team_chat_waiting')),
+    };
+    window.CHAT_HAS_TEAMMATES = false; // set true once users load
+
     // Global variables
     let currentConversationId = null;
     let currentUser = null;
     let messagePollingInterval = null;
     let typingTimeout = null;
     let echo = null; // For Laravel Echo (real-time broadcasting)
+    let subscribedConversationIds = new Set(); // conversation channels we're already subscribed to
     let lastMessageByUserId = {};
     let broadcastingEnabled = false;
     let lastReadByConversation = {};
     let unreadCounts = {};
     let conversationByUserId = {};
+    let teamGroups = []; // team group conversations returned by /dashboard/chat/groups
     const LS_KEYS = {
       lastConversationId: 'chat.lastConversationId',
       lastRead: 'chat.lastReadByConversation',
@@ -426,6 +457,22 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       });
     }
 
+    // Update the "last message" preview text under each user in the sidebar (live).
+    function refreshUserListPreviews() {
+      const items = document.querySelectorAll('#user-list .chat-contact-list-item a');
+      items.forEach(a => {
+        const onclick = a.getAttribute('onclick') || '';
+        const match = onclick.match(/startConversationWithUser\((\d+),/);
+        const userId = match ? parseInt(match[1]) : null;
+        if (!userId) return;
+        const status = a.querySelector('.chat-contact-status');
+        if (status) {
+          const preview = lastMessageByUserId[userId]?.body || 'No messages yet';
+          status.textContent = preview;
+        }
+      });
+    }
+
     // API Helper function
     async function makeApiCall(url, options = {}) {
       const defaultOptions = {
@@ -502,6 +549,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
         displayConversations(data.conversations);
         refreshUserListUnreadBadges();
+        refreshUserListPreviews();
         return data.conversations;
       } catch (error) {
         showError('Failed to fetch conversations');
@@ -528,6 +576,13 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
     // Display users in the user list
     function displayUsers(users) {
+      // Team-chat gating: no teammates => disabled empty state.
+      window.CHAT_HAS_TEAMMATES = Array.isArray(users) && users.length > 0;
+      setChatInputEnabled(window.CHAT_HAS_TEAMMATES);
+      if (!window.CHAT_HAS_TEAMMATES) {
+        showTeamWaitingEmptyState();
+      }
+
       const userList = document.getElementById('user-list');
 
       if (!users || users.length === 0) {
@@ -539,6 +594,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
             <h6 class="text-muted mb-0">No users available</h6>
           </li>
         `;
+        renderTeamGroupsSection();
         return;
       }
 
@@ -573,6 +629,28 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       });
 
       userList.innerHTML = html;
+
+      // Re-inject the team group section on top (displayUsers replaced the list).
+      renderTeamGroupsSection();
+    }
+
+    function setChatInputEnabled(enabled) {
+      const input = document.querySelector('.message-input');
+      const sendBtn = document.querySelector('.send-msg-btn');
+      if (input) { input.disabled = !enabled; }
+      if (sendBtn) { sendBtn.disabled = !enabled; }
+    }
+
+    function showTeamWaitingEmptyState() {
+      const list = document.getElementById('chat-messages');
+      if (list) {
+        list.innerHTML =
+          '<li class="text-center p-4"><small class="text-muted">' +
+          (window.CHAT_I18N ? window.CHAT_I18N.teamChatWaiting : '') +
+          '</small></li>';
+      }
+      const header = document.querySelector('.chat-history-header .chat-contact-info h6');
+      if (header) { header.textContent = ''; }
     }
 
     // Fetch and display groups
@@ -655,15 +733,48 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       chatList.innerHTML = html;
     }
 
-    // Display groups in chat list (merge with messages or separate section)
+    // Store team groups and (re)render the sidebar so they appear above Users.
     function displayGroups(groups) {
-      if (!groups || groups.length === 0) {
-        return;
-      }
+      teamGroups = Array.isArray(groups) ? groups : [];
+      console.log('Available groups:', teamGroups);
+      // Re-render the user list so the team group section is (re)injected at the top.
+      renderTeamGroupsSection();
+    }
 
-      console.log('Available groups:', groups);
-      // Groups are typically shown in the same list as conversations
-      // This function can be used to add group-specific functionality
+    // Inject/refresh the team-group entries at the TOP of #user-list (idempotent).
+    function renderTeamGroupsSection() {
+      const userList = document.getElementById('user-list');
+      if (!userList) return;
+
+      // Remove any previously-injected team-group section to avoid duplicates.
+      userList.querySelectorAll('[data-team-group-section="1"]').forEach(el => el.remove());
+
+      if (!teamGroups || teamGroups.length === 0) return;
+
+      let html = `
+        <li class="chat-contact-list-item chat-contact-list-item-title mt-0" data-team-group-section="1">
+          <h5 class="text-primary mb-0">Team</h5>
+        </li>
+      `;
+      teamGroups.forEach(group => {
+        const groupName = group.name || `Team Chat (${group.id})`;
+        const isActive = currentConversationId === group.id;
+        html += `
+          <li class="chat-contact-list-item mb-1 ${isActive ? 'active' : ''}" data-team-group-section="1">
+            <a class="d-flex align-items-center" href="#" onclick="loadConversation(${group.id}); return false;">
+              <div class="flex-shrink-0 avatar">
+                <span class="avatar-initial rounded-circle bg-label-primary"><i class="ti ti-users"></i></span>
+              </div>
+              <div class="chat-contact-info flex-grow-1 ms-4">
+                <h6 class="chat-contact-name text-truncate m-0 fw-normal">${escapeHtml(groupName)}</h6>
+                <small class="chat-contact-status text-truncate">Team group chat</small>
+              </div>
+            </a>
+          </li>
+        `;
+      });
+      // Prepend so the Team section sits above the "Users" title.
+      userList.insertAdjacentHTML('afterbegin', html);
     }
 
     // Load conversation messages
@@ -686,8 +797,12 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         const messagesContainer = document.getElementById('chat-messages');
         showLoading(messagesContainer);
 
-        // Setup real-time listeners for this conversation
-        setupConversationListeners(conversationId);
+        // Setup real-time listeners for this conversation (best-effort; must NOT block loading)
+        try {
+          setupConversationListeners(conversationId);
+        } catch (e) {
+          console.warn('Real-time listeners unavailable; continuing without live updates:', e);
+        }
 
         // Fetch conversation data and messages
         const convoData = await loadConversationMessages(conversationId);
@@ -838,13 +953,18 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     // Add message to conversation
     function addMessageToConversation(message) {
       const messagesContainer = document.getElementById('chat-messages');
+      if (!messagesContainer) return;
+      // Idempotency: never render the same message twice (optimistic insert + echo, or overlapping listeners).
+      if (message && message.id != null && messagesContainer.querySelector(`[data-message-id="${message.id}"]`)) {
+        return;
+      }
       const isCurrentUser = message.sendable_id === currentUser?.id;
       const messageClass = isCurrentUser ? 'chat-message-right' : '';
       const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
       const timeFormatted = formatMessageTime(message.created_at);
-      
+
       const messageHtml = `
-        <li class="chat-message ${messageClass}">
+        <li class="chat-message ${messageClass}" data-message-id="${message.id}">
           <div class="d-flex overflow-hidden">
             ${!isCurrentUser ? `
               <div class="user-avatar flex-shrink-0 me-4">
@@ -924,6 +1044,13 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         
         addMessageToConversation(tempMessage);
 
+        // Clear the input immediately (optimistic) — the text is already captured in
+        // messageText and shown in the history, so there's no reason to keep it in the box.
+        const messageInput = document.querySelector('.message-input');
+        if (messageInput) {
+          messageInput.value = '';
+        }
+
         // Prepare request data
         const requestData = {
           message: messageText.trim()
@@ -942,33 +1069,44 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         });
 
         console.log('Message sent:', data);
-        
-        // Clear input
-        const messageInput = document.querySelector('.message-input');
-        if (messageInput) {
-          messageInput.value = '';
+
+        // Remove the optimistic temp message (the real one arrives via re-render/echo, deduped by id).
+        if (tempMessage && tempMessage.id != null) {
+          const tempEl = document.querySelector(`[data-message-id="${tempMessage.id}"]`);
+          if (tempEl) tempEl.remove();
         }
-        
+
         // If this was a new conversation, update the conversation list
         if (data.conversation && !conversationId) {
           await fetchMessages();
           loadConversation(data.conversation.id);
-        } else {
-          // Refresh the current conversation to replace temp message with real one
-          if (conversationId) {
-            await loadConversationMessages(conversationId);
+        } else if (conversationId) {
+          // Re-render the conversation from the server so the real message (with real id) shows once.
+          const convoData = await loadConversationMessages(conversationId);
+          if (convoData && Array.isArray(convoData.messages)) {
+            displayConversationMessages(convoData.messages);
+            scrollToBottom();
           }
         }
-        
+
         return data;
       } catch (error) {
         showError('Failed to send message');
         console.error('Error sending message:', error);
-        
-        // Remove the temporary message on error
+
+        // Surface the failure in the chat history: keep the optimistic message visible
+        // and annotate it as failed (instead of silently dropping it), so the user knows
+        // the message was not delivered.
         const tempMessageEl = tempMessage ? document.querySelector(`[data-message-id="${tempMessage.id}"]`) : null;
         if (tempMessageEl) {
-          tempMessageEl.remove();
+          tempMessageEl.classList.add('chat-message-failed');
+          const wrapper = tempMessageEl.querySelector('.chat-message-wrapper');
+          if (wrapper && !wrapper.querySelector('.chat-message-error')) {
+            const err = document.createElement('div');
+            err.className = 'chat-message-error text-danger mt-1';
+            err.innerHTML = '<small><i class="ti ti-alert-circle ti-14px me-1"></i>Message not sent. Please try again.</small>';
+            wrapper.appendChild(err);
+          }
         }
       }
     }
@@ -1121,9 +1259,13 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
           // Load conversation messages
           currentConversationId = conversation.id;
           
-          // Setup real-time listeners for this conversation
-          setupConversationListeners(conversation.id);
-          
+          // Setup real-time listeners for this conversation (best-effort; must NOT block loading)
+          try {
+            setupConversationListeners(conversation.id);
+          } catch (e) {
+            console.warn('Real-time listeners unavailable; continuing without live updates:', e);
+          }
+
           const convoData = await loadConversationMessages(conversation.id);
           updateChatHeaderFromConversation(convoData?.conversation);
           displayConversationMessages(convoData?.messages || []);
@@ -1290,6 +1432,8 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     function handleMessageSubmit(event) {
       event.preventDefault();
 
+      if (!window.CHAT_HAS_TEAMMATES) { return; }
+
       const messageInput = document.querySelector('.message-input');
       const messageText = messageInput?.value?.trim();
 
@@ -1333,24 +1477,16 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     function initializeBroadcasting() {
       try {
         console.log('Checking Echo availability...');
-        console.log('typeof Echo:', typeof Echo);
-        console.log('typeof window.Echo:', typeof window.Echo);
-        console.log('window.Echo:', window.Echo);
-        console.log('Available Echo-related globals:', Object.keys(window).filter(k => k.toLowerCase().includes('echo')));
-        
-        // Check if Echo constructor is available
-        if (typeof window.Echo !== 'undefined' && window.Echo) {
-          echo = window.Echo;
-          console.log('Laravel Echo initialized successfully from window.Echo');
+
+        // Only accept a real Echo INSTANCE (has .private/.channel), not the Echo class/constructor.
+        const candidate = (typeof window.Echo !== 'undefined' && window.Echo) ? window.Echo : (typeof Echo !== 'undefined' ? Echo : null);
+        if (candidate && typeof candidate.private === 'function' && typeof candidate.channel === 'function') {
+          echo = candidate;
+          console.log('Laravel Echo instance ready.');
           return true;
-        } else if (typeof Echo !== 'undefined' && Echo) {
-          echo = Echo;
-          console.log('Laravel Echo initialized successfully from Echo');
-          return true;
-        } else {
-          console.warn('Laravel Echo not available - real-time features disabled');
-          return false;
         }
+        console.warn('Laravel Echo instance not available yet - real-time features disabled for now.');
+        return false;
       } catch (error) {
         console.error('Failed to initialize broadcasting:', error);
         return false;
@@ -1378,92 +1514,47 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       return tryInitialize();
     }
 
-    // Setup real-time listeners for a conversation
+    // Mark the focused conversation and ensure we're subscribed to its channel.
+    // Delegates listener binding to the idempotent subscribeToConversation so the
+    // channel is never double-bound (which would render incoming messages twice),
+    // and never leaves other channels (background subscriptions must stay alive).
     function setupConversationListeners(conversationId) {
-      if (!echo || !conversationId) {
-        console.log('Cannot setup listeners: echo or conversationId missing');
-        return;
-      }
+      if (!conversationId) return;
+      window.currentConversationChannel = `conversation.${conversationId}`;
+      subscribeToConversation(conversationId); // idempotent: binds once, no-op if already subscribed
+    }
 
-      // Leave previous conversation channel
-      if (window.currentConversationChannel) {
-        console.log('Leaving previous channel:', window.currentConversationChannel);
-        echo.leave(window.currentConversationChannel);
-      }
-
-      // Join conversation channel
-      const channelName = `conversation.${conversationId}`;
-      window.currentConversationChannel = channelName;
-      
-      console.log('Attempting to join channel:', channelName);
-      
+    // Subscribe to a single conversation channel WITHOUT leaving others (additive).
+    // Used to keep ALL of the user's conversations live, even when not focused.
+    function subscribeToConversation(conversationId) {
+      if (!echo || typeof echo.private !== 'function' || !conversationId) return null;
+      if (subscribedConversationIds.has(conversationId)) return null; // already listening (idempotent)
       try {
-        const channel = echo.private(channelName);
-        
-        console.log('Successfully created channel:', channel);
-        
-        // Listen for new messages (support both custom name and FQCN)
-        channel.listen('.MessageCreated', (e) => {
-          console.log('New message received via Echo (.MessageCreated):', e);
-          handleIncomingMessage(extractMessage(e));
-        });
-        channel.listen('App\\Events\\MessageCreated', (e) => {
-          console.log('New message received via Echo (App\\Events\\MessageCreated):', e);
-          handleIncomingMessage(extractMessage(e));
-        });
-        // WireChat vendor events
-        channel.listen('Namu\\WireChat\\Events\\MessageCreated', (e) => {
-          console.log('New message received via Echo (Namu\\WireChat\\Events\\MessageCreated):', e);
-          handleIncomingMessage(extractMessage(e));
-        });
-
-        // Listen for message deletions (support both custom name and FQCN)
-        channel.listen('.MessageDeleted', (e) => {
-          console.log('Message deleted via Echo (.MessageDeleted):', e);
-          handleMessageDeletion(extractMessage(e));
-        });
-        channel.listen('App\\Events\\MessageDeleted', (e) => {
-          console.log('Message deleted via Echo (App\\Events\\MessageDeleted):', e);
-          handleMessageDeletion(extractMessage(e));
-        });
-        // WireChat vendor events
-        channel.listen('Namu\\WireChat\\Events\\MessageDeleted', (e) => {
-          console.log('Message deleted via Echo (Namu\\WireChat\\Events\\MessageDeleted):', e);
-          handleMessageDeletion(extractMessage(e));
-        });
-
-        // Listen for typing indicators
+        const channel = echo.private(`conversation.${conversationId}`);
+        // Message created (custom alias + FQCN variants)
+        channel.listen('.MessageCreated', (e) => handleIncomingMessage(extractMessage(e)));
+        channel.listen('App\\Events\\MessageCreated', (e) => handleIncomingMessage(extractMessage(e)));
+        channel.listen('Namu\\WireChat\\Events\\MessageCreated', (e) => handleIncomingMessage(extractMessage(e)));
+        // Message deleted
+        channel.listen('.MessageDeleted', (e) => handleMessageDeletion(extractMessage(e)));
+        channel.listen('App\\Events\\MessageDeleted', (e) => handleMessageDeletion(extractMessage(e)));
+        channel.listen('Namu\\WireChat\\Events\\MessageDeleted', (e) => handleMessageDeletion(extractMessage(e)));
+        // Typing indicator
         channel.listen('TypingIndicator', (e) => {
-          console.log('User typing received:', e);
-          if (e.is_typing) {
-            showTypingIndicator(e.user);
-          } else {
-            hideTypingIndicator(e.user);
-          }
+          if (e.is_typing) { showTypingIndicator(e.user); } else { hideTypingIndicator(e.user); }
         });
-
-        console.log(`Successfully joined conversation channel: ${channelName}`);
-        
-        // Test the channel by listening for any events (debugging)
-        if (channel.subscription && channel.subscription.bind_global) {
-          channel.subscription.bind_global((eventName, data) => {
-            console.log('Received event on channel:', eventName, data);
-          });
-        }
-        
-        // Test connection
-        if (channel.subscription) {
-          channel.subscription.bind('pusher:subscription_succeeded', () => {
-            console.log('Successfully subscribed to channel:', channelName);
-          });
-          channel.subscription.bind('pusher:subscription_error', (error) => {
-            console.error('Failed to subscribe to channel:', channelName, error);
-          });
-        }
-        
-      } catch (error) {
-        console.error('Error setting up conversation listeners:', error);
+        subscribedConversationIds.add(conversationId);
+        return channel;
+      } catch (err) {
+        console.warn('Failed to subscribe to conversation', conversationId, err);
+        return null;
       }
+    }
+
+    // Subscribe to every conversation the user participates in (DMs + team groups).
+    function subscribeToAllConversations(conversationIds) {
+      if (!Array.isArray(conversationIds)) return;
+      conversationIds.forEach(id => { if (id) subscribeToConversation(id); });
     }
 
     // Handle incoming real-time messages
@@ -1503,6 +1594,26 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (!e) return e;
       if (e.message) return e.message;
       return e;
+    }
+
+    // Global (non-conversation) real-time notifications. Best-effort.
+    function setupRealTimeMessaging() {
+      if (!echo || typeof echo.channel !== 'function') {
+        console.warn('Echo instance not ready; global real-time notifications disabled.');
+        return;
+      }
+      try {
+        echo.channel('Web-Message')
+          .listen('.WebMessage', (data) => {
+            console.log('Received WebMessage:', data);
+          })
+          .error((error) => {
+            console.error('Web-Message channel error:', error);
+          });
+        console.log('Real-time messaging setup completed');
+      } catch (e) {
+        console.warn('Failed to set up global real-time messaging:', e);
+      }
     }
 
     // Load a specific message by ID
@@ -1666,9 +1777,14 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       
       messagePollingInterval = setInterval(async () => {
         if (currentConversationId) {
-          // Only refresh if user is actively viewing a conversation
-          // With real-time broadcasting, this is mainly for backup/fallback
-          // await loadConversationMessages(currentConversationId);
+          try {
+            const data = await loadConversationMessages(currentConversationId);
+            if (data && Array.isArray(data.messages)) {
+              displayConversationMessages(data.messages);
+            }
+          } catch (e) {
+            // silent — polling is best-effort
+          }
         }
       }, interval);
     }
@@ -1696,11 +1812,20 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         loadPersistedState();
 
         // Load initial data
-        await Promise.all([
+        const [conversations, groups] = await Promise.all([
           fetchMessages(),
           fetchGroups(),
           fetchUsers()
         ]);
+
+        // Subscribe to ALL conversations (DMs + team groups) so messages arrive
+        // live even when that conversation isn't the focused one.
+        const allConversationIds = [
+          ...((conversations || []).map(c => c.id)),
+          ...((groups || []).map(g => g.id)),
+        ];
+        // Deferred slightly so Echo (loaded async from the layout) is ready.
+        setTimeout(() => subscribeToAllConversations(allConversationIds), 600);
 
         // Set up event listeners
         setupEventListeners();
@@ -1709,6 +1834,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         broadcastingEnabled = initializeBroadcasting();
         if (broadcastingEnabled) {
           console.log('Real-time broadcasting enabled - reduced polling frequency');
+          setupRealTimeMessaging();
           // Use longer intervals since we have real-time updates
           startMessagePolling(60000); // Every minute instead of 30 seconds
         } else {
@@ -1732,11 +1858,20 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
 
     // Listen for Echo ready event
     window.addEventListener('EchoReady', function() {
-      console.log('Echo ready event received, reinitializing broadcasting...');
-      const broadcastingEnabled = initializeBroadcasting();
-      if (broadcastingEnabled) {
-        console.log('Broadcasting enabled after Echo ready');
-        // Restart with real-time features
+      console.log('EchoReady received — (re)initializing real-time.');
+      if (initializeBroadcasting()) {
+        setupRealTimeMessaging();
+        // Re-subscribe the conversation the user currently has open, if any.
+        if (typeof currentConversationId !== 'undefined' && currentConversationId) {
+          try { setupConversationListeners(currentConversationId); } catch (e) {
+            console.warn('Re-subscribe after EchoReady failed:', e);
+          }
+        }
+        // Re-subscribe every known conversation now that Echo is ready.
+        subscribeToAllConversations([
+          ...subscribedConversationIds,
+          currentConversationId,
+        ].filter(Boolean));
         startMessagePolling(60000);
       }
     });
@@ -1897,223 +2032,6 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
     window.deleteGroup = deleteGroup;
     window.searchUsers = searchUsers;
 
-    // Laravel Echo Real-time messaging setup
-    function setupRealTimeMessaging() {
-      if (typeof window.Echo === 'undefined') {
-        console.warn('Laravel Echo not available. Real-time messaging disabled.');
-        return;
-      }
-
-      // Listen for WebMessage events (global notifications)
-      window.Echo.channel('Web-Message')
-        .listen('.WebMessage', (data) => {
-          console.log('Received WebMessage:', data);
-          // Handle global web messages if needed
-        })
-        .error((error) => {
-          console.error('Web-Message channel error:', error);
-        });
-
-      console.log('Real-time messaging setup completed');
-    }
-
-    // Setup conversation-specific listeners
-    function setupConversationListeners(conversationId) {
-      if (typeof window.Echo === 'undefined' || !conversationId) {
-        return;
-      }
-
-      // Remove existing listeners for this conversation
-      if (window.currentConversationChannel) {
-        window.currentConversationChannel.stopListening('MessageCreated');
-        window.Echo.leave(window.currentConversationChannel.name);
-      }
-
-      // Create private channel for this conversation
-      const channelName = `conversation.${conversationId}`;
-      window.currentConversationChannel = window.Echo.private(channelName);
-
-      window.currentConversationChannel
-        .listen('.MessageCreated', (data) => {
-          console.log('New message received:', data);
-          handleNewMessage(data.message);
-        })
-        .error((error) => {
-          console.error(`Conversation ${conversationId} channel error:`, error);
-        });
-    }
-
-    // Handle incoming real-time messages
-    function handleNewMessage(messageData) {
-      if (currentConversationId && messageData.conversation_id == currentConversationId) {
-        // Only add if it's not already in the UI (avoid duplicates)
-        const existingMessage = document.querySelector(`[data-message-id="${messageData.id}"]`);
-        if (!existingMessage) {
-          addMessageToUI(messageData);
-          scrollToBottom();
-        }
-
-        // Clear typing indicator for the user who sent the message
-        if (messageData.sendable) {
-          hideTypingIndicator(messageData.sendable);
-        }
-      } else {
-        // Message for different conversation - increment unread count
-        incrementUnread(messageData.conversation_id);
-        refreshUserListUnreadBadges();
-      }
-    }
-
-    // Add message to UI
-    function addMessageToUI(messageData) {
-      const messagesContainer = document.getElementById('chat-messages');
-      if (!messagesContainer) return;
-
-      const isCurrentUser = messageData.sendable_id === currentUser?.id;
-      const messageClass = isCurrentUser ? 'chat-message-right' : '';
-      const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
-      const senderName = isCurrentUser ? 'You' : getDisplayName(messageData.sendable || {});
-      const timeFormatted = formatMessageTime(messageData.created_at);
-
-      const messageHtml = `
-        <li class="chat-message ${messageClass}" data-message-id="${messageData.id}">
-          <div class="d-flex overflow-hidden">
-            ${!isCurrentUser ? `
-              <div class="user-avatar flex-shrink-0 me-4">
-                <div class="avatar avatar-sm">
-                  <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
-                </div>
-              </div>
-            ` : ''}
-
-            <div class="chat-message-wrapper flex-grow-1">
-              <div class="chat-message-text">
-                <p class="mb-0">${escapeHtml(messageData.body)}</p>
-              </div>
-              <div class="${isCurrentUser ? 'text-end' : ''} text-muted mt-1">
-                <small>${timeFormatted}</small>
-              </div>
-            </div>
-          </div>
-        </li>
-      `;
-
-      // Insert at the end of the messages list (newest at bottom)
-      messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-    }
-
-    // Laravel Echo Real-time messaging setup
-    function setupRealTimeMessaging() {
-      if (typeof window.Echo === 'undefined') {
-        console.warn('Laravel Echo not available. Real-time messaging disabled.');
-        return;
-      }
-
-      // Listen for WebMessage events (global notifications)
-      window.Echo.channel('Web-Message')
-        .listen('.WebMessage', (data) => {
-          console.log('Received WebMessage:', data);
-          // Handle global web messages if needed
-        })
-        .error((error) => {
-          console.error('Web-Message channel error:', error);
-        });
-
-      console.log('Real-time messaging setup completed');
-    }
-
-    // Setup conversation-specific listeners
-    function setupConversationListeners(conversationId) {
-      if (typeof window.Echo === 'undefined' || !conversationId) {
-        return;
-      }
-
-      // Remove existing listeners for this conversation
-      if (window.currentConversationChannel) {
-        window.currentConversationChannel.stopListening('MessageCreated');
-        window.Echo.leave(window.currentConversationChannel.name);
-      }
-
-      // Create private channel for this conversation
-      const channelName = `conversation.${conversationId}`;
-      window.currentConversationChannel = window.Echo.private(channelName);
-
-      window.currentConversationChannel
-        .listen('.MessageCreated', (data) => {
-          console.log('New message received:', data);
-          handleNewMessage(data.message);
-        })
-        .error((error) => {
-          console.error(`Conversation ${conversationId} channel error:`, error);
-        });
-    }
-
-    // Handle incoming real-time messages
-    function handleNewMessage(messageData) {
-      if (currentConversationId && messageData.conversation_id == currentConversationId) {
-        // Only add if it's not already in the UI (avoid duplicates)
-        const existingMessage = document.querySelector(`[data-message-id="${messageData.id}"]`);
-        if (!existingMessage) {
-          addMessageToUI(messageData);
-          scrollToBottom();
-        }
-
-        // Clear typing indicator for the user who sent the message
-        if (messageData.sendable) {
-          hideTypingIndicator(messageData.sendable);
-        }
-      } else {
-        // Message for different conversation - increment unread count
-        incrementUnread(messageData.conversation_id);
-        refreshUserListUnreadBadges();
-      }
-    }
-
-    // Add message to UI
-    function addMessageToUI(messageData) {
-      const messagesContainer = document.getElementById('chat-messages');
-      if (!messagesContainer) return;
-
-      const isCurrentUser = messageData.sendable_id === currentUser?.id;
-      const messageClass = isCurrentUser ? 'chat-message-right' : '';
-      const avatarSrc = isCurrentUser ? '/vuexy/assets/img/avatars/1.png' : '/vuexy/assets/img/avatars/4.png';
-      const senderName = isCurrentUser ? 'You' : getDisplayName(messageData.sendable || {});
-      const timeFormatted = formatMessageTime(messageData.created_at);
-
-      const messageHtml = `
-        <li class="chat-message ${messageClass}" data-message-id="${messageData.id}">
-          <div class="d-flex overflow-hidden">
-            ${!isCurrentUser ? `
-              <div class="user-avatar flex-shrink-0 me-4">
-                <div class="avatar avatar-sm">
-                  <img src="${avatarSrc}" alt="Avatar" class="rounded-circle" />
-                </div>
-              </div>
-            ` : ''}
-
-            <div class="chat-message-wrapper flex-grow-1">
-              <div class="chat-message-text">
-                <p class="mb-0">${escapeHtml(messageData.body)}</p>
-              </div>
-              <div class="${isCurrentUser ? 'text-end' : ''} text-muted mt-1">
-                <small>${timeFormatted}</small>
-              </div>
-            </div>
-          </div>
-        </li>
-      `;
-
-      // Insert at the end of the messages list (newest at bottom)
-      messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
-    }
-
-    // Initialize real-time messaging when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      // Wait a bit for currentUser to be loaded
-      setTimeout(() => {
-        setupRealTimeMessaging();
-      }, 1000);
-    });
 
   </script>
 @stop

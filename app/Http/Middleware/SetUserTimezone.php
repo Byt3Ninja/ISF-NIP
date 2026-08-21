@@ -11,17 +11,19 @@ class SetUserTimezone
     {
         $defaultTimezone = 'Africa/Cairo';
 
+        $userTimezone = $defaultTimezone;
         if (Auth::check()) {
-            $userTimezone = Auth::user()->timezone;
-
-            if (in_array($userTimezone, timezone_identifiers_list())) {
-                date_default_timezone_set($userTimezone);
-            } else {
-                date_default_timezone_set($defaultTimezone);
+            $tz = Auth::user()->timezone;
+            if (in_array($tz, timezone_identifiers_list(), true)) {
+                $userTimezone = $tz;
             }
-        } else {
-            date_default_timezone_set($defaultTimezone);
         }
+
+        // Display-only: expose the user's timezone for views/formatters.
+        // IMPORTANT: do NOT call date_default_timezone_set() here — mutating
+        // PHP's global timezone makes Eloquent write created_at in the user's
+        // wall-clock zone into a timezone-naive column, corrupting ordering.
+        config(['app.user_timezone' => $userTimezone]);
 
         return $next($request);
     }
