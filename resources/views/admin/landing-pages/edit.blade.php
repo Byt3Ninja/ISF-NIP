@@ -981,7 +981,8 @@
 
                 @if($section['key'] === 'custom')
                   <hr class="my-4">
-                  <div class="d-flex align-items-center justify-content-end mb-3">
+                  <div class="d-flex align-items-center justify-content-end mb-3 gap-2">
+                    <span id="customSectionCount" class="badge bg-label-primary rounded-pill" style="display:none">0 / 5</span>
                     <button
                       type="button"
                       class="btn btn-primary btn-sm d-flex align-items-center gap-1"
@@ -992,6 +993,9 @@
                     </button>
                   </div>
                   <div id="customSectionsContainer"></div>
+                  <div id="customSectionMaxHint" class="alert alert-warning py-2 small d-none" role="alert">
+                    {{ $l == 'ar' ? 'يمكنك إضافة حتى 5 أقسام مخصصة فقط.' : 'You can add up to 5 custom sections only.' }}
+                  </div>
                   <div id="customSectionsEmpty" class="text-center py-5 border border-dashed rounded">
                     <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
                     <h5 class="text-muted mb-1">
@@ -2209,6 +2213,7 @@
       // ─────────────────────────────────────────────────────────────
       const customQuills = new Map();
       const customRequiredFields = ['title', 'title_tag', 'content', 'title_ar', 'title_tag_ar', 'content_ar'];
+      const customMaxSections = 5;
       let customSectionCounter = 0;
 
       const customSectionHtml = function (id) {
@@ -2329,6 +2334,9 @@
       const updateCustomSectionsEmpty = function () {
         const count = $('#customSectionsContainer .custom-section-card').length;
         $('#customSectionsEmpty').toggle(count === 0);
+        $('#customSectionCount').text(count + ' / ' + customMaxSections).toggle(count > 0);
+        $('#customAddSection').prop('disabled', count >= customMaxSections);
+        $('#customSectionMaxHint').toggleClass('d-none', count < customMaxSections);
       };
 
       const updateCustomSectionLabels = function () {
@@ -2473,6 +2481,9 @@
       });
 
       const addCustomSection = function () {
+        if ($('#customSectionsContainer .custom-section-card').length >= customMaxSections) {
+          return;
+        }
         const id = ++customSectionCounter;
         $('#customSectionsContainer').append(customSectionHtml(id));
         initCustomQuill($('#customSectionsContainer'));
