@@ -2,7 +2,6 @@
 
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
   <style>
@@ -58,132 +57,6 @@
       {{ __('landing.Create_LandingPage_Description') }}
     </p>
   </div>
-
-  {{-- Custom Landing Page URL configuration --}}
-  <form class="card mb-4" id="lpUrlForm" novalidate>
-    <div class="card-header">
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-3">
-          <div class="form-check form-switch mb-0">
-            <input
-              type="checkbox"
-              class="form-check-input lp-url-toggle"
-              id="lpUrlEnabledToggle"
-              name="lpUrlActive"
-              checked
-            >
-          </div>
-          <div>
-            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <i class="ti ti-link"></i>
-              {{ __('landing.Custom_Landing_Page_URL') }}
-            </h5>
-            <small class="text-muted" id="lpUrlStatusText">
-              <span class="text-success">
-                <i class="ti ti-check me-1"></i>
-                {{ __('landing.Landing_Page_URL_Active') }}
-              </span>
-            </small>
-            <small class="text-muted d-none" id="lpUrlSavedLinkWrap">
-              <i class="ti ti-link me-1"></i>
-              <a href="#" id="lpUrlSavedLink" target="_blank" rel="noopener" class="fw-medium text-primary"></a>
-            </small>
-          </div>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-          <button type="button" class="btn btn-outline-primary" id="lpUrlPreviewBtn">
-            <i class="ti ti-external-link me-1"></i>
-            {{ __('landing.Preview_Landing_Page') }}
-          </button>
-          <button
-            type="submit"
-            class="btn btn-primary"
-            id="lpUrlSaveBtn"
-            disabled
-            title="{{ __('landing.Save_General_First_URL') }}"
-          >
-            <i class="ti ti-device-floppy me-1"></i>
-            {{ __('landing.Save') }}
-          </button>
-        </div>
-      </div>
-      <small class="text-muted d-block mt-2" id="lpUrlSaveHint">
-        <i class="ti ti-lock me-1"></i>
-        {{ __('landing.Save_General_First_URL') }}
-      </small>
-    </div>
-    <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <label class="form-label" for="lpUrlTitle">
-            {{ __('landing.Title') }}
-            <span class="text-danger">*</span>
-          </label>
-          <input
-            type="text"
-            class="form-control"
-            id="lpUrlTitle"
-            name="lpUrlTitle"
-            maxlength="100"
-            placeholder="{{ __('landing.URL_Title_Placeholder') }}"
-          >
-          <div class="invalid-feedback"></div>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label" for="lpUrlName">
-            {{ __('landing.URL_Name') }}
-            <span class="text-danger">*</span>
-          </label>
-          <input
-            type="text"
-            class="form-control"
-            id="lpUrlName"
-            name="lpUrlName"
-            maxlength="100"
-            placeholder="{{ __('landing.URL_Name_Placeholder') }}"
-          >
-          <div class="invalid-feedback"></div>
-        </div>
-        <div class="col-12">
-          <label class="form-label" for="lpUrlSlug">
-            {{ __('landing.Custom_URL') }}
-            <span class="text-danger">*</span>
-          </label>
-          <div class="row g-2 align-items-start">
-            <div class="col-md-6 col-xl-7">
-              <div class="input-group input-group-merge shadow-none">
-                <span class="input-group-text text-muted">{{ url('/lp/') }}/</span>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="lpUrlSlug"
-                  name="lpUrlSlug"
-                  maxlength="100"
-                  placeholder="summer-2025"
-                  pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-                >
-              </div>
-              <div class="invalid-feedback"></div>
-              <div id="lpUrlAvailabilityFeedback" class="mt-1 small fw-medium"></div>
-              <small class="text-muted">
-                {{ __('landing.validation.custom_url_invalid') }}
-              </small>
-            </div>
-            <div class="col-md-6 col-xl-5 d-flex flex-wrap gap-2">
-              <button type="button" class="btn btn-outline-secondary text-nowrap" id="lpUrlGenerateBtn">
-                <i class="ti ti-refresh me-1"></i>
-                {{ __('landing.Generate_From_Title') }}
-              </button>
-              <button type="button" class="btn btn-outline-info text-nowrap" id="lpUrlCheckBtn">
-                <i class="ti ti-check me-1"></i>
-                {{ __('landing.Check_Availability') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </form>
 
   <div class="card mb-4">
     <div class="card-header border-bottom">
@@ -683,7 +556,6 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
 @endsection
 
 @section('pagescripts')
@@ -704,355 +576,7 @@
         window.history.replaceState({}, '', url);
       });
 
-      // ─────────────────────────────────────────────────────────────
-      // Custom landing-page URL configuration (simulated backend)
-      // Save/check hit session-backed controller stubs; validation uses
-      // the exact acceptance-criteria messages for both languages.
-      // ─────────────────────────────────────────────────────────────
       const isArabic = {{ $l == 'ar' ? 'true' : 'false' }};
-      const lpUrlI18n = {
-        titleRequired:  "{{ __('landing.validation.title_required') }}",
-        nameRequired:   "{{ __('landing.validation.custom_url_name_required') }}",
-        slugRequired:   "{{ __('landing.validation.custom_url_slug_required') }}",
-        slugInvalid:    "{{ __('landing.validation.custom_url_invalid') }}",
-        available:      "{{ __('landing.validation.custom_url_available') }}",
-        taken:          "{{ __('landing.validation.custom_url_taken') }}",
-        checking:       "{{ __('landing.validation.checking_url_availability') }}",
-        saved:          "{{ __('landing.success.custom_url_saved') }}",
-        activeStatus:   "{{ __('landing.Landing_Page_URL_Active') }}",
-        inactiveStatus: "{{ __('landing.Landing_Page_URL_Inactive') }}",
-        previewNotSaved: "{{ __('landing.validation.cannot_preview_invalid_url') }}",
-        titleMax:       "{{ __('landing.validation.custom_url_title_max') }}",
-        nameMax:        "{{ __('landing.validation.custom_url_name_max') }}",
-      };
-
-      const lpUrlBase = "{{ url('/lp/') }}/";
-      let lpUrlSlugChecked = false;   // current slug value verified against the backend
-      let lpUrlSlugAvailable = false; // result of the last availability check
-      let lpUrlSavedSlug = null;      // slug of the currently saved configuration
-      let lpUrlActive = true;         // mirrors the Active toggle
-      let lpUrlSaveRoute = null;      // set once General is saved and a page id exists
-
-      const lpUrlSlugify = function (value) {
-        return String(value || '')
-          .toLowerCase()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/[\s_]+/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '');
-      };
-
-      const lpUrlIsValidSlug = function (slug) {
-        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
-      };
-
-      const lpUrlFindFeedback = function ($input) {
-        const $sibling = $input.siblings('.invalid-feedback');
-        if ($sibling.length) return $sibling;
-        return $input.closest('.col-md-6, .col-xl-7, .col-12').find('.invalid-feedback').first();
-      };
-
-      const lpUrlShowFieldError = function ($input, message) {
-        $input.addClass('is-invalid');
-        lpUrlFindFeedback($input).text(message).addClass('d-block');
-      };
-
-      const lpUrlClearFieldError = function ($input) {
-        $input.removeClass('is-invalid');
-        lpUrlFindFeedback($input).text('').removeClass('d-block');
-      };
-
-      const lpUrlSetAvailability = function (state, message) {
-        const $fb = $('#lpUrlAvailabilityFeedback');
-        if (!message) {
-          $fb.removeClass('text-success text-danger text-info').text('').hide();
-          return;
-        }
-        const colorClass = state === 'available' ? 'text-success' : state === 'checking' ? 'text-info' : 'text-danger';
-        $fb.removeClass('text-success text-danger text-info')
-          .addClass(colorClass)
-          .text(message)
-          .show();
-      };
-
-      const lpUrlAjax = function (url, payload) {
-        return $.ajax({
-          url: url,
-          method: 'POST',
-          data: Object.assign({ _token: "{{ csrf_token() }}" }, payload),
-          dataType: 'json',
-        });
-      };
-
-      // FormValidation wiring for the custom-URL card.
-      const lpUrlFvFields = {
-        lpUrlTitle: {
-          validators: {
-            notEmpty: { message: lpUrlI18n.titleRequired },
-            stringLength: { max: 100, message: lpUrlI18n.titleMax },
-          },
-        },
-        lpUrlName: {
-          validators: {
-            notEmpty: { message: lpUrlI18n.nameRequired },
-            stringLength: { max: 100, message: lpUrlI18n.nameMax },
-          },
-        },
-        lpUrlSlug: {
-          validators: {
-            notEmpty: { message: lpUrlI18n.slugRequired },
-            regexp: {
-              regexp: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-              message: lpUrlI18n.slugInvalid,
-            },
-            callback: {
-              message: lpUrlI18n.taken,
-              callback: function (input) {
-                const slug = (input.value || '').trim().toLowerCase();
-                if (!lpUrlIsValidSlug(slug)) return { valid: true };
-                if (!lpUrlSlugChecked) return { valid: true };
-                if (!lpUrlSlugAvailable) {
-                  $('#lpUrlAvailabilityFeedback').text('').removeClass('text-success text-danger').hide();
-                }
-                return { valid: lpUrlSlugAvailable };
-              },
-            },
-          },
-        },
-      };
-
-      let lpUrlFv = null;
-      if (typeof FormValidation !== 'undefined') {
-        const $lpUrlForm = document.getElementById('lpUrlForm');
-        if ($lpUrlForm) {
-          lpUrlFv = FormValidation.formValidation($lpUrlForm, {
-            fields: lpUrlFvFields,
-            plugins: {
-              trigger: new FormValidation.plugins.Trigger(),
-              bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '' }),
-              autoFocus: new FormValidation.plugins.AutoFocus(),
-            },
-            init: instance => {
-              instance.on('plugins.message.placed', function (e) {
-                if (e.element.parentElement.classList.contains('input-group')) {
-                  e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-                }
-              });
-            },
-          });
-        }
-      }
-
-      // Always resolves with { valid, available, message }.
-      const lpUrlCheckAvailability = function () {
-        const $slug = $('#lpUrlSlug');
-        const slug = ($slug.val() || '').trim().toLowerCase();
-        const d = $.Deferred();
-        lpUrlSlugChecked = false;
-        lpUrlSlugAvailable = false;
-
-        if (!slug) {
-          lpUrlSetAvailability('taken', lpUrlI18n.slugRequired);
-          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugRequired, empty: true });
-          return d.promise();
-        }
-        if (!lpUrlIsValidSlug(slug)) {
-          lpUrlSetAvailability('taken', lpUrlI18n.slugInvalid);
-          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugInvalid });
-          return d.promise();
-        }
-
-        lpUrlSetAvailability('checking', lpUrlI18n.checking);
-
-        lpUrlAjax("{{ route('landing-pages.url.check') }}", { slug: slug })
-          .done(function (res) {
-            lpUrlSlugChecked = true;
-            lpUrlSlugAvailable = !!res.available;
-            lpUrlSetAvailability(res.available ? 'available' : 'taken', res.message);
-            d.resolve({ valid: !!res.valid, available: !!res.available, message: res.message });
-          })
-          .fail(function (xhr) {
-            const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
-            lpUrlSetAvailability('taken', message);
-            d.resolve({ valid: false, available: false, message: message });
-          });
-        return d.promise();
-      };
-
-      const lpUrlRenderStatus = function () {
-        const $status = $('#lpUrlStatusText');
-        if (lpUrlActive) {
-          $status.html('<span class="text-success"><i class="ti ti-check me-1"></i>' + lpUrlI18n.activeStatus + '</span>');
-        } else {
-          $status.html('<span class="text-warning"><i class="ti ti-eye-off me-1"></i>' + lpUrlI18n.inactiveStatus + '</span>');
-        }
-      };
-
-      const lpUrlRenderSavedLink = function () {
-        const $wrap = $('#lpUrlSavedLinkWrap');
-        if (!lpUrlSavedSlug) {
-          $wrap.addClass('d-none');
-          return;
-        }
-        const href = lpUrlBase + lpUrlSavedSlug;
-        $('#lpUrlSavedLink').attr('href', href).text(href);
-        $wrap.removeClass('d-none');
-      };
-
-      $('#lpUrlEnabledToggle').on('change', function () {
-        lpUrlActive = this.checked;
-        lpUrlRenderStatus();
-      });
-
-      $('#lpUrlGenerateBtn').on('click', function () {
-        const $title = $('#lpUrlTitle');
-        if (lpUrlFv) {
-          lpUrlFv.revalidateField('lpUrlTitle');
-          if (!$title.val().trim()) return;
-        } else {
-          if (!$title.val().trim()) {
-            lpUrlShowFieldError($title, lpUrlI18n.titleRequired);
-            return;
-          }
-          lpUrlClearFieldError($title);
-        }
-        $('#lpUrlSlug').val(lpUrlSlugify($title.val()));
-        lpUrlSlugChecked = false;
-        lpUrlSlugAvailable = false;
-        lpUrlSetAvailability('', '');
-        if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
-      });
-
-      $('#lpUrlCheckBtn').on('click', function () {
-        lpUrlCheckAvailability().done(function () {
-          if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
-        });
-      });
-
-      $('#lpUrlSlug').on('input', function () {
-        lpUrlSlugChecked = false;
-        lpUrlSlugAvailable = false;
-        lpUrlSetAvailability('', '');
-      });
-
-      $('#lpUrlForm').on('submit', function (e) {
-        e.preventDefault();
-        const $btn = $('#lpUrlSaveBtn');
-        const $title = $('#lpUrlTitle');
-        const $name = $('#lpUrlName');
-        const $slug = $('#lpUrlSlug');
-
-        // Nothing to save the URL onto until General has been saved and a
-        // page id exists; the button is disabled in that state too, this
-        // is just a defensive guard.
-        if (!lpUrlSaveRoute) return;
-
-        const proceedSave = function () {
-          const originalHtml = $btn.html();
-          $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
-
-          lpUrlAjax(lpUrlSaveRoute, {
-            title: $title.val().trim(),
-            name: $name.val().trim(),
-            slug: ($slug.val() || '').trim().toLowerCase(),
-            active: lpUrlActive ? 1 : 0,
-          })
-            .done(function (res) {
-              lpUrlSavedSlug = ($slug.val() || '').trim().toLowerCase();
-              lpUrlSlugChecked = true;
-              lpUrlSlugAvailable = true;
-              lpUrlRenderSavedLink();
-              releaseSuccessAlert({
-                title: "{{ __('admin.success') }}",
-                message: res.message || lpUrlI18n.saved,
-              });
-              $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
-              setTimeout(function () {
-                $btn.removeClass('btn-success').addClass('btn-primary').html(originalHtml);
-              }, 1500);
-            })
-            .fail(function (xhr) {
-              const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
-              releaseFailureAlert({
-                title: "{{ __('admin.Error') }}",
-                message: message,
-              });
-              $btn.html(originalHtml);
-            })
-            .always(function () {
-              $btn.prop('disabled', false);
-            });
-        };
-
-        const runChecks = function () {
-          if (lpUrlFv) {
-            lpUrlFv.validate().then(function (status) {
-              if (status !== 'Valid') return;
-              if (lpUrlSlugChecked && lpUrlSlugAvailable) {
-                proceedSave();
-                return;
-              }
-              lpUrlCheckAvailability().done(function (res) {
-                if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
-                if (res.valid && res.available) proceedSave();
-              });
-            });
-            return;
-          }
-
-          // Fallback when the FormValidation plugin is unavailable.
-          const slug = ($slug.val() || '').trim().toLowerCase();
-          let firstError = null;
-          const mark = function ($input, message) {
-            lpUrlShowFieldError($input, message);
-            if (!firstError) firstError = message;
-          };
-          if (!$title.val().trim()) {
-            mark($title, lpUrlI18n.titleRequired);
-          } else {
-            lpUrlClearFieldError($title);
-          }
-          if (!$name.val().trim()) {
-            mark($name, lpUrlI18n.nameRequired);
-          } else {
-            lpUrlClearFieldError($name);
-          }
-          if (!slug) {
-            mark($slug, lpUrlI18n.slugRequired);
-          } else if (!lpUrlIsValidSlug(slug)) {
-            mark($slug, lpUrlI18n.slugInvalid);
-          } else {
-            lpUrlClearFieldError($slug);
-          }
-          if (firstError) return;
-
-          const proceed = function (checkResult) {
-            if (checkResult.valid && checkResult.available) {
-              proceedSave();
-            }
-          };
-          if (lpUrlSlugChecked && lpUrlSlugAvailable) {
-            proceed({ valid: true, available: true });
-          } else {
-            lpUrlCheckAvailability().done(proceed);
-          }
-        };
-
-        runChecks();
-      });
-
-      $('#lpUrlPreviewBtn').on('click', function () {
-        if (!lpUrlSavedSlug) {
-          releaseFailureAlert({
-            title: lpUrlI18n.activeStatus,
-            message: lpUrlI18n.previewNotSaved,
-          });
-          return;
-        }
-        // Active slug renders the landing page; inactive/unknown slug
-        // returns a real 404 from the public route.
-        window.open(lpUrlBase + lpUrlSavedSlug, '_blank', 'noopener');
-      });
 
       // ─────────────────────────────────────────────────────────────
       // Section forms — FormValidation (client-side)
@@ -1846,7 +1370,7 @@
                   <input type="hidden" name="custom_sections[${id}][content_ar]" class="custom-hidden-content" value="">
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-md-6">
+                {{-- <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Button_text') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
                   <input type="text" name="custom_sections[${id}][button_text]" maxlength="255" class="form-control">
                 </div>
@@ -1854,7 +1378,7 @@
                   <label class="form-label">${"{{ __('landing.Button_link') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
                   <input type="url" name="custom_sections[${id}][button_link]" maxlength="500" class="form-control" placeholder="https://" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
-                </div>
+                </div> --}}
               </div>
             </div>
           </div>
@@ -2123,6 +1647,12 @@
           })
             .done(function (res) {
               $btn.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>' + "{{ __('landing.Save') }}");
+              
+              if (res.success && res.redirect) {
+                window.location.href = res.redirect;
+                return;
+              }
+              
               if (successMessages[sectionKey]) {
                 releaseSuccessAlert({
                   title: "{{ __('admin.success') }}",

@@ -104,10 +104,10 @@
           </div>
         </div>
         <div class="d-flex flex-wrap gap-2">
-          <button type="button" class="btn btn-outline-primary" id="lpUrlPreviewBtn">
+          <a href="" class="btn btn-outline-primary" id="lpUrlPreviewBtn">
             <i class="ti ti-external-link me-1"></i>
             {{ $l == 'ar' ? 'معاينة صفحة الهبوط' : 'Preview Landing Page' }}
-          </button>
+          </a>
           <button type="submit" class="btn btn-primary" id="lpUrlSaveBtn">
             <i class="ti ti-device-floppy me-1"></i>
             {{ $l == 'ar' ? 'حفظ' : 'Save' }}
@@ -117,37 +117,6 @@
     </div>
     <div class="card-body">
       <div class="row g-4">
-        <div class="col-md-6">
-          <label class="form-label" for="lpUrlTitle">
-            {{ $l == 'ar' ? 'العنوان' : 'Title' }}
-            <span class="text-danger">*</span>
-          </label>
-          <input
-            type="text"
-            class="form-control"
-            id="lpUrlTitle"
-            name="lpUrlTitle"
-            value="{{ $currentPage->title }}"
-            maxlength="100"
-            placeholder="{{ $l == 'ar' ? 'صيف 2025' : 'Summer 2025' }}"
-          >
-          <div class="invalid-feedback"></div>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label" for="lpUrlName">
-            {{ $l == 'ar' ? 'اسم الرابط' : 'URL Name' }}
-            <span class="text-danger">*</span>
-          </label>
-          <input
-            type="text"
-            class="form-control"
-            id="lpUrlName"
-            name="lpUrlName"
-            maxlength="100"
-            placeholder="{{ $l == 'ar' ? 'برنامج الصيف' : 'Summer Program' }}"
-          >
-          <div class="invalid-feedback"></div>
-        </div>
         <div class="col-12">
           <label class="form-label" for="lpUrlSlug">
             {{ $l == 'ar' ? 'الرابط المخصص' : 'Custom URL' }}
@@ -735,7 +704,7 @@
       const lpUrlBase = "{{ url('/lp/') }}/";
       let lpUrlSlugChecked = false;   // current slug value verified against the backend
       let lpUrlSlugAvailable = false; // result of the last availability check
-      let lpUrlSavedSlug = null;      // slug of the currently saved configuration
+      let lpUrlSavedSlug = "{{ $currentPage->slug ? $currentPage->slug : '' }}"; // slug of the currently saved configuration
       let lpUrlActive = true;         // mirrors the Active toggle
 
       const lpUrlSlugify = function (value) {
@@ -943,8 +912,8 @@
       $('#lpUrlForm').on('submit', function (e) {
         e.preventDefault();
         const $btn = $('#lpUrlSaveBtn');
-        const $title = $('#lpUrlTitle');
-        const $name = $('#lpUrlName');
+        // const $title = $('#lpUrlTitle');
+        // const $name = $('#lpUrlName');
         const $slug = $('#lpUrlSlug');
 
         const proceedSave = function () {
@@ -952,13 +921,13 @@
           $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
 
           lpUrlAjax("{{ route('landing-pages.url.save', $currentPage->id) }}", {
-            title: $title.val().trim(),
-            name: $name.val().trim(),
+            // title: $title.val().trim(),
+            // name: $name.val().trim(),
             slug: ($slug.val() || '').trim().toLowerCase(),
             active: lpUrlActive ? 1 : 0,
           })
             .done(function (res) {
-              lpUrlSavedSlug = ($slug.val() || '').trim().toLowerCase();
+              lpUrlSavedSlug = res.slug;
               lpUrlSlugChecked = true;
               lpUrlSlugAvailable = true;
               lpUrlRenderSavedLink();
@@ -1060,56 +1029,56 @@
       // ─────────────────────────────────────────────────────────────
       const maxImageSize = 5 * 1024 * 1024; // 5 MB
 
-      const validationMessages = {
-        pageTitle:          isArabic ? 'يرجى إدخال عنوان الصفحة.' : 'Please enter the page title.',
-        logoRequired:       isArabic ? 'يرجى تحميل الشعار.' : 'Please upload a logo.',
-        logoUnsupported:    isArabic ? 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.' : 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
-        logoSize:           isArabic ? 'يجب ألا يتجاوز حجم الشعار 5 ميجابايت.' : 'Logo size must not exceed 5 MB.',
-        description:        isArabic ? 'يرجى إدخال الوصف.' : 'Please enter a description.',
-        descriptionArabic:  isArabic ? 'يرجى إدخال الوصف باللغة العربية.' : 'Please enter a description in Arabic.',
-        heroTitle:          isArabic ? 'يرجى إدخال العنوان.' : 'Please enter the title.',
-        heroSubtitle:       isArabic ? 'يرجى إدخال العنوان الفرعي.' : 'Please enter the subtitle.',
-        heroTitleArabic:    isArabic ? 'يرجى إدخال العنوان باللغة العربية.' : 'Please enter the title in Arabic.',
-        heroSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي باللغة العربية.' : 'Please enter the subtitle in Arabic.',
-        heroImageRequired:  isArabic ? 'يرجى تحميل صورة القسم الرئيسي.' : 'Please upload a hero image.',
-        heroImageFormat:    isArabic ? 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.' : 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
-        heroImageSize:      isArabic ? 'يجب ألا يتجاوز حجم صورة القسم الرئيسي 5 ميجابايت.' : 'Hero image size must not exceed 5 MB.',
-        aboutTitle:         isArabic ? 'يرجى إدخال عنوان القسم.' : 'Please enter the section title.',
-        aboutSubtitle:      isArabic ? 'يرجى إدخال العنوان الفرعي للقسم.' : 'Please enter the section subtitle.',
-        aboutDescription:   isArabic ? 'يرجى إدخال وصف القسم.' : 'Please enter the section description.',
-        aboutTitleArabic:   isArabic ? 'يرجى إدخال عنوان القسم باللغة العربية.' : 'Please enter the section title in Arabic.',
-        aboutSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللغة العربية.' : 'Please enter the section subtitle in Arabic.',
-        aboutDescriptionArabic: isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
-        programsRequired:       isArabic ? 'هذا الحقل مطلوب' : 'This field is required.',
-        howTitle:               isArabic ? 'يرجى إدخال عنوان القسم.' : 'Please enter the section title.',
-        howTitleArabic:         isArabic ? 'يرجى إدخال عنوان القسم باللغة العربيه.' : 'Please enter the section title in Arabic.',
-        howSubtitle:            isArabic ? 'يرجى إدخال العنوان الفرعي للقسم.' : 'Please enter the section subtitle.',
-        howSubtitleArabic:      isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللعة العربية.' : 'Please enter the section subtitle in Arabic.',
-        howDescription:         isArabic ? 'يرجى إدخال وصف القسم.' : 'Please enter the section description.',
-        howDescriptionArabic:   isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
-        howStepTitle:           isArabic ? 'يرجى إدخال عنوان الخطوة.' : 'Please enter the step title.',
-        howStepTitleArabic:     isArabic ? 'يرجى إدخال عنوان الخطوة باللغة  العربية.' : 'Please enter the step title in Arabic.',
-        howStepIcon:            isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
-        howStepDescription:     isArabic ? 'يرجى إدخال وصف الخطوة.' : 'Please enter the step description.',
-        howStepDescriptionArabic: isArabic ? 'يرجى إدخال وصف الخطوة باللغة العربيه.' : 'Please enter the step description in Arabic.',
-        customRequired:         isArabic ? 'هذا الحقل مطلوب.' : 'This field is required.',
-        customUnsupportedType:  isArabic ? 'نوع الملف غير مدعوم. يرجى رفع صورة بصيغة JPG أو PNG أو WEBP.' : 'Unsupported file type. Please upload a JPG, PNG, or WEBP image.',
-        customImageSize:        isArabic ? 'حجم الصورة يتجاوز 5 ميجابايت.' : 'Image size exceeds 5 MB.',
-        customButtonLink:       isArabic ? 'يرجى إدخال رابط زر صالح.' : 'Please enter a valid button link.',
-        cardIcon:           isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
-        cardTitle:          isArabic ? 'يرجى إدخال عنوان البطاقة.' : 'Please enter a card title.',
-        cardDescription:    isArabic ? 'يرجى إدخال وصف البطاقة.' : 'Please enter a card description.',
-        cardTitleArabic:    isArabic ? 'يرجى إدخال عنوان البطاقة باللغة العربية.' : 'Please enter a card title in Arabic.',
-        cardDescriptionArabic: isArabic ? 'يرجى إدخال وصف البطاقة باللغة العربية.' : 'Please enter a card description in Arabic.',
+       const validationMessages = {
+        pageTitle:          "{{ __('landing.validation.page_title_required') }}",
+        logoRequired:       "{{ __('landing.validation.logo_required') }}",
+        logoUnsupported:    "{{ __('landing.validation.image_format_invalid') }}",
+        logoSize:           "{{ __('landing.validation.logo_size_exceeded') }}",
+        description:        "{{ __('landing.validation.description_required') }}",
+        descriptionArabic:  "{{ __('landing.validation.description_ar_required') }}",
+        heroTitle:          "{{ __('landing.validation.title_required') }}",
+        heroSubtitle:       "{{ __('landing.validation.subtitle_required') }}",
+        heroTitleArabic:    "{{ __('landing.validation.title_ar_required') }}",
+        heroSubtitleArabic: "{{ __('landing.validation.subtitle_ar_required') }}",
+        heroImageRequired:  "{{ __('landing.validation.hero_image_required') }}",
+        heroImageFormat:    "{{ __('landing.validation.image_format_invalid') }}",
+        heroImageSize:      "{{ __('landing.validation.hero_image_size_exceeded') }}",
+        aboutTitle:         "{{ __('landing.validation.section_title_required') }}",
+        aboutSubtitle:      "{{ __('landing.validation.section_subtitle_required') }}",
+        aboutDescription:   "{{ __('landing.validation.section_description_required') }}",
+        aboutTitleArabic:   "{{ __('landing.validation.section_title_ar_required') }}",
+        aboutSubtitleArabic: "{{ __('landing.validation.section_subtitle_ar_required') }}",
+        aboutDescriptionArabic: "{{ __('landing.validation.section_description_ar_required') }}",
+        programsRequired:       "{{ __('landing.validation.field_required') }}",
+        howTitle:               "{{ __('landing.validation.section_title_required') }}",
+        howTitleArabic:         "{{ __('landing.validation.section_title_ar_required') }}",
+        howSubtitle:            "{{ __('landing.validation.section_subtitle_required') }}",
+        howSubtitleArabic:      "{{ __('landing.validation.section_subtitle_ar_required') }}",
+        howDescription:         "{{ __('landing.validation.section_description_required') }}",
+        howDescriptionArabic:   "{{ __('landing.validation.section_description_ar_required') }}",
+        howStepTitle:           "{{ __('landing.validation.step_title_required') }}",
+        howStepTitleArabic:     "{{ __('landing.validation.step_title_ar_required') }}",
+        howStepIcon:            "{{ __('landing.validation.icon_required') }}",
+        howStepDescription:     "{{ __('landing.validation.step_description_required') }}",
+        howStepDescriptionArabic: "{{ __('landing.validation.step_description_ar_required') }}",
+        customRequired:         "{{ __('landing.validation.custom_section_field_required') }}",
+        customUnsupportedType:  "{{ __('landing.validation.custom_image_type_invalid') }}",
+        customImageSize:        "{{ __('landing.validation.custom_image_size_exceeded') }}",
+        customButtonLink:       "{{ __('landing.validation.button_link_invalid') }}",
+        cardIcon:           "{{ __('landing.validation.icon_required') }}",
+        cardTitle:          "{{ __('landing.validation.card_title_required') }}",
+        cardDescription:    "{{ __('landing.validation.card_description_required') }}",
+        cardTitleArabic:    "{{ __('landing.validation.card_title_ar_required') }}",
+        cardDescriptionArabic: "{{ __('landing.validation.card_description_ar_required') }}",
       };
 
       const successMessages = {
-        general: isArabic ? 'تم حفظ المعلومات العامة لصفحة الهبوط بنجاح.' : 'General landing page information saved successfully.',
-        hero:    isArabic ? 'تم حفظ معلومات القسم الرئيسي بنجاح.' : 'Hero section information saved successfully.',
-        about:   isArabic ? 'تم حفظ معلومات قسم من نحن بنجاح.' : 'About section information saved successfully.',
-        programs: isArabic ? 'تم حفظ قسم البرامج بنجاح' : 'Programs section saved successfully.',
-        how:      isArabic ? 'تم حفظ المعلومات بنجاح.' : 'Information saved successfully.',
-        custom:   isArabic ? 'تم حفظ القسم المخصص بنجاح.' : 'Custom section saved successfully.',
+        general: "{{ __('landing.success.general_saved') }}",
+        hero:    "{{ __('landing.success.hero_saved') }}",
+        about:   "{{ __('landing.success.about_saved') }}",
+        programs: "{{ __('landing.success.programs_saved') }}",
+        how:      "{{ __('landing.success.how_saved') }}",
+        custom:   "{{ __('landing.success.custom_saved') }}",
       };
 
       const buildImageField = function (requiredMsg, formatMsg, sizeMsg) {
@@ -1308,12 +1277,12 @@
       };
 
       const socialLinkMessages = {
-        linkedin:  isArabic ? 'يرجى إدخال رابط لينكدإن صالح (مثال: https://www.linkedin.com/in/username).' : 'Please enter a valid LinkedIn URL (e.g. https://www.linkedin.com/in/username).',
-        facebook:  isArabic ? 'يرجى إدخال رابط فيسبوك صالح (مثال: https://www.facebook.com/page).' : 'Please enter a valid Facebook URL (e.g. https://www.facebook.com/page).',
-        instagram: isArabic ? 'يرجى إدخال رابط إنستغرام صالح (مثال: https://www.instagram.com/username).' : 'Please enter a valid Instagram URL (e.g. https://www.instagram.com/username).',
-        x:         isArabic ? 'يرجى إدخال رابط إكس / تويتر صالح (مثال: https://x.com/username).' : 'Please enter a valid X / Twitter URL (e.g. https://x.com/username).',
-        tiktok:    isArabic ? 'يرجى إدخال رابط تيك توك صالح (مثال: https://www.tiktok.com/@username).' : 'Please enter a valid TikTok URL (e.g. https://www.tiktok.com/@username).',
-        youtube:   isArabic ? 'يرجى إدخال رابط يوتيوب صالح (مثال: https://www.youtube.com/@channel).' : 'Please enter a valid YouTube URL (e.g. https://www.youtube.com/@channel).',
+        linkedin:  "{{ __('landing.validation.linkedin_url_invalid') }}",
+        facebook:  "{{ __('landing.validation.facebook_url_invalid') }}",
+        instagram: "{{ __('landing.validation.instagram_url_invalid') }}",
+        x:         "{{ __('landing.validation.x_url_invalid') }}",
+        tiktok:    "{{ __('landing.validation.tiktok_url_invalid') }}",
+        youtube:   "{{ __('landing.validation.youtube_url_invalid') }}",
       };
 
       ['linkedin', 'facebook', 'instagram', 'x', 'tiktok', 'youtube'].forEach(function (name) {
@@ -1403,34 +1372,34 @@
           <div class="col-12 about-card" data-card-id="${id}">
             <div class="border rounded p-3">
               <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="mb-0 about-card-label">${isArabic ? 'البطاقة' : 'Card'}</h6>
+                <h6 class="mb-0 about-card-label">${"{{ __('landing.Card') }}"}</h6>
                 <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-about-card">
                   <i class="ti ti-trash"></i>
-                  ${isArabic ? 'حذف' : 'Remove'}
+                  ${"{{ __('landing.Remove') }}"}
                 </button>
               </div>
               <div class="row g-4">
                 <div class="col-md-4">
-                  <label class="form-label">${isArabic ? 'الأيقونة' : 'Icon'}</label>
+                  <label class="form-label">${"{{ __('landing.Icon') }}"}</label>
                   <select name="about[cards][${id}][icon]" class="form-select" data-card-field>
-                    <option value="">${isArabic ? '— اختر أيقونة —' : '— Select an icon —'}</option>
+                    <option value="">${"{{ __('landing.Select_an_icon') }}"}</option>
                     ${iconOptions}
                   </select>
                 </div>
                 <div class="col-md-8">
-                  <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
+                  <label class="form-label">${"{{ __('landing.Title') }}"}</label>
                   <input type="text" name="about[cards][${id}][title]" maxlength="100" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
                   <input type="text" name="about[cards][${id}][title_ar]" maxlength="100" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'الوصف' : 'Description'}</label>
+                  <label class="form-label">${"{{ __('landing.Description') }}"}</label>
                   <textarea name="about[cards][${id}][description]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'الوصف بالعربية' : 'Description (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Description_ar') }}"}</label>
                   <textarea name="about[cards][${id}][description_ar]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
                 </div>
               </div>
@@ -1443,7 +1412,7 @@
         const count = $('#aboutCardsContainer .about-card').length;
         $('#aboutAddCard').prop('disabled', count >= aboutMaxCards);
         $('#aboutCardsContainer .about-card').each(function (i) {
-          $(this).find('.about-card-label').text((isArabic ? 'البطاقة ' : 'Card ') + (i + 1));
+          $(this).find('.about-card-label').text(("{{ __('landing.Card') }}") + (i + 1));
         });
       };
 
@@ -1548,34 +1517,34 @@
           <div class="col-12 how-step" data-step-id="${id}">
             <div class="border rounded p-3">
               <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="mb-0 how-step-label">${isArabic ? 'الخطوة' : 'Step'}</h6>
+                <h6 class="mb-0 how-step-label">${"{{ __('landing.Step') }}"}</h6>
                 <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-how-step">
                   <i class="ti ti-trash"></i>
-                  ${isArabic ? 'حذف' : 'Remove'}
+                  ${"{{ __('landing.Remove') }}"}
                 </button>
               </div>
               <div class="row g-4">
                 <div class="col-md-4">
-                  <label class="form-label">${isArabic ? 'الأيقونة' : 'Icon'}</label>
+                  <label class="form-label">${"{{ __('landing.Icon') }}"}</label>
                   <select name="how[steps][${id}][icon]" class="form-select" data-step-field>
-                    <option value="">${isArabic ? '— اختر أيقونة —' : '— Select an icon —'}</option>
+                    <option value="">${"{{ __('landing.Select_an_icon') }}"}</option>
                     ${iconOptions}
                   </select>
                 </div>
                 <div class="col-md-8">
-                  <label class="form-label">${isArabic ? 'عنوان الخطوة' : 'Step Title'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Title') }}"}</label>
                   <input type="text" name="how[steps][${id}][title]" maxlength="100" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'عنوان الخطوة بالعربية' : 'Step Title (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Title_ar') }}"}</label>
                   <input type="text" name="how[steps][${id}][title_ar]" maxlength="100" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'وصف الخطوة' : 'Step Description'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Description') }}"}</label>
                   <textarea name="how[steps][${id}][description]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'وصف الخطوة بالعربية' : 'Step Description (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Description_ar') }}"}</label>
                   <textarea name="how[steps][${id}][description_ar]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
                 </div>
               </div>
@@ -1588,7 +1557,7 @@
         const count = $('#howStepsContainer .how-step').length;
         $('#howAddStep').prop('disabled', count >= howMaxSteps);
         $('#howStepsContainer .how-step').each(function (i) {
-          $(this).find('.how-step-label').text((isArabic ? 'الخطوة ' : 'Step ') + (i + 1));
+          $(this).find('.how-step-label').text(("{{ __('landing.Step') }}") + (i + 1));
         });
       };
 
@@ -1795,68 +1764,68 @@
       // ─────────────────────────────────────────────────────────────
       const customQuills = new Map();
       const customRequiredFields = ['title', 'title_tag', 'content', 'title_ar', 'title_tag_ar', 'content_ar'];
+      const customMaxSections = 5;
       let customSectionCounter = 0;
 
       const customSectionHtml = function (id) {
         return `
           <div class="card mb-3 border shadow-sm custom-section-card" data-section-id="${id}">
             <div class="card-header py-2 d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 custom-section-label">${isArabic ? 'القسم المخصص' : 'Custom Section'}</h6>
-              <button type="button" class="btn btn-sm btn-icon btn-outline-danger remove-custom-section" title="${isArabic ? 'حذف' : 'Remove'}">
+              <h6 class="mb-0 custom-section-label">${"{{ __('landing.Custom_Section') }}"}</h6>
+              <button type="button" class="btn btn-sm btn-icon btn-outline-danger remove-custom-section" title="${"{{ __('landing.Remove') }}"}">
                 <i class="ti ti-trash"></i>
               </button>
             </div>
             <div class="card-body">
               <div class="row g-4">
-                <input type="hidden" name="custom_sections[${id}][id]" value="">
                 <div class="col-12 custom-field-group" data-field="visibility">
-                  <label class="form-label d-block">${isArabic ? 'الظهور' : 'Visibility'}</label>
+                  <label class="form-label d-block">${"{{ __('landing.Visibility') }}"}</label>
                   <div class="form-check form-switch">
                     <input type="hidden" name="custom_sections[${id}][visibility]" value="0">
                     <input type="checkbox" name="custom_sections[${id}][visibility]" value="1" class="form-check-input custom-visibility-switch" checked>
                   </div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title">
-                  <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
+                  <label class="form-label">${"{{ __('landing.Title') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_ar">
-                  <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag">
-                  <label class="form-label">${isArabic ? 'العنوان الفرعي' : 'Title tag'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_tag') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
-                  <label class="form-label">${isArabic ? 'العنوان الفرعي بالعربية' : 'Title tag (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_tag_ar') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-12 custom-field-group" data-field="content">
-                  <label class="form-label">${isArabic ? 'المحتوى' : 'Content'}</label>
+                <div class="col-md-6 custom-field-group" data-field="content">
+                  <label class="form-label">${"{{ __('landing.Content') }}"}</label>
                   <div class="custom-quill-editor" id="custom-quill-content-${id}" style="min-height: 160px"></div>
                   <input type="hidden" name="custom_sections[${id}][content]" class="custom-hidden-content" value="">
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-12 custom-field-group" data-field="content_ar">
-                  <label class="form-label">${isArabic ? 'المحتوى بالعربية' : 'Content (Arabic)'}</label>
+                <div class="col-md-6 custom-field-group" data-field="content_ar">
+                  <label class="form-label">${"{{ __('landing.Content_ar') }}"}</label>
                   <div class="custom-quill-editor" id="custom-quill-content-ar-${id}" style="min-height: 160px"></div>
                   <input type="hidden" name="custom_sections[${id}][content_ar]" class="custom-hidden-content" value="">
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'نص الزر' : 'Button text'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
+                {{-- <div class="col-md-6">
+                  <label class="form-label">${"{{ __('landing.Button_text') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
                   <input type="text" name="custom_sections[${id}][button_text]" maxlength="255" class="form-control">
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="button_link">
-                  <label class="form-label">${isArabic ? 'رابط الزر' : 'Button link'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
+                  <label class="form-label">${"{{ __('landing.Button_link') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
                   <input type="url" name="custom_sections[${id}][button_link]" maxlength="500" class="form-control" placeholder="https://" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
-                </div>
+                </div> --}}
               </div>
             </div>
           </div>
@@ -1925,6 +1894,9 @@
       const updateCustomSectionsEmpty = function () {
         const count = $('#customSectionsContainer .custom-section-card').length;
         $('#customSectionsEmpty').toggle(count === 0);
+        $('#customSectionCount').text(count + ' / ' + customMaxSections).toggle(count > 0);
+        $('#customAddSection').prop('disabled', count >= customMaxSections);
+        $('#customSectionMaxHint').toggleClass('d-none', count < customMaxSections);
       };
 
       const updateCustomSectionLabels = function () {
@@ -1960,7 +1932,7 @@
               },
               clipboard: { matchVisual: false },
             },
-            placeholder: isArabic ? 'أدخل المحتوى...' : 'Enter content...',
+            placeholder: "{{ __('landing.Enter_Content_Placeholder') }}",
             direction: isArabic ? 'rtl' : 'ltr',
           });
 
@@ -2105,10 +2077,10 @@
           }
 
           releaseWarningAlert({
-            title: isArabic ? 'حذف القسم المخصص' : 'Delete Custom Section',
-            message: isArabic ? 'هل أنت متأكد من حذف هذا القسم المخصص؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this custom section? This action cannot be undone.',
-            confirmText: isArabic ? 'حذف' : 'Delete',
-            cancelText: isArabic ? 'إلغاء' : 'Cancel',
+            title: "{{ __('landing.Delete_Custom_Section') }}",
+            message: "{{ __('landing.Delete_Custom_Section_Confirm') }}",
+            confirmText: "{{ __('landing.Delete') }}",
+            cancelText: "{{ __('landing.Cancel') }}",
             confirmColor: 'danger',
             onConfirm: removeCard,
           });
@@ -2184,7 +2156,7 @@
             processData: false,
             contentType: false,
           })
-            .done(function () {
+            .done(function (res) {
               $btn.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>' + "{{ __('landing.Save') }}");
               if (successMessages[sectionKey]) {
                 releaseSuccessAlert({

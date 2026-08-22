@@ -57,8 +57,10 @@ class LandingPageCustomSectionService
                     'content' => $sectionData['content'] ?? null,
                     'content_ar' => $sectionData['content_ar'] ?? null,
                     'visibility' => !empty($sectionData['visibility']),
-                    'button_text' => $sectionData['button_text'] ?? null,
-                    'button_link' => $sectionData['button_link'] ?? null,
+                    // 'button_text' => $sectionData['button_text'] ?? null,
+                    // 'button_link' => $sectionData['button_link'] ?? null,
+                    'button_text' => null,
+                    'button_link' => null,
                     'sort_order' => $index,
                 ];
 

@@ -1433,10 +1433,10 @@ class LandingPagesController extends Controller
 		$slug = strtolower(trim((string) $request->input('slug')));
 
 		$validator = Validator::make(['title' => $request->input('title'), 'slug' => $slug], [
-			'title' => 'required|string|max:100',
+			// 'title' => 'required|string|max:100',
 			'slug' => ['required', 'string', 'max:100', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
 		], [
-			'title.required' => __('landing.validation.custom_url_title_required'),
+			// 'title.required' => __('landing.validation.custom_url_title_required'),
 			'slug.required' => __('landing.validation.custom_url_slug_required'),
 			'slug.regex' => __('landing.validation.custom_url_invalid'),
 		]);
@@ -1453,13 +1453,14 @@ class LandingPagesController extends Controller
 			], 422);
 		}
 
-		$page->title = $request->input('title');
+		// $page->title = $request->input('title');
 		$page->slug = $slug;
 		$page->status = (bool) $request->input('active');
 		$page->save();
 
 		return response()->json([
 			'message' => __('landing.success.custom_url_saved'),
+      'slug' => url('/lp/' . $slug),
 		]);
 	}
 }
