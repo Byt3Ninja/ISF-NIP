@@ -1497,7 +1497,6 @@
         logoSize:           isArabic ? 'يجب ألا يتجاوز حجم الشعار 5 ميجابايت.' : 'Logo size must not exceed 5 MB.',
         description:        isArabic ? 'يرجى إدخال الوصف.' : 'Please enter a description.',
         descriptionArabic:  isArabic ? 'يرجى إدخال الوصف باللغة العربية.' : 'Please enter a description in Arabic.',
-        invalidUrl:         isArabic ? 'يرجى إدخال رابط صالح.' : 'Please enter a valid URL.',
         heroTitle:          isArabic ? 'يرجى إدخال العنوان.' : 'Please enter the title.',
         heroSubtitle:       isArabic ? 'يرجى إدخال العنوان الفرعي.' : 'Please enter the subtitle.',
         heroTitleArabic:    isArabic ? 'يرجى إدخال العنوان باللغة العربية.' : 'Please enter the title in Arabic.',
@@ -1721,12 +1720,32 @@
       };
 
       // Optional social links: only validate when a value is filled in.
+      // Each network is matched against its own domain-specific pattern
+      // instead of a generic URL check.
+      const socialLinkPatterns = {
+        linkedin:  /^(https?:\/\/)?(www\.)?(?:linkedin\.com\/(?:in|company)\/[a-zA-Z0-9\-_]+|lnkd\.in\/[a-zA-Z0-9\-_]+)(?:\/?(?:[?#][^\s]*)?)?$/i,
+        facebook:  /^(https?:\/\/)?(www\.)?facebook\.com\/[a-zA-Z0-9._]+(?:\/?(?:[?#][^\s]*)?)?$/i,
+        instagram: /^(https?:\/\/)?(www\.)?instagram\.com\/[a-zA-Z0-9._]+(?:\/?(?:[?#][^\s]*)?)?$/i,
+        x:         /^(https?:\/\/)?(www\.)?(?:x\.com|twitter\.com)\/[a-zA-Z0-9_]+(?:\/?(?:[?#][^\s]*)?)?$/i,
+        tiktok:    /^(https?:\/\/)?(www\.)?tiktok\.com\/@?[a-zA-Z0-9._]+(?:\/?(?:[?#][^\s]*)?)?$/i,
+        youtube:   /^(https?:\/\/)?(www\.)?(?:youtube\.com\/(?:@[a-zA-Z0-9_\-]+|channel\/[a-zA-Z0-9_\-]+|watch\?v=[a-zA-Z0-9_\-]{11})|youtu\.be\/[a-zA-Z0-9_\-]{11})(?:\/?(?:[?&][a-zA-Z0-9_\-=]+)*)?$/i,
+      };
+
+      const socialLinkMessages = {
+        linkedin:  isArabic ? 'يرجى إدخال رابط لينكدإن صالح (مثال: https://www.linkedin.com/in/username).' : 'Please enter a valid LinkedIn URL (e.g. https://www.linkedin.com/in/username).',
+        facebook:  isArabic ? 'يرجى إدخال رابط فيسبوك صالح (مثال: https://www.facebook.com/page).' : 'Please enter a valid Facebook URL (e.g. https://www.facebook.com/page).',
+        instagram: isArabic ? 'يرجى إدخال رابط إنستغرام صالح (مثال: https://www.instagram.com/username).' : 'Please enter a valid Instagram URL (e.g. https://www.instagram.com/username).',
+        x:         isArabic ? 'يرجى إدخال رابط إكس / تويتر صالح (مثال: https://x.com/username).' : 'Please enter a valid X / Twitter URL (e.g. https://x.com/username).',
+        tiktok:    isArabic ? 'يرجى إدخال رابط تيك توك صالح (مثال: https://www.tiktok.com/@username).' : 'Please enter a valid TikTok URL (e.g. https://www.tiktok.com/@username).',
+        youtube:   isArabic ? 'يرجى إدخال رابط يوتيوب صالح (مثال: https://www.youtube.com/@channel).' : 'Please enter a valid YouTube URL (e.g. https://www.youtube.com/@channel).',
+      };
+
       ['linkedin', 'facebook', 'instagram', 'x', 'tiktok', 'youtube'].forEach(function (name) {
         sectionFields.general['general[' + name + ']'] = {
           validators: {
-            uri: {
-              protocol: 'http, https',
-              message: validationMessages.invalidUrl,
+            regexp: {
+              regexp: socialLinkPatterns[name],
+              message: socialLinkMessages[name],
             },
           },
         };
