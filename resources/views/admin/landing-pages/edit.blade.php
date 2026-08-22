@@ -793,44 +793,137 @@
 
                 @if($section['key'] === 'programs')
                   <hr class="my-4">
-                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                    <h6 class="mb-0">
-                      {{ $l == 'ar' ? 'اختيار البرامج' : 'Programs Selection' }}
-                    </h6>
-                    <div class="input-group input-group-merge w-100" style="max-width: 320px;">
-                      <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                      <input
-                        type="search"
-                        id="programsSearchInput"
-                        class="form-control"
-                        placeholder="{{ $l == 'ar' ? 'ابحث عن البرامج...' : 'Search programs...' }}"
-                        aria-label="{{ $l == 'ar' ? 'البحث في البرامج' : 'Search programs' }}"
-                      >
+                  @php
+                    $programOrganizations = collect($cycles)
+                      ->filter(fn($program) => $program->organization)
+                      ->map(fn($program) => ['id' => $program->organization->id, 'name' => $program->organization->name])
+                      ->unique('id')
+                      ->sortBy('name')
+                      ->pluck('name', 'id')
+                      ->toArray();
+                  @endphp
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                    <div>
+                      <h6 class="mb-1 d-flex align-items-center gap-2">
+                        <i class="ti ti-rocket text-primary"></i>
+                        {{ $l == 'ar' ? 'اختيار البرامج' : 'Programs Selection' }}
+                      </h6>
+                      <small class="text-muted">
+                        {{ $l == 'ar' ? 'حدد البرامج التي ستظهر على صفحة الهبوط الخاصة بك.' : 'Choose which programs will appear on your landing page.' }}
+                      </small>
                     </div>
                   </div>
-                  <div class="table-responsive">
-                    <table class="table table-hover">
-                      <thead>
+                  <div class="row g-3 mb-3">
+                    <div class="col-12 col-lg-5 col-xl-4">
+                      <label class="form-label mb-1" for="programsSearchInput">
+                        {{ $l == 'ar' ? 'البحث' : 'Search' }}
+                      </label>
+                      <div class="input-group input-group-merge">
+                        <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+                        <input
+                          type="search"
+                          id="programsSearchInput"
+                          class="form-control"
+                          placeholder="{{ $l == 'ar' ? 'ابحث عن البرامج...' : 'Search programs...' }}"
+                          aria-label="{{ $l == 'ar' ? 'البحث في البرامج' : 'Search programs' }}"
+                        >
+                      </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 col-xl-3">
+                      <label class="form-label mb-1" for="programsVisibilityFilter">
+                        {{ $l == 'ar' ? 'الظهور' : 'Visibility' }}
+                      </label>
+                      <select class="form-select select2" id="programsVisibilityFilter" data-allow-clear="true">
+                        <option value=""></option>
+                        <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
+                        <option value="visible">{{ $l == 'ar' ? 'ظاهر' : 'Visible' }}</option>
+                        <option value="hidden">{{ $l == 'ar' ? 'مخفي' : 'Hidden' }}</option>
+                      </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 col-xl-3">
+                      <label class="form-label mb-1" for="programsOrganizationFilter">
+                        {{ $l == 'ar' ? 'المنظمة' : 'Organization' }}
+                      </label>
+                      <select class="form-select select2" id="programsOrganizationFilter" data-allow-clear="true">
+                        <option value=""></option>
+                        <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
+                        @foreach($programOrganizations as $orgId => $orgName)
+                          <option value="{{ $orgId }}">{{ $orgName }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
+                      <label class="form-label mb-1" for="programsTypeFilter">
+                        {{ $l == 'ar' ? 'نوع البرنامج' : 'Program Type' }}
+                      </label>
+                      <select class="form-select select2" id="programsTypeFilter" data-allow-clear="true">
+                        <option value=""></option>
+                        <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
+                        <option value="Hackathon">{{ __('cycles.Hackathon') }}</option>
+                        <option value="General_Program">{{ __('cycles.General_Program') }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="table-responsive border rounded">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
                         <tr>
-                          <th>{{ $l == 'ar' ? 'اسم البرنامج' : 'Program Name' }}</th>
-                          <th>{{ $l == 'ar' ? 'الظهور' : 'Visibility' }}</th>
+                          <th>{{ $l == 'ar' ? 'البرنامج' : 'Program' }}</th>
+                          <th>{{ $l == 'ar' ? 'النوع' : 'Type' }}</th>
+                          <th>{{ $l == 'ar' ? 'المنظمة' : 'Organization' }}</th>
+                          <th>{{ $l == 'ar' ? 'الظهور' : 'Visible' }}</th>
                         </tr>
                       </thead>
                       <tbody id="programsListBody">
                         @foreach($cycles as $program)
-                          <tr class="programs-list-row" data-program-id="{{ $program->id }}" data-search-title="{{ $program->title }}">
+                          <tr
+                            class="programs-list-row"
+                            data-program-id="{{ $program->id }}"
+                            data-search-title="{{ $program->title }} {{ $program->organization->name ?? '' }}"
+                            data-program-visibility="{{ $program->landing_visible ? 'visible' : 'hidden' }}"
+                            data-program-organization="{{ $program->organization_id }}"
+                            data-program-type="{{ $program->type }}"
+                          >
                             <td>
-                              <a
-                                href="{{ url('dashboard/programlist/show/' . $program->id) }}"
-                                target="_blank"
-                                rel="noopener"
-                                class="d-inline-flex align-items-center gap-1"
-                              >
-                                <i class="ti ti-external-link"></i>
-                                {{ $program->title }}
-                              </a>
+                              <div class="d-flex align-items-center gap-3">
+                                <div class="avatar avatar-sm">
+                                  <img src="{{ $program->logo }}" alt="{{ $program->title }}" class="rounded-circle">
+                                </div>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                  <a
+                                    href="{{ url('dashboard/programlist/show/' . $program->id) }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="fw-medium d-inline-flex align-items-center gap-1"
+                                  >
+                                    {{ $program->title }}
+                                    <i class="ti ti-external-link text-muted"></i>
+                                  </a>
+                                  @if($program->location)
+                                    <div class="text-muted small d-flex align-items-center gap-1">
+                                      <i class="ti ti-map-pin"></i>
+                                      {{ $program->location }}
+                                    </div>
+                                  @endif
+                                </div>
+                              </div>
                             </td>
                             <td>
+                              <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
+                                {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
+                              </span>
+                            </td>
+                            <td>
+                              @if($program->organization)
+                                <span class="d-inline-flex align-items-center gap-1 text-muted">
+                                  <i class="ti ti-building"></i>
+                                  {{ $program->organization->name }}
+                                </span>
+                              @else
+                                <span class="text-muted">&mdash;</span>
+                              @endif
+                            </td>
+                            <td class="text-end">
                               <div class="form-check form-switch mb-0">
                                 <input
                                   type="hidden"
@@ -853,8 +946,11 @@
                   </div>
                   <div id="programsNoResults" class="text-center py-5 d-none">
                     <i class="ti ti-search text-muted fs-1 mb-2 d-block"></i>
-                    <h5 class="text-muted mb-1">
+                    <h5 class="text-muted mb-1" id="programsNoResultsSearch">
                       {{ $l == 'ar' ? 'لم يتم العثور على برامج.' : 'No programs found.' }}
+                    </h5>
+                    <h5 class="text-muted mb-1 d-none" id="programsNoResultsFilters">
+                      {{ $l == 'ar' ? 'لا توجد برامج تطابق عوامل التصفية المحددة.' : 'No programs match the selected filters.' }}
                     </h5>
                   </div>
                   <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 mt-3">
@@ -1980,20 +2076,30 @@
       });
 
       // ─────────────────────────────────────────────────────────────
-      // Programs selection list — client-side search + pagination
-      // (10 rows/page). Searching only hides/shows rows so any pending
-      // visibility switch changes are never lost.
+      // Programs selection list — client-side search + filters +
+      // pagination (10 rows/page). Filtering only hides/shows rows so
+      // any pending visibility switch changes are never lost.
       // ─────────────────────────────────────────────────────────────
       const programsPerPage = 10;
       let programsCurrentPage = 1;
       let programsSearchTerm = '';
+      const programsFilters = {
+        visibility: 'all',
+        organization: 'all',
+        type: 'all',
+      };
 
       const getFilteredProgramRows = function () {
         const $rows = $('#programsListBody .programs-list-row');
         const term = programsSearchTerm.trim().toLowerCase();
-        if (!term) return $rows;
+
         return $rows.filter(function () {
-          return ($(this).attr('data-search-title') || '').toLowerCase().indexOf(term) !== -1;
+          const $row = $(this);
+          if (term && ($row.attr('data-search-title') || '').toLowerCase().indexOf(term) === -1) return false;
+          if (programsFilters.visibility !== 'all' && $row.attr('data-program-visibility') !== programsFilters.visibility) return false;
+          if (programsFilters.organization !== 'all' && $row.attr('data-program-organization') !== programsFilters.organization) return false;
+          if (programsFilters.type !== 'all' && $row.attr('data-program-type') !== programsFilters.type) return false;
+          return true;
         });
       };
 
@@ -2010,6 +2116,9 @@
         if (total === 0) {
           $allRows.hide();
           $('#programsNoResults').removeClass('d-none');
+          const hasActiveFilters = programsFilters.visibility !== 'all' || programsFilters.organization !== 'all' || programsFilters.type !== 'all';
+          $('#programsNoResultsSearch').toggleClass('d-none', hasActiveFilters);
+          $('#programsNoResultsFilters').toggleClass('d-none', !hasActiveFilters);
           $nav.hide();
           $info.text('');
           return;
@@ -2045,6 +2154,11 @@
         $list.append(`<li class="page-item ${programsCurrentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${programsCurrentPage + 1}">&raquo;</a></li>`);
       };
 
+      // Keep the visibility filter in sync when a switch is toggled.
+      $('#programsListBody').on('change', '.program-visibility-switch', function () {
+        $(this).closest('.programs-list-row').attr('data-program-visibility', this.checked ? 'visible' : 'hidden');
+      });
+
       $('#programsPaginationList').on('click', '.page-link', function (e) {
         e.preventDefault();
         const page = parseInt($(this).data('page'), 10);
@@ -2055,6 +2169,14 @@
 
       $('#programsSearchInput').on('input', function () {
         programsSearchTerm = $(this).val();
+        programsCurrentPage = 1;
+        renderProgramsPagination();
+      });
+
+      $('#programsVisibilityFilter, #programsOrganizationFilter, #programsTypeFilter').on('change', function () {
+        programsFilters.visibility = $('#programsVisibilityFilter').val() || 'all';
+        programsFilters.organization = $('#programsOrganizationFilter').val() || 'all';
+        programsFilters.type = $('#programsTypeFilter').val() || 'all';
         programsCurrentPage = 1;
         renderProgramsPagination();
       });
