@@ -833,7 +833,7 @@ class HomeController extends Controller
                         $user->title = $u->{'company_user_title_' . $l};
                         $user->logo = User::image_handler( $u->company_user_img_url );
                         return $user;
-                    })->values();
+                    })->unique('id')->values();
                     $company->judges = $_company->judges;
                     $company->datetime = $_company->datetime;
                     $company->duration = $_company->duration;
