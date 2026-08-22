@@ -463,6 +463,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Client's company
     Route::resource('organizations', 'organizationsController');
 
+    // Custom Landing Pages list
+    Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
+
     //Assessment
     Route::resource('questions', 'QuestionController');
     Route::resource('weights', 'WeightController');

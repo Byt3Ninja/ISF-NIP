@@ -353,6 +353,7 @@ return [
 	'Add Service' => 'Add Service',
 	'All Services' => 'All Services',
 	'Rooms Management' => 'Rooms Management',
+	'Custom Landing Pages' => 'Custom Landing Pages',
 	'Permissions' => 'Permissions',
 	'CreatePermission' => 'Create Permission',
 	'EditPermission' => 'Edit Permission',

@@ -349,6 +349,7 @@ return [
 	'Add Service' => 'إضافة خدمة',
 	'All Services' => 'كافة الخدمات',
 	'Rooms Management' => 'إدارة الغرف',
+	'Custom Landing Pages' => 'الصفحات الرئيسية المخصصة',
 	'Permissions' => 'الصلاحيات',
 	'CreatePermission' => 'إنشاء صلاحية',
 	'EditPermission' => 'تحرير صلاحية',
