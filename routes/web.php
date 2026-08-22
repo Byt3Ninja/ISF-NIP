@@ -464,7 +464,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::resource('organizations', 'organizationsController');
 
     // Custom Landing Pages list
-    Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
+    // Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
+    Route::get('/landing-pages', function () {
+      return view('admin.landing-pages.index');
+    });
 
     //Assessment
     Route::resource('questions', 'QuestionController');
