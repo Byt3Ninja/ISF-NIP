@@ -281,14 +281,22 @@ class QuestionsBankController extends Controller
 			/* Add Relation Between Question And Organization  from OrgQuestionBank */
 			$question->organizations()->attach($request->organization_id);
 
-			foreach (Stage::all() as $stage) {
-				Weight::firstOrCreate([
-					'stage_id' => $stage->id,
+			$stageIds = Stage::pluck('id');
+			$existingStageIds = Weight::where('category_id', $question->ascategory_id)
+				->where('subcategory_id', $question->subcategory_id)
+				->pluck('stage_id');
+			$missingStageIds = $stageIds->diff($existingStageIds);
+
+			if ($missingStageIds->isNotEmpty()) {
+				$now = now();
+				Weight::insert($missingStageIds->map(fn($stageId) => [
+					'stage_id' => $stageId,
 					'category_id' => $question->ascategory_id,
 					'subcategory_id' => $question->subcategory_id,
-				], [
 					'weight' => 0,
-				]);
+					'created_at' => $now,
+					'updated_at' => $now,
+				])->values()->all());
 			}
 		}
 

@@ -48,14 +48,16 @@ class StageController extends Controller
             ->get(['ascategory_id', 'subcategory_id'])
             ->unique(fn($question) => $question->ascategory_id . '-' . $question->subcategory_id);
 
-        foreach ($categorySubcategoryPairs as $pair) {
-            Weight::firstOrCreate([
+        if ($categorySubcategoryPairs->isNotEmpty()) {
+            $now = now();
+            Weight::insert($categorySubcategoryPairs->map(fn($pair) => [
                 'stage_id' => $stages->id,
                 'category_id' => $pair->ascategory_id,
                 'subcategory_id' => $pair->subcategory_id,
-            ], [
                 'weight' => 0,
-            ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->values()->all());
         }
 
         // إرجاع استجابة ناجحة (يمكن تعديلها حسب الحاجة)
