@@ -1085,7 +1085,7 @@
             <h5 style="text-transform: capitalize">
               <i class="ti ti-clipboard-list ti-28px"></i>
               <span class="mx-2">
-                {{ __('dashboard.My Latest training') }} ::
+                {{ __('dashboard.My Latest training') }}
                 <a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
               </span>
             </h5>
@@ -1112,11 +1112,11 @@
                     <td>{{ $session->enddatetime ?? '-' }}</td>
                     <td>
                       @if ($session->type == 'sessions')
-                        {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+                        {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }}
                         <a href="{{ $session->join_url }}" target="_blank">
-                          <button title="Join only" type="button"
+                          <button title="{{ __('cycles.Join_Meeting') }}" type="button"
                             class="btn btn-icon rounded-circle btn-light-primary">
-                            <i class="bx bx-desktop"></i></button>
+                            <i class="ti ti-brand-zoom"></i></button>
                         </a>
                       @elseif ($session->type == 'offline')
                         <b>{{ __('cycles.trainer name') }}:</b>
