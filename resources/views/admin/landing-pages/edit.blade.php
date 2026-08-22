@@ -2,6 +2,47 @@
 
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <style>
+    .ql-toolbar .ql-custom-button {
+      width: auto !important;
+      padding: 0 8px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .ql-toolbar .ql-custom-button::after {
+      content: 'Button';
+    }
+
+    /*
+     * Fix: two Quill editors (content / content_ar) rendering on top of
+     * each other inside the custom-section repeater.
+     *
+     * Quill's own CSS sets `.ql-container { height: 100%; position: relative; }`
+     * and `.ql-editor { height: 100%; }`. Nested inside Bootstrap 5's flex
+     * grid (.row.g-4 -> .col-12), that percentage height resolves against
+     * whatever height the surrounding tab/card wrapper happens to report,
+     * instead of the editor's own content -- so both editors end up
+     * sized/stacked off the same inherited value and visually overlap.
+     * Force each editor to size to its own content instead.
+     */
+    .custom-quill-editor.ql-container {
+      position: relative;
+      height: auto !important;
+      z-index: 1;
+    }
+    .custom-quill-editor.ql-container .ql-editor {
+      height: auto !important;
+      min-height: 160px;
+    }
+    .custom-field-group[data-field="content"],
+    .custom-field-group[data-field="content_ar"] {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 0.5rem;
+    }
+  </style>
 @endsection
 
 @section('content')
@@ -270,7 +311,76 @@
         'label_en' => 'Programs',
         'label_ar' => 'البرامج',
         'route'    => route('admin.landing-page.sections.update', 'programs'),
-        'fields'   => [],
+        'fields'   => [
+          [
+            'name'     => 'is_enabled',
+            'type'     => 'checkbox',
+            'label_en' => 'Enable Section',
+            'label_ar' => 'تفعيل القسم',
+            'value'    => 1,
+            'col'      => 12,
+          ],
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Title',
+            'label_ar'  => 'العنوان',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag',
+            'type'      => 'text',
+            'label_en'  => 'Title tag',
+            'label_ar'  => 'العنوان الفرعي',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title (Arabic)',
+            'label_ar'  => 'العنوان بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title tag (Arabic)',
+            'label_ar'  => 'العنوان الفرعي بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+        ],
       ],
       [
         'key'      => 'how',
@@ -278,7 +388,76 @@
         'label_en' => 'How It Works',
         'label_ar' => 'كيف يعمل',
         'route'    => route('admin.landing-page.sections.update', 'how'),
-        'fields'   => [],
+        'fields'   => [
+          [
+            'name'     => 'is_enabled',
+            'type'     => 'checkbox',
+            'label_en' => 'Enable Section',
+            'label_ar' => 'تفعيل القسم',
+            'value'    => 1,
+            'col'      => 12,
+          ],
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Title',
+            'label_ar'  => 'العنوان',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag',
+            'type'      => 'text',
+            'label_en'  => 'Title tag',
+            'label_ar'  => 'العنوان الفرعي',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title (Arabic)',
+            'label_ar'  => 'العنوان بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title tag (Arabic)',
+            'label_ar'  => 'العنوان الفرعي بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+        ],
       ],
       [
         'key'      => 'custom',
@@ -508,6 +687,109 @@
                   </div>
                   <div class="row g-4" id="aboutCardsContainer"></div>
                 @endif
+
+                @if($section['key'] === 'programs')
+                  <hr class="my-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="mb-0">
+                      {{ $l == 'ar' ? 'اختيار البرامج' : 'Programs Selection' }}
+                    </h6>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>{{ $l == 'ar' ? 'اسم البرنامج' : 'Program Name' }}</th>
+                          <th>{{ $l == 'ar' ? 'الظهور' : 'Visibility' }}</th>
+                        </tr>
+                      </thead>
+                      <tbody id="programsListBody">
+                        @foreach($cycles as $program)
+                          <tr class="programs-list-row" data-program-id="{{ $program->id }}">
+                            <td>
+                              <a
+                                href="{{ url('dashboard/programlist/show/' . $program->id) }}"
+                                target="_blank"
+                                rel="noopener"
+                                class="d-inline-flex align-items-center gap-1"
+                              >
+                                <i class="ti ti-external-link"></i>
+                                {{ $program->title }}
+                              </a>
+                            </td>
+                            <td>
+                              <div class="form-check form-switch mb-0">
+                                <input
+                                  type="hidden"
+                                  name="programs[selected_programs][{{ $program->id }}]"
+                                  value="0"
+                                >
+                                <input
+                                  type="checkbox"
+                                  name="programs[selected_programs][{{ $program->id }}]"
+                                  value="1"
+                                  class="form-check-input program-visibility-switch"
+                                  checked
+                                >
+                              </div>
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 mt-3">
+                    <small class="text-muted" id="programsPaginationInfo"></small>
+                    <nav aria-label="Programs pagination" id="programsPaginationNav">
+                      <ul class="pagination justify-content-center mb-0" id="programsPaginationList"></ul>
+                    </nav>
+                  </div>
+                @endif
+
+                @if($section['key'] === 'how')
+                  <hr class="my-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="mb-0">
+                      {{ $l == 'ar' ? 'الخطوات' : 'Process Steps' }}
+                    </h6>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+                      id="howAddStep"
+                    >
+                      <i class="ti ti-plus"></i>
+                      {{ $l == 'ar' ? 'إضافة خطوة' : 'Add Step' }}
+                    </button>
+                  </div>
+                  <div class="row g-4" id="howStepsContainer"></div>
+                @endif
+
+                @if($section['key'] === 'custom')
+                  <hr class="my-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="mb-0">
+                      {{ $l == 'ar' ? 'الأقسام المخصصة' : 'Custom Sections' }}
+                    </h6>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+                      id="customAddSection"
+                    >
+                      <i class="ti ti-plus"></i>
+                      {{ $l == 'ar' ? 'إضافة قسم مخصص' : 'Add Custom Section' }}
+                    </button>
+                  </div>
+                  <div id="customSectionsContainer"></div>
+                  <div id="customSectionsEmpty" class="text-center py-5 border border-dashed rounded">
+                    <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="text-muted mb-1">
+                      {{ $l == 'ar' ? 'لا توجد أقسام مخصصة بعد' : 'No custom sections yet' }}
+                    </h5>
+                    <p class="text-muted small mb-0">
+                      {{ $l == 'ar' ? 'أضف أقسامًا مخصصة لإثراء صفحة الهبوط الخاصة بك' : 'Add custom sections to enrich your landing page' }}
+                    </p>
+                  </div>
+                @endif
               </form>
             </div>
           @endforeach
@@ -517,10 +799,48 @@
   </div>
 @endsection
 
+{{-- Button-link modal for the custom section rich-text content --}}
+<div class="modal fade" id="customButtonModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ $l == 'ar' ? 'إضافة زر' : 'Add Button' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label" for="customButtonText">
+            {{ $l == 'ar' ? 'نص الزر' : 'Button Text' }}
+          </label>
+          <input type="text" class="form-control" id="customButtonText" maxlength="50">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="customButtonLink">
+            {{ $l == 'ar' ? 'رابط الزر' : 'Button Link' }}
+          </label>
+          <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
+          <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          {{ $l == 'ar' ? 'إلغاء' : 'Cancel' }}
+        </button>
+        <button type="button" class="btn btn-primary" id="customButtonSave">
+          {{ $l == 'ar' ? 'إضافة' : 'Add' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
 @endsection
 
 @section('pagescripts')
@@ -568,6 +888,22 @@
         aboutTitleArabic:   isArabic ? 'يرجى إدخال عنوان القسم باللغة العربية.' : 'Please enter the section title in Arabic.',
         aboutSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللغة العربية.' : 'Please enter the section subtitle in Arabic.',
         aboutDescriptionArabic: isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
+        programsRequired:       isArabic ? 'هذا الحقل مطلوب' : 'This field is required.',
+        howTitle:               isArabic ? 'يرجى إدخال عنوان القسم.' : 'Please enter the section title.',
+        howTitleArabic:         isArabic ? 'يرجى إدخال عنوان القسم باللغة العربيه.' : 'Please enter the section title in Arabic.',
+        howSubtitle:            isArabic ? 'يرجى إدخال العنوان الفرعي للقسم.' : 'Please enter the section subtitle.',
+        howSubtitleArabic:      isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللعة العربية.' : 'Please enter the section subtitle in Arabic.',
+        howDescription:         isArabic ? 'يرجى إدخال وصف القسم.' : 'Please enter the section description.',
+        howDescriptionArabic:   isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
+        howStepTitle:           isArabic ? 'يرجى إدخال عنوان الخطوة.' : 'Please enter the step title.',
+        howStepTitleArabic:     isArabic ? 'يرجى إدخال عنوان الخطوة باللغة  العربية.' : 'Please enter the step title in Arabic.',
+        howStepIcon:            isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
+        howStepDescription:     isArabic ? 'يرجى إدخال وصف الخطوة.' : 'Please enter the step description.',
+        howStepDescriptionArabic: isArabic ? 'يرجى إدخال وصف الخطوة باللغة العربيه.' : 'Please enter the step description in Arabic.',
+        customRequired:         isArabic ? 'هذا الحقل مطلوب.' : 'This field is required.',
+        customUnsupportedType:  isArabic ? 'نوع الملف غير مدعوم. يرجى رفع صورة بصيغة JPG أو PNG أو WEBP.' : 'Unsupported file type. Please upload a JPG, PNG, or WEBP image.',
+        customImageSize:        isArabic ? 'حجم الصورة يتجاوز 5 ميجابايت.' : 'Image size exceeds 5 MB.',
+        customButtonLink:       isArabic ? 'يرجى إدخال رابط زر صالح.' : 'Please enter a valid button link.',
         cardIcon:           isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
         cardTitle:          isArabic ? 'يرجى إدخال عنوان البطاقة.' : 'Please enter a card title.',
         cardDescription:    isArabic ? 'يرجى إدخال وصف البطاقة.' : 'Please enter a card description.',
@@ -579,6 +915,9 @@
         general: isArabic ? 'تم حفظ المعلومات العامة لصفحة الهبوط بنجاح.' : 'General landing page information saved successfully.',
         hero:    isArabic ? 'تم حفظ معلومات القسم الرئيسي بنجاح.' : 'Hero section information saved successfully.',
         about:   isArabic ? 'تم حفظ معلومات قسم من نحن بنجاح.' : 'About section information saved successfully.',
+        programs: isArabic ? 'تم حفظ قسم البرامج بنجاح' : 'Programs section saved successfully.',
+        how:      isArabic ? 'تم حفظ المعلومات بنجاح.' : 'Information saved successfully.',
+        custom:   isArabic ? 'تم حفظ القسم المخصص بنجاح.' : 'Custom section saved successfully.',
       };
 
       const buildImageField = function (requiredMsg, formatMsg, sizeMsg) {
@@ -689,6 +1028,70 @@
           'about[description_ar]': {
             validators: {
               notEmpty: { message: validationMessages.aboutDescriptionArabic },
+            },
+          },
+        },
+        programs: {
+          'programs[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+        },
+        how: {
+          'how[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.howTitle },
+            },
+          },
+          'how[title_tag]': {
+            validators: {
+              notEmpty: { message: validationMessages.howSubtitle },
+            },
+          },
+          'how[description]': {
+            validators: {
+              notEmpty: { message: validationMessages.howDescription },
+            },
+          },
+          'how[title_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.howTitleArabic },
+            },
+          },
+          'how[title_tag_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.howSubtitleArabic },
+            },
+          },
+          'how[description_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.howDescriptionArabic },
             },
           },
         },
@@ -887,6 +1290,515 @@
         });
       });
 
+      // ─────────────────────────────────────────────────────────────
+      // How It Works section — process steps repeater (max 3 steps)
+      // Step fields are all-or-nothing: an untouched step is valid, but
+      // once any field of a step is filled every step field becomes
+      // mandatory.
+      // ─────────────────────────────────────────────────────────────
+      const howMaxSteps = 3;
+      const howStepFields = ['title', 'icon', 'description', 'title_ar', 'description_ar'];
+      const howStepMessages = {
+        title:        validationMessages.howStepTitle,
+        icon:         validationMessages.howStepIcon,
+        description:  validationMessages.howStepDescription,
+        title_ar:     validationMessages.howStepTitleArabic,
+        description_ar: validationMessages.howStepDescriptionArabic,
+      };
+      const howIcons = aboutIcons;
+      let howStepCounter = 0;
+
+      const validateHowStepField = function (element) {
+        const $step = $(element).closest('.how-step');
+        const hasAny = $step.find('[data-step-field]').toArray().some(function (el) {
+          const $el = $(el);
+          return $el.is('select') ? !!$el.val() : $el.val().trim() !== '';
+        });
+        if (!hasAny) return { valid: true };
+        if (element.tagName === 'SELECT') {
+          return { valid: element.value !== '' };
+        }
+        return { valid: element.value.trim() !== '' };
+      };
+
+      const howStepHtml = function (id) {
+        const iconOptions = howIcons.map(function (icon) {
+          return '<option value="' + icon.value + '">' + icon.label + '</option>';
+        }).join('');
+        return `
+          <div class="col-12 how-step" data-step-id="${id}">
+            <div class="border rounded p-3">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="mb-0 how-step-label">${isArabic ? 'الخطوة' : 'Step'}</h6>
+                <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-how-step">
+                  <i class="ti ti-trash"></i>
+                  ${isArabic ? 'حذف' : 'Remove'}
+                </button>
+              </div>
+              <div class="row g-4">
+                <div class="col-md-4">
+                  <label class="form-label">${isArabic ? 'الأيقونة' : 'Icon'}</label>
+                  <select name="how[steps][${id}][icon]" class="form-select" data-step-field>
+                    <option value="">${isArabic ? '— اختر أيقونة —' : '— Select an icon —'}</option>
+                    ${iconOptions}
+                  </select>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">${isArabic ? 'عنوان الخطوة' : 'Step Title'}</label>
+                  <input type="text" name="how[steps][${id}][title]" maxlength="100" class="form-control" data-step-field>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">${isArabic ? 'عنوان الخطوة بالعربية' : 'Step Title (Arabic)'}</label>
+                  <input type="text" name="how[steps][${id}][title_ar]" maxlength="100" class="form-control" data-step-field>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">${isArabic ? 'وصف الخطوة' : 'Step Description'}</label>
+                  <textarea name="how[steps][${id}][description]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">${isArabic ? 'وصف الخطوة بالعربية' : 'Step Description (Arabic)'}</label>
+                  <textarea name="how[steps][${id}][description_ar]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
+      const updateHowStepButtons = function () {
+        const count = $('#howStepsContainer .how-step').length;
+        $('#howAddStep').prop('disabled', count >= howMaxSteps);
+        $('#howStepsContainer .how-step').each(function (i) {
+          $(this).find('.how-step-label').text((isArabic ? 'الخطوة ' : 'Step ') + (i + 1));
+        });
+      };
+
+      const addHowStep = function () {
+        const fv = sectionValidations.how;
+        const id = ++howStepCounter;
+        $('#howStepsContainer').append(howStepHtml(id));
+        if (fv) {
+          howStepFields.forEach(function (field) {
+            fv.addField('how[steps][' + id + '][' + field + ']', {
+              validators: {
+                callback: {
+                  message: howStepMessages[field],
+                  callback: function (input) {
+                    return validateHowStepField(input.element);
+                  },
+                },
+              },
+            });
+          });
+        }
+        updateHowStepButtons();
+      };
+
+      $('#howAddStep').on('click', addHowStep);
+
+      $('#howStepsContainer')
+        .on('input change', '[data-step-field]', function () {
+          const fv = sectionValidations.how;
+          if (!fv) return;
+          const id = $(this).closest('.how-step').data('step-id');
+          howStepFields.forEach(function (field) {
+            fv.revalidateField('how[steps][' + id + '][' + field + ']');
+          });
+        })
+        .on('click', '.remove-how-step', function () {
+          const fv = sectionValidations.how;
+          const $step = $(this).closest('.how-step');
+          const id = $step.data('step-id');
+          if (fv) {
+            howStepFields.forEach(function (field) {
+              fv.removeField('how[steps][' + id + '][' + field + ']');
+            });
+          }
+          $step.remove();
+          updateHowStepButtons();
+        });
+
+      // How It Works main fields are only mandatory while the section is enabled.
+      $('#how_is_enabled').on('change', function () {
+        const fv = sectionValidations.how;
+        if (!fv) return;
+        const enabled = this.checked;
+        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
+          const fieldName = 'how[' + name + ']';
+          if (enabled) {
+            fv.enableValidator(fieldName, 'notEmpty');
+          } else {
+            fv.disableValidator(fieldName, 'notEmpty');
+          }
+          fv.revalidateField(fieldName);
+        });
+      });
+
+      // Programs main fields are only mandatory while the section is enabled.
+      $('#programs_is_enabled').on('change', function () {
+        const fv = sectionValidations.programs;
+        if (!fv) return;
+        const enabled = this.checked;
+        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
+          const fieldName = 'programs[' + name + ']';
+          if (enabled) {
+            fv.enableValidator(fieldName, 'notEmpty');
+          } else {
+            fv.disableValidator(fieldName, 'notEmpty');
+          }
+          fv.revalidateField(fieldName);
+        });
+      });
+
+      // ─────────────────────────────────────────────────────────────
+      // Programs selection list — client-side pagination (10 rows/page)
+      // ─────────────────────────────────────────────────────────────
+      const programsPerPage = 10;
+      let programsCurrentPage = 1;
+
+      const renderProgramsPagination = function () {
+        const $rows = $('#programsListBody .programs-list-row');
+        const total = $rows.length;
+        const totalPages = Math.max(1, Math.ceil(total / programsPerPage));
+
+        if (programsCurrentPage > totalPages) programsCurrentPage = totalPages;
+        const start = (programsCurrentPage - 1) * programsPerPage;
+        $rows.hide().slice(start, start + programsPerPage).show();
+
+        const $list = $('#programsPaginationList').empty();
+        const $nav = $('#programsPaginationNav');
+        const $info = $('#programsPaginationInfo');
+
+        if (totalPages <= 1) {
+          $nav.hide();
+          $info.text('');
+          return;
+        }
+
+        $nav.show();
+        const from = start + 1;
+        const to = Math.min(start + programsPerPage, total);
+        $info.text(isArabic ? `عرض ${from} - ${to} من ${total}` : `Showing ${from} - ${to} of ${total}`);
+
+        $list.append(`<li class="page-item ${programsCurrentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${programsCurrentPage - 1}">&laquo;</a></li>`);
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || Math.abs(i - programsCurrentPage) <= 1) {
+            $list.append(`<li class="page-item ${i === programsCurrentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
+          } else if (Math.abs(i - programsCurrentPage) === 2) {
+            $list.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+          }
+        }
+        $list.append(`<li class="page-item ${programsCurrentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${programsCurrentPage + 1}">&raquo;</a></li>`);
+      };
+
+      $('#programsPaginationList').on('click', '.page-link', function (e) {
+        e.preventDefault();
+        const page = parseInt($(this).data('page'), 10);
+        if (isNaN(page) || page < 1 || page === programsCurrentPage) return;
+        programsCurrentPage = page;
+        renderProgramsPagination();
+      });
+
+      renderProgramsPagination();
+
+      // ─────────────────────────────────────────────────────────────
+      // Custom sections — block repeater with rich-text (Quill) editors
+      // A block can stay fully empty; once any required field of a
+      // block is filled, every required field becomes mandatory.
+      // ─────────────────────────────────────────────────────────────
+      const customQuills = new Map();
+      const customRequiredFields = ['title', 'title_tag', 'content', 'title_ar', 'title_tag_ar', 'content_ar'];
+      let customSectionCounter = 0;
+
+      const customSectionHtml = function (id) {
+        return `
+          <div class="card mb-3 border shadow-sm custom-section-card" data-section-id="${id}">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 custom-section-label">${isArabic ? 'القسم المخصص' : 'Custom Section'}</h6>
+              <button type="button" class="btn btn-sm btn-icon btn-outline-danger remove-custom-section" title="${isArabic ? 'حذف' : 'Remove'}">
+                <i class="ti ti-trash"></i>
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="row g-4">
+                <div class="col-12 custom-field-group" data-field="is_visible">
+                  <label class="form-label d-block">${isArabic ? 'الظهور' : 'Visibility'}</label>
+                  <div class="form-check form-switch">
+                    <input type="hidden" name="custom[sections][${id}][is_visible]" value="0">
+                    <input type="checkbox" name="custom[sections][${id}][is_visible]" value="1" class="form-check-input custom-visibility-switch" checked>
+                  </div>
+                </div>
+                <div class="col-md-6 custom-field-group" data-field="title">
+                  <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
+                  <input type="text" name="custom[sections][${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
+                </div>
+                <div class="col-md-6 custom-field-group" data-field="title_ar">
+                  <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                  <input type="text" name="custom[sections][${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
+                </div>
+                <div class="col-md-6 custom-field-group" data-field="title_tag">
+                  <label class="form-label">${isArabic ? 'العنوان الفرعي' : 'Title tag'}</label>
+                  <input type="text" name="custom[sections][${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
+                </div>
+                <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
+                  <label class="form-label">${isArabic ? 'العنوان الفرعي بالعربية' : 'Title tag (Arabic)'}</label>
+                  <input type="text" name="custom[sections][${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
+                </div>
+                <div class="col-12 custom-field-group" data-field="content">
+                  <label class="form-label">${isArabic ? 'المحتوى' : 'Content'}</label>
+                  <div class="custom-quill-editor" id="custom-quill-content-${id}" style="min-height: 160px"></div>
+                  <input type="hidden" name="custom[sections][${id}][content]" class="custom-hidden-content" value="">
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
+                </div>
+                <div class="col-12 custom-field-group" data-field="content_ar">
+                  <label class="form-label">${isArabic ? 'المحتوى بالعربية' : 'Content (Arabic)'}</label>
+                  <div class="custom-quill-editor" id="custom-quill-content-ar-${id}" style="min-height: 160px"></div>
+                  <input type="hidden" name="custom[sections][${id}][content_ar]" class="custom-hidden-content" value="">
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
+      const setCustomFieldError = function ($group, message) {
+        const $err = $group.find('.custom-error-msg');
+        if (message) {
+          $err.text(message).show();
+          $group.find('.form-control, .custom-quill-editor, .form-check-input').addClass('is-invalid');
+        } else {
+          $err.text('').hide();
+          $group.find('.is-invalid').removeClass('is-invalid');
+        }
+      };
+
+      const customFieldValue = function ($card, field) {
+        const $group = $card.find('.custom-field-group[data-field="' + field + '"]');
+        const $input = $group.find('.custom-section-input').first();
+        if ($input.length) return $input.val().trim();
+        return ($group.find('.custom-hidden-content').val() || '').trim();
+      };
+
+      const syncCustomSection = function ($card) {
+        $card.find('.custom-quill-editor').each(function () {
+          const quill = customQuills.get(this);
+          const $input = $(this).closest('.custom-field-group').find('.custom-hidden-content');
+          if (!quill) return;
+          let html = quill.root.innerHTML;
+          html = html.replace(/<p><br\s*\/?><\/p>/gi, '').replace(/&nbsp;/g, ' ').trim();
+          $input.val(html);
+        });
+      };
+
+      const validateCustomSection = function ($card) {
+        const used = customRequiredFields.some(function (field) {
+          return customFieldValue($card, field) !== '';
+        });
+
+        if (!used) {
+          customRequiredFields.forEach(function (field) {
+            setCustomFieldError($card.find('.custom-field-group[data-field="' + field + '"]'), '');
+          });
+          return true;
+        }
+
+        let valid = true;
+        customRequiredFields.forEach(function (field) {
+          const filled = customFieldValue($card, field) !== '';
+          setCustomFieldError($card.find('.custom-field-group[data-field="' + field + '"]'), filled ? '' : validationMessages.customRequired);
+          if (!filled) valid = false;
+        });
+        return valid;
+      };
+
+      const validateCustomSections = function () {
+        let allValid = true;
+        $('#customSectionsContainer .custom-section-card').each(function () {
+          syncCustomSection($(this));
+          if (!validateCustomSection($(this))) allValid = false;
+        });
+        return allValid;
+      };
+
+      const updateCustomSectionsEmpty = function () {
+        const count = $('#customSectionsContainer .custom-section-card').length;
+        $('#customSectionsEmpty').toggle(count === 0);
+      };
+
+      const updateCustomSectionLabels = function () {
+        $('#customSectionsContainer .custom-section-card').each(function (i) {
+          $(this).find('.custom-section-label').text((isArabic ? 'القسم المخصص ' : 'Custom Section ') + (i + 1));
+        });
+      };
+
+      const initCustomQuill = function ($scope) {
+        if (typeof Quill === 'undefined') return;
+        $scope.find('.custom-quill-editor').each(function () {
+          const el = this;
+          if (customQuills.has(el)) return;
+
+          const quill = new Quill(el, {
+            theme: 'snow',
+            modules: {
+              toolbar: {
+                container: [
+                  ['bold', 'italic', 'underline'],
+                  [{ list: 'ordered' }, { list: 'bullet' }],
+                  ['link', 'image', 'clean'],
+                  ['custom-button'],
+                ],
+                handlers: {
+                  image: function () {
+                    handleCustomImage(this.quill, $(el));
+                  },
+                  'custom-button': function () {
+                    openCustomButtonModal(this.quill);
+                  },
+                },
+              },
+              clipboard: { matchVisual: false },
+            },
+            placeholder: isArabic ? 'أدخل المحتوى...' : 'Enter content...',
+            direction: isArabic ? 'rtl' : 'ltr',
+          });
+
+          customQuills.set(el, quill);
+
+          const $group = $(el).closest('.custom-field-group');
+          const $input = $group.find('.custom-hidden-content');
+          quill.on('text-change', function () {
+            let html = quill.root.innerHTML;
+            html = html.replace(/<p><br\s*\/?><\/p>/gi, '').replace(/&nbsp;/g, ' ').trim();
+            $input.val(html);
+            if (html) setCustomFieldError($group, '');
+          });
+        });
+      };
+
+      const handleCustomImage = function (quill, $editor) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/jpeg,image/png,image/webp';
+        input.onchange = function () {
+          const file = input.files && input.files[0];
+          if (!file) return;
+          const $group = $editor.closest('.custom-field-group');
+          const ext = (file.name.split('.').pop() || '').toLowerCase();
+          const allowedExt = ['jpg', 'jpeg', 'png', 'webp'];
+          const allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
+
+          if (allowedExt.indexOf(ext) === -1 && allowedMime.indexOf(file.type) === -1) {
+            setCustomFieldError($group, validationMessages.customUnsupportedType);
+            return;
+          }
+          if (file.size > maxImageSize) {
+            setCustomFieldError($group, validationMessages.customImageSize);
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            setCustomFieldError($group, '');
+            const range = quill.getSelection(true);
+            const index = range ? range.index : quill.getLength();
+            quill.insertEmbed(index, 'image', e.target.result);
+            quill.setSelection(index + 1);
+          };
+          reader.readAsDataURL(file);
+        };
+        input.click();
+      };
+
+      const escapeCustomHtml = function (str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+      };
+
+      const escapeCustomAttr = function (str) {
+        return escapeCustomHtml(str).replace(/"/g, '&quot;');
+      };
+
+      const isValidButtonUrl = function (value) {
+        try {
+          const u = new URL(value);
+          return u.protocol === 'http:' || u.protocol === 'https:';
+        } catch (e) {
+          return false;
+        }
+      };
+
+      let activeButtonQuill = null;
+
+      const openCustomButtonModal = function (quill) {
+        activeButtonQuill = quill;
+        $('#customButtonText').val('');
+        $('#customButtonLink').val('');
+        $('#customButtonLinkError').hide();
+        const modalEl = document.getElementById('customButtonModal');
+        if (modalEl) {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+          modal.show();
+        }
+      };
+
+      $('#customButtonSave').on('click', function () {
+        const $err = $('#customButtonLinkError');
+        const text = $('#customButtonText').val().trim();
+        const link = $('#customButtonLink').val().trim();
+
+        if (!link || !isValidButtonUrl(link)) {
+          $err.text(validationMessages.customButtonLink).show();
+          return;
+        }
+
+        $err.hide();
+        if (activeButtonQuill) {
+          const range = activeButtonQuill.getSelection(true);
+          const index = range ? range.index : activeButtonQuill.getLength();
+          const html = '<a class="btn btn-primary" href="' + escapeCustomAttr(link) + '" target="_blank" rel="noopener">' + escapeCustomHtml(text || link) + '</a>&nbsp;';
+          activeButtonQuill.clipboard.dangerouslyPasteHTML(index, html, 'user');
+          activeButtonQuill.setSelection(index + 1);
+        }
+        const modalEl = document.getElementById('customButtonModal');
+        if (modalEl) {
+          bootstrap.Modal.getInstance(modalEl).hide();
+        }
+      });
+
+      const addCustomSection = function () {
+        const id = ++customSectionCounter;
+        $('#customSectionsContainer').append(customSectionHtml(id));
+        initCustomQuill($('#customSectionsContainer'));
+        updateCustomSectionsEmpty();
+        updateCustomSectionLabels();
+        setTimeout(function () {
+          $('#customSectionsContainer .custom-section-card').last().find('.custom-section-input').first().trigger('focus');
+        }, 100);
+      };
+
+      $('#customAddSection').on('click', addCustomSection);
+
+      $('#customSectionsContainer')
+        .on('input change', '[data-custom-field]', function () {
+          const $group = $(this).closest('.custom-field-group');
+          if ($(this).val().trim()) setCustomFieldError($group, '');
+        })
+        .on('click', '.remove-custom-section', function () {
+          const $card = $(this).closest('.custom-section-card');
+          $card.find('.custom-quill-editor').each(function () {
+            customQuills.delete(this);
+          });
+          $card.remove();
+          updateCustomSectionsEmpty();
+          updateCustomSectionLabels();
+        });
+
       // Each section saves independently via AJAX so switching tabs never
       // loses unsaved input in other sections.
       $('.section-form').on('submit', function (e) {
@@ -922,7 +1834,9 @@
             })
             .fail(function (xhr) {
               $btn.html(originalHtml);
-              let errorMessage = "{{ __('admin.unexpected_error') }}";
+              let errorMessage = sectionKey === 'programs'
+                ? (isArabic ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى' : 'Something went wrong. Please try again.')
+                : "{{ __('admin.unexpected_error') }}";
               if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMessage = xhr.responseJSON.message;
               }
@@ -935,6 +1849,14 @@
               $btn.prop('disabled', false);
             });
         }.bind(this);
+
+        // Custom sections use hand-rolled validation (rich-text editors,
+        // image upload checks and button-link checks).
+        if (sectionKey === 'custom') {
+          if (!validateCustomSections()) return;
+          submitViaAjax();
+          return;
+        }
 
         // Block the save until client-side validation passes.
         if (!fv) {
