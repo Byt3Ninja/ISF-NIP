@@ -199,6 +199,7 @@ $pages = [
                   type="button" 
                   class="btn btn-sm btn-icon btn-text-secondary rounded-circle delete-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.Delete') }}" 
                   data-id="{{ $page['id'] }}" 
+                  data-title="{{ $page['title'] }}" 
                   {{-- data-url="{{ route('landing-pages.destroy', ['page' => $page['id']]) }}" --}}
                 >
                   <i class="ti ti-trash"></i>
@@ -230,12 +231,17 @@ $pages = [
     $(document).on('click', '.delete-btn', function (e) {
       var url = $(this).data('url');
       var token = '{{ csrf_token() }}';
+      var pageName = $(this).data('title') || '';
+      var isArabic = {{ $l == 'ar' ? 'true' : 'false' }};
+      var title = isArabic
+        ? "'" + pageName + "'؟ سيتم حذف صفحة الهبوط نهائيًا ولن يكون رابطها العام متاحًا بعد"
+        : "Are you sure you want to delete '" + pageName + "'?";
 
       releaseWarningAlert({
-        title: "{{__('admin.SureDelete')}}",
-        message: "{{__('admin.Recover')}}",
-        confirmText: "{{ __('admin.DYes') }}",
-        cancelText: "{{ __('admin.No') }}",
+        title: title,
+        message: "{{ $l == 'ar' ? 'سيتم حذف صفحة الهبوط نهائيًا ولن يكون رابطها العام متاحًا بعد ذلك.' : 'This landing page will be permanently removed, and its public URL will no longer be accessible.' }}",
+        confirmText: "{{ $l == 'ar' ? 'حذف' : 'Delete' }}",
+        cancelText: "{{ $l == 'ar' ? 'إلغاء' : 'Cancel' }}",
         confirmColor: 'danger',
         onConfirm: () => {
           $.post(url, {
@@ -246,7 +252,7 @@ $pages = [
               if (response.success) {
                 releaseSuccessAlert({
                   title: "{{ __('admin.Deleted') }}!",
-                  message: "{{ __('admin.DeletedSuccessfully') }}.",
+                  message: "{{ $l == 'ar' ? 'تم حذف صفحة الهبوط بنجاح.' : 'Landing page deleted successfully.' }}",
                 });
 
                 // Remove the landing card from DOM
