@@ -73,8 +73,9 @@
       <img 
         src="/images/logo/{{ $_settings->Logo }}" 
         alt="logo"
-        class="object-fit-contain me-2 rounded-circle border p-1 bg-card"
-        style="width: 50px; height: 50px;"
+        {{-- class="object-fit-contain me-2 rounded-circle border p-1 bg-card" --}}
+        class="object-fit-contain me-2 rounded"
+        style="width: 75px; height: 75px;"
       />
       {{-- <span class="app-brand-logo demo">
         <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
