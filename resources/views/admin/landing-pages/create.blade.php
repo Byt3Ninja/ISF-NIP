@@ -2,6 +2,7 @@
 
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
   <style>
@@ -29,89 +30,160 @@
       z-index: 1;
       margin-bottom: 0.5rem;
     }
+    /* Ended programs: grey out the row without touching the "Ended"
+       badge/tooltip — opacity is applied to specific siblings of the
+       badge (never an ancestor), so the badge stays fully legible
+       instead of inheriting a compositing-reduced opacity. */
+    .program-row-ended {
+      background-color: rgba(94, 96, 103, 0.06);
+    }
+    .program-row-ended td:not(:first-child) {
+      opacity: 0.6;
+    }
+    .program-row-ended td:first-child .avatar img,
+    .program-row-ended td:first-child a.fw-medium,
+    .program-row-ended td:first-child .text-muted.small {
+      opacity: 0.6;
+    }
   </style>
 @endsection
 
 @section('content')
-
   {{-- Header --}}
   <div class="mb-4">
     <h4 class="mb-1">
-      {{ __('landing.Create_Landing_Page')  }}
+      {{ __('landing.Create_Landing_Page') }}
     </h4>
     <p class="text-secondary mb-0">
       {{ __('landing.Create_LandingPage_Description') }}
     </p>
   </div>
 
-  {{-- Custom Landing Page URL configuration — locked until the page exists (see General tab) --}}
-  <div class="card mb-4">
+  {{-- Custom Landing Page URL configuration --}}
+  <form class="card mb-4" id="lpUrlForm" novalidate>
     <div class="card-header">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="d-flex align-items-center gap-3">
           <div class="form-check form-switch mb-0">
-            <input type="checkbox" class="form-check-input" id="lpUrlEnabledToggle" disabled>
+            <input
+              type="checkbox"
+              class="form-check-input lp-url-toggle"
+              id="lpUrlEnabledToggle"
+              name="lpUrlActive"
+              checked
+            >
           </div>
           <div>
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
               <i class="ti ti-link"></i>
-              {{ $l == 'ar' ? 'رابط صفحة الهبوط المخصص' : 'Custom Landing Page URL' }}
+              {{ __('landing.Custom_Landing_Page_URL') }}
             </h5>
+            <small class="text-muted" id="lpUrlStatusText">
+              <span class="text-success">
+                <i class="ti ti-check me-1"></i>
+                {{ __('landing.Landing_Page_URL_Active') }}
+              </span>
+            </small>
+            <small class="text-muted d-none" id="lpUrlSavedLinkWrap">
+              <i class="ti ti-link me-1"></i>
+              <a href="#" id="lpUrlSavedLink" target="_blank" rel="noopener" class="fw-medium text-primary"></a>
+            </small>
           </div>
         </div>
         <div class="d-flex flex-wrap gap-2">
-          <button type="button" class="btn btn-outline-primary" disabled>
+          <button type="button" class="btn btn-outline-primary" id="lpUrlPreviewBtn">
             <i class="ti ti-external-link me-1"></i>
-            {{ $l == 'ar' ? 'معاينة صفحة الهبوط' : 'Preview Landing Page' }}
+            {{ __('landing.Preview_Landing_Page') }}
           </button>
-          <button type="button" class="btn btn-primary" disabled>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="lpUrlSaveBtn"
+            disabled
+            title="{{ __('landing.Save_General_First_URL') }}"
+          >
             <i class="ti ti-device-floppy me-1"></i>
-            {{ $l == 'ar' ? 'حفظ' : 'Save' }}
+            {{ __('landing.Save') }}
           </button>
         </div>
       </div>
+      <small class="text-muted d-block mt-2" id="lpUrlSaveHint">
+        <i class="ti ti-lock me-1"></i>
+        {{ __('landing.Save_General_First_URL') }}
+      </small>
     </div>
     <div class="card-body">
-      <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
-        <i class="ti ti-info-circle"></i>
-        <span>{{ __('landing.Programs_Note') }}</span>
-      </div>
       <div class="row g-4">
         <div class="col-md-6">
-          <label class="form-label">{{ $l == 'ar' ? 'العنوان' : 'Title' }}</label>
-          <input type="text" class="form-control" maxlength="100" placeholder="{{ $l == 'ar' ? 'صيف 2025' : 'Summer 2025' }}" disabled>
+          <label class="form-label" for="lpUrlTitle">
+            {{ __('landing.Title') }}
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="lpUrlTitle"
+            name="lpUrlTitle"
+            maxlength="100"
+            placeholder="{{ __('landing.URL_Title_Placeholder') }}"
+          >
+          <div class="invalid-feedback"></div>
         </div>
         <div class="col-md-6">
-          <label class="form-label">{{ $l == 'ar' ? 'اسم الرابط' : 'URL Name' }}</label>
-          <input type="text" class="form-control" maxlength="100" placeholder="{{ $l == 'ar' ? 'برنامج الصيف' : 'Summer Program' }}" disabled>
+          <label class="form-label" for="lpUrlName">
+            {{ __('landing.URL_Name') }}
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="lpUrlName"
+            name="lpUrlName"
+            maxlength="100"
+            placeholder="{{ __('landing.URL_Name_Placeholder') }}"
+          >
+          <div class="invalid-feedback"></div>
         </div>
         <div class="col-12">
-          <label class="form-label">{{ $l == 'ar' ? 'الرابط المخصص' : 'Custom URL' }}</label>
+          <label class="form-label" for="lpUrlSlug">
+            {{ __('landing.Custom_URL') }}
+            <span class="text-danger">*</span>
+          </label>
           <div class="row g-2 align-items-start">
             <div class="col-md-6 col-xl-7">
               <div class="input-group input-group-merge shadow-none">
                 <span class="input-group-text text-muted">{{ url('/lp/') }}/</span>
-                <input type="text" class="form-control" maxlength="100" placeholder="summer-2025" disabled>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="lpUrlSlug"
+                  name="lpUrlSlug"
+                  maxlength="100"
+                  placeholder="summer-2025"
+                  pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                >
               </div>
+              <div class="invalid-feedback"></div>
+              <div id="lpUrlAvailabilityFeedback" class="mt-1 small fw-medium"></div>
               <small class="text-muted">
-                {{ $l == 'ar' ? 'يجب أن يحتوي الرابط على أحرف إنجليزية صغيرة وأرقام وشرطات فقط.' : 'URL must contain only lowercase letters, numbers, and hyphens.' }}
+                {{ __('landing.validation.custom_url_invalid') }}
               </small>
             </div>
             <div class="col-md-6 col-xl-5 d-flex flex-wrap gap-2">
-              <button type="button" class="btn btn-outline-secondary text-nowrap" disabled>
+              <button type="button" class="btn btn-outline-secondary text-nowrap" id="lpUrlGenerateBtn">
                 <i class="ti ti-refresh me-1"></i>
-                {{ $l == 'ar' ? 'إنشاء من العنوان' : 'Generate from title' }}
+                {{ __('landing.Generate_From_Title') }}
               </button>
-              <button type="button" class="btn btn-outline-info text-nowrap" disabled>
+              <button type="button" class="btn btn-outline-info text-nowrap" id="lpUrlCheckBtn">
                 <i class="ti ti-check me-1"></i>
-                {{ $l == 'ar' ? 'تحقق من التوفر' : 'Check Availability' }}
+                {{ __('landing.Check_Availability') }}
               </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </form>
 
   <div class="card mb-4">
     <div class="card-header border-bottom">
@@ -133,6 +205,7 @@
                 aria-controls="navs-{{ $section['key'] }}"
                 aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
                 @if($index !== 0) tabindex="-1" @endif
+                @if(!empty($section['locked'])) disabled title="{{ __('landing.Save_General_First') }}" @endif
               >
                 <i class="ti {{ $section['icon'] }} me-2"></i>
                 {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
@@ -159,49 +232,50 @@
                 @csrf
                 @method('PUT')
 
+                <fieldset @if(!empty($section['locked'])) disabled @endif class="border-0 p-0 m-0">
+
+                @if(!empty($section['locked']))
+                  <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+                    <i class="ti ti-lock"></i>
+                    {{ __('landing.Section_Locked_Hint') }}
+                  </div>
+                @endif
+
                 {{-- Save button, top-right of each section --}}
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                  <h6 class="mb-0">
+                  <h5 class="mb-0">
                     {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
-                  </h6>
-                  <button
-                    type="submit"
-                    class="btn btn-primary btn-sm d-flex align-items-center gap-1"
-                    {{ $section['locked'] ? 'disabled' : '' }}
-                  >
+                  </h5>
+                  <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
                     <i class="ti ti-device-floppy"></i>
                     {{ __('landing.Save') }}
                   </button>
                 </div>
 
-                @if($section['locked'])
-                  <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
-                    <i class="ti ti-info-circle"></i>
-                    <span>
-                        {{ __('landing.Programs_Note') }}
-                    </span>
-                  </div>
-                @endif
-
                 <div class="row g-4">
                   @foreach ($section['fields'] as $field)
-                    <div class="col-md-{{ ($field['col'] ?? 12) }}">
-                      <label for="{{ $field['id_attr'] }}" class="form-label">
-                        {{ ($l == 'ar' ? $field['label_ar'] : $field['label_en']) }}
+                    @php
+                      $fieldName  = $field['name_attr'];
+                      $fieldId    = $field['id_attr'];
+                      $fieldLabel = $l == 'ar' ? $field['label_ar'] : $field['label_en'];
+                      $colWidth   = $field['col'] ?? 12;
+                    @endphp
+                    <div class="col-md-{{ $colWidth }}">
+                      <label for="{{ $fieldId }}" class="form-label">
+                        {{ $fieldLabel }}
                         @if(!empty($field['required'])) <span class="text-danger">*</span> @endif
                       </label>
 
                       @switch($field['type'])
                         @case('textarea')
                           <textarea
-                            id="{{ $field['id_attr'] }}"
-                            name="{{ $field['name_attr'] }}"
+                            id="{{ $fieldId }}"
+                            name="{{ $fieldName }}"
                             rows="4"
                             @if(!empty($field['maxlength'])) maxlength="{{ $field['maxlength'] }}" @endif
                             @if(!empty($field['required'])) required @endif
-                            @if(!empty($field['disabled'])) disabled @endif
-                            class="form-control @error($field['name_attr']) is-invalid @enderror"
-                          >{{ old($field['name_attr'], $field['value']) }}</textarea>
+                            class="form-control @error($fieldName) is-invalid @enderror"
+                          >{{ old($fieldName, $field['value']) }}</textarea>
                           @if(!empty($field['maxlength']))
                             <div class="form-text">
                               {{ __('landing.Max') }} {{ $field['maxlength'] }}
@@ -213,27 +287,27 @@
                         @case('url')
                           <input
                             type="url"
-                            id="{{ $field['id_attr'] }}"
-                            name="{{ $field['name_attr'] }}"
-                            value="{{ old($field['name_attr'], $field['value']) }}"
+                            id="{{ $fieldId }}"
+                            name="{{ $fieldName }}"
+                            value="{{ old($fieldName, $field['value']) }}"
                             @if(!empty($field['maxlength'])) maxlength="{{ $field['maxlength'] }}" @endif
                             @if(!empty($field['required'])) required @endif
                             placeholder="https://"
-                            class="form-control @error($field['name_attr']) is-invalid @enderror"
+                            class="form-control @error($fieldName) is-invalid @enderror"
                           >
                           @break
 
                         @case('select')
                           <select
-                            id="{{ $field['id_attr'] }}"
-                            name="{{ $field['name_attr'] }}"
+                            id="{{ $fieldId }}"
+                            name="{{ $fieldName }}"
                             @if(!empty($field['required'])) required @endif
-                            class="form-select @error($field['name_attr']) is-invalid @enderror"
+                            class="form-select @error($fieldName) is-invalid @enderror"
                           >
                             @foreach ($field['options'] ?? [] as $optionValue => $optionLabel)
                               <option
                                 value="{{ $optionValue }}"
-                                @selected(old($field['name_attr'], $field['value']) == $optionValue)
+                                @selected(old($fieldName, $field['value']) == $optionValue)
                               >
                                 {{ $optionLabel }}
                               </option>
@@ -245,17 +319,16 @@
                           <div class="form-check form-switch">
                             <input
                               type="hidden"
-                              name="{{ $field['name_attr'] }}"
+                              name="{{ $fieldName }}"
                               value="0"
                             >
                             <input
                               type="checkbox"
-                              id="{{ $field['id_attr'] }}"
-                              name="{{ $field['name_attr'] }}"
+                              id="{{ $fieldId }}"
+                              name="{{ $fieldName }}"
                               value="1"
                               class="form-check-input"
-                              @checked(old($field['name_attr'], $field['value']))
-                              @if(!empty($field['disabled'])) disabled @endif
+                              @checked(old($fieldName, $field['value']))
                             >
                           </div>
                           @break
@@ -265,7 +338,7 @@
                             @if(!empty($field['value']))
                               <img
                                 src="{{ $field['value'] }}"
-                                alt="{{ ($l == 'ar' ? $field['label_ar'] : $field['label_en']) }}"
+                                alt="{{ $fieldLabel }}"
                                 class="rounded"
                                 style="width: 64px; height: 64px; object-fit: cover;"
                               >
@@ -273,11 +346,11 @@
                             <div class="flex-grow-1">
                               <input
                                 type="file"
-                                id="{{ $field['id_attr'] }}"
-                                name="{{ $field['name_attr'] }}"
+                                id="{{ $fieldId }}"
+                                name="{{ $fieldName }}"
                                 accept="{{ $field['accept'] ?? 'image/*' }}"
                                 @if(!empty($field['required']) && empty($field['value'])) required @endif
-                                class="form-control @error($field['name_attr']) is-invalid @enderror"
+                                class="form-control @error($fieldName) is-invalid @enderror"
                               >
                               @if(!empty($field['accept']) || !empty($field['max_size_mb']))
                                 <div class="form-text">
@@ -296,17 +369,16 @@
                         @default
                           <input
                             type="text"
-                            id="{{ $field['id_attr'] }}"
-                            name="{{ $field['name_attr'] }}"
-                            value="{{ old($field['name_attr'], $field['value']) }}"
+                            id="{{ $fieldId }}"
+                            name="{{ $fieldName }}"
+                            value="{{ old($fieldName, $field['value']) }}"
                             @if(!empty($field['maxlength'])) maxlength="{{ $field['maxlength'] }}" @endif
                             @if(!empty($field['required'])) required @endif
-                            @if(!empty($field['disabled'])) disabled @endif
-                            class="form-control @error($field['name_attr']) is-invalid @enderror"
+                            class="form-control @error($fieldName) is-invalid @enderror"
                           >
                       @endswitch
 
-                      @error($field['name_attr'])
+                      @error($fieldName)
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                       @enderror
                     </div>
@@ -331,6 +403,180 @@
                   <div class="row g-4" id="aboutCardsContainer"></div>
                 @endif
 
+                @if($section['key'] === 'programs')
+                  <hr class="my-4">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                    <div>
+                      <h6 class="mb-1 d-flex align-items-center gap-2">
+                        <i class="ti ti-rocket text-primary"></i>
+                        {{ __('landing.Programs_Selection') }}
+                      </h6>
+                      <small class="text-muted">
+                        {{ __('landing.choose_programs') }}
+                      </small>
+                    </div>
+                  </div>
+                  <div class="row g-3 mb-3">
+                    <div class="col-12 col-lg-5 col-xl-4">
+                      <label class="form-label mb-1" for="programsSearchInput">
+                        {{ __('landing.Search') }}
+                      </label>
+                      <div class="input-group input-group-merge">
+                        <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+                        <input
+                          type="search"
+                          id="programsSearchInput"
+                          class="form-control"
+                          placeholder="{{ __('landing.Search_Programs_Placeholder') }}"
+                          aria-label="{{ __('landing.Search_Programs_Aria') }}"
+                        >
+                      </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 col-xl-3">
+                      <label class="form-label mb-1" for="programsVisibilityFilter">
+                        {{ __('landing.Visibility') }}
+                      </label>
+                      <select class="form-select select2" id="programsVisibilityFilter" data-allow-clear="true">
+                        <option value=""></option>
+                        <option value="all">{{ __('landing.All') }}</option>
+                        <option value="visible">{{ __('landing.Visible') }}</option>
+                        <option value="hidden">{{ __('landing.Hidden') }}</option>
+                      </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 col-xl-3">
+                      <label class="form-label mb-1" for="programsOrganizationFilter">
+                        {{ __('landing.Organization') }}
+                      </label>
+                      <select class="form-select select2" id="programsOrganizationFilter" data-allow-clear="true">
+                        <option value=""></option>
+                        <option value="all">{{ __('landing.All') }}</option>
+                        @foreach($programOrganizations as $org)
+                          <option value="{{ $org->id }}">{{ $org->name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
+                      <label class="form-label mb-1" for="programsTypeFilter">
+                        {{ __('landing.Program_Type') }}
+                      </label>
+                      <select class="form-select select2" id="programsTypeFilter" data-allow-clear="true">
+                        <option value=""></option>
+                        <option value="all">{{ __('landing.All') }}</option>
+                        <option value="Hackathon">{{ __('cycles.Hackathon') }}</option>
+                        <option value="General_Program">{{ __('cycles.General_Program') }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="table-responsive border rounded">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>{{ __('landing.Program') }}</th>
+                          <th>{{ __('landing.Type') }}</th>
+                          <th>{{ __('landing.Organization') }}</th>
+                          <th>{{ __('landing.Visibility') }}</th>
+                        </tr>
+                      </thead>
+                      <tbody id="programsListBody">
+                        @foreach($cycles as $program)
+                          <tr
+                            class="programs-list-row @if($program->is_expired) program-row-ended @endif"
+                            data-program-id="{{ $program->id }}"
+                            data-search-title="{{ $program->title }} {{ $program->organization->name ?? '' }}"
+                            data-program-visibility="{{ $program->is_expired ? 'hidden' : ($program->landing_visible ? 'visible' : 'hidden') }}"
+                            data-program-organization="{{ $program->organization_id }}"
+                            data-program-type="{{ $program->type }}"
+                          >
+                            <td>
+                              <div class="d-flex align-items-center gap-3">
+                                <div class="avatar avatar-sm">
+                                  <img src="{{ $program->logo }}" alt="{{ $program->title }}" class="rounded-circle">
+                                </div>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <a
+                                      href="{{ url('dashboard/programlist/show/' . $program->id) }}"
+                                      target="_blank"
+                                      rel="noopener"
+                                      class="fw-medium d-inline-flex align-items-center gap-1"
+                                    >
+                                      {{ $program->title }}
+                                      <i class="ti ti-external-link text-muted"></i>
+                                    </a>
+                                    @if($program->is_expired)
+                                      <span
+                                        class="badge bg-label-secondary"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="{{ __('landing.Program_ended_hint') }}"
+                                      >
+                                        {{ __('landing.Ended') }}
+                                      </span>
+                                    @endif
+                                  </div>
+                                  @if($program->location)
+                                    <div class="text-muted small d-flex align-items-center gap-1">
+                                      <i class="ti ti-map-pin"></i>
+                                      {{ $program->location }}
+                                    </div>
+                                  @endif
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
+                                {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
+                              </span>
+                            </td>
+                            <td>
+                              @if($program->organization)
+                                <span class="d-inline-flex align-items-center gap-1 text-muted">
+                                  <i class="ti ti-building"></i>
+                                  {{ $program->organization->name }}
+                                </span>
+                              @else
+                                <span class="text-muted">&mdash;</span>
+                              @endif
+                            </td>
+                            <td class="text-end">
+                              <div class="form-check form-switch mb-0">
+                                <input
+                                  type="hidden"
+                                  name="programs[selected_programs][{{ $program->id }}]"
+                                  value="0"
+                                >
+                                <input
+                                  type="checkbox"
+                                  name="programs[selected_programs][{{ $program->id }}]"
+                                  value="1"
+                                  class="form-check-input program-visibility-switch"
+                                  @checked(!$program->is_expired)
+                                  @disabled($program->is_expired)
+                                >
+                              </div>
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                  <div id="programsNoResults" class="text-center py-5 d-none">
+                    <i class="ti ti-search text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="text-muted mb-1" id="programsNoResultsSearch">
+                      {{ __('landing.No_Programs_Found') }}
+                    </h5>
+                    <h5 class="text-muted mb-1 d-none" id="programsNoResultsFilters">
+                      {{ __('landing.No_Programs_Match') }}
+                    </h5>
+                  </div>
+                  <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 mt-3">
+                    <small class="text-muted" id="programsPaginationInfo"></small>
+                    <nav aria-label="Programs pagination" id="programsPaginationNav">
+                      <ul class="pagination justify-content-center mb-0" id="programsPaginationList"></ul>
+                    </nav>
+                  </div>
+                @endif
+
                 @if($section['key'] === 'how')
                   <hr class="my-4">
                   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -349,86 +595,6 @@
                   <div class="row g-4" id="howStepsContainer"></div>
                 @endif
 
-                @if($section['key'] === 'programs')
-                  @if($cycles->isEmpty())
-                    <div class="text-center text-muted py-4">
-                      <i class="ti ti-rocket-off fs-1 mb-2 d-block opacity-50"></i>
-                      <p class="small mb-0">{{ __('landing.No_programs_available') }}</p>
-                    </div>
-                  @else
-                    <p class="text-secondary mb-3">
-                      {{ __('landing.choose_programs') }}
-                    </p>
-
-                    <div class="row g-3 mb-4" id="programsFilterBar">
-                      <div class="col-md-4">
-                        <div class="input-group input-group-merge">
-                          <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
-                          <input type="text" class="form-control" id="programsFilterSearch" placeholder="{{ __('admin.Search') }}...">
-                        </div>
-                      </div>
-                      <div class="col-md-3">
-                        <select class="form-select" id="programsFilterOrg">
-                          <option value="">{{ __('landing.All_Organizations') }}</option>
-                          @foreach($programOrganizations as $org)
-                            <option value="{{ $org->id }}">{{ $l == 'ar' ? $org->name_ar : $org->name_en }}</option>
-                          @endforeach
-                        </select>
-                      </div>
-                      <div class="col-md-3">
-                        <select class="form-select" id="programsFilterType">
-                          <option value="">{{ __('landing.All_Types') }}</option>
-                          @foreach($programTypes as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
-                          @endforeach
-                        </select>
-                      </div>
-                      <div class="col-md-2">
-                        <select class="form-select" id="programsFilterVisibility">
-                          <option value="">{{ __('admin.All') }}</option>
-                          <option value="visible">{{ __('admin.visible') }}</option>
-                          <option value="hidden">{{ __('admin.Hidden') }}</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="row g-3" id="programsChecklist">
-                      @foreach($cycles as $cycle)
-                        <div
-                          class="col-md-6 program-item"
-                          data-name="{{ strtolower($cycle->title . ' ' . ($cycle->organization ? ($cycle->organization->name_en . ' ' . $cycle->organization->name_ar) : '')) }}"
-                          data-org="{{ $cycle->organization_id }}"
-                          data-type="{{ $cycle->type }}"
-                        >
-                          <div class="form-check border rounded p-3 d-flex align-items-start gap-2">
-                            <input
-                              type="checkbox"
-                              class="form-check-input mt-1"
-                              id="program_cycle_{{ $cycle->id }}"
-                              name="programs[cycle_ids][]"
-                              value="{{ $cycle->id }}"
-                              disabled
-                            >
-                            <label class="form-check-label" for="program_cycle_{{ $cycle->id }}">
-                              <span class="d-block fw-semibold">{{ $cycle->title }}</span>
-                              <span class="d-block text-secondary small">
-                                {{ $cycle->organization ? ($l == 'ar' ? $cycle->organization->name_ar : $cycle->organization->name_en) : '' }}
-                              </span>
-                            </label>
-                          </div>
-                        </div>
-                      @endforeach
-                    </div>
-
-                    <div class="text-center text-muted py-4 d-none" id="programsFilterEmptyState">
-                      <i class="ti ti-filter-off fs-1 mb-2 d-block opacity-50"></i>
-                      <p class="small mb-0">
-                        {{ __('landing.No_Programs_Match') }}
-                      </p>
-                    </div>
-                  @endif
-                @endif
-
                 @if($section['key'] === 'custom')
                   <hr class="my-4">
                   <div class="d-flex align-items-center justify-content-end mb-3 gap-2">
@@ -442,21 +608,22 @@
                       {{ __('landing.Add_Custom_Section') }}
                     </button>
                   </div>
-
                   <div id="customSectionsContainer"></div>
                   <div id="customSectionMaxHint" class="alert alert-warning py-2 small d-none" role="alert">
-                    {{ $l == 'ar' ? 'يمكنك إضافة حتى 5 أقسام مخصصة فقط.' : 'You can add up to 5 custom sections only.' }}
+                    {{ __('landing.Custom_Sections_Max_Hint') }}
                   </div>
                   <div id="customSectionsEmpty" class="text-center py-5 border border-dashed rounded">
                     <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
                     <h5 class="text-muted mb-1">
-                      {{ $l == 'ar' ? 'لا توجد أقسام مخصصة بعد' : 'No custom sections yet' }}
+                      {{ __('landing.No_custom_sections_yet') }}
                     </h5>
                     <p class="text-muted small mb-0">
-                      {{ $l == 'ar' ? 'أضف أقسامًا مخصصة لإثراء صفحة الهبوط الخاصة بك' : 'Add custom sections to enrich your landing page' }}
+                      {{ __('landing.Add_Custom_Sections_Hint') }}
                     </p>
                   </div>
                 @endif
+
+                </fieldset>
               </form>
             </div>
           @endforeach
@@ -472,20 +639,20 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          {{ $l == 'ar' ? 'إضافة زر' : 'Add Button' }}
+          {{ __('landing.Add_Button') }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label" for="customButtonText">
-            {{ $l == 'ar' ? 'نص الزر' : 'Button Text' }}
+            {{ __('landing.Button_text') }}
           </label>
           <input type="text" class="form-control" id="customButtonText" maxlength="50">
         </div>
         <div class="mb-3">
           <label class="form-label" for="customButtonLink">
-            {{ $l == 'ar' ? 'رابط الزر' : 'Button Link' }}
+            {{ __('landing.Button_link') }}
           </label>
           <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
           <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
@@ -493,10 +660,10 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-          {{ $l == 'ar' ? 'إلغاء' : 'Cancel' }}
+          {{ __('landing.Cancel') }}
         </button>
         <button type="button" class="btn btn-primary" id="customButtonSave">
-          {{ $l == 'ar' ? 'إضافة' : 'Add' }}
+          {{ __('landing.Add') }}
         </button>
       </div>
     </div>
@@ -508,6 +675,7 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
 @endsection
 
 @section('pagescripts')
@@ -529,55 +697,406 @@
       });
 
       // ─────────────────────────────────────────────────────────────
+      // Custom landing-page URL configuration (simulated backend)
+      // Save/check hit session-backed controller stubs; validation uses
+      // the exact acceptance-criteria messages for both languages.
+      // ─────────────────────────────────────────────────────────────
+      const isArabic = {{ $l == 'ar' ? 'true' : 'false' }};
+      const lpUrlI18n = {
+        titleRequired:  "{{ __('landing.validation.title_required') }}",
+        nameRequired:   "{{ __('landing.validation.custom_url_name_required') }}",
+        slugRequired:   "{{ __('landing.validation.custom_url_slug_required') }}",
+        slugInvalid:    "{{ __('landing.validation.custom_url_invalid') }}",
+        available:      "{{ __('landing.validation.custom_url_available') }}",
+        taken:          "{{ __('landing.validation.custom_url_taken') }}",
+        checking:       "{{ __('landing.validation.checking_url_availability') }}",
+        saved:          "{{ __('landing.success.custom_url_saved') }}",
+        activeStatus:   "{{ __('landing.Landing_Page_URL_Active') }}",
+        inactiveStatus: "{{ __('landing.Landing_Page_URL_Inactive') }}",
+        previewNotSaved: "{{ __('landing.validation.cannot_preview_invalid_url') }}",
+        titleMax:       "{{ __('landing.validation.custom_url_title_max') }}",
+        nameMax:        "{{ __('landing.validation.custom_url_name_max') }}",
+      };
+
+      const lpUrlBase = "{{ url('/lp/') }}/";
+      let lpUrlSlugChecked = false;   // current slug value verified against the backend
+      let lpUrlSlugAvailable = false; // result of the last availability check
+      let lpUrlSavedSlug = null;      // slug of the currently saved configuration
+      let lpUrlActive = true;         // mirrors the Active toggle
+      let lpUrlSaveRoute = null;      // set once General is saved and a page id exists
+
+      const lpUrlSlugify = function (value) {
+        return String(value || '')
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_]+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      };
+
+      const lpUrlIsValidSlug = function (slug) {
+        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+      };
+
+      const lpUrlFindFeedback = function ($input) {
+        const $sibling = $input.siblings('.invalid-feedback');
+        if ($sibling.length) return $sibling;
+        return $input.closest('.col-md-6, .col-xl-7, .col-12').find('.invalid-feedback').first();
+      };
+
+      const lpUrlShowFieldError = function ($input, message) {
+        $input.addClass('is-invalid');
+        lpUrlFindFeedback($input).text(message).addClass('d-block');
+      };
+
+      const lpUrlClearFieldError = function ($input) {
+        $input.removeClass('is-invalid');
+        lpUrlFindFeedback($input).text('').removeClass('d-block');
+      };
+
+      const lpUrlSetAvailability = function (state, message) {
+        const $fb = $('#lpUrlAvailabilityFeedback');
+        if (!message) {
+          $fb.removeClass('text-success text-danger').text('').hide();
+          return;
+        }
+        $fb.removeClass('text-success text-danger')
+          .addClass(state === 'available' ? 'text-success' : 'text-danger')
+          .text(message)
+          .show();
+      };
+
+      const lpUrlAjax = function (url, payload) {
+        return $.ajax({
+          url: url,
+          method: 'POST',
+          data: Object.assign({ _token: "{{ csrf_token() }}" }, payload),
+          dataType: 'json',
+        });
+      };
+
+      // FormValidation wiring for the custom-URL card.
+      const lpUrlFvFields = {
+        lpUrlTitle: {
+          validators: {
+            notEmpty: { message: lpUrlI18n.titleRequired },
+            stringLength: { max: 100, message: lpUrlI18n.titleMax },
+          },
+        },
+        lpUrlName: {
+          validators: {
+            notEmpty: { message: lpUrlI18n.nameRequired },
+            stringLength: { max: 100, message: lpUrlI18n.nameMax },
+          },
+        },
+        lpUrlSlug: {
+          validators: {
+            notEmpty: { message: lpUrlI18n.slugRequired },
+            regexp: {
+              regexp: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+              message: lpUrlI18n.slugInvalid,
+            },
+            callback: {
+              message: lpUrlI18n.taken,
+              callback: function (input) {
+                const slug = (input.value || '').trim().toLowerCase();
+                if (!lpUrlIsValidSlug(slug)) return { valid: true };
+                if (!lpUrlSlugChecked) return { valid: true };
+                return { valid: lpUrlSlugAvailable };
+              },
+            },
+          },
+        },
+      };
+
+      let lpUrlFv = null;
+      if (typeof FormValidation !== 'undefined') {
+        const $lpUrlForm = document.getElementById('lpUrlForm');
+        if ($lpUrlForm) {
+          lpUrlFv = FormValidation.formValidation($lpUrlForm, {
+            fields: lpUrlFvFields,
+            plugins: {
+              trigger: new FormValidation.plugins.Trigger(),
+              bootstrap5: new FormValidation.plugins.Bootstrap5({ eleValidClass: '' }),
+              autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: instance => {
+              instance.on('plugins.message.placed', function (e) {
+                if (e.element.parentElement.classList.contains('input-group')) {
+                  e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+                }
+              });
+            },
+          });
+        }
+      }
+
+      // Always resolves with { valid, available, message }.
+      const lpUrlCheckAvailability = function () {
+        const $slug = $('#lpUrlSlug');
+        const slug = ($slug.val() || '').trim().toLowerCase();
+        const d = $.Deferred();
+        lpUrlSlugChecked = false;
+        lpUrlSlugAvailable = false;
+
+        if (!slug) {
+          lpUrlSetAvailability('taken', lpUrlI18n.slugRequired);
+          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugRequired, empty: true });
+          return d.promise();
+        }
+        if (!lpUrlIsValidSlug(slug)) {
+          lpUrlSetAvailability('taken', lpUrlI18n.slugInvalid);
+          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugInvalid });
+          return d.promise();
+        }
+
+        lpUrlSetAvailability('', lpUrlI18n.checking);
+
+        lpUrlAjax("{{ route('landing-pages.url.check') }}", { slug: slug })
+          .done(function (res) {
+            lpUrlSlugChecked = true;
+            lpUrlSlugAvailable = !!res.available;
+            lpUrlSetAvailability(res.available ? 'available' : 'taken', res.message);
+            d.resolve({ valid: !!res.valid, available: !!res.available, message: res.message });
+          })
+          .fail(function (xhr) {
+            const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
+            lpUrlSetAvailability('taken', message);
+            d.resolve({ valid: false, available: false, message: message });
+          });
+        return d.promise();
+      };
+
+      const lpUrlRenderStatus = function () {
+        const $status = $('#lpUrlStatusText');
+        if (lpUrlActive) {
+          $status.html('<span class="text-success"><i class="ti ti-check me-1"></i>' + lpUrlI18n.activeStatus + '</span>');
+        } else {
+          $status.html('<span class="text-warning"><i class="ti ti-eye-off me-1"></i>' + lpUrlI18n.inactiveStatus + '</span>');
+        }
+      };
+
+      const lpUrlRenderSavedLink = function () {
+        const $wrap = $('#lpUrlSavedLinkWrap');
+        if (!lpUrlSavedSlug) {
+          $wrap.addClass('d-none');
+          return;
+        }
+        const href = lpUrlBase + lpUrlSavedSlug;
+        $('#lpUrlSavedLink').attr('href', href).text(href);
+        $wrap.removeClass('d-none');
+      };
+
+      $('#lpUrlEnabledToggle').on('change', function () {
+        lpUrlActive = this.checked;
+        lpUrlRenderStatus();
+      });
+
+      $('#lpUrlGenerateBtn').on('click', function () {
+        const $title = $('#lpUrlTitle');
+        if (lpUrlFv) {
+          lpUrlFv.revalidateField('lpUrlTitle');
+          if (!$title.val().trim()) return;
+        } else {
+          if (!$title.val().trim()) {
+            lpUrlShowFieldError($title, lpUrlI18n.titleRequired);
+            return;
+          }
+          lpUrlClearFieldError($title);
+        }
+        $('#lpUrlSlug').val(lpUrlSlugify($title.val()));
+        lpUrlSlugChecked = false;
+        lpUrlSlugAvailable = false;
+        lpUrlSetAvailability('', '');
+        if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
+      });
+
+      $('#lpUrlCheckBtn').on('click', function () {
+        lpUrlCheckAvailability().done(function () {
+          if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
+        });
+      });
+
+      $('#lpUrlSlug').on('input', function () {
+        lpUrlSlugChecked = false;
+        lpUrlSlugAvailable = false;
+        lpUrlSetAvailability('', '');
+      });
+
+      $('#lpUrlForm').on('submit', function (e) {
+        e.preventDefault();
+        const $btn = $('#lpUrlSaveBtn');
+        const $title = $('#lpUrlTitle');
+        const $name = $('#lpUrlName');
+        const $slug = $('#lpUrlSlug');
+
+        // Nothing to save the URL onto until General has been saved and a
+        // page id exists; the button is disabled in that state too, this
+        // is just a defensive guard.
+        if (!lpUrlSaveRoute) return;
+
+        const proceedSave = function () {
+          const originalHtml = $btn.html();
+          $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+          lpUrlAjax(lpUrlSaveRoute, {
+            title: $title.val().trim(),
+            name: $name.val().trim(),
+            slug: ($slug.val() || '').trim().toLowerCase(),
+            active: lpUrlActive ? 1 : 0,
+          })
+            .done(function (res) {
+              lpUrlSavedSlug = ($slug.val() || '').trim().toLowerCase();
+              lpUrlSlugChecked = true;
+              lpUrlSlugAvailable = true;
+              lpUrlRenderSavedLink();
+              releaseSuccessAlert({
+                title: "{{ __('admin.success') }}",
+                message: res.message || lpUrlI18n.saved,
+              });
+              $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
+              setTimeout(function () {
+                $btn.removeClass('btn-success').addClass('btn-primary').html(originalHtml);
+              }, 1500);
+            })
+            .fail(function (xhr) {
+              const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
+              releaseFailureAlert({
+                title: "{{ __('admin.Error') }}",
+                message: message,
+              });
+              $btn.html(originalHtml);
+            })
+            .always(function () {
+              $btn.prop('disabled', false);
+            });
+        };
+
+        const runChecks = function () {
+          if (lpUrlFv) {
+            lpUrlFv.validate().then(function (status) {
+              if (status !== 'Valid') return;
+              if (lpUrlSlugChecked && lpUrlSlugAvailable) {
+                proceedSave();
+                return;
+              }
+              lpUrlCheckAvailability().done(function (res) {
+                if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
+                if (res.valid && res.available) proceedSave();
+              });
+            });
+            return;
+          }
+
+          // Fallback when the FormValidation plugin is unavailable.
+          const slug = ($slug.val() || '').trim().toLowerCase();
+          let firstError = null;
+          const mark = function ($input, message) {
+            lpUrlShowFieldError($input, message);
+            if (!firstError) firstError = message;
+          };
+          if (!$title.val().trim()) {
+            mark($title, lpUrlI18n.titleRequired);
+          } else {
+            lpUrlClearFieldError($title);
+          }
+          if (!$name.val().trim()) {
+            mark($name, lpUrlI18n.nameRequired);
+          } else {
+            lpUrlClearFieldError($name);
+          }
+          if (!slug) {
+            mark($slug, lpUrlI18n.slugRequired);
+          } else if (!lpUrlIsValidSlug(slug)) {
+            mark($slug, lpUrlI18n.slugInvalid);
+          } else {
+            lpUrlClearFieldError($slug);
+          }
+          if (firstError) return;
+
+          const proceed = function (checkResult) {
+            if (checkResult.valid && checkResult.available) {
+              proceedSave();
+            }
+          };
+          if (lpUrlSlugChecked && lpUrlSlugAvailable) {
+            proceed({ valid: true, available: true });
+          } else {
+            lpUrlCheckAvailability().done(proceed);
+          }
+        };
+
+        runChecks();
+      });
+
+      $('#lpUrlPreviewBtn').on('click', function () {
+        if (!lpUrlSavedSlug) {
+          releaseFailureAlert({
+            title: lpUrlI18n.activeStatus,
+            message: lpUrlI18n.previewNotSaved,
+          });
+          return;
+        }
+        // Active slug renders the landing page; inactive/unknown slug
+        // returns a real 404 from the public route.
+        window.open(lpUrlBase + lpUrlSavedSlug, '_blank', 'noopener');
+      });
+
+      // ─────────────────────────────────────────────────────────────
       // Section forms — FormValidation (client-side)
       // Validation errors only block the save; they never reset the form.
       // ─────────────────────────────────────────────────────────────
-      const isArabic = {{ $l == 'ar' ? 'true' : 'false' }};
       const maxImageSize = 5 * 1024 * 1024; // 5 MB
 
       const validationMessages = {
-        generalTitle:       isArabic ? 'يرجى إدخال عنوان الصفحة.' : 'Please enter the page title.',
-        logoRequired:       isArabic ? 'يرجى تحميل الشعار.' : 'Please upload a logo.',
-        logoUnsupported:    isArabic ? 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.' : 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
-        logoSize:           isArabic ? 'يجب ألا يتجاوز حجم الشعار 5 ميجابايت.' : 'Logo size must not exceed 5 MB.',
-        description:        isArabic ? 'يرجى إدخال الوصف.' : 'Please enter a description.',
-        descriptionArabic:  isArabic ? 'يرجى إدخال الوصف باللغة العربية.' : 'Please enter a description in Arabic.',
-        heroTitle:          isArabic ? 'يرجى إدخال العنوان.' : 'Please enter the title.',
-        heroSubtitle:       isArabic ? 'يرجى إدخال العنوان الفرعي.' : 'Please enter the subtitle.',
-        heroTitleArabic:    isArabic ? 'يرجى إدخال العنوان باللغة العربية.' : 'Please enter the title in Arabic.',
-        heroSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي باللغة العربية.' : 'Please enter the subtitle in Arabic.',
-        heroImageRequired:  isArabic ? 'يرجى تحميل صورة القسم الرئيسي.' : 'Please upload a hero image.',
-        heroImageFormat:    isArabic ? 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.' : 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
-        heroImageSize:      isArabic ? 'يجب ألا يتجاوز حجم صورة القسم الرئيسي 5 ميجابايت.' : 'Hero image size must not exceed 5 MB.',
-        aboutTitle:         isArabic ? 'يرجى إدخال عنوان القسم.' : 'Please enter the section title.',
-        aboutSubtitle:      isArabic ? 'يرجى إدخال العنوان الفرعي للقسم.' : 'Please enter the section subtitle.',
-        aboutDescription:   isArabic ? 'يرجى إدخال وصف القسم.' : 'Please enter the section description.',
-        aboutTitleArabic:   isArabic ? 'يرجى إدخال عنوان القسم باللغة العربية.' : 'Please enter the section title in Arabic.',
-        aboutSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللغة العربية.' : 'Please enter the section subtitle in Arabic.',
-        aboutDescriptionArabic: isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
-        cardIcon:           isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
-        cardTitle:          isArabic ? 'يرجى إدخال عنوان البطاقة.' : 'Please enter a card title.',
-        cardDescription:    isArabic ? 'يرجى إدخال وصف البطاقة.' : 'Please enter a card description.',
-        cardTitleArabic:    isArabic ? 'يرجى إدخال عنوان البطاقة باللغة العربية.' : 'Please enter a card title in Arabic.',
-        cardDescriptionArabic: isArabic ? 'يرجى إدخال وصف البطاقة باللغة العربية.' : 'Please enter a card description in Arabic.',
-        howTitle:            isArabic ? 'يرجى إدخال عنوان القسم.' : 'Please enter the section title.',
-        howTitleArabic:      isArabic ? 'يرجى إدخال عنوان القسم باللغة العربيه.' : 'Please enter the section title in Arabic.',
-        howSubtitle:         isArabic ? 'يرجى إدخال العنوان الفرعي للقسم.' : 'Please enter the section subtitle.',
-        howSubtitleArabic:   isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللعة العربية.' : 'Please enter the section subtitle in Arabic.',
-        howDescription:      isArabic ? 'يرجى إدخال وصف القسم.' : 'Please enter the section description.',
-        howDescriptionArabic: isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
-        stepTitle:           isArabic ? 'يرجى إدخال عنوان الخطوة.' : 'Please enter the step title.',
-        stepTitleArabic:     isArabic ? 'يرجى إدخال عنوان الخطوة باللغة العربية.' : 'Please enter the step title in Arabic.',
-        stepIcon:            isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
-        stepDescription:     isArabic ? 'يرجى إدخال وصف الخطوة.' : 'Please enter the step description.',
-        stepDescriptionArabic: isArabic ? 'يرجى إدخال وصف الخطوة باللغة العربيه.' : 'Please enter the step description in Arabic.',
+        logoRequired:       "{{ __('landing.validation.logo_required') }}",
+        logoUnsupported:    "{{ __('landing.validation.image_format_invalid') }}",
+        logoSize:           "{{ __('landing.validation.logo_size_exceeded') }}",
+        description:        "{{ __('landing.validation.description_required') }}",
+        descriptionArabic:  "{{ __('landing.validation.description_ar_required') }}",
+        heroTitle:          "{{ __('landing.validation.title_required') }}",
+        heroSubtitle:       "{{ __('landing.validation.subtitle_required') }}",
+        heroTitleArabic:    "{{ __('landing.validation.title_ar_required') }}",
+        heroSubtitleArabic: "{{ __('landing.validation.subtitle_ar_required') }}",
+        heroImageRequired:  "{{ __('landing.validation.hero_image_required') }}",
+        heroImageFormat:    "{{ __('landing.validation.image_format_invalid') }}",
+        heroImageSize:      "{{ __('landing.validation.hero_image_size_exceeded') }}",
+        aboutTitle:         "{{ __('landing.validation.section_title_required') }}",
+        aboutSubtitle:      "{{ __('landing.validation.section_subtitle_required') }}",
+        aboutDescription:   "{{ __('landing.validation.section_description_required') }}",
+        aboutTitleArabic:   "{{ __('landing.validation.section_title_ar_required') }}",
+        aboutSubtitleArabic: "{{ __('landing.validation.section_subtitle_ar_required') }}",
+        aboutDescriptionArabic: "{{ __('landing.validation.section_description_ar_required') }}",
+        programsRequired:       "{{ __('landing.validation.field_required') }}",
+        howTitle:               "{{ __('landing.validation.section_title_required') }}",
+        howTitleArabic:         "{{ __('landing.validation.section_title_ar_required') }}",
+        howSubtitle:            "{{ __('landing.validation.section_subtitle_required') }}",
+        howSubtitleArabic:      "{{ __('landing.validation.section_subtitle_ar_required') }}",
+        howDescription:         "{{ __('landing.validation.section_description_required') }}",
+        howDescriptionArabic:   "{{ __('landing.validation.section_description_ar_required') }}",
+        howStepTitle:           "{{ __('landing.validation.step_title_required') }}",
+        howStepTitleArabic:     "{{ __('landing.validation.step_title_ar_required') }}",
+        howStepIcon:            "{{ __('landing.validation.icon_required') }}",
+        howStepDescription:     "{{ __('landing.validation.step_description_required') }}",
+        howStepDescriptionArabic: "{{ __('landing.validation.step_description_ar_required') }}",
+        customRequired:         "{{ __('landing.validation.custom_section_field_required') }}",
+        customUnsupportedType:  "{{ __('landing.validation.custom_image_type_invalid') }}",
+        customImageSize:        "{{ __('landing.validation.custom_image_size_exceeded') }}",
+        customButtonLink:       "{{ __('landing.validation.button_link_invalid') }}",
+        cardIcon:           "{{ __('landing.validation.icon_required') }}",
+        cardTitle:          "{{ __('landing.validation.card_title_required') }}",
+        cardDescription:    "{{ __('landing.validation.card_description_required') }}",
+        cardTitleArabic:    "{{ __('landing.validation.card_title_ar_required') }}",
+        cardDescriptionArabic: "{{ __('landing.validation.card_description_ar_required') }}",
       };
 
       const successMessages = {
-        general: isArabic ? 'تم حفظ المعلومات العامة لصفحة الهبوط بنجاح.' : 'General landing page information saved successfully.',
-        hero:    isArabic ? 'تم حفظ معلومات القسم الرئيسي بنجاح.' : 'Hero section information saved successfully.',
-        about:   isArabic ? 'تم حفظ معلومات قسم من نحن بنجاح.' : 'About section information saved successfully.',
-        how:     isArabic ? 'تم حفظ المعلومات بنجاح.' : 'Information saved successfully.',
+        general: "{{ __('landing.success.general_saved') }}",
+        hero:    "{{ __('landing.success.hero_saved') }}",
+        about:   "{{ __('landing.success.about_saved') }}",
+        programs: "{{ __('landing.success.programs_saved') }}",
+        how:      "{{ __('landing.success.how_saved') }}",
+        custom:   "{{ __('landing.success.custom_saved') }}",
       };
 
       const buildImageField = function (requiredMsg, formatMsg, sizeMsg) {
@@ -606,12 +1125,6 @@
 
       const sectionFields = {
         general: {
-          'general[title]': {
-            validators: {
-              notEmpty: { message: validationMessages.generalTitle },
-              stringLength: { max: 255 },
-            },
-          },
           'general[logo]': buildImageField(
             validationMessages.logoRequired,
             validationMessages.logoUnsupported,
@@ -697,6 +1210,38 @@
             },
           },
         },
+        programs: {
+          'programs[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+        },
         how: {
           'how[title]': {
             validators: {
@@ -744,12 +1289,12 @@
       };
 
       const socialLinkMessages = {
-        linkedin:  isArabic ? 'يرجى إدخال رابط لينكدإن صالح (مثال: https://www.linkedin.com/in/username).' : 'Please enter a valid LinkedIn URL (e.g. https://www.linkedin.com/in/username).',
-        facebook:  isArabic ? 'يرجى إدخال رابط فيسبوك صالح (مثال: https://www.facebook.com/page).' : 'Please enter a valid Facebook URL (e.g. https://www.facebook.com/page).',
-        instagram: isArabic ? 'يرجى إدخال رابط إنستغرام صالح (مثال: https://www.instagram.com/username).' : 'Please enter a valid Instagram URL (e.g. https://www.instagram.com/username).',
-        x:         isArabic ? 'يرجى إدخال رابط إكس / تويتر صالح (مثال: https://x.com/username).' : 'Please enter a valid X / Twitter URL (e.g. https://x.com/username).',
-        tiktok:    isArabic ? 'يرجى إدخال رابط تيك توك صالح (مثال: https://www.tiktok.com/@username).' : 'Please enter a valid TikTok URL (e.g. https://www.tiktok.com/@username).',
-        youtube:   isArabic ? 'يرجى إدخال رابط يوتيوب صالح (مثال: https://www.youtube.com/@channel).' : 'Please enter a valid YouTube URL (e.g. https://www.youtube.com/@channel).',
+        linkedin:  "{{ __('landing.validation.linkedin_url_invalid') }}",
+        facebook:  "{{ __('landing.validation.facebook_url_invalid') }}",
+        instagram: "{{ __('landing.validation.instagram_url_invalid') }}",
+        x:         "{{ __('landing.validation.x_url_invalid') }}",
+        tiktok:    "{{ __('landing.validation.tiktok_url_invalid') }}",
+        youtube:   "{{ __('landing.validation.youtube_url_invalid') }}",
       };
 
       ['linkedin', 'facebook', 'instagram', 'x', 'tiktok', 'youtube'].forEach(function (name) {
@@ -839,34 +1384,34 @@
           <div class="col-12 about-card" data-card-id="${id}">
             <div class="border rounded p-3">
               <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="mb-0 about-card-label">${isArabic ? 'البطاقة' : 'Card'}</h6>
+                <h6 class="mb-0 about-card-label">${"{{ __('landing.Card') }}"}</h6>
                 <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-about-card">
                   <i class="ti ti-trash"></i>
-                  ${isArabic ? 'حذف' : 'Remove'}
+                  ${"{{ __('landing.Remove') }}"}
                 </button>
               </div>
               <div class="row g-4">
                 <div class="col-md-4">
-                  <label class="form-label">${isArabic ? 'الأيقونة' : 'Icon'}</label>
+                  <label class="form-label">${"{{ __('landing.Icon') }}"}</label>
                   <select name="about[cards][${id}][icon]" class="form-select" data-card-field>
-                    <option value="">${isArabic ? '— اختر أيقونة —' : '— Select an icon —'}</option>
+                    <option value="">${"{{ __('landing.Select_an_icon') }}"}</option>
                     ${iconOptions}
                   </select>
                 </div>
                 <div class="col-md-8">
-                  <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
+                  <label class="form-label">${"{{ __('landing.Title') }}"}</label>
                   <input type="text" name="about[cards][${id}][title]" maxlength="100" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
                   <input type="text" name="about[cards][${id}][title_ar]" maxlength="100" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'الوصف' : 'Description'}</label>
+                  <label class="form-label">${"{{ __('landing.Description') }}"}</label>
                   <textarea name="about[cards][${id}][description]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'الوصف بالعربية' : 'Description (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Description_ar') }}"}</label>
                   <textarea name="about[cards][${id}][description_ar]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
                 </div>
               </div>
@@ -879,7 +1424,7 @@
         const count = $('#aboutCardsContainer .about-card').length;
         $('#aboutAddCard').prop('disabled', count >= aboutMaxCards);
         $('#aboutCardsContainer .about-card').each(function (i) {
-          $(this).find('.about-card-label').text((isArabic ? 'البطاقة ' : 'Card ') + (i + 1));
+          $(this).find('.about-card-label').text(("{{ __('landing.Card') }}") + (i + 1));
         });
       };
 
@@ -945,90 +1490,72 @@
       });
 
       // ─────────────────────────────────────────────────────────────
-      // How It Works — process steps repeater (max 3 steps).
-      // Step fields are symmetric: title/icon/description mutually
-      // require each other; title_ar/description_ar share the same
-      // trigger condition as their English counterpart.
+      // How It Works section — process steps repeater (max 3 steps)
+      // Step fields are all-or-nothing: an untouched step is valid, but
+      // once any field of a step is filled every step field becomes
+      // mandatory.
       // ─────────────────────────────────────────────────────────────
       const howMaxSteps = 3;
-      const howStepFields = ['icon', 'title', 'description', 'title_ar', 'description_ar'];
+      const howStepFields = ['title', 'icon', 'description', 'title_ar', 'description_ar'];
       const howStepMessages = {
-        icon:           validationMessages.stepIcon,
-        title:          validationMessages.stepTitle,
-        description:    validationMessages.stepDescription,
-        title_ar:       validationMessages.stepTitleArabic,
-        description_ar: validationMessages.stepDescriptionArabic,
+        title:        validationMessages.howStepTitle,
+        icon:         validationMessages.howStepIcon,
+        description:  validationMessages.howStepDescription,
+        title_ar:     validationMessages.howStepTitleArabic,
+        description_ar: validationMessages.howStepDescriptionArabic,
       };
+      const howIcons = aboutIcons;
       let howStepCounter = 0;
 
       const validateHowStepField = function (element) {
         const $step = $(element).closest('.how-step');
-        const get = function (suffix) {
-          const el = $step.find('[name$="[' + suffix + ']"]')[0];
-          if (!el) return '';
-          return (el.value || '').trim();
-        };
-        const icon = get('icon');
-        const title = get('title');
-        const description = get('description');
-
-        const match = (element.name || '').match(/\[(\w+)\]$/);
-        const fieldKey = match ? match[1] : null;
-
-        let missing = false;
-        switch (fieldKey) {
-          case 'icon':
-            missing = !icon && (title || description);
-            break;
-          case 'title':
-          case 'title_ar':
-            missing = !get(fieldKey) && (icon || description);
-            break;
-          case 'description':
-          case 'description_ar':
-            missing = !get(fieldKey) && (title || icon);
-            break;
+        const hasAny = $step.find('[data-step-field]').toArray().some(function (el) {
+          const $el = $(el);
+          return $el.is('select') ? !!$el.val() : $el.val().trim() !== '';
+        });
+        if (!hasAny) return { valid: true };
+        if (element.tagName === 'SELECT') {
+          return { valid: element.value !== '' };
         }
-
-        return { valid: !missing };
+        return { valid: element.value.trim() !== '' };
       };
 
       const howStepHtml = function (id) {
-        const iconOptions = aboutIcons.map(function (icon) {
+        const iconOptions = howIcons.map(function (icon) {
           return '<option value="' + icon.value + '">' + icon.label + '</option>';
         }).join('');
         return `
           <div class="col-12 how-step" data-step-id="${id}">
             <div class="border rounded p-3">
               <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="mb-0 how-step-label">${isArabic ? 'الخطوة' : 'Step'}</h6>
+                <h6 class="mb-0 how-step-label">${"{{ __('landing.Step') }}"}</h6>
                 <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-how-step">
                   <i class="ti ti-trash"></i>
-                  ${isArabic ? 'حذف' : 'Remove'}
+                  ${"{{ __('landing.Remove') }}"}
                 </button>
               </div>
               <div class="row g-4">
                 <div class="col-md-4">
-                  <label class="form-label">${isArabic ? 'الأيقونة' : 'Icon'}</label>
+                  <label class="form-label">${"{{ __('landing.Icon') }}"}</label>
                   <select name="how[steps][${id}][icon]" class="form-select" data-step-field>
-                    <option value="">${isArabic ? '— اختر أيقونة —' : '— Select an icon —'}</option>
+                    <option value="">${"{{ __('landing.Select_an_icon') }}"}</option>
                     ${iconOptions}
                   </select>
                 </div>
                 <div class="col-md-8">
-                  <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Title') }}"}</label>
                   <input type="text" name="how[steps][${id}][title]" maxlength="100" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Title_ar') }}"}</label>
                   <input type="text" name="how[steps][${id}][title_ar]" maxlength="100" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'الوصف' : 'Description'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Description') }}"}</label>
                   <textarea name="how[steps][${id}][description]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'الوصف بالعربية' : 'Description (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Step_Description_ar') }}"}</label>
                   <textarea name="how[steps][${id}][description_ar]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
                 </div>
               </div>
@@ -1041,7 +1568,7 @@
         const count = $('#howStepsContainer .how-step').length;
         $('#howAddStep').prop('disabled', count >= howMaxSteps);
         $('#howStepsContainer .how-step').each(function (i) {
-          $(this).find('.how-step-label').text((isArabic ? 'الخطوة ' : 'Step ') + (i + 1));
+          $(this).find('.how-step-label').text(("{{ __('landing.Step') }}") + (i + 1));
         });
       };
 
@@ -1106,114 +1633,140 @@
         });
       });
 
-      // ─────────────────────────────────────────────────────────────
-      // Custom Sections — repeater preview only. Saving requires an
-      // existing page (see the warning banner), so this only lets the
-      // admin add/remove/preview blocks; the Save button stays disabled
-      // and there is no image upload endpoint to call yet.
-      // ─────────────────────────────────────────────────────────────
-      const programsPerPage = 10;
-      let programsCurrentPage = 1;
-      let programsSearchTerm = '';
-      const programsFilters = {
-        visibility: 'all',
-        organization: 'all',
-        type: 'all',
-      };
-
-      const getFilteredProgramRows = function () {
-        const $rows = $('#programsListBody .programs-list-row');
-        const term = programsSearchTerm.trim().toLowerCase();
-
-        return $rows.filter(function () {
-          const $row = $(this);
-          if (term && ($row.attr('data-search-title') || '').toLowerCase().indexOf(term) === -1) return false;
-          if (programsFilters.visibility !== 'all' && $row.attr('data-program-visibility') !== programsFilters.visibility) return false;
-          if (programsFilters.organization !== 'all' && $row.attr('data-program-organization') !== programsFilters.organization) return false;
-          if (programsFilters.type !== 'all' && $row.attr('data-program-type') !== programsFilters.type) return false;
-          return true;
+      // Programs main fields are only mandatory while the section is enabled.
+      $('#programs_is_enabled').on('change', function () {
+        const fv = sectionValidations.programs;
+        if (!fv) return;
+        const enabled = this.checked;
+        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
+          const fieldName = 'programs[' + name + ']';
+          if (enabled) {
+            fv.enableValidator(fieldName, 'notEmpty');
+          } else {
+            fv.disableValidator(fieldName, 'notEmpty');
+          }
+          fv.revalidateField(fieldName);
         });
-      };
+      });
 
-      const renderProgramsPagination = function () {
-        const $allRows = $('#programsListBody .programs-list-row');
-        const $rows = getFilteredProgramRows();
-        const total = $rows.length;
-        const totalPages = Math.max(1, Math.ceil(total / programsPerPage));
+      // ─────────────────────────────────────────────────────────────
+      // Programs selection list — client-side search + filters +
+      // pagination (10 rows/page). Filtering only hides/shows rows so
+      // any pending visibility switch changes are never lost.
+      // ─────────────────────────────────────────────────────────────
+      (function () {
+        const $search = $('#programsSearchInput');
+        const $visibility = $('#programsVisibilityFilter');
+        const $org = $('#programsOrganizationFilter');
+        const $type = $('#programsTypeFilter');
+        const $rows = $('#programsListBody .programs-list-row');
+        const $noResults = $('#programsNoResults');
+        const $noResultsSearch = $('#programsNoResultsSearch');
+        const $noResultsFilters = $('#programsNoResultsFilters');
+        const $paginationInfo = $('#programsPaginationInfo');
+        const $paginationList = $('#programsPaginationList');
+        const perPage = 10;
+        let currentPage = 1;
 
-        const $list = $('#programsPaginationList').empty();
-        const $nav = $('#programsPaginationNav');
-        const $info = $('#programsPaginationInfo');
+        if (!$rows.length) return;
 
-        if (total === 0) {
-          $allRows.hide();
-          $('#programsNoResults').removeClass('d-none');
-          const hasActiveFilters = programsFilters.visibility !== 'all' || programsFilters.organization !== 'all' || programsFilters.type !== 'all';
-          $('#programsNoResultsSearch').toggleClass('d-none', hasActiveFilters);
-          $('#programsNoResultsFilters').toggleClass('d-none', !hasActiveFilters);
-          $nav.hide();
-          $info.text('');
-          return;
+        if (typeof $.fn.select2 === 'function') {
+          $('#programsVisibilityFilter, #programsOrganizationFilter, #programsTypeFilter').select2({
+            width: '100%',
+            placeholder: "{{ __('landing.All') }}",
+            allowClear: true,
+            minimumResultsForSearch: 5,
+          });
         }
 
-        $('#programsNoResults').addClass('d-none');
-
-        if (programsCurrentPage > totalPages) programsCurrentPage = totalPages;
-        const start = (programsCurrentPage - 1) * programsPerPage;
-
-        $allRows.hide();
-        $rows.slice(start, start + programsPerPage).show();
-
-        if (totalPages <= 1) {
-          $nav.hide();
-          $info.text('');
-          return;
+        function noFilterValue(value) {
+          return !value || value === 'all';
         }
 
-        $nav.show();
-        const from = start + 1;
-        const to = Math.min(start + programsPerPage, total);
-        $info.text(isArabic ? `عرض ${from} - ${to} من ${total}` : `Showing ${from} - ${to} of ${total}`);
+        function getMatchingRows() {
+          const search = ($search.val() || '').trim().toLowerCase();
+          const visibility = $visibility.val();
+          const org = $org.val();
+          const type = $type.val();
 
-        $list.append(`<li class="page-item ${programsCurrentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${programsCurrentPage - 1}">&laquo;</a></li>`);
-        for (let i = 1; i <= totalPages; i++) {
-          if (i === 1 || i === totalPages || Math.abs(i - programsCurrentPage) <= 1) {
-            $list.append(`<li class="page-item ${i === programsCurrentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
-          } else if (Math.abs(i - programsCurrentPage) === 2) {
-            $list.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+          return $rows.filter(function () {
+            const $row = $(this);
+            const matchesSearch = !search || String($row.data('search-title')).includes(search);
+            const matchesOrg = noFilterValue(org) || String($row.data('program-organization')) === String(org);
+            const matchesType = noFilterValue(type) || String($row.data('program-type')) === String(type);
+            // "Visible" = currently checked (selected for this landing page);
+            // "Hidden" = currently unchecked. Read live so toggling a switch
+            // updates the filter without needing a page reload.
+            const isChecked = $row.find('.program-visibility-switch').is(':checked');
+            const matchesVisibility = noFilterValue(visibility) || (visibility === 'visible' ? isChecked : !isChecked);
+            return matchesSearch && matchesOrg && matchesType && matchesVisibility;
+          });
+        }
+
+        function renderPagination(totalPages, total, start, shown) {
+          $paginationList.empty();
+
+          if (total === 0) {
+            $paginationInfo.text('');
+          } else {
+            const from = start + 1;
+            const to = start + shown;
+            $paginationInfo.text(
+              "{{ __('landing.Programs_Pagination_Info') }}"
+                .replace(':from', from)
+                .replace(':to', to)
+                .replace(':total', total)
+            );
+          }
+
+          if (totalPages <= 1) return;
+
+          for (let page = 1; page <= totalPages; page++) {
+            const $link = $('<button type="button" class="page-link"></button>').text(page);
+            const $li = $('<li class="page-item"></li>').toggleClass('active', page === currentPage).append($link);
+            $link.on('click', function () {
+              currentPage = page;
+              applyProgramsFilter();
+            });
+            $paginationList.append($li);
           }
         }
-        $list.append(`<li class="page-item ${programsCurrentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${programsCurrentPage + 1}">&raquo;</a></li>`);
-      };
 
-      // Keep the visibility filter in sync when a switch is toggled.
-      $('#programsListBody').on('change', '.program-visibility-switch', function () {
-        $(this).closest('.programs-list-row').attr('data-program-visibility', this.checked ? 'visible' : 'hidden');
-      });
+        function applyProgramsFilter() {
+          const $matches = getMatchingRows();
+          const total = $matches.length;
+          const totalPages = Math.max(1, Math.ceil(total / perPage));
+          if (currentPage > totalPages) currentPage = totalPages;
 
-      $('#programsPaginationList').on('click', '.page-link', function (e) {
-        e.preventDefault();
-        const page = parseInt($(this).data('page'), 10);
-        if (isNaN(page) || page < 1 || page === programsCurrentPage) return;
-        programsCurrentPage = page;
-        renderProgramsPagination();
-      });
+          $rows.hide();
 
-      $('#programsSearchInput').on('input', function () {
-        programsSearchTerm = $(this).val();
-        programsCurrentPage = 1;
-        renderProgramsPagination();
-      });
+          const start = (currentPage - 1) * perPage;
+          const $pageRows = $matches.slice(start, start + perPage);
+          $pageRows.show();
 
-      $('#programsVisibilityFilter, #programsOrganizationFilter, #programsTypeFilter').on('change', function () {
-        programsFilters.visibility = $('#programsVisibilityFilter').val() || 'all';
-        programsFilters.organization = $('#programsOrganizationFilter').val() || 'all';
-        programsFilters.type = $('#programsTypeFilter').val() || 'all';
-        programsCurrentPage = 1;
-        renderProgramsPagination();
-      });
+          const anyFilterActive = !noFilterValue($visibility.val()) || !noFilterValue($org.val()) || !noFilterValue($type.val());
+          const searchActive = !!($search.val() || '').trim();
 
-      renderProgramsPagination();
+          $noResults.toggleClass('d-none', total > 0);
+          $noResultsSearch.toggleClass('d-none', !(total === 0 && searchActive && !anyFilterActive));
+          $noResultsFilters.toggleClass('d-none', !(total === 0 && (anyFilterActive || !searchActive)));
+
+          renderPagination(totalPages, total, start, $pageRows.length);
+        }
+
+        $search.on('input', function () { currentPage = 1; applyProgramsFilter(); });
+        $visibility.on('change', function () { currentPage = 1; applyProgramsFilter(); });
+        $org.on('change', function () { currentPage = 1; applyProgramsFilter(); });
+        $type.on('change', function () { currentPage = 1; applyProgramsFilter(); });
+
+        // Re-apply when a switch is toggled so the Visible/Hidden filter
+        // (driven by the switch's checked state) stays accurate live.
+        $('#programsListBody').on('change', '.program-visibility-switch', function () {
+          if (!noFilterValue($visibility.val())) applyProgramsFilter();
+        });
+
+        applyProgramsFilter();
+      })();
 
       // ─────────────────────────────────────────────────────────────
       // Custom sections — block repeater with rich-text (Quill) editors
@@ -1229,58 +1782,58 @@
         return `
           <div class="card mb-3 border shadow-sm custom-section-card" data-section-id="${id}">
             <div class="card-header py-2 d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 custom-section-label">${isArabic ? 'قسم مخصص' : 'Custom Section'}</h6>
-              <button type="button" class="btn btn-sm btn-icon btn-outline-danger remove-custom-section" title="${isArabic ? 'حذف' : 'Remove'}">
+              <h6 class="mb-0 custom-section-label">${"{{ __('landing.Custom_Section') }}"}</h6>
+              <button type="button" class="btn btn-sm btn-icon btn-outline-danger remove-custom-section" title="${"{{ __('landing.Remove') }}"}">
                 <i class="ti ti-trash"></i>
               </button>
             </div>
             <div class="card-body">
               <div class="row g-4">
                 <div class="col-12 custom-field-group" data-field="visibility">
-                  <label class="form-label d-block">${isArabic ? 'الظهور' : 'Visibility'}</label>
+                  <label class="form-label d-block">${"{{ __('landing.Visibility') }}"}</label>
                   <div class="form-check form-switch">
                     <input type="hidden" name="custom_sections[${id}][visibility]" value="0">
                     <input type="checkbox" name="custom_sections[${id}][visibility]" value="1" class="form-check-input custom-visibility-switch" checked>
                   </div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title">
-                  <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
+                  <label class="form-label">${"{{ __('landing.Title') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_ar">
-                  <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag">
-                  <label class="form-label">${isArabic ? 'العنوان الفرعي' : 'Title Tag'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_tag') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
-                  <label class="form-label">${isArabic ? 'العنوان الفرعي بالعربية' : 'Title Tag (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Title_tag_ar') }}"}</label>
                   <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="content">
-                  <label class="form-label">${isArabic ? 'المحتوى' : 'Content'}</label>
+                  <label class="form-label">${"{{ __('landing.Content') }}"}</label>
                   <div class="custom-quill-editor" id="custom-quill-content-${id}" style="min-height: 160px"></div>
                   <input type="hidden" name="custom_sections[${id}][content]" class="custom-hidden-content" value="">
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="content_ar">
-                  <label class="form-label">${isArabic ? 'المحتوى بالعربية' : 'Content (Arabic)'}</label>
+                  <label class="form-label">${"{{ __('landing.Content_ar') }}"}</label>
                   <div class="custom-quill-editor" id="custom-quill-content-ar-${id}" style="min-height: 160px"></div>
                   <input type="hidden" name="custom_sections[${id}][content_ar]" class="custom-hidden-content" value="">
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'نص الزر' : 'Button Text'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
+                  <label class="form-label">${"{{ __('landing.Button_text') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
                   <input type="text" name="custom_sections[${id}][button_text]" maxlength="255" class="form-control">
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="button_link">
-                  <label class="form-label">${isArabic ? 'رابط الزر' : 'Button Link'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
+                  <label class="form-label">${"{{ __('landing.Button_link') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
                   <input type="url" name="custom_sections[${id}][button_link]" maxlength="500" class="form-control" placeholder="https://" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
@@ -1359,7 +1912,7 @@
 
       const updateCustomSectionLabels = function () {
         $('#customSectionsContainer .custom-section-card').each(function (i) {
-          $(this).find('.custom-section-label').text((isArabic ? 'القسم المخصص ' : 'Custom Section ') + (i + 1));
+          $(this).find('.custom-section-label').text(("{{ __('landing.Custom_Section') }}") + (i + 1));
         });
       };
 
@@ -1390,7 +1943,7 @@
               },
               clipboard: { matchVisual: false },
             },
-            placeholder: isArabic ? 'أدخل المحتوى...' : 'Enter content...',
+            placeholder: "{{ __('landing.Enter_Content_Placeholder') }}",
             direction: isArabic ? 'rtl' : 'ltr',
           });
 
@@ -1550,23 +2103,35 @@
             processData: false,
             contentType: false,
           })
-            .done(function (data) {
+            .done(function (res) {
               $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
-
-              // The General tab is the only one wired to actually create the
-              // page on this screen; once it succeeds, hand off to the edit
-              // screen where every tab (including this one) is fully live.
-              if (sectionKey === 'general' && data && data.redirect) {
-                toastr.success((data && data.message) || successMessages.general);
-                window.location.href = data.redirect;
-                return;
-              }
-
               if (successMessages[sectionKey]) {
                 releaseSuccessAlert({
                   title: "{{ __('admin.success') }}",
-                  message: successMessages[sectionKey],
+                  message: (res && res.message) || successMessages[sectionKey],
                 });
+              }
+              // Saving General creates the page; rewire every tab's form
+              // to the real per-page routes (backend-computed) so the rest
+              // of the sections save like a normal edit, without leaving
+              // the create screen.
+              if (res && res.routes) {
+                $('.section-form').each(function () {
+                  const key = $(this).data('section');
+                  if (res.routes[key]) {
+                    $(this).attr('action', res.routes[key]);
+                  }
+                  $(this).find('fieldset').prop('disabled', false);
+                  $(this).find('.alert-warning').addClass('d-none');
+                });
+                $('[data-bs-target^="#navs-"]').prop('disabled', false).removeAttr('title');
+              }
+              // Same unlock for the "Custom Landing Page URL" card's Save
+              // button, which lives outside the tabbed sections.
+              if (res && res.url_save_route) {
+                lpUrlSaveRoute = res.url_save_route;
+                $('#lpUrlSaveBtn').prop('disabled', false).removeAttr('title');
+                $('#lpUrlSaveHint').addClass('d-none');
               }
               setTimeout(() => {
                 $btn.removeClass('btn-success').addClass('btn-primary').html(originalHtml);
@@ -1574,7 +2139,9 @@
             })
             .fail(function (xhr) {
               $btn.html(originalHtml);
-              let errorMessage = "{{ __('admin.unexpected_error') }}";
+              let errorMessage = sectionKey === 'programs'
+                ? ("{{ __('landing.Something_Went_Wrong') }}")
+                : "{{ __('admin.unexpected_error') }}";
               if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMessage = xhr.responseJSON.message;
               }
@@ -1588,6 +2155,14 @@
             });
         }.bind(this);
 
+        // Custom sections use hand-rolled validation (rich-text editors,
+        // image upload checks and button-link checks).
+        if (sectionKey === 'custom') {
+          if (!validateCustomSections()) return;
+          submitViaAjax();
+          return;
+        }
+
         // Block the save until client-side validation passes.
         if (!fv) {
           submitViaAjax();
@@ -1599,52 +2174,6 @@
           submitViaAjax();
         });
       });
-
-      // ─────────────────────────────────────────────────────────────
-      // Programs tab — client-side filtering (search / organization /
-      // type / visibility). Runs entirely in the browser against the
-      // already-rendered checklist, so applying a filter never reloads
-      // the page and never loses an in-progress (unsaved) selection.
-      // ─────────────────────────────────────────────────────────────
-      (function () {
-        const $search = $('#programsFilterSearch');
-        const $org = $('#programsFilterOrg');
-        const $type = $('#programsFilterType');
-        const $visibility = $('#programsFilterVisibility');
-        const $items = $('#programsChecklist .program-item');
-        const $emptyState = $('#programsFilterEmptyState');
-
-        if (!$items.length) return;
-
-        function applyProgramsFilter() {
-          const search = $search.val().trim().toLowerCase();
-          const org = $org.val();
-          const type = $type.val();
-          const visibility = $visibility.val();
-          let visibleCount = 0;
-
-          $items.each(function () {
-            const $item = $(this);
-            const matchesSearch = !search || String($item.data('name')).includes(search);
-            const matchesOrg = !org || String($item.data('org')) === org;
-            const matchesType = !type || String($item.data('type')) === type;
-            // "Visible" = currently checked (selected for this landing page);
-            // "Hidden" = currently unchecked.
-            const isChecked = $item.find('.form-check-input').is(':checked');
-            const matchesVisibility = !visibility || (visibility === 'visible' ? isChecked : !isChecked);
-            const matches = matchesSearch && matchesOrg && matchesType && matchesVisibility;
-            $item.toggle(matches);
-            if (matches) visibleCount++;
-          });
-
-          $emptyState.toggleClass('d-none', visibleCount > 0);
-        }
-
-        $search.on('input', applyProgramsFilter);
-        $org.on('change', applyProgramsFilter);
-        $type.on('change', applyProgramsFilter);
-        $visibility.on('change', applyProgramsFilter);
-      })();
     });
   </script>
 @endsection

@@ -227,7 +227,7 @@ class LandingPagesController extends Controller
         'icon'     => 'ti-align-box-top-center',
         'label_en' => 'Hero',
         'label_ar' => 'البطل',
-        'route'    => $currentPage ? route('landing-pages.hero.update', $currentPage->id) : route('landing-page.sections.update', 'hero'),
+        'route'    => $currentPage ? route('landing-pages.hero.update', $currentPage->id) : route('landing-pages.hero.update', 0),
         'fields'   => [
           [
             'name'      => 'title',
@@ -307,7 +307,7 @@ class LandingPagesController extends Controller
         'icon'     => 'ti-users',
         'label_en' => 'About Us',
         'label_ar' => 'من نحن',
-        'route'    => $currentPage ? route('landing-pages.about.update', $currentPage->id) : route('landing-page.sections.update', 'about'),
+        'route'    => $currentPage ? route('landing-pages.about.update', $currentPage->id) : route('landing-pages.about.update', 0),
         'fields'   => [
           [
             'name'      => 'is_enabled',
@@ -384,7 +384,7 @@ class LandingPagesController extends Controller
         'icon'     => 'ti-rocket',
         'label_en' => 'Programs',
         'label_ar' => 'البرامج',
-        'route'    => $currentPage ? route('landing-pages.programs.update', $currentPage->id) : route('landing-page.sections.update', 'programs'),
+        'route'    => $currentPage ? route('landing-pages.programs.update', $currentPage->id) : route('landing-pages.programs.update', 0),
         'fields'   => [
           [
             'name'      => 'is_enabled',
@@ -461,7 +461,7 @@ class LandingPagesController extends Controller
         'icon'     => 'ti-settings-bolt',
         'label_en' => 'How It Works',
         'label_ar' => 'كيف يعمل',
-        'route'    => $currentPage ? route('landing-pages.how.update', $currentPage->id) : route('landing-page.sections.update', 'how'),
+        'route'    => $currentPage ? route('landing-pages.how.update', $currentPage->id) : route('landing-pages.how.update', 0),
         'fields'   => [
           [
             'name'      => 'is_enabled',
@@ -538,15 +538,14 @@ class LandingPagesController extends Controller
         'icon'     => 'ti-puzzle',
         'label_en' => 'Custom sections',
         'label_ar' => 'أقسام مخصصة',
-        'route'    => $currentPage ? route('landing-pages.custom-sections.update', $currentPage->id) : route('landing-page.sections.update', 'custom'),
+        'route'    => $currentPage ? route('landing-pages.custom-sections.update', $currentPage->id) : route('landing-pages.custom-sections.update', 0),
         'fields'   => [],
       ],
     ];
 
     foreach ($sections as &$section) {
       // Every tab besides General needs an existing page to save into, so
-      // until the page is created (General saved), lock them: this avoids
-      // hitting the front-end-only "updateSection" stub route and pushes
+      // until the page is created (General saved), lock them: this pushes
       // the admin toward the General tab first.
       $section['locked'] = !$currentPage && $section['key'] !== 'general';
 
@@ -583,8 +582,18 @@ class LandingPagesController extends Controller
     if ($user->hasRole('subadmin')) {
       $orgIds = $user->organizations_ids;
 
+      // A creator belongs to an organization either via the single
+      // `organization_id` column (organization managers / registered
+      // users) or via the user_organizations pivot (subadmins, who
+      // manage multiple orgs through that table instead of the single
+      // column — see User::getOrganizationsIdsAttribute()). Checking
+      // only the column misses subadmin-created pages, since a
+      // subadmin's own `organization_id` column is typically null.
       return $query->whereHas('createdBy', function ($query) use ($orgIds) {
-        $query->whereIn('organization_id', $orgIds);
+        $query->whereIn('organization_id', $orgIds)
+          ->orWhereHas('organizations', function ($query) use ($orgIds) {
+            $query->whereIn('organizations.id', $orgIds);
+          });
       });
     }
 
@@ -679,6 +688,9 @@ class LandingPagesController extends Controller
       'success' => true,
       'message' => __('landing.success.general_saved'),
       'redirect' => route('landing-pages.edit', $page->id),
+      'id' => $page->id,
+      'routes' => collect($this->buildSections($page))->pluck('route', 'key'),
+      'url_save_route' => route('landing-pages.url.save', $page->id),
     ]);
   }
 
@@ -717,20 +729,6 @@ class LandingPagesController extends Controller
     ));
   }
 
-
-	/**
-	 * Store a landing page section.
-	 *
-	 * Temporary stub: always returns a successful response so the
-	 * front-end section save never hits a "route not found" error.
-	 *
-	 * @param  string  $section
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	// public function updateSection(Request $request, $section)
-	// {
-	// 	return response()->json(['success' => true]);
-	// }
 
 	/**
 	 * Save the General section for a custom landing page.
@@ -933,7 +931,10 @@ class LandingPagesController extends Controller
 
 		$selectedPrograms = $programs['selected_programs'] ?? [];
 		$requestedIds = array_keys(array_filter($selectedPrograms, fn ($selected) => (bool) $selected));
-		$allowedIds = $this->scopedCycles()->pluck('id')->toArray();
+		// Ended programs can never be attached, no matter what the request
+		// says: reject.is_expired mirrors the same accessor used to hide
+		// expired programs from the public landing page (see show()).
+		$allowedIds = $this->scopedCycles()->reject->is_expired->pluck('id')->toArray();
 		$cycleIds = array_values(array_intersect($requestedIds, $allowedIds));
 
 		$page->cycles()->sync($cycleIds);
@@ -1335,13 +1336,15 @@ class LandingPagesController extends Controller
 	 * page (used by the "Custom Landing Page URL" card's live-availability
 	 * check).
 	 */
-	public function checkCustomUrl(Request $request, $id)
+	public function checkCustomUrl(Request $request, $id = null)
 	{
 		$_user = auth()->user();
-		if (!$_user->ableTo('landing-pages.edit')) {
+		if (!$_user->ableTo($id ? 'landing-pages.edit' : 'landing-pages.create')) {
 			return abort(401);
 		}
-		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		// On the create screen there's no page yet, so $id is absent and
+		// the slug is just checked for global uniqueness.
+		$page = $id ? $this->scopedLandingPagesQuery()->findOrFail($id) : null;
 
 		$slug = strtolower(trim((string) $request->input('slug')));
 		$isValid = (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug);
@@ -1354,7 +1357,9 @@ class LandingPagesController extends Controller
 			]);
 		}
 
-		$taken = LandingPage::where('slug', $slug)->where('id', '!=', $page->id)->exists();
+		$taken = LandingPage::where('slug', $slug)
+			->when($page, fn ($query) => $query->where('id', '!=', $page->id))
+			->exists();
 
 		return response()->json([
 			'valid' => true,

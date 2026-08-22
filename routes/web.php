@@ -467,15 +467,16 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
     Route::get('/landing-pages/create', 'LandingPagesController@create')->name('landing-pages.create');
 
-    // Custom landing page URL configuration (availability check + save,
-    // scoped to a specific page via {id})
-    Route::post('/landing-pages/{id}/url/check', 'LandingPagesController@checkCustomUrl')->name('landing-pages.url.check');
+    // Custom landing page URL configuration (availability check + save).
+    // {id} is optional on the check route (must be the trailing segment
+    // for Laravel to omit it cleanly) since the create screen checks slug
+    // availability before any page exists yet.
+    Route::post('/landing-pages/url/check/{id?}', 'LandingPagesController@checkCustomUrl')->name('landing-pages.url.check');
     Route::post('/landing-pages/{id}/url/save', 'LandingPagesController@saveCustomUrl')->name('landing-pages.url.save');
 
     Route::get('/landing-pages/{id}/edit', 'LandingPagesController@edit')->name('landing-pages.edit');
     Route::delete('/landing-pages/{id}', 'LandingPagesController@destroy')->name('landing-pages.destroy');
 
-    Route::put('/landing-pages/section/{section}', 'LandingPagesController@updateSection')->name('landing-page.sections.update');
     Route::put('/landing-pages/{id}/about', 'LandingPagesController@updateAbout')->name('landing-pages.about.update');
     Route::put('/landing-pages', 'LandingPagesController@store')->name('landing-pages.store');
     Route::put('/landing-pages/{id}/general', 'LandingPagesController@updateGeneral')->name('landing-pages.general.update');

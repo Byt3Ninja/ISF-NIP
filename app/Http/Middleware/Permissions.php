@@ -26,7 +26,6 @@ class Permissions
         'organization.landing.asset',
         'organization.landing.public',
         'landing-pages.public',
-        'landing-page.sections.update',
         'landing-pages.about.update',
         'landing-pages.how.update',
         'landing-pages.contact.update',
