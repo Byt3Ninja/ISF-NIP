@@ -465,9 +465,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // Custom Landing Pages list
     // Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
-    Route::get('/landing-pages', function () {
-      return view('admin.landing-pages.index');
-    });
+    Route::get('/landing-pages', 'LandingPagesController@index');
+    Route::get('/landing-pages/create', 'LandingPagesController@create');
+    Route::get('/landing-pages/edit', 'LandingPagesController@edit');
+    
+    Route::put('/landing-pages/section/{section}', 'LandingPagesController@updateSection')->name('admin.landing-page.sections.update');
 
     //Assessment
     Route::resource('questions', 'QuestionController');
