@@ -37,6 +37,7 @@ class Permissions
         'landing-pages.custom-sections.upload-image',
         'landing-pages.url.check',
         'landing-pages.url.save',
+        'invite_mentor.attachment',
         'organization.wizard.store',
         'organization.wizard.update.step1',
         'organization.wizard.update.step2',

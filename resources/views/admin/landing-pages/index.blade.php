@@ -4,30 +4,16 @@
 @section('subTitle', __('admin.Custom Landing Pages'))
 
 @section('content')
-
   {{-- Header --}}
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h4 class="mb-1">
-        {{ __('landing.Custom_Landing_Page') }}
-      </h4>
-      <p class="text-secondary mb-0">
-        {{ __('landing.Custom_Landing_Page_Description') }}
-      </p>
+  <div class="card mb-6">
+    <div class="card-header">
+      <h4 class="mb-2">{{ __('landing.Custom_Landing_Page') }}</h4>
+      <p class="mb-0">{{ __('landing.Custom_Landing_Page_Description') }}</p>
     </div>
-
-    <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
-      <i class="ti ti-plus me-2"></i>
-      {{ __('landing.Add_New_Page') }}
-    </a>
-  </div>
-
-  {{-- Filters --}}
-  <div class="card mb-4">
     <div class="card-body">
       <form method="GET" id="status-form">
-        <div class="row g-3 align-items-center">
-          <div class="col-lg-4">
+        <div class="row g-4 align-items-center">
+          <div class="col-12 col-lg-5 col-xl-6">
             <div class="input-group input-group-merge">
               <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
               <input 
@@ -41,8 +27,7 @@
               />
             </div>
           </div>
-
-          <div class="col-lg-2 ms-lg-auto">
+          <div class="col-12 col-lg-4 col-xl-4">
             <select class="form-select" id="status-select" name="status">
               <option value="">{{ __('admin.All_statuses') }}</option>
               <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
@@ -53,11 +38,17 @@
               </option>
             </select>
           </div>
+          <div class="col-12 col-lg-3 col-xl-2 d-grid">
+            <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
+              <i class="ti ti-plus me-2"></i>
+              {{ __('landing.Add_New_Page') }}
+            </a>
+          </div>
         </div>
       </form>
     </div>
   </div>
-
+  
   {{-- Cards --}}
   <div class="row g-4">
     @if ($pages->isEmpty())
@@ -109,7 +100,7 @@
                     {{ $page->title }}
                   </h5>
 
-                  <div class="badge rounded-pill border border-{{ $page->status ? 'info' : 'danger' }} bg-label-{{ $page->status ? 'info' : 'danger' }} mb-3 pb-1">
+                  <div class="badge rounded-pill bg-label-{{ $page->status ? 'info' : 'danger' }} mb-3 pb-1">
                     <i class="ti ti-point-filled ti-xs"></i>
                     {{ $page->status ? __('admin.Active') : __('admin.Inactive') }}
                   </div>
@@ -119,7 +110,7 @@
               </div>
 
               <p class="card-text text-secondary">
-                {{ ($l == 'ar' ? $page->description_ar : $page->description) ?: ( __('landing.No_Description') . '...') }}
+                {{ ($l == 'ar' ? $page->description_ar : $page->description) ?: (__('landing.No_Description') . '...') }}
               </p>
 
               <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">

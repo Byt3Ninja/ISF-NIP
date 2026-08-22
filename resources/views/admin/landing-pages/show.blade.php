@@ -297,13 +297,13 @@
         <div class="collapse navbar-collapse justify-content-end" id="navMenu">
           <ul class="navbar-nav align-items-lg-center gap-lg-1">
             @if($page->about_is_enabled)
-              <li class="nav-item"><a class="nav-link text-white" href="#about">{{ $l == 'ar' ? 'من نحن' : 'About' }}</a></li>
+              <li class="nav-item"><a class="nav-link text-white" href="#about">{{ __('landing.about') }}</a></li>
             @endif
             @if($page->programs_is_enabled)
-              <li class="nav-item"><a class="nav-link text-white" href="#programs">{{ $l == 'ar' ? 'البرامج' : 'Programs' }}</a></li>
+              <li class="nav-item"><a class="nav-link text-white" href="#programs">{{ __('landing.programs') }}</a></li>
             @endif
             @if($page->how_is_enabled)
-              <li class="nav-item"><a class="nav-link text-white" href="#how-it-works">{{ $l == 'ar' ? 'كيف يعمل' : 'How it works' }}</a></li>
+              <li class="nav-item"><a class="nav-link text-white" href="#how-it-works">{{ __('landing.how_it_works') }}</a></li>
             @endif
             {{-- Stories/Impact/FAQ nav links: their sections are commented out below (see Success stories / Impact / FAQ comment block) --}}
             {{--
@@ -330,7 +330,7 @@
               </ul>
             </li>
             <li class="nav-item mt-2 mt-lg-0">
-              <a href="#programs" class="btn btn-primary rounded-pill">Apply now</a>
+              <a href="#programs" class="btn btn-primary rounded-pill">{{ __('landing.apply_now') }} </a>
             </li>
           </ul>
         </div>
@@ -357,11 +357,11 @@
           @endif
           <div class="d-flex flex-wrap gap-3 mt-6">
             @if($page->programs_is_enabled)
-              <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ $l == 'ar' ? 'تصفح البرامج المتاحة' : 'Browse open programs' }} <i
+              <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ __('landing.browse_open_programs') }} <i
                   class="ti ti-arrow-up-right ms-1"></i></a>
             @endif
             @if($page->how_is_enabled)
-              <a href="#how-it-works" class="btn btn-outline-dark text-white rounded-pill btn-lg">{{ $l == 'ar' ? 'شاهد كيف يعمل' : 'See how it works' }}</a>
+              <a href="#how-it-works" class="btn btn-outline-dark text-white rounded-pill btn-lg">{{ __('landing.see_how_it_works') }}</a>
             @endif
           </div>
         </div>
@@ -447,7 +447,7 @@
       </div>
 
       <ul class="nav nav-pills mb-4" role="tablist" id="programFilters">
-        <li class="nav-item"><a class="nav-link active" href="#" data-filter="all">{{ $l == 'ar' ? 'كل البرامج' : 'All programs' }}</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#" data-filter="all">{{ __('landing.all_programs') }}</a></li>
         @foreach(\App\Cycle::programTypes() as $typeValue => $typeLabel)
           <li class="nav-item"><a class="nav-link" href="#" data-filter="{{ $typeValue }}">{{ $typeLabel }}</a></li>
         @endforeach
@@ -477,8 +477,8 @@
                 @endif
                 @if($program->start || $program->end)
                   <div class="d-flex justify-content-between mt-3">
-                    @if($program->start)<span class="small"><i class="ti ti-calendar-event"></i> {{ $l == 'ar' ? 'البداية' : 'Start' }}: {{ $program->start->format('M d, Y') }}</span>@endif
-                    @if($program->end)<span class="small"><i class="ti ti-calendar-x"></i> {{ $l == 'ar' ? 'النهاية' : 'End' }}: {{ $program->end->format('M d, Y') }}</span>@endif
+                    @if($program->start)<span class="small"><i class="ti ti-calendar-event"></i> {{ __('landing.start') }}: {{ $program->start->format('M d, Y') }}</span>@endif
+                    @if($program->end)<span class="small"><i class="ti ti-calendar-x"></i> {{ __('landing.end') }}: {{ $program->end->format('M d, Y') }}</span>@endif
                   </div>
                 @endif
                 <div class="mt-3">
@@ -495,7 +495,7 @@
           </div>
         @empty
           <div class="col-12 text-center py-6">
-            <p class="text-secondary mb-0">{{ $l == 'ar' ? 'لا توجد برامج متاحة حالياً.' : 'No programs are available right now.' }}</p>
+            <p class="text-secondary mb-0">{{ __('landing.No_Programs') }}</p>
           </div>
         @endforelse
       </div>
@@ -565,13 +565,13 @@
   <section class="py-5">
     <div class="container">
       <div class="gl-cta text-center">
-        <p class="eyebrow-mono text-primary mb-3 position-relative">{{ $l == 'ar' ? '// لنبدأ' : "// let's get started" }}</p>
-        <h2 class="position-relative">{{ $l == 'ar' ? 'برنامجك القادم بانتظار طلبك.' : 'Your next program is already accepting applications.' }}</h2>
+        <p class="eyebrow-mono text-primary mb-3 position-relative">{{ __('landing.lets_get_started') }}</p>
+        <h2 class="position-relative">{{ __('landing.your_next_program') }}</h2>
         @php $ctaDescription = $l == 'ar' ? $page->description_ar : $page->description; @endphp
         @if($ctaDescription)
           <p class="text-secondary mt-3 position-relative mx-auto" style="max-width:480px;">{{ $ctaDescription }}</p>
         @endif
-        <a href="#programs" class="btn btn-primary mt-3 position-relative">{{ $l == 'ar' ? 'اعثر على برنامجي' : 'Find my program' }} <i
+        <a href="#programs" class="btn btn-primary mt-3 position-relative">{{ __('landing.find_my_program') }} <i
             class="ti ti-arrow-up-right ms-1"></i></a>
       </div>
     </div>
