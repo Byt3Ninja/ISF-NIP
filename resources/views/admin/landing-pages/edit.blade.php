@@ -2215,11 +2215,9 @@
 
             if (!items.length) return false;
 
-            const $list = $('<ul class="mb-0 ps-3"></ul>');
-            items.forEach(function (msg) {
-              $list.append($('<li></li>').text(msg));
-            });
-            $backendErrorsBox.empty().append($list).removeClass('d-none');
+            // Only surface the first error here; every errored field also
+            // gets its own inline message below it.
+            $backendErrorsBox.text(items[0]).removeClass('d-none');
 
             if ($firstInvalid) {
               $firstInvalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2257,7 +2255,7 @@
               }
             })
             .fail(function (xhr) {
-              $btn.html(originalHtml);
+              $btn.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>' + "{{ __('landing.Save') }}");
               const res = xhr.responseJSON || {};
 
               // Show section-specific errors in the alert-danger at the top
