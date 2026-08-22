@@ -1652,29 +1652,79 @@
           const originalHtml = $btn.html();
           const $backendErrorsBox = $form.find('.section-backend-errors');
 
-          // Backend error keys are dot-notation ("general.title"), so match
-          // them to this section by the prefix before the first dot.
+          const clearBackendFieldErrors = function () {
+            $form.find('.backend-error-feedback').remove();
+            $form.find('.backend-error-input').removeClass('is-invalid backend-error-input');
+          };
+
+          // Backend error keys are dot-notation ("general.title",
+          // "about.cards.0.icon"), so match them to this section by the
+          // prefix before the first dot ("custom" submits "custom_sections").
+          const sectionPrefixes = sectionKey === 'custom' ? ['custom_sections'] : [String(sectionKey)];
+
           const showBackendErrors = function (errors) {
+            clearBackendFieldErrors();
+
             const items = [];
+            let $firstInvalid = null;
+
             $.each(errors || {}, function (key, msgs) {
-              if (String(key).split('.')[0] !== String(sectionKey)) return;
-              (Array.isArray(msgs) ? msgs : [msgs]).forEach(function (msg) {
-                items.push(String(msg));
+              const parts = String(key).split('.');
+              if (sectionPrefixes.indexOf(parts[0]) === -1) return;
+
+              const msgList = (Array.isArray(msgs) ? msgs : [msgs]).map(function (msg) {
+                return String(msg);
               });
+              msgList.forEach(function (msg) {
+                items.push(msg);
+              });
+
+              // "about.cards.0.icon" -> input name "about[cards][0][icon]"
+              const fieldName = parts.reduce(function (name, part, i) {
+                return i === 0 ? part : name + '[' + part + ']';
+              }, '');
+              const $inputs = $form.find('[name="' + fieldName + '"]');
+              if (!$inputs.length) return;
+
+              $inputs.addClass('is-invalid backend-error-input');
+              $inputs.last().after(
+                $('<div class="invalid-feedback d-block backend-error-feedback"></div>').text(msgList[0])
+              );
+
+              // Prefer a focusable control; fall back to the Quill editor
+              // for hidden rich-text backing inputs.
+              const $visible = $inputs.filter(':visible').not('[type="hidden"]').first();
+              const $target = $visible.length
+                ? $visible
+                : $inputs.closest('.custom-field-group').find('.ql-editor').first();
+              if (!$firstInvalid && $target.length) {
+                $firstInvalid = $target;
+              }
             });
+
             if (!items.length) return false;
+
             const $list = $('<ul class="mb-0 ps-3"></ul>');
             items.forEach(function (msg) {
               $list.append($('<li></li>').text(msg));
             });
             $backendErrorsBox.empty().append($list).removeClass('d-none');
-            if ($backendErrorsBox[0] && typeof $backendErrorsBox[0].scrollIntoView === 'function') {
+
+            if ($firstInvalid) {
+              $firstInvalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              try {
+                $firstInvalid[0].focus({ preventScroll: true });
+              } catch (err) {
+                $firstInvalid[0].focus();
+              }
+            } else if ($backendErrorsBox[0] && typeof $backendErrorsBox[0].scrollIntoView === 'function') {
               $backendErrorsBox[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             return true;
           };
 
           $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+          clearBackendFieldErrors();
           $backendErrorsBox.addClass('d-none').empty();
 
           $.ajax({
@@ -1686,6 +1736,7 @@
           })
             .done(function (res) {
               $btn.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>' + "{{ __('landing.Save') }}");
+              clearBackendFieldErrors();
               $backendErrorsBox.addClass('d-none').empty();
 
               if (res.success && res.redirect) {
