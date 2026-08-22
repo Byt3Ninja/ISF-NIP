@@ -2474,12 +2474,29 @@
         })
         .on('click', '.remove-custom-section', function () {
           const $card = $(this).closest('.custom-section-card');
-          $card.find('.custom-quill-editor').each(function () {
-            customQuills.delete(this);
+
+          const removeCard = function () {
+            $card.find('.custom-quill-editor').each(function () {
+              customQuills.delete(this);
+            });
+            $card.remove();
+            updateCustomSectionsEmpty();
+            updateCustomSectionLabels();
+          };
+
+          if ($card.attr('data-persisted') !== 'true') {
+            removeCard();
+            return;
+          }
+
+          releaseWarningAlert({
+            title: isArabic ? 'حذف القسم المخصص' : 'Delete Custom Section',
+            message: isArabic ? 'هل أنت متأكد من حذف هذا القسم المخصص؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this custom section? This action cannot be undone.',
+            confirmText: isArabic ? 'حذف' : 'Delete',
+            cancelText: isArabic ? 'إلغاء' : 'Cancel',
+            confirmColor: 'danger',
+            onConfirm: removeCard,
           });
-          $card.remove();
-          updateCustomSectionsEmpty();
-          updateCustomSectionLabels();
         });
 
       // ─────────────────────────────────────────────────────────────
@@ -2512,6 +2529,7 @@
       customSections.forEach(function (section) {
         const id = addCustomSection();
         const $card = $('#customSectionsContainer .custom-section-card[data-section-id="' + id + '"]');
+        $card.attr('data-persisted', 'true');
         $card.find('[name="custom[sections][' + id + '][is_visible]"]').prop('checked', !!section.is_visible);
         $card.find('[name="custom[sections][' + id + '][title]"]').val(section.title || '');
         $card.find('[name="custom[sections][' + id + '][title_ar]"]').val(section.title_ar || '');
