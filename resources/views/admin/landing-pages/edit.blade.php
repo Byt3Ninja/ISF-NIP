@@ -844,6 +844,78 @@
 @endsection
 
 @section('pagescripts')
+  @php
+    // Hard-coded edit-mode pre-fill data. Replace with saved records once
+    // the persistence layer is wired up.
+    $aboutCards = [
+      [
+        'icon'           => 'ti-rocket',
+        'title'          => 'Accelerate Your Startup',
+        'title_ar'       => 'سارع بتطوير شركتك الناشئة',
+        'description'    => 'We help early-stage founders move from idea to traction with hands-on mentorship and a proven growth framework.',
+        'description_ar' => 'نساعد المؤسسين في المراحل المبكرة على الانتقال من الفكرة إلى النجاح من خلال إرشاد عملي وإطار نمو مجرب.',
+      ],
+      [
+        'icon'           => 'ti-bulb',
+        'title'          => 'Mentorship from Experts',
+        'title_ar'       => 'إرشاد من خبراء',
+        'description'    => 'Get direct access to industry leaders, investors and serial entrepreneurs who have built what you are building.',
+        'description_ar' => 'احصل على وصول مباشر إلى قادة الصناعة والمستثمرين ورواد الأعمال الذين بنوا ما تبنيه أنت.',
+      ],
+      [
+        'icon'           => 'ti-trophy',
+        'title'          => 'Funding Readiness',
+        'title_ar'       => 'الاستعداد للتمويل',
+        'description'    => 'From pitch decks to term sheets, we prepare you to raise your next round with confidence.',
+        'description_ar' => 'من العروض التقديمية إلى أوراق الشروط، نعدّك لرفع جولة تمويلك القادمة بثقة.',
+      ],
+    ];
+
+    $howSteps = [
+      [
+        'icon'           => 'ti-flag',
+        'title'          => 'Apply to the Program',
+        'title_ar'       => 'قدّم طلبك للبرنامج',
+        'description'    => 'Submit your application with details about your team, product and current stage.',
+        'description_ar' => 'قدّم طلبك مع تفاصيل عن فريقك ومنتجك ومرحلتك الحالية.',
+      ],
+      [
+        'icon'           => 'ti-users',
+        'title'          => 'Get Matched with Mentors',
+        'title_ar'       => 'التوافق مع المرشدين',
+        'description'    => 'We match you with mentors based on your industry and growth stage.',
+        'description_ar' => 'نوفقك مع مرشدين بناءً على مجالك ومرحلة نموك.',
+      ],
+      [
+        'icon'           => 'ti-rocket',
+        'title'          => 'Launch and Grow',
+        'title_ar'       => 'أطلق ونمِ',
+        'description'    => 'Launch your product, iterate fast and track your growth metrics with our support.',
+        'description_ar' => 'أطلق منتجك وكرر بسرعة وتابع مقاييس نموك بدعمنا.',
+      ],
+    ];
+
+    $customSections = [
+      [
+        'is_visible'   => 1,
+        'title'        => 'Why Join Us?',
+        'title_ar'     => 'لماذا تنضم إلينا؟',
+        'title_tag'    => 'A community built for builders',
+        'title_tag_ar' => 'مجتمع بُني لصنّاع المنتجات',
+        'content'      => '<p>Join a growing community of ambitious founders who are building the future.</p>',
+        'content_ar'   => '<p>انضم إلى مجتمع متنامٍ من المؤسسين الطموحين الذين يبنون المستقبل.</p>',
+      ],
+      [
+        'is_visible'   => 1,
+        'title'        => 'Our Partners',
+        'title_ar'     => 'شركاؤنا',
+        'title_tag'    => 'Backed by leading organizations',
+        'title_tag_ar' => 'بدعم من منظمات رائدة',
+        'content'      => '<p>We work with partners who share our mission of empowering the next generation.</p>',
+        'content_ar'   => '<p>نعمل مع شركاء يشاركوننا رسالتنا في تمكين الجيل القادم.</p>',
+      ],
+    ];
+  @endphp
   <script>
     $(function () {
       const urlTab = new URLSearchParams(window.location.search).get('tab');
@@ -1248,6 +1320,7 @@
           });
         }
         updateAboutCardButtons();
+        return id;
       };
 
       $('#aboutAddCard').on('click', addAboutCard);
@@ -1392,6 +1465,7 @@
           });
         }
         updateHowStepButtons();
+        return id;
       };
 
       $('#howAddStep').on('click', addHowStep);
@@ -1780,6 +1854,7 @@
         setTimeout(function () {
           $('#customSectionsContainer .custom-section-card').last().find('.custom-section-input').first().trigger('focus');
         }, 100);
+        return id;
       };
 
       $('#customAddSection').on('click', addCustomSection);
@@ -1798,6 +1873,51 @@
           updateCustomSectionsEmpty();
           updateCustomSectionLabels();
         });
+
+      // ─────────────────────────────────────────────────────────────
+      // Pre-fill repeaters from server-rendered data (edit mode)
+      // ─────────────────────────────────────────────────────────────
+      const aboutCards = @json($aboutCards);
+      const howSteps = @json($howSteps);
+      const customSections = @json($customSections);
+
+      aboutCards.forEach(function (card) {
+        const id = addAboutCard();
+        const $card = $('#aboutCardsContainer .about-card[data-card-id="' + id + '"]');
+        $card.find('[name="about[cards][' + id + '][icon]"]').val(card.icon || '');
+        $card.find('[name="about[cards][' + id + '][title]"]').val(card.title || '');
+        $card.find('[name="about[cards][' + id + '][title_ar]"]').val(card.title_ar || '');
+        $card.find('[name="about[cards][' + id + '][description]"]').val(card.description || '');
+        $card.find('[name="about[cards][' + id + '][description_ar]"]').val(card.description_ar || '');
+      });
+
+      howSteps.forEach(function (step) {
+        const id = addHowStep();
+        const $step = $('#howStepsContainer .how-step[data-step-id="' + id + '"]');
+        $step.find('[name="how[steps][' + id + '][icon]"]').val(step.icon || '');
+        $step.find('[name="how[steps][' + id + '][title]"]').val(step.title || '');
+        $step.find('[name="how[steps][' + id + '][title_ar]"]').val(step.title_ar || '');
+        $step.find('[name="how[steps][' + id + '][description]"]').val(step.description || '');
+        $step.find('[name="how[steps][' + id + '][description_ar]"]').val(step.description_ar || '');
+      });
+
+      customSections.forEach(function (section) {
+        const id = addCustomSection();
+        const $card = $('#customSectionsContainer .custom-section-card[data-section-id="' + id + '"]');
+        $card.find('[name="custom[sections][' + id + '][is_visible]"]').prop('checked', !!section.is_visible);
+        $card.find('[name="custom[sections][' + id + '][title]"]').val(section.title || '');
+        $card.find('[name="custom[sections][' + id + '][title_ar]"]').val(section.title_ar || '');
+        $card.find('[name="custom[sections][' + id + '][title_tag]"]').val(section.title_tag || '');
+        $card.find('[name="custom[sections][' + id + '][title_tag_ar]"]').val(section.title_tag_ar || '');
+        $card.find('.custom-quill-editor').each(function (i) {
+          const quill = customQuills.get(this);
+          if (!quill) return;
+          const html = i === 0 ? (section.content || '') : (section.content_ar || '');
+          if (html) {
+            quill.clipboard.dangerouslyPasteHTML(0, html, 'user');
+          }
+        });
+      });
 
       // Each section saves independently via AJAX so switching tabs never
       // loses unsaved input in other sections.
