@@ -467,9 +467,15 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     // Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
     Route::get('/landing-pages', 'LandingPagesController@index');
     Route::get('/landing-pages/create', 'LandingPagesController@create');
-    Route::get('/landing-pages/edit', 'LandingPagesController@edit');
+    Route::get('/landing-pages/1/edit', 'LandingPagesController@edit');
+    Route::get('/landing-pages/1/show', 'LandingPagesController@show');
     
     Route::put('/landing-pages/section/{section}', 'LandingPagesController@updateSection')->name('admin.landing-page.sections.update');
+    
+    // Custom landing page URL configuration (simulated backend)
+    Route::post('/landing-pages/url/check', 'LandingPagesController@checkCustomUrl')->name('admin.landing-page.url.check');
+    Route::post('/landing-pages/url/save', 'LandingPagesController@saveCustomUrl')->name('admin.landing-page.url.save');
+    
 
     //Assessment
     Route::resource('questions', 'QuestionController');
@@ -1093,6 +1099,9 @@ Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCal
 // Public Organization Landing Page
 Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
 Route::post('/o/{slug}/contact', 'PublicLandingController@submitContact')->name('organization.contact.submit');
+
+// Public Custom Landing Page URL (active => page, inactive/unknown => 404)
+Route::get('/lp/{slug}', 'LandingPagesController@publicCustomLanding')->name('admin.landing-page.url.public');
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');
