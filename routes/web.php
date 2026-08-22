@@ -152,6 +152,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('judger/screening', 'Judger\JudgerScreeningController@index');
     Route::post('judger/screening/evaluation/save_draft', 'Judger\JudgerScreeningController@save_evaluation_draft')->name('screening.evaluate_save_draft');
     Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
+    Route::get('judger/screening/export', 'Judger\JudgerScreeningController@export')->name('screening.judger_export');
 
     // Chat
     Route::get('chat', 'ChatController@index');

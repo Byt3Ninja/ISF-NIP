@@ -6145,6 +6145,15 @@
                 ]
             },
             {
+                "name": "screening.judger_export",
+                "description": "Export My Screening Evaluations (Judger)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "judger"
+                ]
+            },
+            {
                 "name": "screening.get",
                 "description": "Get Judger Users",
                 "guard_name": "web",
