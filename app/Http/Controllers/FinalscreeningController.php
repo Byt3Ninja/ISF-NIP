@@ -306,6 +306,7 @@ class FinalscreeningController extends Controller
 						'meeting_link' => $item->meeting_link,
 						'start_time' => $item->start_time,
 						'end_time' => $item->end_time,
+						'interval' => $item->interval,
 					];
 					$session['checked'] = !is_null($item->session_date) && !is_null($item->meeting_link);
 					return ['companies' => $users, 'session' => $session];
@@ -341,7 +342,11 @@ class FinalscreeningController extends Controller
 						'date' => $panelData['session']['date'] ?? null,
 						'meeting_link' => $panelData['session']['meeting_link'] ?? null,
 						'start_time' => $panelData['session']['start_time'] ?? null,
-						'end_time' => $panelData['session']['end_time'] ?? null
+						'end_time' => $panelData['session']['end_time'] ?? null,
+						// Interval mode must survive a reload: without these the
+						// blade always rendered the switch OFF (GV-3295).
+						'interval' => $panelData['session']['interval'] ?? null,
+						'interval_checked' => !empty($panelData['session']['interval']),
 					]
 				];
 				$judgingPanels[] = $panelEntry;

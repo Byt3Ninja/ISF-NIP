@@ -587,14 +587,24 @@
 						<div class="col-md-12">
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<h5 class="card-title mb-0">{{ __("admin.Final_Session") }}</h5>
+									<div>
+										<h5 class="card-title mb-0">{{ __("admin.Final_Session") }}</h5>
+										{{-- GV-3320/3321: program + step the session belongs to --}}
+										@if( !empty($evaluation_program_title) || !empty($evaluation_step_title) )
+											<small class="text-muted">
+												@if( !empty($evaluation_program_title) ){{ __('dashboard.Program') }}: {{ $evaluation_program_title }}@endif
+												@if( !empty($evaluation_program_title) && !empty($evaluation_step_title) ) &middot; @endif
+												@if( !empty($evaluation_step_title) ){{ __('dashboard.Step') }}: {{ $evaluation_step_title }}@endif
+											</small>
+										@endif
+									</div>
 								</div>
 								@if( !is_null( $myFinal ) && $myFinal->join_url )
 								<div class="card-datatable table-responsive">
 									<table class="table mb-0 sessonsTable">
 										<thead class="table-light">
 											<tr>
-												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('dashboard.Founder')}}</th>
 												<th>{{__('admin.Judger')}}</th>
 												<th>{{__('cycles.Date/Time')}}</th>
 												<th>{{__('cycles.Done')}}</th>
@@ -632,16 +642,36 @@
 													@endif
 													@endforeach
 												</td>
-												<td> {{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M) </td>
+												{{-- GV-3321: per-startup slot derived from the panel interval --}}
+												<td>
+													@if( !empty( $myFinal->meeting_time ) )
+														{{ $myFinal->meeting_date }} <br>
+														<small class="text-muted">{{ $myFinal->meeting_time }}</small>
+													@else
+														{{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M)
+													@endif
+												</td>
 												<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
-												<td> 
+												<td>
 													@php
-														$startTime = \Carbon\Carbon::parse($myFinal->datetime);
-														$endTime = \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
+														$startTime = $myFinal->meeting_start ?? \Carbon\Carbon::parse($myFinal->datetime);
+														$endTime = $myFinal->meeting_end
+															?? \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
+														// Join Now + passcode unlock 10 minutes before the slot starts
+														// and stay available until an hour after it ends.
+														$canJoin = now()->gte( $startTime->copy()->subMinutes(10) )
+															&& now()->lte( $endTime->copy()->addHour() );
 													@endphp
-													@if( $startTime->format('Y-m-d') == date('Y-m-d') )
+													@if( $canJoin )
 														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
-													@elseif(now() > $endTime)
+														@if( !empty( $myFinal->passcode ) )
+															<button title="{{ __('dashboard.Passcode') }}" type="button"
+																data-passcode="{{ $myFinal->passcode }}"
+																class="btn btn-label-warning btn-sm show-passcode rounded ms-1">
+																<i class="ti ti-key"></i>
+															</button>
+														@endif
+													@elseif( now() > $endTime->copy()->addHour() )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -670,14 +700,24 @@
 						<div class="col-md-12">
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<h5 class="card-title mb-0">{{ __("admin.Screening_Sessions") }}</h5>
+									<div>
+										<h5 class="card-title mb-0">{{ __("admin.Screening_Sessions") }}</h5>
+										{{-- GV-3320/3321: program + step the session belongs to --}}
+										@if( !empty($evaluation_program_title) || !empty($evaluation_step_title) )
+											<small class="text-muted">
+												@if( !empty($evaluation_program_title) ){{ __('dashboard.Program') }}: {{ $evaluation_program_title }}@endif
+												@if( !empty($evaluation_program_title) && !empty($evaluation_step_title) ) &middot; @endif
+												@if( !empty($evaluation_step_title) ){{ __('dashboard.Step') }}: {{ $evaluation_step_title }}@endif
+											</small>
+										@endif
+									</div>
 								</div>
 								@if( !is_null( $myInitial ) )
 								<div class="card-datatable table-responsive">
 									<table class="table mb-0 initialScreeningTable">
 										<thead class="table-light">
 											<tr>
-												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('dashboard.Founder')}}</th>
 												<th>{{__('admin.Judger')}}</th>
 												<th>{{__('cycles.Date/Time')}}</th>
 												<th>{{__('cycles.Done')}}</th>
@@ -711,8 +751,12 @@
 														</div>
 													@endif
 												</td>
+												{{-- GV-3320: per-startup slot derived from the panel interval --}}
 												<td>
-													@if( !is_null( $screening->dateTime ) )
+													@if( !empty( $screening->meeting_time ) )
+														{{ $screening->meeting_date }} <br>
+														<small class="text-muted">{{ $screening->meeting_time }}</small>
+													@elseif( !is_null( $screening->dateTime ) )
 														{{ $screening->dateTime }} <br>({{ $screening->duration }}M)
 													@else
 														-
@@ -720,9 +764,27 @@
 												</td>
 												<td> {{ !is_null( $screening->dateTime ) && $screening->dateTime < now() ? __('Yes') : __('No') }} </td>
 												<td>
-													@if( !is_null( $screening->dateTime ) && !is_null( $screening->meeting_link ) && \Carbon\Carbon::parse( $screening->dateTime )->format('Y-m-d') == date('Y-m-d') )
+													@php
+														$slotStart = $screening->meeting_start
+															?? ( !is_null( $screening->dateTime ) ? \Carbon\Carbon::parse( $screening->dateTime ) : null );
+														$slotEnd = $screening->meeting_end
+															?? ( !is_null( $screening->endTime ) ? \Carbon\Carbon::parse( $screening->endTime ) : null );
+														// Join Now + passcode unlock 10 minutes before the slot starts
+														// and stay available until an hour after it ends.
+														$canJoin = !is_null( $screening->meeting_link ) && $slotStart
+															&& now()->gte( $slotStart->copy()->subMinutes(10) )
+															&& ( is_null( $slotEnd ) || now()->lte( $slotEnd->copy()->addHour() ) );
+													@endphp
+													@if( $canJoin )
 														<a href="{{ $screening->meeting_link }}" target="_blank">({{__('dashboard.Join now')}})</a>
-													@elseif( !is_null( $screening->endTime ) && now() > $screening->endTime)
+														@if( !empty( $screening->meeting_password ) )
+															<button title="{{ __('dashboard.Passcode') }}" type="button"
+																data-passcode="{{ $screening->meeting_password }}"
+																class="btn btn-label-warning btn-sm show-passcode rounded ms-1">
+																<i class="ti ti-key"></i>
+															</button>
+														@endif
+													@elseif( $slotEnd && now() > $slotEnd->copy()->addHour() )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -1235,15 +1297,17 @@
 												<thead>
 													<tr>
 													  <th>{{ __('dashboard.Company') }}</th>
-													  <th>{{ __('dashboard.User/Title') }}</th>
+													  <th>{{ __('dashboard.Founder') }}</th>
 													  <th>{{ __('dashboard.Screening completed') }}</th>
+													  <th>{{ __('dashboard.Meeting') }}</th>
+													  <th>{{ __('dashboard.Actions') }}</th>
 													  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
 													</tr>
 												  </thead>
 												  <tbody>
 													@if( $step->companies->count() == 0 )
 														<tr>
-															<td class="text-center" colspan="4">{{ __('cycles.No data available in table') }}</td>
+															<td class="text-center" colspan="5">{{ __('cycles.No data available in table') }}</td>
 														</tr>
 													@else
 														@foreach( $step->companies as $company )
@@ -1286,6 +1350,37 @@
 																<span class="badge bg-label-danger">
 																	<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
 																</span>
+																@endif
+															</td>
+															{{-- GV-3311: per-startup meeting slot derived from the panel interval --}}
+															<td>
+																@if( !empty( $company->meeting_time ) )
+																	<div>{{ $company->meeting_date }}</div>
+																	<small class="text-muted">{{ $company->meeting_time }}</small>
+																	@if( !empty( $company->passcode ) )
+																		<div>
+																			<button title="{{ __('dashboard.Passcode') }}" type="button"
+																				data-passcode="{{ $company->passcode }}"
+																				class="btn btn-label-warning btn-sm show-passcode rounded mt-1">
+																				<i class="ti ti-key"></i>
+																			</button>
+																		</div>
+																	@endif
+																@else
+																	{{ __('dashboard.Not added yet') }}
+																@endif
+															</td>
+															<td>
+																{{-- Join Now opens a day before the meeting and disappears an
+																	 hour after it ends. --}}
+																@if( !empty( $company->join_url ) && !empty( $company->meeting_start )
+																	&& now()->gte( $company->meeting_start->copy()->subDay() )
+																	&& ( empty( $company->meeting_end ) || now()->lte( $company->meeting_end->copy()->addHour() ) ) )
+																	<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
+																		<i class="ti ti-video"></i> {{ __('dashboard.Join') }}
+																	</a>
+																@else
+																	-
 																@endif
 															</td>
 														</tr>
@@ -1347,7 +1442,7 @@
 														<thead>
 															<tr>
 																<th>{{ __('dashboard.Company') }}</th>
-																<th>{{ __('dashboard.User/Title') }}</th>
+																<th>{{ __('dashboard.Founder') }}</th>
 																<th>{{ __('dashboard.Screening completed') }}</th>
 																<th>{{ __('dashboard.Meeting') }}</th>
 																<th>{{ __('dashboard.Actions') }}</th>
@@ -1403,14 +1498,26 @@
 																			</span>
 																			@endif
 																		</td>
-																		<td> {{ $company->datetime ?? __('dashboard.Not added yet') }} </td>
+																		{{-- GV-3312: per-startup meeting slot derived from the panel interval --}}
 																		<td>
-																			@if( $company->join_url )
+																			@if( !empty( $company->meeting_time ) )
+																				<div>{{ $company->meeting_date }}</div>
+																				<small class="text-muted">{{ $company->meeting_time }}</small>
+																			@else
+																				{{ $company->datetime ?? __('dashboard.Not added yet') }}
+																			@endif
+																		</td>
+																		<td>
+																			{{-- Join Now opens a day before the meeting and disappears an
+																				 hour after it ends. --}}
+																			@if( $company->join_url
+																				&& ( empty( $company->meeting_start ) || now()->gte( $company->meeting_start->copy()->subDay() ) )
+																				&& ( empty( $company->meeting_end ) || now()->lte( $company->meeting_end->copy()->addHour() ) ) )
 																				<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																					<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
 																				</a>
 																				@if( !empty( $company->passcode ) )
-																						| <button title="Show Passcode" type="button" data-passcode="{{ $company->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																						| <button title="{{ __('dashboard.Passcode') }}" type="button" data-passcode="{{ $company->passcode }}" class="btn btn-label-warning show-passcode rounded">
 																						<i class="ti ti-key"></i>
 																					</button>
 																				@endif

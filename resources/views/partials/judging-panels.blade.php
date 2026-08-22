@@ -256,6 +256,27 @@
         return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
       };
 
+      // Number of startups submitted for a panel. Two DISJOINT groups make up the
+      // total, and they must not be conflated:
+      //   1. picker selections, held in the trigger's `data-selected` set and
+      //      mirrored into .companies-hidden-container by syncCompaniesState()
+      //   2. off-step startups, rendered by blade as hidden inputs OUTSIDE that
+      //      container (their options are disabled, so they are preserved here)
+      // Counting the container's inputs on top of `data-selected` would count
+      // every picker selection twice, doubling the calculated end time.
+      const countPanelCompanies = ($panel) => {
+        const $item = $panel.closest('.accordion-item').length ? $panel.closest('.accordion-item') : $panel;
+        const $trig = $item.find('.companies-picker-trigger');
+        const selected = $trig.length ? ($trig.data('selected') || new Set()).size : 0;
+        const offStep = $item.find('input[type="hidden"][name*="[companies][]"]')
+          .not('.companies-hidden-container input').length;
+        return selected + offStep;
+      };
+
+      // The panel books ONE meeting that every startup joins in sequence, so the
+      // end time must cover ALL of their slots: start + (count * interval).
+      // Mirrors the server-side derivation in ScreeningController@addJudgingPanels
+      // so the previewed end time equals the one that is actually saved.
       const computeEndTime = ($panel) => {
         const $end = $panel.find('input[name*="end_time"]');
         const start = parseTime($panel.find('input[name*="start_time"]').val());
@@ -264,7 +285,8 @@
           $end.val('');
           return;
         }
-        $end.val(minutesToTime(start + interval));
+        const slots = Math.max(countPanelCompanies($panel), 1);
+        $end.val(minutesToTime(start + (slots * interval)));
       };
 
       const rangeLabels = {
@@ -413,6 +435,11 @@
           $trig.removeClass('is-invalid');
           $trig.closest('.col-md-6').find('.error-companies').text('');
         }
+
+        // The auto-calculated end time depends on how many startups are booked,
+        // so adding/removing one must refresh the preview.
+        const $item = $trig.closest('.accordion-item');
+        if ($item.find('.interval-toggle').is(':checked')) computeEndTime($item);
       };
 
       const refreshCompaniesPopover = ($trig) => {

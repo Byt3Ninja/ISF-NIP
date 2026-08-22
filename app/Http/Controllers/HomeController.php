@@ -597,6 +597,12 @@ class HomeController extends Controller
                     sc.user_id AS `screening_user_id`,
                     sc.users AS `screening_users`,
                     sc.panel AS `screening_panel`,
+                    sc.session_date AS `screening_session_date`,
+                    sc.start_time AS `screening_start_time`,
+                    sc.end_time AS `screening_end_time`,
+                    sc.`interval` AS `screening_interval`,
+                    sc.meeting_link AS `screening_meeting_link`,
+                    sc.meeting_password AS `screening_meeting_password`,
                     cp.id AS company_id,
                     cp.name_en AS `company_name_en`,
                     cp.name_ar AS `company_name_ar`,
@@ -688,6 +694,25 @@ class HomeController extends Controller
                     $user->logo = User::image_handler($step->company_user_img_url);
                     return $user;
                 })->unique('id')->values();
+
+                // Per-startup meeting slot (GV-3311). Derived from the panel's
+                // start time, the admin's interval and this startup's position
+                // within the panel, so each startup sees its own window rather
+                // than the panel-wide one.
+                $slot = \App\Services\ScreeningSlotService::slotFor(
+                    $c->screening_session_date ?? null,
+                    $c->screening_start_time ?? null,
+                    isset($c->screening_interval) ? (int) $c->screening_interval : null,
+                    \App\Services\ScreeningSlotService::positionOf($c->screening_users ?? [], $c->company_id),
+                    $c->screening_end_time ?? null
+                );
+                $company->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
+                $company->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+                $company->meeting_start = $slot['start'];
+                $company->meeting_end = $slot['end'];
+                $company->join_url = $c->screening_meeting_link ?? null;
+                $company->passcode = $c->screening_meeting_password ?? null;
+
                 return $company;
             })->values();
             $step->panel = $groupedSteps->map(function ($oneStep) {
@@ -731,7 +756,12 @@ class HomeController extends Controller
                     fs.zoom_id,
                     fs.zoom_passcode,
                     fs.start_url,
-                    fs.join_url
+                    fs.join_url,
+                    sc.session_date AS `panel_session_date`,
+                    sc.start_time AS `panel_start_time`,
+                    sc.end_time AS `panel_end_time`,
+                    sc.`interval` AS `panel_interval`,
+                    sc.users AS `panel_users`
                 FROM
                     finalscreenings fs
                 LEFT JOIN
@@ -742,6 +772,10 @@ class HomeController extends Controller
                     steps s ON fs.step_id = s.id
                 LEFT JOIN
                     cycles cy ON s.cycle_id = cy.id
+                LEFT JOIN
+                    screenings sc ON sc.step_id = fs.step_id
+                        AND sc.deleted_at IS NULL
+                        AND JSON_CONTAINS(sc.users, CAST(fs.company_id AS CHAR))
                 WHERE
                     fs.deleted_at IS NULL
                     AND c.step = fs.step_id
@@ -807,6 +841,23 @@ class HomeController extends Controller
                     $company->passcode = $_company->zoom_passcode;
                     $company->start_url = $_company->start_url;
                     $company->join_url = $_company->join_url;
+
+                    // Per-startup meeting slot (GV-3312). When the admin scheduled
+                    // the panel with an interval, each startup gets its own window
+                    // derived from the panel start time and its position in the
+                    // panel; otherwise fall back to the stored panel datetime.
+                    $slot = \App\Services\ScreeningSlotService::slotFor(
+                        $_company->panel_session_date ?? null,
+                        $_company->panel_start_time ?? null,
+                        isset($_company->panel_interval) ? (int) $_company->panel_interval : null,
+                        \App\Services\ScreeningSlotService::positionOf($_company->panel_users ?? [], $_company->company_id),
+                        $_company->panel_end_time ?? null
+                    );
+                    $company->meeting_start = $slot['start'];
+                    $company->meeting_end = $slot['end'];
+                    $company->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
+                    $company->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+
                     return $company;
                 })->values();
                 return $step;
@@ -1183,6 +1234,10 @@ class HomeController extends Controller
         
         $myFinal = null;
         $myInitial = null;
+        // GV-3320/3321: defaults so the Evaluation Session header renders even
+        // when the user has no company/step yet.
+        $data['evaluation_step_title'] = null;
+        $data['evaluation_program_title'] = null;
         $days = request()->query('days', 14);
         $company = $user->company;
         $sessions = collect([]);
@@ -1213,6 +1268,12 @@ class HomeController extends Controller
                     fs.join_url,
                     fs.datetime,
                     fs.duration,
+                    fs.zoom_passcode,
+                    sc.session_date AS `panel_session_date`,
+                    sc.start_time AS `panel_start_time`,
+                    sc.end_time AS `panel_end_time`,
+                    sc.`interval` AS `panel_interval`,
+                    sc.users AS `panel_users`,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_en AS `user_first_name_en`,
@@ -1227,12 +1288,30 @@ class HomeController extends Controller
                     companies c ON c.id = fs.company_id
                 LEFT JOIN
                     users u ON u.company_id = c.id AND u.id = ?
+                LEFT JOIN
+                    screenings sc ON sc.step_id = fs.step_id
+                        AND sc.deleted_at IS NULL
+                        AND JSON_CONTAINS(sc.users, CAST(fs.company_id AS CHAR))
                 WHERE
                     fs.company_id = ?
                 AND fs.step_id = ?
                 LIMIT 1";
             $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]))->first();
             if (!empty($myFinal)) {
+                // GV-3321: this startup's own slot within the final panel.
+                $finalSlot = \App\Services\ScreeningSlotService::slotFor(
+                    $myFinal->panel_session_date ?? null,
+                    $myFinal->panel_start_time ?? null,
+                    isset($myFinal->panel_interval) ? (int) $myFinal->panel_interval : null,
+                    \App\Services\ScreeningSlotService::positionOf($myFinal->panel_users ?? [], $company->id),
+                    $myFinal->panel_end_time ?? null
+                );
+                $myFinal->meeting_start = $finalSlot['start'];
+                $myFinal->meeting_end = $finalSlot['end'];
+                $myFinal->meeting_date = $finalSlot['start'] ? $finalSlot['start']->format('d-m-Y') : null;
+                $myFinal->meeting_time = \App\Services\ScreeningSlotService::formatRange($finalSlot);
+                $myFinal->passcode = $myFinal->zoom_passcode ?? null;
+
                 $judges = json_decode($myFinal->judges, true) ?? [];
                 if (!is_array($judges)) {
                     $judges = [];
@@ -1288,6 +1367,10 @@ class HomeController extends Controller
             if (!empty($stepData)) {
                 $cType = $stepData->stype;
             }
+            // GV-3320/3321: the Evaluation Session section shows which program and
+            // step the scheduled meeting belongs to.
+            $data['evaluation_step_title'] = $stepData->title ?? null;
+            $data['evaluation_program_title'] = $company->cycledata->title ?? null;
             $cycle_id = $company->cycle;
             $cycleData = $company->cycledata;
             if ($cycleData) {
@@ -1308,7 +1391,7 @@ class HomeController extends Controller
                 return in_array($companyId, $item->users);
             })->values();
 
-            $myInitial = $myInitial->map(function ($item) {
+            $myInitial = $myInitial->map(function ($item) use ($companyId) {
                 $item->judge = $item->user;
                 if( !is_null( $item->session_date ) )
                 {
@@ -1322,6 +1405,15 @@ class HomeController extends Controller
                     $item->endTime = null;
                     $item->duration = null;
                 }
+
+                // GV-3320: this startup's own slot within the panel, derived from
+                // the admin's interval and the startup's position in the panel.
+                $slot = \App\Services\ScreeningSlotService::slotForCompany($item, $companyId);
+                $item->meeting_start = $slot['start'];
+                $item->meeting_end = $slot['end'];
+                $item->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
+                $item->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+
                 return $item;
             });
         }
