@@ -335,6 +335,10 @@ class ScreeningController extends Controller
 						'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
 						'meeting_link' => $screening->meeting_link,
 						'meeting_password' => $screening->meeting_password,
+						// Interval mode must survive a reload: without these the
+						// blade always rendered the switch OFF (GV-3295).
+						'interval' => $screening->interval,
+						'interval_checked' => !empty($screening->interval),
 					];
 				}
 				$judgingPanels[] = $panelEntry;
@@ -543,6 +547,7 @@ class ScreeningController extends Controller
 			'panels.*.session_date' => 'nullable|date',
 			'panels.*.start_time' => 'nullable',
 			'panels.*.end_time' => 'nullable',
+			'panels.*.interval' => 'nullable|integer|min:1|max:99',
 		], $messages);
 
 		if ($validator->fails()) {
@@ -592,13 +597,34 @@ class ScreeningController extends Controller
 			$startDateTime = null;
 			$duration = null;
 
+			// Interval scheduling (GV-3295). When the interval switch is on the
+			// admin never types an end time -- the field is rendered disabled, and
+			// browsers omit disabled inputs from the submission, so `end_time`
+			// arrives empty. Derive it here instead of storing NULL.
+			//
+			// The panel holds ONE meeting that the startups join in sequence, so
+			// its end time must cover EVERY startup's slot: start + (count *
+			// interval). Individual per-startup windows are derived at read time
+			// by ScreeningSlotService from (start_time, interval, position).
+			$interval = isset($panel['interval']) && $panel['interval'] !== '' ? (int) $panel['interval'] : null;
+			if ($interval !== null && $interval <= 0) {
+				$interval = null;
+			}
+			$endTime = $panel['end_time'] ?? null;
+
+			if ($interval !== null && !empty($panel['start_time'])) {
+				$endTime = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $panel['start_time'])
+					->addMinutes(count($companyIds) * $interval)
+					->format('H:i');
+			}
+
 			if (!empty($panel['session_date']) && !empty($panel['start_time'])) {
 				try {
 					$startDateTime = $panel['session_date'] . ' ' . $panel['start_time'];
 					$duration = 60;
-					if (!empty($panel['end_time'])) {
+					if (!empty($endTime)) {
 						$start = \Carbon\Carbon::parse($startDateTime);
-						$end = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $panel['end_time']);
+						$end = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $endTime);
 						$duration = max($start->diffInMinutes($end), 30);
 					}
 
@@ -634,7 +660,8 @@ class ScreeningController extends Controller
 					'zoom_id' => $zoomId,
 					'start_url' => $startUrl,
 					'start_time' => $panel['start_time'] ?? null,
-					'end_time' => $panel['end_time'] ?? null,
+					'end_time' => $endTime ?: null,
+					'interval' => $interval,
 				]);
 			}
 
@@ -646,12 +673,33 @@ class ScreeningController extends Controller
 			// (Final Screening only). Persisted once after the loop so companies in
 			// multiple panels keep the union of all their panels' judges.
 			if ($step && $step->stype == 5) {
-				foreach ($companyIds as $companyId) {
+				foreach (array_values($companyIds) as $position => $companyId) {
 					$judgesByCompany[$companyId] = array_merge($judgesByCompany[$companyId] ?? [], $judgeIds);
+
+					// finalscreenings rows are PER COMPANY, so each must carry that
+					// company's own slot -- not the panel-wide window (GV-3295).
+					// With the interval off this collapses to the panel window,
+					// preserving the previous behaviour.
+					$companyDatetime = $startDateTime;
+					$companyDuration = $duration;
+
+					if ($interval !== null && !empty($panel['session_date']) && !empty($panel['start_time'])) {
+						$slot = \App\Services\ScreeningSlotService::slotFor(
+							$panel['session_date'],
+							$panel['start_time'],
+							$interval,
+							$position
+						);
+						if (!empty($slot['start'])) {
+							$companyDatetime = $slot['start']->format('Y-m-d H:i:s');
+							$companyDuration = $interval;
+						}
+					}
+
 					$meetingByCompany[$companyId] = [
 						'meeting_link' => $meetingLink,
-						'datetime' => $startDateTime,
-						'duration' => $duration
+						'datetime' => $companyDatetime,
+						'duration' => $companyDuration
 					];
 				}
 			}

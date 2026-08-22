@@ -2918,6 +2918,10 @@ return [
 	'end_time_must_be_after_start_time' => 'يجب أن يكون الوقت النهاية بعد الوقت البدء',
 	'meeting_link_required' => 'يرجى إدخال رابط الاجتماع',
 	'meeting_link_url_required' => 'يرجى إدخال رابط اجتماع صحيح',
+	'interval' => 'الفاصل الزمني',
+	'interval_minutes' => 'الفاصل الزمني (بالدقائق)',
+	'select_start_time_first' => 'يرجى اختيار وقت البدء أولاً.',
+	'valid_interval_duration' => 'يرجى إدخال مدة زمنية صحيحة.',
 
 	'mandatory' => 'اجباري',
 	'optional' => 'اختياري',
