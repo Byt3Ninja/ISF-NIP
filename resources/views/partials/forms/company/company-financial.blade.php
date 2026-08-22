@@ -139,8 +139,11 @@
 
           <div class="col-md-6 mb-3">
             <label for="stage" class="form-label fw-medium">{{ __('admin.development_stage') }}</label>
+            @php
+              $hasSelectedStage = !empty($client->company) && $Stages->contains('id', $client->company->stage);
+            @endphp
             <select class="form-select select2" required id="stage" name="stage">
-              <option value="" disabled>{{ __('admin.development_stage') }}</option>
+              <option value="" disabled {{ !$hasSelectedStage ? 'selected' : '' }}>{{ __('admin.development_stage') }}</option>
               @foreach ($Stages as $Stage)
               <option value="{{ $Stage->id }}"
                 {{ !empty($client->company) && $client->company->stage == $Stage->id ? 'selected' : '' }}>

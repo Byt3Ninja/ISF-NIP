@@ -1317,6 +1317,8 @@ return [
 	'Add_Period' => 'إضافة الفترة',
 	'Remove_Period' => 'إزالة الفترة',
 	'ChooseYourStageFirst' => 'اختر (مرحلة التطوير) اولا',
+	'ChooseStageForCompany' => 'يتعين على :founder اختيار "مرحلة التطوير" من قسم "المعلومات المالية" في ملف تعريف الشركة.',
+	'StartDateCannotBeInPast' => 'لا يمكن أن يكون تاريخ البداية قبل اليوم.',
 	'Tiktok' => ' تيكتوك',
 	'Instagram' => ' انستقرام',
 	'Password_should_be_strong' => 'يجب أن تكون كلمة المرور قوية',

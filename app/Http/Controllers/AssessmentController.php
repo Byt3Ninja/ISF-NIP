@@ -88,7 +88,12 @@ class AssessmentController extends Controller
             'user_id' => 'required|exists:users,id', // يجب أن يكون موجودًا في جدول المستخدمين
             'start_date' => 'required|date', // تاريخ صالح وأقل أو يساوي end_date
         ]);
-        
+
+        if( \Carbon\Carbon::parse($request->start_date)->startOfDay()->lt(now()->startOfDay()) )
+        {
+            return redirect()->back()->with(['class'=>'danger', 'message'=>__('admin.StartDateCannotBeInPast'), 'message_resolved' => true]);
+        }
+
         $userid = $request->user_id;
         $l = app()->getLocale();
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
@@ -105,10 +110,18 @@ class AssessmentController extends Controller
                 $company = Company::find($companyid);
                 
                 $title = $company?->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
-               
-                if( $company?->stage == null )
+
+                if( $company?->stage == null || !is_numeric($company->stage) )
                 {
-                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('NotStage')]);
+                    $founderName = trim($user->{'first_name_'.$l} .' '. $user->{'last_name_'.$l});
+
+                    return redirect()->back()->with([
+                        'class' => 'danger',
+                        'message' => __('admin.ChooseStageForCompany', [
+                            'founder' => $founderName,
+                        ]),
+                        'message_resolved' => true,
+                    ]);
                 }
 
                 $company_weights = Weight::where('stage_id', $company->stage)->get();

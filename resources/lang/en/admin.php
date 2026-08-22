@@ -1307,6 +1307,8 @@ return [
 	'Add_Period' => 'Add Period',
 	'Remove_Period' => 'Remove Period',
 	'ChooseYourStageFirst' => 'Choose Your Development Stage First',
+	'ChooseStageForCompany' => ':founder needs to select the Development Stage from the Financial Info section in their company profile.',
+	'StartDateCannotBeInPast' => 'Start date cannot be earlier than today.',
 	'Tiktok' => 'Tiktok',
 	'Instagram' => 'Instagram',
 	'Password_should_be_strong' => 'Password should be strong',
