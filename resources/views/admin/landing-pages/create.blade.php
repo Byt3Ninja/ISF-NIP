@@ -14,19 +14,6 @@
     .ql-toolbar .ql-custom-button::after {
       content: 'Button';
     }
-
-    /*
-     * Fix: two Quill editors (content / content_ar) rendering on top of
-     * each other inside the custom-section repeater.
-     *
-     * Quill's own CSS sets `.ql-container { height: 100%; position: relative; }`
-     * and `.ql-editor { height: 100%; }`. Nested inside Bootstrap 5's flex
-     * grid (.row.g-4 -> .col-12), that percentage height resolves against
-     * whatever height the surrounding tab/card wrapper happens to report,
-     * instead of the editor's own content -- so both editors end up
-     * sized/stacked off the same inherited value and visually overlap.
-     * Force each editor to size to its own content instead.
-     */
     .custom-quill-editor.ql-container {
       position: relative;
       height: auto !important;
@@ -806,10 +793,20 @@
 
                 @if($section['key'] === 'programs')
                   <hr class="my-4">
-                  <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                     <h6 class="mb-0">
                       {{ $l == 'ar' ? 'اختيار البرامج' : 'Programs Selection' }}
                     </h6>
+                    <div class="input-group input-group-merge w-100" style="max-width: 320px;">
+                      <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+                      <input
+                        type="search"
+                        id="programsSearchInput"
+                        class="form-control"
+                        placeholder="{{ $l == 'ar' ? 'ابحث عن البرامج...' : 'Search programs...' }}"
+                        aria-label="{{ $l == 'ar' ? 'البحث في البرامج' : 'Search programs' }}"
+                      >
+                    </div>
                   </div>
                   <div class="table-responsive">
                     <table class="table table-hover">
@@ -821,7 +818,7 @@
                       </thead>
                       <tbody id="programsListBody">
                         @foreach($cycles as $program)
-                          <tr class="programs-list-row" data-program-id="{{ $program->id }}">
+                          <tr class="programs-list-row" data-program-id="{{ $program->id }}" data-search-title="{{ $program->title }}">
                             <td>
                               <a
                                 href="{{ url('dashboard/programlist/show/' . $program->id) }}"
@@ -853,6 +850,12 @@
                         @endforeach
                       </tbody>
                     </table>
+                  </div>
+                  <div id="programsNoResults" class="text-center py-5 d-none">
+                    <i class="ti ti-search text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="text-muted mb-1">
+                      {{ $l == 'ar' ? 'لم يتم العثور على برامج.' : 'No programs found.' }}
+                    </h5>
                   </div>
                   <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 mt-3">
                     <small class="text-muted" id="programsPaginationInfo"></small>
@@ -1903,23 +1906,48 @@
       });
 
       // ─────────────────────────────────────────────────────────────
-      // Programs selection list — client-side pagination (10 rows/page)
+      // Programs selection list — client-side search + pagination
+      // (10 rows/page). Searching only hides/shows rows so any pending
+      // visibility switch changes are never lost.
       // ─────────────────────────────────────────────────────────────
       const programsPerPage = 10;
       let programsCurrentPage = 1;
+      let programsSearchTerm = '';
+
+      const getFilteredProgramRows = function () {
+        const $rows = $('#programsListBody .programs-list-row');
+        const term = programsSearchTerm.trim().toLowerCase();
+        if (!term) return $rows;
+        return $rows.filter(function () {
+          return ($(this).attr('data-search-title') || '').toLowerCase().indexOf(term) !== -1;
+        });
+      };
 
       const renderProgramsPagination = function () {
-        const $rows = $('#programsListBody .programs-list-row');
+        const $allRows = $('#programsListBody .programs-list-row');
+        const $rows = getFilteredProgramRows();
         const total = $rows.length;
         const totalPages = Math.max(1, Math.ceil(total / programsPerPage));
-
-        if (programsCurrentPage > totalPages) programsCurrentPage = totalPages;
-        const start = (programsCurrentPage - 1) * programsPerPage;
-        $rows.hide().slice(start, start + programsPerPage).show();
 
         const $list = $('#programsPaginationList').empty();
         const $nav = $('#programsPaginationNav');
         const $info = $('#programsPaginationInfo');
+
+        if (total === 0) {
+          $allRows.hide();
+          $('#programsNoResults').removeClass('d-none');
+          $nav.hide();
+          $info.text('');
+          return;
+        }
+
+        $('#programsNoResults').addClass('d-none');
+
+        if (programsCurrentPage > totalPages) programsCurrentPage = totalPages;
+        const start = (programsCurrentPage - 1) * programsPerPage;
+
+        $allRows.hide();
+        $rows.slice(start, start + programsPerPage).show();
 
         if (totalPages <= 1) {
           $nav.hide();
@@ -1948,6 +1976,12 @@
         const page = parseInt($(this).data('page'), 10);
         if (isNaN(page) || page < 1 || page === programsCurrentPage) return;
         programsCurrentPage = page;
+        renderProgramsPagination();
+      });
+
+      $('#programsSearchInput').on('input', function () {
+        programsSearchTerm = $(this).val();
+        programsCurrentPage = 1;
         renderProgramsPagination();
       });
 
