@@ -205,6 +205,9 @@
                 @csrf
                 @method('PUT')
 
+                {{-- Backend validation errors surfaced from the AJAX save --}}
+                <div class="alert alert-danger section-backend-errors d-none mb-4" role="alert"></div>
+
                 {{-- Save button, top-right of each section --}}
                 <div class="d-flex align-items-center justify-content-between mb-4">
                   <h5 class="mb-0">
@@ -2158,8 +2161,32 @@
         const submitViaAjax = function () {
           const $btn = $form.find('button[type="submit"]');
           const originalHtml = $btn.html();
+          const $backendErrorsBox = $form.find('.section-backend-errors');
+
+          // Backend error keys are dot-notation ("general.title"), so match
+          // them to this section by the prefix before the first dot.
+          const showBackendErrors = function (errors) {
+            const items = [];
+            $.each(errors || {}, function (key, msgs) {
+              if (String(key).split('.')[0] !== String(sectionKey)) return;
+              (Array.isArray(msgs) ? msgs : [msgs]).forEach(function (msg) {
+                items.push(String(msg));
+              });
+            });
+            if (!items.length) return false;
+            const $list = $('<ul class="mb-0 ps-3"></ul>');
+            items.forEach(function (msg) {
+              $list.append($('<li></li>').text(msg));
+            });
+            $backendErrorsBox.empty().append($list).removeClass('d-none');
+            if ($backendErrorsBox[0] && typeof $backendErrorsBox[0].scrollIntoView === 'function') {
+              $backendErrorsBox[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return true;
+          };
 
           $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+          $backendErrorsBox.addClass('d-none').empty();
 
           $.ajax({
             url: $form.attr('action'),
@@ -2170,6 +2197,7 @@
           })
             .done(function (res) {
               $btn.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>' + "{{ __('landing.Save') }}");
+              $backendErrorsBox.addClass('d-none').empty();
               if (successMessages[sectionKey]) {
                 releaseSuccessAlert({
                   title: "{{ __('admin.success') }}",
@@ -2179,11 +2207,17 @@
             })
             .fail(function (xhr) {
               $btn.html(originalHtml);
+              const res = xhr.responseJSON || {};
+
+              // Show section-specific errors in the alert-danger at the top
+              // of this section; fall back to the toast otherwise.
+              if (showBackendErrors(res.errors)) return;
+
               let errorMessage = sectionKey === 'programs'
                 ? (isArabic ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى' : 'Something went wrong. Please try again.')
                 : "{{ __('admin.unexpected_error') }}";
-              if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
+              if (res.message) {
+                errorMessage = res.message;
               }
               releaseFailureAlert({
                 title: "{{ __('admin.Error') }}",
