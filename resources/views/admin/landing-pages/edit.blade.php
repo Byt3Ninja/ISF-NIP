@@ -3,6 +3,34 @@
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <style>
+    .ql-toolbar .ql-custom-button {
+      width: auto !important;
+      padding: 0 8px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .ql-toolbar .ql-custom-button::after {
+      content: 'Button';
+    }
+    .custom-quill-editor.ql-container {
+      position: relative;
+      height: auto !important;
+      z-index: 1;
+    }
+    .custom-quill-editor.ql-container .ql-editor {
+      height: auto !important;
+      min-height: 160px;
+    }
+    .custom-field-group[data-field="content"],
+    .custom-field-group[data-field="content_ar"] {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 0.5rem;
+    }
+  </style>
 @endsection
 
 @section('content')
@@ -457,47 +485,46 @@
 
                   <div id="customSectionsContainer">
                     @forelse($customSectionBlocks as $blockIndex => $block)
-                      <div class="col-12 custom-section-block mb-4" data-block-id="{{ $blockIndex }}">
-                        <div class="border rounded p-3">
-                          <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h6 class="mb-0 custom-section-label"> {{ __('landing.custom_section') }} {{ $blockIndex + 1 }}</h6>
-                            <div class="d-flex align-items-center gap-3">
-                              <div class="form-check form-switch mb-0">
-                                <input
-                                  type="checkbox"
-                                  class="form-check-input"
-                                  name="custom_sections[{{ $blockIndex }}][visibility]"
-                                  value="1"
-                                  {{ $block->visibility ? 'checked' : '' }}
-                                >
-                                <label class="form-check-label small">{{ __('landing.Visible') }}</label>
-                              </div>
-                              <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-custom-section">
-                                <i class="ti ti-trash"></i>
-                                {{ __('landing.Remove') }}
-                              </button>
+                      <div class="card mb-3 border shadow-sm custom-section-card" data-section-id="{{ $blockIndex }}">
+                        <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                          <h6 class="mb-0 custom-section-label"> {{ __('landing.custom_section') }} {{ $blockIndex + 1 }}</h6>
+                          <div class="d-flex align-items-center gap-3">
+                            <div class="form-check form-switch mb-0">
+                              <input
+                                type="checkbox"
+                                class="form-check-input custom-visibility-switch"
+                                name="custom_sections[{{ $blockIndex }}][visibility]"
+                                value="1"
+                                {{ $block->visibility ? 'checked' : '' }}
+                              >
+                              <label class="form-check-label small">{{ __('landing.Visible') }}</label>
                             </div>
+                            <button type="button" class="btn btn-sm btn-icon btn-outline-danger remove-custom-section" title="{{ __('landing.Remove') }}">
+                              <i class="ti ti-trash"></i>
+                            </button>
                           </div>
+                        </div>
+                        <div class="card-body">
                           <input type="hidden" name="custom_sections[{{ $blockIndex }}][id]" value="{{ $block->id }}">
                           <div class="row g-4">
                             <div class="col-md-6 custom-field-group" data-field="title">
                               <label class="form-label">{{ __('landing.Title') }}</label>
-                              <input type="text" class="form-control" name="custom_sections[{{ $blockIndex }}][title]" maxlength="255" value="{{ $block->title }}" data-custom-field>
+                              <input type="text" class="form-control custom-section-input" name="custom_sections[{{ $blockIndex }}][title]" maxlength="255" value="{{ $block->title }}" data-custom-field>
                               <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
                             </div>
                             <div class="col-md-6 custom-field-group" data-field="title_ar">
                               <label class="form-label">{{ __('landing.Title_ar') }}</label>
-                              <input type="text" class="form-control" dir="rtl" name="custom_sections[{{ $blockIndex }}][title_ar]" maxlength="255" value="{{ $block->title_ar }}" data-custom-field>
+                              <input type="text" class="form-control custom-section-input" dir="rtl" name="custom_sections[{{ $blockIndex }}][title_ar]" maxlength="255" value="{{ $block->title_ar }}" data-custom-field>
                               <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
                             </div>
                             <div class="col-md-6 custom-field-group" data-field="title_tag">
                               <label class="form-label">{{ __('landing.Title_tag') }}</label>
-                              <input type="text" class="form-control" name="custom_sections[{{ $blockIndex }}][title_tag]" maxlength="255" value="{{ $block->title_tag }}" data-custom-field>
+                              <input type="text" class="form-control custom-section-input" name="custom_sections[{{ $blockIndex }}][title_tag]" maxlength="255" value="{{ $block->title_tag }}" data-custom-field>
                               <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
                             </div>
                             <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
                               <label class="form-label">{{ __('landing.Title_tag_ar') }}</label>
-                              <input type="text" class="form-control" dir="rtl" name="custom_sections[{{ $blockIndex }}][title_tag_ar]" maxlength="255" value="{{ $block->title_tag_ar }}" data-custom-field>
+                              <input type="text" class="form-control custom-section-input" dir="rtl" name="custom_sections[{{ $blockIndex }}][title_tag_ar]" maxlength="255" value="{{ $block->title_tag_ar }}" data-custom-field>
                               <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
                             </div>
                             <div class="col-md-6 custom-field-group" data-field="content">
@@ -2069,43 +2096,52 @@
             </div>
             <div class="card-body">
               <div class="row g-4">
-                <div class="col-12 custom-field-group" data-field="is_visible">
+                <div class="col-12 custom-field-group" data-field="visibility">
                   <label class="form-label d-block">${isArabic ? 'الظهور' : 'Visibility'}</label>
                   <div class="form-check form-switch">
-                    <input type="hidden" name="custom[sections][${id}][is_visible]" value="0">
-                    <input type="checkbox" name="custom[sections][${id}][is_visible]" value="1" class="form-check-input custom-visibility-switch" checked>
+                    <input type="hidden" name="custom_sections[${id}][visibility]" value="0">
+                    <input type="checkbox" name="custom_sections[${id}][visibility]" value="1" class="form-check-input custom-visibility-switch" checked>
                   </div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title">
                   <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
-                  <input type="text" name="custom[sections][${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_ar">
                   <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
-                  <input type="text" name="custom[sections][${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag">
                   <label class="form-label">${isArabic ? 'العنوان الفرعي' : 'Title tag'}</label>
-                  <input type="text" name="custom[sections][${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
                   <label class="form-label">${isArabic ? 'العنوان الفرعي بالعربية' : 'Title tag (Arabic)'}</label>
-                  <input type="text" name="custom[sections][${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-12 custom-field-group" data-field="content">
+                <div class="col-md-6 custom-field-group" data-field="content">
                   <label class="form-label">${isArabic ? 'المحتوى' : 'Content'}</label>
                   <div class="custom-quill-editor" id="custom-quill-content-${id}" style="min-height: 160px"></div>
-                  <input type="hidden" name="custom[sections][${id}][content]" class="custom-hidden-content" value="">
+                  <input type="hidden" name="custom_sections[${id}][content]" class="custom-hidden-content" value="">
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-12 custom-field-group" data-field="content_ar">
+                <div class="col-md-6 custom-field-group" data-field="content_ar">
                   <label class="form-label">${isArabic ? 'المحتوى بالعربية' : 'Content (Arabic)'}</label>
                   <div class="custom-quill-editor" id="custom-quill-content-ar-${id}" style="min-height: 160px"></div>
-                  <input type="hidden" name="custom[sections][${id}][content_ar]" class="custom-hidden-content" value="">
+                  <input type="hidden" name="custom_sections[${id}][content_ar]" class="custom-hidden-content" value="">
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">${isArabic ? 'نص الزر' : 'Button Text'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
+                  <input type="text" name="custom_sections[${id}][button_text]" maxlength="255" class="form-control">
+                </div>
+                <div class="col-md-6 custom-field-group" data-field="button_link">
+                  <label class="form-label">${isArabic ? 'رابط الزر' : 'Button Link'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
+                  <input type="url" name="custom_sections[${id}][button_link]" maxlength="500" class="form-control" placeholder="https://" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
               </div>
@@ -2376,7 +2412,6 @@
       // ─────────────────────────────────────────────────────────────
       const aboutCards = @json($aboutCards);
       const howSteps = @json($howSteps);
-      const customSections = @json($customSections);
 
       aboutCards.forEach(function (card) {
         const id = addAboutCard();
@@ -2398,24 +2433,9 @@
         $step.find('[name="how[steps][' + id + '][description_ar]"]').val(step.description_ar || '');
       });
 
-      customSections.forEach(function (section) {
-        const id = addCustomSection();
-        const $card = $('#customSectionsContainer .custom-section-card[data-section-id="' + id + '"]');
-        $card.attr('data-persisted', 'true');
-        $card.find('[name="custom[sections][' + id + '][is_visible]"]').prop('checked', !!section.is_visible);
-        $card.find('[name="custom[sections][' + id + '][title]"]').val(section.title || '');
-        $card.find('[name="custom[sections][' + id + '][title_ar]"]').val(section.title_ar || '');
-        $card.find('[name="custom[sections][' + id + '][title_tag]"]').val(section.title_tag || '');
-        $card.find('[name="custom[sections][' + id + '][title_tag_ar]"]').val(section.title_tag_ar || '');
-        $card.find('.custom-quill-editor').each(function (i) {
-          const quill = customQuills.get(this);
-          if (!quill) return;
-          const html = i === 0 ? (section.content || '') : (section.content_ar || '');
-          if (html) {
-            quill.clipboard.dangerouslyPasteHTML(0, html, 'user');
-          }
-        });
-      });
+      // Custom sections are already server-rendered from $customSectionBlocks
+      // above (unlike About cards / How steps, which have no blade-side
+      // loop), so there's no client-side pre-fill step for them here.
 
       // Each section saves independently via AJAX so switching tabs never
       // loses unsaved input in other sections.

@@ -2,7 +2,34 @@
 
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <style>
+    .ql-toolbar .ql-custom-button {
+      width: auto !important;
+      padding: 0 8px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .ql-toolbar .ql-custom-button::after {
+      content: 'Button';
+    }
+    .custom-quill-editor.ql-container {
+      position: relative;
+      height: auto !important;
+      z-index: 1;
+    }
+    .custom-quill-editor.ql-container .ql-editor {
+      height: auto !important;
+      min-height: 160px;
+    }
+    .custom-field-group[data-field="content"],
+    .custom-field-group[data-field="content_ar"] {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 0.5rem;
+    }
+  </style>
 @endsection
 
 @section('content')
@@ -15,6 +42,75 @@
     <p class="text-secondary mb-0">
       {{ __('landing.Create_LandingPage_Description') }}
     </p>
+  </div>
+
+  {{-- Custom Landing Page URL configuration — locked until the page exists (see General tab) --}}
+  <div class="card mb-4">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="form-check form-switch mb-0">
+            <input type="checkbox" class="form-check-input" id="lpUrlEnabledToggle" disabled>
+          </div>
+          <div>
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+              <i class="ti ti-link"></i>
+              {{ $l == 'ar' ? 'رابط صفحة الهبوط المخصص' : 'Custom Landing Page URL' }}
+            </h5>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-outline-primary" disabled>
+            <i class="ti ti-external-link me-1"></i>
+            {{ $l == 'ar' ? 'معاينة صفحة الهبوط' : 'Preview Landing Page' }}
+          </button>
+          <button type="button" class="btn btn-primary" disabled>
+            <i class="ti ti-device-floppy me-1"></i>
+            {{ $l == 'ar' ? 'حفظ' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+        <i class="ti ti-info-circle"></i>
+        <span>{{ __('landing.Programs_Note') }}</span>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <label class="form-label">{{ $l == 'ar' ? 'العنوان' : 'Title' }}</label>
+          <input type="text" class="form-control" maxlength="100" placeholder="{{ $l == 'ar' ? 'صيف 2025' : 'Summer 2025' }}" disabled>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">{{ $l == 'ar' ? 'اسم الرابط' : 'URL Name' }}</label>
+          <input type="text" class="form-control" maxlength="100" placeholder="{{ $l == 'ar' ? 'برنامج الصيف' : 'Summer Program' }}" disabled>
+        </div>
+        <div class="col-12">
+          <label class="form-label">{{ $l == 'ar' ? 'الرابط المخصص' : 'Custom URL' }}</label>
+          <div class="row g-2 align-items-start">
+            <div class="col-md-6 col-xl-7">
+              <div class="input-group input-group-merge shadow-none">
+                <span class="input-group-text text-muted">{{ url('/lp/') }}/</span>
+                <input type="text" class="form-control" maxlength="100" placeholder="summer-2025" disabled>
+              </div>
+              <small class="text-muted">
+                {{ $l == 'ar' ? 'يجب أن يحتوي الرابط على أحرف إنجليزية صغيرة وأرقام وشرطات فقط.' : 'URL must contain only lowercase letters, numbers, and hyphens.' }}
+              </small>
+            </div>
+            <div class="col-md-6 col-xl-5 d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-outline-secondary text-nowrap" disabled>
+                <i class="ti ti-refresh me-1"></i>
+                {{ $l == 'ar' ? 'إنشاء من العنوان' : 'Generate from title' }}
+              </button>
+              <button type="button" class="btn btn-outline-info text-nowrap" disabled>
+                <i class="ti ti-check me-1"></i>
+                {{ $l == 'ar' ? 'تحقق من التوفر' : 'Check Availability' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="card mb-4">
@@ -369,6 +465,43 @@
     </div>
   </div>
 @endsection
+
+{{-- Button-link modal for the custom section rich-text content --}}
+<div class="modal fade" id="customButtonModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ $l == 'ar' ? 'إضافة زر' : 'Add Button' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label" for="customButtonText">
+            {{ $l == 'ar' ? 'نص الزر' : 'Button Text' }}
+          </label>
+          <input type="text" class="form-control" id="customButtonText" maxlength="50">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="customButtonLink">
+            {{ $l == 'ar' ? 'رابط الزر' : 'Button Link' }}
+          </label>
+          <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
+          <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+          {{ $l == 'ar' ? 'إلغاء' : 'Cancel' }}
+        </button>
+        <button type="button" class="btn btn-primary" id="customButtonSave">
+          {{ $l == 'ar' ? 'إضافة' : 'Add' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
@@ -1094,66 +1227,88 @@
 
       const customSectionHtml = function (id) {
         return `
-          <div class="col-12 custom-section-block mb-4" data-block-id="${id}">
-            <div class="border rounded p-3">
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="mb-0 custom-section-label">${isArabic ? 'قسم مخصص' : 'Custom Section'}</h6>
-                <div class="d-flex align-items-center gap-3">
-                  <div class="form-check form-switch mb-0">
-                    <input type="checkbox" class="form-check-input" name="custom_sections[${id}][visibility]" value="1" checked disabled>
-                    <label class="form-check-label small">${isArabic ? 'ظاهر' : 'Visible'}</label>
-                  </div>
-                  <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-custom-section">
-                    <i class="ti ti-trash"></i>
-                    ${isArabic ? 'حذف' : 'Remove'}
-                  </button>
-                </div>
-              </div>
+          <div class="card mb-3 border shadow-sm custom-section-card" data-section-id="${id}">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 custom-section-label">${isArabic ? 'قسم مخصص' : 'Custom Section'}</h6>
+              <button type="button" class="btn btn-sm btn-icon btn-outline-danger remove-custom-section" title="${isArabic ? 'حذف' : 'Remove'}">
+                <i class="ti ti-trash"></i>
+              </button>
+            </div>
+            <div class="card-body">
               <div class="row g-4">
-                <div class="col-md-6">
+                <div class="col-12 custom-field-group" data-field="visibility">
+                  <label class="form-label d-block">${isArabic ? 'الظهور' : 'Visibility'}</label>
+                  <div class="form-check form-switch">
+                    <input type="hidden" name="custom_sections[${id}][visibility]" value="0">
+                    <input type="checkbox" name="custom_sections[${id}][visibility]" value="1" class="form-check-input custom-visibility-switch" checked>
+                  </div>
+                </div>
+                <div class="col-md-6 custom-field-group" data-field="title">
                   <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
-                  <input type="text" class="form-control" name="custom_sections[${id}][title]" maxlength="255" disabled>
+                  <input type="text" name="custom_sections[${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 custom-field-group" data-field="title_ar">
                   <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
-                  <input type="text" class="form-control" dir="rtl" name="custom_sections[${id}][title_ar]" maxlength="255" disabled>
+                  <input type="text" name="custom_sections[${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 custom-field-group" data-field="title_tag">
                   <label class="form-label">${isArabic ? 'العنوان الفرعي' : 'Title Tag'}</label>
-                  <input type="text" class="form-control" name="custom_sections[${id}][title_tag]" maxlength="255" disabled>
+                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
                   <label class="form-label">${isArabic ? 'العنوان الفرعي بالعربية' : 'Title Tag (Arabic)'}</label>
-                  <input type="text" class="form-control" dir="rtl" name="custom_sections[${id}][title_tag_ar]" maxlength="255" disabled>
+                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 custom-field-group" data-field="content">
                   <label class="form-label">${isArabic ? 'المحتوى' : 'Content'}</label>
-                  <div class="custom-quill-editor" style="height:180px;"></div>
-                  <textarea class="d-none custom-hidden-content" name="custom_sections[${id}][content]"></textarea>
+                  <div class="custom-quill-editor" id="custom-quill-content-${id}" style="min-height: 160px"></div>
+                  <input type="hidden" name="custom_sections[${id}][content]" class="custom-hidden-content" value="">
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 custom-field-group" data-field="content_ar">
                   <label class="form-label">${isArabic ? 'المحتوى بالعربية' : 'Content (Arabic)'}</label>
-                  <div class="custom-quill-editor" dir="rtl" style="height:180px;"></div>
-                  <textarea class="d-none custom-hidden-content" name="custom_sections[${id}][content_ar]"></textarea>
+                  <div class="custom-quill-editor" id="custom-quill-content-ar-${id}" style="min-height: 160px"></div>
+                  <input type="hidden" name="custom_sections[${id}][content_ar]" class="custom-hidden-content" value="">
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${isArabic ? 'نص الزر' : 'Button Text'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
-                  <input type="text" class="form-control" name="custom_sections[${id}][button_text]" maxlength="255" disabled>
+                  <input type="text" name="custom_sections[${id}][button_text]" maxlength="255" class="form-control">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 custom-field-group" data-field="button_link">
                   <label class="form-label">${isArabic ? 'رابط الزر' : 'Button Link'} <span class="text-muted">(${isArabic ? 'اختياري' : 'Optional'})</span></label>
-                  <input type="url" class="form-control" name="custom_sections[${id}][button_link]" maxlength="500" placeholder="https://" disabled>
+                  <input type="url" name="custom_sections[${id}][button_link]" maxlength="500" class="form-control" placeholder="https://" data-custom-field>
+                  <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
               </div>
             </div>
           </div>
         `;
-      }
+      };
 
-      $('#customAddSection').on('click', function () {
-        const id = ++customSectionCounter;
-        const $card = $(customSectionHtml(id));
-        $('#customSectionsContainer').append($card);
+      const setCustomFieldError = function ($group, message) {
+        const $err = $group.find('.custom-error-msg');
+        if (message) {
+          $err.text(message).show();
+          $group.find('.form-control, .custom-quill-editor, .form-check-input').addClass('is-invalid');
+        } else {
+          $err.text('').hide();
+          $group.find('.is-invalid').removeClass('is-invalid');
+        }
+      };
+
+      const customFieldValue = function ($card, field) {
+        const $group = $card.find('.custom-field-group[data-field="' + field + '"]');
+        const $input = $group.find('.custom-section-input').first();
+        if ($input.length) return $input.val().trim();
+        return ($group.find('.custom-hidden-content').val() || '').trim();
+      };
+
+      const syncCustomSection = function ($card) {
         $card.find('.custom-quill-editor').each(function () {
           const quill = customQuills.get(this);
           const $input = $(this).closest('.custom-field-group').find('.custom-hidden-content');
