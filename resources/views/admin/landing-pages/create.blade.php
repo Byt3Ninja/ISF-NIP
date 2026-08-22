@@ -270,7 +270,76 @@
         'label_en' => 'Programs',
         'label_ar' => 'البرامج',
         'route'    => route('admin.landing-page.sections.update', 'programs'),
-        'fields'   => [],
+        'fields'   => [
+          [
+            'name'     => 'is_enabled',
+            'type'     => 'checkbox',
+            'label_en' => 'Enable Section',
+            'label_ar' => 'تفعيل القسم',
+            'value'    => 1,
+            'col'      => 12,
+          ],
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Title',
+            'label_ar'  => 'العنوان',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag',
+            'type'      => 'text',
+            'label_en'  => 'Title tag',
+            'label_ar'  => 'العنوان الفرعي',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title (Arabic)',
+            'label_ar'  => 'العنوان بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title tag (Arabic)',
+            'label_ar'  => 'العنوان الفرعي بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => null,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+        ],
       ],
       [
         'key'      => 'how',
@@ -508,6 +577,64 @@
                   </div>
                   <div class="row g-4" id="aboutCardsContainer"></div>
                 @endif
+
+                @if($section['key'] === 'programs')
+                  <hr class="my-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="mb-0">
+                      {{ $l == 'ar' ? 'اختيار البرامج' : 'Programs Selection' }}
+                    </h6>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>{{ $l == 'ar' ? 'اسم البرنامج' : 'Program Name' }}</th>
+                          <th>{{ $l == 'ar' ? 'الظهور' : 'Visibility' }}</th>
+                        </tr>
+                      </thead>
+                      <tbody id="programsListBody">
+                        @foreach($cycles as $program)
+                          <tr class="programs-list-row" data-program-id="{{ $program->id }}">
+                            <td>
+                              <a
+                                href="{{ url('dashboard/programlist/show/' . $program->id) }}"
+                                target="_blank"
+                                rel="noopener"
+                                class="d-inline-flex align-items-center gap-1"
+                              >
+                                <i class="ti ti-external-link"></i>
+                                {{ $program->title }}
+                              </a>
+                            </td>
+                            <td>
+                              <div class="form-check form-switch mb-0">
+                                <input
+                                  type="hidden"
+                                  name="programs[selected_programs][{{ $program->id }}]"
+                                  value="0"
+                                >
+                                <input
+                                  type="checkbox"
+                                  name="programs[selected_programs][{{ $program->id }}]"
+                                  value="1"
+                                  class="form-check-input program-visibility-switch"
+                                  checked
+                                >
+                              </div>
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 mt-3">
+                    <small class="text-muted" id="programsPaginationInfo"></small>
+                    <nav aria-label="Programs pagination" id="programsPaginationNav">
+                      <ul class="pagination justify-content-center mb-0" id="programsPaginationList"></ul>
+                    </nav>
+                  </div>
+                @endif
               </form>
             </div>
           @endforeach
@@ -568,6 +695,7 @@
         aboutTitleArabic:   isArabic ? 'يرجى إدخال عنوان القسم باللغة العربية.' : 'Please enter the section title in Arabic.',
         aboutSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللغة العربية.' : 'Please enter the section subtitle in Arabic.',
         aboutDescriptionArabic: isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
+        programsRequired:       isArabic ? 'هذا الحقل مطلوب' : 'This field is required.',
         cardIcon:           isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
         cardTitle:          isArabic ? 'يرجى إدخال عنوان البطاقة.' : 'Please enter a card title.',
         cardDescription:    isArabic ? 'يرجى إدخال وصف البطاقة.' : 'Please enter a card description.',
@@ -579,6 +707,7 @@
         general: isArabic ? 'تم حفظ المعلومات العامة لصفحة الهبوط بنجاح.' : 'General landing page information saved successfully.',
         hero:    isArabic ? 'تم حفظ معلومات القسم الرئيسي بنجاح.' : 'Hero section information saved successfully.',
         about:   isArabic ? 'تم حفظ معلومات قسم من نحن بنجاح.' : 'About section information saved successfully.',
+        programs: isArabic ? 'تم حفظ قسم البرامج بنجاح' : 'Programs section saved successfully.',
       };
 
       const buildImageField = function (requiredMsg, formatMsg, sizeMsg) {
@@ -689,6 +818,38 @@
           'about[description_ar]': {
             validators: {
               notEmpty: { message: validationMessages.aboutDescriptionArabic },
+            },
+          },
+        },
+        programs: {
+          'programs[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
             },
           },
         },
@@ -887,6 +1048,73 @@
         });
       });
 
+      // Programs main fields are only mandatory while the section is enabled.
+      $('#programs_is_enabled').on('change', function () {
+        const fv = sectionValidations.programs;
+        if (!fv) return;
+        const enabled = this.checked;
+        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
+          const fieldName = 'programs[' + name + ']';
+          if (enabled) {
+            fv.enableValidator(fieldName, 'notEmpty');
+          } else {
+            fv.disableValidator(fieldName, 'notEmpty');
+          }
+          fv.revalidateField(fieldName);
+        });
+      });
+
+      // ─────────────────────────────────────────────────────────────
+      // Programs selection list — client-side pagination (10 rows/page)
+      // ─────────────────────────────────────────────────────────────
+      const programsPerPage = 10;
+      let programsCurrentPage = 1;
+
+      const renderProgramsPagination = function () {
+        const $rows = $('#programsListBody .programs-list-row');
+        const total = $rows.length;
+        const totalPages = Math.max(1, Math.ceil(total / programsPerPage));
+
+        if (programsCurrentPage > totalPages) programsCurrentPage = totalPages;
+        const start = (programsCurrentPage - 1) * programsPerPage;
+        $rows.hide().slice(start, start + programsPerPage).show();
+
+        const $list = $('#programsPaginationList').empty();
+        const $nav = $('#programsPaginationNav');
+        const $info = $('#programsPaginationInfo');
+
+        if (totalPages <= 1) {
+          $nav.hide();
+          $info.text('');
+          return;
+        }
+
+        $nav.show();
+        const from = start + 1;
+        const to = Math.min(start + programsPerPage, total);
+        $info.text(isArabic ? `عرض ${from} - ${to} من ${total}` : `Showing ${from} - ${to} of ${total}`);
+
+        $list.append(`<li class="page-item ${programsCurrentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${programsCurrentPage - 1}">&laquo;</a></li>`);
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || Math.abs(i - programsCurrentPage) <= 1) {
+            $list.append(`<li class="page-item ${i === programsCurrentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
+          } else if (Math.abs(i - programsCurrentPage) === 2) {
+            $list.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+          }
+        }
+        $list.append(`<li class="page-item ${programsCurrentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${programsCurrentPage + 1}">&raquo;</a></li>`);
+      };
+
+      $('#programsPaginationList').on('click', '.page-link', function (e) {
+        e.preventDefault();
+        const page = parseInt($(this).data('page'), 10);
+        if (isNaN(page) || page < 1 || page === programsCurrentPage) return;
+        programsCurrentPage = page;
+        renderProgramsPagination();
+      });
+
+      renderProgramsPagination();
+
       // Each section saves independently via AJAX so switching tabs never
       // loses unsaved input in other sections.
       $('.section-form').on('submit', function (e) {
@@ -922,7 +1150,9 @@
             })
             .fail(function (xhr) {
               $btn.html(originalHtml);
-              let errorMessage = "{{ __('admin.unexpected_error') }}";
+              let errorMessage = sectionKey === 'programs'
+                ? (isArabic ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى' : 'Something went wrong. Please try again.')
+                : "{{ __('admin.unexpected_error') }}";
               if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMessage = xhr.responseJSON.message;
               }
