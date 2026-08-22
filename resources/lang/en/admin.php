@@ -2857,6 +2857,8 @@ return [
 	'range_numbers_only' => 'Range values accept numbers only.',
 	'range_invalid' => 'Invalid range. The start number must be less than or equal to the end number.',
 	'range_outside' => 'Range is outside the available startup list.',
+	'search_startups' => 'Search startups',
+	'no_startups_match_search' => 'No startups match your search.',
 	'date_required' => 'Please enter a date.',
 	'start_time_required' => 'Please enter the start time.',
 	'end_time_required' => 'Please enter the end time.',

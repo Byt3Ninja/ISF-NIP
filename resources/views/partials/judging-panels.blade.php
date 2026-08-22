@@ -7,6 +7,14 @@
   .companies-picker-popover .popover-body {
     padding: 0;
   }
+
+  /* The picker trigger is a <button>, so Bootstrap's .is-invalid (which only
+     styles form controls) leaves it unmarked. Border it explicitly so the
+     mandatory-startups error is visible on the field itself, not just below it. */
+  .companies-picker-trigger.is-invalid {
+    border-color: var(--bs-danger);
+    color: var(--bs-danger);
+  }
 </style>
 
 <div class="row">
@@ -103,6 +111,8 @@
                     @endforeach
                     {{-- JS keeps selected available companies in sync here for submission --}}
                     <div class="companies-hidden-container d-none" data-panel-index="{{ $index }}"></div>
+                    {{-- Startups are mandatory; mirrors the server-side rule inline --}}
+                    <div class="text-danger small mt-1 error-companies"></div>
                   </div>
                 </div>
 
@@ -211,8 +221,23 @@
         to: '{{ __("admin.To") }}',
         apply: '{{ __("admin.Apply") }}',
         title: '{{ __("admin.auto_select_range") }}',
-        clear: '{{ __("admin.clear_range") }}'
+        clear: '{{ __("admin.clear_range") }}',
+        search: '{{ __("admin.search_startups") }}',
+        noMatch: '{{ __("admin.no_startups_match_search") }}'
       };
+
+      // The single source of truth for a startup's sequential number.
+      //
+      // The number a user reads next to a startup and the number Auto Select Range
+      // consumes MUST be the same axis, otherwise applying a range twice selects
+      // different startups than the list shows. Both therefore derive from this
+      // one ordered list of selectable companies. Search filters what is *displayed*
+      // but never renumbers, so a startup keeps number 7 whether or not a search is
+      // active. Off-step (read-only) startups are excluded entirely: they are not
+      // selectable and must not consume range positions.
+      const orderedCompanyIds = () => allCompanies.map(c => String(c.id));
+
+      const companyDisplayName = (c) => c['name_' + locale] || c.name_en;
 
       const parseIdList = (raw) => raw ? raw.replace(/[\[\]"]/g, '').split(',').filter(Boolean).map(s => String(s.trim())) : [];
 
@@ -241,21 +266,37 @@
       const buildCompaniesRows = ($trig) => {
         const offStepIds = $trig.data('off-step') || [];
         const selected = $trig.data('selected') || new Set();
-        const filter = $trig.data('range-filter');
+        const search = String($trig.data('search') || '').trim().toLowerCase();
 
         let rows = '';
-        allCompanies.forEach(c => {
+        let matches = 0;
+
+        // Number comes from the startup's position in the FULL ordered list, not
+        // from its position among the search results, so numbers stay stable while
+        // the user types and always agree with what Auto Select Range acts on.
+        allCompanies.forEach((c, i) => {
           const id = String(c.id);
-          if (filter && !filter.has(id)) return;
+          const name = companyDisplayName(c);
+          if (search && !String(name).toLowerCase().includes(search)) return;
+          matches++;
           const checked = selected.has(id) ? 'checked' : '';
-          rows += `<li class="list-group-item px-3 py-2"><label class="d-flex align-items-center gap-2 mb-0 w-100 cursor-pointer"><input type="checkbox" class="form-check-input company-check m-0" value="${id}" ${checked}> <span class="text-truncate">${esc(c['name_' + locale] || c.name_en)}</span></label></li>`;
+          rows += `<li class="list-group-item px-3 py-2"><label class="d-flex align-items-center gap-2 mb-0 w-100 cursor-pointer"><input type="checkbox" class="form-check-input company-check m-0" value="${id}" ${checked}> <span class="text-muted small company-number" style="min-width: 1.75rem;">${i + 1}.</span> <span class="text-truncate">${esc(name)}</span></label></li>`;
         });
 
-        offStepIds.forEach(offId => {
-          const off = offStepMap[offId];
-          if (!off) return;
-          rows += `<li class="list-group-item px-3 py-2 bg-lighter"><label class="d-flex align-items-center gap-2 mb-0 w-100 text-muted"><input type="checkbox" class="form-check-input m-0" disabled checked> <span class="text-truncate">${esc(off['name_' + locale] || off.name_en)} — {{ __('admin.moved_off_step') }}</span></label></li>`;
-        });
+        if (search && matches === 0) {
+          return `<li class="list-group-item text-muted text-center py-4">${esc(rangeLabels.noMatch)}</li>`;
+        }
+
+        // Off-step startups are read-only references and carry no sequential
+        // number, so they never shift the numbering of selectable startups.
+        // They are hidden while searching, since they cannot be acted on.
+        if (!search) {
+          offStepIds.forEach(offId => {
+            const off = offStepMap[offId];
+            if (!off) return;
+            rows += `<li class="list-group-item px-3 py-2 bg-lighter"><label class="d-flex align-items-center gap-2 mb-0 w-100 text-muted"><input type="checkbox" class="form-check-input m-0" disabled checked> <span class="text-truncate">${esc(companyDisplayName(off))} — {{ __('admin.moved_off_step') }}</span></label></li>`;
+          });
+        }
 
         if (!rows) rows = `<li class="list-group-item text-muted text-center py-4">{{ __('admin.select_startups') }}</li>`;
         return rows;
@@ -263,14 +304,21 @@
 
       const buildCompaniesPopoverHtml = ($trig) => {
         const rangeValues = $trig.data('range-values') || {};
-        const filter = $trig.data('range-filter');
+        const hasRange = rangeValues.from != null || rangeValues.to != null;
         const total = allCompanies.length;
+        const search = String($trig.data('search') || '');
         return `
         <div class="companies-popover" data-panel-index="${$trig.data('panel-index')}">
+          <div class="p-3 border-bottom">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="ti ti-search"></i></span>
+              <input type="text" class="form-control companies-search" placeholder="${esc(rangeLabels.search)}" value="${esc(search)}" autocomplete="off">
+            </div>
+          </div>
           <div class="auto-range p-3 border-bottom bg-card">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-semibold small text-uppercase">${rangeLabels.title}</span>
-              <a href="javascript:void(0);" class="clear-range small fw-medium ${filter ? '' : 'd-none'}">${rangeLabels.clear}</a>
+              <a href="javascript:void(0);" class="clear-range small fw-medium ${hasRange ? '' : 'd-none'}">${rangeLabels.clear}</a>
             </div>
             <div class="d-flex align-items-end flex-wrap gap-2">
               <div class="flex-grow-1" style="min-width: 70px;">
@@ -299,12 +347,21 @@
         });
 
         const count = selected.size;
-        const total = allCompanies.length;
         const $summary = $trig.find('.companies-summary');
         $summary.text(count > 0 ? count + ' {{ __("admin.Selected") }}' : '{{ __("admin.select_startups") }}');
 
+        // The Select All / Deselect All label must describe what the link will do
+        // to the rows on screen, so it reflects the currently visible subset.
+        const visible = visibleCompanyIds($trig);
+        const allVisibleOn = visible.length > 0 && visible.every(id => selected.has(id));
         const $link = $trig.closest('.col-md-6').find('.select-all-toggle');
-        $link.text(count === total && total > 0 ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
+        $link.text(allVisibleOn ? '{{ __("admin.deselect_all") }}' : '{{ __("admin.select_all") }}');
+
+        // Selecting a startup clears the "required" error surfaced on submit.
+        if (count > 0) {
+          $trig.removeClass('is-invalid');
+          $trig.closest('.col-md-6').find('.error-companies').text('');
+        }
       };
 
       const refreshCompaniesPopover = ($trig) => {
@@ -312,13 +369,22 @@
         const $pop = $(`.companies-popover[data-panel-index="${panelIndex}"]`);
         if (!$pop.length) return;
         $pop.find('.companies-list').html(buildCompaniesRows($trig));
-        $pop.find('.clear-range').toggleClass('d-none', !$trig.data('range-filter'));
+        const rangeValues = $trig.data('range-values') || {};
+        $pop.find('.clear-range').toggleClass('d-none', rangeValues.from == null && rangeValues.to == null);
+      };
+
+      // Select All acts on what the user can currently SEE. With a search active
+      // that means the matching startups only, so the link never silently toggles
+      // startups scrolled out of view behind a filter.
+      const visibleCompanyIds = ($trig) => {
+        const search = String($trig.data('search') || '').trim().toLowerCase();
+        return allCompanies
+          .filter(c => !search || String(companyDisplayName(c)).toLowerCase().includes(search))
+          .map(c => String(c.id));
       };
 
       const toggleAllCompanies = ($trig) => {
-        const filter = $trig.data('range-filter');
-        let ids = allCompanies.map(c => String(c.id));
-        if (filter) ids = ids.filter(id => filter.has(id));
+        const ids = visibleCompanyIds($trig);
         const selected = $trig.data('selected') || new Set();
         const allOn = ids.length > 0 && ids.every(id => selected.has(id));
         if (allOn) ids.forEach(id => selected.delete(id));
@@ -507,7 +573,7 @@
           return;
         }
 
-        const selectable = allCompanies.map(c => String(c.id));
+        const selectable = orderedCompanyIds();
         const total = selectable.length;
         const from = fromStr === '' ? 1 : parseInt(fromStr, 10);
         const to = toStr === '' ? total : parseInt(toStr, 10);
@@ -517,14 +583,21 @@
           return;
         }
 
+        // Checked before the bounds test would otherwise mask it, since the ticket
+        // requires this specific message whenever start > end.
         if (from > to) {
           showError('{{ __("admin.range_invalid") }}', $from);
           return;
         }
 
+        // From/To are the sequential numbers shown beside each startup, so the
+        // slice indexes the full ordered list regardless of any active search.
+        // The list is NOT filtered to the range: hiding the other startups would
+        // renumber them, and a second Apply would then act on a different set
+        // than the one on screen.
         const matching = selectable.slice(from - 1, to);
         $trig.data('selected', new Set(matching));
-        $trig.data('range-filter', new Set(matching));
+        $trig.removeData('range-filter');
         $trig.data('range-values', { from, to });
         syncCompaniesState($trig);
         refreshCompaniesPopover($trig);
@@ -538,12 +611,31 @@
         const $pop = $(this).closest('.companies-popover');
         const $trig = getCompaniesTrigger($pop.data('panel-index'));
         if (!$trig.length) return;
+        // Clearing the range only forgets the From/To values; it deliberately
+        // leaves the selection alone, so a user who applied a range and then
+        // hand-adjusted a few startups does not lose that work.
         $trig.removeData('range-filter').removeData('range-values');
         refreshCompaniesPopover($trig);
         $(this).addClass('d-none');
         $pop.find('.range-from, .range-to').val('');
         $pop.find('.range-error').text('').addClass('d-none');
         $pop.find('.range-from, .range-to').removeClass('is-invalid');
+      });
+
+      // Search filters the visible startups by name. It never changes the
+      // selection and never renumbers, so selections survive typing and clearing.
+      $(document).on('input', '.companies-search', function () {
+        const $pop = $(this).closest('.companies-popover');
+        const $trig = getCompaniesTrigger($pop.data('panel-index'));
+        if (!$trig.length) return;
+        $trig.data('search', this.value);
+        $pop.find('.companies-list').html(buildCompaniesRows($trig));
+        syncCompaniesState($trig);
+      });
+
+      // Typing in the search box must not submit the surrounding form.
+      $(document).on('keydown', '.companies-search', function (e) {
+        if (e.key === 'Enter') e.preventDefault();
       });
 
       $(document).on('change', '.select2', function () { updateSelectAllText($(this)); });
@@ -573,6 +665,8 @@
           .removeData('selected')
           .removeData('range-filter')
           .removeData('range-values')
+          .removeData('search')
+          .removeClass('is-invalid')
           .removeAttr('aria-describedby');
         const $clonePop = bootstrap.Popover.getInstance($cloneCompanies[0]);
         if ($clonePop) $clonePop.dispose();
@@ -582,6 +676,8 @@
         $clone.find('.range-error').text('').addClass('d-none');
         $clone.find('.range-from, .range-to').removeClass('is-invalid');
         $clone.find('.clear-range').addClass('d-none');
+        $clone.find('.companies-search').val('');
+        $clone.find('.error-companies').text('');
         $clone.find('.select-all-toggle').text('{{ __("admin.select_all") }}');
 
         $clone.find('.accordion-button').addClass('collapsed').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> @lang('admin.screening.panel') #${idx}`);
@@ -655,6 +751,26 @@
 
         $('.session-inputs input').removeClass('is-invalid');
         $('.invalid-feedback').text('');
+        $('.error-companies').text('');
+        $('.companies-picker-trigger').removeClass('is-invalid');
+
+        // Startups are mandatory per panel. Checked for EVERY panel, before the
+        // session-only checks below bail out on panels with no scheduled session,
+        // so an empty picker surfaces inline instead of only as a server toast.
+        $('.accordion-item').each(function (i) {
+          const $p = $(this);
+          const $trig = $p.find('.companies-picker-trigger');
+          if (!$trig.length) return;
+          const selectedCount = ($trig.data('selected') || new Set()).size;
+          const offStepCount = $p.find('input[type="hidden"][name*="[companies][]"]').length;
+          if (selectedCount + offStepCount === 0) {
+            $trig.addClass('is-invalid');
+            $p.find('.error-companies').text(
+              '{{ __('admin.screening.panel_companies_required', ['panel' => ':panel']) }}'.replace(':panel', i + 1)
+            );
+            valid = false;
+          }
+        });
 
         $('.accordion-item').each(function () {
           const $p = $(this);
