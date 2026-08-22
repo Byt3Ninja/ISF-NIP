@@ -2865,6 +2865,10 @@ return [
 	'end_time_must_be_after_start_time' => 'The end time must be after the start time.',
 	'meeting_link_required' => 'Please enter the meeting link.',
 	'meeting_link_url_required' => 'Please enter a valid meeting link',
+	'interval' => 'Interval',
+	'interval_minutes' => 'Interval (Minutes)',
+	'select_start_time_first' => 'Please select a start time first.',
+	'valid_interval_duration' => 'Please enter a valid interval duration.',
 
 	'mandatory' => 'Mandatory',
 	'optional' => 'Optional',

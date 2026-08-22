@@ -126,6 +126,29 @@
 
                 <div class="session-inputs border rounded p-4"
                   style="display: {{ !empty($panel['session']) ? 'block' : 'none' }}">
+
+                  <label class="switch switch-square mb-3">
+                    <input type="checkbox" class="switch-input interval-toggle" id="interval-toggle-{{ $index + 1 }}" {{ !empty($panel['session']['interval_checked']) ? 'checked' : '' }}>
+                    <span class="switch-toggle-slider">
+                      <span class="switch-on"></span>
+                      <span class="switch-off"></span>
+                    </span>
+                    <span class="switch-label">{{ __('admin.interval') }}</span>
+                  </label>
+                  
+                  <div class="interval-inputs mb-3"
+                    style="display: {{ !empty($panel['session']['interval_checked']) ? 'block' : 'none' }}">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ __('admin.interval_minutes') }}</label>
+                        <input type="number" class="form-control interval-duration" name="panels[{{ $index }}][interval]"
+                          value="{{ $panel['session']['interval'] ?? '' }}" min="1" max="99" maxlength="2"
+                          inputmode="numeric" placeholder="30">
+                        <div class="invalid-feedback error-interval"></div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label class="form-label">{{ __('admin.Session_date') }}</label>
@@ -142,7 +165,8 @@
                     <div class="col-md-6 mb-3">
                       <label class="form-label">{{ __('admin.End Time') }}</label>
                       <input type="text" class="form-control session-time" name="panels[{{ $index }}][end_time]"
-                        value="{{ $panel['session']['end_time'] ?? '' }}" placeholder="HH:MM">
+                        value="{{ $panel['session']['end_time'] ?? '' }}" placeholder="HH:MM"
+                        {{ !empty($panel['session']['interval_checked']) ? 'disabled' : '' }}>
                       <div class="invalid-feedback error-end_time"></div>
                     </div>
                     <div class="col-md-6 mb-3">
@@ -215,6 +239,33 @@
       };
 
       const esc = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+      // ---- Interval scheduling helpers: auto-calculated end time ----
+
+      const parseTime = (t) => {
+        const m = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(String(t || '').trim());
+        if (!m) return null;
+        const h = parseInt(m[1], 10);
+        const min = parseInt(m[2], 10);
+        if (h > 23 || min > 59) return null;
+        return h * 60 + min;
+      };
+
+      const minutesToTime = (mins) => {
+        const total = ((Math.round(mins) % 1440) + 1440) % 1440;
+        return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+      };
+
+      const computeEndTime = ($panel) => {
+        const $end = $panel.find('input[name*="end_time"]');
+        const start = parseTime($panel.find('input[name*="start_time"]').val());
+        const interval = parseInt($panel.find('input[name*="interval"]').val(), 10);
+        if (start === null || !interval || interval <= 0) {
+          $end.val('');
+          return;
+        }
+        $end.val(minutesToTime(start + interval));
+      };
 
       const rangeLabels = {
         from: '{{ __("admin.From") }}',
@@ -455,6 +506,10 @@
           initCompaniesState($trig);
           initCompaniesPopover($trig);
         });
+        $(el).find('.accordion-item').each(function () {
+          const $panel = $(this);
+          if ($panel.find('.interval-toggle').is(':checked')) computeEndTime($panel);
+        });
       };
 
       const updateSelectAllText = ($select) => {
@@ -473,6 +528,7 @@
           $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> {{ __('admin.screening.panel') }} #${idx}`);
           $panel.find('.accordion-collapse').attr('id', `panel-${idx}`);
           $panel.find('.session-toggle').attr('id', `session-toggle-${idx}`);
+          $panel.find('.interval-toggle').attr('id', `interval-toggle-${idx}`);
           $panel.find('.companies-picker-trigger, .companies-hidden-container').attr('data-panel-index', i);
           $panel.find('[name*="panels["]').each(function () {
             $(this).attr('name', $(this).attr('name').replace(/panels\[\d+\]/, `panels[${i}]`));
@@ -683,7 +739,12 @@
         $clone.find('.accordion-button').addClass('collapsed').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> @lang('admin.screening.panel') #${idx}`);
         $clone.find('.accordion-collapse').removeClass('show').attr('id', `panel-${idx}`);
         $clone.find('.session-toggle').prop('checked', false).attr('id', `session-toggle-${idx}`);
+        $clone.find('.interval-toggle').prop('checked', false).attr('id', `interval-toggle-${idx}`);
         $clone.find('.session-inputs').hide();
+        $clone.find('.interval-inputs').hide();
+        $clone.find('.interval-duration').val('');
+        $clone.find('input[name*="end_time"]').prop('disabled', false).val('');
+        $clone.find('.error-interval').text('');
         $clone.find('.meeting-link-input, .meeting-password-input').val('');
         $clone.find('.copy-meeting-link, .copy-meeting-password').hide();
 
@@ -745,6 +806,34 @@
         $(this).closest('.accordion-body').find('.session-inputs').toggle(this.checked);
       });
 
+      // ---- Interval scheduling: auto-calculated end time per startup slot ----
+
+      $(document).on('change', '.interval-toggle', function () {
+        const $body = $(this).closest('.accordion-body');
+        const on = this.checked;
+        $body.find('.interval-inputs').toggle(on);
+        const $end = $body.find('input[name*="end_time"]');
+        $end.prop('disabled', on).removeClass('is-invalid');
+        $body.find('.error-end_time').text('');
+        $body.find('.interval-duration').removeClass('is-invalid');
+        $body.find('.error-interval').text('');
+        if (on) {
+          $end.val('');
+          computeEndTime($body);
+        }
+      });
+
+      $(document).on('input change', '.session-time, .interval-duration', function () {
+        const $body = $(this).closest('.accordion-body');
+        if ($body.find('.interval-toggle').is(':checked')) computeEndTime($body);
+      });
+
+      $(document).on('input', '.interval-duration', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 2);
+        $(this).removeClass('is-invalid');
+        $(this).closest('.accordion-body').find('.error-interval').text('');
+      });
+
       $(document).on('submit', '#judging-panels-form', function (e) {
         e.preventDefault();
         let valid = true;
@@ -776,10 +865,12 @@
           const $p = $(this);
           if (!$p.find('.session-toggle').is(':checked')) return;
 
+          const $start = $p.find('input[name*="start_time"]');
+          const $end = $p.find('input[name*="end_time"]');
+          const intervalOn = $p.find('.interval-toggle').is(':checked');
+
           const fields = {
-            session_date: { msg: '{{ __('admin.date_required') }}' },
-            start_time: { msg: '{{ __('admin.start_time_required') }}' },
-            end_time: { msg: '{{ __('admin.end_time_required') }}' }
+            session_date: { msg: '{{ __('admin.date_required') }}' }
           };
 
           $.each(fields, (name, cfg) => {
@@ -797,12 +888,41 @@
             }
           });
 
-          const start = $p.find('input[name*="start_time"]').val();
-          const end = $p.find('input[name*="end_time"]').val();
-          if (start && end && start >= end) {
-            $p.find('input[name*="end_time"]').addClass('is-invalid');
-            $p.find('.error-end_time').text('{{ __('admin.end_time_must_be_after_start_time') }}');
-            valid = false;
+          const startVal = $start.val().trim();
+          const endVal = $end.val().trim();
+
+          if (intervalOn) {
+            const $interval = $p.find('input[name*="interval"]');
+            const intervalVal = $interval.val().trim();
+
+            if (!startVal) {
+              $start.addClass('is-invalid');
+              $p.find('.error-start_time').text('{{ __('admin.select_start_time_first') }}');
+              valid = false;
+            }
+
+            if (intervalVal === '' || !/^\d+$/.test(intervalVal) || parseInt(intervalVal, 10) <= 0) {
+              $interval.addClass('is-invalid');
+              $p.find('.error-interval').text('{{ __('admin.valid_interval_duration') }}');
+              valid = false;
+            } else {
+              computeEndTime($p);
+            }
+          } else {
+            if (!startVal) {
+              $start.addClass('is-invalid');
+              $p.find('.error-start_time').text('{{ __('admin.start_time_required') }}');
+              valid = false;
+            }
+            if (!endVal) {
+              $end.addClass('is-invalid');
+              $p.find('.error-end_time').text('{{ __('admin.end_time_required') }}');
+              valid = false;
+            } else if (startVal && endVal && startVal >= endVal) {
+              $end.addClass('is-invalid');
+              $p.find('.error-end_time').text('{{ __('admin.end_time_must_be_after_start_time') }}');
+              valid = false;
+            }
           }
         });
 
