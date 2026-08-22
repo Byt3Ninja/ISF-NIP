@@ -709,19 +709,19 @@
       // ─────────────────────────────────────────────────────────────
       const isArabic = {{ $l == 'ar' ? 'true' : 'false' }};
       const lpUrlI18n = {
-        titleRequired:  isArabic ? 'يرجى إدخال العنوان.' : 'Please enter the title.',
-        nameRequired:   isArabic ? 'يرجى إدخال الاسم.' : 'Please enter the name.',
-        slugRequired:   isArabic ? 'يرجى إدخال الرابط.' : 'Please enter the URL.',
-        slugInvalid:    isArabic ? 'يمكن أن يحتوي الرابط على أحرف إنجليزية صغيرة وأرقام وشرطات فقط.' : 'URL slug can only contain lowercase letters, numbers, and hyphens.',
-        available:      isArabic ? 'هذا الرابط متاح.' : 'This URL is available.',
-        taken:          isArabic ? 'هذا الرابط مستخدم بالفعل. يرجى اختيار رابط آخر.' : 'This URL is already taken. Please choose another one.',
-        checking:       isArabic ? 'جاري التحقق من توفر الرابط...' : 'Checking URL availability...',
-        saved:          isArabic ? 'تم حفظ رابط صفحة الهبوط المخصصة بنجاح.' : 'Custom landing page URL saved successfully.',
-        activeStatus:   isArabic ? 'رابط صفحة الهبوط نشط' : 'Landing page URL is active',
-        inactiveStatus: isArabic ? 'رابط صفحة الهبوط غير نشط' : 'Landing page URL is inactive',
-        previewNotSaved: isArabic ? 'لا يمكن معاينة صفحة الهبوط قبل حفظ رابط مخصص صالح.' : 'Cannot preview the landing page before saving a valid custom URL.',
-        titleMax:       isArabic ? 'يجب ألا يتجاوز العنوان 100 حرف.' : 'Title must not exceed 100 characters.',
-        nameMax:        isArabic ? 'يجب ألا يتجاوز الاسم 100 حرف.' : 'URL name must not exceed 100 characters.',
+        titleRequired:  "{{ __('landing.validation.title_required') }}",
+        nameRequired:   "{{ __('landing.validation.custom_url_name_required') }}",
+        slugRequired:   "{{ __('landing.validation.custom_url_slug_required') }}",
+        slugInvalid:    "{{ __('landing.validation.custom_url_invalid') }}",
+        available:      "{{ __('landing.validation.custom_url_available') }}",
+        taken:          "{{ __('landing.validation.custom_url_taken') }}",
+        checking:       "{{ __('landing.validation.checking_url_availability') }}",
+        saved:          "{{ __('landing.success.custom_url_saved') }}",
+        activeStatus:   "{{ __('landing.Landing_Page_URL_Active') }}",
+        inactiveStatus: "{{ __('landing.Landing_Page_URL_Inactive') }}",
+        previewNotSaved: "{{ __('landing.validation.cannot_preview_invalid_url') }}",
+        titleMax:       "{{ __('landing.validation.custom_url_title_max') }}",
+        nameMax:        "{{ __('landing.validation.custom_url_name_max') }}",
       };
 
       const lpUrlBase = "{{ url('/lp/') }}/";
@@ -762,11 +762,12 @@
       const lpUrlSetAvailability = function (state, message) {
         const $fb = $('#lpUrlAvailabilityFeedback');
         if (!message) {
-          $fb.removeClass('text-success text-danger').text('').hide();
+          $fb.removeClass('text-success text-danger text-info').text('').hide();
           return;
         }
-        $fb.removeClass('text-success text-danger')
-          .addClass(state === 'available' ? 'text-success' : 'text-danger')
+        const colorClass = state === 'available' ? 'text-success' : state === 'checking' ? 'text-info' : 'text-danger';
+        $fb.removeClass('text-success text-danger text-info')
+          .addClass(colorClass)
           .text(message)
           .show();
       };
@@ -807,6 +808,9 @@
                 const slug = (input.value || '').trim().toLowerCase();
                 if (!lpUrlIsValidSlug(slug)) return { valid: true };
                 if (!lpUrlSlugChecked) return { valid: true };
+                if (!lpUrlSlugAvailable) {
+                  $('#lpUrlAvailabilityFeedback').text('').removeClass('text-success text-danger').hide();
+                }
                 return { valid: lpUrlSlugAvailable };
               },
             },
@@ -855,7 +859,7 @@
           return d.promise();
         }
 
-        lpUrlSetAvailability('', lpUrlI18n.checking);
+        lpUrlSetAvailability('checking', lpUrlI18n.checking);
 
         lpUrlAjax("{{ route('landing-pages.url.check', $currentPage->id) }}", { slug: slug })
           .done(function (res) {
@@ -1049,6 +1053,7 @@
       const maxImageSize = 5 * 1024 * 1024; // 5 MB
 
       const validationMessages = {
+        pageTitle:          isArabic ? 'يرجى إدخال عنوان الصفحة.' : 'Please enter the page title.',
         logoRequired:       isArabic ? 'يرجى تحميل الشعار.' : 'Please upload a logo.',
         logoUnsupported:    isArabic ? 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.' : 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
         logoSize:           isArabic ? 'يجب ألا يتجاوز حجم الشعار 5 ميجابايت.' : 'Logo size must not exceed 5 MB.',
@@ -1102,21 +1107,22 @@
       const buildImageField = function (requiredMsg, formatMsg, sizeMsg) {
         return {
           validators: {
-            notEmpty: {
-              message: requiredMsg,
-            },
             file: {
               extension: 'png,jpg,jpeg,webp',
               message: formatMsg,
             },
             callback: {
-              message: sizeMsg,
+              message: requiredMsg,
               callback: function (input) {
                 const files = input.element.files;
-                if (!files || !files.length) {
+                if (files && files.length) {
+                  if (files[0].size > maxImageSize) {
+                    return { valid: false, message: sizeMsg };
+                  }
                   return { valid: true };
                 }
-                return { valid: files[0].size <= maxImageSize };
+                const hasExisting = $(input.element).parent().siblings('img').length > 0;
+                return { valid: hasExisting, message: requiredMsg };
               },
             },
           },
@@ -1125,6 +1131,11 @@
 
       const sectionFields = {
         general: {
+          'general[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.pageTitle },
+            },
+          },
           'general[logo]': buildImageField(
             validationMessages.logoRequired,
             validationMessages.logoUnsupported,

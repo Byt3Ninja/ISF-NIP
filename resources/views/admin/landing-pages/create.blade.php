@@ -757,11 +757,12 @@
       const lpUrlSetAvailability = function (state, message) {
         const $fb = $('#lpUrlAvailabilityFeedback');
         if (!message) {
-          $fb.removeClass('text-success text-danger').text('').hide();
+          $fb.removeClass('text-success text-danger text-info').text('').hide();
           return;
         }
-        $fb.removeClass('text-success text-danger')
-          .addClass(state === 'available' ? 'text-success' : 'text-danger')
+        const colorClass = state === 'available' ? 'text-success' : state === 'checking' ? 'text-info' : 'text-danger';
+        $fb.removeClass('text-success text-danger text-info')
+          .addClass(colorClass)
           .text(message)
           .show();
       };
@@ -802,6 +803,9 @@
                 const slug = (input.value || '').trim().toLowerCase();
                 if (!lpUrlIsValidSlug(slug)) return { valid: true };
                 if (!lpUrlSlugChecked) return { valid: true };
+                if (!lpUrlSlugAvailable) {
+                  $('#lpUrlAvailabilityFeedback').text('').removeClass('text-success text-danger').hide();
+                }
                 return { valid: lpUrlSlugAvailable };
               },
             },
@@ -850,7 +854,7 @@
           return d.promise();
         }
 
-        lpUrlSetAvailability('', lpUrlI18n.checking);
+        lpUrlSetAvailability('checking', lpUrlI18n.checking);
 
         lpUrlAjax("{{ route('landing-pages.url.check') }}", { slug: slug })
           .done(function (res) {
@@ -1049,6 +1053,7 @@
       const maxImageSize = 5 * 1024 * 1024; // 5 MB
 
       const validationMessages = {
+        pageTitle:          "{{ __('landing.validation.page_title_required') }}",
         logoRequired:       "{{ __('landing.validation.logo_required') }}",
         logoUnsupported:    "{{ __('landing.validation.image_format_invalid') }}",
         logoSize:           "{{ __('landing.validation.logo_size_exceeded') }}",
@@ -1125,6 +1130,11 @@
 
       const sectionFields = {
         general: {
+          'general[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.pageTitle },
+            },
+          },
           'general[logo]': buildImageField(
             validationMessages.logoRequired,
             validationMessages.logoUnsupported,
