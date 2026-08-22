@@ -172,7 +172,7 @@
   </div>
 
   @if ($pages->hasPages())
-    <div class="d-flex justify-content-center mt-4">
+    <div class="mt-8">
       {{ $pages->links('pagination::bootstrap-5') }}
     </div>
   @endif
