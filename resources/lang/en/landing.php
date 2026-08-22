@@ -78,6 +78,7 @@ return [
     'Type' => 'Type',
     'Ended' => 'Ended',
     'Program_ended_hint' => 'This program has ended and can no longer be shown on the landing page.',
+    'Program_not_public_hint' => "This program isn't Public and has no URL slug, so its Apply button won't work on the landing page until that's set in the program's Visibility settings.",
     'No_Programs_Found' => 'No programs found.',
     'Add_Button' => 'Add Button',
     'Cancel' => 'Cancel',

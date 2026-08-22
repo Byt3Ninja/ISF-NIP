@@ -512,6 +512,14 @@
                                       >
                                         {{ __('landing.Ended') }}
                                       </span>
+                                    @elseif(!$program->is_public || empty($program->public_slug))
+                                      <span
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="{{ __('landing.Program_not_public_hint') }}"
+                                      >
+                                        <i class="ti ti-alert-triangle text-warning"></i>
+                                      </span>
                                     @endif
                                   </div>
                                   @if($program->location)
@@ -2114,7 +2122,7 @@
             contentType: false,
           })
             .done(function (res) {
-              $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
+              $btn.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>' + "{{ __('landing.Save') }}");
               if (successMessages[sectionKey]) {
                 releaseSuccessAlert({
                   title: "{{ __('admin.success') }}",
@@ -2143,9 +2151,6 @@
                 $('#lpUrlSaveBtn').prop('disabled', false).removeAttr('title');
                 $('#lpUrlSaveHint').addClass('d-none');
               }
-              setTimeout(() => {
-                $btn.removeClass('btn-success').addClass('btn-primary').html(originalHtml);
-              }, 1500);
             })
             .fail(function (xhr) {
               $btn.html(originalHtml);

@@ -26,7 +26,14 @@ class LandingPagesController extends Controller
 	 */
 	public function index(Request $request)
 	{
-		$pagesQuery = $this->scopedLandingPagesQuery()->with('createdBy')->withCount('cycles');
+		// Count only cycles that aren't expired, so the badge matches what
+		// actually renders on the public landing page (see show(), which
+		// filters $page->cycles the same way via reject->is_expired).
+		$pagesQuery = $this->scopedLandingPagesQuery()->with('createdBy')->withCount(['cycles' => function ($query) {
+			$query->where(function ($query) {
+				$query->whereNull('end')->orWhere('end', '>=', now());
+			});
+		}]);
 
 		if ($request->status !== null && $request->status !== '') {
 			$pagesQuery->where('status', $request->status);
@@ -64,7 +71,7 @@ class LandingPagesController extends Controller
 	 */
 	public function show(Request $request, $slug)
 	{
-		$page = LandingPage::with(['createdBy', 'cycles', 'customSections'])
+		$page = LandingPage::with(['createdBy', 'cycles.organization', 'cycles.steps', 'customSections'])
 			->where('slug', $slug)
 			->when(!auth()->check(), function ($query) {
 				$query->where('status', true);
@@ -72,9 +79,48 @@ class LandingPagesController extends Controller
 			->firstOrFail();
 
 		$colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary', 'dark'];
-		$visiblePrograms = $page->cycles->reject->is_expired->values();
+		$l = app()->getLocale();
+		$now = now();
 
-		return view('public.landing-page', compact('page', 'colors', 'visiblePrograms'));
+		$visiblePrograms = $page->cycles->reject->is_expired->values()->map(function ($program) use ($now, $l) {
+			// Programs attached to a custom landing page are general cycles
+			// (via scopedCycles()) and typically have no configured
+			// application steps, so status is derived from the cycle's own
+			// start/end dates. If a form step IS configured, prefer its
+			// dates since that's the actual application window.
+			$firstFormStep = $program->steps->where('stype', 1)->sortBy('arr')->first();
+			$stepStart = $firstFormStep && $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : $program->start;
+			$stepEnd = $firstFormStep && $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : $program->end;
+
+			$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+			$isUpcoming = $stepStart !== null && $now->lt($stepStart);
+
+			if ($isOpen) {
+				$statusLabel = $l == 'ar' ? ('مفتوح حتى ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.') : ('Open Till ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.');
+				$btnText = $l == 'ar' ? 'تقدم الآن' : 'Apply now';
+			} elseif ($isUpcoming) {
+				$statusLabel = $l == 'ar' ? ('سيفتح في ' . $stepStart->format('Y-m-d') . '.') : ('Will open on ' . $stepStart->format('Y-m-d') . '.');
+				$btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications open soon';
+			} else {
+				$statusLabel = $l == 'ar' ? 'مغلق.' : 'Closed.';
+				$btnText = $l == 'ar' ? 'التقديم مغلق' : 'Applications closed';
+			}
+
+			$program->isOpen = $isOpen;
+			$program->isUpcoming = $isUpcoming;
+			$program->statusLabel = $statusLabel;
+			$program->btnText = $btnText;
+			$program->canApply = $isOpen && !empty($program->public_slug) && !empty($program->organization) && !empty($program->organization->short_code);
+
+			return $program;
+		});
+
+		$customSections = $page->customSections
+			->where('visibility', true)
+			->filter(fn ($section) => !empty($section->content) || !empty($section->content_ar))
+			->values();
+
+		return view('admin.landing-pages.show', compact('page', 'colors', 'visiblePrograms', 'customSections'));
 	}
 
   public function create(Request $request)

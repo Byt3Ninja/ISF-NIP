@@ -507,6 +507,14 @@
                                       >
                                         {{ $l == 'ar' ? 'منتهي' : 'Ended' }}
                                       </span>
+                                    @elseif(!$program->is_public || empty($program->public_slug))
+                                      <span
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="{{ $l == 'ar' ? 'هذا البرنامج غير عام (Public) وليس له رابط URL، لذلك زر التقديم لن يعمل على صفحة الهبوط حتى يتم تفعيل ذلك من إعدادات البرنامج' : 'This program isn\'t Public and has no URL slug, so its Apply button won\'t work on the landing page until that\'s set in the program\'s Visibility settings' }}"
+                                      >
+                                        <i class="ti ti-alert-triangle text-warning"></i>
+                                      </span>
                                     @endif
                                   </div>
                                   @if($program->location)
@@ -2177,16 +2185,13 @@
             contentType: false,
           })
             .done(function () {
-              $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
+              $btn.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>' + "{{ __('landing.Save') }}");
               if (successMessages[sectionKey]) {
                 releaseSuccessAlert({
                   title: "{{ __('admin.success') }}",
                   message: successMessages[sectionKey],
                 });
               }
-              setTimeout(() => {
-                $btn.removeClass('btn-success').addClass('btn-primary').html(originalHtml);
-              }, 1500);
             })
             .fail(function (xhr) {
               $btn.html(originalHtml);

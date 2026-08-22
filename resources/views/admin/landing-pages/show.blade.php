@@ -7,7 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Growth Labs — Find the Right Growth Program</title>
+  <title>{{ $page->title }}</title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
 
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
@@ -284,20 +284,33 @@
     <nav class="navbar navbar-expand-lg gl-nav py-3">
       <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-        <span class="brand-mark"><img src="/images/growthlab.jpeg" alt="Growth Labs logo"></span>
-        <span class="fw-bold text-white fs-5">Growth Labs</span>
+        <span class="brand-mark">
+          @if($page->logo_url)
+            <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
+          @endif
+        </span>
+        <span class="fw-bold text-white fs-5">{{ $page->title }}</span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
           <i class="ti ti-menu-2 text-white fs-3"></i>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navMenu">
           <ul class="navbar-nav align-items-lg-center gap-lg-1">
-            <li class="nav-item"><a class="nav-link text-white" href="#about">About</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#programs">Programs</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#how-it-works">How it works</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#success-stories">Stories</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#impact">Impact</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#faq">FAQ</a></li>
+            @if($page->about_is_enabled)
+              <li class="nav-item"><a class="nav-link text-white" href="#about">{{ $l == 'ar' ? 'من نحن' : 'About' }}</a></li>
+            @endif
+            @if($page->programs_is_enabled)
+              <li class="nav-item"><a class="nav-link text-white" href="#programs">{{ $l == 'ar' ? 'البرامج' : 'Programs' }}</a></li>
+            @endif
+            @if($page->how_is_enabled)
+              <li class="nav-item"><a class="nav-link text-white" href="#how-it-works">{{ $l == 'ar' ? 'كيف يعمل' : 'How it works' }}</a></li>
+            @endif
+            {{-- Stories/Impact/FAQ nav links: their sections are commented out below (see Success stories / Impact / FAQ comment block) --}}
+            {{--
+            <li class="nav-item"><a class="nav-link text-white" href="#success-stories">{{ $l == 'ar' ? 'قصص النجاح' : 'Stories' }}</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#impact">{{ $l == 'ar' ? 'الأثر' : 'Impact' }}</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="#faq">{{ $l == 'ar' ? 'الأسئلة الشائعة' : 'FAQ' }}</a></li>
+            --}}
             <li class="nav-item dropdown-language dropdown ms-lg-3">
               <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                 <i class="ti ti-language text-white fs-5"></i>
@@ -328,24 +341,34 @@
       style="flex:1; display:flex; flex-direction:column; justify-content:center;">
       <div class="row align-items-center g-5">
         <div class="col-lg-6">
-          <span class="hero-eyebrow"><span class="live-pulse"></span> COHORT_2025.STATUS = OPEN</span>
-          <h1 class="mt-4">
-            Stop scrolling job <br> boards.<br>Start <em>building</em> with the right cohort.
-          </h1>
-          <p class="mt-6" style="font-size:1.08rem; line-height:1.7; max-width:520px; color: rgba(255,255,255,.78);">
-            Growth Labs matches early-stage founders with vetted accelerators, incubators, and hackathons — filtered by
-            stage, funding need, and timeline, so you apply to programs built for where you actually are.
-          </p>
+          @php $heroTag = $l == 'ar' ? $page->hero_title_tag_ar : $page->hero_title_tag; @endphp
+          @if($heroTag)
+            <span class="hero-eyebrow"><span class="live-pulse"></span> {{ $heroTag }}</span>
+          @endif
+          @php $heroTitle = $l == 'ar' ? $page->hero_title_ar : $page->hero_title; @endphp
+          @if($heroTitle)
+            <h1 class="mt-4">{{ $heroTitle }}</h1>
+          @endif
+          @php $heroDescription = $l == 'ar' ? $page->hero_description_ar : $page->hero_description; @endphp
+          @if($heroDescription)
+            <p class="mt-6" style="font-size:1.08rem; line-height:1.7; max-width:520px; color: rgba(255,255,255,.78);">
+              {{ $heroDescription }}
+            </p>
+          @endif
           <div class="d-flex flex-wrap gap-3 mt-6">
-            <a href="#programs" class="btn btn-primary rounded-pill btn-lg">Browse open programs <i
-                class="ti ti-arrow-up-right ms-1"></i></a>
-            <a href="#how-it-works" class="btn btn-outline-dark text-white rounded-pill btn-lg">See how it works</a>
+            @if($page->programs_is_enabled)
+              <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ $l == 'ar' ? 'تصفح البرامج المتاحة' : 'Browse open programs' }} <i
+                  class="ti ti-arrow-up-right ms-1"></i></a>
+            @endif
+            @if($page->how_is_enabled)
+              <a href="#how-it-works" class="btn btn-outline-dark text-white rounded-pill btn-lg">{{ $l == 'ar' ? 'شاهد كيف يعمل' : 'See how it works' }}</a>
+            @endif
           </div>
         </div>
 
         <div class="col-lg-6">
           <div class="ratio ratio-4x3 rounded-4 overflow-hidden shadow-lg">
-            <img src="/images/form-illustration.svg" alt="hero-illustration" class="w-100 h-100"
+            <img src="{{ $page->hero_image_url ?: asset('images/form-illustration.svg') }}" alt="{{ $page->title }}" class="w-100 h-100"
               style="object-fit: contain;">
           </div>
         </div>
@@ -354,330 +377,212 @@
   </header>
 
   <!-- ===== About / Value props ===== -->
+  @if($page->about_is_enabled)
   <section class="py-5 py-lg-5" id="about">
     <div class="container py-4">
       <div class="row section-head mb-4">
         <div class="col-lg-7">
-          <p class="eyebrow-mono mb-2">// why growth labs</p>
-          <h2>A curated path, not another endless directory</h2>
+          @php $aboutTag = $l == 'ar' ? $page->about_title_tag_ar : $page->about_title_tag; @endphp
+          @if($aboutTag)
+            <p class="eyebrow-mono mb-2">{{ $aboutTag }}</p>
+          @endif
+          @php $aboutTitle = $l == 'ar' ? $page->about_title_ar : $page->about_title; @endphp
+          @if($aboutTitle)
+            <h2>{{ $aboutTitle }}</h2>
+          @endif
         </div>
-        <div class="col-lg-4 offset-lg-1 d-flex align-items-end">
-          <p class="text-secondary mb-0">We reject more programs than we list. Every accelerator, incubator, and
-            hackathon here has been checked for real mentorship, real outcomes, and real founders behind it.</p>
-        </div>
+        @php $aboutDescription = $l == 'ar' ? $page->about_description_ar : $page->about_description; @endphp
+        @if($aboutDescription)
+          <div class="col-lg-4 offset-lg-1 d-flex align-items-end">
+            <p class="text-secondary mb-0">{{ $aboutDescription }}</p>
+          </div>
+        @endif
       </div>
 
-
-      <div class="border-top">
-        <div class="row value-item border-bottom py-6 g-3 align-items-center">
-          <div class="col-auto"><span class="text-secondary">01</span></div>
-          <div class="col-lg-1 col-2">
-            <div class="avatar">
-              <div class="avatar-initial bg-label-primary rounded">
-                <i class="ti ti-filter-cog"></i>
+      @if(!empty($page->about_cards))
+        <div class="border-top">
+          @foreach($page->about_cards as $index => $card)
+            <div class="row value-item border-bottom py-6 g-3 align-items-center">
+              <div class="col-auto"><span class="text-secondary">{{ sprintf('%02d', $index + 1) }}</span></div>
+              <div class="col-lg-1 col-2">
+                <div class="avatar">
+                  <div class="avatar-initial bg-label-primary rounded">
+                    @if(!empty($card['icon']))<i class="ti {{ $card['icon'] }}"></i>@endif
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 col-10">
+                <h5 class="mb-0">{{ $l == 'ar' ? ($card['title_ar'] ?? '') : ($card['title'] ?? '') }}</h5>
+              </div>
+              <div class="col-lg-6">
+                <p class="text-secondary mb-0 small">{{ $l == 'ar' ? ($card['description_ar'] ?? '') : ($card['description'] ?? '') }}</p>
               </div>
             </div>
-          </div>
-          <div class="col-lg-4 col-10">
-            <h5 class="mb-0">Matched, not just listed</h5>
-          </div>
-          <div class="col-lg-6">
-            <p class="text-secondary mb-0 small">Tell us your stage and runway once. We surface programs that actually
-              fit instead of a generic feed of every accelerator on the internet.</p>
-          </div>
+          @endforeach
         </div>
-        <div class="row value-item border-bottom py-6 g-3 align-items-center">
-          <div class="col-auto"><span class="text-secondary">02</span></div>
-          <div class="col-lg-1 col-2">
-            <div class="avatar">
-              <div class="avatar-initial bg-label-primary rounded">
-                <i class="ti ti-shield-check"></i>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-10">
-            <h5 class="mb-0">Vetted before you waste a weekend</h5>
-          </div>
-          <div class="col-lg-6">
-            <p class="text-secondary mb-0 small">Our team reviews mentor quality, past cohort outcomes, and terms before
-              a program ever gets listed — so you're not the guinea pig.</p>
-          </div>
-        </div>
-        <div class="row value-item border-bottom py-6 g-3 align-items-center">
-          <div class="col-auto"><span class="text-secondary">03</span></div>
-          <div class="col-lg-1 col-2">
-            <div class="avatar">
-              <div class="avatar-initial bg-label-primary rounded">
-                <i class="ti ti-clock-bolt"></i>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-10">
-            <h5 class="mb-0">Deadlines you won't miss</h5>
-          </div>
-          <div class="col-lg-6">
-            <p class="text-secondary mb-0 small">Live seat counts and closing dates on every listing mean you know
-              exactly how much runway you have left to apply.</p>
-          </div>
-        </div>
-      </div>
+      @endif
     </div>
   </section>
+  @endif
 
   <!-- ===== Programs ===== -->
+  @if($page->programs_is_enabled)
   <section class="bg-label-secondary py-5" id="programs">
     <div class="container py-4">
       <div class="row section-head mb-4">
         <div class="col-lg-7">
-          <p class="eyebrow-mono mb-2">// open cohorts</p>
-          <h2>Selected programs, ranked by deadline</h2>
-          <p class="text-secondary mb-0 mt-3" style="max-width:560px;">Every program below is vetted and matched to your
-            stage — compare live seat counts, closing dates, and terms at a glance.</p>
-        </div>
-        <div class="col-lg-5 d-flex align-items-end justify-content-lg-end">
-          <p class="text-secondary mb-0">Showing 3 open · 2 closed for this cycle</p>
+          @php $programsTag = $l == 'ar' ? $page->programs_title_tag_ar : $page->programs_title_tag; @endphp
+          @if($programsTag)
+            <p class="eyebrow-mono mb-2">{{ $programsTag }}</p>
+          @endif
+          @php $programsTitle = $l == 'ar' ? $page->programs_title_ar : $page->programs_title; @endphp
+          @if($programsTitle)
+            <h2>{{ $programsTitle }}</h2>
+          @endif
+          @php $programsDescription = $l == 'ar' ? $page->programs_description_ar : $page->programs_description; @endphp
+          @if($programsDescription)
+            <p class="text-secondary mb-0 mt-3" style="max-width:560px;">{{ $programsDescription }}</p>
+          @endif
         </div>
       </div>
 
       <ul class="nav nav-pills mb-4" role="tablist" id="programFilters">
-        <li class="nav-item"><a class="nav-link active" href="#" data-filter="all">All programs</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" data-filter="incubator">Incubator</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" data-filter="accelerator">Accelerator</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" data-filter="hackathon">Hackathon</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#" data-filter="all">{{ $l == 'ar' ? 'كل البرامج' : 'All programs' }}</a></li>
+        @foreach(\App\Cycle::programTypes() as $typeValue => $typeLabel)
+          <li class="nav-item"><a class="nav-link" href="#" data-filter="{{ $typeValue }}">{{ $typeLabel }}</a></li>
+        @endforeach
       </ul>
 
       <div class="row g-4">
-        <!-- Card 1 -->
-        <div class="col-md-6 col-lg-4" data-type="incubator">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center gap-2">
-              <div class="d-flex align-items-center gap-2 min-w-0">
-                <div class="avatar avatar-md flex-shrink-0">
-                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Launchpad Accelerator logo">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="mb-1 text-truncate">Launchpad Accelerator 2025</h5>
-                  <span class="badge bg-label-primary rounded-pill text-uppercase">Incubator</span>
-                </div>
-              </div>
-              <span class="deadline-tag text-secondary text-nowrap"><i class="ti ti-clock"></i> 6 days left</span>
-            </div>
-            <div class="card-body">
-              <p class="desc text-secondary">A 12-week intensive helping early-stage startups validate their model and
-                connect with top investors.</p>
-              <div class="d-flex justify-content-between mt-3">
-                <span class="small"><i class="ti ti-calendar-event"></i> Start: Sep 8</span>
-                <span class="small"><i class="ti ti-calendar-x"></i> End: Nov 28, 2025</span>
-              </div>
-              <div class="d-flex justify-content-between align-items-center mb-1 mt-3">
-                <span class="small">82/100 seats filled</span>
-              </div>
-              <div class="progress primary mb-3">
-                <div class="fill bg-primary" style="height:100%; border-radius:99px; width:80%;"></div>
-              </div>
-              <a href="#" class="btn btn-primary rounded-pill w-100">Apply now</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="col-md-6 col-lg-4" data-type="hackathon">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center gap-2">
-              <div class="d-flex align-items-center gap-2 min-w-0">
-                <div class="avatar avatar-md flex-shrink-0">
-                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="BuildFast Hackathon logo">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="mb-1 text-truncate">BuildFast Hackathon 2025</h5>
-                  <span class="badge bg-label-secondary rounded-pill text-uppercase">Hackathon</span>
+        @forelse($visiblePrograms as $program)
+          <div class="col-md-6 col-lg-4" data-type="{{ $program->type }}">
+            <div class="card h-100 {{ !$program->isOpen ? 'opacity-50' : '' }}">
+              <div class="card-header d-flex justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 min-w-0">
+                  <div class="avatar avatar-md flex-shrink-0">
+                    <img class="rounded" src="{{ $program->logo }}" alt="{{ $l == 'ar' ? $program->title_ar : $program->title }}">
+                  </div>
+                  <div class="min-w-0">
+                    <h5 class="mb-1 text-truncate">{{ $l == 'ar' ? $program->title_ar : $program->title }}</h5>
+                    @if($program->type)
+                      <span class="badge bg-label-primary rounded-pill text-uppercase">{{ \App\Cycle::programTypes()[$program->type] ?? $program->type }}</span>
+                    @endif
+                  </div>
                 </div>
               </div>
-              <span class="deadline-tag text-secondary text-nowrap"><i class="ti ti-clock"></i> 2 days left</span>
-            </div>
-            <div class="card-body">
-              <p class="desc text-secondary">A 48-hour sprint for tech founders to build, pitch, and win in front of
-                industry judges.</p>
-              <div class="d-flex justify-content-between mt-3">
-                <span class="small"><i class="ti ti-calendar-event"></i> Start: Sep 20</span>
-                <span class="small"><i class="ti ti-calendar-x"></i> End: Sep 22, 2025</span>
+              <div class="card-body">
+                @php $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description; @endphp
+                @if($programDescription)
+                  <p class="desc text-secondary">{{ $programDescription }}</p>
+                @endif
+                @if($program->start || $program->end)
+                  <div class="d-flex justify-content-between mt-3">
+                    @if($program->start)<span class="small"><i class="ti ti-calendar-event"></i> {{ $l == 'ar' ? 'البداية' : 'Start' }}: {{ $program->start->format('M d, Y') }}</span>@endif
+                    @if($program->end)<span class="small"><i class="ti ti-calendar-x"></i> {{ $l == 'ar' ? 'النهاية' : 'End' }}: {{ $program->end->format('M d, Y') }}</span>@endif
+                  </div>
+                @endif
+                <div class="mt-3">
+                  <span class="badge {{ $program->isOpen ? 'bg-label-success' : ($program->isUpcoming ? 'bg-label-warning' : 'bg-label-secondary') }}">{{ $program->statusLabel }}</span>
+                </div>
+                @if($program->canApply)
+                  <a href="{{ route('public.program_join', ['org_slug' => $program->organization->short_code, 'program_slug' => $program->public_slug]) }}"
+                     class="btn btn-primary rounded-pill w-100 mt-3">{{ $program->btnText }}</a>
+                @else
+                  <span class="btn btn-disabled rounded-pill border border-dashed w-100 mt-3">{{ $program->btnText }}</span>
+                @endif
               </div>
-              <div class="d-flex justify-content-between align-items-center mb-1 mt-3">
-                <span class="small">240/300 seats filled</span>
-              </div>
-              <div class="progress primary mb-3">
-                <div class="fill bg-primary" style="height:100%; border-radius:99px; width:80%;"></div>
-              </div>
-              <a href="#" class="btn btn-primary rounded-pill w-100">Apply now</a>
             </div>
           </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="col-md-6 col-lg-4" data-type="incubator">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center gap-2">
-              <div class="d-flex align-items-center gap-2 min-w-0">
-                <div class="avatar avatar-md flex-shrink-0">
-                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Founders Incubator logo">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="mb-1 text-truncate">Founders Incubator Spring</h5>
-                  <span class="badge bg-label-primary rounded-pill text-uppercase">Incubator</span>
-                </div>
-              </div>
-              <span class="deadline-tag text-secondary text-nowrap"><i class="ti ti-clock"></i> 11 days left</span>
-            </div>
-            <div class="card-body">
-              <p class="desc text-secondary">9-month incubation offering workspace, capital, and seed funding for
-                pre-revenue startups.</p>
-              <div class="d-flex justify-content-between mt-3">
-                <span class="small"><i class="ti ti-calendar-event"></i> Start: Sep 1, 2025</span>
-                <span class="small"><i class="ti ti-calendar-x"></i> End: Jun 1, 2026</span>
-              </div>
-              <div class="d-flex justify-content-between align-items-center mb-1 mt-3">
-                <span class="small">17/20 seats filled</span>
-              </div>
-              <div class="progress primary mb-3">
-                <div class="fill bg-primary" style="height:100%; border-radius:99px; width:80%;"></div>
-              </div>
-              <a href="#" class="btn btn-primary rounded-pill w-100">Apply now</a>
-            </div>
+        @empty
+          <div class="col-12 text-center py-6">
+            <p class="text-secondary mb-0">{{ $l == 'ar' ? 'لا توجد برامج متاحة حالياً.' : 'No programs are available right now.' }}</p>
           </div>
-        </div>
-
-        <!-- Closed 1 -->
-        <div class="col-md-6 col-lg-4" data-type="incubator">
-          <div class="card h-100 opacity-50">
-            <div class="card-header d-flex justify-content-between align-items-center gap-2">
-              <div class="d-flex align-items-center gap-2 min-w-0">
-                <div class="avatar avatar-md flex-shrink-0">
-                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Startup Fundamentals logo">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="mb-1 text-truncate">Startup Fundamentals 2024</h5>
-                  <span class="badge bg-label-primary rounded-pill text-uppercase">Incubator</span>
-                </div>
-              </div>
-              <span class="deadline-tag text-secondary text-nowrap">Closed</span>
-            </div>
-            <div class="card-body">
-              <p class="desc text-secondary">An 8-week training program covering lean methodology, product-market fit,
-                and pitch prep.</p>
-              <div class="d-flex justify-content-between mt-3">
-                <span class="small"><i class="ti ti-calendar-event"></i> Start: Aug 12, 2024</span>
-                <span class="small"><i class="ti ti-calendar-x"></i> End: Oct 1, 2024</span>
-              </div>
-              <div class="d-flex justify-content-between align-items-center mb-1 mt-3">
-                <span class="small">Full — waitlist closed</span>
-              </div>
-              <div class="progress primary mb-3">
-                <div class="fill bg-secondary" style="height:100%; border-radius:99px; width:100%;"></div>
-              </div>
-              <span class="btn btn-disabled rounded-pill border border-dashed w-100">Applications closed</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Closed 2 -->
-        <div class="col-md-6 col-lg-4" data-type="accelerator">
-          <div class="card h-100 opacity-50">
-            <div class="card-header d-flex justify-content-between align-items-center gap-2">
-              <div class="d-flex align-items-center gap-2 min-w-0">
-                <div class="avatar avatar-md flex-shrink-0">
-                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Scale-Up Accelerator logo">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="mb-1 text-truncate">Scale-Up Accelerator 2024</h5>
-                  <span class="badge bg-label-secondary rounded-pill text-uppercase">Accelerator</span>
-                </div>
-              </div>
-              <span class="deadline-tag text-secondary text-nowrap">Closed</span>
-            </div>
-            <div class="card-body">
-              <p class="desc text-secondary">A growth-stage accelerator focused on scaling operations, fundraising, and
-                expansion.</p>
-              <div class="d-flex justify-content-between mt-3">
-                <span class="small"><i class="ti ti-calendar-event"></i> Start: Jan 15, 2024</span>
-                <span class="small"><i class="ti ti-calendar-x"></i> End: Jun 30, 2024</span>
-              </div>
-              <div class="d-flex justify-content-between align-items-center mb-1 mt-3">
-                <span class="small">Full — waitlist closed</span>
-              </div>
-              <div class="progress primary mb-3">
-                <div class="fill bg-secondary" style="height:100%; border-radius:99px; width:100%;"></div>
-              </div>
-              <span class="btn btn-disabled rounded-pill border border-dashed w-100">Applications closed</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notify card -->
-        <div class="col-md-6 col-lg-4">
-          <div class="card waves-effect d-flex flex-column align-items-center justify-content-center text-center p-4 h-100"
-            style="border-style:dashed; border-color: rgba(33, 37, 41, 0.1);">
-            <i class="ti ti-bell-ringing fs-2 text-primary mb-2"></i>
-            <h5 class="mb-2">More cohorts opening soon</h5>
-            <p class="desc text-secondary mb-3">Get notified the moment a new program matching your stage opens
-              applications.</p>
-            <a href="#" class="btn btn-primary btn-lg rounded-pill px-4">Notify me</a>
-          </div>
-        </div>
+        @endforelse
       </div>
     </div>
   </section>
+  @endif
 
   <!-- ===== How it works ===== -->
+  @if($page->how_is_enabled)
   <section class="py-5" id="how-it-works">
     <div class="container py-4">
       <div class="row section-head mb-5 text-center">
         <div class="col-lg-7 mx-auto">
-          <p class="eyebrow-mono mb-2">// the process</p>
-          <h2>From browsing to building, in three steps</h2>
-          <p class="text-secondary mb-0 mt-3">A simple pipeline — set your goals, compare your matches, and apply with
-            one profile. No spreadsheets, no tabs.</p>
+          @php $howTag = $l == 'ar' ? $page->how_title_tag_ar : $page->how_title_tag; @endphp
+          @if($howTag)
+            <p class="eyebrow-mono mb-2">{{ $howTag }}</p>
+          @endif
+          @php $howTitle = $l == 'ar' ? $page->how_title_ar : $page->how_title; @endphp
+          @if($howTitle)
+            <h2>{{ $howTitle }}</h2>
+          @endif
+          @php $howDescription = $l == 'ar' ? $page->how_description_ar : $page->how_description; @endphp
+          @if($howDescription)
+            <p class="text-secondary mb-0 mt-3">{{ $howDescription }}</p>
+          @endif
         </div>
       </div>
 
       <div class="row pipeline-wrap">
         <div class="pipeline-line d-none d-lg-block"></div>
 
-        <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
-          <span class="pipeline-node"><i class="ti ti-adjustments-horizontal"></i></span>
-          <h5 class="fw-bold mt-3">Set your stage &amp; goals</h5>
-          <p class="text-secondary small mx-auto" style="max-width:260px;">Tell us where your startup stands — idea,
-            MVP, or revenue — and what you need most: capital, mentorship, or speed.</p>
-        </div>
-        <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
-          <span class="pipeline-node"><i class="ti ti-list-search"></i></span>
-          <h5 class="fw-bold mt-3">Compare matched programs</h5>
-          <p class="text-secondary small mx-auto" style="max-width:260px;">Review live seat counts, deadlines, and
-            mentor profiles side by side — no more digging through ten browser tabs.</p>
-        </div>
-        <div class="col-lg-4 pipeline-step text-center">
-          <span class="pipeline-node"><i class="ti ti-send"></i></span>
-          <h5 class="fw-bold mt-3">Apply with one profile</h5>
-          <p class="text-secondary small mx-auto" style="max-width:260px;">Reuse a single founder profile across every
-            application. Track every response in one inbox.</p>
-        </div>
+        @foreach($page->how_steps ?? [] as $step)
+          <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
+            <span class="pipeline-node">
+              @if(!empty($step['icon']))<i class="ti {{ $step['icon'] }}"></i>@endif
+            </span>
+            <h5 class="fw-bold mt-3">{{ $l == 'ar' ? ($step['title_ar'] ?? '') : ($step['title'] ?? '') }}</h5>
+            <p class="text-secondary small mx-auto" style="max-width:260px;">{{ $l == 'ar' ? ($step['description_ar'] ?? '') : ($step['description'] ?? '') }}</p>
+          </div>
+        @endforeach
       </div>
     </div>
   </section>
+  @endif
+
+  <!-- ===== Custom sections ===== -->
+  @foreach($customSections as $customSection)
+    <section class="py-5" id="custom-{{ $customSection->id }}">
+      <div class="container py-4">
+        @php $sectionTag = $l == 'ar' ? $customSection->title_tag_ar : $customSection->title_tag; @endphp
+        @if($sectionTag)
+          <p class="eyebrow-mono mb-2">{{ $sectionTag }}</p>
+        @endif
+        @php $sectionTitle = $l == 'ar' ? $customSection->title_ar : $customSection->title; @endphp
+        @if($sectionTitle)
+          <h2>{{ $sectionTitle }}</h2>
+        @endif
+        <div class="mt-3">{!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
+        @if($customSection->button_text && $customSection->button_link)
+          <a href="{{ $customSection->button_link }}" class="btn btn-primary rounded-pill mt-4">{{ $customSection->button_text }}</a>
+        @endif
+      </div>
+    </section>
+  @endforeach
 
   <!-- ===== CTA ===== -->
   <section class="py-5">
     <div class="container">
       <div class="gl-cta text-center">
-        <p class="eyebrow-mono text-primary mb-3 position-relative">// next cohort closes in 2 days</p>
-        <h2 class="position-relative">Your next program is already accepting applications.</h2>
-        <p class="text-secondary mt-3 position-relative mx-auto" style="max-width:480px;">Join 4,300 founders who
-          skipped the search and went straight to building.</p>
-        <a href="#programs" class="btn btn-primary mt-3 position-relative">Find my program <i
+        <p class="eyebrow-mono text-primary mb-3 position-relative">{{ $l == 'ar' ? '// لنبدأ' : "// let's get started" }}</p>
+        <h2 class="position-relative">{{ $l == 'ar' ? 'برنامجك القادم بانتظار طلبك.' : 'Your next program is already accepting applications.' }}</h2>
+        @php $ctaDescription = $l == 'ar' ? $page->description_ar : $page->description; @endphp
+        @if($ctaDescription)
+          <p class="text-secondary mt-3 position-relative mx-auto" style="max-width:480px;">{{ $ctaDescription }}</p>
+        @endif
+        <a href="#programs" class="btn btn-primary mt-3 position-relative">{{ $l == 'ar' ? 'اعثر على برنامجي' : 'Find my program' }} <i
             class="ti ti-arrow-up-right ms-1"></i></a>
       </div>
     </div>
   </section>
 
+  {{-- Success stories / Impact / FAQ: static/fabricated demo content, kept
+  here commented out rather than deleted. This kind of content is now meant
+  to be added by admins through the working Custom Sections feature (see
+  the @foreach($customSections as $customSection) loop above), the same way
+  How it works / About / Programs are admin-configurable. --}}
+  {{--
   <!-- ===== Success stories ===== -->
   <section class="py-5" id="success-stories">
     <div class="container py-4">
@@ -821,6 +726,7 @@
       </div>
     </div>
   </section>
+  --}}
 
   <!-- ===== Footer ===== -->
   <footer class="gl-footer py-5 mt-3">
@@ -828,74 +734,56 @@
       <div class="row g-4">
         <div class="col-lg-4">
           <a class="d-flex align-items-center gap-2 mb-3" href="#">
-            <span class="brand-mark"><img src="/images/growthlab.jpeg" alt="Growth Labs logo"></span>
-            <span class="fw-bold text-white fs-5">Growth Labs</span>
+            <span class="brand-mark">
+              @if($page->logo_url)
+                <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
+              @endif
+            </span>
+            <span class="fw-bold text-white fs-5">{{ $page->title }}</span>
           </a>
-          <p class="text-secondary small" style="max-width:280px;">A curated path from founder to funded — accelerators,
-            incubators, and hackathons, matched to your stage.</p>
-          <div class="d-flex gap-2 mt-3">
-            <a href="https://x.com/your-profile" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
-              <i class="ti ti-brand-x"></i>
-            </a>
-          
-            <a href="https://www.linkedin.com/company/your-company" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
-              <i class="ti ti-brand-linkedin"></i>
-            </a>
-          
-            <a href="https://www.instagram.com/your-profile" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
-              <i class="ti ti-brand-instagram"></i>
-            </a>
-          
-            <a href="https://www.youtube.com/@your-channel" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
-              <i class="ti ti-brand-youtube"></i>
-            </a>
-          
-            <a href="https://www.tiktok.com/@your-profile" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
-              <i class="ti ti-brand-tiktok"></i>
-            </a>
-          
-            <a href="https://www.facebook.com/your-page" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
-              <i class="ti ti-brand-facebook"></i>
-            </a>
-          </div>
+          @php $footerDescription = $l == 'ar' ? $page->description_ar : $page->description; @endphp
+          @if($footerDescription)
+            <p class="text-secondary small" style="max-width:280px;">{{ $footerDescription }}</p>
+          @endif
+          @php
+            $socialLinks = array_filter([
+              'x' => $page->x,
+              'linkedin' => $page->linkedin,
+              'instagram' => $page->instagram,
+              'youtube' => $page->youtube,
+              'tiktok' => $page->tiktok,
+              'facebook' => $page->facebook,
+            ]);
+          @endphp
+          @if(count($socialLinks) > 0)
+            <div class="d-flex gap-2 mt-3">
+              @foreach($socialLinks as $icon => $link)
+                <a href="{{ $link }}" target="_blank" rel="noopener noreferrer"
+                  class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="{{ ucfirst($icon) }}">
+                  <i class="ti ti-brand-{{ $icon }}"></i>
+                </a>
+              @endforeach
+            </div>
+          @endif
         </div>
         <div class="col-6 col-lg-2 offset-lg-2">
-          <h6 class="mb-3">Navigate</h6>
+          <h6 class="mb-3">{{ $l == 'ar' ? 'تصفح' : 'Navigate' }}</h6>
           <div class="d-flex flex-column gap-2">
-            <a href="#about" class="flink">About</a>
-            <a href="#programs" class="flink">Programs</a>
-            <a href="#how-it-works" class="flink">Process</a>
-          </div>
-        </div>
-        <div class="col-6 col-lg-2">
-          <h6 class="mb-3">Programs</h6>
-          <div class="d-flex flex-column gap-2">
-            <a href="#" class="flink">Accelerators</a>
-            <a href="#" class="flink">Incubators</a>
-            <a href="#" class="flink">Hackathons</a>
-          </div>
-        </div>
-        <div class="col-6 col-lg-2">
-          <h6 class="mb-3">Company</h6>
-          <div class="d-flex flex-column gap-2">
-            <a href="#" class="flink">Contact</a>
-            <a href="#" class="flink">Partners</a>
-            <a href="#" class="flink">Privacy</a>
+            @if($page->about_is_enabled)
+              <a href="#about" class="flink">{{ $l == 'ar' ? 'من نحن' : 'About' }}</a>
+            @endif
+            @if($page->programs_is_enabled)
+              <a href="#programs" class="flink">{{ $l == 'ar' ? 'البرامج' : 'Programs' }}</a>
+            @endif
+            @if($page->how_is_enabled)
+              <a href="#how-it-works" class="flink">{{ $l == 'ar' ? 'كيف يعمل' : 'Process' }}</a>
+            @endif
           </div>
         </div>
       </div>
       <hr class="border-secondary mt-5">
       <div class="d-flex flex-wrap justify-content-between gap-2">
-        <p class="text-secondary small mb-0">© 2025 Growth Labs. All rights reserved.</p>
-        <p class="text-secondary small mb-0" style="letter-spacing: 0.01em">
-          Built for founders, by founders.
-        </p>
+        <p class="text-secondary small mb-0">© {{ date('Y') }} {{ $page->title }}. All rights reserved.</p>
       </div>
     </div>
   </footer>
