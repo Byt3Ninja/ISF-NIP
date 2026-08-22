@@ -48,6 +48,11 @@ class Cycle extends Model
     {
         return date('Y-m-d',strtotime($this->attributes['end']));
     }
+    public function getIsExpiredAttribute()
+    {
+        return $this->end && $this->end->isPast();
+    }
+
     public function getLogoAttribute()
     {
         if ($this->img_url) {

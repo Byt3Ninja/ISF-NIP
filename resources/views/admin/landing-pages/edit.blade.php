@@ -2,473 +2,22 @@
 
 @section('vendorstyle')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
-  <style>
-    .ql-toolbar .ql-custom-button {
-      width: auto !important;
-      padding: 0 8px;
-      font-weight: 600;
-      font-size: 13px;
-    }
-    .ql-toolbar .ql-custom-button::after {
-      content: 'Button';
-    }
-    .custom-quill-editor.ql-container {
-      position: relative;
-      height: auto !important;
-      z-index: 1;
-    }
-    .custom-quill-editor.ql-container .ql-editor {
-      height: auto !important;
-      min-height: 160px;
-    }
-    .custom-field-group[data-field="content"],
-    .custom-field-group[data-field="content_ar"] {
-      position: relative;
-      z-index: 1;
-      margin-bottom: 0.5rem;
-    }
-  </style>
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 @endsection
 
 @section('content')
-  @php
-    $sections = [
-      [
-        'key'      => 'general',
-        'icon'     => 'ti-settings',
-        'label_en' => 'General',
-        'label_ar' => 'عام',
-        'route'    => route('admin.landing-page.sections.update', 'general'),
-        'fields'   => [
-          [
-            'name'        => 'logo',
-            'type'        => 'image',
-            'label_en'    => 'Logo',
-            'label_ar'    => 'الشعار',
-            'value'       => null,
-            'required'    => true,
-            'accept'      => '.png,.jpg,.jpeg,.webp',
-            'max_size_mb' => 5,
-            'col'         => 12,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'linkedin',
-            'type'      => 'url',
-            'label_en'  => 'LinkedIn',
-            'label_ar'  => 'لينكدإن',
-            'value'     => null,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'facebook',
-            'type'      => 'url',
-            'label_en'  => 'Facebook',
-            'label_ar'  => 'فيسبوك',
-            'value'     => null,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'instagram',
-            'type'      => 'url',
-            'label_en'  => 'Instagram',
-            'label_ar'  => 'إنستغرام',
-            'value'     => null,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'x',
-            'type'      => 'url',
-            'label_en'  => 'X',
-            'label_ar'  => 'إكس',
-            'value'     => null,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'tiktok',
-            'type'      => 'url',
-            'label_en'  => 'TikTok',
-            'label_ar'  => 'تيك توك',
-            'value'     => null,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'youtube',
-            'type'      => 'url',
-            'label_en'  => 'YouTube',
-            'label_ar'  => 'يوتيوب',
-            'value'     => null,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'hero',
-        'icon'     => 'ti-align-box-top-center',
-        'label_en' => 'Hero',
-        'label_ar' => 'البطل',
-        'route'    => route('admin.landing-page.sections.update', 'hero'),
-        'fields'   => [
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 150,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 150,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-          [
-            'name'        => 'hero_image',
-            'type'        => 'image',
-            'label_en'    => 'Hero image',
-            'label_ar'    => 'صورة القسم الرئيسي',
-            'value'       => null,
-            'required'    => true,
-            'accept'      => '.png,.jpg,.jpeg,.webp',
-            'max_size_mb' => 5,
-            'col'         => 12,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'about',
-        'icon'     => 'ti-users',
-        'label_en' => 'About Us',
-        'label_ar' => 'من نحن',
-        'route'    => route('admin.landing-page.sections.update', 'about'),
-        'fields'   => [
-          [
-            'name'      => 'is_enabled',
-            'type'      => 'checkbox',
-            'label_en'  => 'Enable Section',
-            'label_ar'  => 'تفعيل القسم',
-            'value'     => 1,
-            'col'       => 12,
-          ],
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 150,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 150,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'programs',
-        'icon'     => 'ti-rocket',
-        'label_en' => 'Programs',
-        'label_ar' => 'البرامج',
-        'route'    => route('admin.landing-page.sections.update', 'programs'),
-        'fields'   => [
-          [
-            'name'     => 'is_enabled',
-            'type'     => 'checkbox',
-            'label_en' => 'Enable Section',
-            'label_ar' => 'تفعيل القسم',
-            'value'    => 1,
-            'col'      => 12,
-          ],
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 50,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 50,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 50,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 50,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'how',
-        'icon'     => 'ti-settings-bolt',
-        'label_en' => 'How It Works',
-        'label_ar' => 'كيف يعمل',
-        'route'    => route('admin.landing-page.sections.update', 'how'),
-        'fields'   => [
-          [
-            'name'     => 'is_enabled',
-            'type'     => 'checkbox',
-            'label_en' => 'Enable Section',
-            'label_ar' => 'تفعيل القسم',
-            'value'    => 1,
-            'col'      => 12,
-          ],
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 150,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 100,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 150,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => null,
-            'required'  => true,
-            'maxlength' => 500,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'custom',
-        'icon'     => 'ti-puzzle',
-        'label_en' => 'Custom sections',
-        'label_ar' => 'أقسام مخصصة',
-        'route'    => route('admin.landing-page.sections.update', 'custom'),
-        'fields'   => [],
-      ],
-    ];
-  @endphp
-
   {{-- Header --}}
   <div class="mb-4">
     <h4 class="mb-1">
-      {{ $l == 'ar' ? 'تعديل صفحة هبوط' : 'Edit Landing Page' }}
+      {{ __('landing.Edit_landing_page') }}
     </h4>
     <p class="text-secondary mb-0">
-      {{ $l == 'ar' ? 'أدِر صفحة هبوط مخصصة لبرامجك.' : 'Manage tailored landing page for your programs.' }}
+      {{ __('landing.Manage_landing_page') }}
     </p>
   </div>
 
   {{-- Custom Landing Page URL configuration --}}
-  <form class="card mb-4" id="lpUrlForm" novalidate>
+  <form class="card mb-4" id="lpUrlForm" action="{{ route('landing-pages.url.save', $currentPage->id) }}" novalidate>
     <div class="card-header">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="d-flex align-items-center gap-3">
@@ -478,7 +27,7 @@
               class="form-check-input lp-url-toggle"
               id="lpUrlEnabledToggle"
               name="lpUrlActive"
-              checked
+              @checked($currentPage->status)
             >
           </div>
           <div>
@@ -487,14 +36,21 @@
               {{ $l == 'ar' ? 'رابط صفحة الهبوط المخصص' : 'Custom Landing Page URL' }}
             </h5>
             <small class="text-muted" id="lpUrlStatusText">
-              <span class="text-success">
-                <i class="ti ti-check me-1"></i>
-                {{ $l == 'ar' ? 'رابط صفحة الهبوط نشط' : 'Landing page URL is active' }}
-              </span>
+              @if($currentPage->status)
+                <span class="text-success">
+                  <i class="ti ti-check me-1"></i>
+                  {{ $l == 'ar' ? 'رابط صفحة الهبوط نشط' : 'Landing page URL is active' }}
+                </span>
+              @else
+                <span class="text-warning">
+                  <i class="ti ti-eye-off me-1"></i>
+                  {{ $l == 'ar' ? 'رابط صفحة الهبوط غير نشط' : 'Landing page URL is inactive' }}
+                </span>
+              @endif
             </small>
-            <small class="text-muted d-none" id="lpUrlSavedLinkWrap">
+            <small class="text-muted @if(!$currentPage->slug) d-none @endif" id="lpUrlSavedLinkWrap">
               <i class="ti ti-link me-1"></i>
-              <a href="#" id="lpUrlSavedLink" target="_blank" rel="noopener" class="fw-medium text-primary"></a>
+              <a href="{{ $currentPage->slug ? url('/lp/' . $currentPage->slug) : '#' }}" id="lpUrlSavedLink" target="_blank" rel="noopener" class="fw-medium text-primary">{{ $currentPage->slug ? url('/lp/' . $currentPage->slug) : '' }}</a>
             </small>
           </div>
         </div>
@@ -523,6 +79,7 @@
             id="lpUrlTitle"
             name="lpUrlTitle"
             maxlength="100"
+            value="{{ $currentPage->title }}"
             placeholder="{{ $l == 'ar' ? 'صيف 2025' : 'Summer 2025' }}"
           >
           <div class="invalid-feedback"></div>
@@ -530,7 +87,6 @@
         <div class="col-md-6">
           <label class="form-label" for="lpUrlName">
             {{ $l == 'ar' ? 'اسم الرابط' : 'URL Name' }}
-            <span class="text-danger">*</span>
           </label>
           <input
             type="text"
@@ -557,6 +113,7 @@
                   id="lpUrlSlug"
                   name="lpUrlSlug"
                   maxlength="100"
+                  value="{{ $currentPage->slug }}"
                   placeholder="summer-2025"
                   pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
                 >
@@ -636,38 +193,32 @@
                   </h5>
                   <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
                     <i class="ti ti-device-floppy"></i>
-                    {{ $l == 'ar' ? 'حفظ' : 'Save' }}
+                    {{ __('landing.Save') }}
                   </button>
                 </div>
 
                 <div class="row g-4">
                   @foreach ($section['fields'] as $field)
-                    @php
-                      $fieldName  = "{$section['key']}[{$field['name']}]";
-                      $fieldId    = "{$section['key']}_{$field['name']}";
-                      $fieldLabel = $l == 'ar' ? $field['label_ar'] : $field['label_en'];
-                      $colWidth   = $field['col'] ?? 12;
-                    @endphp
-                    <div class="col-md-{{ $colWidth }}">
-                      <label for="{{ $fieldId }}" class="form-label">
-                        {{ $fieldLabel }}
+                    <div class="col-md-{{ ($field['col'] ?? 12) }}">
+                      <label for="{{ $field['id_attr'] }}" class="form-label">
+                        {{ ($l == 'ar' ? $field['label_ar'] : $field['label_en']) }}
                         @if(!empty($field['required'])) <span class="text-danger">*</span> @endif
                       </label>
 
                       @switch($field['type'])
                         @case('textarea')
                           <textarea
-                            id="{{ $fieldId }}"
-                            name="{{ $fieldName }}"
+                            id="{{ $field['id_attr'] }}"
+                            name="{{ $field['name_attr'] }}"
                             rows="4"
                             @if(!empty($field['maxlength'])) maxlength="{{ $field['maxlength'] }}" @endif
                             @if(!empty($field['required'])) required @endif
-                            class="form-control @error($fieldName) is-invalid @enderror"
-                          >{{ old($fieldName, $field['value']) }}</textarea>
+                            class="form-control @error($field['name_attr']) is-invalid @enderror"
+                          >{{ old($field['name_attr'], $field['value']) }}</textarea>
                           @if(!empty($field['maxlength']))
                             <div class="form-text">
-                              {{ $l == 'ar' ? 'الحد الأقصى' : 'Max' }} {{ $field['maxlength'] }}
-                              {{ $l == 'ar' ? 'حرف' : 'characters' }}
+                              {{ __('landing.Max') }} {{ $field['maxlength'] }}
+                              {{ __('landing.characters') }}
                             </div>
                           @endif
                           @break
@@ -675,27 +226,27 @@
                         @case('url')
                           <input
                             type="url"
-                            id="{{ $fieldId }}"
-                            name="{{ $fieldName }}"
-                            value="{{ old($fieldName, $field['value']) }}"
+                            id="{{ $field['id_attr'] }}"
+                            name="{{ $field['name_attr'] }}"
+                            value="{{ old($field['name_attr'], $field['value']) }}"
                             @if(!empty($field['maxlength'])) maxlength="{{ $field['maxlength'] }}" @endif
                             @if(!empty($field['required'])) required @endif
                             placeholder="https://"
-                            class="form-control @error($fieldName) is-invalid @enderror"
+                            class="form-control @error($field['name_attr']) is-invalid @enderror"
                           >
                           @break
 
                         @case('select')
                           <select
-                            id="{{ $fieldId }}"
-                            name="{{ $fieldName }}"
+                            id="{{ $field['id_attr'] }}"
+                            name="{{ $field['name_attr'] }}"
                             @if(!empty($field['required'])) required @endif
-                            class="form-select @error($fieldName) is-invalid @enderror"
+                            class="form-select @error($field['name_attr']) is-invalid @enderror"
                           >
                             @foreach ($field['options'] ?? [] as $optionValue => $optionLabel)
                               <option
                                 value="{{ $optionValue }}"
-                                @selected(old($fieldName, $field['value']) == $optionValue)
+                                @selected(old($field['name_attr'], $field['value']) == $optionValue)
                               >
                                 {{ $optionLabel }}
                               </option>
@@ -707,16 +258,16 @@
                           <div class="form-check form-switch">
                             <input
                               type="hidden"
-                              name="{{ $fieldName }}"
+                              name="{{ $field['name_attr'] }}"
                               value="0"
                             >
                             <input
                               type="checkbox"
-                              id="{{ $fieldId }}"
-                              name="{{ $fieldName }}"
+                              id="{{ $field['id_attr'] }}"
+                              name="{{ $field['name_attr'] }}"
                               value="1"
                               class="form-check-input"
-                              @checked(old($fieldName, $field['value']))
+                              @checked(old($field['name_attr'], $field['value']))
                             >
                           </div>
                           @break
@@ -726,7 +277,7 @@
                             @if(!empty($field['value']))
                               <img
                                 src="{{ $field['value'] }}"
-                                alt="{{ $fieldLabel }}"
+                                alt="{{ ($l == 'ar' ? $field['label_ar'] : $field['label_en']) }}"
                                 class="rounded"
                                 style="width: 64px; height: 64px; object-fit: cover;"
                               >
@@ -734,11 +285,11 @@
                             <div class="flex-grow-1">
                               <input
                                 type="file"
-                                id="{{ $fieldId }}"
-                                name="{{ $fieldName }}"
+                                id="{{ $field['id_attr'] }}"
+                                name="{{ $field['name_attr'] }}"
                                 accept="{{ $field['accept'] ?? 'image/*' }}"
                                 @if(!empty($field['required']) && empty($field['value'])) required @endif
-                                class="form-control @error($fieldName) is-invalid @enderror"
+                                class="form-control @error($field['name_attr']) is-invalid @enderror"
                               >
                               @if(!empty($field['accept']) || !empty($field['max_size_mb']))
                                 <div class="form-text">
@@ -746,7 +297,7 @@
                                     {{ strtoupper(str_replace(['.', ','], ['', ', '], trim($field['accept']))) }}
                                   @endif
                                   @if(!empty($field['max_size_mb']))
-                                    &mdash; {{ $l == 'ar' ? 'الحد الأقصى' : 'Max' }} {{ $field['max_size_mb'] }}MB
+                                    &mdash; {{ __('landing.Max') }} {{ $field['max_size_mb'] }}MB
                                   @endif
                                 </div>
                               @endif
@@ -757,16 +308,16 @@
                         @default
                           <input
                             type="text"
-                            id="{{ $fieldId }}"
-                            name="{{ $fieldName }}"
-                            value="{{ old($fieldName, $field['value']) }}"
+                            id="{{ $field['id_attr'] }}"
+                            name="{{ $field['name_attr'] }}"
+                            value="{{ old($field['name_attr'], $field['value']) }}"
                             @if(!empty($field['maxlength'])) maxlength="{{ $field['maxlength'] }}" @endif
                             @if(!empty($field['required'])) required @endif
-                            class="form-control @error($fieldName) is-invalid @enderror"
+                            class="form-control @error($field['name_attr']) is-invalid @enderror"
                           >
                       @endswitch
 
-                      @error($fieldName)
+                      @error($field['name_attr'])
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                       @enderror
                     </div>
@@ -777,31 +328,214 @@
                   <hr class="my-4">
                   <div class="d-flex align-items-center justify-content-between mb-3">
                     <h6 class="mb-0">
-                      {{ $l == 'ar' ? 'البطاقات' : 'Cards' }}
+                      {{ __('landing.Cards') }}
                     </h6>
                     <button
                       type="button"
                       class="btn btn-primary btn-sm d-flex align-items-center gap-1"
                       id="aboutAddCard"
+                      {{ count($aboutCards) >= 3 ? 'disabled' : '' }}
                     >
                       <i class="ti ti-plus"></i>
-                      {{ $l == 'ar' ? 'إضافة بطاقة' : 'Add Card' }}
+                      {{ __('landing.Add_Card') }}
                     </button>
                   </div>
-                  <div class="row g-4" id="aboutCardsContainer"></div>
+                  <div class="row g-4" id="aboutCardsContainer">
+                    @foreach($aboutCards as $cardIndex => $card)
+                      <div class="col-12 about-card" data-card-id="{{ $cardIndex }}">
+                        <div class="border rounded p-3">
+                          <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="mb-0 about-card-label">{{ __('landing.Card') }} {{ $cardIndex + 1 }}</h6>
+                            <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-about-card">
+                              <i class="ti ti-trash"></i>
+                              {{ __('landing.Remove') }}
+                            </button>
+                          </div>
+                          <div class="row g-4">
+                            <div class="col-md-4">
+                              <label class="form-label">{{ __('landing.Icon') }}</label>
+                              <select name="about[cards][{{ $cardIndex }}][icon]" class="form-select" data-card-field>
+                                <option value="">{{ __('landing.Select_an_icon') }}</option>
+                                @foreach($aboutIconsList as $iconValue => $iconLabel)
+                                  <option value="{{ $iconValue }}" {{ ($card['icon'] ?? '') === $iconValue ? 'selected' : '' }}>{{ $iconLabel }}</option>
+                                @endforeach
+                              </select>
+                            </div>
+                            <div class="col-md-8">
+                              <label class="form-label">{{ __('landing.Title') }}</label>
+                              <input type="text" name="about[cards][{{ $cardIndex }}][title]" maxlength="100" class="form-control" value="{{ $card['title'] ?? '' }}" data-card-field>
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">{{ __('landing.Title_ar') }}</label>
+                              <input type="text" name="about[cards][{{ $cardIndex }}][title_ar]" maxlength="100" class="form-control" value="{{ $card['title_ar'] ?? '' }}" data-card-field>
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">{{ __('landing.Description') }}</label>
+                              <textarea name="about[cards][{{ $cardIndex }}][description]" maxlength="500" rows="4" class="form-control" data-card-field>{{ $card['description'] ?? '' }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">{{ __('landing.Description_ar') }}</label>
+                              <textarea name="about[cards][{{ $cardIndex }}][description_ar]" maxlength="500" rows="4" class="form-control" data-card-field>{{ $card['description_ar'] ?? '' }}</textarea>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
+                @endif
+
+                @if($section['key'] === 'how')
+                  <hr class="my-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="mb-0">
+                      {{  __('landing.Process_Steps') }}
+                    </h6>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+                      id="howAddStep"
+                      {{ count($howSteps) >= 3 ? 'disabled' : '' }}
+                    >
+                      <i class="ti ti-plus"></i>
+                      {{ __('landing.Add_Step') }}
+                    </button>
+                  </div>
+                  <div class="row g-4" id="howStepsContainer">
+                    @foreach($howSteps as $stepIndex => $step)
+                      <div class="col-12 how-step" data-step-id="{{ $stepIndex }}">
+                        <div class="border rounded p-3">
+                          <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="mb-0 how-step-label">{{ __('landing.Step') }} {{ $stepIndex + 1 }}</h6>
+                            <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-how-step">
+                              <i class="ti ti-trash"></i>
+                              {{ __('landing.Remove') }}
+                            </button>
+                          </div>
+                          <div class="row g-4">
+                            <div class="col-md-4">
+                              <label class="form-label">{{ __('landing.Icon') }}</label>
+                              <select name="how[steps][{{ $stepIndex }}][icon]" class="form-select" data-step-field>
+                                <option value="">{{ __('landing.Select_an_icon') }}</option>
+                                @foreach($aboutIconsList as $iconValue => $iconLabel)
+                                  <option value="{{ $iconValue }}" {{ ($step['icon'] ?? '') === $iconValue ? 'selected' : '' }}>{{ $iconLabel }}</option>
+                                @endforeach
+                              </select>
+                            </div>
+                            <div class="col-md-8">
+                              <label class="form-label">{{ __('landing.Title') }}</label>
+                              <input type="text" name="how[steps][{{ $stepIndex }}][title]" maxlength="100" class="form-control" value="{{ $step['title'] ?? '' }}" data-step-field>
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">{{ __('landing.Title_ar') }}</label>
+                              <input type="text" name="how[steps][{{ $stepIndex }}][title_ar]" maxlength="100" class="form-control" value="{{ $step['title_ar'] ?? '' }}" data-step-field>
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">{{ __('landing.Description') }}</label>
+                              <textarea name="how[steps][{{ $stepIndex }}][description]" maxlength="300" rows="4" class="form-control" data-step-field>{{ $step['description'] ?? '' }}</textarea>
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">{{ __('landing.Description_ar') }}</label>
+                              <textarea name="how[steps][{{ $stepIndex }}][description_ar]" maxlength="300" rows="4" class="form-control" data-step-field>{{ $step['description_ar'] ?? '' }}</textarea>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
+                @endif
+
+                @if($section['key'] === 'custom')
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <p class="text-secondary mb-0">
+                      {{ __('landing.add_optional')}}
+                    </p>
+                    <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1" id="customAddSection">
+                      <i class="ti ti-plus"></i>
+                      {{  __('landing.add_custom_section') }}
+                    </button>
+                  </div>
+
+                  <div id="customSectionsContainer">
+                    @forelse($customSectionBlocks as $blockIndex => $block)
+                      <div class="col-12 custom-section-block mb-4" data-block-id="{{ $blockIndex }}">
+                        <div class="border rounded p-3">
+                          <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="mb-0 custom-section-label"> {{ __('landing.custom_section') }} {{ $blockIndex + 1 }}</h6>
+                            <div class="d-flex align-items-center gap-3">
+                              <div class="form-check form-switch mb-0">
+                                <input
+                                  type="checkbox"
+                                  class="form-check-input"
+                                  name="custom_sections[{{ $blockIndex }}][visibility]"
+                                  value="1"
+                                  {{ $block->visibility ? 'checked' : '' }}
+                                >
+                                <label class="form-check-label small">{{ __('landing.Visible') }}</label>
+                              </div>
+                              <button type="button" class="btn btn-label-danger btn-sm d-flex align-items-center gap-1 remove-custom-section">
+                                <i class="ti ti-trash"></i>
+                                {{ __('landing.Remove') }}
+                              </button>
+                            </div>
+                          </div>
+                          <input type="hidden" name="custom_sections[{{ $blockIndex }}][id]" value="{{ $block->id }}">
+                          <div class="row g-4">
+                            <div class="col-md-6 custom-field-group" data-field="title">
+                              <label class="form-label">{{ __('landing.Title') }}</label>
+                              <input type="text" class="form-control" name="custom_sections[{{ $blockIndex }}][title]" maxlength="255" value="{{ $block->title }}" data-custom-field>
+                              <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
+                            </div>
+                            <div class="col-md-6 custom-field-group" data-field="title_ar">
+                              <label class="form-label">{{ __('landing.Title_ar') }}</label>
+                              <input type="text" class="form-control" dir="rtl" name="custom_sections[{{ $blockIndex }}][title_ar]" maxlength="255" value="{{ $block->title_ar }}" data-custom-field>
+                              <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
+                            </div>
+                            <div class="col-md-6 custom-field-group" data-field="title_tag">
+                              <label class="form-label">{{ __('landing.Title_tag') }}</label>
+                              <input type="text" class="form-control" name="custom_sections[{{ $blockIndex }}][title_tag]" maxlength="255" value="{{ $block->title_tag }}" data-custom-field>
+                              <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
+                            </div>
+                            <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
+                              <label class="form-label">{{ __('landing.Title_tag_ar') }}</label>
+                              <input type="text" class="form-control" dir="rtl" name="custom_sections[{{ $blockIndex }}][title_tag_ar]" maxlength="255" value="{{ $block->title_tag_ar }}" data-custom-field>
+                              <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
+                            </div>
+                            <div class="col-md-6 custom-field-group" data-field="content">
+                              <label class="form-label">{{ __('landing.Content') }}</label>
+                              <div class="custom-quill-editor" style="height:180px;">{!! $block->content !!}</div>
+                              <textarea class="d-none custom-hidden-content" name="custom_sections[{{ $blockIndex }}][content]" data-custom-field>{{ $block->content }}</textarea>
+                              <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
+                            </div>
+                            <div class="col-md-6 custom-field-group" data-field="content_ar">
+                              <label class="form-label">{{ __('landing.Content_ar') }}</label>
+                              <div class="custom-quill-editor" dir="rtl" style="height:180px;">{!! $block->content_ar !!}</div>
+                              <textarea class="d-none custom-hidden-content" name="custom_sections[{{ $blockIndex }}][content_ar]" data-custom-field>{{ $block->content_ar }}</textarea>
+                              <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">{{ __('landing.Button_text') }} <span class="text-muted">({{ $l == 'ar' ? 'اختياري' : 'Optional' }})</span></label>
+                              <input type="text" class="form-control" name="custom_sections[{{ $blockIndex }}][button_text]" maxlength="255" value="{{ $block->button_text }}">
+                            </div>
+                            <div class="col-md-6 custom-field-group" data-field="button_link">
+                              <label class="form-label">{{ __('landing.Button_link') }} <span class="text-muted">({{ $l == 'ar' ? 'اختياري' : 'Optional' }})</span></label>
+                              <input type="url" class="form-control" name="custom_sections[{{ $blockIndex }}][button_link]" maxlength="500" value="{{ $block->button_link }}" placeholder="https://" data-custom-field>
+                              <div class="invalid-feedback d-block custom-error-msg" style="display:none"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    @empty
+                    @endforelse
+                  </div>
+
+                  <div class="text-center text-muted py-4 {{ $customSectionBlocks->isNotEmpty() ? 'd-none' : '' }}" id="customSectionsEmptyState">
+                    <i class="ti ti-puzzle fs-1 mb-2 d-block opacity-50"></i>
+                    <p class="small mb-0">{{ __('landing.No_custom_sections_yet') }}</p>
+                  </div>
                 @endif
 
                 @if($section['key'] === 'programs')
                   <hr class="my-4">
-                  @php
-                    $programOrganizations = collect($cycles)
-                      ->filter(fn($program) => $program->organization)
-                      ->map(fn($program) => ['id' => $program->organization->id, 'name' => $program->organization->name])
-                      ->unique('id')
-                      ->sortBy('name')
-                      ->pluck('name', 'id')
-                      ->toArray();
-                  @endphp
                   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
                     <div>
                       <h6 class="mb-1 d-flex align-items-center gap-2">
@@ -847,8 +581,8 @@
                       <select class="form-select select2" id="programsOrganizationFilter" data-allow-clear="true">
                         <option value=""></option>
                         <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
-                        @foreach($programOrganizations as $orgId => $orgName)
-                          <option value="{{ $orgId }}">{{ $orgName }}</option>
+                        @foreach($programOrganizations as $org)
+                          <option value="{{ $org->id }}">{{ $l == 'ar' ? $org->name_ar : $org->name_en }}</option>
                         @endforeach
                       </select>
                     </div>
@@ -859,8 +593,9 @@
                       <select class="form-select select2" id="programsTypeFilter" data-allow-clear="true">
                         <option value=""></option>
                         <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
-                        <option value="Hackathon">{{ __('cycles.Hackathon') }}</option>
-                        <option value="General_Program">{{ __('cycles.General_Program') }}</option>
+                        @foreach($programTypes as $value => $label)
+                          <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
                       </select>
                     </div>
                   </div>
@@ -877,10 +612,9 @@
                       <tbody id="programsListBody">
                         @foreach($cycles as $program)
                           <tr
-                            class="programs-list-row"
+                            class="programs-list-row {{ $program->is_expired ? 'bg-lighter' : '' }}"
                             data-program-id="{{ $program->id }}"
-                            data-search-title="{{ $program->title }} {{ $program->organization->name ?? '' }}"
-                            data-program-visibility="{{ $program->landing_visible ? 'visible' : 'hidden' }}"
+                            data-search-title="{{ strtolower($program->title . ' ' . ($program->organization ? ($program->organization->name_en . ' ' . $program->organization->name_ar) : '')) }}"
                             data-program-organization="{{ $program->organization_id }}"
                             data-program-type="{{ $program->type }}"
                           >
@@ -891,10 +625,10 @@
                                 </div>
                                 <div class="flex-grow-1" style="min-width: 0;">
                                   <a
-                                    href="{{ url('dashboard/programlist/show/' . $program->id) }}"
+                                    href="{{ route('programlist.show', $program->id) }}"
                                     target="_blank"
                                     rel="noopener"
-                                    class="fw-medium d-inline-flex align-items-center gap-1"
+                                    class="fw-medium d-inline-flex align-items-center gap-1 {{ $program->is_expired ? 'text-muted' : '' }}"
                                   >
                                     {{ $program->title }}
                                     <i class="ti ti-external-link text-muted"></i>
@@ -904,6 +638,9 @@
                                       <i class="ti ti-map-pin"></i>
                                       {{ $program->location }}
                                     </div>
+                                  @endif
+                                  @if($program->is_expired)
+                                    <div class="text-muted small">{{ __('landing.program_ended') }}</div>
                                   @endif
                                 </div>
                               </div>
@@ -917,7 +654,7 @@
                               @if($program->organization)
                                 <span class="d-inline-flex align-items-center gap-1 text-muted">
                                   <i class="ti ti-building"></i>
-                                  {{ $program->organization->name }}
+                                  {{ $l == 'ar' ? $program->organization->name_ar : $program->organization->name_en }}
                                 </span>
                               @else
                                 <span class="text-muted">&mdash;</span>
@@ -928,14 +665,15 @@
                                 <input
                                   type="hidden"
                                   name="programs[selected_programs][{{ $program->id }}]"
-                                  value="0"
+                                  value="{{ $program->is_expired && in_array($program->id, $selectedCycleIds) ? 1 : 0 }}"
                                 >
                                 <input
                                   type="checkbox"
                                   name="programs[selected_programs][{{ $program->id }}]"
                                   value="1"
                                   class="form-check-input program-visibility-switch"
-                                  checked
+                                  @checked(in_array($program->id, $selectedCycleIds))
+                                  @if($program->is_expired) disabled @endif
                                 >
                               </div>
                             </td>
@@ -1057,6 +795,7 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
 @endsection
 
 @section('pagescripts')
@@ -1174,8 +913,8 @@
       const lpUrlBase = "{{ url('/lp/') }}/";
       let lpUrlSlugChecked = false;   // current slug value verified against the backend
       let lpUrlSlugAvailable = false; // result of the last availability check
-      let lpUrlSavedSlug = null;      // slug of the currently saved configuration
-      let lpUrlActive = true;         // mirrors the Active toggle
+      let lpUrlSavedSlug = {!! $currentPage->slug ? json_encode($currentPage->slug) : 'null' !!}; // slug of the currently saved configuration
+      let lpUrlActive = {{ $currentPage->status ? 'true' : 'false' }}; // mirrors the Active toggle
 
       const lpUrlSlugify = function (value) {
         return String(value || '')
@@ -1237,7 +976,6 @@
         },
         lpUrlName: {
           validators: {
-            notEmpty: { message: lpUrlI18n.nameRequired },
             stringLength: { max: 100, message: lpUrlI18n.nameMax },
           },
         },
@@ -1304,7 +1042,7 @@
 
         lpUrlSetAvailability('', lpUrlI18n.checking);
 
-        lpUrlAjax("{{ route('admin.landing-page.url.check') }}", { slug: slug })
+        lpUrlAjax("{{ route('landing-pages.url.check', $currentPage->id) }}", { slug: slug })
           .done(function (res) {
             lpUrlSlugChecked = true;
             lpUrlSlugAvailable = !!res.available;
@@ -1386,7 +1124,7 @@
           const originalHtml = $btn.html();
           $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
 
-          lpUrlAjax("{{ route('admin.landing-page.url.save') }}", {
+          lpUrlAjax("{{ route('landing-pages.url.save', $currentPage->id) }}", {
             title: $title.val().trim(),
             name: $name.val().trim(),
             slug: ($slug.val() || '').trim().toLowerCase(),
@@ -1496,6 +1234,7 @@
       const maxImageSize = 5 * 1024 * 1024; // 5 MB
 
       const validationMessages = {
+        generalTitle:       isArabic ? 'يرجى إدخال عنوان الصفحة.' : 'Please enter the page title.',
         logoRequired:       isArabic ? 'يرجى تحميل الشعار.' : 'Please upload a logo.',
         logoUnsupported:    isArabic ? 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.' : 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
         logoSize:           isArabic ? 'يجب ألا يتجاوز حجم الشعار 5 ميجابايت.' : 'Logo size must not exceed 5 MB.',
@@ -1503,6 +1242,7 @@
         descriptionArabic:  isArabic ? 'يرجى إدخال الوصف باللغة العربية.' : 'Please enter a description in Arabic.',
         heroTitle:          isArabic ? 'يرجى إدخال العنوان.' : 'Please enter the title.',
         heroSubtitle:       isArabic ? 'يرجى إدخال العنوان الفرعي.' : 'Please enter the subtitle.',
+        heroDescription:    isArabic ? 'يرجى إدخال الوصف.' : 'Please enter the description.',
         heroTitleArabic:    isArabic ? 'يرجى إدخال العنوان باللغة العربية.' : 'Please enter the title in Arabic.',
         heroSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي باللغة العربية.' : 'Please enter the subtitle in Arabic.',
         heroImageRequired:  isArabic ? 'يرجى تحميل صورة القسم الرئيسي.' : 'Please upload a hero image.',
@@ -1514,68 +1254,81 @@
         aboutTitleArabic:   isArabic ? 'يرجى إدخال عنوان القسم باللغة العربية.' : 'Please enter the section title in Arabic.',
         aboutSubtitleArabic: isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللغة العربية.' : 'Please enter the section subtitle in Arabic.',
         aboutDescriptionArabic: isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
-        programsRequired:       isArabic ? 'هذا الحقل مطلوب' : 'This field is required.',
-        howTitle:               isArabic ? 'يرجى إدخال عنوان القسم.' : 'Please enter the section title.',
-        howTitleArabic:         isArabic ? 'يرجى إدخال عنوان القسم باللغة العربيه.' : 'Please enter the section title in Arabic.',
-        howSubtitle:            isArabic ? 'يرجى إدخال العنوان الفرعي للقسم.' : 'Please enter the section subtitle.',
-        howSubtitleArabic:      isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللعة العربية.' : 'Please enter the section subtitle in Arabic.',
-        howDescription:         isArabic ? 'يرجى إدخال وصف القسم.' : 'Please enter the section description.',
-        howDescriptionArabic:   isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
-        howStepTitle:           isArabic ? 'يرجى إدخال عنوان الخطوة.' : 'Please enter the step title.',
-        howStepTitleArabic:     isArabic ? 'يرجى إدخال عنوان الخطوة باللغة  العربية.' : 'Please enter the step title in Arabic.',
-        howStepIcon:            isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
-        howStepDescription:     isArabic ? 'يرجى إدخال وصف الخطوة.' : 'Please enter the step description.',
-        howStepDescriptionArabic: isArabic ? 'يرجى إدخال وصف الخطوة باللغة العربيه.' : 'Please enter the step description in Arabic.',
-        customRequired:         isArabic ? 'هذا الحقل مطلوب.' : 'This field is required.',
-        customUnsupportedType:  isArabic ? 'نوع الملف غير مدعوم. يرجى رفع صورة بصيغة JPG أو PNG أو WEBP.' : 'Unsupported file type. Please upload a JPG, PNG, or WEBP image.',
-        customImageSize:        isArabic ? 'حجم الصورة يتجاوز 5 ميجابايت.' : 'Image size exceeds 5 MB.',
-        customButtonLink:       isArabic ? 'يرجى إدخال رابط زر صالح.' : 'Please enter a valid button link.',
         cardIcon:           isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
-        cardTitle:          isArabic ? 'يرجى إدخال عنوان البطاقة.' : 'Please enter a card title.',
-        cardDescription:    isArabic ? 'يرجى إدخال وصف البطاقة.' : 'Please enter a card description.',
-        cardTitleArabic:    isArabic ? 'يرجى إدخال عنوان البطاقة باللغة العربية.' : 'Please enter a card title in Arabic.',
-        cardDescriptionArabic: isArabic ? 'يرجى إدخال وصف البطاقة باللغة العربية.' : 'Please enter a card description in Arabic.',
+        cardTitle:          isArabic ? 'يرجى إدخال العنوان.' : 'Please enter the card title.',
+        cardDescription:    isArabic ? 'يرجى إدخال الوصف.' : 'Please enter the card description.',
+        cardTitleArabic:    isArabic ? 'يرجى إدخال العنوان باللغة العربية.' : 'Please enter the card title in Arabic.',
+        cardDescriptionArabic: isArabic ? 'يرجى إدخال الوصف باللغة العربية.' : 'Please enter the card description in Arabic.',
+        howTitle:            isArabic ? 'يرجى إدخال عنوان القسم.' : 'Please enter the section title.',
+        howTitleArabic:      isArabic ? 'يرجى إدخال عنوان القسم باللغة العربيه.' : 'Please enter the section title in Arabic.',
+        howSubtitle:         isArabic ? 'يرجى إدخال العنوان الفرعي للقسم.' : 'Please enter the section subtitle.',
+        howSubtitleArabic:   isArabic ? 'يرجى إدخال العنوان الفرعي للقسم باللعة العربية.' : 'Please enter the section subtitle in Arabic.',
+        howDescription:      isArabic ? 'يرجى إدخال وصف القسم.' : 'Please enter the section description.',
+        howDescriptionArabic: isArabic ? 'يرجى إدخال وصف القسم باللغة العربية.' : 'Please enter the section description in Arabic.',
+        stepTitle:           isArabic ? 'يرجى إدخال عنوان الخطوة.' : 'Please enter the step title.',
+        stepTitleArabic:     isArabic ? 'يرجى إدخال عنوان الخطوة باللغة العربية.' : 'Please enter the step title in Arabic.',
+        stepIcon:            isArabic ? 'يرجى اختيار أيقونة.' : 'Please select an icon.',
+        stepDescription:     isArabic ? 'يرجى إدخال وصف الخطوة.' : 'Please enter the step description.',
+        stepDescriptionArabic: isArabic ? 'يرجى إدخال وصف الخطوة باللغة العربيه.' : 'Please enter the step description in Arabic.',
+        programsRequired: isArabic ? 'هذا الحقل مطلوب' : 'This field is required.',
       };
 
       const successMessages = {
         general: isArabic ? 'تم حفظ المعلومات العامة لصفحة الهبوط بنجاح.' : 'General landing page information saved successfully.',
         hero:    isArabic ? 'تم حفظ معلومات القسم الرئيسي بنجاح.' : 'Hero section information saved successfully.',
         about:   isArabic ? 'تم حفظ معلومات قسم من نحن بنجاح.' : 'About section information saved successfully.',
-        programs: isArabic ? 'تم حفظ قسم البرامج بنجاح' : 'Programs section saved successfully.',
-        how:      isArabic ? 'تم حفظ المعلومات بنجاح.' : 'Information saved successfully.',
-        custom:   isArabic ? 'تم حفظ القسم المخصص بنجاح.' : 'Custom section saved successfully.',
       };
 
-      const buildImageField = function (requiredMsg, formatMsg, sizeMsg) {
-        return {
-          validators: {
-            notEmpty: {
-              message: requiredMsg,
-            },
-            file: {
-              extension: 'png,jpg,jpeg,webp',
-              message: formatMsg,
-            },
-            callback: {
-              message: sizeMsg,
-              callback: function (input) {
-                const files = input.element.files;
-                if (!files || !files.length) {
-                  return { valid: true };
-                }
-                return { valid: files[0].size <= maxImageSize };
-              },
+      const customMessages = {
+        required:       isArabic ? 'هذا الحقل مطلوب.' : 'This field is required.',
+        buttonLink:     isArabic ? 'يرجى إدخال رابط زر صالح.' : 'Please enter a valid button link.',
+        unsupportedFile: isArabic ? 'نوع الملف غير مدعوم. يرجى رفع صورة بصيغة JPG أو PNG أو WEBP.' : 'Unsupported file type. Please upload a JPG, PNG, or WEBP image.',
+        fileTooLarge:   isArabic ? 'حجم الصورة يتجاوز 5 ميجابايت.' : 'Image size exceeds 5 MB.',
+      };
+
+      const buildImageField = function (requiredMsg, formatMsg, sizeMsg, requireFile) {
+        const validators = {
+          file: {
+            extension: 'png,jpg,jpeg,webp',
+            message: formatMsg,
+          },
+          callback: {
+            message: sizeMsg,
+            callback: function (input) {
+              const files = input.element.files;
+              if (!files || !files.length) {
+                return { valid: true };
+              }
+              return { valid: files[0].size <= maxImageSize };
             },
           },
         };
+
+        // A file input can never be pre-filled by the browser, so only
+        // require a new upload when there is no existing saved file.
+        if (requireFile) {
+          validators.notEmpty = { message: requiredMsg };
+        }
+
+        return { validators: validators };
       };
+
+      const hasExistingLogo = {{ $currentPage?->logo ? 'true' : 'false' }};
+      const hasExistingHeroImage = {{ $currentPage?->hero_image ? 'true' : 'false' }};
 
       const sectionFields = {
         general: {
+          'general[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.generalTitle },
+              stringLength: { max: 255 },
+            },
+          },
           'general[logo]': buildImageField(
             validationMessages.logoRequired,
             validationMessages.logoUnsupported,
-            validationMessages.logoSize
+            validationMessages.logoSize,
+            !hasExistingLogo
           ),
           'general[description]': {
             validators: {
@@ -1601,7 +1354,7 @@
           },
           'hero[description]': {
             validators: {
-              notEmpty: { message: validationMessages.description },
+              notEmpty: { message: validationMessages.heroDescription },
             },
           },
           'hero[title_ar]': {
@@ -1614,15 +1367,12 @@
               notEmpty: { message: validationMessages.heroSubtitleArabic },
             },
           },
-          'hero[description_ar]': {
-            validators: {
-              notEmpty: { message: validationMessages.descriptionArabic },
-            },
-          },
+          // Description (Arabic) is optional for the Hero section.
           'hero[hero_image]': buildImageField(
             validationMessages.heroImageRequired,
             validationMessages.heroImageFormat,
-            validationMessages.heroImageSize
+            validationMessages.heroImageSize,
+            !hasExistingHeroImage
           ),
         },
         about: {
@@ -1657,38 +1407,6 @@
             },
           },
         },
-        programs: {
-          'programs[title]': {
-            validators: {
-              notEmpty: { message: validationMessages.programsRequired },
-            },
-          },
-          'programs[title_tag]': {
-            validators: {
-              notEmpty: { message: validationMessages.programsRequired },
-            },
-          },
-          'programs[description]': {
-            validators: {
-              notEmpty: { message: validationMessages.programsRequired },
-            },
-          },
-          'programs[title_ar]': {
-            validators: {
-              notEmpty: { message: validationMessages.programsRequired },
-            },
-          },
-          'programs[title_tag_ar]': {
-            validators: {
-              notEmpty: { message: validationMessages.programsRequired },
-            },
-          },
-          'programs[description_ar]': {
-            validators: {
-              notEmpty: { message: validationMessages.programsRequired },
-            },
-          },
-        },
         how: {
           'how[title]': {
             validators: {
@@ -1718,6 +1436,38 @@
           'how[description_ar]': {
             validators: {
               notEmpty: { message: validationMessages.howDescriptionArabic },
+            },
+          },
+        },
+        programs: {
+          'programs[title]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[title_tag_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
+            },
+          },
+          'programs[description_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.programsRequired },
             },
           },
         },
@@ -1812,15 +1562,40 @@
 
       const validateAboutCardField = function (element) {
         const $card = $(element).closest('.about-card');
-        const hasAny = $card.find('[data-card-field]').toArray().some(function (el) {
-          const $el = $(el);
-          return $el.is('select') ? !!$el.val() : $el.val().trim() !== '';
-        });
-        if (!hasAny) return { valid: true };
-        if (element.tagName === 'SELECT') {
-          return { valid: element.value !== '' };
+        const get = function (suffix) {
+          const el = $card.find('[name$="[' + suffix + ']"]')[0];
+          if (!el) return '';
+          return (el.value || '').trim();
+        };
+        const icon = get('icon');
+        const title = get('title');
+        const titleAr = get('title_ar');
+        const description = get('description');
+        const descriptionAr = get('description_ar');
+
+        const match = (element.name || '').match(/\[(\w+)\]$/);
+        const fieldKey = match ? match[1] : null;
+
+        let missing = false;
+        switch (fieldKey) {
+          case 'icon':
+            missing = !icon && (title || description || titleAr || descriptionAr);
+            break;
+          case 'title':
+            missing = !title && (icon || description || titleAr || descriptionAr);
+            break;
+          case 'title_ar':
+            missing = !titleAr && (icon || description || descriptionAr || title);
+            break;
+          case 'description':
+            missing = !description && (icon || title);
+            break;
+          case 'description_ar':
+            missing = !descriptionAr && (icon || title || titleAr || description);
+            break;
         }
-        return { valid: element.value.trim() !== '' };
+
+        return { valid: !missing };
       };
 
       const aboutCardHtml = function (id) {
@@ -1921,55 +1696,83 @@
           updateAboutCardButtons();
         });
 
-      // About main fields are only mandatory while the section is enabled.
-      $('#about_is_enabled').on('change', function () {
+      // Bootstrap server-rendered (previously saved) cards: register their
+      // FormValidation fields and make sure new cards get IDs above any
+      // existing one.
+      (function bootstrapExistingAboutCards() {
         const fv = sectionValidations.about;
-        if (!fv) return;
-        const enabled = this.checked;
-        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
-          const fieldName = 'about[' + name + ']';
-          if (enabled) {
-            fv.enableValidator(fieldName, 'notEmpty');
-          } else {
-            fv.disableValidator(fieldName, 'notEmpty');
+        $('#aboutCardsContainer .about-card').each(function () {
+          const id = parseInt($(this).data('card-id'), 10);
+          if (!isNaN(id) && id > aboutCardCounter) aboutCardCounter = id;
+          if (fv) {
+            aboutCardFields.forEach(function (field) {
+              fv.addField('about[cards][' + id + '][' + field + ']', {
+                validators: {
+                  callback: {
+                    message: aboutCardMessages[field],
+                    callback: function (input) {
+                      return validateAboutCardField(input.element);
+                    },
+                  },
+                },
+              });
+            });
           }
-          fv.revalidateField(fieldName);
         });
-      });
+        updateAboutCardButtons();
+      })();
 
       // ─────────────────────────────────────────────────────────────
-      // How It Works section — process steps repeater (max 3 steps)
-      // Step fields are all-or-nothing: an untouched step is valid, but
-      // once any field of a step is filled every step field becomes
-      // mandatory.
+      // How It Works — process steps repeater (max 3 steps).
+      // Step fields are symmetric: title/icon/description mutually
+      // require each other; title_ar/description_ar share the same
+      // trigger condition as their English counterpart.
       // ─────────────────────────────────────────────────────────────
       const howMaxSteps = 3;
-      const howStepFields = ['title', 'icon', 'description', 'title_ar', 'description_ar'];
+      const howStepFields = ['icon', 'title', 'description', 'title_ar', 'description_ar'];
       const howStepMessages = {
-        title:        validationMessages.howStepTitle,
-        icon:         validationMessages.howStepIcon,
-        description:  validationMessages.howStepDescription,
-        title_ar:     validationMessages.howStepTitleArabic,
-        description_ar: validationMessages.howStepDescriptionArabic,
+        icon:           validationMessages.stepIcon,
+        title:          validationMessages.stepTitle,
+        description:    validationMessages.stepDescription,
+        title_ar:       validationMessages.stepTitleArabic,
+        description_ar: validationMessages.stepDescriptionArabic,
       };
-      const howIcons = aboutIcons;
       let howStepCounter = 0;
 
       const validateHowStepField = function (element) {
         const $step = $(element).closest('.how-step');
-        const hasAny = $step.find('[data-step-field]').toArray().some(function (el) {
-          const $el = $(el);
-          return $el.is('select') ? !!$el.val() : $el.val().trim() !== '';
-        });
-        if (!hasAny) return { valid: true };
-        if (element.tagName === 'SELECT') {
-          return { valid: element.value !== '' };
+        const get = function (suffix) {
+          const el = $step.find('[name$="[' + suffix + ']"]')[0];
+          if (!el) return '';
+          return (el.value || '').trim();
+        };
+        const icon = get('icon');
+        const title = get('title');
+        const description = get('description');
+
+        const match = (element.name || '').match(/\[(\w+)\]$/);
+        const fieldKey = match ? match[1] : null;
+
+        let missing = false;
+        switch (fieldKey) {
+          case 'icon':
+            missing = !icon && (title || description);
+            break;
+          case 'title':
+          case 'title_ar':
+            missing = !get(fieldKey) && (icon || description);
+            break;
+          case 'description':
+          case 'description_ar':
+            missing = !get(fieldKey) && (title || icon);
+            break;
         }
-        return { valid: element.value.trim() !== '' };
+
+        return { valid: !missing };
       };
 
       const howStepHtml = function (id) {
-        const iconOptions = howIcons.map(function (icon) {
+        const iconOptions = aboutIcons.map(function (icon) {
           return '<option value="' + icon.value + '">' + icon.label + '</option>';
         }).join('');
         return `
@@ -1991,19 +1794,19 @@
                   </select>
                 </div>
                 <div class="col-md-8">
-                  <label class="form-label">${isArabic ? 'عنوان الخطوة' : 'Step Title'}</label>
+                  <label class="form-label">${isArabic ? 'العنوان' : 'Title'}</label>
                   <input type="text" name="how[steps][${id}][title]" maxlength="100" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'عنوان الخطوة بالعربية' : 'Step Title (Arabic)'}</label>
+                  <label class="form-label">${isArabic ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
                   <input type="text" name="how[steps][${id}][title_ar]" maxlength="100" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'وصف الخطوة' : 'Step Description'}</label>
+                  <label class="form-label">${isArabic ? 'الوصف' : 'Description'}</label>
                   <textarea name="how[steps][${id}][description]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">${isArabic ? 'وصف الخطوة بالعربية' : 'Step Description (Arabic)'}</label>
+                  <label class="form-label">${isArabic ? 'الوصف بالعربية' : 'Description (Arabic)'}</label>
                   <textarea name="how[steps][${id}][description_ar]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
                 </div>
               </div>
@@ -2039,7 +1842,6 @@
           });
         }
         updateHowStepButtons();
-        return id;
       };
 
       $('#howAddStep').on('click', addHowStep);
@@ -2065,6 +1867,46 @@
           $step.remove();
           updateHowStepButtons();
         });
+
+      // Bootstrap server-rendered (previously saved) steps.
+      (function bootstrapExistingHowSteps() {
+        const fv = sectionValidations.how;
+        $('#howStepsContainer .how-step').each(function () {
+          const id = parseInt($(this).data('step-id'), 10);
+          if (!isNaN(id) && id > howStepCounter) howStepCounter = id;
+          if (fv) {
+            howStepFields.forEach(function (field) {
+              fv.addField('how[steps][' + id + '][' + field + ']', {
+                validators: {
+                  callback: {
+                    message: howStepMessages[field],
+                    callback: function (input) {
+                      return validateHowStepField(input.element);
+                    },
+                  },
+                },
+              });
+            });
+          }
+        });
+        updateHowStepButtons();
+      })();
+
+      // About main fields are only mandatory while the section is enabled.
+      $('#about_is_enabled').on('change', function () {
+        const fv = sectionValidations.about;
+        if (!fv) return;
+        const enabled = this.checked;
+        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
+          const fieldName = 'about[' + name + ']';
+          if (enabled) {
+            fv.enableValidator(fieldName, 'notEmpty');
+          } else {
+            fv.disableValidator(fieldName, 'notEmpty');
+          }
+          fv.revalidateField(fieldName);
+        });
+      });
 
       // How It Works main fields are only mandatory while the section is enabled.
       $('#how_is_enabled').on('change', function () {
@@ -2596,9 +2438,11 @@
             processData: false,
             contentType: false,
           })
-            .done(function () {
+            .done(function (data) {
               $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
-              if (successMessages[sectionKey]) {
+              if (sectionKey === 'about' || sectionKey === 'custom' || sectionKey === 'programs') {
+                toastr.success((data && data.message) || successMessages[sectionKey]);
+              } else if (successMessages[sectionKey]) {
                 releaseSuccessAlert({
                   title: "{{ __('admin.success') }}",
                   message: successMessages[sectionKey],
@@ -2610,9 +2454,7 @@
             })
             .fail(function (xhr) {
               $btn.html(originalHtml);
-              let errorMessage = sectionKey === 'programs'
-                ? (isArabic ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى' : 'Something went wrong. Please try again.')
-                : "{{ __('admin.unexpected_error') }}";
+              let errorMessage = "{{ __('admin.unexpected_error') }}";
               if (xhr.responseJSON && xhr.responseJSON.message) {
                 errorMessage = xhr.responseJSON.message;
               }
@@ -2626,14 +2468,6 @@
             });
         }.bind(this);
 
-        // Custom sections use hand-rolled validation (rich-text editors,
-        // image upload checks and button-link checks).
-        if (sectionKey === 'custom') {
-          if (!validateCustomSections()) return;
-          submitViaAjax();
-          return;
-        }
-
         // Block the save until client-side validation passes.
         if (!fv) {
           submitViaAjax();
@@ -2645,6 +2479,127 @@
           submitViaAjax();
         });
       });
+
+      // ─────────────────────────────────────────────────────────────
+      // Programs tab — client-side filtering (search / organization /
+      // type / visibility) plus client-side pagination (10/page). Runs
+      // entirely in the browser against the already-rendered checklist —
+      // every row (across all pages) stays in the DOM and is submitted
+      // with the form, so filtering/paginating never loses an
+      // in-progress (unsaved) selection.
+      // ─────────────────────────────────────────────────────────────
+      (function () {
+        const $search = $('#programsSearchInput');
+        const $visibility = $('#programsVisibilityFilter');
+        const $org = $('#programsOrganizationFilter');
+        const $type = $('#programsTypeFilter');
+        const $rows = $('#programsListBody .programs-list-row');
+        const $noResults = $('#programsNoResults');
+        const $noResultsSearch = $('#programsNoResultsSearch');
+        const $noResultsFilters = $('#programsNoResultsFilters');
+        const $paginationInfo = $('#programsPaginationInfo');
+        const $paginationList = $('#programsPaginationList');
+        const perPage = 10;
+        let currentPage = 1;
+
+        if (!$rows.length) return;
+
+        if (typeof $.fn.select2 === 'function') {
+          $('#programsVisibilityFilter, #programsOrganizationFilter, #programsTypeFilter').select2({
+            width: '100%',
+            placeholder: isArabic ? 'الكل' : 'All',
+            allowClear: true,
+            minimumResultsForSearch: 5,
+          });
+        }
+
+        function noFilterValue(value) {
+          return !value || value === 'all';
+        }
+
+        function getMatchingRows() {
+          const search = ($search.val() || '').trim().toLowerCase();
+          const visibility = $visibility.val();
+          const org = $org.val();
+          const type = $type.val();
+
+          return $rows.filter(function () {
+            const $row = $(this);
+            const matchesSearch = !search || String($row.data('search-title')).includes(search);
+            const matchesOrg = noFilterValue(org) || String($row.data('program-organization')) === String(org);
+            const matchesType = noFilterValue(type) || String($row.data('program-type')) === String(type);
+            // "Visible" = currently checked (selected for this landing page);
+            // "Hidden" = currently unchecked. Read live so toggling a switch
+            // updates the filter without needing a page reload.
+            const isChecked = $row.find('.program-visibility-switch').is(':checked');
+            const matchesVisibility = noFilterValue(visibility) || (visibility === 'visible' ? isChecked : !isChecked);
+            return matchesSearch && matchesOrg && matchesType && matchesVisibility;
+          });
+        }
+
+        function renderPagination(totalPages, total, start, shown) {
+          $paginationList.empty();
+
+          if (total === 0) {
+            $paginationInfo.text('');
+          } else {
+            const from = start + 1;
+            const to = start + shown;
+            $paginationInfo.text(
+              isArabic
+                ? `عرض ${from}-${to} من ${total}`
+                : `Showing ${from}-${to} of ${total}`
+            );
+          }
+
+          if (totalPages <= 1) return;
+
+          for (let page = 1; page <= totalPages; page++) {
+            const $link = $('<button type="button" class="page-link"></button>').text(page);
+            const $li = $('<li class="page-item"></li>').toggleClass('active', page === currentPage).append($link);
+            $link.on('click', function () {
+              currentPage = page;
+              applyProgramsFilter();
+            });
+            $paginationList.append($li);
+          }
+        }
+
+        function applyProgramsFilter() {
+          const $matches = getMatchingRows();
+          const total = $matches.length;
+          const totalPages = Math.max(1, Math.ceil(total / perPage));
+          if (currentPage > totalPages) currentPage = totalPages;
+
+          $rows.hide();
+
+          const start = (currentPage - 1) * perPage;
+          const $pageRows = $matches.slice(start, start + perPage);
+          $pageRows.show();
+
+          const anyFilterActive = !noFilterValue($visibility.val()) || !noFilterValue($org.val()) || !noFilterValue($type.val());
+          const searchActive = !!($search.val() || '').trim();
+
+          $noResults.toggleClass('d-none', total > 0);
+          $noResultsSearch.toggleClass('d-none', !(total === 0 && searchActive && !anyFilterActive));
+          $noResultsFilters.toggleClass('d-none', !(total === 0 && (anyFilterActive || !searchActive)));
+
+          renderPagination(totalPages, total, start, $pageRows.length);
+        }
+
+        $search.on('input', function () { currentPage = 1; applyProgramsFilter(); });
+        $visibility.on('change', function () { currentPage = 1; applyProgramsFilter(); });
+        $org.on('change', function () { currentPage = 1; applyProgramsFilter(); });
+        $type.on('change', function () { currentPage = 1; applyProgramsFilter(); });
+
+        // Re-apply when a switch is toggled so the Visible/Hidden filter
+        // (driven by the switch's checked state) stays accurate live.
+        $('#programsListBody').on('change', '.program-visibility-switch', function () {
+          if (!noFilterValue($visibility.val())) applyProgramsFilter();
+        });
+
+        applyProgramsFilter();
+      })();
     });
   </script>
 @endsection

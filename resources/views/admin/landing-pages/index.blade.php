@@ -3,55 +3,22 @@
 @section('title', __('admin.Custom Landing Pages'))
 @section('subTitle', __('admin.Custom Landing Pages'))
 
-@php
-$pages = [
-  [
-    'id' => 1,
-    'title' => 'Summer Accelerator 2025',
-    'logo' => '/vuexy/assets/img/branding/brand-img-small.png',
-    'url' => 'https://unsplash.com/',
-    'status' => 1,
-    'description' => 'Landing page for the upcoming summer batch focusing on AI and SaaS startups.',
-    'programs' => 12,
-    'created_by' => [
-      'id' => 20,
-      'name' => 'Kelly Mentor',
-      'img_url' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYscfUBUbqwGd_DHVhG-ZjCOD7MUpxp4uhNe7toUg4ug&s'
-    ]
-  ],
-  [
-    'id' => 2,
-    'title' => 'Fintech Hackathon',
-    'logo' => null,
-    'url' => 'https://unsplash.com/',
-    'status' => 0,
-    'description' => 'Registration page for the weekend fintech hackathon.',
-    'programs' => 25,
-    'created_by' => [
-      'id' => 25,
-      'name' => 'Mentor MeMo',
-      'img_url' => null
-    ]
-  ],
-];
-@endphp
-
 @section('content')
 
   {{-- Header --}}
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="mb-1">
-        {{ $l == 'ar' ? 'صفحات هبوط مخصصة' : 'Custom Landing Pages' }}
+        {{ __('landing.Custom_Landing_Page') }}
       </h4>
       <p class="text-secondary mb-0">
-        {{ $l == 'ar' ? 'أنشئ صفحات هبوط مخصصة لبرامجك وأدِرها.' : 'Manage and create tailored landing pages for your programs.' }}
+        {{ __('landing.Custom_Landing_Page_Description') }}
       </p>
     </div>
 
-    <a href="#" class="btn btn-primary">
+    <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
       <i class="ti ti-plus me-2"></i>
-      {{ $l == 'ar' ? 'إضافة صفحة جديدة' : 'Add New Page' }}
+      {{ __('landing.Add_New_Page') }}
     </a>
   </div>
 
@@ -93,40 +60,41 @@ $pages = [
 
   {{-- Cards --}}
   <div class="row g-4">
-    @if (empty($pages))
+    @if ($pages->isEmpty())
       <div class="col-12">
         <div class="card">
           <div class="card-body text-center">
             <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
             <h4 class="mb-2">
-              {{ $l == 'ar' ? 'لم يتم إنشاء أي صفحات هبوط بعد' : 'No landing pages created yet' }}
+              {{ __('landing.No_LandingPages') }}
             </h4>
             <p class="text-secondary mb-4">
-              {{ $l == 'ar' ? 'لم تقم بإنشاء أي صفحات هبوط مخصصة' : "You haven't created any custom landing pages for your" }} <br>
-              {{ $l == 'ar' ? 'لبرامجك' : 'programs' }}. {{ $l == 'ar' ? 'ابدأ بإنشاء صفحة الهبوط الأولى الخاصة بك.' : 'Get started by creating your first landing page.' }}
+              {{ __('landing.Have_Not_Created') }}
+              <br>
+              {{ __('landing.Programs') }}. {{ __('landing.Get_Started') }}
             </p>
-            <button class="btn btn-primary">
+            <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
               <i class="ti ti-plus me-2"></i>
-              {{ $l == 'ar' ? 'إضافة اول صفحة' : 'Create First Page' }}
-            </button>
+              {{ __('landing.Create_First_Page') }}
+            </a>
           </div>
         </div>
       </div>
     @else
       @foreach($pages as $page)
 
-        <div class="col-xl-4 col-md-6" data-id="{{ $page['id'] }}">
+        <div class="col-xl-4 col-md-6" data-id="{{ $page->id }}">
 
-          <div class="card landing-card h-100 shadow-sm" data-url="{{ $page['url'] }}">
+          <div class="card landing-card h-100 shadow-sm" data-url="{{ $page->public_url }}">
 
             <div class="card-body d-flex flex-column">
 
               <div class="d-flex gap-3 mb-3">
                 <div class="avatar avatar-lg">
-                    @if ($page['logo'])
-                      <img 
-                        src="{{ $page['logo'] }}"
-                        alt="logo" 
+                    @if ($page->logo_url)
+                      <img
+                        src="{{ $page->logo_url }}"
+                        alt="logo"
                         class="rounded object-fit-contain"
                       />
                     @else
@@ -138,12 +106,12 @@ $pages = [
                 <div>
 
                   <h5 class="card-title mb-1">
-                    {{ $page['title'] }}
+                    {{ $page->title }}
                   </h5>
 
-                  <div class="badge rounded-pill border border-{{ $page['status'] == 1 ? 'info' : 'danger' }} bg-label-{{ $page['status'] == 1 ? 'info' : 'danger' }} mb-3 pb-1">
+                  <div class="badge rounded-pill border border-{{ $page->status ? 'info' : 'danger' }} bg-label-{{ $page->status ? 'info' : 'danger' }} mb-3 pb-1">
                     <i class="ti ti-point-filled ti-xs"></i>
-                    {{ $page['status'] == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                    {{ $page->status ? __('admin.Active') : __('admin.Inactive') }}
                   </div>
 
                 </div>
@@ -151,24 +119,24 @@ $pages = [
               </div>
 
               <p class="card-text text-secondary">
-                {{ $page['description'] ?? ($l == 'ar' ? 'لم تتم إضافة وصف' : 'No description added') }}
+                {{ ($l == 'ar' ? $page->description_ar : $page->description) ?: ( __('landing.No_Description') . '...') }}
               </p>
 
-              <a href="/dashboard/show/UserProfile/{{ $page['created_by']['id'] }}" class="d-flex align-items-center gap-2 mt-auto">
+              <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
                 <div class="avatar">
                   <div class="avatar-initial rounded-circle overflow-hidden">
-                    @if($page['created_by']['img_url'])
-                      <img src="{{ $page['created_by']['img_url'] }}" alt="logo" class="rounded object-fit-cover" />
+                    @if($page->createdBy && $page->createdBy->img_url)
+                      <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
                     @else
                       <i class="ti ti-user text-dark"></i>
                     @endif
                   </div>
                 </div>
                 <span class="text-body">{{ __('admin.created_by') }}</span>
-                <span 
+                <span
                   class="fw-semibold text-dark"
                 >
-                  {{ $page['created_by']['name'] }}
+                  {{ $page->createdBy->name ?? '' }}
                 </span>
               </a>
 
@@ -178,16 +146,16 @@ $pages = [
 
               <div class="text-secondary small">
                 <i class="ti ti-rocket me-1"></i>
-                <strong>{{ $page['programs'] ?? 0 }}</strong> {{ __('admin.Programs') }}
+                <strong>{{ $page->cycles_count ?? 0 }}</strong> {{ __('admin.Programs') }}
               </div>
 
               <div class="d-flex">
 
-                <a href="{{ $page['url'] }}" class="btn btn-sm btn-icon btn-text-secondary rounded-circle" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.Preview') }}">
+                <a href="{{ $page->public_url }}" class="btn btn-sm btn-icon btn-text-secondary rounded-circle" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.Preview') }}">
                   <i class="ti ti-eye"></i>
                 </a>
 
-                <a href="#" class="btn btn-sm btn-icon btn-text-secondary rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.Edit') }}">
+                <a href="{{ route('landing-pages.edit', $page->id) }}" class="btn btn-sm btn-icon btn-text-secondary rounded-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.Edit') }}">
                   <i class="ti ti-edit"></i>
                 </a>
 
@@ -196,11 +164,11 @@ $pages = [
                 </button>
 
                 <button
-                  type="button" 
-                  class="btn btn-sm btn-icon btn-text-secondary rounded-circle delete-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.Delete') }}" 
-                  data-id="{{ $page['id'] }}" 
-                  data-title="{{ $page['title'] }}" 
-                  {{-- data-url="{{ route('landing-pages.destroy', ['page' => $page['id']]) }}" --}}
+                  type="button"
+                  class="btn btn-sm btn-icon btn-text-secondary rounded-circle delete-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('admin.Delete') }}"
+                  data-id="{{ $page->id }}"
+                  data-title="{{ $page->title }}"
+                  data-url="{{ route('landing-pages.destroy', $page->id) }}"
                 >
                   <i class="ti ti-trash"></i>
                 </button>
@@ -211,6 +179,12 @@ $pages = [
       @endforeach
     @endif
   </div>
+
+  @if ($pages->hasPages())
+    <div class="d-flex justify-content-center mt-4">
+      {{ $pages->links('pagination::bootstrap-5') }}
+    </div>
+  @endif
 @endsection
 
 @section('pagescripts')
@@ -221,11 +195,21 @@ $pages = [
 
     $(document).on('click', '.copy-btn', function () {
       const text = $(this).closest('.landing-card').data('url');
-      if (text) {
-        navigator.clipboard.writeText(text).then(() => {
+      if (!text) return;
+
+      // navigator.clipboard is only available in secure contexts (HTTPS or
+      // localhost); fall back to the classic execCommand approach otherwise.
+      (navigator.clipboard?.writeText(text) ?? Promise.reject())
+        .catch(() => {
+          const el = Object.assign(document.createElement('input'), { value: text });
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+        })
+        .then(() => {
           toastr.success("{{ $l == 'ar' ? 'تم نسخ رابط صفحة الهبوط بنجاح.' : 'Landing page URL copied successfully.' }}");
         });
-      }
     });
 
     $(document).on('click', '.delete-btn', function (e) {

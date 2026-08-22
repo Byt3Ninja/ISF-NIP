@@ -3,22 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Cycle;
-use App\Organization;
+use App\LandingPage;
+use App\Services\FileManagerService;
+use App\Services\LandingPageCustomSectionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class LandingPagesController extends Controller
 {
 	/**
 	 * Create a new controller instance.
 	 *
-	 * The public custom-landing URL (publicCustomLanding) is intentionally
-	 * excluded from the auth guard so visitors can open a saved link.
-	 *
 	 * @return void
 	 */
 	public function __construct()
 	{
-		$this->middleware('auth')->except(['publicCustomLanding']);
+		$this->middleware('auth')->except(['show']);
 	}
 
 	/**
@@ -26,29 +26,697 @@ class LandingPagesController extends Controller
 	 */
 	public function index(Request $request)
 	{
-		$_user = auth()->user();
-		
-		return view('admin.landing-pages.index');
+		$pagesQuery = $this->scopedLandingPagesQuery()->with('createdBy')->withCount('cycles');
+
+		if ($request->status !== null && $request->status !== '') {
+			$pagesQuery->where('status', $request->status);
+		}
+
+		if ($request->search) {
+			$search = $request->search;
+			$pagesQuery->where(function ($query) use ($search) {
+				$query->where('title', 'LIKE', '%' . $search . '%')
+					->orWhere('description', 'LIKE', '%' . $search . '%');
+			});
+		}
+
+		$pagesQuery->orderBy('created_at', 'desc');
+
+		$pages = $pagesQuery->paginate(9)->withQueryString();
+
+		return view('admin.landing-pages.index', compact('pages'));
 	}
-  
+
+	/**
+	 * Delete a custom landing page.
+	 */
+	public function destroy(Request $request, $id)
+	{
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$page->delete();
+
+		return response()->json(['success' => true]);
+	}
+
+	/**
+	 * Display the public landing page.
+	 */
+	public function show(Request $request, $slug)
+	{
+		$page = LandingPage::with(['createdBy', 'cycles', 'customSections'])
+			->where('slug', $slug)
+			->when(!auth()->check(), function ($query) {
+				$query->where('status', true);
+			})
+			->firstOrFail();
+
+		$colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary', 'dark'];
+		$visiblePrograms = $page->cycles->reject->is_expired->values();
+
+		return view('public.landing-page', compact('page', 'colors', 'visiblePrograms'));
+	}
+
   public function create(Request $request)
   {
-    $cycles = Cycle::all();
-    
-    return view('admin.landing-pages.create', compact('cycles')); 
+    $cycles = $this->scopedCycles();
+    $programOrganizations = $this->programOrganizations($cycles);
+    $programTypes = Cycle::programTypes();
+    $sections = $this->buildSections();
+
+    return view('admin.landing-pages.create', compact('cycles', 'programOrganizations', 'programTypes', 'sections'));
   }
 
-  public function edit(Request $request)
+  /**
+   * Organizations behind the given programs, deduplicated and sorted by
+   * name in the current locale — used to populate the Programs tab's
+   * organization filter dropdown.
+   */
+  protected function programOrganizations($cycles)
   {
-    $cycles = Cycle::all();
-    
-    return view('admin.landing-pages.edit', compact('cycles'));
+    $locale = app()->getLocale();
+
+    return $cycles->pluck('organization')
+      ->filter()
+      ->unique('id')
+      ->sortBy($locale === 'ar' ? 'name_ar' : 'name_en');
   }
-  
-  public function show(Request $request)
+
+  /**
+   * Build the tab/field configuration shared by the create and edit
+   * screens. Field values are pulled from $currentPage when editing an
+   * existing page; they're left null on the create screen, where the
+   * Programs/Custom Sections tabs are also fully disabled until the page
+   * exists (see the "Programs_Note" banner).
+   */
+  protected function buildSections(?LandingPage $currentPage = null): array
   {
-    return view('admin.landing-pages.show') ;
+    $sections = [
+      [
+        'key'      => 'general',
+        'icon'     => 'ti-settings',
+        'label_en' => 'General',
+        'label_ar' => 'عام',
+        'route'    => $currentPage ? route('landing-pages.general.update', $currentPage->id) : route('landing-pages.store'),
+        'fields'   => [
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Page Title',
+            'label_ar'  => 'عنوان الصفحة',
+            'value'     => $currentPage?->title,
+            'required'  => true,
+            'maxlength' => 255,
+            'col'       => 12,
+          ],
+          [
+            'name'        => 'logo',
+            'type'        => 'image',
+            'label_en'    => 'Logo',
+            'label_ar'    => 'الشعار',
+            'value'       => $currentPage?->logo_url,
+            'required'    => true,
+            'accept'      => '.png,.jpg,.jpeg,.webp',
+            'max_size_mb' => 5,
+            'col'         => 12,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => $currentPage?->description,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => $currentPage?->description_ar,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'linkedin',
+            'type'      => 'url',
+            'label_en'  => 'LinkedIn',
+            'label_ar'  => 'لينكدإن',
+            'value'     => $currentPage?->linkedin,
+            'required'  => false,
+            'maxlength' => 255,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'facebook',
+            'type'      => 'url',
+            'label_en'  => 'Facebook',
+            'label_ar'  => 'فيسبوك',
+            'value'     => $currentPage?->facebook,
+            'required'  => false,
+            'maxlength' => 255,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'instagram',
+            'type'      => 'url',
+            'label_en'  => 'Instagram',
+            'label_ar'  => 'إنستغرام',
+            'value'     => $currentPage?->instagram,
+            'required'  => false,
+            'maxlength' => 255,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'x',
+            'type'      => 'url',
+            'label_en'  => 'X',
+            'label_ar'  => 'إكس',
+            'value'     => $currentPage?->x,
+            'required'  => false,
+            'maxlength' => 255,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'tiktok',
+            'type'      => 'url',
+            'label_en'  => 'TikTok',
+            'label_ar'  => 'تيك توك',
+            'value'     => $currentPage?->tiktok,
+            'required'  => false,
+            'maxlength' => 255,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'youtube',
+            'type'      => 'url',
+            'label_en'  => 'YouTube',
+            'label_ar'  => 'يوتيوب',
+            'value'     => $currentPage?->youtube,
+            'required'  => false,
+            'maxlength' => 255,
+            'col'       => 6,
+          ],
+        ],
+      ],
+      [
+        'key'      => 'hero',
+        'icon'     => 'ti-align-box-top-center',
+        'label_en' => 'Hero',
+        'label_ar' => 'البطل',
+        'route'    => $currentPage ? route('landing-pages.hero.update', $currentPage->id) : route('landing-page.sections.update', 'hero'),
+        'fields'   => [
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Title',
+            'label_ar'  => 'العنوان',
+            'value'     => $currentPage?->hero_title,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag',
+            'type'      => 'text',
+            'label_en'  => 'Title tag',
+            'label_ar'  => 'العنوان الفرعي',
+            'value'     => $currentPage?->hero_title_tag,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => $currentPage?->hero_description,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title (Arabic)',
+            'label_ar'  => 'العنوان بالعربية',
+            'value'     => $currentPage?->hero_title_ar,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title tag (Arabic)',
+            'label_ar'  => 'العنوان الفرعي بالعربية',
+            'value'     => $currentPage?->hero_title_tag_ar,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => $currentPage?->hero_description_ar,
+            'required'  => false,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+          [
+            'name'        => 'hero_image',
+            'type'        => 'image',
+            'label_en'    => 'Hero image',
+            'label_ar'    => 'صورة القسم الرئيسي',
+            'value'       => $currentPage?->hero_image_url,
+            'required'    => true,
+            'accept'      => '.png,.jpg,.jpeg,.webp',
+            'max_size_mb' => 5,
+            'col'         => 12,
+          ],
+        ],
+      ],
+      [
+        'key'      => 'about',
+        'icon'     => 'ti-users',
+        'label_en' => 'About Us',
+        'label_ar' => 'من نحن',
+        'route'    => $currentPage ? route('landing-pages.about.update', $currentPage->id) : route('landing-page.sections.update', 'about'),
+        'fields'   => [
+          [
+            'name'      => 'is_enabled',
+            'type'      => 'checkbox',
+            'label_en'  => 'Enable Section',
+            'label_ar'  => 'تفعيل القسم',
+            'value'     => $currentPage ? (bool) $currentPage->about_is_enabled : 1,
+            'col'       => 12,
+          ],
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Title',
+            'label_ar'  => 'العنوان',
+            'value'     => $currentPage?->about_title,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag',
+            'type'      => 'text',
+            'label_en'  => 'Title tag',
+            'label_ar'  => 'العنوان الفرعي',
+            'value'     => $currentPage?->about_title_tag,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => $currentPage?->about_description,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title (Arabic)',
+            'label_ar'  => 'العنوان بالعربية',
+            'value'     => $currentPage?->about_title_ar,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title tag (Arabic)',
+            'label_ar'  => 'العنوان الفرعي بالعربية',
+            'value'     => $currentPage?->about_title_tag_ar,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => $currentPage?->about_description_ar,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+        ],
+      ],
+      [
+        'key'      => 'programs',
+        'icon'     => 'ti-rocket',
+        'label_en' => 'Programs',
+        'label_ar' => 'البرامج',
+        'route'    => $currentPage ? route('landing-pages.programs.update', $currentPage->id) : route('landing-page.sections.update', 'programs'),
+        'fields'   => [
+          [
+            'name'      => 'is_enabled',
+            'type'      => 'checkbox',
+            'label_en'  => 'Enable Section',
+            'label_ar'  => 'تفعيل القسم',
+            'value'     => $currentPage ? (bool) $currentPage->programs_is_enabled : 1,
+            'col'       => 12,
+          ],
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Title',
+            'label_ar'  => 'العنوان',
+            'value'     => $currentPage?->programs_title,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag',
+            'type'      => 'text',
+            'label_en'  => 'Title tag',
+            'label_ar'  => 'العنوان الفرعي',
+            'value'     => $currentPage?->programs_title_tag,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => $currentPage?->programs_description,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title (Arabic)',
+            'label_ar'  => 'العنوان بالعربية',
+            'value'     => $currentPage?->programs_title_ar,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title tag (Arabic)',
+            'label_ar'  => 'العنوان الفرعي بالعربية',
+            'value'     => $currentPage?->programs_title_tag_ar,
+            'required'  => true,
+            'maxlength' => 50,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => $currentPage?->programs_description_ar,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+        ],
+      ],
+      [
+        'key'      => 'how',
+        'icon'     => 'ti-settings-bolt',
+        'label_en' => 'How It Works',
+        'label_ar' => 'كيف يعمل',
+        'route'    => $currentPage ? route('landing-pages.how.update', $currentPage->id) : route('landing-page.sections.update', 'how'),
+        'fields'   => [
+          [
+            'name'      => 'is_enabled',
+            'type'      => 'checkbox',
+            'label_en'  => 'Enable Section',
+            'label_ar'  => 'تفعيل القسم',
+            'value'     => $currentPage ? (bool) $currentPage->how_is_enabled : 1,
+            'col'       => 12,
+          ],
+          [
+            'name'      => 'title',
+            'type'      => 'text',
+            'label_en'  => 'Title',
+            'label_ar'  => 'العنوان',
+            'value'     => $currentPage?->how_title,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag',
+            'type'      => 'text',
+            'label_en'  => 'Title tag',
+            'label_ar'  => 'العنوان الفرعي',
+            'value'     => $currentPage?->how_title_tag,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description',
+            'type'      => 'textarea',
+            'label_en'  => 'Description',
+            'label_ar'  => 'الوصف',
+            'value'     => $currentPage?->how_description,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title (Arabic)',
+            'label_ar'  => 'العنوان بالعربية',
+            'value'     => $currentPage?->how_title_ar,
+            'required'  => true,
+            'maxlength' => 100,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'title_tag_ar',
+            'type'      => 'text',
+            'label_en'  => 'Title tag (Arabic)',
+            'label_ar'  => 'العنوان الفرعي بالعربية',
+            'value'     => $currentPage?->how_title_tag_ar,
+            'required'  => true,
+            'maxlength' => 150,
+            'col'       => 6,
+          ],
+          [
+            'name'      => 'description_ar',
+            'type'      => 'textarea',
+            'label_en'  => 'Description (Arabic)',
+            'label_ar'  => 'الوصف بالعربية',
+            'value'     => $currentPage?->how_description_ar,
+            'required'  => true,
+            'maxlength' => 500,
+            'col'       => 6,
+          ],
+        ],
+      ],
+      [
+        'key'      => 'custom',
+        'icon'     => 'ti-puzzle',
+        'label_en' => 'Custom sections',
+        'label_ar' => 'أقسام مخصصة',
+        'route'    => $currentPage ? route('landing-pages.custom-sections.update', $currentPage->id) : route('landing-page.sections.update', 'custom'),
+        'fields'   => [],
+      ],
+    ];
+
+    foreach ($sections as &$section) {
+      // Every tab besides General needs an existing page to save into, so
+      // until the page is created (General saved), lock them: this avoids
+      // hitting the front-end-only "updateSection" stub route and pushes
+      // the admin toward the General tab first.
+      $section['locked'] = !$currentPage && $section['key'] !== 'general';
+
+      foreach ($section['fields'] as &$field) {
+        $field['name_attr'] = "{$section['key']}[{$field['name']}]";
+        $field['id_attr'] = "{$section['key']}_{$field['name']}";
+
+        if ($section['locked']) {
+          $field['disabled'] = true;
+        }
+      }
+      unset($field);
+    }
+    unset($section);
+
+    return $sections;
   }
+
+  /**
+   * Landing pages visible to the current user: Admin sees every page,
+   * Sub Admin sees pages created by users belonging to any organization
+   * they manage, and everyone else (including Organization Manager) only
+   * sees pages they personally created.
+   */
+  protected function scopedLandingPagesQuery()
+  {
+    $user = auth()->user();
+    $query = LandingPage::query();
+
+    if ($user->hasRole('admin')) {
+      return $query;
+    }
+
+    if ($user->hasRole('subadmin')) {
+      $orgIds = $user->organizations_ids;
+
+      return $query->whereHas('createdBy', function ($query) use ($orgIds) {
+        $query->whereIn('organization_id', $orgIds);
+      });
+    }
+
+    return $query->where('created_by', $user->id);
+  }
+
+  /**
+   * Programs available to the current user for attaching to a landing
+   * page: Super Admin sees every program, Sub Admin / Tenant Admin see
+   * only programs belonging to their organizations.
+   */
+  protected function scopedCycles()
+  {
+    $user = auth()->user();
+
+    $query = Cycle::with('organization');
+
+    if (!$user->hasRole('admin')) {
+      $orgIds = $user->organizations_ids;
+      $query->whereIn('organization_id', $orgIds);
+    }
+
+    return $query->orderBy('created_at', 'desc')->get();
+  }
+
+  /**
+   * Create a new custom landing page from the General tab of the
+   * create-page flow.
+   */
+  public function store(Request $request)
+  {
+	$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.create')) {
+            return abort(401);
+        }
+    $user = auth()->user();
+
+    $validator = Validator::make($request->all(), [
+      'general.title' => 'required|string|max:255',
+      'general.logo' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
+      'general.description' => 'required|string|max:500',
+      'general.description_ar' => 'required|string|max:500',
+      'general.linkedin' => 'nullable|url|max:255',
+      'general.facebook' => 'nullable|url|max:255',
+      'general.instagram' => 'nullable|url|max:255',
+      'general.x' => 'nullable|url|max:255',
+      'general.tiktok' => 'nullable|url|max:255',
+      'general.youtube' => 'nullable|url|max:255',
+    ], [
+      'general.title.required' => __('landing.validation.page_title_required'),
+      'general.logo.required' => __('landing.validation.logo_required'),
+      'general.logo.image' => __('landing.validation.image_format_invalid'),
+      'general.logo.mimes' => __('landing.validation.image_format_invalid'),
+      'general.logo.max' => __('landing.validation.logo_size_exceeded'),
+      'general.description.required' => __('landing.validation.description_required'),
+      'general.description_ar.required' => __('landing.validation.description_ar_required'),
+      'general.linkedin.url' => __('landing.validation.invalid_url'),
+      'general.facebook.url' => __('landing.validation.invalid_url'),
+      'general.instagram.url' => __('landing.validation.invalid_url'),
+      'general.x.url' => __('landing.validation.invalid_url'),
+      'general.tiktok.url' => __('landing.validation.invalid_url'),
+      'general.youtube.url' => __('landing.validation.invalid_url'),
+    ]);
+
+    if ($validator->fails()) {
+      return response()->json([
+        'success' => false,
+        'message' => $validator->errors()->first(),
+        'errors' => $validator->errors(),
+      ], 422);
+    }
+
+    $general = $request->input('general', []);
+
+    $page = new LandingPage();
+    $page->created_by = $user->id;
+    $page->title = $general['title'];
+    $page->slug = LandingPage::generateSlug($general['title']);
+    $page->status = true;
+    $page->logo = app(FileManagerService::class)->upload($request->file('general.logo'), 'landing-pages', 'public_uploads');
+    $page->description = $general['description'];
+    $page->description_ar = $general['description_ar'];
+    $page->linkedin = $general['linkedin'] ?? null;
+    $page->facebook = $general['facebook'] ?? null;
+    $page->instagram = $general['instagram'] ?? null;
+    $page->x = $general['x'] ?? null;
+    $page->tiktok = $general['tiktok'] ?? null;
+    $page->youtube = $general['youtube'] ?? null;
+    $page->save();
+
+    return response()->json([
+      'success' => true,
+      'message' => __('landing.success.general_saved'),
+      'redirect' => route('landing-pages.edit', $page->id),
+    ]);
+  }
+
+  public function edit(Request $request, $id)
+  {
+    $cycles = $this->scopedCycles();
+    $currentPage = $this->scopedLandingPagesQuery()->with('cycles', 'customSections')->findOrFail($id);
+
+    $programOrganizations = $this->programOrganizations($cycles);
+    $programTypes = Cycle::programTypes();
+    $sections = $this->buildSections($currentPage);
+    $aboutCards = $currentPage->about_cards ?? [];
+    $howSteps = $currentPage->how_steps ?? [];
+    $customSectionBlocks = $currentPage->customSections;
+    $selectedCycleIds = $currentPage->cycles->pluck('id')->toArray();
+    $aboutIconsList = [
+      'ti-rocket' => 'Rocket', 'ti-bulb' => 'Idea', 'ti-target' => 'Target',
+      'ti-chart-line' => 'Growth', 'ti-users' => 'Community', 'ti-trophy' => 'Achievement',
+      'ti-shield' => 'Protection', 'ti-heart' => 'Care', 'ti-star' => 'Quality',
+      'ti-book' => 'Education', 'ti-code' => 'Code', 'ti-cpu' => 'Technology',
+      'ti-world' => 'Global', 'ti-flag' => 'Goal', 'ti-crown' => 'Leadership',
+      'ti-gift' => 'Reward', 'ti-briefcase' => 'Career', 'ti-cloud' => 'Cloud',
+    ];
+
+    return view('admin.landing-pages.edit', compact(
+      'cycles',
+      'currentPage',
+      'programOrganizations',
+      'programTypes',
+      'sections',
+      'aboutCards',
+      'howSteps',
+      'customSectionBlocks',
+      'selectedCycleIds',
+      'aboutIconsList'
+    ));
+  }
+
 
 	/**
 	 * Store a landing page section.
@@ -59,164 +727,688 @@ class LandingPagesController extends Controller
 	 * @param  string  $section
 	 * @return \Illuminate\Http\JsonResponse
 	 */
-	public function updateSection(Request $request, $section)
-	{
-		return response()->json(['success' => true]);
-	}
+	// public function updateSection(Request $request, $section)
+	// {
+	// 	return response()->json(['success' => true]);
+	// }
 
 	/**
-	 * Session-backed simulated store for custom landing-page URLs.
-	 *
-	 * No DB model exists yet, so the saved configuration is kept in the
-	 * admin's session to mimic the behaviour of the real persistence layer.
-	 *
-	 * @return array
+	 * Save the General section for a custom landing page.
 	 */
-	protected function customUrlStore(): array
+	public function updateGeneral(Request $request, $id)
 	{
-		return (array) session()->get('landing_page_urls', []);
-	}
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        } 
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 
-	/**
-	 * Slugs that can no longer be claimed: real organization slugs plus
-	 * every custom landing-page URL saved earlier in this session.
-	 *
-	 * @return array
-	 */
-	protected function customUrlTakenSlugs(): array
-	{
-		$orgSlugs = Organization::whereNotNull('slug')
-			->where('slug', '!=', '')
-			->pluck('slug')
-			->unique()
-			->values()
-			->all();
-
-		$savedSlugs = array_keys($this->customUrlStore());
-
-		return array_values(array_unique(array_merge($orgSlugs, $savedSlugs)));
-	}
-
-	/**
-	 * Simulated "Check Availability" endpoint for a custom landing-page URL.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	public function checkCustomUrl(Request $request)
-	{
-		$locale = app()->getLocale();
-		$slug = strtolower(trim((string) $request->input('slug', '')));
-
-		if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
-			return response()->json([
-				'valid' => false,
-				'available' => false,
-				'message' => $locale === 'ar'
-					? 'يمكن أن يحتوي الرابط على أحرف إنجليزية صغيرة وأرقام وشرطات فقط.'
-					: 'URL slug can only contain lowercase letters, numbers, and hyphens.',
-			]);
-		}
-
-		if (in_array($slug, $this->customUrlTakenSlugs())) {
-			return response()->json([
-				'valid' => true,
-				'available' => false,
-				'message' => $locale === 'ar'
-					? 'هذا الرابط مستخدم بالفعل. يرجى اختيار رابط آخر.'
-					: 'This URL is already taken. Please choose another one.',
-			]);
-		}
-
-		return response()->json([
-			'valid' => true,
-			'available' => true,
-			'message' => $locale === 'ar'
-				? 'هذا الرابط متاح.'
-				: 'This URL is available.',
+		$validator = Validator::make($request->all(), [
+			'general.title' => 'required|string|max:255',
+			'general.logo' => [
+				$page->logo ? 'nullable' : 'required',
+				'image',
+				'mimes:png,jpg,jpeg,webp',
+				'max:5120',
+			],
+			'general.description' => 'required|string|max:500',
+			'general.description_ar' => 'required|string|max:500',
+			'general.linkedin' => 'nullable|url|max:255',
+			'general.facebook' => 'nullable|url|max:255',
+			'general.instagram' => 'nullable|url|max:255',
+			'general.x' => 'nullable|url|max:255',
+			'general.tiktok' => 'nullable|url|max:255',
+			'general.youtube' => 'nullable|url|max:255',
+		], [
+			'general.title.required' => __('landing.validation.page_title_required'),
+			'general.logo.required' => __('landing.validation.logo_required'),
+			'general.logo.image' => __('landing.validation.image_format_invalid'),
+			'general.logo.mimes' => __('landing.validation.image_format_invalid'),
+			'general.logo.max' => __('landing.validation.logo_size_exceeded'),
+			'general.description.required' => __('landing.validation.description_required'),
+			'general.description_ar.required' => __('landing.validation.description_ar_required'),
+			'general.linkedin.url' => __('landing.validation.invalid_url'),
+			'general.facebook.url' => __('landing.validation.invalid_url'),
+			'general.instagram.url' => __('landing.validation.invalid_url'),
+			'general.x.url' => __('landing.validation.invalid_url'),
+			'general.tiktok.url' => __('landing.validation.invalid_url'),
+			'general.youtube.url' => __('landing.validation.invalid_url'),
 		]);
-	}
 
-	/**
-	 * Simulated "Save" endpoint for the custom landing-page URL configuration.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return \Illuminate\Http\JsonResponse
-	 */
-	public function saveCustomUrl(Request $request)
-	{
-		$locale = app()->getLocale();
-		$title = trim((string) $request->input('title', ''));
-		$name = trim((string) $request->input('name', ''));
-		$slug = strtolower(trim((string) $request->input('slug', '')));
-		$active = $request->boolean('active');
-
-		$fail = function (string $message) {
-			return response()->json(['success' => false, 'message' => $message], 422);
-		};
-
-		if ($name === '') {
-			return $fail($locale === 'ar'
-				? 'يرجى إدخال الاسم.'
-				: 'Please enter the name.');
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+				'errors' => $validator->errors(),
+			], 422);
 		}
 
-		if ($title === '') {
-			return $fail($locale === 'ar'
-				? 'يرجى إدخال العنوان.'
-				: 'Please enter the title.');
+		$general = $request->input('general', []);
+
+		if ($request->hasFile('general.logo')) {
+			$page->logo = app(FileManagerService::class)->update(
+				$request->file('general.logo'),
+				$page->logo,
+				'landing-pages',
+				'public_uploads'
+			);
 		}
 
-		if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
-			return $fail($locale === 'ar'
-				? 'يمكن أن يحتوي الرابط على أحرف إنجليزية صغيرة وأرقام وشرطات فقط.'
-				: 'URL slug can only contain lowercase letters, numbers, and hyphens.');
-		}
-
-		if (in_array($slug, $this->customUrlTakenSlugs())) {
-			return $fail($locale === 'ar'
-				? 'هذا الرابط مستخدم بالفعل. يرجى اختيار رابط آخر.'
-				: 'This URL is already taken. Please choose another one.');
-		}
-
-		// Simulated persistence — swap for a real model once wired up.
-		$store = $this->customUrlStore();
-		$store[$slug] = [
-			'title'     => $title,
-			'name'      => $name,
-			'active'    => $active,
-			'saved_at'  => now()->toDateTimeString(),
-		];
-		session()->put('landing_page_urls', $store);
+		$page->title = $general['title'];
+		$page->description = $general['description'];
+		$page->description_ar = $general['description_ar'];
+		$page->linkedin = $general['linkedin'] ?? null;
+		$page->facebook = $general['facebook'] ?? null;
+		$page->instagram = $general['instagram'] ?? null;
+		$page->x = $general['x'] ?? null;
+		$page->tiktok = $general['tiktok'] ?? null;
+		$page->youtube = $general['youtube'] ?? null;
+		$page->save();
 
 		return response()->json([
 			'success' => true,
-			'active'  => $active,
-			'url'     => url('/lp/' . $slug),
-			'message' => $locale === 'ar'
-				? 'تم حفظ رابط صفحة الهبوط المخصصة بنجاح.'
-				: 'Custom landing page URL saved successfully.',
+			'message' => __('landing.success.general_saved'),
 		]);
 	}
 
 	/**
-	 * Public access to a saved custom landing-page URL.
-	 *
-	 * A slug that was never saved (or whose landing page is disabled)
-	 * resolves to a 404, exactly like the real persistence layer will.
-	 *
-	 * @param  string  $slug
-	 * @return \Illuminate\View\View|\Illuminate\Http\Response
+	 * Save the Hero section for a custom landing page.
 	 */
-	public function publicCustomLanding($slug)
+	public function updateHero(Request $request, $id)
 	{
-		$slug = strtolower(trim((string) $slug));
-		$config = $this->customUrlStore()[$slug] ?? null;
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 
-		if (!$config || empty($config['active'])) {
-			abort(404);
+		$validator = Validator::make($request->all(), [
+			'hero.title' => 'required|string|max:100',
+			'hero.title_ar' => 'required|string|max:100',
+			'hero.title_tag' => 'required|string|max:150',
+			'hero.title_tag_ar' => 'required|string|max:150',
+			'hero.description' => 'required|string|max:500',
+			'hero.description_ar' => 'nullable|string|max:500',
+			'hero.hero_image' => [
+				$page->hero_image ? 'nullable' : 'required',
+				'image',
+				'mimes:png,jpg,jpeg,webp',
+				'max:5120',
+			],
+		], [
+			'hero.title.required' => __('landing.validation.title_required'),
+			'hero.title_ar.required' => __('landing.validation.title_ar_required'),
+			'hero.title_tag.required' => __('landing.validation.subtitle_required'),
+			'hero.title_tag_ar.required' => __('landing.validation.subtitle_ar_required'),
+			'hero.description.required' => __('landing.validation.description_required'),
+			'hero.hero_image.required' => __('landing.validation.hero_image_required'),
+			'hero.hero_image.image' => __('landing.validation.image_format_invalid'),
+			'hero.hero_image.mimes' => __('landing.validation.image_format_invalid'),
+			'hero.hero_image.max' => __('landing.validation.hero_image_size_exceeded'),
+		]);
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+				'errors' => $validator->errors(),
+			], 422);
 		}
 
-		return view('admin.landing-pages.show');
+		$hero = $request->input('hero', []);
+
+		if ($request->hasFile('hero.hero_image')) {
+			$page->hero_image = app(FileManagerService::class)->update(
+				$request->file('hero.hero_image'),
+				$page->hero_image,
+				'landing-pages',
+				'public_uploads'
+			);
+		}
+
+		$page->hero_title = $hero['title'];
+		$page->hero_title_ar = $hero['title_ar'];
+		$page->hero_title_tag = $hero['title_tag'];
+		$page->hero_title_tag_ar = $hero['title_tag_ar'];
+		$page->hero_description = $hero['description'];
+		$page->hero_description_ar = $hero['description_ar'] ?? null;
+		$page->save();
+
+		return response()->json([
+			'success' => true,
+			'message' => __('landing.success.hero_saved'),
+		]);
+	}
+
+	/**
+	 * Save the Programs section for a custom landing page: which programs
+	 * (cycles) are featured. Only programs the current user is allowed to
+	 * see (per scopedCycles()) may be attached, regardless of what IDs are
+	 * submitted.
+	 */
+	public function updatePrograms(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$validator = Validator::make($request->all(), [
+			'programs.selected_programs' => 'nullable|array',
+			'programs.selected_programs.*' => 'in:0,1',
+			'programs.is_enabled' => 'nullable|boolean',
+			'programs.title' => 'nullable|string|max:50',
+			'programs.title_ar' => 'nullable|string|max:50',
+			'programs.title_tag' => 'nullable|string|max:50',
+			'programs.title_tag_ar' => 'nullable|string|max:50',
+			'programs.description' => 'nullable|string|max:100',
+			'programs.description_ar' => 'nullable|string|max:100',
+		]);
+
+		$requiredMsg = __('landing.validation.field_required');
+
+		$validator->after(function ($validator) use ($request, $requiredMsg) {
+			$programs = $request->input('programs', []);
+			$isEnabled = !empty($programs['is_enabled']);
+
+			if ($isEnabled) {
+				foreach (['title', 'title_ar', 'title_tag', 'title_tag_ar', 'description', 'description_ar'] as $field) {
+					if (!trim((string) ($programs[$field] ?? ''))) {
+						$validator->errors()->add("programs.{$field}", $requiredMsg);
+					}
+				}
+			}
+		});
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+				'errors' => $validator->errors(),
+			], 422);
+		}
+
+		$programs = $request->input('programs', []);
+
+		$selectedPrograms = $programs['selected_programs'] ?? [];
+		$requestedIds = array_keys(array_filter($selectedPrograms, fn ($selected) => (bool) $selected));
+		$allowedIds = $this->scopedCycles()->pluck('id')->toArray();
+		$cycleIds = array_values(array_intersect($requestedIds, $allowedIds));
+
+		$page->cycles()->sync($cycleIds);
+
+		$page->programs_is_enabled = !empty($programs['is_enabled']);
+		$page->programs_title = $programs['title'] ?? null;
+		$page->programs_title_ar = $programs['title_ar'] ?? null;
+		$page->programs_title_tag = $programs['title_tag'] ?? null;
+		$page->programs_title_tag_ar = $programs['title_tag_ar'] ?? null;
+		$page->programs_description = $programs['description'] ?? null;
+		$page->programs_description_ar = $programs['description_ar'] ?? null;
+		$page->save();
+
+		return response()->json([
+			'success' => true,
+			'message' => __('landing.success.programs_saved'),
+		]);
+	}
+
+	/**
+	 * Save the About Us section for a custom landing page.
+	 */
+	public function updateAbout(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$validator = Validator::make($request->all(), [
+			'about.is_enabled' => 'nullable|boolean',
+			'about.title' => 'nullable|string|max:100',
+			'about.title_ar' => 'nullable|string|max:100',
+			'about.title_tag' => 'nullable|string|max:150',
+			'about.title_tag_ar' => 'nullable|string|max:150',
+			'about.description' => 'nullable|string|max:500',
+			'about.description_ar' => 'nullable|string|max:500',
+			'about.cards' => 'nullable|array|max:3',
+			'about.cards.*.icon' => 'nullable|string|max:50',
+			'about.cards.*.title' => 'nullable|string|max:100',
+			'about.cards.*.title_ar' => 'nullable|string|max:100',
+			'about.cards.*.description' => 'nullable|string|max:500',
+			'about.cards.*.description_ar' => 'nullable|string|max:500',
+		]);
+
+		$validator->after(function ($validator) use ($request) {
+			$about = $request->input('about', []);
+			$isEnabled = !empty($about['is_enabled']);
+
+			if ($isEnabled) {
+				$mainFields = [
+					'about.title' => [$about['title'] ?? '', __('landing.validation.title_required')],
+					'about.title_ar' => [$about['title_ar'] ?? '', __('landing.validation.title_ar_required')],
+					'about.title_tag' => [$about['title_tag'] ?? '', __('landing.validation.subtitle_required')],
+					'about.title_tag_ar' => [$about['title_tag_ar'] ?? '', __('landing.validation.subtitle_ar_required')],
+					'about.description' => [$about['description'] ?? '', __('landing.validation.description_required')],
+					'about.description_ar' => [$about['description_ar'] ?? '', __('landing.validation.description_ar_required')],
+				];
+
+				foreach ($mainFields as $field => [$value, $message]) {
+					if (!trim((string) $value)) {
+						$validator->errors()->add($field, $message);
+					}
+				}
+			}
+
+			$cardIconMsg = __('landing.validation.icon_required');
+			$cardTitleMsg = __('landing.validation.card_title_required');
+			$cardTitleArMsg = __('landing.validation.card_title_ar_required');
+			$cardDescriptionMsg = __('landing.validation.card_description_required');
+			$cardDescriptionArMsg = __('landing.validation.card_description_ar_required');
+
+			foreach (($about['cards'] ?? []) as $index => $card) {
+				$icon = trim((string) ($card['icon'] ?? ''));
+				$title = trim((string) ($card['title'] ?? ''));
+				$titleAr = trim((string) ($card['title_ar'] ?? ''));
+				$description = trim((string) ($card['description'] ?? ''));
+				$descriptionAr = trim((string) ($card['description_ar'] ?? ''));
+
+				if (!$icon && ($title || $description || $titleAr || $descriptionAr)) {
+					$validator->errors()->add("about.cards.{$index}.icon", $cardIconMsg);
+				}
+
+				if (!$title && ($icon || $description || $titleAr || $descriptionAr)) {
+					$validator->errors()->add("about.cards.{$index}.title", $cardTitleMsg);
+				}
+
+				if (!$titleAr && ($icon || $description || $descriptionAr || $title)) {
+					$validator->errors()->add("about.cards.{$index}.title_ar", $cardTitleArMsg);
+				}
+
+				if (!$description && ($icon || $title)) {
+					$validator->errors()->add("about.cards.{$index}.description", $cardDescriptionMsg);
+				}
+
+				if (!$descriptionAr && ($icon || $title || $titleAr || $description)) {
+					$validator->errors()->add("about.cards.{$index}.description_ar", $cardDescriptionArMsg);
+				}
+			}
+		});
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+				'errors' => $validator->errors(),
+			], 422);
+		}
+
+		$about = $request->input('about', []);
+
+		$page->about_is_enabled = !empty($about['is_enabled']);
+		$page->about_title = $about['title'] ?? null;
+		$page->about_title_ar = $about['title_ar'] ?? null;
+		$page->about_title_tag = $about['title_tag'] ?? null;
+		$page->about_title_tag_ar = $about['title_tag_ar'] ?? null;
+		$page->about_description = $about['description'] ?? null;
+		$page->about_description_ar = $about['description_ar'] ?? null;
+		$page->about_cards = $this->processAboutCards($about['cards'] ?? []);
+		$page->save();
+
+		return response()->json([
+			'success' => true,
+			'message' => __('landing.success.about_saved'),
+		]);
+	}
+
+	/**
+	 * Filter, normalize, and cap About Us info cards.
+	 */
+	protected function processAboutCards(array $cards): array
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$validCards = [];
+
+		foreach ($cards as $card) {
+			if (!empty($card['icon']) || !empty($card['title']) || !empty($card['title_ar']) || !empty($card['description']) || !empty($card['description_ar'])) {
+				$validCards[] = [
+					'icon' => $card['icon'] ?? '',
+					'title' => $card['title'] ?? '',
+					'title_ar' => $card['title_ar'] ?? '',
+					'description' => $card['description'] ?? '',
+					'description_ar' => $card['description_ar'] ?? '',
+				];
+			}
+		}
+
+		return array_slice($validCards, 0, 3);
+	}
+
+	/**
+	 * Save the How It Works section for a custom landing page.
+	 */
+	public function updateHow(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$validator = Validator::make($request->all(), [
+			'how.is_enabled' => 'nullable|boolean',
+			'how.title' => 'nullable|string|max:100',
+			'how.title_ar' => 'nullable|string|max:100',
+			'how.title_tag' => 'nullable|string|max:150',
+			'how.title_tag_ar' => 'nullable|string|max:150',
+			'how.description' => 'nullable|string|max:500',
+			'how.description_ar' => 'nullable|string|max:500',
+			'how.steps' => 'nullable|array|max:3',
+			'how.steps.*.icon' => 'nullable|string|max:50',
+			'how.steps.*.title' => 'nullable|string|max:100',
+			'how.steps.*.title_ar' => 'nullable|string|max:100',
+			'how.steps.*.description' => 'nullable|string|max:300',
+			'how.steps.*.description_ar' => 'nullable|string|max:300',
+		]);
+
+		$validator->after(function ($validator) use ($request) {
+			$how = $request->input('how', []);
+			$isEnabled = !empty($how['is_enabled']);
+
+			if ($isEnabled) {
+				$mainFields = [
+					'how.title' => [$how['title'] ?? '', __('landing.validation.section_title_required')],
+					'how.title_ar' => [$how['title_ar'] ?? '', __('landing.validation.section_title_ar_required')],
+					'how.title_tag' => [$how['title_tag'] ?? '', __('landing.validation.section_subtitle_required')],
+					'how.title_tag_ar' => [$how['title_tag_ar'] ?? '', __('landing.validation.section_subtitle_ar_required')],
+					'how.description' => [$how['description'] ?? '', __('landing.validation.section_description_required')],
+					'how.description_ar' => [$how['description_ar'] ?? '', __('landing.validation.section_description_ar_required')],
+				];
+
+				foreach ($mainFields as $field => [$value, $message]) {
+					if (!trim((string) $value)) {
+						$validator->errors()->add($field, $message);
+					}
+				}
+			}
+
+			$stepIconMsg = __('landing.validation.icon_required');
+			$stepTitleMsg = __('landing.validation.step_title_required');
+			$stepTitleArMsg = __('landing.validation.step_title_ar_required');
+			$stepDescriptionMsg = __('landing.validation.step_description_required');
+			$stepDescriptionArMsg = __('landing.validation.step_description_ar_required');
+
+			foreach (($how['steps'] ?? []) as $index => $step) {
+				$icon = trim((string) ($step['icon'] ?? ''));
+				$title = trim((string) ($step['title'] ?? ''));
+				$titleAr = trim((string) ($step['title_ar'] ?? ''));
+				$description = trim((string) ($step['description'] ?? ''));
+				$descriptionAr = trim((string) ($step['description_ar'] ?? ''));
+
+				if (!$icon && ($title || $description)) {
+					$validator->errors()->add("how.steps.{$index}.icon", $stepIconMsg);
+				}
+
+				if (!$title && ($icon || $description)) {
+					$validator->errors()->add("how.steps.{$index}.title", $stepTitleMsg);
+				}
+
+				if (!$titleAr && ($icon || $description)) {
+					$validator->errors()->add("how.steps.{$index}.title_ar", $stepTitleArMsg);
+				}
+
+				if (!$description && ($title || $icon)) {
+					$validator->errors()->add("how.steps.{$index}.description", $stepDescriptionMsg);
+				}
+
+				if (!$descriptionAr && ($title || $icon)) {
+					$validator->errors()->add("how.steps.{$index}.description_ar", $stepDescriptionArMsg);
+				}
+			}
+		});
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+				'errors' => $validator->errors(),
+			], 422);
+		}
+
+		$how = $request->input('how', []);
+
+		$page->how_is_enabled = !empty($how['is_enabled']);
+		$page->how_title = $how['title'] ?? null;
+		$page->how_title_ar = $how['title_ar'] ?? null;
+		$page->how_title_tag = $how['title_tag'] ?? null;
+		$page->how_title_tag_ar = $how['title_tag_ar'] ?? null;
+		$page->how_description = $how['description'] ?? null;
+		$page->how_description_ar = $how['description_ar'] ?? null;
+		$page->how_steps = $this->processHowSteps($how['steps'] ?? []);
+		$page->save();
+
+		return response()->json([
+			'success' => true,
+			'message' => __('landing.success.how_saved'),
+		]);
+	}
+
+	/**
+	 * Filter, normalize, and cap How It Works process steps.
+	 */
+	protected function processHowSteps(array $steps): array
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$validSteps = [];
+
+		foreach ($steps as $step) {
+			if (!empty($step['icon']) || !empty($step['title']) || !empty($step['title_ar']) || !empty($step['description']) || !empty($step['description_ar'])) {
+				$validSteps[] = [
+					'icon' => $step['icon'] ?? '',
+					'title' => $step['title'] ?? '',
+					'title_ar' => $step['title_ar'] ?? '',
+					'description' => $step['description'] ?? '',
+					'description_ar' => $step['description_ar'] ?? '',
+				];
+			}
+		}
+
+		return array_slice($validSteps, 0, 3);
+	}
+
+	/**
+	 * Save the Custom Sections for a custom landing page. Each block is
+	 * fully optional; if any of its mandatory fields is filled, all of
+	 * them become required. Button Text/Link are always optional, but
+	 * the Button Link must be a valid URL when provided.
+	 */
+	public function updateCustomSections(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$requiredMsg = __('landing.validation.custom_section_field_required');
+		$buttonLinkMsg = __('landing.validation.button_link_invalid');
+
+		$validator = Validator::make($request->all(), [
+			'custom_sections' => 'nullable|array',
+			'custom_sections.*.id' => 'nullable|integer',
+			'custom_sections.*.title' => 'nullable|string|max:255',
+			'custom_sections.*.title_ar' => 'nullable|string|max:255',
+			'custom_sections.*.title_tag' => 'nullable|string|max:255',
+			'custom_sections.*.title_tag_ar' => 'nullable|string|max:255',
+			'custom_sections.*.content' => 'nullable|string',
+			'custom_sections.*.content_ar' => 'nullable|string',
+			'custom_sections.*.button_text' => 'nullable|string|max:255',
+			'custom_sections.*.button_link' => ['nullable', 'string', 'max:500', 'url'],
+		], [
+			'custom_sections.*.button_link.url' => $buttonLinkMsg,
+		]);
+
+		$validator->after(function ($validator) use ($request, $requiredMsg) {
+			$sections = $request->input('custom_sections', []);
+
+			$requiredFields = ['title', 'title_ar', 'title_tag', 'title_tag_ar', 'content', 'content_ar'];
+
+			foreach ($sections as $index => $section) {
+				$values = [];
+				foreach ($requiredFields as $field) {
+					$values[$field] = trim((string) ($section[$field] ?? ''));
+				}
+
+				$anyFilled = collect($values)->contains(fn ($v) => $v !== '');
+
+				if (!$anyFilled) {
+					continue;
+				}
+
+				foreach ($requiredFields as $field) {
+					if ($values[$field] === '') {
+						$validator->errors()->add("custom_sections.{$index}.{$field}", $requiredMsg);
+					}
+				}
+			}
+		});
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+				'errors' => $validator->errors(),
+			], 422);
+		}
+
+		$result = app(LandingPageCustomSectionService::class)->update($page->id, $request->input('custom_sections', []));
+
+		return response()->json($result, $result['success'] ? 200 : 422);
+	}
+
+	/**
+	 * Upload an image for insertion into a Custom Section's rich text
+	 * content (used by the Quill editor's image toolbar button).
+	 */
+	public function uploadCustomSectionImage(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$validator = Validator::make($request->all(), [
+			'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+		], [
+			'image.required' => __('landing.validation.custom_image_type_invalid'),
+			'image.image' => __('landing.validation.custom_image_type_invalid'),
+			'image.mimes' => __('landing.validation.custom_image_type_invalid'),
+			'image.max' => __('landing.validation.custom_image_size_exceeded'),
+		]);
+
+		if ($validator->fails()) {
+			return response()->json([
+				'success' => false,
+				'message' => $validator->errors()->first(),
+			], 422);
+		}
+
+		$path = app(FileManagerService::class)->upload($request->file('image'), 'landing-pages/custom-sections', 'public_uploads');
+		$url = app(FileManagerService::class)->getUrl($path, 'public_uploads');
+
+		return response()->json([
+			'success' => true,
+			'location' => $url,
+		]);
+	}
+
+	/**
+	 * Check whether a custom URL slug is available for the given landing
+	 * page (used by the "Custom Landing Page URL" card's live-availability
+	 * check).
+	 */
+	public function checkCustomUrl(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+			return abort(401);
+		}
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$slug = strtolower(trim((string) $request->input('slug')));
+		$isValid = (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug);
+
+		if (!$isValid) {
+			return response()->json([
+				'valid' => false,
+				'available' => false,
+				'message' => __('landing.validation.custom_url_invalid'),
+			]);
+		}
+
+		$taken = LandingPage::where('slug', $slug)->where('id', '!=', $page->id)->exists();
+
+		return response()->json([
+			'valid' => true,
+			'available' => !$taken,
+			'message' => $taken
+				? __('landing.validation.custom_url_taken')
+				: __('landing.validation.custom_url_available'),
+		]);
+	}
+
+	/**
+	 * Save the custom URL card for a landing page: the page's title,
+	 * public slug, and active (published) status. "URL Name" is a
+	 * display-only convenience field with no dedicated column yet, so it
+	 * isn't persisted.
+	 */
+	public function saveCustomUrl(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+			return abort(401);
+		}
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$slug = strtolower(trim((string) $request->input('slug')));
+
+		$validator = Validator::make(['title' => $request->input('title'), 'slug' => $slug], [
+			'title' => 'required|string|max:100',
+			'slug' => ['required', 'string', 'max:100', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
+		], [
+			'title.required' => __('landing.validation.custom_url_title_required'),
+			'slug.required' => __('landing.validation.custom_url_slug_required'),
+			'slug.regex' => __('landing.validation.custom_url_invalid'),
+		]);
+
+		if ($validator->fails()) {
+			return response()->json([
+				'message' => $validator->errors()->first(),
+			], 422);
+		}
+
+		if (LandingPage::where('slug', $slug)->where('id', '!=', $page->id)->exists()) {
+			return response()->json([
+				'message' => __('landing.validation.custom_url_taken'),
+			], 422);
+		}
+
+		$page->title = $request->input('title');
+		$page->slug = $slug;
+		$page->status = (bool) $request->input('active');
+		$page->save();
+
+		return response()->json([
+			'message' => __('landing.success.custom_url_saved'),
+		]);
 	}
 }
