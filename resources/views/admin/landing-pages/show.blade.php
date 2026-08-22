@@ -799,12 +799,35 @@
           <p class="text-secondary small" style="max-width:280px;">A curated path from founder to funded — accelerators,
             incubators, and hackathons, matched to your stage.</p>
           <div class="d-flex gap-2 mt-3">
-            <a href="#" class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill"><i
-                class="ti ti-brand-x"></i></a>
-            <a href="#" class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill"><i
-                class="ti ti-brand-linkedin"></i></a>
-            <a href="#" class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill"><i
-                class="ti ti-brand-instagram"></i></a>
+            <a href="https://x.com/your-profile" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
+              <i class="ti ti-brand-x"></i>
+            </a>
+          
+            <a href="https://www.linkedin.com/company/your-company" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
+              <i class="ti ti-brand-linkedin"></i>
+            </a>
+          
+            <a href="https://www.instagram.com/your-profile" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
+              <i class="ti ti-brand-instagram"></i>
+            </a>
+          
+            <a href="https://www.youtube.com/@your-channel" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
+              <i class="ti ti-brand-youtube"></i>
+            </a>
+          
+            <a href="https://www.tiktok.com/@your-profile" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
+              <i class="ti ti-brand-tiktok"></i>
+            </a>
+          
+            <a href="https://www.facebook.com/your-page" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
+              <i class="ti ti-brand-facebook"></i>
+            </a>
           </div>
         </div>
         <div class="col-6 col-lg-2 offset-lg-2">
