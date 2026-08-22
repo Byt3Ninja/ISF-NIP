@@ -71,7 +71,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .live-pulse {
+    .live-pulse {
         animation: none;
       }
     }
@@ -450,12 +450,19 @@
         <!-- Card 1 -->
         <div class="col-md-6 col-lg-4" data-type="incubator">
           <div class="card h-100">
-            <div class="card-top d-flex justify-content-between align-items-start p-4 pt-4 pb-0">
-              <span class="badge bg-label-primary rounded-pill text-uppercase mb-3">Incubator</span>
-              <span class="deadline-tag text-secondary"><i class="ti ti-clock"></i> 6 days left</span>
+            <div class="card-header d-flex justify-content-between align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 min-w-0">
+                <div class="avatar avatar-md flex-shrink-0">
+                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Launchpad Accelerator logo">
+                </div>
+                <div class="min-w-0">
+                  <h5 class="mb-1 text-truncate">Launchpad Accelerator 2025</h5>
+                  <span class="badge bg-label-primary rounded-pill text-uppercase">Incubator</span>
+                </div>
+              </div>
+              <span class="deadline-tag text-secondary text-nowrap"><i class="ti ti-clock"></i> 6 days left</span>
             </div>
-            <div class="px-4 pb-4">
-              <h5>Launchpad Accelerator 2025</h5>
+            <div class="card-body">
               <p class="desc text-secondary">A 12-week intensive helping early-stage startups validate their model and
                 connect with top investors.</p>
               <div class="d-flex justify-content-between mt-3">
@@ -476,12 +483,19 @@
         <!-- Card 2 -->
         <div class="col-md-6 col-lg-4" data-type="hackathon">
           <div class="card h-100">
-            <div class="card-top d-flex justify-content-between align-items-start p-4 pt-4 pb-0">
-              <span class="badge bg-label-secondary rounded-pill text-uppercase mb-3">Hackathon</span>
-              <span class="deadline-tag text-secondary"><i class="ti ti-clock"></i> 2 days left</span>
+            <div class="card-header d-flex justify-content-between align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 min-w-0">
+                <div class="avatar avatar-md flex-shrink-0">
+                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="BuildFast Hackathon logo">
+                </div>
+                <div class="min-w-0">
+                  <h5 class="mb-1 text-truncate">BuildFast Hackathon 2025</h5>
+                  <span class="badge bg-label-secondary rounded-pill text-uppercase">Hackathon</span>
+                </div>
+              </div>
+              <span class="deadline-tag text-secondary text-nowrap"><i class="ti ti-clock"></i> 2 days left</span>
             </div>
-            <div class="px-4 pb-4">
-              <h5>BuildFast Hackathon 2025</h5>
+            <div class="card-body">
               <p class="desc text-secondary">A 48-hour sprint for tech founders to build, pitch, and win in front of
                 industry judges.</p>
               <div class="d-flex justify-content-between mt-3">
@@ -502,12 +516,19 @@
         <!-- Card 3 -->
         <div class="col-md-6 col-lg-4" data-type="incubator">
           <div class="card h-100">
-            <div class="card-top d-flex justify-content-between align-items-start p-4 pt-4 pb-0">
-              <span class="badge bg-label-primary rounded-pill text-uppercase mb-3">Incubator</span>
-              <span class="deadline-tag text-secondary"><i class="ti ti-clock"></i> 11 days left</span>
+            <div class="card-header d-flex justify-content-between align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 min-w-0">
+                <div class="avatar avatar-md flex-shrink-0">
+                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Founders Incubator logo">
+                </div>
+                <div class="min-w-0">
+                  <h5 class="mb-1 text-truncate">Founders Incubator Spring</h5>
+                  <span class="badge bg-label-primary rounded-pill text-uppercase">Incubator</span>
+                </div>
+              </div>
+              <span class="deadline-tag text-secondary text-nowrap"><i class="ti ti-clock"></i> 11 days left</span>
             </div>
-            <div class="px-4 pb-4">
-              <h5>Founders Incubator Spring</h5>
+            <div class="card-body">
               <p class="desc text-secondary">9-month incubation offering workspace, capital, and seed funding for
                 pre-revenue startups.</p>
               <div class="d-flex justify-content-between mt-3">
@@ -528,12 +549,19 @@
         <!-- Closed 1 -->
         <div class="col-md-6 col-lg-4" data-type="incubator">
           <div class="card h-100 opacity-50">
-            <div class="card-top d-flex justify-content-between align-items-start p-4 pt-4 pb-0">
-              <span class="badge bg-label-primary rounded-pill text-uppercase mb-3">Incubator</span>
-              <span class="deadline-tag text-secondary">Closed</span>
+            <div class="card-header d-flex justify-content-between align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 min-w-0">
+                <div class="avatar avatar-md flex-shrink-0">
+                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Startup Fundamentals logo">
+                </div>
+                <div class="min-w-0">
+                  <h5 class="mb-1 text-truncate">Startup Fundamentals 2024</h5>
+                  <span class="badge bg-label-primary rounded-pill text-uppercase">Incubator</span>
+                </div>
+              </div>
+              <span class="deadline-tag text-secondary text-nowrap">Closed</span>
             </div>
-            <div class="px-4 pb-4">
-              <h5>Startup Fundamentals 2024</h5>
+            <div class="card-body">
               <p class="desc text-secondary">An 8-week training program covering lean methodology, product-market fit,
                 and pitch prep.</p>
               <div class="d-flex justify-content-between mt-3">
@@ -554,12 +582,19 @@
         <!-- Closed 2 -->
         <div class="col-md-6 col-lg-4" data-type="accelerator">
           <div class="card h-100 opacity-50">
-            <div class="card-top d-flex justify-content-between align-items-start p-4 pt-4 pb-0">
-              <span class="badge bg-label-secondary rounded-pill text-uppercase mb-3">Accelerator</span>
-              <span class="deadline-tag text-secondary">Closed</span>
+            <div class="card-header d-flex justify-content-between align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 min-w-0">
+                <div class="avatar avatar-md flex-shrink-0">
+                  <img class="rounded" src="/vuexy/assets/svg/icons/rocket.svg" alt="Scale-Up Accelerator logo">
+                </div>
+                <div class="min-w-0">
+                  <h5 class="mb-1 text-truncate">Scale-Up Accelerator 2024</h5>
+                  <span class="badge bg-label-secondary rounded-pill text-uppercase">Accelerator</span>
+                </div>
+              </div>
+              <span class="deadline-tag text-secondary text-nowrap">Closed</span>
             </div>
-            <div class="px-4 pb-4">
-              <h5>Scale-Up Accelerator 2024</h5>
+            <div class="card-body">
               <p class="desc text-secondary">A growth-stage accelerator focused on scaling operations, fundraising, and
                 expansion.</p>
               <div class="d-flex justify-content-between mt-3">
