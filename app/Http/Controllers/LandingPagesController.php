@@ -655,7 +655,7 @@ class LandingPagesController extends Controller
   {
     $user = auth()->user();
 
-    $query = Cycle::with('organization');
+    $query = Cycle::with('organization')->withCount('steps');
 
     if (!$user->hasRole('admin')) {
       $orgIds = $user->organizations_ids;

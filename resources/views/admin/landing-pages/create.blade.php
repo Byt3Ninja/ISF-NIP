@@ -408,6 +408,18 @@
                               <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
                                 {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
                               </span>
+                              @if(($program->steps_count ?? 0) == 0)
+                                <a href="{{ url('dashboard/programlist/show/' . $program->id) }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
+                                  <span
+                                    class="badge bg-label-secondary"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="{{ __('landing.No_steps_hint') }}"
+                                  >
+                                    {{ __('landing.No_steps') }}
+                                  </span>
+                                </a>
+                              @endif
                             </td>
                             <td>
                               @if($program->organization)

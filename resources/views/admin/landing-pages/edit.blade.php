@@ -52,10 +52,10 @@
   {{-- Header --}}
   <div class="mb-4">
     <h4 class="mb-1">
-      {{ $l == 'ar' ? 'تعديل صفحة هبوط' : 'Edit Landing Page' }}
+      {{ __('landing.Edit_landing_page') }}
     </h4>
     <p class="text-secondary mb-0">
-      {{ $l == 'ar' ? 'أدِر صفحة هبوط مخصصة لبرامجك.' : 'Manage tailored landing page for your programs.' }}
+      {{ __('landing.Manage_landing_page') }}
     </p>
   </div>
 
@@ -76,18 +76,18 @@
           <div>
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
               <i class="ti ti-link"></i>
-              {{ $l == 'ar' ? 'رابط صفحة الهبوط المخصص' : 'Custom Landing Page URL' }}
+              {{ __('landing.Custom_Landing_Page_URL') }}
             </h5>
             <small class="text-muted" id="lpUrlStatusText">
               @if($currentPage->status)
                 <span class="text-success">
                   <i class="ti ti-check me-1"></i>
-                  {{ $l == 'ar' ? 'رابط صفحة الهبوط نشط' : 'Landing page URL is active' }}
+                  {{ __('landing.Landing_Page_URL_Active') }}
                 </span>
               @else
                 <span class="text-warning">
                   <i class="ti ti-eye-off me-1"></i>
-                  {{ $l == 'ar' ? 'رابط صفحة الهبوط غير نشط' : 'Landing page URL is inactive' }}
+                  {{ __('landing.Landing_Page_URL_Inactive') }}
                 </span>
               @endif
             </small>
@@ -106,11 +106,11 @@
         <div class="d-flex flex-wrap gap-2">
           <a href="" class="btn btn-outline-primary" id="lpUrlPreviewBtn">
             <i class="ti ti-external-link me-1"></i>
-            {{ $l == 'ar' ? 'معاينة صفحة الهبوط' : 'Preview Landing Page' }}
+            {{ __('landing.Preview_Landing_Page') }}
           </a>
           <button type="submit" class="btn btn-primary" id="lpUrlSaveBtn">
             <i class="ti ti-device-floppy me-1"></i>
-            {{ $l == 'ar' ? 'حفظ' : 'Save' }}
+            {{ __('landing.Save') }}
           </button>
         </div>
       </div>
@@ -119,7 +119,7 @@
       <div class="row g-4">
         <div class="col-12">
           <label class="form-label" for="lpUrlSlug">
-            {{ $l == 'ar' ? 'الرابط المخصص' : 'Custom URL' }}
+            {{ __('landing.Custom_URL') }}
             <span class="text-danger">*</span>
           </label>
           <div class="row g-2 align-items-start">
@@ -140,17 +140,17 @@
               <div class="invalid-feedback"></div>
               <div id="lpUrlAvailabilityFeedback" class="mt-1 small fw-medium"></div>
               <small class="text-muted">
-                {{ $l == 'ar' ? 'يجب أن يحتوي الرابط على أحرف إنجليزية صغيرة وأرقام وشرطات فقط.' : 'URL must contain only lowercase letters, numbers, and hyphens.' }}
+                {{ __('landing.Custom_URL_Format_Hint') }}
               </small>
             </div>
             <div class="col-md-6 col-xl-5 d-flex flex-wrap gap-2">
               <button type="button" class="btn btn-outline-secondary text-nowrap" id="lpUrlGenerateBtn">
                 <i class="ti ti-refresh me-1"></i>
-                {{ $l == 'ar' ? 'إنشاء من العنوان' : 'Generate from title' }}
+                {{ __('landing.Generate_From_Title') }}
               </button>
               <button type="button" class="btn btn-outline-info text-nowrap" id="lpUrlCheckBtn">
                 <i class="ti ti-check me-1"></i>
-                {{ $l == 'ar' ? 'تحقق من التوفر' : 'Check Availability' }}
+                {{ __('landing.Check_Availability') }}
               </button>
             </div>
           </div>
@@ -212,7 +212,7 @@
                   </h5>
                   <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
                     <i class="ti ti-device-floppy"></i>
-                    {{ $l == 'ar' ? 'حفظ' : 'Save' }}
+                    {{ __('landing.Save') }}
                   </button>
                 </div>
 
@@ -242,8 +242,8 @@
                           >{{ old($fieldName, $field['value']) }}</textarea>
                           @if(!empty($field['maxlength']))
                             <div class="form-text">
-                              {{ $l == 'ar' ? 'الحد الأقصى' : 'Max' }} {{ $field['maxlength'] }}
-                              {{ $l == 'ar' ? 'حرف' : 'characters' }}
+                              {{ __('landing.Max') }} {{ $field['maxlength'] }}
+                              {{ __('landing.characters') }}
                             </div>
                           @endif
                           @break
@@ -322,7 +322,7 @@
                                     {{ strtoupper(str_replace(['.', ','], ['', ', '], trim($field['accept']))) }}
                                   @endif
                                   @if(!empty($field['max_size_mb']))
-                                    &mdash; {{ $l == 'ar' ? 'الحد الأقصى' : 'Max' }} {{ $field['max_size_mb'] }}MB
+                                    &mdash; {{ __('landing.Max') }} {{ $field['max_size_mb'] }}MB
                                   @endif
                                 </div>
                               @endif
@@ -353,7 +353,7 @@
                   <hr class="my-4">
                   <div class="d-flex align-items-center justify-content-between mb-3">
                     <h6 class="mb-0">
-                      {{ $l == 'ar' ? 'البطاقات' : 'Cards' }}
+                      {{ __('landing.Cards') }}
                     </h6>
                     <button
                       type="button"
@@ -361,7 +361,7 @@
                       id="aboutAddCard"
                     >
                       <i class="ti ti-plus"></i>
-                      {{ $l == 'ar' ? 'إضافة بطاقة' : 'Add Card' }}
+                      {{ __('landing.Add_Card') }}
                     </button>
                   </div>
                   <div class="row g-4" id="aboutCardsContainer"></div>
@@ -373,17 +373,17 @@
                     <div>
                       <h6 class="mb-1 d-flex align-items-center gap-2">
                         <i class="ti ti-rocket text-primary"></i>
-                        {{ $l == 'ar' ? 'اختيار البرامج' : 'Programs Selection' }}
+                        {{ __('landing.Programs_Selection') }}
                       </h6>
                       <small class="text-muted">
-                        {{ $l == 'ar' ? 'حدد البرامج التي ستظهر على صفحة الهبوط الخاصة بك.' : 'Choose which programs will appear on your landing page.' }}
+                        {{ __('landing.choose_programs') }}
                       </small>
                     </div>
                   </div>
                   <div class="row g-3 mb-3">
                     <div class="col-12 col-lg-5 col-xl-4">
                       <label class="form-label mb-1" for="programsSearchInput">
-                        {{ $l == 'ar' ? 'البحث' : 'Search' }}
+                        {{ __('landing.Search') }}
                       </label>
                       <div class="input-group input-group-merge">
                         <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
@@ -391,29 +391,29 @@
                           type="search"
                           id="programsSearchInput"
                           class="form-control"
-                          placeholder="{{ $l == 'ar' ? 'ابحث عن البرامج...' : 'Search programs...' }}"
-                          aria-label="{{ $l == 'ar' ? 'البحث في البرامج' : 'Search programs' }}"
+                          placeholder="{{ __('landing.Search_Programs_Placeholder') }}"
+                          aria-label="{{ __('landing.Search_Programs_Aria') }}"
                         >
                       </div>
                     </div>
                     <div class="col-12 col-sm-6 col-lg-3 col-xl-3">
                       <label class="form-label mb-1" for="programsVisibilityFilter">
-                        {{ $l == 'ar' ? 'الظهور' : 'Visibility' }}
+                        {{ __('landing.Visibility') }}
                       </label>
                       <select class="form-select select2" id="programsVisibilityFilter" data-allow-clear="true">
                         <option value=""></option>
-                        <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
-                        <option value="visible">{{ $l == 'ar' ? 'ظاهر' : 'Visible' }}</option>
-                        <option value="hidden">{{ $l == 'ar' ? 'مخفي' : 'Hidden' }}</option>
+                        <option value="all">{{ __('landing.All') }}</option>
+                        <option value="visible">{{ __('landing.Visible') }}</option>
+                        <option value="hidden">{{ __('landing.Hidden') }}</option>
                       </select>
                     </div>
                     <div class="col-12 col-sm-6 col-lg-3 col-xl-3">
                       <label class="form-label mb-1" for="programsOrganizationFilter">
-                        {{ $l == 'ar' ? 'المنظمة' : 'Organization' }}
+                        {{ __('landing.Organization') }}
                       </label>
                       <select class="form-select select2" id="programsOrganizationFilter" data-allow-clear="true">
                         <option value=""></option>
-                        <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
+                        <option value="all">{{ __('landing.All') }}</option>
                         @foreach($programOrganizations as $org)
                           <option value="{{ $org->id }}">{{ $org->name }}</option>
                         @endforeach
@@ -421,11 +421,11 @@
                     </div>
                     <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
                       <label class="form-label mb-1" for="programsTypeFilter">
-                        {{ $l == 'ar' ? 'نوع البرنامج' : 'Program Type' }}
+                        {{ __('landing.Program_Type') }}
                       </label>
                       <select class="form-select select2" id="programsTypeFilter" data-allow-clear="true">
                         <option value=""></option>
-                        <option value="all">{{ $l == 'ar' ? 'الكل' : 'All' }}</option>
+                        <option value="all">{{ __('landing.All') }}</option>
                         <option value="Hackathon">{{ __('cycles.Hackathon') }}</option>
                         <option value="General_Program">{{ __('cycles.General_Program') }}</option>
                       </select>
@@ -435,10 +435,10 @@
                     <table class="table table-hover mb-0">
                       <thead class="table-light">
                         <tr>
-                          <th>{{ $l == 'ar' ? 'البرنامج' : 'Program' }}</th>
-                          <th>{{ $l == 'ar' ? 'النوع' : 'Type' }}</th>
-                          <th>{{ $l == 'ar' ? 'المنظمة' : 'Organization' }}</th>
-                          <th>{{ $l == 'ar' ? 'الظهور' : 'Visible' }}</th>
+                          <th>{{ __('landing.Program') }}</th>
+                          <th>{{ __('landing.Type') }}</th>
+                          <th>{{ __('landing.Organization') }}</th>
+                          <th>{{ __('landing.Visible') }}</th>
                         </tr>
                       </thead>
                       <tbody id="programsListBody">
@@ -472,15 +472,15 @@
                                         class="badge bg-label-secondary"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="top"
-                                        title="{{ $l == 'ar' ? 'انتهى هذا البرنامج، لذلك لا يمكن عرضه على صفحة الهبوط' : 'This program has ended and can no longer be shown on the landing page' }}"
+                                        title="{{ __('landing.Program_ended_hint') }}"
                                       >
-                                        {{ $l == 'ar' ? 'منتهي' : 'Ended' }}
+                                        {{ __('landing.Ended') }}
                                       </span>
                                     @elseif(!$program->is_public || empty($program->public_slug))
                                       <span
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="top"
-                                        title="{{ $l == 'ar' ? 'هذا البرنامج غير عام (Public) وليس له رابط URL، لذلك زر التقديم لن يعمل على صفحة الهبوط حتى يتم تفعيل ذلك من إعدادات البرنامج' : 'This program isn\'t Public and has no URL slug, so its Apply button won\'t work on the landing page until that\'s set in the program\'s Visibility settings' }}"
+                                        title="{{ __('landing.Program_not_public_hint') }}"
                                       >
                                         <i class="ti ti-alert-triangle text-warning"></i>
                                       </span>
@@ -499,6 +499,18 @@
                               <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
                                 {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
                               </span>
+                              @if(($program->steps_count ?? 0) == 0)
+                                <a href="{{ url('dashboard/programlist/show/' . $program->id) }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
+                                  <span
+                                    class="badge bg-label-secondary"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="{{ __('landing.No_steps_hint') }}"
+                                  >
+                                    {{ __('landing.No_steps') }}
+                                  </span>
+                                </a>
+                              @endif
                             </td>
                             <td>
                               @if($program->organization)
@@ -535,10 +547,10 @@
                   <div id="programsNoResults" class="text-center py-5 d-none">
                     <i class="ti ti-search text-muted fs-1 mb-2 d-block"></i>
                     <h5 class="text-muted mb-1" id="programsNoResultsSearch">
-                      {{ $l == 'ar' ? 'لم يتم العثور على برامج.' : 'No programs found.' }}
+                      {{ __('landing.No_Programs_Found') }}
                     </h5>
                     <h5 class="text-muted mb-1 d-none" id="programsNoResultsFilters">
-                      {{ $l == 'ar' ? 'لا توجد برامج تطابق عوامل التصفية المحددة.' : 'No programs match the selected filters.' }}
+                      {{ __('landing.No_Programs_Match') }}
                     </h5>
                   </div>
                   <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 mt-3">
@@ -553,7 +565,7 @@
                   <hr class="my-4">
                   <div class="d-flex align-items-center justify-content-between mb-3">
                     <h6 class="mb-0">
-                      {{ $l == 'ar' ? 'الخطوات' : 'Process Steps' }}
+                      {{ __('landing.Process_Steps') }}
                     </h6>
                     <button
                       type="button"
@@ -561,7 +573,7 @@
                       id="howAddStep"
                     >
                       <i class="ti ti-plus"></i>
-                      {{ $l == 'ar' ? 'إضافة خطوة' : 'Add Step' }}
+                      {{ __('landing.Add_Step') }}
                     </button>
                   </div>
                   <div class="row g-4" id="howStepsContainer"></div>
@@ -576,17 +588,17 @@
                       id="customAddSection"
                     >
                       <i class="ti ti-plus"></i>
-                      {{ $l == 'ar' ? 'إضافة قسم مخصص' : 'Add Custom Section' }}
+                      {{ __('landing.Add_Custom_Section') }}
                     </button>
                   </div>
                   <div id="customSectionsContainer"></div>
                   <div id="customSectionsEmpty" class="text-center py-5 border border-dashed rounded">
                     <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
                     <h5 class="text-muted mb-1">
-                      {{ $l == 'ar' ? 'لا توجد أقسام مخصصة بعد' : 'No custom sections yet' }}
+                      {{ __('landing.No_custom_sections_yet') }}
                     </h5>
                     <p class="text-muted small mb-0">
-                      {{ $l == 'ar' ? 'أضف أقسامًا مخصصة لإثراء صفحة الهبوط الخاصة بك' : 'Add custom sections to enrich your landing page' }}
+                      {{ __('landing.Add_Custom_Sections_Hint') }}
                     </p>
                   </div>
                 @endif
@@ -605,20 +617,20 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          {{ $l == 'ar' ? 'إضافة زر' : 'Add Button' }}
+          {{ __('landing.Add_Button') }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label" for="customButtonText">
-            {{ $l == 'ar' ? 'نص الزر' : 'Button Text' }}
+            {{ __('landing.Button_text') }}
           </label>
           <input type="text" class="form-control" id="customButtonText" maxlength="50">
         </div>
         <div class="mb-3">
           <label class="form-label" for="customButtonLink">
-            {{ $l == 'ar' ? 'رابط الزر' : 'Button Link' }}
+            {{ __('landing.Button_link') }}
           </label>
           <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
           <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
@@ -626,10 +638,10 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-          {{ $l == 'ar' ? 'إلغاء' : 'Cancel' }}
+          {{ __('landing.Cancel') }}
         </button>
         <button type="button" class="btn btn-primary" id="customButtonSave">
-          {{ $l == 'ar' ? 'إضافة' : 'Add' }}
+          {{ __('landing.Add') }}
         </button>
       </div>
     </div>
