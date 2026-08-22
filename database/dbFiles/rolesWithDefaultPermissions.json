@@ -5525,6 +5525,56 @@
         ]
     },
     {
+        "name": "Landing Pages Management",
+        "description": null,
+        "permissions": [
+            {
+                "name": "landing-pages.index",
+                "description": "List Custom Landing Pages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "landing-pages.create",
+                "description": "Create Custom Landing Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "landing-pages.edit",
+                "description": "Edit Custom Landing Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "landing-pages.destroy",
+                "description": "Delete Custom Landing Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin",
+                    "organizationmanager"
+                ]
+            }
+        ]
+    },
+    {
         "name": "Form Builder",
         "description": null,
         "permissions": [

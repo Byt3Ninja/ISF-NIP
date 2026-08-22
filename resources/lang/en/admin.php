@@ -353,6 +353,7 @@ return [
 	'Add Service' => 'Add Service',
 	'All Services' => 'All Services',
 	'Rooms Management' => 'Rooms Management',
+	'Custom Landing Pages' => 'Custom Landing Pages',
 	'Permissions' => 'Permissions',
 	'CreatePermission' => 'Create Permission',
 	'EditPermission' => 'Edit Permission',
@@ -3193,6 +3194,8 @@ return [
 
 	// Step 5: Custom Sections - Success/Error Messages
 	'Custom sections saved successfully' => 'Custom sections saved successfully.',
+	'Custom section saved successfully' => 'Custom section saved successfully.',
+	'Landing page not found' => 'Landing page not found',
 	'Error saving custom sections' => 'Error saving custom sections',
 	'Section deleted successfully' => 'Section deleted successfully.',
 	'Section not found' => 'Section not found',

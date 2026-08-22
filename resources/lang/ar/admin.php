@@ -349,6 +349,7 @@ return [
 	'Add Service' => 'إضافة خدمة',
 	'All Services' => 'كافة الخدمات',
 	'Rooms Management' => 'إدارة الغرف',
+	'Custom Landing Pages' => 'الصفحات الرئيسية المخصصة',
 	'Permissions' => 'الصلاحيات',
 	'CreatePermission' => 'إنشاء صلاحية',
 	'EditPermission' => 'تحرير صلاحية',
@@ -3250,6 +3251,8 @@ return [
 
 	// Step 5: Custom Sections - Success/Error Messages
 	'Custom sections saved successfully' => 'تم حفظ الأقسام المخصصة بنجاح',
+	'Custom section saved successfully' => 'تم حفظ القسم المخصص بنجاح.',
+	'Landing page not found' => 'صفحة الهبوط غير موجودة',
 	'Error saving custom sections' => 'خطأ في حفظ الأقسام المخصصة',
 	'Section deleted successfully' => 'تم حذف القسم بنجاح',
 	'Section not found' => 'القسم غير موجود',

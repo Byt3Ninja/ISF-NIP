@@ -463,6 +463,30 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Client's company
     Route::resource('organizations', 'organizationsController');
 
+    // Custom Landing Pages list
+    Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
+    Route::get('/landing-pages/create', 'LandingPagesController@create')->name('landing-pages.create');
+
+    // Custom landing page URL configuration (availability check + save).
+    // {id} is optional on the check route (must be the trailing segment
+    // for Laravel to omit it cleanly) since the create screen checks slug
+    // availability before any page exists yet.
+    Route::post('/landing-pages/url/check/{id?}', 'LandingPagesController@checkCustomUrl')->name('landing-pages.url.check');
+    Route::post('/landing-pages/{id}/url/save', 'LandingPagesController@saveCustomUrl')->name('landing-pages.url.save');
+
+    Route::get('/landing-pages/{id}/edit', 'LandingPagesController@edit')->name('landing-pages.edit');
+    Route::delete('/landing-pages/{id}', 'LandingPagesController@destroy')->name('landing-pages.destroy');
+
+    Route::put('/landing-pages/{id}/about', 'LandingPagesController@updateAbout')->name('landing-pages.about.update');
+    Route::put('/landing-pages', 'LandingPagesController@store')->name('landing-pages.store');
+    Route::put('/landing-pages/{id}/general', 'LandingPagesController@updateGeneral')->name('landing-pages.general.update');
+    Route::put('/landing-pages/{id}/hero', 'LandingPagesController@updateHero')->name('landing-pages.hero.update');
+    Route::put('/landing-pages/{id}/programs', 'LandingPagesController@updatePrograms')->name('landing-pages.programs.update');
+    Route::put('/landing-pages/{id}/how', 'LandingPagesController@updateHow')->name('landing-pages.how.update');
+    Route::put('/landing-pages/{id}/custom-sections', 'LandingPagesController@updateCustomSections')->name('landing-pages.custom-sections.update');
+    Route::post('/landing-pages/{id}/custom-sections/upload-image', 'LandingPagesController@uploadCustomSectionImage')->name('landing-pages.custom-sections.upload-image');
+
+
     //Assessment
     Route::resource('questions', 'QuestionController');
     Route::resource('weights', 'WeightController');
@@ -1085,6 +1109,11 @@ Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCal
 // Public Organization Landing Page
 Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
 Route::post('/o/{slug}/contact', 'PublicLandingController@submitContact')->name('organization.contact.submit');
+
+
+// Public Custom Landing Page
+Route::get('/lp/{slug}', 'LandingPagesController@show')->name('landing-pages.public');
+
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');
