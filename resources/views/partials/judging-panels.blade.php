@@ -15,6 +15,158 @@
     border-color: var(--bs-danger);
     color: var(--bs-danger);
   }
+
+  /* ------------------------------------------------------------------
+     History panels
+
+     This screen mixes two kinds of thing: panels an admin can still act on,
+     and panels that merely record what already happened. The design job is to
+     make that distinction readable at a glance without the finished record
+     shouting louder than the live work.
+
+     The theme's own surfaces do the work. A card sits at --bs-card-bg (white in
+     light, a lifted slate in dark) on a page of --bs-body-bg. A finished panel
+     therefore RECEDES to the page color instead of being painted over: it reads
+     as an inset shelf rather than a grey slab stacked on top of the card.
+
+     Deliberately NOT --bs-secondary-bg: that token is rgba(47,43,61,.12) — a 12%
+     dark wash meant for small chips. Across a whole panel it renders as heavy
+     grey, which is what made this section outweigh the live panels around it.
+     Every value below is a theme variable, so the light/dark stylesheet swap
+     recolors it automatically; no hardcoded hex would survive that toggle.
+     ------------------------------------------------------------------ */
+  .accordion-item.panel-history {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+  }
+
+  /* One quiet accent marks the state on the inline edge, so it reads correctly
+     in both LTR and RTL without a second rule. */
+  .accordion-item.panel-history {
+    box-shadow: inset 3px 0 0 0 var(--bs-border-color);
+  }
+
+  .accordion-item.panel-history > .accordion-header .accordion-button {
+    background-color: transparent;
+    color: var(--bs-secondary-color);
+  }
+
+  /* The badge is a pill with its clock icon, sized to sit beside the title
+     without competing with it. */
+  .accordion-item.panel-history .accordion-button .badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--bs-body-bg) !important;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 50rem;
+    padding: .25rem .625rem;
+    margin-inline-start: .625rem !important;
+    color: var(--bs-secondary-color);
+    font-size: .75rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .accordion-item.panel-history .accordion-button .badge i {
+    font-size: .875rem;
+    line-height: 1;
+  }
+
+  /* ------------------------------------------------------------------
+     Panel header / body separation
+
+     Every panel — live or history — needs a hairline between the header strip
+     and the fields below it. Without one the title floats directly above the
+     first label and the two read as a single block, which is what made a long
+     list of panels feel undifferentiated.
+     ------------------------------------------------------------------ */
+  #panels-container .accordion-item > .accordion-collapse > .accordion-body {
+    border-top: 1px solid var(--bs-border-color);
+    /* Generous top padding so the first row of labels (Judges / Startups) clears
+       the divider instead of sitting tight against it. The Bootstrap default
+       leaves them cramped once a rule is introduced above. */
+    padding: 1.5rem 1.25rem 1.25rem;
+  }
+
+  /* Give the panels breathing room from each other so each reads as its own
+     card rather than one continuous stack. */
+  #panels-container .accordion-item {
+    margin-bottom: .75rem;
+    border-radius: var(--bs-border-radius);
+  }
+
+  #panels-container .accordion-item:last-child {
+    margin-bottom: 0;
+  }
+
+  /* The header strip is the panel's handle: keep it compact so a collapsed list
+     of finished panels stays scannable. */
+  #panels-container .accordion-header .accordion-button {
+    padding-block: .875rem;
+  }
+
+  /* Locked fields sit on the CARD color — lifted just clear of the recessed
+     panel so each value still reads as a distinct field. Muting is carried by
+     the surrounding surface, not by fading the text: this is a record people
+     still need to read. */
+  .accordion-item.panel-history fieldset[disabled] .form-control,
+  .accordion-item.panel-history fieldset[disabled] .form-select,
+  .accordion-item.panel-history fieldset[disabled] .select2-selection {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+    opacity: 1;
+    cursor: default;
+  }
+
+  /* Select2 chips: same treatment, kept legible. */
+  .accordion-item.panel-history .select2-selection__choice {
+    background-color: var(--bs-card-bg) !important;
+    border-color: var(--bs-border-color) !important;
+    color: var(--bs-body-color) !important;
+    opacity: 1;
+  }
+
+  /* The startups picker stays clickable so the selection can be READ, so it must
+     not wear the flat look of its locked neighbours. */
+  .accordion-item.panel-history .companies-picker-trigger[data-readonly="1"] {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .accordion-item.panel-history .companies-picker-trigger[data-readonly="1"]:hover {
+    border-color: var(--bs-primary);
+  }
+
+  /* The lock notice is a caption above the record, not a warning banner. It is
+     the one place the rule is stated in full, so it stays — but tightly, since a
+     boxed alert on every finished panel is what made the list feel heavy. */
+  .accordion-item.panel-history .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    padding: .75rem 1rem;
+    margin-bottom: 1.5rem;
+    /* --bs-body-color, not --bs-secondary-color: the latter is the body colour at
+       75% opacity, which lands at ~3:1 on the recessed panel background — under
+       the 4.5:1 AA floor. This sentence explains WHY the panel is locked, so it
+       has to be comfortably readable rather than decoratively faint. */
+    color: var(--bs-body-color);
+    font-size: .8125rem;
+  }
+
+  /* Startups summary: names, not just a count, so the trigger says what it holds. */
+  .companies-picker-trigger .companies-summary {
+    font-weight: 500;
+    text-align: start;
+  }
+
 </style>
 
 <div class="row">
@@ -48,29 +200,63 @@
 
       <div class="accordion mb-4" id="panels-container">
         @foreach($judgingPanels as $index => $panel)
-          <div class="accordion-item border" data-index="{{ $index }}">
+          @php
+            // A finished panel is History: read-only and preserved as a record of
+            // what took place. Collapsed by default so live panels stay in view.
+            $isHistory = !empty($panel['is_history']);
+            $expanded = $index === 0 && !$isHistory;
+          @endphp
+          <div class="accordion-item border {{ $isHistory ? 'panel-history' : '' }}" data-index="{{ $index }}"
+            @if($isHistory) data-history="1" @endif>
+            @if($isHistory)
+              {{-- The panel number this history record is stored under. Deleting an
+                   earlier panel renumbers the accordion, so position alone cannot
+                   identify it; the server matches on this instead. Outside the
+                   fieldset so it is still submitted. --}}
+              <input type="hidden" name="panels[{{ $index }}][history_panel]"
+                value="{{ $panel['panel_number'] ?? $index + 1 }}">
+            @endif
             <h2 class="accordion-header d-flex align-items-center py-3">
-              <button class="accordion-button flex-grow-1 {{ $index === 0 ? '' : 'collapsed' }}" type="button"
+              <button class="accordion-button flex-grow-1 {{ $expanded ? '' : 'collapsed' }}" type="button"
                 data-bs-toggle="collapse" data-bs-target="#panel-{{ $index + 1 }}">
                 <i class="ti ti-user-check me-2"></i>
                 {{ __('admin.screening.panel') }} #{{ $index + 1 }}
+                @if($isHistory)
+                  <span class="badge bg-label-secondary ms-2">
+                    <i class="ti ti-history me-1"></i>{{ __('admin.screening.panel_history') }}
+                  </span>
+                @endif
               </button>
+              {{-- History panels record a screening that already happened, so they
+                   cannot be deleted. --}}
               <button type="button"
-                class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel {{ $index === 0 && count($judgingPanels) === 1 ? 'd-none' : '' }}"
+                class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel {{ ($index === 0 && count($judgingPanels) === 1) || $isHistory ? 'd-none' : '' }}"
                 title="{{ __('admin.delete') }}">
                 <i class="ti ti-trash"></i>
               </button>
             </h2>
 
-            <div id="panel-{{ $index + 1 }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}">
-              <div class="accordion-body mt-3">
+            <div id="panel-{{ $index + 1 }}" class="accordion-collapse collapse {{ $expanded ? 'show' : '' }}">
+              <div class="accordion-body">
+                @if($isHistory)
+                  <div class="alert alert-secondary d-flex align-items-center" role="alert">
+                    <i class="ti ti-lock me-2"></i>
+                    <span>{{ __('admin.screening.panel_history_notice') }}</span>
+                  </div>
+                @endif
+                {{-- One fieldset gates the whole panel rather than a `disabled` on
+                     each control: a single authoritative switch cannot be applied
+                     to some inputs and forgotten on others. The server rebuilds
+                     history panels from stored state regardless, since disabled
+                     inputs are simply absent from the submission. --}}
+                <fieldset @if($isHistory) disabled @endif class="border-0 p-0 m-0">
                 <div class="row">
                   <!-- Judges -->
                   <div class="col-md-6 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                       <label class="form-label fw-semibold mb-0">{{ __('admin.Judgers') }}</label>
                       <a href="javascript:void(0);"
-                        class="select-all-toggle small fw-medium">{{ __('admin.select_all') }}</a>
+                        class="select-all-toggle small fw-medium {{ $isHistory ? 'd-none' : '' }}">{{ __('admin.select_all') }}</a>
                     </div>
                     <select name="panels[{{ $index }}][judges][]" class="form-select select2" multiple
                       data-placeholder="{{ __('cycles.Select Judges') }}">
@@ -87,7 +273,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                       <label class="form-label fw-semibold mb-0">{{ __('admin.Startups') }}</label>
                       <a href="javascript:void(0);"
-                        class="select-all-toggle small fw-medium">{{ __('admin.select_all') }}</a>
+                        class="select-all-toggle small fw-medium {{ $isHistory ? 'd-none' : '' }}">{{ __('admin.select_all') }}</a>
                     </div>
                     @php
                       // Off-step companies saved in THIS panel (read-only references).
@@ -197,6 +383,25 @@
                     </div>
                   </div>
                 </div>
+                </fieldset>
+
+                {{-- Notify now (per panel). One switch covers judges AND startups,
+                     mail AND in-app notification: separate toggles per audience and
+                     per channel would be configuration nobody sets correctly.
+                     Default OFF — saving never contacts anyone unless asked. On a
+                     history panel it is hidden entirely, since a finished meeting
+                     must not re-notify. --}}
+                @unless($isHistory)
+                  <div class="form-check form-switch mt-3">
+                    <input class="form-check-input notify-toggle" type="checkbox"
+                      id="notify-toggle-{{ $index + 1 }}"
+                      name="panels[{{ $index }}][notify]" value="1">
+                    <label class="form-check-label" for="notify-toggle-{{ $index + 1 }}">
+                      {{ __('admin.screening.notify_now') }}
+                      <span class="text-muted d-block small">{{ __('admin.screening.notify_now_hint') }}</span>
+                    </label>
+                  </div>
+                @endunless
               </div>
             </div>
           </div>
@@ -204,7 +409,10 @@
       </div>
 
       <div class="d-flex justify-content-end mt-4">
-        <button type="submit" class="btn btn-primary">{{ __('admin.submit') }}</button>
+        <button type="submit" class="btn btn-primary" id="panels-submit-btn">
+          <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+          <span class="submit-label">{{ __('admin.submit') }}</span>
+        </button>
       </div>
     </form>
   </div>
@@ -213,6 +421,13 @@
 @push('scripts')
   <script>
     $(function () {
+
+      // Declared up here, not beside the badge helpers further down: initPlugins()
+      // runs during setup and calls companyDisplayName()/syncCompaniesState(),
+      // which read `locale`. A `const` declared after that call is still in its
+      // temporal dead zone, so reaching it throws
+      // "ReferenceError: Cannot access 'locale' before initialization".
+      const locale = '{{ $l ?? "en" }}';
 
       const allJudges = @json($judges);
       const allCompanies = @json($companies);
@@ -384,7 +599,10 @@
           if (search && !String(name).toLowerCase().includes(search)) return;
           matches++;
           const checked = selected.has(id) ? 'checked' : '';
-          rows += `<li class="list-group-item px-3 py-2"><label class="d-flex align-items-center gap-2 mb-0 w-100 cursor-pointer"><input type="checkbox" class="form-check-input company-check m-0" value="${id}" ${checked}> <span class="text-muted small company-number" style="min-width: 1.75rem;">${i + 1}.</span> <span class="text-truncate">${esc(name)}</span></label></li>`;
+          // A history panel's picker opens so the selection can be READ, but its
+          // checkboxes must not change anything.
+          const ro = $trig.attr('data-readonly') === '1' ? 'disabled' : '';
+          rows += `<li class="list-group-item px-3 py-2"><label class="d-flex align-items-center gap-2 mb-0 w-100 ${ro ? '' : 'cursor-pointer'}"><input type="checkbox" class="form-check-input company-check m-0" value="${id}" ${checked} ${ro}> <span class="text-muted small company-number" style="min-width: 1.75rem;">${i + 1}.</span> <span class="text-truncate">${esc(name)}</span></label></li>`;
         });
 
         if (search && matches === 0) {
@@ -419,7 +637,7 @@
               <input type="text" class="form-control companies-search" placeholder="${esc(rangeLabels.search)}" value="${esc(search)}" autocomplete="off">
             </div>
           </div>
-          <div class="auto-range p-3 border-bottom bg-card">
+          <div class="auto-range p-3 border-bottom bg-card ${$trig.attr('data-readonly') === '1' ? 'd-none' : ''}">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-semibold small text-uppercase">${rangeLabels.title}</span>
               <a href="javascript:void(0);" class="clear-range small fw-medium ${hasRange ? '' : 'd-none'}">${rangeLabels.clear}</a>
@@ -450,9 +668,32 @@
           $container.append(`<input type="hidden" name="panels[${panelIndex}][companies][]" value="${id}">`);
         });
 
+        // Name the startups rather than only counting them. "3 Selected" forces a
+        // click to learn WHICH three, and on a history panel — where the picker is
+        // read-only — the trigger is the primary way the selection is read at all.
+        // Long lists fall back to a count so the button cannot grow unbounded.
         const count = selected.size;
         const $summary = $trig.find('.companies-summary');
-        $summary.text(count > 0 ? count + ' {{ __("admin.Selected") }}' : '{{ __("admin.select_startups") }}');
+        if (count === 0) {
+          $summary.text('{{ __("admin.select_startups") }}');
+        } else {
+          const names = [...selected]
+            .map(id => companiesMap[id] ? companyDisplayName(companiesMap[id]) : null)
+            .filter(Boolean);
+          const sep = locale === 'ar' ? '، ' : ', ';
+          // Names are shown only when they account for EVERY selected id. If one
+          // cannot be resolved (an off-step startup, or stale state), listing the
+          // rest would understate the selection — "Alpha" while two are selected.
+          // Fall back to the count, which is always true.
+          $summary.text(
+            names.length === count && count <= 3
+              ? names.join(sep)
+              : count + ' {{ __("admin.Selected") }}'
+          );
+        }
+        $summary.attr('title', [...selected]
+          .map(id => companiesMap[id] ? companyDisplayName(companiesMap[id]) : id)
+          .join(', '));
 
         // The Select All / Deselect All label must describe what the link will do
         // to the rows on screen, so it reflects the currently visible subset.
@@ -493,6 +734,7 @@
       };
 
       const toggleAllCompanies = async ($trig) => {
+        if ($trig.attr('data-readonly') === '1') return;
         const ids = visibleCompanyIds($trig);
         const selected = $trig.data('selected') || new Set();
         const allOn = ids.length > 0 && ids.every(id => selected.has(id));
@@ -560,16 +802,40 @@
         });
       });
 
+      // True for controls inside a finished (History) panel.
+      const inHistoryPanel = (el) => $(el).closest('.accordion-item').attr('data-history') === '1';
+
       const initPlugins = (el) => {
-        $(el).find('.session-date').flatpickr({ dateFormat: 'Y-m-d', minDate: 'today' });
-        $(el).find('.session-time').flatpickr({ enableTime: true, noCalendar: true, dateFormat: 'H:i' });
+        // flatpickr is NOT attached to history panels. `minDate: 'today'` rejects
+        // a past date, and the picker then rewrites the field — which is why a
+        // finished panel rendered its END TIME inside the Session Date box. The
+        // stored value is correct; the picker was corrupting the display. A
+        // read-only panel needs no picker anyway.
+        $(el).find('.session-date').filter((_, d) => !inHistoryPanel(d))
+          .flatpickr({ dateFormat: 'Y-m-d', minDate: 'today' });
+        $(el).find('.session-time').filter((_, d) => !inHistoryPanel(d))
+          .flatpickr({ enableTime: true, noCalendar: true, dateFormat: 'H:i' });
         $(el).find('.select2').each(function () {
           initSelect2($(this));
+          // Select2 renders its own widget, which ignores an ancestor
+          // `fieldset[disabled]` and stays fully interactive — judges could still
+          // be added to a locked panel. Disable the underlying <select> so Select2
+          // reflects it.
+          if (inHistoryPanel(this)) {
+            $(this).prop('disabled', true).trigger('change.select2');
+          }
         });
         $(el).find('.companies-picker-trigger').each(function () {
           const $trig = $(this);
           initCompaniesState($trig);
+          // The startups picker is a <button>, so the fieldset disables it and the
+          // popover cannot open — leaving "3 Selected" with no way to see WHICH
+          // three. A history panel keeps its popover so the selection stays
+          // viewable; the checkboxes inside are rendered read-only instead.
           initCompaniesPopover($trig);
+          if (inHistoryPanel(this)) {
+            $trig.prop('disabled', false).attr('data-readonly', '1');
+          }
         });
         $(el).find('.accordion-item').each(function () {
           const $panel = $(this);
@@ -590,18 +856,33 @@
           const idx = i + 1;
           const $panel = $(el);
           $panel.attr('data-index', i);
-          $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> {{ __('admin.screening.panel') }} #${idx}`);
+          // Rebuilding the label wholesale would strip a history panel's badge,
+          // so re-append it for panels that carry one.
+          const historyBadge = $panel.attr('data-history') === '1'
+            ? ` <span class="badge bg-label-secondary ms-2"><i class="ti ti-history me-1"></i>{{ __('admin.screening.panel_history') }}</span>`
+            : '';
+          $panel.find('.accordion-button').attr('data-bs-target', `#panel-${idx}`).html(`<i class="ti ti-user-check me-2"></i> {{ __('admin.screening.panel') }} #${idx}${historyBadge}`);
           $panel.find('.accordion-collapse').attr('id', `panel-${idx}`);
           $panel.find('.session-toggle').attr('id', `session-toggle-${idx}`);
           $panel.find('.interval-toggle').attr('id', `interval-toggle-${idx}`);
+          // The notify switch carries a name, so it must be renumbered like any
+          // other field; its label is tied to it by id.
+          $panel.find('.notify-toggle')
+            .attr('name', `panels[${i}][notify]`)
+            .attr('id', `notify-toggle-${idx}`)
+            .closest('.form-check').find('.form-check-label').attr('for', `notify-toggle-${idx}`);
           $panel.find('.companies-picker-trigger, .companies-hidden-container').attr('data-panel-index', i);
           $panel.find('[name*="panels["]').each(function () {
             $(this).attr('name', $(this).attr('name').replace(/panels\[\d+\]/, `panels[${i}]`));
           });
 
-          // Always hide delete button for first panel
+          // Delete is hidden for the first panel (a step keeps at least one) and
+          // for ANY history panel — a finished screening is a record and must not
+          // be removable. This ran on every Add Panel and previously re-showed the
+          // button on locked panels, so adding a panel made the finished ones
+          // deletable again.
           const $btn = $panel.find('.remove-panel');
-          if (i === 0) {
+          if (i === 0 || $panel.attr('data-history') === '1') {
             $btn.addClass('d-none');
           } else {
             $btn.removeClass('d-none');
@@ -632,6 +913,8 @@
         const panelIndex = $(this).closest('.companies-popover').data('panel-index');
         const $trig = getCompaniesTrigger(panelIndex);
         if (!$trig.length) return;
+        // A history panel's picker is view-only; never mutate its selection.
+        if ($trig.attr('data-readonly') === '1') return;
         const selected = $trig.data('selected') || new Set();
 
         if (this.checked) {
@@ -765,7 +1048,45 @@
       $(document).on('change', '.select2', function () { updateSelectAllText($(this)); });
 
       $('#addPanelBtn').on('click', () => {
-        const $clone = $('.accordion-item').first().clone();
+        // Clone a LIVE panel as the template. Cloning a history panel would carry
+        // its disabled fieldset, History badge and locked state into a new panel.
+        const $template = $('.accordion-item').not('[data-history="1"]').first();
+        const $clone = ($template.length ? $template : $('.accordion-item').first()).clone();
+        // A new panel is never history, whatever it was cloned from. When EVERY
+        // existing panel is history there is no live template, so the clone comes
+        // from a locked panel and every lock has to be undone explicitly:
+        // initPlugins() disables the judges <select> and marks the startups picker
+        // read-only DIRECTLY on those elements, so clearing the fieldset alone
+        // leaves both controls dead in the new panel.
+        $clone.removeAttr('data-history').removeClass('panel-history');
+        $clone.find('fieldset').prop('disabled', false).removeAttr('disabled');
+        $clone.find('select').prop('disabled', false).removeAttr('disabled');
+        $clone.find('input, textarea, button').prop('disabled', false);
+        $clone.find('.companies-picker-trigger').removeAttr('data-readonly');
+        // THE marker that makes the server treat a panel as history. Cloning a
+        // history panel copies this hidden input, so without removing it every
+        // NEW panel was submitted as history and got overwritten with the stored
+        // panel's date/judges/startups. Everything else in this reset is cosmetic;
+        // this line is the one that decides what the SERVER does.
+        $clone.find('input[name*="[history_panel]"]').remove();
+        $clone.find('.badge').filter((_, el) => $(el).find('.ti-history').length).remove();
+        $clone.find('.alert').filter((_, el) => $(el).find('.ti-lock').length).remove();
+        $clone.find('.notify-toggle').prop('checked', false);
+        $clone.find('.select-all-toggle').removeClass('d-none');
+        // Blade renders the notify switch only for non-history panels, so a clone
+        // taken from a history panel has none to copy. Rebuild it, otherwise a new
+        // panel silently loses the ability to notify.
+        if (!$clone.find('.notify-toggle').length) {
+          $clone.find('.accordion-body').append(
+            `<div class="form-check form-switch notify-row">
+               <input class="form-check-input notify-toggle" type="checkbox" value="1">
+               <label class="form-check-label">
+                 {{ __('admin.screening.notify_now') }}
+                 <span class="text-muted d-block small">{{ __('admin.screening.notify_now_hint') }}</span>
+               </label>
+             </div>`
+          );
+        }
 
         // mark as unsaved
         $clone.attr('data-unsaved', 'true');
@@ -916,6 +1237,10 @@
         // so an empty picker surfaces inline instead of only as a server toast.
         $('.accordion-item').each(function (i) {
           const $p = $(this);
+          // History panels are rebuilt server-side from stored state; their inputs
+          // are disabled and therefore not submitted, so validating them would
+          // report a required-field error the admin cannot act on.
+          if ($p.attr('data-history') === '1') return;
           const $trig = $p.find('.companies-picker-trigger');
           if (!$trig.length) return;
           const selectedCount = ($trig.data('selected') || new Set()).size;
@@ -931,6 +1256,7 @@
 
         $('.accordion-item').each(function () {
           const $p = $(this);
+          if ($p.attr('data-history') === '1') return;
           if (!$p.find('.session-toggle').is(':checked')) return;
 
           const $start = $p.find('input[name*="start_time"]');
@@ -1014,7 +1340,21 @@
       // Confirm we re-post the SAME payload plus an acknowledgement flag.
       // `acknowledged` guards the retry so a second conflict response can never
       // loop the dialog.
+      // Submit busy-state. The button is disabled with a spinner while the request
+      // is in flight so a second click cannot fire another save — this endpoint
+      // deletes and rebuilds every screening for the step, so a double submit is
+      // not harmless.
+      //
+      // It is released around the confirmation dialogs too: those await the admin,
+      // and a button left spinning behind a modal reads as a hung page.
+      const setSubmitBusy = (busy) => {
+        const $btn = $('#panels-submit-btn');
+        $btn.prop('disabled', busy);
+        $btn.find('.spinner-border').toggleClass('d-none', !busy);
+      };
+
       const submitPanels = (action, formData, acknowledged = false) => {
+        setSubmitBusy(true);
         if (acknowledged) formData.set('acknowledge_judge_conflicts', '1');
 
         return fetch(action, {
@@ -1025,6 +1365,7 @@
           .then(async d => {
             if (!d.success) {
               if (!acknowledged && d.requires_confirmation && Array.isArray(d.judge_conflicts) && d.judge_conflicts.length) {
+                setSubmitBusy(false);
                 const { isConfirmed } = await Swal.fire({
                   icon: 'warning',
                   title: '{{ __("admin.screening.judge_conflict_title") }}',
@@ -1043,6 +1384,7 @@
                 return submitPanels(action, formData, true);
               }
 
+              setSubmitBusy(false);
               releaseFailureAlert({
                 title: '{{ __('admin.error') }}',
                 message: d.message || '{{ __('admin.unexpected_error') }}'
@@ -1050,6 +1392,8 @@
 
               return;
             }
+
+            setSubmitBusy(false);
 
             releaseSuccessAlert({
               title: '{{ __('admin.success') }}',
@@ -1073,11 +1417,13 @@
               });
             }
           })
-          .catch(e => releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' }));
+          .catch(e => {
+            setSubmitBusy(false);
+            releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
+          });
       };
 
       const maxVisible = 10;
-      const locale = '{{ $l ?? "en" }}';
 
       const renderBadge = (id, name, imgUrl, href, iconClass) => `
       <a href="${href}" class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">

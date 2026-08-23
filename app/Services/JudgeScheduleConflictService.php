@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Screening;
 use App\Step;
 use App\User;
+use App\Services\PanelWindowService;
 use Carbon\Carbon;
 
 /**
@@ -87,40 +88,20 @@ class JudgeScheduleConflictService
                 continue;
             }
 
-            $interval = isset($panel['interval']) && $panel['interval'] !== ''
-                ? (int) $panel['interval']
-                : null;
-            if ($interval !== null && $interval <= 0) {
-                $interval = null;
-            }
-
-            $companyCount = count(array_unique(array_map('intval', (array) ($panel['companies'] ?? []))));
-
-            try {
-                $startAt = Carbon::parse($date . ' ' . $start);
-
-                if ($interval !== null) {
-                    $endAt = (clone $startAt)->addMinutes(max($companyCount, 1) * $interval);
-                } elseif (!empty($panel['end_time'])) {
-                    $endAt = Carbon::parse($date . ' ' . $panel['end_time']);
-                } else {
-                    continue; // no derivable end => no comparable window
-                }
-            } catch (\Exception $e) {
-                continue; // unparseable date/time is caught by the shape validator
-            }
-
-            // A window that ends at or before it starts covers no time.
-            if ($endAt->lessThanOrEqualTo($startAt)) {
+            // Shared derivation (PanelWindowService) so conflict detection,
+            // history locking and change notification all measure a panel
+            // identically. Returns null when the panel books no time.
+            $window = PanelWindowService::fromInput($panel);
+            if ($window === null) {
                 continue;
             }
 
             $windows[] = [
                 'panel'  => $index + 1,
                 'judges' => $judges,
-                'start'  => $startAt,
-                'end'    => $endAt,
-                'date'   => $startAt->format('Y-m-d'),
+                'start'  => $window['start'],
+                'end'    => $window['end'],
+                'date'   => $window['start']->format('Y-m-d'),
             ];
         }
 
@@ -238,30 +219,9 @@ class JudgeScheduleConflictService
             return null;
         }
 
-        $date = $row->session_date instanceof \DateTimeInterface
-            ? $row->session_date->format('Y-m-d')
-            : (string) $row->session_date;
-
-        try {
-            $start = Carbon::parse($date . ' ' . $row->start_time);
-
-            $interval = $row->interval !== null ? (int) $row->interval : null;
-
-            if ($interval !== null && $interval > 0) {
-                // `users` is the panel's company list; it drives the derived end
-                // time exactly as it does on save.
-                $companies = is_array($row->users) ? $row->users : (json_decode((string) $row->users, true) ?: []);
-                $end = (clone $start)->addMinutes(max(count($companies), 1) * $interval);
-            } elseif (!empty($row->end_time)) {
-                $end = Carbon::parse($date . ' ' . $row->end_time);
-            } else {
-                return null;
-            }
-        } catch (\Exception $e) {
-            return null;
-        }
-
-        return $end->greaterThan($start) ? ['start' => $start, 'end' => $end] : null;
+        // Same shared derivation as the submitted side, so both halves of a
+        // comparison are measured the same way.
+        return PanelWindowService::fromScreening($row);
     }
 
     /**

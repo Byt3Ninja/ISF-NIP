@@ -2774,6 +2774,12 @@ return [
 		'judge_conflict_same_step' => 'Judge :judge is already assigned to panel ":panel" on :date from :start to :end. Please change the judge or schedule.',
 		'judge_conflict_other_step' => 'Judge :judge is already assigned to panel ":panel" in the ":step" on :date from :start to :end. Please change the judge or schedule.',
 		'judge_conflict_title' => 'Judge scheduling conflict',
+		// History panels (past meetings) — read-only records.
+		'panel_history' => 'History',
+		'panel_history_notice' => 'This panel\'s scheduled screening time has passed. It is kept as a read-only record and can no longer be edited.',
+		'notify_now' => 'Notify now',
+		'notify_now_hint' => 'Email the judges and startups in this panel about their meeting details when you save.',
+		'panel_history_cannot_delete' => 'This panel is a read-only record of a screening that already took place and cannot be deleted.',
 	],
 	'training_sessions' => 'Training Sessions',
 	'training_courses' => 'Training Courses',
