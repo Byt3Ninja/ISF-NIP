@@ -831,11 +831,15 @@
 												<td>
 													@if( $session->type == 'sessions' )
 													{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+													@if( $session->can_join ?? false )
 													<a href="{{ $session->join_url }}" target="_blank">
 														<button title="Join only" type="button"
 															class="btn btn-icon rounded-circle btn-light-primary"> <i class="ti ti-brand-zoom"></i>
 														</button>
 													</a>
+													@else
+													{{ __('admin.Finished') }}
+													@endif
 													@elseif ($session->type == 'offline')
 													<b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
 													<b>{{ __('cycles.training location') }}:</b>

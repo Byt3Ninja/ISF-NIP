@@ -33,6 +33,7 @@ use App\SurveyResponses;
 use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
+use App\Services\MeetingWindowService;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
@@ -1261,6 +1262,18 @@ class HomeController extends Controller
                     ts.datetime ASC
                 LIMIT 5";
             $sessions = collect(DB::select($sessions_q, [$company->step]));
+
+            // GV-8301: the widget's join icon must close once the session has ended.
+            $sessions = $sessions->map(function ($session) use ($user) {
+                $session->can_join = MeetingWindowService::isOpen(
+                    TrainingSession::wallClock($session->datetime),
+                    TrainingSession::wallClock($session->end_datetime),
+                    $user,
+                    'founder'
+                );
+
+                return $session;
+            });
 
             $myFinal_q = "SELECT
                     fs.id,
