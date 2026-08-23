@@ -101,13 +101,14 @@ return [
     'Step_Description_ar' => 'وصف الخطوة بالعربية',
 
     'validation' => [
+        'please_correct_fields' => 'يرجى تصحيح الحقول المميزة.',
         'page_title_required' => 'يرجى إدخال عنوان الصفحة.',
         'logo_required' => 'يرجى تحميل الشعار.',
         'image_format_invalid' => 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.',
         'logo_size_exceeded' => 'يجب ألا يتجاوز حجم الشعار 5 ميجابايت.',
         'description_required' => 'يرجى إدخال الوصف.',
         'description_ar_required' => 'يرجى إدخال الوصف باللغة العربية.',
-        'invalid_url' => 'يرجى إدخال رابط صالح.',
+        'invalid_url' => 'يرجى إدخال رابط :field صالح (مثال: :example).',
         'title_required' => 'يرجى إدخال العنوان.',
         'title_ar_required' => 'يرجى إدخال العنوان باللغة العربية.',
         'subtitle_required' => 'يرجى إدخال العنوان الفرعي.',

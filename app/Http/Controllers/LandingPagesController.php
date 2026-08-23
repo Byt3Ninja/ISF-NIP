@@ -696,18 +696,18 @@ class LandingPagesController extends Controller
       'general.logo.max' => __('landing.validation.logo_size_exceeded'),
       'general.description.required' => __('landing.validation.description_required'),
       'general.description_ar.required' => __('landing.validation.description_ar_required'),
-      'general.linkedin.url' => __('landing.validation.invalid_url'),
-      'general.facebook.url' => __('landing.validation.invalid_url'),
-      'general.instagram.url' => __('landing.validation.invalid_url'),
-      'general.x.url' => __('landing.validation.invalid_url'),
-      'general.tiktok.url' => __('landing.validation.invalid_url'),
-      'general.youtube.url' => __('landing.validation.invalid_url'),
+      'general.linkedin.url' => __('landing.validation.invalid_url', ['field' => 'LinkedIn', 'example' => 'https://linkedin.com/in/username']),
+      'general.facebook.url' => __('landing.validation.invalid_url', ['field' => 'Facebook', 'example' => 'https://facebook.com/yourpage']),
+      'general.instagram.url' => __('landing.validation.invalid_url', ['field' => 'Instagram', 'example' => 'https://instagram.com/yourprofile']),
+      'general.x.url' => __('landing.validation.invalid_url', ['field' => 'X', 'example' => 'https://x.com/yourprofile']),
+      'general.tiktok.url' => __('landing.validation.invalid_url', ['field' => 'TikTok', 'example' => 'https://tiktok.com/@yourprofile']),
+      'general.youtube.url' => __('landing.validation.invalid_url', ['field' => 'YouTube', 'example' => 'https://youtube.com/@yourchannel']),
     ]);
 
     if ($validator->fails()) {
       return response()->json([
         'success' => false,
-        'message' => $validator->errors()->first(),
+        'message' => __('landing.validation.please_correct_fields'),
         'errors' => $validator->errors(),
       ], 422);
     }
@@ -811,18 +811,18 @@ class LandingPagesController extends Controller
 			'general.logo.max' => __('landing.validation.logo_size_exceeded'),
 			'general.description.required' => __('landing.validation.description_required'),
 			'general.description_ar.required' => __('landing.validation.description_ar_required'),
-			'general.linkedin.url' => __('landing.validation.invalid_url'),
-			'general.facebook.url' => __('landing.validation.invalid_url'),
-			'general.instagram.url' => __('landing.validation.invalid_url'),
-			'general.x.url' => __('landing.validation.invalid_url'),
-			'general.tiktok.url' => __('landing.validation.invalid_url'),
-			'general.youtube.url' => __('landing.validation.invalid_url'),
+			'general.linkedin.url' => __('landing.validation.invalid_url', ['field' => 'LinkedIn', 'example' => 'https://linkedin.com/in/username']),
+			'general.facebook.url' => __('landing.validation.invalid_url', ['field' => 'Facebook', 'example' => 'https://facebook.com/yourpage']),
+			'general.instagram.url' => __('landing.validation.invalid_url', ['field' => 'Instagram', 'example' => 'https://instagram.com/yourprofile']),
+			'general.x.url' => __('landing.validation.invalid_url', ['field' => 'X', 'example' => 'https://x.com/yourprofile']),
+			'general.tiktok.url' => __('landing.validation.invalid_url', ['field' => 'TikTok', 'example' => 'https://tiktok.com/@yourprofile']),
+			'general.youtube.url' => __('landing.validation.invalid_url', ['field' => 'YouTube', 'example' => 'https://youtube.com/@yourchannel']),
 		]);
 
 		if ($validator->fails()) {
 			return response()->json([
 				'success' => false,
-				'message' => $validator->errors()->first(),
+				'message' => __('landing.validation.please_correct_fields'),
 				'errors' => $validator->errors(),
 			], 422);
 		}

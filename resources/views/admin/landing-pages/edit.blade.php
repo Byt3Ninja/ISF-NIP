@@ -2173,7 +2173,7 @@
           // prefix before the first dot ("custom" submits "custom_sections").
           const sectionPrefixes = sectionKey === 'custom' ? ['custom_sections'] : [String(sectionKey)];
 
-          const showBackendErrors = function (errors) {
+          const showBackendErrors = function (errors, message) {
             clearBackendFieldErrors();
 
             const items = [];
@@ -2215,9 +2215,9 @@
 
             if (!items.length) return false;
 
-            // Only surface the first error here; every errored field also
-            // gets its own inline message below it.
-            $backendErrorsBox.text(items[0]).removeClass('d-none');
+            // Prefer the backend's overall message; every errored field
+            // also gets its own inline message below it.
+            $backendErrorsBox.text(message || items[0]).removeClass('d-none');
 
             if ($firstInvalid) {
               $firstInvalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2260,7 +2260,7 @@
 
               // Show section-specific errors in the alert-danger at the top
               // of this section; fall back to the toast otherwise.
-              if (showBackendErrors(res.errors)) return;
+              if (showBackendErrors(res.errors, res.message)) return;
 
               let errorMessage = sectionKey === 'programs'
                 ? (isArabic ? 'حدث خطأ ما. يرجى المحاولة مرة أخرى' : 'Something went wrong. Please try again.')

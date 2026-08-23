@@ -101,13 +101,14 @@ return [
     'Step_Description_ar' => 'Step Description (Arabic)',
 
     'validation' => [
+        'please_correct_fields' => 'Please correct the highlighted fields.',
         'page_title_required' => 'Please enter the page title.',
         'logo_required' => 'Please upload a logo.',
         'image_format_invalid' => 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
         'logo_size_exceeded' => 'Logo size must not exceed 5 MB.',
         'description_required' => 'Please enter a description.',
         'description_ar_required' => 'Please enter a description in Arabic.',
-        'invalid_url' => 'Please enter a valid URL.',
+        'invalid_url' => 'Please enter a valid :field URL (e.g. :example).',
         'title_required' => 'Please enter the title.',
         'title_ar_required' => 'Please enter the title in Arabic.',
         'subtitle_required' => 'Please enter the subtitle.',
