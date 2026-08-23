@@ -1618,6 +1618,7 @@ class CyclesController extends Controller
 
         // update cycle & step
         $company->update(['cycle' => $request->cycle, 'step' => $request->id]);
+        $company = Company::with(['stepdata', 'cycledata'])->find($cid);
 
         // gather the form data as field_name => [ label, data ]
         /* foreach ($field_map_ids as $fid)
