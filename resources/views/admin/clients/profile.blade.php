@@ -99,7 +99,7 @@
                       <span class="align-middle">{{ $l == 'ar' ? 'تعديل' : 'Edit' }}</span>
                     </a>
                   @endif
-                  @if( $_user->ableTo('users.edit', $permissions) )
+                  @if( $_user->ableTo('users.edit', $permissions) && $_user->id != $client->id )
                     <a href="{{ route('users.edit', $client->id) }}" class="btn btn-primary mb-1">
                       <i class="ti ti-settings me-3 ti-md"></i>
                       <span class="align-middle">{{ $l == 'ar' ? 'تعديل' : 'Edit' }}</span>
