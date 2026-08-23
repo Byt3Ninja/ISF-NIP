@@ -21,6 +21,7 @@ use App\ScreeningEvaluationCustomFields;
 use App\ScreeningEvaluationFieldsValues;
 use App\ScreeningEvaluationResults;
 use App\Factories\OnlineMeetingFactory;
+use App\Services\JudgeScheduleConflictService;
 use App\Services\WhatsAppService;
 use App\Step;
 use App\User;
@@ -564,6 +565,30 @@ class ScreeningController extends Controller
 		$stepId = $request->step;
 		$panels = $request->panels ?? [];
 		$step = Step::with('cycle.organization')->find($stepId);
+
+		// Judge double-booking gate (GV-8300). A judge cannot sit on two panels
+		// whose windows overlap, within this submission or against panels already
+		// saved on other screening/final steps of the same cycle.
+		//
+		// This MUST run before the two mutations below (the step's judge mapping
+		// and the wholesale delete of the step's screenings): a rejected save has
+		// to leave the step exactly as it was.
+		//
+		// Conflicts are advisory, not fatal — the admin may knowingly proceed, so
+		// the first response asks for confirmation and the retry carries the
+		// acknowledgement flag.
+		if (!$request->boolean('acknowledge_judge_conflicts')) {
+			$judgeConflicts = JudgeScheduleConflictService::detect((int) $stepId, $panels);
+
+			if (!empty($judgeConflicts)) {
+				return response()->json([
+					'success' => false,
+					'requires_confirmation' => true,
+					'judge_conflicts' => $judgeConflicts,
+					'message' => $judgeConflicts[0],
+				], 422);
+			}
+		}
 
 		// Update Step list (judges mapping)
 		$stepList = [];

@@ -2822,6 +2822,9 @@ return [
 		'add_first_panel' => 'أضف لجنتك الأولى',
 		'panel_judges_required' => 'يرجى تعيين محكم واحد على الأقل للجنة رقم :panel.',
 		'panel_companies_required' => 'يرجى تعيين شركة ناشئة واحدة على الأقل للجنة رقم :panel.',
+		'judge_conflict_same_step' => 'المحكم :judge معين بالفعل في اللجنة ":panel" بتاريخ :date من :start إلى :end. يرجى تغيير المحكم أو الموعد.',
+		'judge_conflict_other_step' => 'المحكم :judge معين بالفعل في اللجنة ":panel" ضمن خطوة ":step" بتاريخ :date من :start إلى :end. يرجى تغيير المحكم أو الموعد.',
+		'judge_conflict_title' => 'تعارض في جدول المحكم',
 	],
 	'training_sessions' => 'جلسات التدريب',
 	'training_courses' => 'دورات التدريب',
@@ -2907,7 +2910,7 @@ return [
 	'select_startups' => 'اختر الشركات',
 	'select_all' => 'اختر الكل',
 	'deselect_all' => 'إلغاء الكل',
-	'auto_select_range' => 'تحديد النطاق تلقائيًا',
+	'auto_select_range' => 'تحديد نطاق الشركات الناشئة',
 	'clear_range' => 'مسح النطاق',
 	'range_required' => 'يرجى إدخال نطاق.',
 	'range_numbers_only' => 'قيم النطاق تقبل الأرقام فقط.',
@@ -3971,6 +3974,7 @@ return [
   'chat_are_typing' => 'يكتبون الآن...',
   'chat_and' => 'و',
   'company_assigned_other_panel' => 'هذه الشركة الناشئة مُعينة بالفعل إلى لجنة فرز أخرى. هل أنت متأكد من رغبتك في تعيينها إلى هذه اللجنة أيضًا؟',
+  'companies_assigned_other_panel' => 'الشركات الناشئة التالية مُعينة بالفعل إلى لجنة فرز أخرى. هل أنت متأكد من رغبتك في تعيينها إلى هذه اللجنة أيضًا؟',
 
 	// GV-3340: judge screening export
 	'Founder Name' => 'اسم المؤسس',

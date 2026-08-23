@@ -325,6 +325,37 @@
         });
       };
 
+      // Confirm a BULK selection that would duplicate startups already sitting in
+      // another panel (Select All / Select Startup Range).
+      //
+      // The single-checkbox path asks per startup, but a bulk action can touch
+      // dozens at once, so asking once and listing them keeps it usable. Returns
+      // the ids to actually select: Confirm keeps every duplicate, Cancel drops
+      // ONLY the duplicates and keeps the rest of the action's selection — the
+      // spec's "Cancel removes the startup from the current panel" applied per
+      // startup rather than abandoning the whole action.
+      const confirmBulkDuplicates = async (panelIndex, ids) => {
+        const duplicates = ids.filter(id => isSelectedInOtherPanel(panelIndex, id));
+        if (!duplicates.length) return ids;
+
+        const names = duplicates
+          .map(id => companiesMap[id] ? companyDisplayName(companiesMap[id]) : id)
+          .map(n => `<li class="text-start">${esc(n)}</li>`)
+          .join('');
+
+        const { isConfirmed } = await Swal.fire({
+          icon: 'warning',
+          html: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
+          showCancelButton: true,
+          confirmButtonText: '{{ __("admin.Confirm") }}',
+          cancelButtonText: '{{ __("admin.Cancel") }}',
+          customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
+          buttonsStyling: false
+        });
+
+        return isConfirmed ? ids : ids.filter(id => !duplicates.includes(id));
+      };
+
       const initSelect2 = ($select) => {
         $select.select2({
           placeholder: $select.data('placeholder'),
@@ -461,12 +492,19 @@
           .map(c => String(c.id));
       };
 
-      const toggleAllCompanies = ($trig) => {
+      const toggleAllCompanies = async ($trig) => {
         const ids = visibleCompanyIds($trig);
         const selected = $trig.data('selected') || new Set();
         const allOn = ids.length > 0 && ids.every(id => selected.has(id));
-        if (allOn) ids.forEach(id => selected.delete(id));
-        else ids.forEach(id => selected.add(id));
+        if (allOn) {
+          ids.forEach(id => selected.delete(id));
+        } else {
+          // Only startups not already in THIS panel are newly assigned, so only
+          // those need confirming.
+          const adding = ids.filter(id => !selected.has(id));
+          const approved = await confirmBulkDuplicates($trig.data('panel-index'), adding);
+          ids.filter(id => selected.has(id) || approved.includes(id)).forEach(id => selected.add(id));
+        }
         $trig.data('selected', selected);
         syncCompaniesState($trig);
         refreshCompaniesPopover($trig);
@@ -628,7 +666,7 @@
         $wrap.find('.range-from, .range-to').removeClass('is-invalid');
       });
 
-      $(document).on('click', '.apply-range', function () {
+      $(document).on('click', '.apply-range', async function () {
         const $pop = $(this).closest('.companies-popover');
         const $trig = getCompaniesTrigger($pop.data('panel-index'));
         if (!$trig.length) return;
@@ -679,7 +717,10 @@
         // renumber them, and a second Apply would then act on a different set
         // than the one on screen.
         const matching = selectable.slice(from - 1, to);
-        $trig.data('selected', new Set(matching));
+        // Applying a range must honour the same duplicate check as ticking a box
+        // one at a time, otherwise the range is a way to bypass the warning.
+        const approved = await confirmBulkDuplicates($trig.data('panel-index'), matching);
+        $trig.data('selected', new Set(approved));
         $trig.removeData('range-filter');
         $trig.data('range-values', { from, to });
         syncCompaniesState($trig);
@@ -962,13 +1003,46 @@
           return;
         }
 
-        fetch($(this).attr('action'), {
-          method: 'POST', body: new FormData(this),
+        submitPanels($(this).attr('action'), new FormData(this));
+      });
+
+      // Posts the panels, handling the judge-conflict round-trip.
+      //
+      // Judge double-booking (GV-8300) can only be resolved on the server: a
+      // conflict may sit on another step entirely, which the browser never
+      // loads. So the first POST may come back asking for confirmation; on
+      // Confirm we re-post the SAME payload plus an acknowledgement flag.
+      // `acknowledged` guards the retry so a second conflict response can never
+      // loop the dialog.
+      const submitPanels = (action, formData, acknowledged = false) => {
+        if (acknowledged) formData.set('acknowledge_judge_conflicts', '1');
+
+        return fetch(action, {
+          method: 'POST', body: formData,
           headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
         })
           .then(r => r.json())
-          .then(d => {
+          .then(async d => {
             if (!d.success) {
+              if (!acknowledged && d.requires_confirmation && Array.isArray(d.judge_conflicts) && d.judge_conflicts.length) {
+                const { isConfirmed } = await Swal.fire({
+                  icon: 'warning',
+                  title: '{{ __("admin.screening.judge_conflict_title") }}',
+                  html: d.judge_conflicts.map(m => `<p class="mb-2 text-start">${esc(m)}</p>`).join(''),
+                  showCancelButton: true,
+                  confirmButtonText: '{{ __("admin.Confirm") }}',
+                  cancelButtonText: '{{ __("admin.Cancel") }}',
+                  customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
+                  buttonsStyling: false
+                });
+
+                // Cancel leaves the form exactly as the admin left it, so the
+                // judge or the schedule can be corrected before retrying.
+                if (!isConfirmed) return;
+
+                return submitPanels(action, formData, true);
+              }
+
               releaseFailureAlert({
                 title: '{{ __('admin.error') }}',
                 message: d.message || '{{ __('admin.unexpected_error') }}'
@@ -1000,7 +1074,7 @@
             }
           })
           .catch(e => releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' }));
-      });
+      };
 
       const maxVisible = 10;
       const locale = '{{ $l ?? "en" }}';

@@ -2769,6 +2769,11 @@ return [
 		'add_first_panel' => 'Add your first panel',
 		'panel_judges_required' => 'Please assign at least one judge to panel #:panel.',
 		'panel_companies_required' => 'Please assign at least one startup to panel #:panel.',
+		// Judge double-booking (GV-8300). :panel renders as the ordinal shown in
+		// the UI ("panel #2"); panels have no stored name.
+		'judge_conflict_same_step' => 'Judge :judge is already assigned to panel ":panel" on :date from :start to :end. Please change the judge or schedule.',
+		'judge_conflict_other_step' => 'Judge :judge is already assigned to panel ":panel" in the ":step" on :date from :start to :end. Please change the judge or schedule.',
+		'judge_conflict_title' => 'Judge scheduling conflict',
 	],
 	'training_sessions' => 'Training Sessions',
 	'training_courses' => 'Training Courses',
@@ -2854,7 +2859,7 @@ return [
 	'select_startups' => 'Select Startups',
 	'select_all' => 'Select All',
 	'deselect_all' => 'Deselect All',
-	'auto_select_range' => 'Auto Select Range',
+	'auto_select_range' => 'Select Startup Range',
 	'clear_range' => 'Clear Range',
 	'range_required' => 'Please enter a range.',
 	'range_numbers_only' => 'Range values accept numbers only.',
@@ -3916,6 +3921,9 @@ return [
   'chat_are_typing' => 'are typing...',
   'chat_and' => 'and',
   'company_assigned_other_panel' => 'This startup is already assigned to another screening panel. Are you sure you want to assign it to this panel as well?',
+  // Bulk variant (Select All / Select Startup Range). Asking once per startup
+  // would fire a dialog storm, so the affected startups are listed in one prompt.
+  'companies_assigned_other_panel' => 'The following startups are already assigned to another screening panel. Are you sure you want to assign them to this panel as well?',
 
 	// GV-3340: judge screening export
 	'Founder Name' => 'Founder Name',
