@@ -1547,7 +1547,8 @@ class MentorsController extends Controller
 			$_sesssion->zoom_date = $session->zoom_date;
 			$_sesssion->period = $session->period;
 			if ($session->zoom_date) {
-				$_sesssion->status = $session->zoom_date > now() ? 'Upcoming' : ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress');
+				$meetingStatus = mentorshipMeetingStatus($session->zoom_date, $session->period);
+				$_sesssion->status = $meetingStatus === 'before' ? 'Upcoming' : ($meetingStatus === 'expired' ? 'Completed' : 'In-progress');
 				$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' -30 minutes'));
 				$_sesssion->end_time   = date('Y-m-d H:i', strtotime($session->zoom_date . ' +' . $session->period . ' minutes'));
 			} else {
