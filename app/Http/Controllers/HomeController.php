@@ -1337,7 +1337,10 @@ class HomeController extends Controller
                         $judger = new stdClass;
                         $judger->id = $item->id;
                         $judger->name = trim($item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l});
-                        $judger->img_url = User::image_handler($item->img_url);
+                        // `image_url` so the shared judges-cell partial renders
+                        // final and initial screening rows identically.
+                        $judger->image_url = User::image_handler($item->img_url);
+                        $judger->img_url = $judger->image_url;
                         return $judger;
                     });
 
@@ -1360,7 +1363,12 @@ class HomeController extends Controller
                     unset($myFinal->user_last_name_ar);
                     unset($myFinal->user_title_en);
                     unset($myFinal->user_title_ar);
-                } else { $judgers = collect(); }
+                } else {
+                    // GV-8357: leaving the raw JSON string here made the blade
+                    // @foreach fatal on judge-less final screenings.
+                    $judgers = collect();
+                    $myFinal->judges = $judgers;
+                }
             }
 
             $stepData = $company->stepdata;
@@ -1416,6 +1424,31 @@ class HomeController extends Controller
 
                 return $item;
             });
+
+            // GV-8357: `screenings` holds one row per judge per panel, so a
+            // 3-judge panel produced 3 identical rows for the startup. Collapse
+            // each panel into a single row whose `judges` collection carries
+            // every judge on it; the panel keeps its own time slot and link.
+            $myInitial = $myInitial->groupBy(function ($item) {
+                return $item->step_id . '-' . $item->panel;
+            })->map(function ($panelRows) {
+                $row = $panelRows->first();
+
+                $row->judges = $panelRows
+                    ->pluck('judge')
+                    ->filter()
+                    ->unique('id')
+                    ->map(function ($judge) {
+                        $entry = new stdClass;
+                        $entry->id = $judge->id;
+                        $entry->name = $judge->name;
+                        $entry->image_url = $judge->image_url;
+                        return $entry;
+                    })
+                    ->values();
+
+                return $row;
+            })->values();
         }
 
         $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');

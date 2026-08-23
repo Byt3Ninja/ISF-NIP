@@ -327,7 +327,10 @@ class ScreeningController extends Controller
 					'companies' => (array) ($panelData['companies'] ?? []),
 					'session' => []
 				];
-				if ($screening && $screening->session_date) {
+				// GV-8365: gated on session_date alone, a panel whose meeting was
+				// created without a date still holds a passcode/link that must be
+				// rendered — otherwise a reload looks like the passcode was cleared.
+				if ($screening && ($screening->session_date || $screening->meeting_link || $screening->meeting_password)) {
 					$panelEntry['session'] = [
 						'checked' => !is_null($screening->session_date) && !is_null($screening->meeting_link),
 						'date' => $screening->session_date,

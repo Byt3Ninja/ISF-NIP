@@ -628,19 +628,8 @@
 													</div>
 												</td>
 												<td>
-													@foreach( $myFinal->judges as $judger )
-													@if(!empty($judge))
-													<div style="cursor: pointer;" class="d-flex align-items-center">
-														<div class="chip-body">
-															<div class="avatar">
-																<img class="img-fluid rounded-circle me-3" src="{{ $judger->img_url }}" alt="photo"
-																	height="20" width="20">
-															</div>
-															<span class="chip-text text-nowrap"> {{ $judger->name }} </span>
-														</div>
-													</div>
-													@endif
-													@endforeach
+													{{-- GV-8357: all of the panel's judges in one cell, capped with a +N overflow --}}
+													@include('includes.partials.judges-cell', ['judges' => $myFinal->judges])
 												</td>
 												{{-- GV-3321: per-startup slot derived from the panel interval --}}
 												<td>
@@ -654,13 +643,16 @@
 												<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
 												<td>
 													@php
+														// GV-8363: compare in the viewer's own timezone. Slots are stored as
+														// bare wall-clock times, so comparing them against the raw server
+														// clock opened/closed the window at the wrong moment for anyone whose
+														// profile timezone differed from the server's.
 														$startTime = $myFinal->meeting_start ?? \Carbon\Carbon::parse($myFinal->datetime);
 														$endTime = $myFinal->meeting_end
 															?? \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
 														// Join Now + passcode unlock 10 minutes before the slot starts
 														// and stay available until an hour after it ends.
-														$canJoin = now()->gte( $startTime->copy()->subMinutes(10) )
-															&& now()->lte( $endTime->copy()->addHour() );
+														$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
 													@endphp
 													@if( $canJoin )
 														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
@@ -671,7 +663,7 @@
 																<i class="ti ti-key"></i>
 															</button>
 														@endif
-													@elseif( now() > $endTime->copy()->addHour() )
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $endTime, $_user ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -742,14 +734,8 @@
 													</div>
 												</td>
 												<td>
-													@if(!empty($screening->judge))
-														<div style="cursor: pointer;" class="d-flex align-items-center">
-															<img class="img-fluid rounded-circle me-3" src="{{ $screening->judge->image_url }}" alt="photo" height="20" width="20">
-															<div class="media-body">
-																<h6 class="media-heading mb-0 text-nowrap">{{ $screening->judge->name }}</h6>
-															</div>
-														</div>
-													@endif
+													{{-- GV-8357: all of the panel's judges in one cell, capped with a +N overflow --}}
+													@include('includes.partials.judges-cell', ['judges' => $screening->judges ?? []])
 												</td>
 												{{-- GV-3320: per-startup slot derived from the panel interval --}}
 												<td>
@@ -769,11 +755,11 @@
 															?? ( !is_null( $screening->dateTime ) ? \Carbon\Carbon::parse( $screening->dateTime ) : null );
 														$slotEnd = $screening->meeting_end
 															?? ( !is_null( $screening->endTime ) ? \Carbon\Carbon::parse( $screening->endTime ) : null );
-														// Join Now + passcode unlock 10 minutes before the slot starts
-														// and stay available until an hour after it ends.
-														$canJoin = !is_null( $screening->meeting_link ) && $slotStart
-															&& now()->gte( $slotStart->copy()->subMinutes(10) )
-															&& ( is_null( $slotEnd ) || now()->lte( $slotEnd->copy()->addHour() ) );
+														// GV-8363: Join Now + passcode unlock 10 minutes before the slot
+														// starts and stay available until an hour after it ends, compared
+														// in the viewer's own timezone rather than the server clock.
+														$canJoin = !is_null( $screening->meeting_link )
+															&& \App\Services\MeetingWindowService::isOpen( $slotStart, $slotEnd, $_user, 'founder' );
 													@endphp
 													@if( $canJoin )
 														<a href="{{ $screening->meeting_link }}" target="_blank">({{__('dashboard.Join now')}})</a>
@@ -784,7 +770,7 @@
 																<i class="ti ti-key"></i>
 															</button>
 														@endif
-													@elseif( $slotEnd && now() > $slotEnd->copy()->addHour() )
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $slotEnd, $_user ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -1371,14 +1357,17 @@
 																@endif
 															</td>
 															<td>
-																{{-- Join Now opens a day before the meeting and disappears an
-																	 hour after it ends. --}}
-																@if( !empty( $company->join_url ) && !empty( $company->meeting_start )
-																	&& now()->gte( $company->meeting_start->copy()->subDay() )
-																	&& ( empty( $company->meeting_end ) || now()->lte( $company->meeting_end->copy()->addHour() ) ) )
+																{{-- GV-8361/8364: Join Now opens 24h before the judge's slot and
+																	 closes an hour after it ends, compared in the viewer's own
+																	 timezone. The old gate used an unbounded subDay() on the
+																	 server clock, so it stayed visible past the end time. --}}
+																@if( !empty( $company->join_url )
+																	&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
 																	<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																		<i class="ti ti-video"></i> {{ __('dashboard.Join') }}
 																	</a>
+																@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																	<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 																@else
 																	-
 																@endif
@@ -1508,11 +1497,12 @@
 																			@endif
 																		</td>
 																		<td>
-																			{{-- Join Now opens a day before the meeting and disappears an
-																				 hour after it ends. --}}
+																			{{-- GV-8364: Join Now opens 24h before the judge's slot and closes
+																				 an hour after it ends, in the viewer's own timezone. The old gate
+																				 fell open whenever meeting_start was missing and used an
+																				 unbounded subDay() on the server clock. --}}
 																			@if( $company->join_url
-																				&& ( empty( $company->meeting_start ) || now()->gte( $company->meeting_start->copy()->subDay() ) )
-																				&& ( empty( $company->meeting_end ) || now()->lte( $company->meeting_end->copy()->addHour() ) ) )
+																				&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
 																				<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																					<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
 																				</a>
@@ -1526,6 +1516,8 @@
 																					<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
 																				</a>
 																				@endif  --}}
+																			@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																				<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 																			@else
 																				{{ __('dashboard.Not started') }}
 																			@endif
