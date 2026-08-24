@@ -41,9 +41,24 @@ class FormController extends Controller
 		}
 		$forms = DB::select($forms);
 		$forms = collect($forms);
-		$steps = DB::table('steps')->whereNull('deleted_at')->get();
 
-		$data = $forms->map(function ($form) use ($l, $steps) {
+		// A submission is one filled-in form: a distinct (step, startup, submitter)
+		// group of answers in form_data. Counting `steps` rows instead would report
+		// how many cycle steps reference the form, not how many people submitted it.
+		$submissionsCountByForm = DB::table('form_data as FD')
+			->join('steps as S', 'S.id', '=', 'FD.step_id')
+			->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
+			->whereNull('FD.deleted_at')
+			->whereNull('S.deleted_at')
+			->whereNotNull('S.data')
+			->when(!$user->hasRole('admin') && !empty($orgIds), function ($query) use ($orgIds) {
+				return $query->whereIn('CYC.organization_id', $orgIds);
+			})
+			->select('S.data as form_id', DB::raw('COUNT(DISTINCT FD.step_id, FD.company_id, FD.user_id) as submissions'))
+			->groupBy('S.data')
+			->pluck('submissions', 'form_id');
+
+		$data = $forms->map(function ($form) use ($l, $submissionsCountByForm) {
 			$data = new stdClass;
 			$data->form_id = $form->BF_id ?? 'null';
 			$data->form_name = $form->BF_form_name ?? 'null';
@@ -51,8 +66,7 @@ class FormController extends Controller
 			$data->org_id = $form->o_id ?? 'null';
 			$data->last_modified = $form->BF_updated_at ?? 'null';
 			$data->created_date = $form->BF_created_at ?? 'null';
-			$filteredSteps = $steps->whereIn('data', $form->BF_id) ?? 'null';
-			$data->submissions = $filteredSteps->count();
+			$data->submissions = (int) ($submissionsCountByForm[$form->BF_id] ?? 0);
 			$data->status = 'active' ?? 'null';
 			return $data;
 		});
@@ -62,20 +76,17 @@ class FormController extends Controller
 
 		$top_organizations = collect();
 
-		$formsCountByOrg = $data
-				->filter(fn($item) => $item->submissions > 0)
-				->groupBy('assigned_organization')
-				->map(fn($items) => $items->count());
+		// Both series are keyed off the submissions data so they describe the same
+		// organization: a submission belongs to the organization of the cycle it was
+		// made in, which is not necessarily the organization the form is assigned to.
+		$submissionsByOrg = $submissions
+				->filter(fn($item) => !empty($item->organization_name))
+				->groupBy('organization_name');
 
-		$submissionsCountByOrg = $submissions
-				->groupBy('organization_name')
-				->map(fn($items) => $items->count());
-
-
-		foreach ($formsCountByOrg as $org => $formsCount) {
+		foreach ($submissionsByOrg as $org => $orgSubmissions) {
 				$top_organizations[$org] = [
-						'forms_with_submissions' => $formsCount,
-						'total_submissions'      => $submissionsCountByOrg[$org] ?? 0,
+						'forms_with_submissions' => $orgSubmissions->pluck('form_id')->filter()->unique()->count(),
+						'total_submissions'      => $orgSubmissions->count(),
 				];
 		}
 
