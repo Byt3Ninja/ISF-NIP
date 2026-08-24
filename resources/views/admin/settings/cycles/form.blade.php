@@ -271,7 +271,7 @@
                                     name="{{ $fieldName }}"
                                     rows="4"
                                     class="form-control @error($fieldName) is-invalid @enderror"
-                                    placeholder="{{ $question['label'] }}"
+                                    placeholder="{{ form_field_placeholder($question) }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
                                     {{ $isReadOnly ? 'disabled' : '' }}
                                   >{{ old($fieldName) }}</textarea>
@@ -412,7 +412,7 @@
                                       id="{{ $fieldId }}"
                                       name="{{ $fieldName }}"
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                       {{ $isReadOnly ? 'disabled' : '' }}
                                     />
@@ -430,7 +430,7 @@
                                       id="{{ $fieldId }}"
                                       name="{{ $fieldName }}"
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                       {{ $isReadOnly ? 'disabled' : '' }}
                                     />
@@ -494,7 +494,7 @@
                                       data-min="{{ (isset($question['min']) && $question['min'] !== null && $question['min'] !== '') ? $question['min'] : 0 }}"
                                       @if(isset($question['max']) && $question['max'] !== null && $question['max'] !== '') data-max="{{ $question['max'] }}" @endif
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       min="{{ (isset($question['min']) && $question['min'] !== null && $question['min'] !== '') ? $question['min'] : 0 }}"
                                       @if(isset($question['max']) && $question['max'] !== null && $question['max'] !== '') max="{{ $question['max'] }}" @endif
                                       @if(isset($question['step']) && $question['step'] !== null && $question['step'] !== '') step="{{ $question['step'] }}" @else step="any" @endif
@@ -520,7 +520,7 @@
                                       data-qtype="{{ $question['type'] }}"
                                       data-allowed-domains="{{ $question['allowed_domains'] ?? '' }}"
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                       {{ $isReadOnly ? 'disabled' : '' }}
                                     />

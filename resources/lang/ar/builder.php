@@ -125,4 +125,16 @@ return [
     'Discard_Create' => 'تجاهل وإنشاء نموذج جديد',
     'Unsaved_Changes_New_Form' => 'لديك تغييرات غير محفوظة. إنشاء نموذج جديد سيؤدي إلى فقدانها.',
     'empty_section_error' => 'لا يمكن حفظ قسم فارغ. يرجى إضافة أسئلة للقسم أو حذفه.',
+    // GV-8348 end-user field hints. See the English file for why the format
+    // examples below are left untranslated.
+    'hint_enter' => 'أدخل',
+    'hint_email' => 'name@example.com',
+    'hint_url' => 'https://example.com',
+    'hint_date' => 'YYYY-MM-DD',
+    'hint_time' => 'HH:MM',
+    'hint_phone' => 'أدخل رقم هاتفك',
+    'hint_number' => 'أدخل رقماً',
+    'hint_number_between' => 'أدخل رقماً بين',
+    'hint_number_from' => 'أدخل رقماً لا يقل عن',
+    'hint_and' => 'و',
 ];

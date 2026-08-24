@@ -191,7 +191,7 @@
                                       name="{{ $fieldName }}"
                                       rows="4"
                                       class="form-control @error($fieldName) is-invalid @enderror"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       data-qtype="paragraph"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                     >{{ old($fieldName) }}</textarea>
@@ -295,7 +295,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="date"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -313,7 +313,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="time"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -349,7 +349,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="number"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -367,7 +367,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="email"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -385,7 +385,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="url"
                                         data-allowed-domains="{{ $question['allowed_domains'] ?? '' }}"
                                         {{ $question['is_required'] ? 'required' : '' }}
@@ -405,7 +405,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="short_answer"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
