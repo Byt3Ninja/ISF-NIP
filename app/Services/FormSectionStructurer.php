@@ -36,10 +36,7 @@ class FormSectionStructurer
 
             $sectionIndex = $sectionIndexByTitle[$title];
 
-            $optionValues = $options->values ?? '';
-            if (!is_array($optionValues)) {
-                $optionValues = $optionValues === '' ? [] : array_map('trim', explode(',', (string) $optionValues));
-            }
+            $optionValues = form_field_options($options->values ?? null);
 
             $logic = $options->logic ?? 'continue';
             if (is_object($logic)) {

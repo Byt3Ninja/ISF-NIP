@@ -276,9 +276,7 @@ class FormBuilderController extends Controller
                 'section'       => $options['section'] ?? 'بدون قسم',
                 'type'          => $options['type'] ?? null,
                 'is_required'   => (bool)($options['validation']['required'] ?? 0),
-                'options'       => isset($options['values'])
-                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                    : [],
+                'options'       => form_field_options($options['values'] ?? null),
                 'logic'         => $options['logic'] ?? [],
                 'allowed_domains' => $options['allowed_domains'] ?? '',
                 'min'           => $options['min'] ?? null,
@@ -527,7 +525,23 @@ class FormBuilderController extends Controller
 
         
         $section_index = 0;
-        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields, &$section_index) {
+
+        // GV-8346: choice options are stored as a comma-joined string. Trim,
+        // drop blanks and de-duplicate before persisting — the builder's
+        // `Add "Other"` button could be clicked repeatedly, and every extra
+        // row was serialized as its own `__OTHER__` entry, so the founder-
+        // facing form rendered one "Other" choice per click. De-duplicating
+        // here also heals questions already saved with duplicates the next
+        // time their form is saved.
+        $normalizeOptions = function ($options) {
+            return collect($options ?? [])
+                ->map(fn($o) => trim((string) $o))
+                ->filter(fn($o) => $o !== '')
+                ->unique()
+                ->implode(',');
+        };
+
+        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields, &$section_index, $normalizeOptions) {
             
             if (($item['type'] ?? null) === 'question') {
                 $section_title = null; 
@@ -547,7 +561,7 @@ class FormBuilderController extends Controller
                 return []; 
             }
 
-            return collect($questions)->map(function ($question) use ($fields, $section_title, $description) {
+            return collect($questions)->map(function ($question) use ($fields, $section_title, $description, $normalizeOptions) {
                 $field_type = $question['question_type'] ?? 'short_answer';
 
                 switch ($field_type) {
@@ -563,20 +577,17 @@ class FormBuilderController extends Controller
 
                     case 'multiple_choice':
                         $field_id = $fields['select'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'multiple_choice', 'values' => $values];
+                        $additional_config = ['type' => 'multiple_choice', 'values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'checkboxes':
                         $field_id = $fields['radio'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'checkboxes','values' => $values];
+                        $additional_config = ['type' => 'checkboxes','values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'dropdown':
                         $field_id = $fields['select'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'dropdown','values' => $values];
+                        $additional_config = ['type' => 'dropdown','values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'linear_scale':

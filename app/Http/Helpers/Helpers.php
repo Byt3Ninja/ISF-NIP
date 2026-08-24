@@ -514,3 +514,32 @@ if (! function_exists('form_number_placeholder')) {
         return __('builder.hint_number');
     }
 }
+
+if (!function_exists('form_field_options')) {
+    /**
+     * Normalize a builder question's stored choice list into a clean array.
+     *
+     * `options.values` is persisted as a comma-joined string (older rows may
+     * hold a real array). GV-8346: the builder's `Add "Other"` button had no
+     * guard, so a question could be saved with several `__OTHER__` entries and
+     * every renderer drew one "Other" choice per entry. De-duplicating on read
+     * keeps already-corrupted rows displaying correctly without a data fix,
+     * and blank entries (a trailing comma) never deserved a choice either.
+     *
+     * @param  mixed  $values  Raw `options['values']` (string or array).
+     * @return array<int, string>
+     */
+    function form_field_options($values)
+    {
+        if ($values === null || $values === '') {
+            return [];
+        }
+
+        return collect(is_array($values) ? $values : explode(',', $values))
+            ->map(fn($o) => trim((string) $o))
+            ->filter(fn($o) => $o !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+}

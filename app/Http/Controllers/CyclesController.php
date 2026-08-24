@@ -1112,9 +1112,7 @@ class CyclesController extends Controller
                     'section'     => $options['section'] ?? 'N/A',
                     'type'        => $options['type'] ?? null,
                     'is_required' => (bool)($options['validation']['required'] ?? 0),
-                    'options'     => isset($options['values'])
-                        ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                        : [],
+                    'options'     => form_field_options($options['values'] ?? null),
                     'logic'       => $options['logic'] ?? 'continue',
                     'min'         => $options['min'] ?? null,
                     'max'         => $options['max'] ?? null,
@@ -1241,9 +1239,7 @@ class CyclesController extends Controller
                 'section'     => $options['section'] ?? 'N/A',
                 'type'        => $options['type'] ?? null,
                 'is_required' => (bool)($options['validation']->required ?? 0),
-                'options'     => isset($options['values'])
-                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                    : [],
+                'options'     => form_field_options($options['values'] ?? null),
                 'logic'       => $options['logic'] ?? 'continue',
                 'allowed_domains' => $options['allowed_domains'] ?? '',
                 'min'         => $options['min'] ?? null,

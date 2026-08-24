@@ -804,6 +804,15 @@ function addOption(button, questionType) {
 function addOtherOption(button, questionType) {
   const optionsContainer = button.closest('.options-list');
   const qCard            = button.closest('.item-card');
+
+  // GV-8346: a question may hold at most ONE "Other" option. The button stays
+  // clickable, and every extra row it inserted was serialized as its own
+  // `__OTHER__` entry by extractQuestionData(), so the founder-facing form
+  // rendered one "Other" choice per click.
+  const hasOther = Array.from(optionsContainer.querySelectorAll('.option-input'))
+    .some(input => input.value.trim() === t.other_value);
+  if (hasOther) return;
+
   const currentLogic     = captureCurrentLogic(qCard);
   const icon             = questionType === 'multiple_choice' ? '○' : '☐';
 
