@@ -392,7 +392,9 @@
           <div class="mb-4" id="menu1">
             <div class="form-group mb-0">
               <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
-              <span><a href="/dashboard/forms" target="_blank">{{ __('admin.Create_form') }}</a></span>
+              @if( $_user->ableTo('forms.builder_view', $permissions) )
+              <span><a href="{{ route('forms.builder_view') }}" target="_blank">{{ __('admin.Create_form') }}</a></span>
+              @endif
               <select class="select form-control" name="FormSelect" id="FormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
