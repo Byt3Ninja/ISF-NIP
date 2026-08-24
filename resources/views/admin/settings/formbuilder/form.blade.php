@@ -18,6 +18,10 @@
       'date' => ['icon' => 'ti ti-calendar-event', 'label' => __('builder.Date')],
       'time' => ['icon' => 'ti ti-clock-hour-4', 'label' => __('builder.Time')],
       'file' => ['icon' => 'ti ti-paperclip', 'label' => __('builder.File_upload')],
+      'url' => ['icon' => 'ti ti-link', 'label' => __('builder.URL')],
+      'link' => ['icon' => 'ti ti-link', 'label' => __('builder.Link')],
+      'number' => ['icon' => 'ti ti-numbers', 'label' => __('builder.Number')],
+      'email' => ['icon' => 'ti ti-mail', 'label' => __('builder.Email')],
   ];
 @endphp
 
@@ -149,7 +153,7 @@
                                         </label>
                                       @endif
                                       <div class="text-muted small">
-                                        {{ $question['is_required'] ? 'Required field' : 'Optional field' }}
+                                        {{ $question['is_required'] ? __('admin.Required field') : __('admin.Optional field') }}
                                       </div>
                                     </div>
                                   </div>
@@ -460,9 +464,6 @@
                      <div class="d-flex flex-column flex-sm-row gap-2">
                        <button type="button" class="btn btn-outline-secondary btn-prev-submit btn-lg">
                          <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
-                       </button>
-                       <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-form">
-                         <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }}
                        </button>
                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
                          <i class="ti ti-edit me-2"></i>{{ __('builder.Edit_Form') }}
@@ -800,11 +801,11 @@
       if (nextBtn.dataset.action === "submitting") return;
 
       if (logic === "submit") {
-        if (textSpan) textSpan.textContent = "Submit";
+        if (textSpan) textSpan.textContent = "{{ $l == 'en' ? 'Submit' : 'إرسال' }}";
         if (iconSpan) iconSpan.className = "ti ti-send ms-2 btn-next-icon";
         nextBtn.dataset.action = "submit";
       } else {
-        if (textSpan) textSpan.textContent = "Next";
+        if (textSpan) textSpan.textContent = "{{ $l == 'en' ? 'Next' : 'التالي' }}";
         if (iconSpan) iconSpan.className = "ti ti-arrow-right ms-2 btn-next-icon";
         nextBtn.dataset.action = "next";
       }

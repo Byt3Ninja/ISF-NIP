@@ -403,7 +403,7 @@
                       <th style="width: 40px;"><input type="checkbox" id="select-all" class="form-check-input"></th>
                     @endif
                     <th>{{ __('dashboard.sp_startup_name') }}</th>
-                    <th>{{ __('dashboard.sp_note') }}</th>
+                    <th style="max-width: 250px;">{{ __('dashboard.sp_note') }}</th>
                     <th>{{ __('dashboard.sp_service_name') }}</th>
                     <th>{{ __('dashboard.sp_submitted') }}</th>
                     <th>{{ __('dashboard.sp_status') }}</th>
@@ -507,7 +507,9 @@
         rejectTitle: @json(__('dashboard.sp_reject_reason')),
         rejectRequired: @json(__('dashboard.sp_reject_reason_required')),
         successTitle: @json(__('dashboard.sp_action_success')),
-        refreshError: @json(__('dashboard.sp_refresh_error'))
+        refreshError: @json(__('dashboard.sp_refresh_error')),
+        cancel: @json(__('admin.Cancel')),
+        showDetails: @json(__('dashboard.sp_show_request_details'))
       };
 
       // Initial data from server
@@ -560,6 +562,17 @@
                             </button>
                         </div>
                     `;
+          } else if (CAN_QUICK_ACTION) {
+            actions = `
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="${escapeHtml(row.details_url)}" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill btn-details"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="${LABELS.showDetails}">
+                                <i class="ti ti-eye"></i>
+                            </a>
+                        </div>
+                    `;
           }
 
           let checkbox = '';
@@ -579,7 +592,7 @@
             escapeHtml(row.startup_company)
             + '</a>'
             + '</td>' +
-            '<td><small class="text-muted">' + escapeHtml(row.comment) + '</small></td>' +
+            '<td style="max-width: 250px; min-width: 150px; white-space: normal; word-break: break-word;"><small class="text-muted">' + escapeHtml(row.comment) + '</small></td>' +
             '<td>' + escapeHtml(row.service_name) + '</td>' +
             '<td><small>' + escapeHtml(row.submitted) + '</small></td>' +
             '<td>' + statusBadge + '</td>' +
@@ -815,8 +828,15 @@
             if (!value || !value.trim()) return LABELS.rejectRequired;
           },
           showCancelButton: true,
+          showDenyButton: false,
           confirmButtonText: LABELS.reject,
-          confirmButtonColor: 'btn btn-danger'
+          cancelButtonText: LABELS.cancel,
+          customClass: {
+            confirmButton: 'btn btn-danger ms-3',
+            cancelButton: 'btn btn-label-secondary'
+          },
+          buttonsStyling: false,
+          reverseButtons: true
         }).then(function (result) {
           if (result.isConfirmed) {
             doQuickAction(id, 'reject', result.value);
@@ -845,8 +865,15 @@
             if (!value || !value.trim()) return LABELS.rejectRequired;
           },
           showCancelButton: true,
+          showDenyButton: false,
           confirmButtonText: LABELS.reject,
-          confirmButtonColor: 'btn btn-danger'
+          cancelButtonText: LABELS.cancel,
+          customClass: {
+            confirmButton: 'btn btn-danger ms-3',
+            cancelButton: 'btn btn-label-secondary'
+          },
+          buttonsStyling: false,
+          reverseButtons: true
         }).then(function (result) {
           if (result.isConfirmed) {
             doBulkAction(ids, 'reject', result.value);
@@ -905,6 +932,7 @@
 
   <script>
     (function () {
+      const lang = @json($l);
       const rvLabels = {!! $rvLabels !!};
       const rvData = {!! $rvData !!};
       const sdLabels = {!! $sdLabels !!};
@@ -943,7 +971,7 @@
         data: {
           labels: rvLabels,
           datasets: [{
-            label: 'Requests',
+            label: lang === 'ar' ? 'الطلبات' : 'Requests',
             data: rvData,
             borderColor: purple,
             borderWidth: 2.5,
@@ -982,7 +1010,7 @@
               boxWidth: 8, boxHeight: 8,
               callbacks: {
                 title: (i) => i[0].label,
-                label: (i) => '  Requests:  ' + i.raw
+                label: (i) => '  ' + (lang === 'ar' ? 'الطلبات' : 'Requests') + ':  ' + i.raw
               }
             }
           },
@@ -1070,7 +1098,7 @@
               displayColors: true,
               boxWidth: 8, boxHeight: 8,
               callbacks: {
-                label: (i) => ' ' + i.raw + ' requests (' + i.raw + '%)'
+                label: (i) => ' ' + i.raw + (lang === 'ar' ? ' طلبات' : ' requests') + ' (' + i.raw + '%)'
               }
             }
           },

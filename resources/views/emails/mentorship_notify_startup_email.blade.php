@@ -86,6 +86,10 @@
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.ensure_on_time') }}</p>
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.wishes') }}</p>
 
+                        @if($isRtl)
+                            <p style="margin: 20px 0 0 0; font-size: 15px; color: #374151;">{{ __('email.action_session_details') }}</p>
+                        @endif
+
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
                             {{ __('email.regards') }}<br>
                             <strong>{{ __('email.team', ['platform_name' => $platformName]) }}</strong>

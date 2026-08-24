@@ -92,6 +92,7 @@ return [
     'Number' => 'رقم',
     'Email' => 'بريد الإلكتروني',
     'URL' => 'رابط',
+    'Link' => 'رابط',
     'Number_placeholder' => 'مكان لكتابة الرقم',
     'Min_value' => 'أدنى القيمة',
     'Min_optional' => 'أدنى القيمة (اختياري)',

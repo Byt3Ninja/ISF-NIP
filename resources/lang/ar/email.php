@@ -201,4 +201,13 @@ return [
     'thank_you' => 'شكراً لاستخدامك منصتنا',
     'online' => 'اونلاين',
     'offline' => 'اوفلاين',
+    'action_session_details' => 'الإجراء: تفاصيل الجلسة.',
+    'founder_name' => 'اسم المؤسس',
+    'startup_name' => 'اسم الشركة الناشئة',
+    'mentorship_session_action_notify' => [
+        'mentor_message' => 'لقد تم :status جلسة الإرشاد مع :startup_owner.',
+        'user_approved' => 'لديك جلسة إرشاد جديدة مع :mentor.',
+        'user_rescheduled' => 'تم تعديل موعد جلسة الإرشاد مع :mentor.',
+        'user_declined' => 'تم رفض طلب جلسة الإرشاد مع :mentor.',
+    ],
 ];

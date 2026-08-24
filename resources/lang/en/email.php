@@ -224,4 +224,13 @@ return [
     'dear_female' => 'Dear Ms. ',
     'regards' => 'Best regards,',
     'team' => ':platform_name Team',
+    'action_session_details' => 'Action: Session details.',
+    'founder_name' => 'Founder Name',
+    'startup_name' => 'Startup Name',
+    'mentorship_session_action_notify' => [
+        'mentor_message' => 'The mentorship session with :startup_owner has been :status.',
+        'user_approved' => 'You have a new mentorship session with :mentor.',
+        'user_rescheduled' => 'The mentorship session with :mentor has been rescheduled.',
+        'user_declined' => 'The mentorship session request with :mentor has been declined.',
+    ],
 ];

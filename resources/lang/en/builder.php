@@ -92,6 +92,7 @@ return [
     'Number' => 'Number',
     'Email' => 'Email',
     'URL' => 'URL',
+    'Link' => 'Link',
     'Number_placeholder' => 'Number placeholder',
     'Min_value' => 'Min value',
     'Min_optional' => 'Min value (optional)',

@@ -238,6 +238,7 @@ return [
     'sp_request_rejected' => 'You rejected a request for :service',
     'sp_service_created' => 'Service ":name" was created',
     'sp_service_updated' => 'Service ":name" was updated',
+    'sp_show_request_details' => 'Show Request Details',
     'sp_service_status_changed' => 'Service ":name" status changed',
 
     // Service Provider Approval Status Banner
