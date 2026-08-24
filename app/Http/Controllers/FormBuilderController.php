@@ -182,6 +182,17 @@ class FormBuilderController extends Controller
                             'step' => $options->step ?? '',
                         ]
                         : null,
+                    // Re-hydrate the linear scale endpoints/labels so the
+                    // builder repopulates them on edit (the JS reads
+                    // scale.from/to/label_low/label_high).
+                    'scale' => $type === 'linear_scale'
+                        ? [
+                            'from'       => $options->min ?? 1,
+                            'to'         => $options->max ?? 5,
+                            'label_low'  => $options->label_low  ?? '',
+                            'label_high' => $options->label_high ?? '',
+                        ]
+                        : null,
                 ];
             });
 
@@ -206,6 +217,7 @@ class FormBuilderController extends Controller
                                 'logic' => $f['logic'],
                                 'url_config' => $f['url_config'] ?? null,
                                 'number_config' => $f['number_config'] ?? null,
+                                'scale' => $f['scale'] ?? null,
                             ];
                         })->values()->toArray(),
                     ];
@@ -269,6 +281,10 @@ class FormBuilderController extends Controller
                     : [],
                 'logic'         => $options['logic'] ?? [],
                 'allowed_domains' => $options['allowed_domains'] ?? '',
+                'min'           => $options['min'] ?? null,
+                'max'           => $options['max'] ?? null,
+                'label_low'     => $options['label_low'] ?? '',
+                'label_high'    => $options['label_high'] ?? '',
             ];
         })
         ->groupBy('section')
@@ -289,6 +305,10 @@ class FormBuilderController extends Controller
                         'options'     => $q['options'],
                         'logic'       => $q['logic'],
                         'allowed_domains' => $q['allowed_domains'] ?? '',
+                        'min'         => $q['min'] ?? null,
+                        'max'         => $q['max'] ?? null,
+                        'label_low'   => $q['label_low'] ?? '',
+                        'label_high'  => $q['label_high'] ?? '',
                     ];
                 })->toArray(),
             ];
@@ -561,13 +581,29 @@ class FormBuilderController extends Controller
 
                     case 'linear_scale':
                         $field_id = $fields['input'] ?? 0;
-                        $min = $question['min'] ?? 1;
-                        $max = $question['max'] ?? 5;
+                        // GV-8349: the builder JS nests these under `scale`
+                        // (see extractQuestionData). Reading $question['min']
+                        // never matched, so every scale silently persisted as
+                        // the 1-5 default and the authored endpoint labels
+                        // were dropped entirely.
+                        $scaleConfig = $question['scale'] ?? [];
+                        $min = $scaleConfig['from'] ?? 1;
+                        $max = $scaleConfig['to'] ?? 5;
+                        $min = is_numeric($min) ? (int) $min : 1;
+                        $max = is_numeric($max) ? (int) $max : 5;
+                        // An inverted or zero-width range would render no
+                        // choices at all; fall back to the 1-5 default.
+                        if ($max <= $min) {
+                            $min = 1;
+                            $max = 5;
+                        }
                         $additional_config = [
                             'type' => 'linear_scale',
                             'min' => $min,
                             'max' => $max,
-                            'step' => 1
+                            'step' => 1,
+                            'label_low' => $scaleConfig['label_low'] ?? '',
+                            'label_high' => $scaleConfig['label_high'] ?? '',
                         ];
                         break;
 

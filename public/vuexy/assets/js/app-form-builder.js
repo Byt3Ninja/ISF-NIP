@@ -677,22 +677,22 @@ function updateQuestionOptions(select) {
     linear_scale: `
       <div>
         <div class="d-flex align-items-center gap-3 mb-3">
-          <select class="scale-from form-select" disabled>
+          <select name="questions[${cardId}][scale][from]" class="scale-from form-select">
             <option value="0">0</option><option value="1" selected>1</option>
           </select>
           <span class="text-muted small">${t.to}</span>
-          <select class="scale-to form-select" disabled>
+          <select name="questions[${cardId}][scale][to]" class="scale-to form-select">
             <option value="5" selected>5</option><option value="10">10</option>
           </select>
         </div>
         <div class="row g-3">
           <div class="col-md-6">
             <input type="text" name="questions[${cardId}][scale][label_low]" class="scale-label-low form-control"
-              placeholder="${t.label_low}" value="${t.low}" disabled> 
+              placeholder="${t.label_low}" value="${t.low}">
           </div>
           <div class="col-md-6">
             <input type="text" name="questions[${cardId}][scale][label_high]" class="scale-label-high form-control"
-              placeholder="${t.label_high}" value="${t.high}" disabled> 
+              placeholder="${t.label_high}" value="${t.high}">
           </div>
         </div>
       </div>`,

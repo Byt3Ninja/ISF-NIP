@@ -784,12 +784,32 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													break;
 
 												case 'linear_scale':
-													fieldsHtml += `<select class="form-select" id="${value.id_for}" name="${value.field_name}" ${requiredAttr}>`;
-													fieldsHtml += `<option value="">${chooseText}...</option>`;
-													for (var i = 1; i <= 5; i++) {
-														fieldsHtml += `<option value="${i}">${i}</option>`;
+													// GV-8349: render the ordered scale itself rather than a
+													// dropdown, matching the portal form. A dropdown hides the
+													// ordering and duplicates what multiple_choice already does.
+													var scaleOpts = value.raw_options || {};
+													var scaleMin = (scaleOpts.min !== undefined && scaleOpts.min !== '' && !isNaN(scaleOpts.min)) ? parseInt(scaleOpts.min, 10) : 1;
+													var scaleMax = (scaleOpts.max !== undefined && scaleOpts.max !== '' && !isNaN(scaleOpts.max)) ? parseInt(scaleOpts.max, 10) : 5;
+													if (scaleMax <= scaleMin) { scaleMin = 1; scaleMax = 5; }
+													var scaleLow = (scaleOpts.label_low || '').trim();
+													var scaleHigh = (scaleOpts.label_high || '').trim();
+													// The `options-group` class is what wires this into the
+													// page's group validation (validateGroup) and its
+													// .invalid-feedback placement — radios are skipped by the
+													// per-field loop, so without it a required scale is never
+													// validated on the client.
+													fieldsHtml += `<div class="options-group linear-scale-group d-flex align-items-center flex-wrap gap-2" data-required-group="${isRequired ? '1' : '0'}" data-group-name="${value.field_name}">`;
+													if (scaleLow !== '') {
+														fieldsHtml += `<span class="text-muted small me-1">${scaleLow}</span>`;
 													}
-													fieldsHtml += `</select>`;
+													for (var i = scaleMin; i <= scaleMax; i++) {
+														fieldsHtml += `<input type="radio" class="btn-check" name="${value.field_name}" id="${idFor}_${i}" value="${i}" autocomplete="off" ${requiredAttr} />`;
+														fieldsHtml += `<label class="btn btn-outline-primary rounded-pill px-3" for="${idFor}_${i}">${i}</label>`;
+													}
+													if (scaleHigh !== '') {
+														fieldsHtml += `<span class="text-muted small ms-1">${scaleHigh}</span>`;
+													}
+													fieldsHtml += `</div>`;
 													break;
 
 												case 'date':

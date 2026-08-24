@@ -1119,6 +1119,8 @@ class CyclesController extends Controller
                     'min'         => $options['min'] ?? null,
                     'max'         => $options['max'] ?? null,
                     'step'        => $options['step'] ?? null,
+                    'label_low'   => $options['label_low'] ?? '',
+                    'label_high'  => $options['label_high'] ?? '',
                 ];
             })
             ->groupBy('section')
@@ -1140,6 +1142,8 @@ class CyclesController extends Controller
                             'min'         => $q['min'] ?? null,
                             'max'         => $q['max'] ?? null,
                             'step'        => $q['step'] ?? null,
+                            'label_low'   => $q['label_low'] ?? '',
+                            'label_high'  => $q['label_high'] ?? '',
                         ];
                     })->toArray(),
                 ];
@@ -1245,6 +1249,8 @@ class CyclesController extends Controller
                 'min'         => $options['min'] ?? null,
                 'max'         => $options['max'] ?? null,
                 'step'        => $options['step'] ?? null,
+                'label_low'   => $options['label_low'] ?? '',
+                'label_high'  => $options['label_high'] ?? '',
             ];
         })
         ->groupBy('section')
@@ -1266,6 +1272,8 @@ class CyclesController extends Controller
                         'min'         => $q['min'] ?? null,
                         'max'         => $q['max'] ?? null,
                         'step'        => $q['step'] ?? null,
+                        'label_low'   => $q['label_low'] ?? '',
+                        'label_high'  => $q['label_high'] ?? '',
                     ];
                 })->toArray(),
             ];
