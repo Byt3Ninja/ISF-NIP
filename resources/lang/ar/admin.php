@@ -3,6 +3,7 @@
 return [
 	'Dashboard' => 'الرئيسية',
 	'Logout' => 'تسجيل الخروج',
+	'ProfileUpdatedSuccessfully' => 'تم تحديث الملف الشخصي بنجاح',
 	'Apps' => 'تطبيقات',
 	'Messages' => 'رسائل الزوار',
 	'My messages' => 'رسائلي',

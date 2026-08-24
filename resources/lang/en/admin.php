@@ -3,6 +3,7 @@
 return [
 	'Dashboard' => 'Dashboard',
 	'Logout' => 'Logout',
+	'ProfileUpdatedSuccessfully' => 'Profile Updated Successfully',
 	'Apps' => 'Apps',
 	'Messages' => 'Messages',
 	'My messages' => 'My messages',

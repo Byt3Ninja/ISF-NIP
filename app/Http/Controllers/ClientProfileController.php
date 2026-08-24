@@ -300,7 +300,7 @@ class ClientProfileController extends Controller
                 ]);
             }
 
-            return redirect()->route('user.profile_view')->with(['msg' => 'UpdateSuccess', 'class' => 'success']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'ProfileUpdatedSuccessfully', 'class' => 'success']);
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
