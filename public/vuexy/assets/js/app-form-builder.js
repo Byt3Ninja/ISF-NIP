@@ -413,21 +413,30 @@ function _reorderPost(url, payload) {
 ══════════════════════════════════════════════════════════════════ */
 function getSectionsList() {
   const sections = [];
+  // GV-8351: `id` MUST be the section's POSITIONAL index, not `dataset.itemId`.
+  // itemId comes from a counter shared with questions, so on reload sections get
+  // ids like 0, 4, 9 — while saveForm() normalizes every `section-N` target to a
+  // positional index (see sectionIdMap) and the founder-side wizard resolves
+  // `section-N` against the positional order of its rendered sections. Emitting
+  // itemIds here put the <option> values in a different id-space than the stored
+  // logic, so restoring a saved target matched no option and the select silently
+  // blanked — losing every per-option jump on the next save.
   document.querySelectorAll('.section-wrapper').forEach((section, index) => {
     const titleInput = section.querySelector('.section-title');
     const title = (titleInput && titleInput.value.trim())
       ? titleInput.value.trim()
       : `${t.section} ${index + 1}`;
-    sections.push({ id: section.dataset.itemId, title });
+    sections.push({ id: index, title });
   });
   return sections;
 }
 
 function updateAllLogicPanels() {
-  document.querySelectorAll('.logic-panel').forEach(panel => {
-    const qCard = panel.closest('.item-card');
-    if (qCard) addLogicPanel(qCard);
-  });
+  // GV-8351: rebuild via refreshLogicPanels() so each question replays its own
+  // saved targets. The previous `addLogicPanel(qCard)` (no currentLogic) reset
+  // every panel to `continue` — and addSection() calls this on every section
+  // added, so simply loading a saved form wiped all per-option jumps.
+  refreshLogicPanels();
 
   const sections = getSectionsList();
   document.querySelectorAll('.section-logic').forEach(select => {
@@ -736,6 +745,7 @@ function createOptionHTML(type, number, value = '') {
       <input type="text" name="questions[OPTION_ID][options][]" class="option-input form-control form-control-sm border-0 border-bottom flex-fill"
         placeholder="${t.option} ${number}"
         value="${escHtml(value)}"
+        onfocus="rememberOptionValue(this)"
         onchange="updateLogicPanelOptions(this)"> 
       <button type="button" class="btn btn-link text-muted p-0" onclick="removeOption(this)">
         <i class="ti ti-x"></i>
@@ -744,11 +754,13 @@ function createOptionHTML(type, number, value = '') {
 }
 
 function captureCurrentLogic(questionCard) {
-  const logic  = {};
-  const inputs = questionCard.querySelectorAll('.logic-options select');
-  const opts   = questionCard.querySelectorAll('.option-input');
-  inputs.forEach((sel, i) => {
-    const key = opts[i]?.value?.trim();
+  // Key off each select's own `data-logic-for` rather than pairing selects with
+  // `.option-input`s by position — the two lists drift apart as soon as an
+  // option is blank, added, or removed, which stored the target under the
+  // wrong option value.
+  const logic = {};
+  questionCard.querySelectorAll('.logic-options select').forEach(sel => {
+    const key = sel.dataset.logicFor;
     if (key) logic[key] = sel.value;
   });
   return logic;
@@ -821,18 +833,105 @@ function updateDropdownNumbers(container) {
   });
 }
 
+/** Stash an option's text before the user edits it, so a rename can be tracked. */
+function rememberOptionValue(input) {
+  input.dataset.previousValue = input.value;
+}
+
 function updateLogicPanelOptions(input) {
   const qCard        = input.closest('.item-card');
   const questionType = qCard.querySelector('.question-type').value;
-  if (['multiple_choice', 'dropdown', 'checkboxes'].includes(questionType)) {
-    addLogicPanel(qCard);
+  if (!['multiple_choice', 'dropdown', 'checkboxes'].includes(questionType)) return;
+
+  // A question's logic map is keyed by option TEXT, so renaming an option
+  // orphans its configured target. Carry it over to the new key before the
+  // panel is rebuilt.
+  const oldKey = logicKeyFor(input.dataset.previousValue ?? '');
+  const newKey = logicKeyFor(input.value);
+  const saved  = qCard._savedLogic || captureCurrentLogic(qCard);
+
+  if (oldKey && newKey && oldKey !== newKey && saved[oldKey]) {
+    saved[newKey] = saved[oldKey];
+    delete saved[oldKey];
+    qCard._savedLogic = saved;
   }
+  input.dataset.previousValue = input.value;
+
+  addLogicPanel(qCard, qCard._savedLogic || {});
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    LOGIC PANEL
 ══════════════════════════════════════════════════════════════════ */
+/**
+ * The key a question's `logic` map is stored under for a given option input
+ * value. Mirrors extractQuestionData(): the free-text "Other" option is stored
+ * as the sentinel `__OTHER__`, everything else as its trimmed literal value.
+ */
+function logicKeyFor(rawValue) {
+  const val = (rawValue ?? '').trim();
+  return val === t.other_value ? '__OTHER__' : val;
+}
+
+/** Minimal CSS.escape fallback for attribute-selector values. */
+function cssEscape(value) {
+  return (window.CSS && CSS.escape)
+    ? CSS.escape(value)
+    : String(value).replace(/["\\]/g, '\\$&');
+}
+
+/**
+ * Select the stored target for every option select in a question's logic panel.
+ *
+ * A `section-N` target whose <option> is not in the DOM yet (a forward jump seen
+ * while the form is still being populated) is LEFT ALONE rather than reset to
+ * `continue`, and the desired map stays on the card so a later
+ * refreshLogicPanels() can finish the job once every section exists.
+ */
+function applySavedLogic(questionCard, currentLogic = {}) {
+  const saved = (currentLogic && Object.keys(currentLogic).length)
+    ? currentLogic
+    : (questionCard._savedLogic || {});
+
+  questionCard._savedLogic = saved;
+
+  questionCard.querySelectorAll('.logic-options select').forEach(select => {
+    const key = select.dataset.logicFor ?? '';
+    const want = saved[key];
+    if (!want) {
+      select.value = 'continue';
+      return;
+    }
+    // Only assign a value the select actually offers; otherwise the browser
+    // blanks it and the target is silently lost on the next save.
+    if (select.querySelector(`option[value="${cssEscape(want)}"]`)) {
+      select.value = want;
+    }
+  });
+}
+
+/**
+ * Rebuild every logic panel (option lists change when sections are added,
+ * renamed, reordered or deleted) WITHOUT losing the configured targets: each
+ * card replays its own remembered map. This is what makes a forward jump
+ * survive populate — during populate the target section may not exist yet.
+ */
+function refreshLogicPanels() {
+  document.querySelectorAll('.logic-panel').forEach(panel => {
+    const qCard = panel.closest('.item-card');
+    if (qCard) addLogicPanel(qCard, qCard._savedLogic || {});
+  });
+}
+
 function addLogicPanel(questionCard, currentLogic = {}) {
+  // Remember the intended targets before the panel is torn down, so a rebuild
+  // triggered by an unrelated section edit cannot wipe them.
+  if (currentLogic && Object.keys(currentLogic).length) {
+    questionCard._savedLogic = currentLogic;
+  } else if (questionCard.querySelector('.logic-panel')) {
+    questionCard._savedLogic = captureCurrentLogic(questionCard);
+  }
+
   const existing = questionCard.querySelector('.logic-panel');
   if (existing) existing.remove();
 
@@ -856,7 +955,8 @@ function addLogicPanel(questionCard, currentLogic = {}) {
             <span class="text-muted" style="min-width:6rem;">
               ${t.if} "${escHtml(opt.value) || t.option + ' ' + (idx + 1)}":
             </span>
-            <select class="option-logic-${idx} form-select form-select-sm flex-fill">
+            <select class="option-logic-${idx} form-select form-select-sm flex-fill"
+              data-logic-for="${escHtml(logicKeyFor(opt.value))}">
               <option value="continue">${t.continue_next_section}</option>
               ${sections.map(s => `<option value="section-${s.id}">${t.go_to} ${s.title}</option>`).join('')}
               <option value="submit">${t.submit_form}</option>
@@ -868,11 +968,12 @@ function addLogicPanel(questionCard, currentLogic = {}) {
   const footerDiv = questionCard.querySelector('.mt-4.pt-4.border-top');
   footerDiv.insertAdjacentHTML('beforebegin', logicHTML);
 
-  const newSelects = questionCard.querySelectorAll('.logic-options select');
-  newSelects.forEach((select, idx) => {
-    const optVal = options[idx]?.value?.trim() ?? '';
-    select.value = currentLogic[optVal] || 'continue';
-  });
+  // Restore each select by the option's own logic key. Positional restoration
+  // (`options[idx]`) desynced whenever an option row was blank or reordered.
+  // `applySavedLogic` is a no-op for values whose <option> does not exist yet
+  // (a forward jump during populate) — refreshLogicPanels() re-applies once the
+  // whole form is in the DOM.
+  applySavedLogic(questionCard, currentLogic);
 }
 
 function toggleLogicOptions(button) {
@@ -913,31 +1014,18 @@ function saveForm() {
   const formData = { title: formTitle, organization_id: organizationId, items: [] };
   const container = document.getElementById('itemsContainer');
 
-  // Build a map of old section itemIds to new index-based IDs in saved DOM order.
-  const sectionIdMap = {};
-  let sectionIndex = 0;
-  Array.from(container.children).forEach(child => {
-    if (child.classList.contains('drop-placeholder')) return;
-    if (child.dataset.itemType === 'section') {
-      const oldId = child.dataset.itemId;
-      if (oldId !== undefined) {
-        sectionIdMap[oldId] = sectionIndex++;
-      }
-    }
-  });
-
+  // GV-8351: no itemId->index remap here any more. Every `section-N` <option>
+  // value is now emitted as a POSITIONAL index by getSectionsList(), and
+  // updateAllLogicPanels() regenerates those options from live DOM order on
+  // every reorder/delete — so the selected values are already in the stored
+  // id-space. The old remap keyed itemIds, which after this change would
+  // mistake a positional value for an itemId and rewrite it to a wrong section.
   Array.from(container.children).forEach(child => {
     if (child.classList.contains('drop-placeholder')) return;
     const itemType = child.dataset.itemType;
 
     if (itemType === 'section') {
-      let sectionLogic = child.querySelector('.section-logic').value;
-      if (sectionLogic && sectionLogic.startsWith('section-')) {
-        const oldId = sectionLogic.replace('section-', '');
-        if (sectionIdMap[oldId] !== undefined) {
-          sectionLogic = `section-${sectionIdMap[oldId]}`;
-        }
-      }
+      const sectionLogic = child.querySelector('.section-logic').value;
 
       const section = {
         type:        'section',
@@ -947,11 +1035,11 @@ function saveForm() {
         questions:   [],
       };
       child.querySelectorAll('.question-card').forEach(qCard => {
-        section.questions.push(extractQuestionData(qCard, sectionIdMap));
+        section.questions.push(extractQuestionData(qCard));
       });
       formData.items.push(section);
     } else if (itemType === 'question') {
-      formData.items.push(extractQuestionData(child, sectionIdMap));
+      formData.items.push(extractQuestionData(child));
     }
   });
 
@@ -986,7 +1074,7 @@ function saveForm() {
     .catch(() => releaseFailureAlert({ message: t.error_saving_form }));
 }
 
-function extractQuestionData(questionCard, sectionIdMap = null) {
+function extractQuestionData(questionCard) {
   const questionType = questionCard.querySelector('.question-type').value;
   const question = {
     type:          'question',
@@ -1004,16 +1092,13 @@ function extractQuestionData(questionCard, sectionIdMap = null) {
       const key = val === t.other_value ? '__OTHER__' : val;
       question.options.push(key);
       if (questionType === 'multiple_choice' || questionType === 'dropdown') {
-        const logicSel = questionCard.querySelector(`.option-logic-${idx}`);
+        // Read the logic select by the option's OWN value rather than by a
+        // positional `.option-logic-${idx}` class: `idx` here counts only
+        // non-empty options, so a blank option row above shifts it out of sync
+        // with the panel's own indexes and the wrong target gets stored.
+        const logicSel = questionCard.querySelector(`[data-logic-for="${cssEscape(key)}"]`);
         if (logicSel) {
-          let logicVal = logicSel.value;
-          if (sectionIdMap && logicVal && logicVal.startsWith('section-')) {
-            const oldId = logicVal.replace('section-', '');
-            if (sectionIdMap[oldId] !== undefined) {
-              logicVal = `section-${sectionIdMap[oldId]}`;
-            }
-          }
-          question.logic[key] = logicVal;
+          question.logic[key] = logicSel.value;
         }
       }
     });
@@ -1052,6 +1137,10 @@ function populateForm(formData, builderData) {
   }
   if (Array.isArray(builderData)) {
     builderData.forEach(item => populateSection(item));
+    // GV-8351: a question in section 1 can target section 3, whose <option>
+    // did not exist while section 1 was being populated. Now that every
+    // section is in the DOM, replay the saved targets one final time.
+    refreshLogicPanels();
   }
 }
 

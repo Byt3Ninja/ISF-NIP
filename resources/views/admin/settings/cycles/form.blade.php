@@ -1016,6 +1016,17 @@
       });
     }
 
+    // A stored target is only meaningful if it is "submit" or "section-<n>".
+    // Older saves wrote an empty string when the builder lost a target
+    // (GV-8351), and anything unrecognised must fall through to "continue"
+    // rather than be treated as a jump.
+    function normalizeLogic(value) {
+      const logic = (value || "").trim();
+      if (logic === "submit") return "submit";
+      if (/^section-\d+$/.test(logic)) return logic;
+      return "continue";
+    }
+
     function getNextLogic(section) {
       let logic = "continue";
       const inputs = section.querySelectorAll(".question-logic");
@@ -1024,11 +1035,11 @@
         let questionLogic = "continue";
         if (input.tagName === "SELECT") {
           const selectedOption = input.options[input.selectedIndex];
-          questionLogic = selectedOption ? (selectedOption.dataset.logic || "continue") : "continue";
+          questionLogic = selectedOption ? normalizeLogic(selectedOption.dataset.logic) : "continue";
         } else if (input.type === "radio" && input.checked) {
-          questionLogic = input.dataset.logic || "continue";
+          questionLogic = normalizeLogic(input.dataset.logic);
         } else if (input.type === "checkbox" && input.checked) {
-          const jumpLogic = input.dataset.logic || "continue";
+          const jumpLogic = normalizeLogic(input.dataset.logic);
           if (jumpLogic !== "continue") questionLogic = jumpLogic;
         }
         if (questionLogic !== "continue") {
@@ -1037,7 +1048,7 @@
       });
 
       if (logic === "continue") {
-        logic = section.dataset.sectionLogic || "continue";
+        logic = normalizeLogic(section.dataset.sectionLogic);
       }
 
       return logic;
