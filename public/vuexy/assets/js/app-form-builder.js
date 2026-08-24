@@ -301,6 +301,9 @@ function onQuestionZoneDrop(e) {
   removePlaceholder();
 
   if (sourceSection && sourceSection !== targetSection) {
+    // GV-8347: the card changed owning section, so the section it may no
+    // longer target (and the one it now may) both changed. Rebuild its panel.
+    refreshLogicPanels();
     reorderQuestions([targetSection, sourceSection]);
   } else {
     reorderQuestions(targetSection);
@@ -429,6 +432,19 @@ function getSectionsList() {
     sections.push({ id: index, title });
   });
   return sections;
+}
+
+/**
+ * GV-8347: positional index of the section a question card lives in, in the
+ * same id-space getSectionsList() emits (document order of .section-wrapper).
+ * Returns -1 when the card is not inside a section yet. Used to drop the
+ * current section from a question's Response Logic destinations: jumping to
+ * the section you are already in is not a valid target.
+ */
+function getOwningSectionIndex(questionCard) {
+  const wrapper = questionCard.closest('.section-wrapper');
+  if (!wrapper) return -1;
+  return [...document.querySelectorAll('.section-wrapper')].indexOf(wrapper);
 }
 
 function updateAllLogicPanels() {
@@ -939,7 +955,11 @@ function addLogicPanel(questionCard, currentLogic = {}) {
   if (!['multiple_choice', 'dropdown', 'checkboxes'].includes(questionType)) return;
   if (questionType === 'checkboxes') return;
 
-  const sections = getSectionsList();
+  // GV-8347: the question's own section is not a valid jump destination.
+  // Note this is deliberately NOT applied to the section-level "After this
+  // section" select, whose id-space getSectionsList() must keep intact.
+  const ownSectionIndex = getOwningSectionIndex(questionCard);
+  const sections = getSectionsList().filter(s => s.id !== ownSectionIndex);
   const options  = questionCard.querySelectorAll('.option-input');
 
   const logicHTML = `
