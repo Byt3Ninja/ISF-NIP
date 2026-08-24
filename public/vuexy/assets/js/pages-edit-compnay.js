@@ -64,6 +64,10 @@ const translations = {
     average_annual_revenues: {
       number: 'Please enter a valid number.',
       min: 'Value cannot be less than 0.'
+    },
+    financial_plan: {
+      file_invalid: 'Invalid file format. Only PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX are allowed.',
+      size: 'File size must not exceed 10 MB.'
     }
   },
   ar: {
@@ -120,6 +124,10 @@ const translations = {
     average_annual_revenues: {
       number: 'يرجى إدخال رقم صحيح.',
       min: 'لا يمكن أن تكون القيمة أقل من 0.'
+    },
+    financial_plan: {
+      file_invalid: 'تنسيق الملف غير صالح. يُسمح فقط بملفات PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX.',
+      size: 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.'
     }
   }
 };
@@ -477,6 +485,23 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
                 if (!/^\d+$/.test(val)) return { valid: false, message: translations[lang].average_annual_revenues.number };
                 if (Number(val) < 0) return { valid: false, message: translations[lang].average_annual_revenues.min };
                 return { valid: true };
+              }
+            }
+          }
+        },
+        financial_plan: {
+          validators: {
+            file: {
+              extension: 'pdf,doc,docx,xls,xlsx,ppt,pptx',
+              maxSize: 10 * 1024 * 1024, // 10 MB
+              message: function(input) {
+                if (input && input.element && input.element.files && input.element.files.length > 0) {
+                  const file = input.element.files[0];
+                  if (file.size > 10 * 1024 * 1024) {
+                    return translations[lang].financial_plan.size;
+                  }
+                }
+                return translations[lang].financial_plan.file_invalid;
               }
             }
           }
