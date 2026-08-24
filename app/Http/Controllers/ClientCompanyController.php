@@ -1620,7 +1620,7 @@ class ClientCompanyController extends Controller
                 $result->Pre_money_Valuation = $data['pre_money_valuation'];
                 $result->raised_fund = $data['raised_fund'];
                 $result->Funding_Target = $data['Funding_Target'];
-                $result->stage = $data['stage'];
+                $result->stage = array_key_exists('stage', $data) ? $data['stage'] : null;
                 $result->development_stage = $data['development_stage'];
                 $result->targeted_market = json_encode($data['targeted_market']);
                 $result->business_type = $data['business_type'];
