@@ -5,6 +5,8 @@ return [
     'Manage_landing_page' => 'Manage tailored landing page for your programs.',
     'Save' => 'Save',
     'Max' => 'Max',
+    'Choose_File' => 'Choose File',
+    'No_File_Chosen' => 'No file chosen',
     'characters' => 'characters',
     'Cards' => 'Cards',
     'Add_Card' => 'Add Card',

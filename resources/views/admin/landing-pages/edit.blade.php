@@ -44,6 +44,28 @@
     .program-row-ended td:first-child .text-muted.small {
       opacity: 0.6;
     }
+    /* Localized file input: the native control is kept in the DOM (so the
+       form still submits it and `required` still validates) but visually
+       replaced, because its "Choose File" / "No file chosen" chrome is
+       drawn by the browser in the browser's locale, not the app's. */
+    .localized-file-input {
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .localized-file-input-native {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .localized-file-input-button {
+      flex: 0 0 auto;
+      pointer-events: none;
+    }
+    .localized-file-input-name {
+      min-width: 0;
+    }
   </style>
 @endsection
 
@@ -301,7 +323,7 @@
                           @break
 
                         @case('image')
-                          <div class="d-flex align-items-center gap-3">
+                          <div class="image-field d-flex align-items-center gap-3">
                             @if(!empty($field['value']))
                               <img
                                 src="{{ $field['value'] }}"
@@ -311,14 +333,25 @@
                               >
                             @endif
                             <div class="flex-grow-1">
-                              <input
-                                type="file"
-                                id="{{ $fieldId }}"
-                                name="{{ $fieldName }}"
-                                accept="{{ $field['accept'] ?? 'image/*' }}"
-                                @if(!empty($field['required']) && empty($field['value'])) required @endif
-                                class="form-control @error($fieldName) is-invalid @enderror"
-                              >
+                              {{-- The browser renders its own "Choose File" / "No file chosen"
+                                   chrome on a bare file input, and that text follows the browser
+                                   locale, not the app locale. Hide the native control and drive a
+                                   localized button + filename label instead. --}}
+                              <div class="localized-file-input form-control d-flex align-items-center gap-2 @error($fieldName) is-invalid @enderror">
+                                <input
+                                  type="file"
+                                  id="{{ $fieldId }}"
+                                  name="{{ $fieldName }}"
+                                  accept="{{ $field['accept'] ?? 'image/*' }}"
+                                  @if(!empty($field['required']) && empty($field['value'])) required @endif
+                                  class="localized-file-input-native"
+                                >
+                                <button type="button" class="btn btn-sm btn-label-secondary localized-file-input-button">
+                                  {{ __('landing.Choose_File') }}
+                                </button>
+                                <span class="localized-file-input-name text-muted text-truncate"
+                                      data-placeholder="{{ __('landing.No_File_Chosen') }}">{{ __('landing.No_File_Chosen') }}</span>
+                              </div>
                               @if(!empty($field['accept']) || !empty($field['max_size_mb']))
                                 <div class="form-text">
                                   @if(!empty($field['accept']))
@@ -679,6 +712,24 @@
   @endphp
   <script>
     $(function () {
+      // Localized file input: forward clicks to the hidden native input and
+      // mirror the chosen filename into the localized label. The click is
+      // dispatched natively and clicks originating from the native input are
+      // ignored, otherwise the forwarded click bubbles back to this handler
+      // and recurses until the stack blows.
+      $(document).on('click', '.localized-file-input', function (e) {
+        const native = this.querySelector('.localized-file-input-native');
+        if (!native || e.target === native) {
+          return;
+        }
+        native.click();
+      });
+
+      $(document).on('change', '.localized-file-input-native', function () {
+        const $name = $(this).closest('.localized-file-input').find('.localized-file-input-name');
+        $name.text(this.files && this.files.length ? this.files[0].name : $name.data('placeholder'));
+      });
+
       const urlTab = new URLSearchParams(window.location.search).get('tab');
       if (urlTab) {
         const $targetBtn = $('button[data-bs-target="#' + urlTab + '"]');
@@ -1113,7 +1164,13 @@
                   }
                   return { valid: true };
                 }
-                const hasExisting = $(input.element).parent().siblings('img').length > 0;
+                // Anchor on the field container rather than a fixed number of
+                // .parent() hops or a generic utility class, so the check keeps
+                // working regardless of how the input is nested within the field.
+                const hasExisting = $(input.element)
+                  .closest('.image-field')
+                  .find('img')
+                  .length > 0;
                 return { valid: hasExisting, message: requiredMsg };
               },
             },

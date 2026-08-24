@@ -5,6 +5,8 @@ return [
     'Manage_landing_page' => 'أدِر صفحة هبوط مخصصة لبرامجك.',
     'Save' => 'حفظ',
     'Max' => 'الحد الأقصى',
+    'Choose_File' => 'اختر ملفًا',
+    'No_File_Chosen' => 'لم يتم اختيار ملف',
     'characters' => 'حرف',
     'Cards' => 'البطاقات',
     'Add_Card' => 'إضافة بطاقة',
