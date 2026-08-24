@@ -35,6 +35,9 @@ const _reorderTimers = { sections: null, questions: null };
 /* Convenience alias – assigned inside the IIFE once FB_CONFIG is live */
 let t;   // = FB_CONFIG.translations
 
+/* Unsaved-changes guard; module-scoped so the form modal can clear it on save */
+let isBuilderFormDirty = false;
+
 (function ($) {
   'use strict';
 
@@ -57,7 +60,7 @@ let t;   // = FB_CONFIG.translations
   updateFormSelect();
 
   let initialState = $('#builder-form').serialize();
-  let isBuilderFormDirty = false;
+  isBuilderFormDirty = false;
 
   console.log('builder-form', $('#builder-form'));
 
@@ -1167,13 +1170,59 @@ function populateQuestionData(questionCard, questionData) {
 ══════════════════════════════════════════════════════════════════ */
 function showForm(set, id, title, organization_id) {
   $('#mtitle').val(title);
-  if (typeof organization_id !== 'undefined') {
+  if (typeof organization_id !== 'undefined' && organization_id !== null) {
     $('#modal_organization_id').val(organization_id).trigger('change');
   }
   const labels = { 0: t.edit_form, 1: t.copy_form, 2: t.add_new_form };
   $('#AddFormTitle').text(labels[set] ?? '');
-  $('#modelSubmit').attr('onclick', `DoChange(${set},${id},'${title}',${organization_id})`);
+
+  // Bind the handler directly instead of building an inline onclick string:
+  // titles may contain quotes, which would produce invalid JS.
+  $('#modelSubmit').off('click.formModal').on('click.formModal', function () {
+    submitFormModal(set, id);
+  });
   $('#AddForm').modal('show');
+}
+
+/**
+ * Persist the modify-form modal (rename = 0, copy = 1, create = 2).
+ * Reads the live modal values so a changed organization/title is respected.
+ */
+function submitFormModal(set, id) {
+  const $submit = $('#modelSubmit');
+  if ($submit.prop('disabled')) return;
+
+  const title           = $.trim($('#mtitle').val() || '');
+  const organization_id = $('#modal_organization_id').val();
+
+  if (!title) {
+    releaseFailureAlert({ message: t.form_title_required });
+    return;
+  }
+  if (!organization_id) {
+    releaseFailureAlert({ message: t.organization_required });
+    return;
+  }
+
+  $submit.prop('disabled', true);
+  $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
+  $.ajax({
+    type: 'POST',
+    url:  '/dashboard/builder/' + set,
+    data: { id, title, organization_id },
+    success: function (newId) {
+      // Leaving the page after a successful save: don't trip the unsaved-changes guard.
+      isBuilderFormDirty = false;
+      const targetId = newId || id;
+      location.href = targetId
+        ? '/dashboard/show-builder/' + targetId
+        : '/dashboard/show-builder';
+    },
+    error: function () {
+      $submit.prop('disabled', false);
+      releaseFailureAlert({ message: t.error_occurred });
+    },
+  });
 }
 
 async function deleteForm(set, id, title, organization_id = 0) {
