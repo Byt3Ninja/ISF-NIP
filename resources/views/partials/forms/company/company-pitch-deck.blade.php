@@ -40,7 +40,7 @@
                 @if($client->company)
                 @if ($client->company->pitch_deck != null)
                 <iframe
-                  src="{{ asset($client->company->pitch_deck) }}"
+                  src="/pitch_decks/{{ $client->company->pitch_deck }}"
                   class="mb-2 border rouned"
                   target="_blank"
                   width="100%"
