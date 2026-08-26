@@ -91,7 +91,7 @@
             <option value=""></option>
             @foreach ($currencies as $Currency)
               <option value="{{ $Currency->currency_code }}">
-                {{ __('admin.' . $Currency->currency_name) }}
+                {{ $Currency->name }}
               </option>
             @endforeach
           </select>
