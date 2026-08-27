@@ -245,7 +245,7 @@
           @if(optional($client->company)->financial_plan != null)
           <div class="col-12 mb-3">
             <a
-              href="{{ URL::to( $client->company->financial_plan ) }}"
+              href="{{ app(\App\Services\FileManagerService::class)->getUrl( $client->company->financial_plan,  'pitch_deck') }}"
               target="_blank"
               download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
