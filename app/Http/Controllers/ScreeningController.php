@@ -13,6 +13,7 @@ use App\Jobs\ExportResScreenData;
 use App\Jobs\ExportScreeneData;
 use App\Jobs\SendChangeCycleNotificationJob;
 use App\Notifications\ChangeCycle;
+use App\Notifications\JudgeAssignedToScreeningNotification;
 use App\Notifications\TemplateEmail;
 use App\Screening;
 use App\ScreeningEvaluation;
@@ -640,6 +641,7 @@ class ScreeningController extends Controller
 			'panels.*.start_time' => 'nullable',
 			'panels.*.end_time' => 'nullable',
 			'panels.*.interval' => 'nullable|integer|min:1|max:99',
+			'panels.*.notify' => 'nullable|boolean',
 		], $messages);
 
 		if ($validator->fails()) {
@@ -713,6 +715,28 @@ class ScreeningController extends Controller
 			$stepList[$index + 1] = array_map('intval', $panel['judges']);
 		}
 		Step::where('id', $stepId)->update(['list' => $panels ? json_encode($stepList) : null]);
+
+		// Snapshot who was judging this step BEFORE the rebuild wipes it (GV-7317).
+		//
+		// Screening has no SoftDeletes, so the delete below is a hard delete and
+		// the previous assignment is unrecoverable a line later. Taking it here —
+		// after the conflict gate has passed — also means a save that gets
+		// rejected for confirmation notifies nobody.
+		//
+		// Keyed by "panel:judge", not by judge alone: a panel is a distinct
+		// assignment with its own startups, date and meeting, so a judge already
+		// sitting on panel 1 who is now added to panel 2 IS newly assigned there
+		// and must be told. Diffing on judge id alone silently swallowed that.
+		//
+		// Panel numbers are a safe key here because both sides of this comparison
+		// come from the same step in one request. deleteJudgingPanel() does
+		// renumber panels, but it shifts `steps.list` and the `screenings` rows
+		// together in a separate request, so the stored numbering always matches
+		// the numbering the form posts back.
+		$judgesBefore = Screening::where('step_id', $stepId)
+			->get(['panel', 'user_id'])
+			->map(fn ($row) => ((int) $row->panel) . ':' . ((int) $row->user_id))
+			->unique();
 
 		// Clear existing screenings for this step
 		Screening::where('step_id', $stepId)->delete();
@@ -884,11 +908,83 @@ class ScreeningController extends Controller
 			}
 		}
 
+		$this->notifyNewlyAssignedJudges($stepId, $panels, $judgesBefore);
+
 		return response()->json([
 			'success' => true,
 			'message' => __('admin.Saved_successfully'),
 			'data' => $panels
 		]);
+	}
+
+	/**
+	 * Email judges who were NEWLY added to a panel whose "Notify now" switch is on.
+	 *
+	 * Covers both initial screening (stype 2) and final screening (stype 5) —
+	 * both are saved through addJudgingPanels(), so one call site serves both,
+	 * and every role that can assign (super admin, org manager, sub admin) hits
+	 * the same endpoint (GV-7317 / GV-7237 / GV-7290 / GV-7291).
+	 *
+	 * @param  \Illuminate\Support\Collection  $judgesBefore  "panel:judge" pairs assigned before this save
+	 */
+	private function notifyNewlyAssignedJudges(int $stepId, array $panels, $judgesBefore): void
+	{
+		$toNotify = [];
+
+		foreach ($panels as $index => $panel) {
+			// A finished meeting must not re-notify. The blade hides the switch on
+			// a history panel, but the payload is not a boundary — re-check here.
+			if (isset($panel['history_panel'])) {
+				continue;
+			}
+
+			if (!filter_var($panel['notify'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+				continue;
+			}
+
+			// Panel numbers are 1-based, matching how $stepList and the Screening
+			// rows are numbered from the same $panels array in addJudgingPanels().
+			$panelNumber = $index + 1;
+
+			foreach ((array) ($panel['judges'] ?? []) as $judgeId) {
+				$judgeId = (int) $judgeId;
+
+				if (!$judgeId) {
+					continue;
+				}
+
+				// Retained judges are silent: a judge already on THIS panel before
+				// the save is not newly assigned to it. A judge new to this panel
+				// is notified even if they already sit on another panel of the
+				// same step — that is a separate assignment with its own meeting.
+				if ($judgesBefore->contains($panelNumber . ':' . $judgeId)) {
+					continue;
+				}
+
+				// Keyed by judge id so one save sends at most one email per judge,
+				// even when they are newly added to several panels at once.
+				$toNotify[$judgeId] = $judgeId;
+			}
+		}
+
+		if (empty($toNotify)) {
+			return;
+		}
+
+		foreach (User::whereIn('id', array_values($toNotify))->get() as $judge) {
+			try {
+				$judge->notify(new JudgeAssignedToScreeningNotification($stepId));
+			} catch (\Throwable $th) {
+				// A mail failure must never fail the assignment: the judges are
+				// already saved, and throwing here would report a save error for
+				// work that succeeded.
+				Log::error('Failed to notify newly assigned judge', [
+					'judge_id' => $judge->id,
+					'step_id'  => $stepId,
+					'error'    => $th->getMessage(),
+				]);
+			}
+		}
 	}
 
     public function deleteJudgingPanel(Request $request)

@@ -395,7 +395,7 @@
                   <div class="form-check form-switch mt-3">
                     <input class="form-check-input notify-toggle" type="checkbox"
                       id="notify-toggle-{{ $index + 1 }}"
-                      name="panels[{{ $index }}][notify]" value="1">
+                      name="panels[{{ $index }}][notify]" value="1" checked>
                     <label class="form-check-label" for="notify-toggle-{{ $index + 1 }}">
                       {{ __('admin.screening.notify_now') }}
                       <span class="text-muted d-block small">{{ __('admin.screening.notify_now_hint') }}</span>
@@ -1071,15 +1071,19 @@
         $clone.find('input[name*="[history_panel]"]').remove();
         $clone.find('.badge').filter((_, el) => $(el).find('.ti-history').length).remove();
         $clone.find('.alert').filter((_, el) => $(el).find('.ti-lock').length).remove();
-        $clone.find('.notify-toggle').prop('checked', false);
+        // Default ON, matching a freshly rendered panel: a new panel's judges are
+        // by definition newly assigned, so notifying is the expected case and the
+        // admin opts OUT. (The clone's source may be a history panel, whose switch
+        // is forced off, so this is a set-to-default and not a copy.)
+        $clone.find('.notify-toggle').prop('checked', true);
         $clone.find('.select-all-toggle').removeClass('d-none');
         // Blade renders the notify switch only for non-history panels, so a clone
         // taken from a history panel has none to copy. Rebuild it, otherwise a new
         // panel silently loses the ability to notify.
         if (!$clone.find('.notify-toggle').length) {
           $clone.find('.accordion-body').append(
-            `<div class="form-check form-switch notify-row">
-               <input class="form-check-input notify-toggle" type="checkbox" value="1">
+            `<div class="form-check form-switch notify-row mt-3">
+               <input class="form-check-input notify-toggle" type="checkbox" value="1" checked>
                <label class="form-check-label">
                  {{ __('admin.screening.notify_now') }}
                  <span class="text-muted d-block small">{{ __('admin.screening.notify_now_hint') }}</span>
