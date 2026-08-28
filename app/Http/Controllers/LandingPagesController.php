@@ -1024,8 +1024,8 @@ class LandingPagesController extends Controller
 			'about.cards.*.icon' => 'nullable|string|max:50',
 			'about.cards.*.title' => 'nullable|string|max:100',
 			'about.cards.*.title_ar' => 'nullable|string|max:100',
-			'about.cards.*.description' => 'nullable|string|max:500',
-			'about.cards.*.description_ar' => 'nullable|string|max:500',
+			'about.cards.*.description' => 'nullable|string|max:300',
+			'about.cards.*.description_ar' => 'nullable|string|max:300',
 		]);
 
 		$validator->after(function ($validator) use ($request) {
