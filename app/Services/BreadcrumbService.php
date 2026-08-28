@@ -202,6 +202,13 @@ class BreadcrumbService
      */
     public function getLabel(string $titleKey): string
     {
+        // Normalize legacy session entries that stored the rendered label
+        // (e.g. "My Profile") instead of a snake_case translation key,
+        // so they still resolve to the right lang key regardless of locale.
+        if (preg_match('/[A-Z\s]/', $titleKey)) {
+            $titleKey = Str::snake(trim($titleKey));
+        }
+
         // Try breadcrumb translations first
         $breadcrumbKey = 'breadcrumb.' . $titleKey;
         $translated = __($breadcrumbKey);

@@ -92,7 +92,7 @@
   <!--/ Hero -->
 
   <!-- About Us -->
-  @if($page->about_is_enabled)
+  @if($page->isAboutRenderable($isAr))
     @php
       $aboutTitle = $isAr ? $page->about_title_ar : $page->about_title;
       $aboutTitleTag = $isAr ? $page->about_title_tag_ar : $page->about_title_tag;
