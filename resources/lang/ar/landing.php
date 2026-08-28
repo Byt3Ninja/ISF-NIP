@@ -132,7 +132,7 @@ return [
         'step_title_ar_required' => 'يرجى إدخال عنوان الخطوة باللغة العربية.',
         'step_description_required' => 'يرجى إدخال وصف الخطوة.',
         'step_description_ar_required' => 'يرجى إدخال وصف الخطوة باللغة العربيه.',
-        'field_required' => 'هذا الحقل مطلوب',
+        'field_required' => 'هذا الحقل مطلوب.',
         'custom_section_field_required' => 'هذا الحقل مطلوب.',
         'button_link_invalid' => 'يرجى إدخال رابط زر صالح.',
         'custom_image_type_invalid' => 'نوع الملف غير مدعوم. يرجى رفع صورة بصيغة JPG أو PNG أو WEBP.',
@@ -157,7 +157,7 @@ return [
 
     'success' => [
         'general_saved' => 'تم حفظ المعلومات العامة لصفحة الهبوط بنجاح.',
-        'hero_saved' => 'تم حفظ معلومات القسم الرئيسي بنجاح.',
+        'hero_saved' => 'تم تحديث معلومات القسم الرئيسي بنجاح.',
         'programs_saved' => 'تم حفظ قسم البرامج بنجاح',
         'about_saved' => 'تم تحديث المعلومات بنجاح.',
         'how_saved' => 'تم حفظ المعلومات بنجاح.',
