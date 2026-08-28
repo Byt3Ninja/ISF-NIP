@@ -163,6 +163,11 @@ return [
         'how_saved' => 'Information saved successfully.',
         'custom_url_saved' => 'Custom landing page URL saved successfully.',
         'custom_saved' => 'Custom section saved successfully.',
+        'custom_deleted' => 'Custom section deleted successfully.',
+    ],
+
+    'error' => [
+        'custom_delete_failed' => 'Custom section could not be deleted. Please try again.',
     ],
     'lets_get_started' => "Let's get started",
     'your_next_program' => 'Your next program is already accepting applications.',

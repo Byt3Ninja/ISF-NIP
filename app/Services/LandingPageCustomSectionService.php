@@ -93,4 +93,39 @@ class LandingPageCustomSectionService
             ];
         }
     }
+
+    /**
+     * Delete a single custom section belonging to the given landing page.
+     *
+     * @param int $landingPageId
+     * @param int $sectionId
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function delete(int $landingPageId, int $sectionId): array
+    {
+        $section = LandingPageCustomSection::where('landing_page_id', $landingPageId)
+            ->where('id', $sectionId)
+            ->first();
+
+        if (!$section) {
+            return [
+                'success' => false,
+                'message' => __('landing.error.custom_delete_failed'),
+            ];
+        }
+
+        try {
+            $section->delete();
+
+            return [
+                'success' => true,
+                'message' => __('landing.success.custom_deleted'),
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => __('landing.error.custom_delete_failed'),
+            ];
+        }
+    }
 }

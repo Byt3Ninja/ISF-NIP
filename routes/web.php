@@ -485,6 +485,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('/landing-pages/{id}/programs', 'LandingPagesController@updatePrograms')->name('landing-pages.programs.update');
     Route::put('/landing-pages/{id}/how', 'LandingPagesController@updateHow')->name('landing-pages.how.update');
     Route::put('/landing-pages/{id}/custom-sections', 'LandingPagesController@updateCustomSections')->name('landing-pages.custom-sections.update');
+    Route::delete('/landing-pages/{id}/custom-sections/{sectionId}', 'LandingPagesController@destroyCustomSection')->name('landing-pages.custom-sections.destroy');
     Route::post('/landing-pages/{id}/custom-sections/upload-image', 'LandingPagesController@uploadCustomSectionImage')->name('landing-pages.custom-sections.upload-image');
 
 

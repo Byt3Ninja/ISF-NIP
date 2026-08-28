@@ -1342,6 +1342,22 @@ class LandingPagesController extends Controller
 	}
 
 	/**
+	 * Delete a single custom section from a landing page.
+	 */
+	public function destroyCustomSection($id, $sectionId)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		$result = app(LandingPageCustomSectionService::class)->delete($page->id, (int) $sectionId);
+
+		return response()->json($result, $result['success'] ? 200 : 422);
+	}
+
+	/**
 	 * Upload an image for insertion into a Custom Section's rich text
 	 * content (used by the Quill editor's image toolbar button).
 	 */

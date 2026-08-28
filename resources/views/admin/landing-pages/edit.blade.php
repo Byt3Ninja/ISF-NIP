@@ -1850,6 +1850,7 @@
             </div>
             <div class="card-body">
               <div class="row g-4">
+                <input type="hidden" name="custom_sections[${id}][id]" class="custom-section-db-id" value="">
                 <div class="col-12 custom-field-group" data-field="visibility">
                   <label class="form-label d-block">${"{{ __('landing.Visibility') }}"}</label>
                   <div class="form-check form-switch">
@@ -2133,6 +2134,7 @@
         })
         .on('click', '.remove-custom-section', function () {
           const $card = $(this).closest('.custom-section-card');
+          const $btn = $(this);
 
           const removeCard = function () {
             $card.find('.custom-quill-editor').each(function () {
@@ -2143,10 +2145,41 @@
             updateCustomSectionLabels();
           };
 
+          // Unsaved card: nothing on the server to delete, drop it silently.
           if ($card.attr('data-persisted') !== 'true') {
             removeCard();
             return;
           }
+
+          const dbId = $card.find('.custom-section-db-id').val();
+
+          const deleteFromServer = function () {
+            if (!dbId) {
+              removeCard();
+              return;
+            }
+            $btn.prop('disabled', true);
+            $.ajax({
+              url: "{{ url('dashboard/landing-pages/' . $currentPage->id . '/custom-sections') }}/" + encodeURIComponent(dbId),
+              method: 'POST',
+              data: { _token: "{{ csrf_token() }}", _method: 'DELETE' },
+            })
+              .done(function (res) {
+                removeCard();
+                releaseSuccessAlert({
+                  title: "{{ __('admin.success') }}",
+                  message: (res && res.message) ? res.message : "{{ __('landing.success.custom_deleted') }}",
+                });
+              })
+              .fail(function (xhr) {
+                $btn.prop('disabled', false);
+                const res = xhr.responseJSON || {};
+                releaseFailureAlert({
+                  title: "{{ __('admin.Error') }}",
+                  message: res.message || "{{ __('landing.error.custom_delete_failed') }}",
+                });
+              });
+          };
 
           releaseWarningAlert({
             title: "{{ __('landing.Delete_Custom_Section') }}",
@@ -2154,7 +2187,7 @@
             confirmText: "{{ __('landing.Delete') }}",
             cancelText: "{{ __('landing.Cancel') }}",
             confirmColor: 'danger',
-            onConfirm: removeCard,
+            onConfirm: deleteFromServer,
           });
         });
 

@@ -34,6 +34,7 @@ class Permissions
         'landing-pages.store',
         'landing-pages.programs.update',
         'landing-pages.custom-sections.update',
+        'landing-pages.custom-sections.destroy',
         'landing-pages.custom-sections.upload-image',
         'landing-pages.url.check',
         'landing-pages.url.save',
