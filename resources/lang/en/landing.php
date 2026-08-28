@@ -157,7 +157,7 @@ return [
 
     'success' => [
         'general_saved' => 'General landing page information saved successfully.',
-        'hero_saved' => 'Hero section information saved successfully.',
+        'hero_saved' => 'Hero section information updated successfully.',
         'programs_saved' => 'Programs section saved successfully.',
         'about_saved' => 'Information updated successfully.',
         'how_saved' => 'Information saved successfully.',

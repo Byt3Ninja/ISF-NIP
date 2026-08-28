@@ -331,7 +331,7 @@ class LandingPagesController extends Controller
             'label_en'  => 'Description (Arabic)',
             'label_ar'  => 'الوصف بالعربية',
             'value'     => $currentPage?->hero_description_ar,
-            'required'  => false,
+            'required'  => true,
             'maxlength' => 500,
             'col'       => 6,
           ],
@@ -872,7 +872,7 @@ class LandingPagesController extends Controller
 			'hero.title_tag' => 'required|string|max:150',
 			'hero.title_tag_ar' => 'required|string|max:150',
 			'hero.description' => 'required|string|max:500',
-			'hero.description_ar' => 'nullable|string|max:500',
+			'hero.description_ar' => 'required|string|max:500',
 			'hero.hero_image' => [
 				$page->hero_image ? 'nullable' : 'required',
 				'image',
@@ -880,12 +880,13 @@ class LandingPagesController extends Controller
 				'max:5120',
 			],
 		], [
-			'hero.title.required' => __('landing.validation.title_required'),
-			'hero.title_ar.required' => __('landing.validation.title_ar_required'),
-			'hero.title_tag.required' => __('landing.validation.subtitle_required'),
-			'hero.title_tag_ar.required' => __('landing.validation.subtitle_ar_required'),
-			'hero.description.required' => __('landing.validation.description_required'),
-			'hero.hero_image.required' => __('landing.validation.hero_image_required'),
+			'hero.title.required' => __('landing.validation.field_required'),
+			'hero.title_ar.required' => __('landing.validation.field_required'),
+			'hero.title_tag.required' => __('landing.validation.field_required'),
+			'hero.title_tag_ar.required' => __('landing.validation.field_required'),
+			'hero.description.required' => __('landing.validation.field_required'),
+			'hero.description_ar.required' => __('landing.validation.field_required'),
+			'hero.hero_image.required' => __('landing.validation.field_required'),
 			'hero.hero_image.image' => __('landing.validation.image_format_invalid'),
 			'hero.hero_image.mimes' => __('landing.validation.image_format_invalid'),
 			'hero.hero_image.max' => __('landing.validation.hero_image_size_exceeded'),
@@ -915,7 +916,7 @@ class LandingPagesController extends Controller
 		$page->hero_title_tag = $hero['title_tag'];
 		$page->hero_title_tag_ar = $hero['title_tag_ar'];
 		$page->hero_description = $hero['description'];
-		$page->hero_description_ar = $hero['description_ar'] ?? null;
+		$page->hero_description_ar = $hero['description_ar'];
 		$page->save();
 
 		return response()->json([
