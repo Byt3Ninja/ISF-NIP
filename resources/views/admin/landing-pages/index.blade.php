@@ -208,13 +208,13 @@
       var token = '{{ csrf_token() }}';
       var pageName = $(this).data('title') || '';
       var isArabic = {{ $l == 'ar' ? 'true' : 'false' }};
-      var title = isArabic
-        ? "'" + pageName + "'؟ سيتم حذف صفحة الهبوط نهائيًا ولن يكون رابطها العام متاحًا بعد"
-        : "Are you sure you want to delete '" + pageName + "'?";
+      var warningMessage = isArabic
+        ? "هل أنت متأكد من حذف '" + pageName + "'؟ سيتم حذف صفحة الهبوط نهائيًا ولن يكون رابطها العام متاحًا بعد ذلك."
+        : "Are you sure you want to delete '" + pageName + "'? This landing page will be permanently removed, and its public URL will no longer be accessible.";
 
       releaseWarningAlert({
-        title: title,
-        message: "{{ $l == 'ar' ? 'سيتم حذف صفحة الهبوط نهائيًا ولن يكون رابطها العام متاحًا بعد ذلك.' : 'This landing page will be permanently removed, and its public URL will no longer be accessible.' }}",
+        title: "{{ $l == 'ar' ? 'حذف صفحة الهبوط' : 'Delete Landing Page' }}",
+        message: warningMessage,
         confirmText: "{{ $l == 'ar' ? 'حذف' : 'Delete' }}",
         cancelText: "{{ $l == 'ar' ? 'إلغاء' : 'Cancel' }}",
         confirmColor: 'danger',
@@ -230,13 +230,14 @@
                   message: "{{ $l == 'ar' ? 'تم حذف صفحة الهبوط بنجاح.' : 'Landing page deleted successfully.' }}",
                 });
 
-                // Remove the landing card from DOM
+                // Remove the landing card from the list. Reload only when the
+                // list is now empty so the empty-state renders correctly.
                 $('div[data-id="' + $(this).data('id') + '"]').fadeOut(300, function () {
                   $(this).remove();
+                  if ($('.landing-card').length === 0) {
+                    location.reload();
+                  }
                 });
-
-                // Reload the page
-                location.reload();
 
               } else {
                 releaseFailureAlert({
