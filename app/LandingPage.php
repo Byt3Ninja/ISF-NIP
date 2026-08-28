@@ -104,6 +104,33 @@ class LandingPage extends Model
     }
 
     /**
+     * Whether the About Us section should render on the public landing page
+     * for the given language. It must be enabled and have all mandatory
+     * fields (title, title tag, description) filled for that language.
+     *
+     * @param bool $isAr Render language is Arabic
+     * @return bool
+     */
+    public function isAboutRenderable($isAr = false)
+    {
+        if (!$this->about_is_enabled) {
+            return false;
+        }
+
+        $mandatory = $isAr
+            ? [$this->about_title_ar, $this->about_title_tag_ar, $this->about_description_ar]
+            : [$this->about_title, $this->about_title_tag, $this->about_description];
+
+        foreach ($mandatory as $value) {
+            if (trim((string) $value) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Generate a unique slug from a landing page title.
      *
      * @param string $title
