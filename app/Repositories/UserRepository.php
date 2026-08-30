@@ -148,6 +148,10 @@ class UserRepository
                     $user->title_en = $data['title_en'];
                 }
                 $role = Role::where('name', $data['role'])->first();
+                if(!$role)
+                {
+                    $role = Role::where('default_for', $data['role'])->first();
+                }
                 DB::table('model_has_roles')->insert([
                     'role_id' => $role->id,
                     'model_type' => User::class,

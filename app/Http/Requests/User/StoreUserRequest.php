@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Traits\ApiResponder;
+use Illuminate\Support\Facades\DB;
 class StoreUserRequest extends FormRequest
 {
     use ApiResponder;
@@ -32,7 +33,19 @@ class StoreUserRequest extends FormRequest
             'phone' => 'required|unique:users,phone',
             'email' => 'email|required|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|exists:roles,name',
+            'role' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $exists = DB::table('roles')
+                        ->where('name', $value)
+                        ->orWhere('default_for', $value)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("The selected {$attribute} is invalid.");
+                    }
+                }
+            ],
             'gender'=>'nullable|in:Male,Female',
             'img_url' => 'nullable|image|mimes:jpeg,bmp,png,jpg,gif',
             'country_code' => 'required',
