@@ -197,7 +197,7 @@ return function () {
         ['title' => 'create_service', 'route' => 'services.create', 'group' => 'services', 'menuOnly' => false],
         ['title' => 'edit_service', 'route' => 'services.edit', 'group' => 'services', 'menuOnly' => false],
         ['title' => 'file_manager', 'route' => 'my_files.list', 'group' => 'services', 'menuOnly' => true],
-        ['title' => 'rooms', 'route' => 'rooms.index', 'menuOnly' => true],
+        // ['title' => 'rooms', 'route' => 'rooms.index', 'menuOnly' => true],
         
       ],
     ],
@@ -209,7 +209,7 @@ return function () {
         ['title' => 'logs_viewer', 'route' => 'audit-logs.index', 'menuOnly' => true],
         ['title' => 'reminder_logs', 'route' => 'organization.ReminderLogs', 'menuOnly' => true],
         ['title' => 'documentations', 'route' => 'documentation.index', 'menuOnly' => true],
-        ['title' => 'custom_landing_pages', 'route' => 'landing-pages.index', 'menuOnly' => true],
+        // ['title' => 'custom_landing_pages', 'route' => 'landing-pages.index', 'menuOnly' => true],
         ['title' => 'create_documentation', 'route' => 'documentation.create', 'group' => 'documentation', 'menuOnly' => false],
         ['title' => 'edit_documentation', 'route' => 'documentation.edit', 'group' => 'documentation', 'menuOnly' => false],
 
@@ -239,17 +239,21 @@ return function () {
     ],
   ];
   if (app()->environment(['local', 'dev', 'test', 'beta'])) {
-        $menu['services']['children'][] = [
-            'title' => 'timesheets',
-            'route' => 'TimeSheet.index',
-            'menuOnly' => true,
-        ];
-        $menu['dashboard']['children'][] = ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true];
+      $menu['services']['children'][] = [
+        'title' => 'timesheets',
+        'route' => 'TimeSheet.index',
+        'menuOnly' => true,
+      ];
+      $menu['dashboard']['children'][] = ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true];
+    }
+    if (app()->environment(['local', 'dev', 'test']))
+    {
+      $menu['admin']['children'][] = ['title' => 'custom_landing_pages', 'route' => 'landing-pages.index', 'menuOnly' => true];
     }
     if(auth()->check() && auth()->user()->hasRole('Admin')) {
-        $menu['admin']['children'][] = ['title' => 'general', 'route' => 'settings.system_general_view' , 'menuOnly' => false];
-    }else{
-        $menu['admin']['children'][] = ['title' => 'general', 'route' => 'settings.system_general_view', 'menuOnly' => false];
+      $menu['admin']['children'][] = ['title' => 'general', 'route' => 'settings.system_general_view' , 'menuOnly' => false];
+    } else {
+      $menu['admin']['children'][] = ['title' => 'general', 'route' => 'settings.system_general_view', 'menuOnly' => false];
     }
     
   return $menu;
