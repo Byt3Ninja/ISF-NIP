@@ -70,6 +70,10 @@
       -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
               mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
     }
+    .partners-marquee.is-static {
+      -webkit-mask-image: none;
+              mask-image: none;
+    }
     .partners-marquee-track {
       display: flex;
       align-items: center;
@@ -77,6 +81,13 @@
       width: max-content;
       padding-block: 1rem;
       animation: partners-marquee-scroll 30s linear infinite;
+    }
+    .partners-marquee.is-static .partners-marquee-track {
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem 4rem;
+      animation: none;
     }
     .partners-marquee:hover .partners-marquee-track {
       animation-play-state: paused;
@@ -114,7 +125,7 @@
     .partners-marquee-item:hover .partners-marquee-name {
       color: #696cff;
     }
-    [dir="rtl"] .partners-marquee-track {
+    [dir="rtl"] .partners-marquee:not(.is-static) .partners-marquee-track {
       animation-name: partners-marquee-scroll-rtl;
     }
     @keyframes partners-marquee-scroll {
@@ -807,7 +818,8 @@
         @endif
       </div>
 
-      <div class="partners-marquee">
+      @php $shouldScrollPartners = count($partnersWithUrls) > 5; @endphp
+      <div class="partners-marquee{{ $shouldScrollPartners ? '' : ' is-static' }}">
         <div class="partners-marquee-track">
           @foreach($partnersWithUrls as $partner)
             <div class="partners-marquee-item">
@@ -817,14 +829,16 @@
               <span class="partners-marquee-name">{{ $partner['name'] ?? '' }}</span>
             </div>
           @endforeach
-          @foreach($partnersWithUrls as $partner)
-            <div class="partners-marquee-item" aria-hidden="true">
-              @if(!empty($partner['logo_url']))
-                <img src="{{ $partner['logo_url'] }}" alt="" class="partners-marquee-logo" />
-              @endif
-              <span class="partners-marquee-name">{{ $partner['name'] ?? '' }}</span>
-            </div>
-          @endforeach
+          @if($shouldScrollPartners)
+            @foreach($partnersWithUrls as $partner)
+              <div class="partners-marquee-item" aria-hidden="true">
+                @if(!empty($partner['logo_url']))
+                  <img src="{{ $partner['logo_url'] }}" alt="" class="partners-marquee-logo" />
+                @endif
+                <span class="partners-marquee-name">{{ $partner['name'] ?? '' }}</span>
+              </div>
+            @endforeach
+          @endif
         </div>
       </div>
     </div>
