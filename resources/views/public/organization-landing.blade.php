@@ -65,84 +65,58 @@
       box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08) !important;
       transform: translateY(-2px);
     }
-    .partners-marquee {
-      overflow: hidden;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
-              mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    .partners-carousel .swiper-slide {
+      height: auto;
     }
-    .partners-marquee.is-static {
-      -webkit-mask-image: none;
-              mask-image: none;
-    }
-    .partners-marquee-track {
-      display: flex;
-      align-items: center;
-      gap: 4rem;
-      width: max-content;
-      padding-block: 1rem;
-      animation: partners-marquee-scroll 30s linear infinite;
-    }
-    .partners-marquee.is-static .partners-marquee-track {
-      width: 100%;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 2rem 4rem;
-      animation: none;
-    }
-    .partners-marquee:hover .partners-marquee-track {
-      animation-play-state: paused;
-    }
-    .partners-marquee-item {
+    .partners-carousel-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
+      justify-content: flex-start;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      height: 100%;
     }
-    .partners-marquee-logo {
-      max-height: 40px;
-      max-width: 160px;
+    .partners-carousel-logo-frame {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 88px;
+    }
+    .partners-carousel-logo {
+      max-width: 100%;
+      max-height: 100%;
       width: auto;
+      height: auto;
       object-fit: contain;
       filter: grayscale(100%);
-      opacity: 0.7;
+      opacity: 0.75;
       transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
     }
-    .partners-marquee-item:hover .partners-marquee-logo {
+    .partners-carousel-item:hover .partners-carousel-logo {
       filter: grayscale(0);
       opacity: 1;
       transform: scale(1.05);
     }
-    .partners-marquee-name {
-      font-size: 0.875rem;
+    .partners-carousel-name {
+      font-size: 0.9375rem;
       font-weight: 600;
-      color: #8592a3;
+      color: #6f7782;
       text-align: center;
-      white-space: nowrap;
       transition: color 0.3s ease;
     }
-    .partners-marquee-item:hover .partners-marquee-name {
+    .partners-carousel-item:hover .partners-carousel-name {
       color: #696cff;
     }
-    [dir="rtl"] .partners-marquee:not(.is-static) .partners-marquee-track {
-      animation-name: partners-marquee-scroll-rtl;
+    .partners-carousel .swiper-pagination {
+      position: static;
+      margin-top: 1.5rem;
     }
-    @keyframes partners-marquee-scroll {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
+    /* Swiper adds -lock when every slide fits: hide pagination on a single page. */
+    .partners-carousel .swiper-pagination.swiper-pagination-lock {
+      display: none;
     }
-    @keyframes partners-marquee-scroll-rtl {
-      from { transform: translateX(0); }
-      to   { transform: translateX(50%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .partners-marquee-track {
-        animation: none;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 100%;
-      }
     }
   </style>
 
@@ -578,7 +552,7 @@
               @endforeach
             </div>
             <!-- Pagination -->
-            <div class="swiper-pagination pt-4"></div>
+            <div class="swiper-pagination pt-4" id="programs-pagination"></div>
           </div>
         </div>
     
@@ -794,7 +768,7 @@
 
   @if($landingPage->partners_enabled && !empty($partnersWithUrls))
   <section id="partners" class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }} landing-reviews pb-0">@php $landingBg = !$landingBg; @endphp
-    <!-- Partners logo marquee: Start -->
+    <!-- Partners carousel: Start -->
     <div class="container">
       <div class="text-center mb-12">
         @if($landingPage->partners_subtitle)
@@ -818,31 +792,32 @@
         @endif
       </div>
 
-      @php $shouldScrollPartners = count($partnersWithUrls) > 5; @endphp
-      <div class="partners-marquee{{ $shouldScrollPartners ? '' : ' is-static' }}">
-        <div class="partners-marquee-track">
-          @foreach($partnersWithUrls as $partner)
-            <div class="partners-marquee-item">
-              @if(!empty($partner['logo_url']))
-                <img src="{{ $partner['logo_url'] }}" alt="{{ $partner['name'] ?? '' }}" class="partners-marquee-logo" />
-              @endif
-              <span class="partners-marquee-name">{{ $partner['name'] ?? '' }}</span>
-            </div>
-          @endforeach
-          @if($shouldScrollPartners)
+      <div class="partners-carousel overflow-hidden">
+        <div class="swiper" id="swiper-partners">
+          <div class="swiper-wrapper">
             @foreach($partnersWithUrls as $partner)
-              <div class="partners-marquee-item" aria-hidden="true">
-                @if(!empty($partner['logo_url']))
-                  <img src="{{ $partner['logo_url'] }}" alt="" class="partners-marquee-logo" />
-                @endif
-                <span class="partners-marquee-name">{{ $partner['name'] ?? '' }}</span>
+              <div class="swiper-slide">
+                <div class="partners-carousel-item">
+                  @if(!empty($partner['logo_url']))
+                    <div class="partners-carousel-logo-frame">
+                      <img
+                        src="{{ $partner['logo_url'] }}"
+                        alt="{{ $partner['name'] ?? '' }}"
+                        loading="lazy"
+                        class="partners-carousel-logo" />
+                    </div>
+                  @endif
+                  @if(!empty($partner['name']))
+                    <span class="partners-carousel-name">{{ $partner['name'] }}</span>
+                  @endif
+                </div>
               </div>
             @endforeach
-          @endif
+          </div>
+          <div class="swiper-pagination pt-2" id="partners-pagination"></div>
         </div>
       </div>
-    </div>
-    <!-- Partners logo marquee: End -->
+    <!-- Partners carousel: End -->
     <hr class="m-0 mt-6 mt-md-12" />
   </section>
   @endif
@@ -1174,7 +1149,7 @@
             prevEl: '#programs-previous-btn'
           },
           pagination: {
-            el: '.swiper-pagination',
+            el: '#programs-pagination',
             clickable: true
           },
           breakpoints: {
@@ -1199,7 +1174,28 @@
         window.addEventListener('resize', toggleProgramsNav);
       }
 
-      // Partners logo marquee is a pure-CSS animation; no JS required.
+      // -----------------------------------
+      // Partners carousel
+      // -----------------------------------
+      const swiperPartners = document.getElementById('swiper-partners');
+      if (swiperPartners) {
+        new Swiper(swiperPartners, {
+          slidesPerView: 2,
+          spaceBetween: 24,
+          grabCursor: true,
+          watchOverflow: true,
+          autoHeight: false,
+          pagination: {
+            el: '#partners-pagination',
+            clickable: true
+          },
+          breakpoints: {
+            1200: { slidesPerView: 6 },
+            992: { slidesPerView: 4 },
+            576: { slidesPerView: 3 }
+          }
+        });
+      }
     })();
   </script>
 </body>
