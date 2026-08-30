@@ -996,7 +996,8 @@
 			</div>
 			@endif
 			
-			@if( array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null($cycle_id) )
+			{{-- GV-3691: hide the mentors widget until the program reaches the mentorship stage --}}
+			@if( array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null($cycle_id) && ($mentorshipActive ?? true) )
 			<div class="col-12">
 				<div class="card mb-6">
 					<div class="card-header border-bottom">

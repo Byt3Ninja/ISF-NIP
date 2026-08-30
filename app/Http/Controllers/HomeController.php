@@ -34,6 +34,7 @@ use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
 use App\Services\MeetingWindowService;
+use App\Services\MentorshipAvailabilityService;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
@@ -3141,6 +3142,10 @@ class HomeController extends Controller
             $data['profile_completed'] = $profileComplete;
             $data['company_completed'] = $startupComplete;
         }
+
+        // GV-3691: the mentors widget offers "Request Mentorship", so it is only
+        // relevant while the founder's program sits on its mentorship stage.
+        $data['mentorshipActive'] = MentorshipAvailabilityService::isActiveForCompany($user->company);
 
         return view('includes.dashboard', $data);
     }
