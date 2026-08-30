@@ -18,6 +18,7 @@ use App\MentorshipTask;
 use App\Notifications\ConfirmEmailUpdateNotification;
 use App\Otp;
 use App\Schedule;
+use App\Services\MentorshipAvailabilityService;
 use App\Services\NotificationSettingsService;
 use App\Services\WhatsAppService;
 use App\Settings;
@@ -690,7 +691,11 @@ class ClientProfileController extends Controller
                 
                     
                 // $mentors = User::role('mentor')->get();
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter'));
+                // GV-3554: founders only see mentor cards once their program has
+                // reached the mentorship stage.
+                $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany($user->company);
+
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter', 'mentorshipActive'));
             }
         } else {
 
@@ -819,7 +824,9 @@ class ClientProfileController extends Controller
                     return $mentor;
                 });
                 // $mentors = User::role('mentor')->get();
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
+                $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany(Auth::user()->company);
+
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'mentorshipActive'));
             } else {
                 return redirect()->route('core.dashboard_view');
             }

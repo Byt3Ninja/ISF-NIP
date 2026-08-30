@@ -589,6 +589,7 @@ return [
     'No_Mentors_Found' => 'لم يتم العثور على مرشدين',
     'No_Mentors_Enrolled' => 'لا يوجد مرشدين مسجلين في برنامج',
     'No_Mentors_For_Selected_Program' => 'لا يوجد مرشدين متاحين للبرنامج المختار',
+    'Mentorship_Not_Available_Yet' => 'الإرشاد غير متاح حالياً. يمكنك طلب الجلسات عند الوصول إلى مرحلة الإرشاد.',
     'Request_Mentorship' => 'طلب ارشاد',
     'Show_Filters' => 'إظهار الفلاتر',
     'Any_Rating' => 'أي تقييم',

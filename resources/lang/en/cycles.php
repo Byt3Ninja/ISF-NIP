@@ -596,6 +596,7 @@ return [
     'No_Mentors_Found' => 'No Mentors Found',
     'No_Mentors_Enrolled' => 'No mentors enrolled in a program.',
     'No_Mentors_For_Selected_Program' => 'No mentors available for the selected program.',
+    'Mentorship_Not_Available_Yet' => 'Mentorship is not available yet. You can request sessions once you reach the mentorship stage.',
     'Request_Mentorship' => 'Request Mentorship',
     'Show_Filters' => 'Show Filters',
     'Any_Rating' => 'Any Rating',
