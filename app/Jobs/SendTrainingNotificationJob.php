@@ -56,7 +56,8 @@ class SendTrainingNotificationJob implements ShouldQueue
             return;
         }
 
-        $org_name = optional($step->cycle)->organization->{'name_' . $this->lang} ?? 'Unknown Organization';
+        $organization = optional($step->cycle)->organization;
+        $org_name = $organization->{'name_' . $this->lang} ?? 'Unknown Organization';
         Log::info("SendTrainingNotificationJob: org_name: " . $org_name);
         if ($this->type == 'offline') {
             // Notify Trainer
@@ -67,14 +68,13 @@ class SendTrainingNotificationJob implements ShouldQueue
                     'date' => $this->datetime ?? 'Unknown Date',
                     'type' => $this->type ?? 'Unknown Type',
                     'join_url' => $this->join_url ?? 'Unknown Join URL',
-                    'organization_name_en' => optional($step->cycle)->organization->name_en ?? 'Unknown Organization',
-                    'organization_name_ar' => optional($step->cycle)->organization->name_ar ?? 'Unknown Organization',
+                    'organization_name_en' => $organization->name_en ?? 'Unknown Organization',
+                    'organization_name_ar' => $organization->name_ar ?? 'Unknown Organization',
                     'Address' => $this->address ?? 'Unknown Address',
                 ];
 
                 try {
-                  Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail));
-                  
+                    Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail, $organization));
                     Log::info('Trainer notified: ' . $this->trainer_email);
                 } catch (\Throwable $th) {
                     Log::error('Failed to notify trainer: ' . $th->getMessage());
@@ -164,12 +164,12 @@ class SendTrainingNotificationJob implements ShouldQueue
                     'date' => $this->datetime ?? 'Unknown Date',
                     'type' => $this->type ?? 'Unknown Type',
                     'join_url' => $this->join_url ?? 'Unknown Join URL',
-                    'organization_name_en' => optional($step->cycle)->organization->name_en ?? 'Unknown Organization',
-                    'organization_name_ar' => optional($step->cycle)->organization->name_ar ?? 'Unknown Organization',
+                    'organization_name_en' => $organization->name_en ?? 'Unknown Organization',
+                    'organization_name_ar' => $organization->name_ar ?? 'Unknown Organization',
                 ];
 
                 try {
-                    Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail));
+                    Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail, $organization));
                     Log::info('Trainer notified: ' . $this->trainer_email);
                 } catch (\Throwable $th) {
                     Log::error('Failed to notify trainer: ' . $th->getMessage());
