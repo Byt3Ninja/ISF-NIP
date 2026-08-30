@@ -114,7 +114,7 @@
                   <i class="ti ti-pencil"></i> {{ __('builder.Edit') }}
               </button></li>
               <li><button class="dropdown-item d-flex align-items-center gap-2"
-                  onclick="showForm(1,{{ $title->id }},'{{ $title->form_name }} {{ __("builder.Copy.") }}')">
+                  onclick="showForm(1,{{ $title->id }},'{{ $title->form_name }} {{ __("builder.Copy.") }}',{{ $title->organization_id }})">
                   <i class="ti ti-copy"></i> {{ __('builder.Copy') }}
               </button></li>
               <li><button class="dropdown-item d-flex align-items-center gap-2 text-danger"

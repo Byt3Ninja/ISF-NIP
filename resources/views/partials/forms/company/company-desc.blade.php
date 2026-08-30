@@ -20,7 +20,7 @@
   <div class="card-body">
     <form id="desc-form" method="post" action="{{ $action }}" enctype="multipart/form-data">
       {!! csrf_field() !!}
-      <input type="hidden" name="CompanyN" value="3">
+      <input type="hidden" name="CompanyN" value="{{ \App\Enums\CompanyFormStep::AboutDescription->value }}">
 
       {{-- Header --}}
       <div class="border-bottom mb-4">

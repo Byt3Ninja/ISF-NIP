@@ -239,7 +239,7 @@
                 </div>
               </div>
               <div class="mb-4">
-                <button class="btn btn-primary d-grid w-100" type="submit">{{ __('auth.Login') }}</button>
+                <button id="login-submit-btn" class="btn btn-primary d-grid w-100" type="submit">{{ __('auth.Login') }}</button>
               </div>
             </form>
 
@@ -379,9 +379,36 @@
             autoFocus: new FormValidation.plugins.AutoFocus()
           }
         });
+
+        // GV-3679: disable the Login button once the form is actually being
+        // submitted, so a second click cannot fire a duplicate request.
+        // The native `submit` event fires only AFTER FormValidation has passed,
+        // so a rejected form never leaves the button stuck.
+        const loginBtn = document.getElementById('login-submit-btn');
+        if (loginBtn) {
+          // Capture the rendered label rather than re-deriving it, so the
+          // restored button always matches the markup.
+          const loginBtnHtml = loginBtn.innerHTML;
+
+          formAuthentication.addEventListener('submit', function() {
+            if (loginBtn.disabled) { return; }
+            loginBtn.disabled = true;
+            loginBtn.classList.add('disabled');
+            loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+              + '{{ $l == "ar" ? "جارٍ تسجيل الدخول..." : "Signing in..." }}';
+          });
+
+          // A bfcache restore (browser Back) reuses the old DOM, which would
+          // otherwise show a permanently disabled button.
+          window.addEventListener('pageshow', function(event) {
+            if (!event.persisted) { return; }
+            loginBtn.disabled = false;
+            loginBtn.classList.remove('disabled');
+            loginBtn.innerHTML = loginBtnHtml;
+          });
+        }
       }
     });
-  </script>
   </script>
 </body>
 

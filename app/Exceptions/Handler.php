@@ -76,10 +76,13 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
 {
     if ($exception instanceof MethodNotAllowedHttpException) {
-        return response()->json([
-            'success' => false,
-            'message' => 'The Request method is not allowed'
-        ], 405);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The Request method is not allowed'
+            ], 405);
+        }
+        return parent::render($request, $exception);
     }
 
     if ($exception instanceof AuthorizationException) {

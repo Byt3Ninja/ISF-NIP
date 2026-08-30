@@ -5,7 +5,7 @@
     </div>
     <form id="mvp-form" method="post" action="{{ route('company.profile_update_mine', isset($client) && $client->company ? $client->company->id : auth()->user()->id) }}" enctype="multipart/form-data">
       {!! csrf_field() !!}
-      <input type="hidden" value="13" name="CompanyN">
+      <input type="hidden" value="{{ \App\Enums\CompanyFormStep::BusinessModel->value }}" name="CompanyN">
       <div class="row">
         @php
         $models = ['Marketplace_model', 'On_demand_model', 'Disintermediation_model', 'Subscription_model',

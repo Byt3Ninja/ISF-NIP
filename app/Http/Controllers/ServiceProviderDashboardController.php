@@ -168,13 +168,13 @@ class ServiceProviderDashboardController extends Controller
         });
         
         $requestVolume = [
-            ['day' => 'Sat', 'value' => $volumes->where('weekday', 'Sat')->count()],
-            ['day' => 'Sun', 'value' => $volumes->where('weekday', 'Sun')->count()],
-            ['day' => 'Mon', 'value' => $volumes->where('weekday', 'Mon')->count()],
-            ['day' => 'Tue', 'value' => $volumes->where('weekday', 'Tue')->count()],
-            ['day' => 'Wed', 'value' => $volumes->where('weekday', 'Wed')->count()],
-            ['day' => 'Thu', 'value' => $volumes->where('weekday', 'Thu')->count()],
-            ['day' => 'Fri', 'value' => $volumes->where('weekday', 'Fri')->count()],
+            ['day' => $l === 'ar' ? 'السبت' : 'Sat', 'value' => $volumes->where('weekday', 'Sat')->count()],
+            ['day' => $l === 'ar' ? 'الأحد' : 'Sun', 'value' => $volumes->where('weekday', 'Sun')->count()],
+            ['day' => $l === 'ar' ? 'الإثنين' : 'Mon', 'value' => $volumes->where('weekday', 'Mon')->count()],
+            ['day' => $l === 'ar' ? 'الثلاثاء' : 'Tue', 'value' => $volumes->where('weekday', 'Tue')->count()],
+            ['day' => $l === 'ar' ? 'الأربعاء' : 'Wed', 'value' => $volumes->where('weekday', 'Wed')->count()],
+            ['day' => $l === 'ar' ? 'الخميس' : 'Thu', 'value' => $volumes->where('weekday', 'Thu')->count()],
+            ['day' => $l === 'ar' ? 'الجمعة' : 'Fri', 'value' => $volumes->where('weekday', 'Fri')->count()],
         ];
 
         $available_colors = [
@@ -323,6 +323,7 @@ class ServiceProviderDashboardController extends Controller
                 'decided_raw' => $row->decided_at,
                 'status' => $statusLabel,
                 'is_pending' => is_null($row->approved),
+                'details_url' => route('service_requests.list_all', ['open_request' => $row->id]),
             ];
         })->toArray();
     }
@@ -344,30 +345,60 @@ class ServiceProviderDashboardController extends Controller
             ->pluck('id')
             ->toArray();
 
-        $query = DB::table('audit_logs');
+        $srSubjectTypes = array_map(fn($id) => "App\\ServicesRequests#{$id}", $srIds);
+        $serviceSubjectTypes = array_map(fn($id) => "App\\Service#{$id}", $serviceIds);
+        $allowedSubjectTypes = array_merge($srSubjectTypes, $serviceSubjectTypes);
 
-        if (!empty($srIds)) {
-            $query->where(function ($q) use ($serviceIds, $srIds) {
-                $q->where(function ($q2) use ($srIds) {
-                    $q2->where('subject_type', 'like', 'App\\ServicesRequests#%')
-                        ->whereIn('subject_id', $srIds);
-                })->orWhere(function ($q2) use ($serviceIds) {
-                    $q2->where('subject_type', 'like', 'App\\Service#%')
-                        ->whereIn('subject_id', $serviceIds);
-                });
-            });
-        } else {
-            $query->where(function ($q) use ($serviceIds) {
-                $q->where('subject_type', 'like', 'App\\Service#%')
-                    ->whereIn('subject_id', $serviceIds);
-            });
-        }
-
-        $logs = $query->orderByDesc('created_at')
+        $logs = DB::table('audit_logs')
+            ->whereIn('subject_type', $allowedSubjectTypes)
+            ->orderByDesc('created_at')
             ->limit(10)
             ->get();
 
-        return $logs->map(function ($log) use ($l) {
+        $srIdsInLogs = [];
+        $serviceIdsInLogs = [];
+        foreach ($logs as $log) {
+            if (str_contains($log->subject_type, 'ServicesRequests')) {
+                $srIdsInLogs[] = $log->subject_id;
+            } elseif (str_contains($log->subject_type, 'Service#')) {
+                $serviceIdsInLogs[] = $log->subject_id;
+            }
+        }
+
+        $serviceRequestsMap = [];
+        if (!empty($srIdsInLogs)) {
+            $serviceRequestsMap = DB::table('services_requests')
+                ->join('services', 'services_requests.service_id', '=', 'services.id')
+                ->join('users', 'services_requests.user_id', '=', 'users.id')
+                ->leftJoin('companies', 'users.company_id', '=', 'companies.id')
+                ->whereIn('services_requests.id', $srIdsInLogs)
+                ->select([
+                    'services_requests.id',
+                    "services.name_{$l} as service_name",
+                    "services.name_en as service_name_en",
+                    "companies.name_{$l} as startup_name",
+                    "companies.name_en as startup_name_en"
+                ])
+                ->get()
+                ->keyBy('id')
+                ->toArray();
+        }
+
+        $servicesMap = [];
+        if (!empty($serviceIdsInLogs)) {
+            $servicesMap = DB::table('services')
+                ->whereIn('id', $serviceIdsInLogs)
+                ->select([
+                    'id',
+                    "name_{$l} as name",
+                    "name_en as name_en"
+                ])
+                ->get()
+                ->keyBy('id')
+                ->toArray();
+        }
+
+        return $logs->map(function ($log) use ($l, $serviceRequestsMap, $servicesMap) {
             $properties = json_decode($log->properties, true) ?? [];
             $type = 'info';
             $icon = 'ti-info-circle';
@@ -379,32 +410,37 @@ class ServiceProviderDashboardController extends Controller
             $isService = str_contains($log->subject_type, 'Service#') && !$isServiceRequest;
 
             if ($isServiceRequest) {
+                $srData = $serviceRequestsMap[$log->subject_id] ?? null;
+                $serviceName = $srData ? ($srData->service_name ?? $srData->service_name_en) : '';
+                $startupName = $srData ? ($srData->startup_name ?? $srData->startup_name_en) : '';
+
                 if ($log->description === 'audit:created') {
                     $type = 'new_request';
                     $icon = 'ti-mail-forward';
                     $color = 'primary';
-                    $text = __('dashboard.sp_new_request', ['startup' => '']);
+                    $text = __('dashboard.sp_new_request', ['startup' => $startupName]);
                 } elseif ($log->description === 'audit:updated') {
                     $approved = $properties['approved'] ?? null;
                     if ($approved === 'Yes') {
                         $type = 'accepted';
                         $icon = 'ti-circle-check';
                         $color = 'success';
-                        $text = __('dashboard.sp_request_accepted', ['service' => '']);
+                        $text = __('dashboard.sp_request_accepted', ['service' => $serviceName]);
                     } elseif ($approved === 'No') {
                         $type = 'rejected';
                         $icon = 'ti-circle-x';
                         $color = 'danger';
-                        $text = __('dashboard.sp_request_rejected', ['service' => '']);
+                        $text = __('dashboard.sp_request_rejected', ['service' => $serviceName]);
                     } else {
                         $type = 'updated';
                         $icon = 'ti-edit';
                         $color = 'warning';
-                        $text = __('dashboard.sp_service_updated', ['name' => '']);
+                        $text = __('dashboard.sp_service_updated', ['name' => $serviceName]);
                     }
                 }
             } elseif ($isService) {
-                $serviceName = $properties["name_{$l}"] ?? $properties['name_en'] ?? '';
+                $sData = $servicesMap[$log->subject_id] ?? null;
+                $serviceName = $sData ? ($sData->name ?? $sData->name_en) : '';
                 if ($log->description === 'audit:created') {
                     $type = 'service_created';
                     $icon = 'ti-plus';

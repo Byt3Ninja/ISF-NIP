@@ -5,8 +5,8 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
     <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <style>
-  /* Edit-step picker is positioned via JS using viewport-fixed coords so the
-     month/year selectors stay fully visible inside the modal (GV-3736). */
+   /* Edit-step picker is positioned via JS using viewport-fixed coords so the
+      month/year selectors stay fully visible inside the offcanvas (GV-3736). */
   .daterangepicker.drp-viewport-fixed {
     margin-top: 0 !important;
     position: fixed !important;
@@ -362,60 +362,56 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 </div>
 
 @if ($cstep)
-<!-- Step Form Modal -->
-<div class="modal fade" id="step-form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
-  aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title mb-0" id="myModalLabel33">{{ __('admin.screening.modify_step') }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="_token" value="">
-        <div class="modal-body">
-          <input type="hidden" name="sid" id="step-id-value">
-          <input type="hidden" name="type" value="8">
-          <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
-          <div class="form-group mb-3">
-            <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
-            <select class="form-select select2" id="mFormSelect" name="mFormSelect">
-              <option value="" @selected(!$form)>{{ __('admin.no_form_option') }}</option>
-              @foreach($forms as $f)
-                <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>{{ $f->form_name }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Title') }}</label>
-            <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
-              class="form-control" required>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label" for="step-range-picker">{{ __('admin.start_date') }} - {{ __('admin.end_date') }}:</label>
-            <input type="hidden" name="fromDate" id="mfromDate">
-            <input type="hidden" name="toDate" id="mtoDate">
-            <input type="text" id="step-range-picker" class="form-control" name="date_range">
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Description') }}</label>
-            <textarea id="step-description" name="description" placeholder="{{ __('cycles.Description') }}"
-              class="form-control" style="min-height: 80px; resize: vertical;"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" value="submit" class="btn btn-primary">
-            <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
-          </button>
-          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-            <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
-          </button>
-        </div>
-      </form>
-    </div>
+<!-- Step Form Offcanvas -->
+<div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="step-form-modal" aria-labelledby="myModalLabel33">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title mb-0" id="myModalLabel33">{{ __('admin.screening.modify_step') }}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
+  <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
+    class="d-flex flex-column flex-grow-1 overflow-hidden">
+    <input type="hidden" name="_token" value="">
+    <div class="offcanvas-body">
+      <input type="hidden" name="sid" id="step-id-value">
+      <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
+      <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
+      <div class="form-group mb-3">
+        <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
+        <select class="form-select select2" id="mFormSelect" name="mFormSelect">
+          <option value="" @selected(!$form)>{{ __('admin.no_form_option') }}</option>
+          @foreach($forms as $f)
+            <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>{{ $f->form_name }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label">{{ __('cycles.Title') }}</label>
+        <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
+          class="form-control" required>
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label" for="step-range-picker">{{ __('admin.start_date') }} - {{ __('admin.end_date') }}:</label>
+        <input type="hidden" name="fromDate" id="mfromDate">
+        <input type="hidden" name="toDate" id="mtoDate">
+        <input type="text" id="step-range-picker" class="form-control" name="date_range">
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label">{{ __('cycles.Description') }}</label>
+        <textarea id="step-description" name="description" placeholder="{{ __('cycles.Description') }}"
+          class="form-control" style="min-height: 80px; resize: vertical;"></textarea>
+      </div>
+    </div>
+    <div class="offcanvas-footer border-top p-3 d-flex justify-content-end gap-2">
+      <button type="submit" value="submit" class="btn btn-primary">
+        <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+      </button>
+      <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">
+        <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
+      </button>
+    </div>
+  </form>
 </div>
-<!--/ Step Form Modal -->
+<!--/ Step Form Offcanvas -->
 
 @if ($cstep->data == 'grouptogroup')
 <!-- Users form -->
@@ -545,7 +541,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 
       if (stepData) {
         $('#stepForm input[name="_token"]').val($('meta[name="csrf-token"]').attr('content'));
-        $('#step-form-modal').modal('show');
+        $('#step-form-modal').offcanvas('show');
         $('#step-id-value').val(stepData.id);
         $('#step-title').val(stepData.title);
         $('#step-description').val(stepData.description);
@@ -562,7 +558,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 
         // Combined range picker, mirroring the Steps Page dialog. The picker is
         // positioned via JS (viewport-fixed) instead of drops:'up', which clipped
-        // it inside the modal and hid the month/year selectors (GV-3736).
+        // it inside the offcanvas and hid the month/year selectors (GV-3736).
         const $stepRangeInput = $('#step-range-picker');
         $stepRangeInput.daterangepicker({
           opens: $('html').attr('dir') === 'rtl' ? 'left' : 'right',
@@ -577,6 +573,8 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
       }
     });
 
+    // Viewport-fixed positioning now lives in /js/daterangepicker-viewport.js
+    // (loaded globally by the admin layout) so every modal picker behaves the same.
     function positionStepRangePicker($input) {
       const drp = $input.data('daterangepicker');
       if (!drp) return;
@@ -616,7 +614,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
       });
       const $modal = $('#step-form-modal');
       $modal.off('scroll.drpViewport').on('scroll.drpViewport', reposition);
-      $modal.find('.modal-body, .modal-dialog').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
+      $modal.find('.offcanvas-body').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
       $(window).off('scroll.drpViewport resize.drpViewport').on('scroll.drpViewport resize.drpViewport', reposition);
 
       if (drp.isShowing) reposition();
@@ -647,7 +645,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             url: "/dashboard/cycles/modify",
             data: {
               "stepid": stepId,
-              "type": 6,
+              "type": "{{ \App\Enums\CycleModifyAction::DELETE_STEP }}",
             },
             success: function(response) {
               $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();
@@ -797,7 +795,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
       // (which otherwise redirects back with a flash). $stepFormSubmissions is the
       // founder form_data count for this step (server-embedded).
       let stepFormOriginalValue = null;
-      $('#step-form-modal').on('shown.bs.modal', function () {
+      $('#step-form-modal').on('shown.bs.offcanvas', function () {
         stepFormOriginalValue = $('#mFormSelect').val();
         $('#confirm_form_change').val('0');
       });

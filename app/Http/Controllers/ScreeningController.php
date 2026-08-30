@@ -13,6 +13,7 @@ use App\Jobs\ExportResScreenData;
 use App\Jobs\ExportScreeneData;
 use App\Jobs\SendChangeCycleNotificationJob;
 use App\Notifications\ChangeCycle;
+use App\Notifications\JudgeAssignedToScreeningNotification;
 use App\Notifications\TemplateEmail;
 use App\Screening;
 use App\ScreeningEvaluation;
@@ -21,6 +22,8 @@ use App\ScreeningEvaluationCustomFields;
 use App\ScreeningEvaluationFieldsValues;
 use App\ScreeningEvaluationResults;
 use App\Factories\OnlineMeetingFactory;
+use App\Services\JudgeScheduleConflictService;
+use App\Services\PanelWindowService;
 use App\Services\WhatsAppService;
 use App\Step;
 use App\User;
@@ -325,9 +328,23 @@ class ScreeningController extends Controller
 				$panelEntry = [
 					'judges' => (array) ($panelData['judgers'] ?? []),
 					'companies' => (array) ($panelData['companies'] ?? []),
-					'session' => []
+					'session' => [],
+					// A panel whose meeting has finished becomes History: read-only,
+					// preserved as a record of what actually took place. Derived from
+					// the saved row (not request input), so it cannot be spoofed.
+					'is_history' => PanelWindowService::isPast(
+						PanelWindowService::fromScreening($screening),
+						auth()->user()
+					),
+					// The panel number this record is STORED under. The view's loop
+					// index is not the same thing once panels have been deleted, so
+					// the real number is carried through rather than recomputed.
+					'panel_number' => (int) $panelId,
 				];
-				if ($screening && $screening->session_date) {
+				// GV-8365: gated on session_date alone, a panel whose meeting was
+				// created without a date still holds a passcode/link that must be
+				// rendered — otherwise a reload looks like the passcode was cleared.
+				if ($screening && ($screening->session_date || $screening->meeting_link || $screening->meeting_password)) {
 					$panelEntry['session'] = [
 						'checked' => !is_null($screening->session_date) && !is_null($screening->meeting_link),
 						'date' => $screening->session_date,
@@ -335,6 +352,10 @@ class ScreeningController extends Controller
 						'end_time' => $screening->end_time ? substr($screening->end_time, 0, 5) : '',
 						'meeting_link' => $screening->meeting_link,
 						'meeting_password' => $screening->meeting_password,
+						// Interval mode must survive a reload: without these the
+						// blade always rendered the switch OFF (GV-3295).
+						'interval' => $screening->interval,
+						'interval_checked' => !empty($screening->interval),
 					];
 				}
 				$judgingPanels[] = $panelEntry;
@@ -522,8 +543,84 @@ class ScreeningController extends Controller
 		return view('admin.settings.screening.form', compact('answers', 'company'));
 	}
 
+	/**
+	 * Overwrite any finished (History) panel's submitted values with the stored
+	 * ones, and report which array indexes those are.
+	 *
+	 * Read-only rendering is presentation, not a security boundary: the request
+	 * can still carry anything, and disabled inputs are omitted entirely. Both
+	 * problems have the same answer — trust storage, never the payload. Without
+	 * this the rebuild in addJudgingPanels() (which deletes every screening for
+	 * the step) would ERASE the very records History is meant to preserve.
+	 *
+	 * @return array the panels array with history entries replaced
+	 */
+	private function restoreHistoryPanels(int $stepId, array $panels): array
+	{
+		if (!$stepId || empty($panels)) {
+			return $panels;
+		}
+
+		foreach ($panels as $index => $panel) {
+			// ONLY panels the form marked as history are restored. `history_panel`
+			// is emitted by blade exclusively for panels rendered read-only, so its
+			// absence means the admin is editing a live panel — leave it alone.
+			//
+			// Falling back to ($index + 1) here was a data-loss bug: a NEW panel
+			// carries no marker, so position 5 matched stored panel 5 and silently
+			// overwrote the admin's entry with that finished panel's date, judges
+			// and startups (reported: saved 2026-08-28, got back 2026-08-23 locked).
+			// Position is not identity — only the marker is.
+			if (!isset($panel['history_panel'])) {
+				continue;
+			}
+
+			$panelNumber = (int) $panel['history_panel'];
+			$saved = Screening::where('step_id', $stepId)->where('panel', $panelNumber)->first();
+			if (!$saved) {
+				continue;
+			}
+
+			if (!PanelWindowService::isPast(PanelWindowService::fromScreening($saved), auth()->user())) {
+				continue;
+			}
+
+			$savedJudges = Screening::where('step_id', $stepId)->where('panel', $panelNumber)
+				->pluck('user_id')->map(fn ($i) => (int) $i)->unique()->values()->all();
+
+			$panels[$index] = [
+				'judges'       => $savedJudges,
+				'companies'    => is_array($saved->users) ? $saved->users : (json_decode((string) $saved->users, true) ?: []),
+				'session_date' => $saved->session_date instanceof \DateTimeInterface
+					? $saved->session_date->format('Y-m-d')
+					: $saved->session_date,
+				'start_time'   => $saved->start_time ? substr($saved->start_time, 0, 5) : null,
+				'end_time'     => $saved->end_time ? substr($saved->end_time, 0, 5) : null,
+				'interval'     => $saved->interval,
+				// Never re-notify for a meeting that already happened.
+				'notify'       => false,
+				'history_panel' => $panelNumber,
+			];
+		}
+
+		return $panels;
+	}
+
 	public function addJudgingPanels(Request $request)
 	{
+		// History panels are restored FIRST, before validation.
+		//
+		// A finished panel renders read-only, so the browser omits its disabled
+		// inputs entirely — the request carries no judges/startups for it. Running
+		// the validator first therefore rejected the save with "assign at least one
+		// judge to panel #N", naming a locked panel the admin cannot edit. Filling
+		// the stored values in up front means validation sees the real data, and
+		// everything downstream operates on trusted state rather than input.
+		$request->merge(['panels' => $this->restoreHistoryPanels(
+			(int) $request->input('step'),
+			$request->input('panels', []) ?? []
+		)]);
+
 		$panelsInput = $request->input('panels', []) ?? [];
 
 		$messages = [];
@@ -543,6 +640,8 @@ class ScreeningController extends Controller
 			'panels.*.session_date' => 'nullable|date',
 			'panels.*.start_time' => 'nullable',
 			'panels.*.end_time' => 'nullable',
+			'panels.*.interval' => 'nullable|integer|min:1|max:99',
+			'panels.*.notify' => 'nullable|boolean',
 		], $messages);
 
 		if ($validator->fails()) {
@@ -557,12 +656,87 @@ class ScreeningController extends Controller
 		$panels = $request->panels ?? [];
 		$step = Step::with('cycle.organization')->find($stepId);
 
+		// Judge double-booking gate (GV-8300). A judge cannot sit on two panels
+		// whose windows overlap, within this submission or against panels already
+		// saved on other screening/final steps of the same cycle.
+		//
+		// This MUST run before the two mutations below (the step's judge mapping
+		// and the wholesale delete of the step's screenings): a rejected save has
+		// to leave the step exactly as it was.
+		//
+		// Conflicts are advisory, not fatal — the admin may knowingly proceed, so
+		// the first response asks for confirmation and the retry carries the
+		// acknowledgement flag.
+		//
+		// History panels are excluded. Their meetings already happened, so they
+		// cannot be rescheduled and raise no NEW conflict — warning about them
+		// would ask the admin to resolve a clash they have no way to act on
+		// (and, with every panel finished, would block a save that changes
+		// nothing about anyone's schedule).
+		if (!$request->boolean('acknowledge_judge_conflicts')) {
+			// array_filter (NOT array_values): the conflict service derives the
+			// panel number a message names from the array index, so reindexing
+			// would report the wrong panel — with panels 1-3 finished, a clash on
+			// panel 4 would be announced as "panel #1".
+			$schedulablePanels = array_filter(
+				$panels,
+				fn ($panel) => !isset($panel['history_panel'])
+			);
+
+			$judgeConflicts = JudgeScheduleConflictService::detect((int) $stepId, $schedulablePanels);
+
+			if (!empty($judgeConflicts)) {
+				return response()->json([
+					'success' => false,
+					'requires_confirmation' => true,
+					'judge_conflicts' => $judgeConflicts,
+					'message' => $judgeConflicts[0],
+				], 422);
+			}
+		}
+
+		// Map the restored history panels by array index, so the rebuild loop below
+		// can reuse each one's ORIGINAL meeting instead of creating a new one.
+		// restoreHistoryPanels() stamps `history_panel` on exactly those entries.
+		$historyPanels = [];
+		foreach ($panels as $index => $panel) {
+			if (!isset($panel['history_panel'])) {
+				continue;
+			}
+			$row = Screening::where('step_id', $stepId)->where('panel', (int) $panel['history_panel'])->first();
+			if ($row) {
+				$historyPanels[$index] = $row;
+			}
+		}
+
 		// Update Step list (judges mapping)
 		$stepList = [];
 		foreach ($panels as $index => $panel) {
 			$stepList[$index + 1] = array_map('intval', $panel['judges']);
 		}
 		Step::where('id', $stepId)->update(['list' => $panels ? json_encode($stepList) : null]);
+
+		// Snapshot who was judging this step BEFORE the rebuild wipes it (GV-7317).
+		//
+		// Screening has no SoftDeletes, so the delete below is a hard delete and
+		// the previous assignment is unrecoverable a line later. Taking it here —
+		// after the conflict gate has passed — also means a save that gets
+		// rejected for confirmation notifies nobody.
+		//
+		// Keyed by "panel:judge", not by judge alone: a panel is a distinct
+		// assignment with its own startups, date and meeting, so a judge already
+		// sitting on panel 1 who is now added to panel 2 IS newly assigned there
+		// and must be told. Diffing on judge id alone silently swallowed that.
+		//
+		// Panel numbers are a safe key here because both sides of this comparison
+		// come from the same step in one request. deleteJudgingPanel() does
+		// renumber panels, but it shifts `steps.list` and the `screenings` rows
+		// together in a separate request, so the stored numbering always matches
+		// the numbering the form posts back.
+		$judgesBefore = Screening::where('step_id', $stepId)
+			->get(['panel', 'user_id'])
+			->map(fn ($row) => ((int) $row->panel) . ':' . ((int) $row->user_id))
+			->unique();
 
 		// Clear existing screenings for this step
 		Screening::where('step_id', $stepId)->delete();
@@ -592,13 +766,48 @@ class ScreeningController extends Controller
 			$startDateTime = null;
 			$duration = null;
 
-			if (!empty($panel['session_date']) && !empty($panel['start_time'])) {
+			// Interval scheduling (GV-3295). When the interval switch is on the
+			// admin never types an end time -- the field is rendered disabled, and
+			// browsers omit disabled inputs from the submission, so `end_time`
+			// arrives empty. Derive it here instead of storing NULL.
+			//
+			// The panel holds ONE meeting that the startups join in sequence, so
+			// its end time must cover EVERY startup's slot: start + (count *
+			// interval). Individual per-startup windows are derived at read time
+			// by ScreeningSlotService from (start_time, interval, position).
+			$interval = isset($panel['interval']) && $panel['interval'] !== '' ? (int) $panel['interval'] : null;
+			if ($interval !== null && $interval <= 0) {
+				$interval = null;
+			}
+			$endTime = $panel['end_time'] ?? null;
+
+			if ($interval !== null && !empty($panel['start_time'])) {
+				$endTime = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $panel['start_time'])
+					->addMinutes(count($companyIds) * $interval)
+					->format('H:i');
+			}
+
+			// A history panel keeps the meeting it actually held. Re-running
+			// createMeeting() here would mint a NEW Zoom link for a session that
+			// already took place, discarding the link/passcode participants used.
+			if (isset($historyPanels[$index])) {
+				$saved = $historyPanels[$index];
+				$meetingLink = $saved->meeting_link;
+				$meetingPassword = $saved->meeting_password;
+				$zoomId = $saved->zoom_id;
+				$startUrl = $saved->start_url;
+				$startDateTime = $saved->session_date && $saved->start_time
+					? (($saved->session_date instanceof \DateTimeInterface
+						? $saved->session_date->format('Y-m-d')
+						: $saved->session_date) . ' ' . $saved->start_time)
+					: null;
+			} elseif (!empty($panel['session_date']) && !empty($panel['start_time'])) {
 				try {
 					$startDateTime = $panel['session_date'] . ' ' . $panel['start_time'];
 					$duration = 60;
-					if (!empty($panel['end_time'])) {
+					if (!empty($endTime)) {
 						$start = \Carbon\Carbon::parse($startDateTime);
-						$end = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $panel['end_time']);
+						$end = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $endTime);
 						$duration = max($start->diffInMinutes($end), 30);
 					}
 
@@ -634,7 +843,8 @@ class ScreeningController extends Controller
 					'zoom_id' => $zoomId,
 					'start_url' => $startUrl,
 					'start_time' => $panel['start_time'] ?? null,
-					'end_time' => $panel['end_time'] ?? null,
+					'end_time' => $endTime ?: null,
+					'interval' => $interval,
 				]);
 			}
 
@@ -646,12 +856,33 @@ class ScreeningController extends Controller
 			// (Final Screening only). Persisted once after the loop so companies in
 			// multiple panels keep the union of all their panels' judges.
 			if ($step && $step->stype == 5) {
-				foreach ($companyIds as $companyId) {
+				foreach (array_values($companyIds) as $position => $companyId) {
 					$judgesByCompany[$companyId] = array_merge($judgesByCompany[$companyId] ?? [], $judgeIds);
+
+					// finalscreenings rows are PER COMPANY, so each must carry that
+					// company's own slot -- not the panel-wide window (GV-3295).
+					// With the interval off this collapses to the panel window,
+					// preserving the previous behaviour.
+					$companyDatetime = $startDateTime;
+					$companyDuration = $duration;
+
+					if ($interval !== null && !empty($panel['session_date']) && !empty($panel['start_time'])) {
+						$slot = \App\Services\ScreeningSlotService::slotFor(
+							$panel['session_date'],
+							$panel['start_time'],
+							$interval,
+							$position
+						);
+						if (!empty($slot['start'])) {
+							$companyDatetime = $slot['start']->format('Y-m-d H:i:s');
+							$companyDuration = $interval;
+						}
+					}
+
 					$meetingByCompany[$companyId] = [
 						'meeting_link' => $meetingLink,
-						'datetime' => $startDateTime,
-						'duration' => $duration
+						'datetime' => $companyDatetime,
+						'duration' => $companyDuration
 					];
 				}
 			}
@@ -677,11 +908,83 @@ class ScreeningController extends Controller
 			}
 		}
 
+		$this->notifyNewlyAssignedJudges($stepId, $panels, $judgesBefore);
+
 		return response()->json([
 			'success' => true,
 			'message' => __('admin.Saved_successfully'),
 			'data' => $panels
 		]);
+	}
+
+	/**
+	 * Email judges who were NEWLY added to a panel whose "Notify now" switch is on.
+	 *
+	 * Covers both initial screening (stype 2) and final screening (stype 5) —
+	 * both are saved through addJudgingPanels(), so one call site serves both,
+	 * and every role that can assign (super admin, org manager, sub admin) hits
+	 * the same endpoint (GV-7317 / GV-7237 / GV-7290 / GV-7291).
+	 *
+	 * @param  \Illuminate\Support\Collection  $judgesBefore  "panel:judge" pairs assigned before this save
+	 */
+	private function notifyNewlyAssignedJudges(int $stepId, array $panels, $judgesBefore): void
+	{
+		$toNotify = [];
+
+		foreach ($panels as $index => $panel) {
+			// A finished meeting must not re-notify. The blade hides the switch on
+			// a history panel, but the payload is not a boundary — re-check here.
+			if (isset($panel['history_panel'])) {
+				continue;
+			}
+
+			if (!filter_var($panel['notify'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+				continue;
+			}
+
+			// Panel numbers are 1-based, matching how $stepList and the Screening
+			// rows are numbered from the same $panels array in addJudgingPanels().
+			$panelNumber = $index + 1;
+
+			foreach ((array) ($panel['judges'] ?? []) as $judgeId) {
+				$judgeId = (int) $judgeId;
+
+				if (!$judgeId) {
+					continue;
+				}
+
+				// Retained judges are silent: a judge already on THIS panel before
+				// the save is not newly assigned to it. A judge new to this panel
+				// is notified even if they already sit on another panel of the
+				// same step — that is a separate assignment with its own meeting.
+				if ($judgesBefore->contains($panelNumber . ':' . $judgeId)) {
+					continue;
+				}
+
+				// Keyed by judge id so one save sends at most one email per judge,
+				// even when they are newly added to several panels at once.
+				$toNotify[$judgeId] = $judgeId;
+			}
+		}
+
+		if (empty($toNotify)) {
+			return;
+		}
+
+		foreach (User::whereIn('id', array_values($toNotify))->get() as $judge) {
+			try {
+				$judge->notify(new JudgeAssignedToScreeningNotification($stepId));
+			} catch (\Throwable $th) {
+				// A mail failure must never fail the assignment: the judges are
+				// already saved, and throwing here would report a save error for
+				// work that succeeded.
+				Log::error('Failed to notify newly assigned judge', [
+					'judge_id' => $judge->id,
+					'step_id'  => $stepId,
+					'error'    => $th->getMessage(),
+				]);
+			}
+		}
 	}
 
     public function deleteJudgingPanel(Request $request)
@@ -693,7 +996,19 @@ class ScreeningController extends Controller
 
         $stepId = $request->step;
         $panelIdx = (int)$request->panel; // 1-based index from UI usually, or 0-based. Let's assume 1-based to match 'panel' column.
-        
+
+        // A finished panel is a record of a screening that took place; it cannot be
+        // deleted. The button is hidden client-side, but that is presentation only
+        // — this endpoint takes a panel number straight from the request, so the
+        // rule has to be enforced here too.
+        $existing = Screening::where('step_id', $stepId)->where('panel', $panelIdx)->first();
+        if ($existing && PanelWindowService::isPast(PanelWindowService::fromScreening($existing), auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => __('admin.screening.panel_history_cannot_delete'),
+            ], 422);
+        }
+
         $step = Step::findOrFail($stepId);
         $list = json_decode($step->list, true) ?? [];
         

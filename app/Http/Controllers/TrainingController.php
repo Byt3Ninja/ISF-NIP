@@ -48,6 +48,7 @@ use App\Jobs\SendTrainingNotificationJob;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
 use App\TrainingDuration;
+use App\Services\MeetingWindowService;
 use Intervention\Image\ImageManagerStatic as Image;
 
 class TrainingController extends Controller
@@ -673,7 +674,18 @@ class TrainingController extends Controller
 				}
 				
 			}
-			$sessions = $sessions->map(function ($session) {
+			$user = Auth::user();
+			$sessions = $sessions->map(function ($session) use ($user) {
+				// GV-8301: decide joinability from the raw stored values, before
+				// the display formatting below overwrites `enddatetime` (and
+				// truncates it to Y-m-d for `online` courses).
+				$session->can_join = MeetingWindowService::isOpen(
+					TrainingSession::wallClock($session->getRawOriginal('datetime')),
+					TrainingSession::wallClock($session->getRawOriginal('enddatetime')),
+					$user,
+					'founder'
+				);
+
 				if ($session->type == "online") {
 					$session->datetime1 = FormatDate($session->datetime, 'Y-m-d');
 					$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d');
@@ -1035,6 +1047,13 @@ class TrainingController extends Controller
 			$session['duration'] = $sessionData->duration;
 			$session['start_url'] = $sessionData->start_url;
 			$session['join_url'] = $sessionData->join_url;
+			// GV-8301: the details modal hides its Join button once the window closes.
+			$session['can_join'] = MeetingWindowService::isOpen(
+				TrainingSession::wallClock($sessionData->getRawOriginal('datetime')),
+				TrainingSession::wallClock($sessionData->getRawOriginal('enddatetime')),
+				Auth::user(),
+				'founder'
+			);
 			$session['created_at'] = $sessionData->created_at;
 			$session['step_id'] = $sessionData->step_id;
 			$session['cycle_id'] = $sessionData->step?->cycle_id;
@@ -1834,6 +1853,22 @@ class TrainingController extends Controller
 		$session = TrainingSession::findOrFail($id);
 		
 		$user = Auth::user();
+
+		// GV-8301: the join route is directly reachable, so the window is
+		// enforced here too and not only by hiding the button in the view.
+		// Attendance must not be recorded for a session that can no longer be joined.
+		$joinOpen = MeetingWindowService::isOpen(
+			TrainingSession::wallClock($session->getRawOriginal('datetime')),
+			TrainingSession::wallClock($session->getRawOriginal('enddatetime')),
+			$user,
+			'founder'
+		);
+
+		if (!$joinOpen) {
+			return redirect()
+				->route('trainings.my_sessions_mine')
+				->with('error', __('admin.Finished'));
+		}
 		
 		AttendanceTrainingOffline::updateOrCreate(
 			[

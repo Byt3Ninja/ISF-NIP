@@ -8,6 +8,7 @@ return [
     'Portal Cycles' => 'Portal Programs',
     'Select cycle from list' => 'Select program from list',
     'Start' => 'Start',
+    'Started' => 'Started',
     'Users' => 'Users',
     'Edit' => 'Edit',
     'New' => 'New',
@@ -595,6 +596,7 @@ return [
     'No_Mentors_Found' => 'No Mentors Found',
     'No_Mentors_Enrolled' => 'No mentors enrolled in a program.',
     'No_Mentors_For_Selected_Program' => 'No mentors available for the selected program.',
+    'Mentorship_Not_Available_Yet' => 'Mentorship is not available yet. You can request sessions once you reach the mentorship stage.',
     'Request_Mentorship' => 'Request Mentorship',
     'Show_Filters' => 'Show Filters',
     'Any_Rating' => 'Any Rating',
@@ -686,4 +688,11 @@ return [
     'evaluation_subcriterion_name_too_long_named' => 'The name of :subcriterion under :criterion is too long. Please keep it under 255 characters.',
     'evaluation_subcriterion_weight_required_named' => 'Please enter a weight for :subcriterion under :criterion.',
     'evaluation_subcriterion_weight_range_named' => 'The weight of :subcriterion under :criterion must be a percentage between 0 and 100.',
+    
+    'Branding_Colors' => 'Branding Colors',
+    'Gradient_Start_Color' => 'Gradient Start Color',
+    'Gradient_End_Color' => 'Gradient End Color',
+    'Main_Color' => 'Main Color',
+    'Gradient_Preview' => 'Gradient Preview',
+    'Reset_To_Default' => 'Rest to Default',
 ];

@@ -386,13 +386,15 @@
         </div>
         <div class="modal-body">
           <input type="hidden" name="cid" id="cid" value="{{ $id }}">
-          <input type="hidden" name="type" id="type5" value="5">
+          <input type="hidden" name="type" id="type5" value="{{ \App\Enums\CycleModifyAction::ADD_STEP }}">
           <input type="hidden" name="arr" id="sarr" value="{{ isset($step) ? $step->arr + 1 : 1 }}">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-4" id="menu1">
             <div class="form-group mb-0">
               <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
-              <span><a href="/dashboard/forms" target="_blank">{{ __('admin.Create_form') }}</a></span>
+              @if( $_user->ableTo('forms.builder_view', $permissions) )
+              <span><a href="{{ route('forms.builder_view') }}" target="_blank">{{ __('admin.Create_form') }}</a></span>
+              @endif
               <select class="select form-control" name="FormSelect" id="FormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
@@ -400,7 +402,7 @@
               </select>
             </div>
           </div>
-          <div class="mb-4" id="menu2">
+          {{--  <div class="mb-4" id="menu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div class="form-group mb-0">
               <select class="form-select" name="ScreeningSelect">
@@ -410,7 +412,7 @@
                 <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
               </select>
             </div>
-          </div>
+          </div>  --}}
           <div class="col-12 mb-4">
             <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="fromDate" name="fromDate" />
@@ -480,7 +482,7 @@
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
           <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
-          <input type="hidden" name="type" id="type7" value="8">
+          <input type="hidden" name="type" id="type7" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
@@ -760,6 +762,15 @@ if (editStepForm) {
 
 <script>
 
+  const CYCLE_MODIFY_ACTION = {
+    EDIT_CYCLE: '{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}',
+    SAVE_CYCLE_NOOP: '{{ \App\Enums\CycleModifyAction::SAVE_CYCLE_NOOP }}',
+    DELETE_CYCLE: '{{ \App\Enums\CycleModifyAction::DELETE_CYCLE }}',
+    ARRANGE_STEPS: '{{ \App\Enums\CycleModifyAction::ARRANGE_STEPS }}',
+    DELETE_STEP: '{{ \App\Enums\CycleModifyAction::DELETE_STEP }}',
+    FETCH_STEP: '{{ \App\Enums\CycleModifyAction::FETCH_STEP }}',
+  };
+
   // $('#count_team_number, #mcount_team_number').on('input', function () {
   //   let val = $(this).val();
   //   if (val < 1) {
@@ -813,7 +824,7 @@ if (editStepForm) {
           url: "/dashboard/cycles/modify",
           data: {
             "steps": ids,
-            "type": 4,
+            "type": CYCLE_MODIFY_ACTION.ARRANGE_STEPS,
           },
           success: function(response) {
             // console.log(response);
@@ -845,7 +856,7 @@ if (editStepForm) {
               $('#title').val(response.title);
               $('#description').val(response.description);
               $('#cycleid').val(cycle);
-              $('#type').val(1);
+              $('#type').val(CYCLE_MODIFY_ACTION.EDIT_CYCLE);
 
               var bsRangePickerBasic = $('#bs-rangepicker-basic');
               // $('#start').val(response.start);
@@ -880,7 +891,7 @@ if (editStepForm) {
           $('#title').val('');
           $('#description').val('');
           $('#cycleid').val('');
-          $('#type').val(2);
+          $('#type').val(CYCLE_MODIFY_ACTION.SAVE_CYCLE_NOOP);
 
           var bsRangePickerBasic = $('#bs-rangepicker-basic');
           // $('#start').val(response.start);
@@ -906,7 +917,7 @@ if (editStepForm) {
                 url: "/dashboard/cycles/modify",
                 data: {
                   "cycleid": cycle,
-                  "type": 3,
+                  "type": CYCLE_MODIFY_ACTION.DELETE_CYCLE,
                 },
                 success: function(response) {
                   // console.log(response);
@@ -999,7 +1010,7 @@ if (editStepForm) {
             type: "POST",
             url: "/dashboard/cycles/modify",
             data: {
-              "type": 7,
+              "type": CYCLE_MODIFY_ACTION.FETCH_STEP,
               "sid": id,
               "cycleid": 0,
             },
@@ -1124,7 +1135,7 @@ if (editStepForm) {
           data: {
             "stepid": id,
             "steps": ids,
-            "type": 6,
+            "type": CYCLE_MODIFY_ACTION.DELETE_STEP,
           },
           success: function(response) {
             // console.log(response);
@@ -1137,49 +1148,10 @@ if (editStepForm) {
         });
       }
     }
+    // Viewport-fixed positioning now lives in /js/daterangepicker-viewport.js
+    // (loaded globally by the admin layout) so every modal picker behaves the same.
     function positionStepRangePicker($input) {
-      const drp = $input.data('daterangepicker');
-      if (!drp) return;
-      const $picker = drp.container;
-      $picker.addClass('drp-viewport-fixed');
-
-      const reposition = function () {
-        if (!drp.isShowing) return;
-        const inputRect = $input[0].getBoundingClientRect();
-        const pickerHeight = $picker.outerHeight();
-        const pickerWidth = $picker.outerWidth();
-        const viewportH = window.innerHeight;
-        const viewportW = window.innerWidth;
-        const gap = 4;
-
-        let top = inputRect.bottom + gap;
-        if (top + pickerHeight > viewportH - gap) {
-          const above = inputRect.top - pickerHeight - gap;
-          top = above >= gap ? above : Math.max(gap, viewportH - pickerHeight - gap);
-        }
-
-        let left;
-        if (drp.opens === 'left') {
-          left = inputRect.right - pickerWidth;
-        } else if (drp.opens === 'center') {
-          left = inputRect.left + inputRect.width / 2 - pickerWidth / 2;
-        } else {
-          left = inputRect.left;
-        }
-        left = Math.max(gap, Math.min(left, viewportW - pickerWidth - gap));
-
-        $picker.css({ top: top + 'px', left: left + 'px', right: 'auto', bottom: 'auto' });
-      };
-
-      $input.off('show.daterangepicker.viewport').on('show.daterangepicker.viewport', function () {
-        setTimeout(reposition, 0);
-      });
-      const $modal = $('#ModifyStepForm');
-      $modal.off('scroll.drpViewport').on('scroll.drpViewport', reposition);
-      $modal.find('.modal-body, .modal-dialog').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
-      $(window).off('scroll.drpViewport resize.drpViewport').on('scroll.drpViewport resize.drpViewport', reposition);
-
-      if (drp.isShowing) reposition();
+      window.attachViewportDateRangePicker($input);
     }
 
     $(document).on('change', '#is_public', function() {

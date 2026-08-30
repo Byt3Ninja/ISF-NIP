@@ -14,7 +14,7 @@
 
 	<style>
 		:root {
-			--primary: #6366f1;
+			--primary: {{ $program->main_color }};
 			--on-primary: #ffffff;
 			--background: #f8fafc;
 			--surface: #ffffff;
@@ -24,6 +24,32 @@
 			--secondary: #0891b2;
 			--tertiary: #d97706;
 			--outline: #e2e8f0;
+		}
+
+		/* Override default theme purple/primary colors with the customized main color */
+		.text-primary {
+			color: var(--primary) !important;
+		}
+		.bg-primary {
+			background-color: var(--primary) !important;
+		}
+		.bg-label-primary {
+			background-color: color-mix(in srgb, var(--primary) 14%, transparent) !important;
+			color: var(--primary) !important;
+		}
+		.btn-primary {
+			background-color: var(--primary) !important;
+			border-color: var(--primary) !important;
+		}
+		.spinner-grow.text-primary {
+			color: var(--primary) !important;
+		}
+		.bs-stepper .step.active .step-trigger .bs-stepper-circle {
+			background-color: var(--primary) !important;
+			color: #fff !important;
+		}
+		.bs-stepper .step.active .step-trigger .bs-stepper-label {
+			color: var(--primary) !important;
 		}
 
 		body {
@@ -51,8 +77,8 @@
 		}
 
 		.hero-gradient {
-			background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-						radial-gradient(circle at 80% 70%, rgba(8, 145, 178, 0.08) 0%, transparent 50%);
+			background: radial-gradient(circle at 20% 30%, {{ $program->start_color }} 0%, transparent 50%),
+						radial-gradient(circle at 80% 70%, {{ $program->end_color }} 0%, transparent 50%);
 		}
 
 		.btn-primary-custom {
@@ -65,8 +91,9 @@
 			transition: all 0.3s ease;
 		}
 		.btn-primary-custom:hover {
-			background-color: #4f46e5;
-			box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+			background-color: var(--primary);
+			opacity: 0.9;
+			box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 			color: white;
 		}
 
@@ -499,8 +526,233 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 		// defined` ReferenceError on submit, which aborted the whole validation
 		// pass silently (nothing got validated).
 		const numericText = '{{ $l == "ar" ? "يرجى إدخال رقم صحيح." : "Please enter a valid number." }}';
+		// GV-3679: the message must describe the actual bound. "Please enter a
+		// valid positive number" is only true when the floor is 0 (the default);
+		// when an author sets min="5" it misleads, so fall back to a templated
+		// "no less than N". numberMinText mirrors the server's message verbatim
+		// for the min=0 case so both layers read identically.
 		const numberMinText = '{{ $l == "ar" ? "يرجى إدخال رقم موجب صحيح." : "Please enter a valid positive number." }}';
+		// NOTE: blade trims whitespace inside an echo tag, so a trailing space in
+		// the literal is lost. Concatenate the separator explicitly instead.
+		const numberMinTplText = '{{ $l == "ar" ? "يرجى إدخال رقم لا يقل عن" : "Please enter a number no less than" }}' + ' ';
+		const numberMaxTplText = '{{ $l == "ar" ? "يرجى إدخال رقم لا يتجاوز" : "Please enter a number no greater than" }}' + ' ';
 		const emailFormatText = '{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com)." : "Please enter a valid email address (e.g. name@example.com)." }}';
+		const urlFormatText = '{{ $l == "ar" ? "يرجى إدخال رابط صحيح (مثال: https://example.com)." : "Please enter a valid URL (e.g. https://example.com)." }}';
+		const requiredText = '{{ $l == "ar" ? "هذا الحقل مطلوب." : "This field is required." }}';
+		const chooseOneText = '{{ $l == "ar" ? "يرجى اختيار خيار واحد على الأقل." : "Please select at least one option." }}';
+
+		function numberMinMessage(min) {
+			return min === 0 ? numberMinText : numberMinTplText + min;
+		}
+
+		// ---------------------------------------------------------------------
+		// GV-3679: single-submit guard.
+		//
+		// Every action button here fires an AJAX request, so nothing stops a
+		// second click while the first is in flight — that produced duplicate
+		// registrations. lockButton() disables the button and swaps in a
+		// spinner; unlockButton() restores it. The `data-locked` flag is checked
+		// by the handlers themselves because `disabled` alone does not stop a
+		// delegated jQuery handler in every browser.
+		//
+		// The lock is released on failure and on validation rejection, but NOT
+		// on a success path that navigates away or advances the stepper —
+		// re-enabling there would just re-open the duplicate-submit window.
+		// ---------------------------------------------------------------------
+		function lockButton($btn) {
+			if ($btn.data('locked')) { return false; }
+			$btn.data('locked', true);
+			$btn.data('original-html', $btn.html());
+			$btn.prop('disabled', true).addClass('disabled');
+			$btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+				+ '{{ $l == "ar" ? "جارٍ المعالجة..." : "Processing..." }}');
+			return true;
+		}
+
+		function unlockButton($btn) {
+			if (!$btn.data('locked')) { return; }
+			$btn.data('locked', false);
+			$btn.prop('disabled', false).removeClass('disabled');
+			const html = $btn.data('original-html');
+			if (html !== undefined) { $btn.html(html); }
+		}
+		// ---------------------------------------------------------------------
+		// Application wizard engine.
+		//
+		// #register-fields is rebuilt from scratch every time the email step
+		// succeeds (see the `validate_email` success handler), so this state
+		// lives at page scope and is reset by `initApplicationWizard()` each
+		// time that HTML is (re)rendered — never assume it survives across
+		// renders.
+		// ---------------------------------------------------------------------
+		var sectionHistory = [0];
+
+		function applicationSections() {
+			return document.querySelectorAll('#register-fields .section-wrapper[data-section-index]');
+		}
+
+		// Mirrors the admin form-builder preview's getNextLogic(): the LAST
+		// branching input with a non-"continue" logic wins, falling back to the
+		// section's own default logic when every branching input reads "continue"
+		// (or there are none).
+		function getSectionNextLogic(sectionEl) {
+			var logic = 'continue';
+			sectionEl.querySelectorAll('.question-logic').forEach(function(input) {
+				var questionLogic = 'continue';
+				if (input.type === 'radio') {
+					if (input.checked) { questionLogic = input.dataset.logic || 'continue'; }
+				} else if (input.tagName === 'SELECT') {
+					var opt = input.options[input.selectedIndex];
+					questionLogic = opt ? (opt.dataset.logic || 'continue') : 'continue';
+				}
+				if (questionLogic !== 'continue') { logic = questionLogic; }
+			});
+			if (logic === 'continue') { logic = sectionEl.dataset.sectionLogic || 'continue'; }
+			return logic;
+		}
+
+		function updateNextButtonLabel(sectionEl) {
+			var nextBtn = sectionEl.querySelector('.btn-next');
+			if (!nextBtn) { return; }
+			var logic = getSectionNextLogic(sectionEl);
+			var textSpan = nextBtn.querySelector('.btn-next-text');
+			if (logic === 'submit' && textSpan) {
+				textSpan.textContent = '{{ $l == "ar" ? "إرسال" : "Submit" }}';
+			} else if (textSpan) {
+				textSpan.textContent = '{{ $l == "ar" ? "التالي" : "Next" }}';
+			}
+		}
+
+		function showApplicationSection(index) {
+			var sections = applicationSections();
+			sections.forEach(function(s) { s.style.display = 'none'; });
+			var submitStep = document.getElementById('submit-step');
+			if (submitStep) { submitStep.style.display = 'none'; }
+
+			if (index === 'submit' || index === null || index >= sections.length) {
+				if (submitStep) {
+					submitStep.style.display = 'block';
+					submitStep.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				}
+				return;
+			}
+
+			var section = sections[index];
+			section.style.display = 'block';
+			updateNextButtonLabel(section);
+			section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+
+		function doApplicationNavigate(sectionEl) {
+			var currentIndex = parseInt(sectionEl.dataset.sectionIndex, 10);
+			var sections = applicationSections();
+			var logic = getSectionNextLogic(sectionEl);
+			var next;
+
+			if (logic === 'submit') {
+				next = 'submit';
+			} else if (logic.indexOf('section-') === 0) {
+				var target = parseInt(logic.replace('section-', ''), 10);
+				if (sectionHistory.indexOf(target) === -1 && target > currentIndex && sections[target]) {
+					next = target;
+				} else if (sections[currentIndex + 1]) {
+					next = currentIndex + 1;
+				} else {
+					next = 'submit';
+				}
+			} else {
+				next = sections[currentIndex + 1] ? currentIndex + 1 : 'submit';
+			}
+
+			if (next === 'submit') {
+				showApplicationSection('submit');
+				return;
+			}
+
+			// Re-entering this section on a fresh path invalidates anything that
+			// was visited beyond it on a previous route — the founder may have
+			// gone Back and changed a branching answer.
+			var pos = sectionHistory.indexOf(currentIndex);
+			if (pos !== -1) { sectionHistory = sectionHistory.slice(0, pos + 1); }
+			if (sectionHistory.indexOf(next) === -1) { sectionHistory.push(next); }
+			showApplicationSection(next);
+		}
+
+		// Validates only the fields inside `sectionEl`, using the same
+		// synchronous validators the #join_btn handler already uses (this page
+		// never loads FormValidation.js, unlike the admin builder's preview).
+		function validateApplicationSection(sectionEl) {
+			var $section = $(sectionEl);
+			var isValid = true;
+
+			$section.find('input, select, textarea').each(function() {
+				var $field = $(this);
+				var type = ($field.attr('type') || '').toLowerCase();
+				if (type === 'radio' || type === 'checkbox') { return; }
+				if ($field.is(':disabled')) { return; }
+				if ($field.hasClass('other-field')) { return; }
+				$field.data('gv-touched', true);
+				if (!applyFieldState($field, validateField($field))) { isValid = false; }
+			});
+
+			$section.find('.options-group').each(function() {
+				if (!validateGroup($(this))) { isValid = false; }
+			});
+
+			$section.find('.other-wrapper').each(function() {
+				if (!validateOtherWrapper($(this))) { isValid = false; }
+			});
+
+			return isValid;
+		}
+
+		function navigateApplicationNext(sectionEl) {
+			if (!validateApplicationSection(sectionEl)) {
+				var $firstError = $(sectionEl).find('.is-invalid').first();
+				if ($firstError.length) { $firstError.trigger('focus'); }
+				return;
+			}
+			doApplicationNavigate(sectionEl);
+		}
+
+		function navigateApplicationPrev() {
+			if (sectionHistory.length <= 1) { return; }
+			sectionHistory.pop();
+			showApplicationSection(sectionHistory[sectionHistory.length - 1]);
+		}
+
+		// Rebinds navigation for the freshly-rendered #register-fields markup and
+		// shows section 0. Call this right after replacing #register-fields' HTML.
+		function initApplicationWizard() {
+			sectionHistory = [0];
+			var sections = applicationSections();
+			sections.forEach(function(section) {
+				section.style.display = 'none';
+				var prevBtn = section.querySelector('.btn-prev');
+				if (prevBtn) {
+					prevBtn.classList.toggle('d-none', parseInt(section.dataset.sectionIndex, 10) === 0);
+				}
+			});
+			if (sections.length) { showApplicationSection(0); }
+		}
+
+		// Delegated (the section markup is injected dynamically): Next / Back /
+		// changing a branching answer.
+		$(document).on('click', '#register-fields .btn-next', function() {
+			var section = this.closest('.section-wrapper');
+			if (section) { navigateApplicationNext(section); }
+		});
+		$(document).on('click', '#register-fields .btn-prev', function() {
+			navigateApplicationPrev();
+		});
+		$(document).on('click', '#submit-step .btn-prev-submit', function() {
+			navigateApplicationPrev();
+		});
+		$(document).on('change', '#register-fields .question-logic', function() {
+			var section = this.closest('.section-wrapper');
+			if (section) { updateNextButtonLabel(section); }
+		});
+
 		document.addEventListener('DOMContentLoaded', function() {
 			stepper = new Stepper(document.querySelector('#stepper-form'), {
 				linear: true,
@@ -528,6 +780,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 		$(document).on('click', '#check-email', function(e) {
 			e.preventDefault();
+			const $btn = $(this);
+			if ($btn.data('locked')) { return; }
 			let email = $('#initial-email').val();
 			if (email.trim() == '') {
 				$('#initial-email-feedback').html('{{ $l == "ar" ? "يرجى إدخال بريد إلكتروني صحيح." : "Please enter a valid email address." }}');
@@ -535,6 +789,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				return;
 			} else {
 				if (validateEmail(email)) {
+					lockButton($btn);
 					$.ajaxSetup({
 						headers: {
 							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -587,6 +842,46 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									// top-level script scope (near `var stepper`) so both this renderer
 									// and the separate #join_btn submit handler can see them.
 
+									// GV-3679 placeholders. The form builder has no author-supplied
+									// placeholder field, and echoing the label back into the box (the
+									// previous behaviour) is redundant with the label right above it.
+									// So typed fields get a hint describing the EXPECTED FORMAT, which
+									// is the actual guidance the ticket asks for; free-text fields,
+									// where only the label carries meaning, keep a label-derived
+									// prompt phrased as an instruction.
+									// Format examples are locale-independent by design — a date
+									// mask or a sample address reads the same either way.
+									const phEmail = 'name@example.com';
+									const phUrl = 'https://example.com';
+									const phDate = 'YYYY-MM-DD';
+									const phTime = 'HH:MM';
+									// Trailing/leading spaces are appended outside the echo tag —
+									// blade trims whitespace within it.
+									const phEnterTpl = '{{ $l == "ar" ? "أدخل" : "Enter" }}' + ' ';
+									const phNumberPlain = '{{ $l == "ar" ? "أدخل رقماً" : "Enter a number" }}';
+									const phNumberRangeTpl = '{{ $l == "ar" ? "أدخل رقماً بين" : "Enter a number between" }}' + ' ';
+									const phNumberMinTpl = '{{ $l == "ar" ? "أدخل رقماً لا يقل عن" : "Enter a number from" }}' + ' ';
+									const phAndText = ' ' + '{{ $l == "ar" ? "و" : "and" }}' + ' ';
+
+									// Free-text fields carry no format to hint at, so the label —
+									// the only thing that describes them — becomes an instruction.
+									// A label-less field has nothing to say, so leave the box bare
+									// rather than showing a dangling verb ("Enter").
+									function phText(label) {
+										return label ? phEnterTpl + label : '';
+									}
+									// Describe the accepted range so the bound is visible BEFORE the
+									// user trips the validation message, not only after.
+									function numberPlaceholder(options, minVal) {
+										var min = Number(minVal);
+										var hasMax = options && options.max !== undefined && options.max !== '';
+										if (hasMax) { return phNumberRangeTpl + min + phAndText + options.max; }
+										// Only worth stating when the floor is a real constraint;
+										// min <= 0 is the unremarkable default.
+										if (min > 0) { return phNumberMinTpl + min; }
+										return phNumberPlain;
+									}
+
 									// Free-text input revealed when the user picks the "Other" option.
 									// Hidden by default; toggled by the change handler; its value is
 									// merged into the field on submit (see normalizeOtherFields).
@@ -597,21 +892,18 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 											+ `</div>`;
 									}
 
-									var sections = {};
-									$.each(response.fields, function(key, value) {
-										var sectionName = (value.options && value.options.section) ? value.options.section : '';
-										if (!sections[sectionName]) {
-											sections[sectionName] = {
-												title: sectionName,
-												description: (value.options && value.options.description) ? value.options.description : '',
-												fields: []
-											};
-										}
-										sections[sectionName].fields.push(value);
-									});
+									// The server already groups/orders questions into sections and
+									// resolves each question's branching `logic` (GV wizard rework) —
+									// render directly from response.sections instead of re-grouping
+									// a flat field list here, so the client can never derive a
+									// different section order than the server uses to recompute the
+									// visited path on submit.
+									var sections = response.sections || [];
+									var totalSections = sections.length;
 
-									$.each(sections, function(sectionName, section) {
-										fieldsHtml += `<div class="section-wrapper mb-4">`;
+									$.each(sections, function(sectionIndex, section) {
+										var sectionLogic = section.logic || 'continue';
+										fieldsHtml += `<div class="section-wrapper mb-4" data-section-index="${sectionIndex}" data-section-logic="${sectionLogic}" style="${sectionIndex === 0 ? '' : 'display:none;'}">`;
 										if (section.title || section.description) {
 											fieldsHtml += `<div class="section-header mb-3">`;
 											if (section.title) {
@@ -624,28 +916,32 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 										}
 										fieldsHtml += `<div class="card border shadow-sm"><div class="card-body p-4"><div class="row g-4">`;
 
-										$.each(section.fields, function(key, value) {
-											var builderType = (value.options && value.options.type) ? value.options.type : 'short_answer';
+										$.each(section.questions, function(key, value) {
+											var builderType = value.type || 'short_answer';
 											// "Dropdown" was retired as an authorable type (GV-3828);
 											// existing dropdown fields render as multiple choice (radio).
 											// Both store a single scalar answer — render-time coercion,
 											// no data migration.
 											if (builderType === 'dropdown') { builderType = 'multiple_choice'; }
-											var isRequired = value.options && value.options.validation && value.options.validation.required == 1;
+											var isRequired = !!value.is_required;
 											var requiredAttr = isRequired ? 'required' : '';
 											var requiredStar = isRequired ? '<span class="text-danger ms-1">*</span>' : '';
-											var label = (value.options && value.options.label) ? value.options.label : '';
-											var valuesStr = (value.options && value.options.values) ? value.options.values : '';
-											var optionsList = valuesStr ? valuesStr.split(',') : [];
+											var label = value.label || '';
+											var optionsList = value.options || [];
+											var idFor = 'input-fld-' + value.id;
+											// Only multiple_choice/dropdown questions carry branching
+											// logic (an object map of option -> target), matching what
+											// the admin form builder's logic panel authors.
+											var logicMap = (value.logic && typeof value.logic === 'object') ? value.logic : {};
 
 											fieldsHtml += `<div class="col-12"><div class="form-group">`;
 											if (label) {
-												fieldsHtml += `<label for="${value.id_for}" class="form-label fw-semibold mb-2">${label} ${requiredStar}</label>`;
+												fieldsHtml += `<label for="${idFor}" class="form-label fw-semibold mb-2">${label} ${requiredStar}</label>`;
 											}
 
 											switch (builderType) {
 												case 'dropdown':
-													fieldsHtml += `<select class="form-select" id="${value.id_for}" name="${value.field_name}" ${requiredAttr}>`;
+													fieldsHtml += `<select class="form-select" id="${idFor}" name="${value.field_name}" ${requiredAttr}>`;
 													fieldsHtml += `<option value="">${chooseText}...</option>`;
 													$.each(optionsList, function(i, option) {
 														var optLabel = option === '__OTHER__' ? otherText : option;
@@ -653,26 +949,27 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													});
 													fieldsHtml += `</select>`;
 													if (optionsList.indexOf('__OTHER__') !== -1) {
-														fieldsHtml += otherWrapperHtml(value.field_name, value.id_for);
+														fieldsHtml += otherWrapperHtml(value.field_name, idFor);
 													}
 													break;
 
 												case 'paragraph':
-													var rows = (value.options && value.options.rows) ? value.options.rows : 3;
-													fieldsHtml += `<textarea class="form-control" id="${value.id_for}" name="${value.field_name}" rows="${rows}" placeholder="${label}" ${requiredAttr}></textarea>`;
+													var rows = (value.raw_options && value.raw_options.rows) ? value.raw_options.rows : 3;
+													fieldsHtml += `<textarea class="form-control" id="${idFor}" name="${value.field_name}" rows="${rows}" placeholder="${phText(label)}" ${requiredAttr}></textarea>`;
 													break;
 
 												case 'multiple_choice':
 													fieldsHtml += `<div class="options-group" data-group-name="${value.field_name}">`;
 													$.each(optionsList, function(i, option) {
 														var optLabel = option === '__OTHER__' ? otherText : option;
+														var optLogic = logicMap[option] || 'continue';
 														fieldsHtml += `<div class="form-check mb-2">`;
-														fieldsHtml += `<input class="form-check-input" type="radio" name="${value.field_name}" id="${value.id_for}_${i}" value="${option}" ${requiredAttr} />`;
-														fieldsHtml += `<label class="form-check-label" for="${value.id_for}_${i}">${optLabel}</label>`;
+														fieldsHtml += `<input class="form-check-input question-logic" type="radio" name="${value.field_name}" id="${idFor}_${i}" value="${option}" data-logic="${optLogic}" ${requiredAttr} />`;
+														fieldsHtml += `<label class="form-check-label" for="${idFor}_${i}">${optLabel}</label>`;
 														fieldsHtml += `</div>`;
 													});
 													if (optionsList.indexOf('__OTHER__') !== -1) {
-														fieldsHtml += otherWrapperHtml(value.field_name, value.id_for);
+														fieldsHtml += otherWrapperHtml(value.field_name, idFor);
 													}
 													fieldsHtml += `</div>`;
 													break;
@@ -682,58 +979,84 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 													$.each(optionsList, function(i, option) {
 														var optLabel = option === '__OTHER__' ? otherText : option;
 														fieldsHtml += `<div class="form-check mb-2">`;
-														fieldsHtml += `<input class="form-check-input" type="checkbox" name="${value.field_name}[]" id="${value.id_for}_${i}" value="${option}" />`;
-														fieldsHtml += `<label class="form-check-label" for="${value.id_for}_${i}">${optLabel}</label>`;
+														fieldsHtml += `<input class="form-check-input" type="checkbox" name="${value.field_name}[]" id="${idFor}_${i}" value="${option}" />`;
+														fieldsHtml += `<label class="form-check-label" for="${idFor}_${i}">${optLabel}</label>`;
 														fieldsHtml += `</div>`;
 													});
 													if (optionsList.indexOf('__OTHER__') !== -1) {
-														fieldsHtml += otherWrapperHtml(value.field_name, value.id_for);
+														fieldsHtml += otherWrapperHtml(value.field_name, idFor);
 													}
 													fieldsHtml += `</div>`;
 													break;
 
 												case 'linear_scale':
-													fieldsHtml += `<select class="form-select" id="${value.id_for}" name="${value.field_name}" ${requiredAttr}>`;
-													fieldsHtml += `<option value="">${chooseText}...</option>`;
-													for (var i = 1; i <= 5; i++) {
-														fieldsHtml += `<option value="${i}">${i}</option>`;
+													// GV-8349: render the ordered scale itself rather than a
+													// dropdown, matching the portal form. A dropdown hides the
+													// ordering and duplicates what multiple_choice already does.
+													var scaleOpts = value.raw_options || {};
+													var scaleMin = (scaleOpts.min !== undefined && scaleOpts.min !== '' && !isNaN(scaleOpts.min)) ? parseInt(scaleOpts.min, 10) : 1;
+													var scaleMax = (scaleOpts.max !== undefined && scaleOpts.max !== '' && !isNaN(scaleOpts.max)) ? parseInt(scaleOpts.max, 10) : 5;
+													if (scaleMax <= scaleMin) { scaleMin = 1; scaleMax = 5; }
+													var scaleLow = (scaleOpts.label_low || '').trim();
+													var scaleHigh = (scaleOpts.label_high || '').trim();
+													// The `options-group` class is what wires this into the
+													// page's group validation (validateGroup) and its
+													// .invalid-feedback placement — radios are skipped by the
+													// per-field loop, so without it a required scale is never
+													// validated on the client.
+													fieldsHtml += `<div class="options-group linear-scale-group d-flex align-items-center flex-wrap gap-2" data-required-group="${isRequired ? '1' : '0'}" data-group-name="${value.field_name}">`;
+													if (scaleLow !== '') {
+														fieldsHtml += `<span class="text-muted small me-1">${scaleLow}</span>`;
 													}
-													fieldsHtml += `</select>`;
+													for (var i = scaleMin; i <= scaleMax; i++) {
+														fieldsHtml += `<input type="radio" class="btn-check" name="${value.field_name}" id="${idFor}_${i}" value="${i}" autocomplete="off" ${requiredAttr} />`;
+														fieldsHtml += `<label class="btn btn-outline-primary rounded-pill px-3" for="${idFor}_${i}">${i}</label>`;
+													}
+													if (scaleHigh !== '') {
+														fieldsHtml += `<span class="text-muted small ms-1">${scaleHigh}</span>`;
+													}
+													fieldsHtml += `</div>`;
 													break;
 
 												case 'date':
-													fieldsHtml += `<input type="text" class="form-control datepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="text" class="form-control datepicker" id="${idFor}" name="${value.field_name}" placeholder="${phDate}" ${requiredAttr} />`;
 													break;
 
 												case 'time':
-													fieldsHtml += `<input type="text" class="form-control timepicker" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="text" class="form-control timepicker" id="${idFor}" name="${value.field_name}" placeholder="${phTime}" ${requiredAttr} />`;
 													break;
 
 												case 'file':
-													fieldsHtml += `<input type="file" class="form-control" id="${value.id_for}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" ${requiredAttr} />`;
+													fieldsHtml += `<input type="file" class="form-control" id="${idFor}" name="${value.field_name}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" ${requiredAttr} />`;
 													break;
 
 												case 'number':
 													// Non-negative by default (GV-3831/GV-2814): when the field author
 													// set no min, default to 0 so the native stepper can't go negative.
-													var numMinVal = (value.options && value.options.min !== undefined && value.options.min !== '') ? value.options.min : 0;
+													var numMinVal = (value.raw_options && value.raw_options.min !== undefined && value.raw_options.min !== '') ? value.raw_options.min : 0;
 													var numMin = `min="${numMinVal}"`;
-													var numMax = (value.options && value.options.max !== undefined && value.options.max !== '') ? `max="${value.options.max}"` : '';
-													var numStep = (value.options && value.options.step !== undefined && value.options.step !== '') ? `step="${value.options.step}"` : '';
-													fieldsHtml += `<input type="number" inputmode="decimal" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${numMin} ${numMax} ${numStep} ${requiredAttr} />`;
+													var numMax = (value.raw_options && value.raw_options.max !== undefined && value.raw_options.max !== '') ? `max="${value.raw_options.max}"` : '';
+													var numStep = (value.raw_options && value.raw_options.step !== undefined && value.raw_options.step !== '') ? `step="${value.raw_options.step}"` : '';
+													// GV-3679: `type="number"` natively accepts "e"/"E" (scientific
+													// notation) plus "+"/"-". The keydown guard blocks them at entry
+													// and the paste guard strips them (keydown never fires on paste).
+													// A negative floor is still honoured: "-" is only blocked when
+													// the effective min is >= 0.
+													var allowNeg = Number(numMinVal) < 0 ? '1' : '0';
+													fieldsHtml += `<input type="number" inputmode="decimal" class="form-control number-field" data-allow-negative="${allowNeg}" id="${idFor}" name="${value.field_name}" placeholder="${numberPlaceholder(value.raw_options, numMinVal)}" ${numMin} ${numMax} ${numStep} ${requiredAttr} />`;
 													break;
 
 												case 'email':
-													fieldsHtml += `<input type="email" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="email" class="form-control" id="${idFor}" name="${value.field_name}" placeholder="${phEmail}" ${requiredAttr} />`;
 													break;
 
 												case 'url':
-													fieldsHtml += `<input type="url" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="url" class="form-control" id="${idFor}" name="${value.field_name}" placeholder="${phUrl}" ${requiredAttr} />`;
 													break;
 
 												case 'short_answer':
 												default:
-													fieldsHtml += `<input type="text" class="form-control" id="${value.id_for}" name="${value.field_name}" placeholder="${label}" ${requiredAttr} />`;
+													fieldsHtml += `<input type="text" class="form-control" id="${idFor}" name="${value.field_name}" placeholder="${phText(label)}" ${requiredAttr} />`;
 													break;
 											}
 
@@ -742,24 +1065,50 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 										});
 
 										fieldsHtml += `</div></div></div>`;
+
+										var sectionCounterText = '{{ $l == "ar" ? "قسم" : "Section" }}';
+										fieldsHtml += `
+											<div class="section-footer d-flex justify-content-between align-items-center mt-3">
+												<div class="text-muted small">${sectionCounterText} ${sectionIndex + 1} / ${totalSections}</div>
+												<div class="d-flex gap-2">
+													<button type="button" class="btn btn-outline-custom btn-prev ${sectionIndex === 0 ? 'd-none' : ''}">
+														<i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'left' : 'left' }} me-2"></i>
+														{{ $l == 'ar' ? 'السابق' : 'Back' }}
+													</button>
+													<button type="button" class="btn btn-primary-custom btn-next">
+														<span class="btn-next-text">{{ $l == 'ar' ? 'التالي' : 'Next' }}</span>
+														<i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'right' : 'right' }} ms-2"></i>
+													</button>
+												</div>
+											</div>
+										`;
 										fieldsHtml += `</div>`;
 									});
 
-									$("#register-fields").html(fieldsHtml);
-									let registerNavButtons = `
-										<div class="col-12 mt-8 d-flex justify-content-between">
-											<button type="button" class="btn btn-secondary" onclick="stepper.to(1)">
-												<i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'left' : 'left' }} me-2"></i>
-												{{ $l == 'ar' ? 'السابق' : 'Previous' }}
-											</button>
-											<button id="join_btn" type="button" class="btn btn-primary-custom w-px-120">
-												{{ $l == 'ar' ? 'انضم' : 'Join' }}
-												<i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'right' : 'right' }} ms-2"></i>
-											</button>
+									fieldsHtml += `
+										<div class="section-wrapper" id="submit-step" style="display:none;">
+											<div class="card border shadow-sm"><div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+												<div>
+													<h5 class="mb-1">{{ $l == 'ar' ? 'جاهز للإرسال؟' : 'Ready to submit?' }}</h5>
+													<p class="text-muted mb-0">{{ $l == 'ar' ? 'يرجى مراجعة إجاباتك قبل الإرسال.' : 'Please review your answers before submitting.' }}</p>
+												</div>
+												<div class="d-flex gap-2">
+													<button type="button" class="btn btn-outline-custom btn-prev-submit">
+														<i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'left' : 'left' }} me-2"></i>
+														{{ $l == 'ar' ? 'السابق' : 'Back' }}
+													</button>
+													<button id="join_btn" type="button" class="btn btn-primary-custom w-px-120">
+														{{ $l == 'ar' ? 'انضم' : 'Join' }}
+														<i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'right' : 'right' }} ms-2"></i>
+													</button>
+												</div>
+											</div></div>
 										</div>
 									`;
-									$("#register-fields").append(registerNavButtons);
+
+									$("#register-fields").html(fieldsHtml);
 									datePicker();
+									initApplicationWizard();
 									stepper.to(3);
 								} else {
 									Swal.fire({ 
@@ -813,6 +1162,12 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 								},
 								buttonsStyling: false,
 							});
+						},
+						// Always release the lock: this step advances the stepper on
+						// success, but "Previous" brings the user back to this button,
+						// so it must be usable again either way.
+						complete: function() {
+							unlockButton($btn);
 						}
 					});
 				} else {
@@ -825,6 +1180,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 		$(document).on('click', '#login-btn', function(e) {
 			e.preventDefault();
+			const $btn = $(this);
+			if ($btn.data('locked')) { return; }
 			let email = $('#login-email').val();
 			let password = $('#login-password').val();
 
@@ -833,7 +1190,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				$('#login-password').addClass('is-invalid');
 				return;
 			}
-			
+
+			lockButton($btn);
 			$.ajaxSetup({
 				headers: {
 					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -845,8 +1203,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				data: { email: email, password: password },
 				success: function(response) {
 					if (response.status) {
+						// Navigating away — deliberately stay locked so the button
+						// cannot be re-fired during the page transition.
 						window.location.href = response.url;
 					} else {
+						unlockButton($btn);
 						Swal.fire({
 							title: '{{ $l == "ar" ? "خطأ" : "Authentication Failed" }}',
 							text: response.message,
@@ -863,7 +1224,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				},
 				error: function(error) {
 					console.log(error);
-					Swal.fire({ 
+					unlockButton($btn);
+					Swal.fire({
 						title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
 					 	text: '{{ $l == "ar" ? "حدث خطأ أثناء المصادقة. يرجى المحاولة مرة أخرى." : "An error occurred during authentication. Please try again." }}',
 					  icon: 'error',
@@ -889,22 +1251,247 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			return re.test(String(email).toLowerCase());
 		}
 
-		// Auto-clear the red validation state as soon as the user fills / changes a field.
-		$(document).on('input change', '#register-form input, #register-form select, #register-form textarea', function() {
-			const $field = $(this);
-			const type = $field.attr('type');
-			const name = $field.attr('name');
+		// ---------------------------------------------------------------------
+		// GV-3679: real-time validation.
+		//
+		// One `validateField` is the single source of truth for BOTH the live
+		// (input/change/blur) pass and the #join_btn submit pass. Keeping them
+		// as one function is the point: the earlier split meant submit could
+		// reject something the live pass had just cleared. It returns an error
+		// message string, or null when the field is acceptable.
+		//
+		// Live feedback is deliberately gentle-first: a field the user has not
+		// finished with yet is only marked once it has been blurred ("touched"),
+		// so errors do not flash on the very first keystroke of an empty box.
+		// Once a field is already marked invalid, it revalidates on every input
+		// so the red state clears the instant the value becomes good.
+		// ---------------------------------------------------------------------
+		function fieldFeedbackEl($field) {
+			// Every rendered field has a sibling .invalid-feedback; grouped
+			// (radio/checkbox) fields carry it after the .options-group wrapper.
+			const $group = $field.closest('.options-group');
+			if ($group.length) {
+				const $after = $group.nextAll('.invalid-feedback').first();
+				if ($after.length) { return $after; }
+			}
+			const $sibling = $field.nextAll('.invalid-feedback').first();
+			if ($sibling.length) { return $sibling; }
+			return $field.closest('.form-group').find('.invalid-feedback').first();
+		}
 
-			if (type === 'radio' || type === 'checkbox') {
-				// Clear the whole group (and its container marker) once any option is chosen.
-				if (name) {
-					$('#register-form').find(`input[name="${name}"]`).removeClass('is-invalid');
-				}
-				$field.closest('.options-group').find('.is-invalid').removeClass('is-invalid');
-			} else if ($field.val() && $field.val().toString().trim() !== '') {
+		function validateField($field) {
+			const el = $field[0];
+			if (!el) { return null; }
+			const type = ($field.attr('type') || '').toLowerCase();
+			const isRequired = $field.is('[required]');
+			const rawVal = $field.val();
+			const value = (rawVal === null || rawVal === undefined) ? '' : rawVal.toString();
+			const trimmed = value.trim();
+
+			if (type === 'file') {
+				if (isRequired && (!el.files || el.files.length === 0)) { return requiredText; }
+				return null;
+			}
+
+			// MUST precede the empty check: a number input holding un-parseable
+			// text (e.g. "12e", "--") reports value === "", which would otherwise
+			// be reported as "required" — or silently accepted when optional.
+			// badInput is the only signal that the box has junk in it.
+			if (type === 'number' && el.validity && el.validity.badInput) {
+				return numericText;
+			}
+
+			if (!trimmed) {
+				return isRequired ? requiredText : null;
+			}
+
+			if (type === 'number') {
+				const num = Number(trimmed);
+				if (isNaN(num)) { return numericText; }
+				const minAttr = $field.attr('min');
+				const maxAttr = $field.attr('max');
+				const min = (minAttr !== undefined && minAttr !== '') ? Number(minAttr) : 0;
+				const max = (maxAttr !== undefined && maxAttr !== '') ? Number(maxAttr) : null;
+				if (num < min) { return numberMinMessage(min); }
+				if (max !== null && num > max) { return numberMaxTplText + max; }
+				return null;
+			}
+
+			if (type === 'email') {
+				if (!/.+@.+\..+/.test(trimmed)) { return emailFormatText; }
+				return null;
+			}
+
+			if (type === 'url') {
+				// Mirror the browser's own `type="url"` verdict rather than
+				// inventing a second, stricter rule.
+				if (el.validity && el.validity.typeMismatch) { return urlFormatText; }
+				return null;
+			}
+
+			return null;
+		}
+
+		function applyFieldState($field, message) {
+			const $feedback = fieldFeedbackEl($field);
+			if (message) {
+				$field.addClass('is-invalid');
+				if ($feedback.length) { $feedback.html(message); }
+			} else {
 				$field.removeClass('is-invalid');
-			} else if (type === 'file' && this.files && this.files.length > 0) {
-				$field.removeClass('is-invalid');
+			}
+			return !message;
+		}
+
+		// Required radio / checkbox groups: validated as a unit, marked on every
+		// option so the whole group reads as invalid.
+		function validateGroup($group) {
+			const isRequired = $group.data('required-group') === 1
+				|| $group.data('required-group') === '1'
+				|| $group.find('input[required]').length > 0;
+			if (!isRequired) { return true; }
+			const $inputs = $group.find('input[type="radio"], input[type="checkbox"]');
+			const ok = $inputs.filter(':checked').length > 0;
+			const $feedback = $group.nextAll('.invalid-feedback').first();
+			if (ok) {
+				$inputs.removeClass('is-invalid');
+			} else {
+				$inputs.addClass('is-invalid');
+				if ($feedback.length) { $feedback.html(chooseOneText); }
+			}
+			return ok;
+		}
+
+		// "Other" free-text is mandatory whenever its wrapper is visible.
+		function validateOtherWrapper($wrapper) {
+			const $input = $wrapper.find('.other-field');
+			if ($wrapper.hasClass('d-none')) {
+				$input.removeClass('is-invalid');
+				return true;
+			}
+			const val = ($input.val() || '').trim();
+			if (!val) {
+				$input.addClass('is-invalid');
+				return false;
+			}
+			$input.removeClass('is-invalid');
+			return true;
+		}
+
+		const TOUCHED = 'gv-touched';
+
+		function liveValidate($field) {
+			// Only speak up once the user has left the field, or if we are already
+			// showing an error on it (so corrections clear immediately).
+			if (!$field.data(TOUCHED) && !$field.hasClass('is-invalid')) { return; }
+			applyFieldState($field, validateField($field));
+		}
+
+		// Blur marks the field as "touched" and validates it for the first time.
+		$(document).on('blur', '#register-form input, #register-form select, #register-form textarea', function() {
+			const $field = $(this);
+			const type = ($field.attr('type') || '').toLowerCase();
+			if (type === 'radio' || type === 'checkbox') { return; }
+			$field.data(TOUCHED, true);
+			applyFieldState($field, validateField($field));
+		});
+
+		// Typing revalidates a touched/invalid field so the error disappears as
+		// soon as the value becomes valid.
+		$(document).on('input', '#register-form input, #register-form select, #register-form textarea', function() {
+			liveValidate($(this));
+		});
+
+		// Selecting an option validates immediately — there is no "still typing"
+		// state for a choice, so instant feedback is correct here.
+		$(document).on('change', '#register-form select', function() {
+			const $field = $(this);
+			$field.data(TOUCHED, true);
+			applyFieldState($field, validateField($field));
+		});
+
+		$(document).on('change', '#register-form input[type="radio"], #register-form input[type="checkbox"]', function() {
+			const $group = $(this).closest('.options-group');
+			if ($group.length) { validateGroup($group); }
+		});
+
+		$(document).on('change', '#register-form input[type="file"]', function() {
+			const $field = $(this);
+			$field.data(TOUCHED, true);
+			applyFieldState($field, validateField($field));
+		});
+
+		$(document).on('input blur', '#register-form .other-field', function() {
+			const $wrapper = $(this).closest('.other-wrapper');
+			if ($wrapper.length && ($(this).hasClass('is-invalid') || $(this).data(TOUCHED))) {
+				validateOtherWrapper($wrapper);
+			}
+		});
+		$(document).on('blur', '#register-form .other-field', function() {
+			$(this).data(TOUCHED, true);
+		});
+
+		// The two static base fields live outside the dynamic renderer but should
+		// behave identically.
+		$(document).on('blur', '#register-first-name, #register-last-name', function() {
+			$(this).data(TOUCHED, true);
+			applyFieldState($(this), validateField($(this)));
+		});
+
+		// -- Number input hygiene (GV-3679) -----------------------------------
+		// `type="number"` accepts "e"/"E" (scientific notation) and "+"/"-" by
+		// design. Block them on keydown; "-" only when the field's floor is >= 0.
+		$(document).on('keydown', '#register-form input[type="number"]', function(e) {
+			// Never swallow shortcuts (Ctrl+V, Ctrl+A, Cmd+C, Ctrl+E, ...) — the
+			// guard is only meant to stop literal character entry.
+			if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+
+			// Navigation / editing keys are always allowed. Anything with a
+			// multi-character e.key name (Backspace, ArrowUp, Tab, F5, Enter...)
+			// is a control key, never a typed character.
+			if (e.key === undefined || e.key.length !== 1) { return; }
+
+			// ALLOWLIST, not a denylist. `type="number"` silently discards every
+			// letter — the browser refuses it from .value but still PAINTS it in
+			// the box, so the user sees "abcdef" while the field reads "". A
+			// denylist of e/E/+/- left every other letter in that broken state
+			// (GV-3679 reopen). Permit only what can build a number and reject
+			// the rest outright, so nothing unusable ever appears.
+			const allowNeg = $(this).data('allow-negative') === 1 || $(this).data('allow-negative') === '1';
+			const isDigit = e.key >= '0' && e.key <= '9';
+			// "." only — a number input rejects a comma-containing value outright
+			// (it reads back as empty), so letting one be typed would blank the
+			// field silently. "-" is allowed only where the floor is negative.
+			const isSeparator = e.key === '.';
+			const isMinus = e.key === '-' && allowNeg;
+
+			if (!isDigit && !isSeparator && !isMinus) {
+				e.preventDefault();
+			}
+		});
+
+		// keydown never fires for a paste or a drop, so strip the same characters
+		// from pasted content instead of letting the browser blank the field.
+		$(document).on('paste drop', '#register-form input[type="number"]', function(e) {
+			const $field = $(this);
+			const allowNeg = $field.data('allow-negative') === 1 || $field.data('allow-negative') === '1';
+			const ev = e.originalEvent || e;
+			const clip = ev.clipboardData || ev.dataTransfer;
+			if (!clip) { return; }
+			const text = clip.getData('text') || '';
+			// Mirror the keydown allowlist: keep digits and the sign/decimal point
+			// only, so a pasted "12abc" cannot land the field in the same
+			// invisible-text state that plain typing used to produce.
+			//
+			// Commas are DROPPED rather than kept: a number input rejects
+			// "1,299.00" outright (its .value reads back empty), so preserving
+			// the comma would leave a silently blank box. Dropping it yields
+			// "1299.00", which is what a pasted thousands-separated figure means.
+			let cleaned = text.replace(/,/g, '').replace(/[^0-9.-]/g, '');
+			cleaned = allowNeg ? cleaned.replace(/(?!^)-/g, '') : cleaned.replace(/-/g, '');
+			if (cleaned !== text) {
+				e.preventDefault();
+				$field.val(cleaned).trigger('input');
 			}
 		});
 
@@ -938,114 +1525,69 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 		$(document).on('click', '#join_btn', function(e) {
 			e.preventDefault();
+			const $btn = $(this);
+			// Guard before any work: a second click while the first POST is in
+			// flight was creating duplicate registrations.
+			if ($btn.data('locked')) { return; }
 			let $form = $('#register-form');
 			let isValid = true;
 
 			$form.find('.is-invalid').removeClass('is-invalid');
 
-			// Track radio groups so each group is only validated once.
-			const validatedRadioGroups = {};
+			// Sections the founder never actually reached (skipped by a branching
+			// answer, or beyond the resolved path) must contribute neither
+			// validation errors nor answers. Disabling their inputs makes both
+			// the validation loops below (which already skip `:disabled`) and
+			// the native FormData(form) construction further down exclude them
+			// automatically — no separate field-stripping logic needed.
+			let $allSections = $form.find('.section-wrapper[data-section-index]');
+			let $skippedInputs = $allSections
+				.filter(function() { return sectionHistory.indexOf(parseInt(this.dataset.sectionIndex, 10)) === -1; })
+				.find('input, select, textarea');
+			let previouslyDisabled = $skippedInputs.map(function() { return this.disabled; }).get();
+			$skippedInputs.prop('disabled', true);
 
-			$form.find('[required]').each(function() {
+			function isInVisitedSection(el) {
+				const sec = el.closest('.section-wrapper[data-section-index]');
+				if (!sec) { return true; }
+				return sectionHistory.indexOf(parseInt(sec.dataset.sectionIndex, 10)) !== -1;
+			}
+
+			// Submit runs the SAME per-field rules as the live pass (validateField),
+			// so the two layers can never disagree. Grouped inputs (radio /
+			// checkbox) and the "Other" free-text boxes are unit-validated
+			// separately, since neither maps onto a single input's value.
+			$form.find('input, select, textarea').each(function() {
 				const $field = $(this);
-				if (!$field.is(':visible') || $field.attr('required') === undefined) {
-					return;
-				}
+				const type = ($field.attr('type') || '').toLowerCase();
+				if (type === 'radio' || type === 'checkbox') { return; }
+				if ($field.is(':disabled') || !$field.is(':visible')) { return; }
+				if ($field.hasClass('other-field')) { return; }
 
-				const type = $field.attr('type');
-				const name = $field.attr('name');
-
-				if (type === 'radio') {
-					// Required radio group: at least one option in the group must be checked.
-					if (validatedRadioGroups[name]) { return; }
-					validatedRadioGroups[name] = true;
-					if ($form.find(`input[type="radio"][name="${name}"]:checked`).length === 0) {
-						$form.find(`input[type="radio"][name="${name}"]`).addClass('is-invalid');
-						isValid = false;
-					}
-				} else if (type === 'checkbox') {
-					if (!$field.is(':checked')) {
-						$field.addClass('is-invalid');
-						isValid = false;
-					}
-				} else if (type === 'file') {
-					if (this.files.length === 0) {
-						$field.addClass('is-invalid');
-						isValid = false;
-					}
-				} else {
-					const value = $field.val();
-					if (!value || value.trim() === '') {
-						$field.addClass('is-invalid');
-						isValid = false;
-					}
+				// Mark everything touched: after an attempted submit the user has
+				// "finished" with every field, so all errors should now be visible.
+				$field.data(TOUCHED, true);
+				if (!applyFieldState($field, validateField($field))) {
+					isValid = false;
 				}
 			});
 
-			// Required checkbox groups (rendered without a native `required` attribute):
-			// at least one box in the group must be checked.
-			$form.find('.options-group[data-required-group="1"]').each(function() {
+			// Required radio / checkbox groups: at least one option must be chosen.
+			$form.find('.options-group').each(function() {
 				const $group = $(this);
 				if (!$group.is(':visible')) { return; }
-				if ($group.find('input[type="checkbox"]:checked').length === 0) {
-					$group.find('input[type="checkbox"]').addClass('is-invalid');
-					isValid = false;
-				}
+				if (!validateGroup($group)) { isValid = false; }
 			});
 
 			// When "Other" is selected, its free-text input must be filled in.
-			$form.find('.other-wrapper:not(.d-none)').each(function() {
-				const $otherInput = $(this).find('.other-field');
-				if (!$otherInput.val() || $otherInput.val().trim() === '') {
-					$otherInput.addClass('is-invalid');
-					isValid = false;
-				}
-			});
-
-			// Number format/range check (GV-3831/GV-3453): reject non-numeric text
-			// and values below the field's min (defaults to 0 — see the 'number'
-			// render case above), respecting an authored max when present.
-			$form.find('input[type="number"]:not(:disabled)').each(function() {
-				const $field = $(this);
-				if (!$field.is(':visible')) { return; }
-				const value = $field.val();
-				if (value === '' || value === null) { return; }
-				const num = Number(value);
-				const min = $field.attr('min') !== undefined && $field.attr('min') !== '' ? Number($field.attr('min')) : 0;
-				const max = $field.attr('max') !== undefined && $field.attr('max') !== '' ? Number($field.attr('max')) : null;
-				let message = null;
-				if (isNaN(num)) {
-					message = numericText;
-				} else if (num < min) {
-					message = numberMinText;
-				} else if (max !== null && num > max) {
-					message = '{{ $l == "ar" ? "يرجى إدخال رقم لا يتجاوز " : "Please enter a number no greater than " }}' + max;
-				}
-				if (message) {
-					$field.addClass('is-invalid');
-					$field.next('.invalid-feedback').html(message);
-					isValid = false;
-				}
-			});
-
-			// Email format check (GV-3832): require a dotted domain (e.g. rejects
-			// "user@example") without a live DNS lookup. Skips #register-email —
-			// that field is disabled/pre-filled from the already-verified initial
-			// email step and is not one of the dynamic form fields.
-			$form.find('input[type="email"]:not(:disabled)').each(function() {
-				const $field = $(this);
-				if (!$field.is(':visible')) { return; }
-				const value = $field.val();
-				if (!value || value.trim() === '') { return; }
-				if (!/.+@.+\..+/.test(value.trim())) {
-					$field.addClass('is-invalid');
-					$field.next('.invalid-feedback').html(emailFormatText);
-					isValid = false;
-				}
+			$form.find('.other-wrapper').each(function() {
+				if (!isInVisitedSection(this)) { return; }
+				if (!validateOtherWrapper($(this))) { isValid = false; }
 			});
 
 			if (!isValid) {
-				Swal.fire({ 
+				$skippedInputs.each(function(i) { this.disabled = previouslyDisabled[i]; });
+				Swal.fire({
 					title: '{{ $l == "ar" ? "نموذج غير مكتمل" : "Incomplete Form" }}',
 					text: '{{ $l == "ar" ? "يرجى ملء جميع الحقول المطلوبة." : "Please fill out all required fields." }}',
 					icon: 'warning',
@@ -1061,9 +1603,18 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			}
 			// Build the payload, replacing any "__OTHER__" marker with the typed
 			// free-text value so the server stores the real answer (matches portal).
+			// $skippedInputs are still disabled here on purpose — FormData(form)
+			// natively omits disabled controls, which is what excludes answers
+			// from un-visited sections from the submission.
 			let formData = new FormData($form[0]);
+			$skippedInputs.each(function(i) { this.disabled = previouslyDisabled[i]; });
 
 			$form.find('.other-wrapper').each(function() {
+				// Inputs were just re-enabled above, so this must re-check the
+				// visited path itself rather than rely on :disabled — otherwise
+				// a skipped section's live DOM value could get merged back into
+				// formData below, undoing the exclusion FormData(form) just did.
+				if (!isInVisitedSection(this)) { return; }
 				const $wrapper = $(this);
 				const fieldName = $wrapper.data('other-for');
 				const otherVal = ($wrapper.find('.other-field').val() || '').trim();
@@ -1101,6 +1652,9 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				}
 			});
 			formData.append('register-email', $('#register-email').val());
+			// Lock only once the payload is built and validation has passed —
+			// a rejected submit above leaves the button usable.
+			lockButton($btn);
 			$.ajax({
 				type: "POST",
 				url: "/{{ $org_slug }}/program/{{ $program_slug }}/register",
@@ -1109,13 +1663,17 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				processData: false,
 				success: function(response) {
 					if (response.status) {
+						// Registration succeeded — stay locked. The stepper moves on
+						// (or we navigate away), and re-enabling would re-open the
+						// duplicate-registration window this guard exists to close.
 						@if($VFEmail)
 							stepper.next();
 						@else
 							window.location.href = response.url;
 						@endif
 					} else {
-						Swal.fire({ 
+						unlockButton($btn);
+						Swal.fire({
 							title: '{{ $l == "ar" ? "خطأ في التسجيل" : "Registration Error" }}',
 							text: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
 							icon: 'error',
@@ -1131,6 +1689,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 				},
 				error: function(xhr, status, error) {
 					console.log(error);
+					// The request failed, so nothing was created — let the user retry.
+					unlockButton($btn);
 					if( xhr.status == 422 )
 					{
 						var response = xhr.responseJSON || {};

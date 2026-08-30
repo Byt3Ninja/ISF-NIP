@@ -868,11 +868,15 @@
                     </div>
                   </td>
                   <td>
-                    <span class="badge bg-label-info">Official Attachment</span>
+                    <span class="badge bg-label-info">{{ $l == 'ar' ? 'مرفق رسمي' : 'Official Attachment' }}</span>
                   </td>
                   <td class="text-end">
                     <a
+                      @if( $field == 'financial_plan' )
+                      href="{{ app(\App\Services\FileManagerService::class)->getUrl( $co->$field,  'pitch_deck') }}"
+                      @else
                       href="{{ $co->$field }}"
+                      @endif
                       target="_blank"
                       rel="noopener noreferrer"
                       class="btn btn-sm btn-icon rounded-pill btn-label-secondary"

@@ -148,11 +148,15 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
             ] : [];
         }
 
-        // $startupName = $mentorship_session?->user?->company?->name ?? $mentorship_session?->user?->name;
-        $startupName = $mentorship_session?->user?->name;
+        $founderName = $mentorship_session?->user?->name ?? '';
+        $startupName = $founderName;
+        $subject = app()->getLocale() === 'ar'
+            ? "جلسة إرشاد مع {$founderName}."
+            : "Mentorship Session with {$founderName}.";
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
-            ->subject( __('email.mentor_notify_email.subject') . ' ' . $startupName )
+            ->subject($subject)
             ->view('emails.mentorship_notify_mentor_email', array_merge([
                 'party'             => $notifiable,
                 'other_party'       => $mentorship_session?->user,

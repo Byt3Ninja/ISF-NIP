@@ -473,7 +473,7 @@ class TasksController extends Controller
         ]);
 
         $feedbacks = $task->feedbacks
-            ->when($filterCompanyId, fn($c) => $c->filter(fn($fb) => $fb->company_id == $filterCompanyId))
+            ->when($filterCompanyId, fn($c) => $c->filter(fn($fb) => $fb->company_id == $filterCompanyId || is_null($fb->company_id)))
             ->sortByDesc('created_at')->values()->map(fn($fb) => [
             'id'         => $fb->id,
             'user'       => $fb->user->name ?? 'N/A',
@@ -486,7 +486,7 @@ class TasksController extends Controller
         ]);
 
         $activities = $task->activities
-            ->when($filterCompanyId, fn($c) => $c->filter(fn($act) => $act->company_id == $filterCompanyId))
+            ->when($filterCompanyId, fn($c) => $c->filter(fn($act) => $act->company_id == $filterCompanyId || is_null($act->company_id)))
             ->sortByDesc('created_at')->map(function ($act) {
             $action = match($act->action) {
                 'create'   => 'created this task',
@@ -1278,6 +1278,10 @@ class TasksController extends Controller
 
 
             $companyIdForCheck = $request->input('company_id');
+            if (empty($companyIdForCheck) && $task->assignees()->count() === 1) {
+                $companyIdForCheck = $task->assignees()->first()->id;
+            }
+
             $assigneeStatus = ProgramTaskAssignee::where('program_task_id', $task->id)
                 ->when($companyIdForCheck, fn($q) => $q->where('company_id', $companyIdForCheck))
                 ->value('status');

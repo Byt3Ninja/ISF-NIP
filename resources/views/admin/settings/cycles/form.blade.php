@@ -151,10 +151,28 @@
                           // withInput() re-flashes the submission on a validation
                           // redirect. The value can be an array (POST of field_X[])
                           // or a JSON string (flashed DB answer) — normalize both.
+                          // Checkbox answers exist in TWO stored formats:
+                          //   * JSON array  — CyclesController@saveForm (json_encode)
+                          //   * comma list  — ExternalCyclesController@registerUser
+                          //                   (implode(',')), i.e. the public apply form
+                          // Try JSON first, then fall back to splitting on commas.
+                          // Reading a comma list as one opaque string made the whole
+                          // answer ("Option 1,taza taza") match no predefined option,
+                          // so it was misdetected as the "Other" free text and every
+                          // real selection was lost on render.
                           $checkboxAnswers = old($fieldName, []);
                           if (is_string($checkboxAnswers)) {
                               $decoded = json_decode($checkboxAnswers, true);
-                              $checkboxAnswers = is_array($decoded) ? $decoded : array_filter([$checkboxAnswers]);
+                              if (is_array($decoded)) {
+                                  $checkboxAnswers = $decoded;
+                              } elseif ($checkboxAnswers === '') {
+                                  $checkboxAnswers = [];
+                              } else {
+                                  $checkboxAnswers = array_values(array_filter(
+                                      array_map('trim', explode(',', $checkboxAnswers)),
+                                      fn($v) => $v !== ''
+                                  ));
+                              }
                           }
                           $checkboxAnswers = is_array($checkboxAnswers) ? $checkboxAnswers : [];
 
@@ -253,7 +271,7 @@
                                     name="{{ $fieldName }}"
                                     rows="4"
                                     class="form-control @error($fieldName) is-invalid @enderror"
-                                    placeholder="{{ $question['label'] }}"
+                                    placeholder="{{ form_field_placeholder($question) }}"
                                     {{ $question['is_required'] ? 'required' : '' }}
                                     {{ $isReadOnly ? 'disabled' : '' }}
                                   >{{ old($fieldName) }}</textarea>
@@ -340,29 +358,47 @@
                                   @break
 
                                 @case('linear_scale')
-                                  <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
-                                    <select
-                                      id="{{ $fieldId }}"
-                                      name="{{ $fieldName }}"
-                                      class="form-select w-px-250 @error($fieldName) is-invalid @enderror"
-                                      {{ $question['is_required'] ? 'required' : '' }}
-                                      {{ $isReadOnly ? 'disabled' : '' }}
-                                    >
-                                      <option value="">Select a rating</option>
-                                      @for($i = 1; $i <= 5; $i++)
-                                        <option value="{{ $i }}" {{ old($fieldName) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                      @endfor
-                                    </select>
-                                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                                      @for($i = 1; $i <= 5; $i++)
-                                        <span class="badge bg-label-primary rounded-pill px-3 py-2">{{ $i }}</span>
-                                      @endfor
-                                    </div>
+                                  @php
+                                    // GV-8349: render the scale itself rather than a
+                                    // dropdown. The ordered, side-by-side choices and
+                                    // the endpoint anchors are the whole point of the
+                                    // type; a <select> hides them and duplicates what
+                                    // multiple_choice already does.
+                                    $scaleMin = is_numeric($question['min'] ?? null) ? (int) $question['min'] : 1;
+                                    $scaleMax = is_numeric($question['max'] ?? null) ? (int) $question['max'] : 5;
+                                    if ($scaleMax <= $scaleMin) {
+                                        $scaleMin = 1;
+                                        $scaleMax = 5;
+                                    }
+                                    $scaleLow = trim((string) ($question['label_low'] ?? ''));
+                                    $scaleHigh = trim((string) ($question['label_high'] ?? ''));
+                                    $scaleValue = old($fieldName);
+                                  @endphp
+                                  <div class="linear-scale-group d-flex align-items-center flex-wrap gap-2 @error($fieldName) is-invalid @enderror">
+                                    @if($scaleLow !== '')
+                                      <span class="text-muted small me-1">{{ $scaleLow }}</span>
+                                    @endif
+                                    @for($i = $scaleMin; $i <= $scaleMax; $i++)
+                                      <input
+                                        type="radio"
+                                        class="btn-check"
+                                        name="{{ $fieldName }}"
+                                        id="{{ $fieldId }}_{{ $i }}"
+                                        value="{{ $i }}"
+                                        autocomplete="off"
+                                        {{ (string) $scaleValue === (string) $i ? 'checked' : '' }}
+                                        {{ ($question['is_required'] && $i === $scaleMin) ? 'required' : '' }}
+                                        {{ $isReadOnly ? 'disabled' : '' }}
+                                      />
+                                      <label class="btn btn-outline-primary rounded-pill px-3" for="{{ $fieldId }}_{{ $i }}">{{ $i }}</label>
+                                    @endfor
+                                    @if($scaleHigh !== '')
+                                      <span class="text-muted small ms-1">{{ $scaleHigh }}</span>
+                                    @endif
                                   </div>
-                                  <div class="d-flex justify-content-between text-muted small mt-2">
-                                    <span>Low</span>
-                                    <span>High</span>
-                                  </div>
+                                  @error($fieldName)
+                                    <div class="text-danger small mt-2">{{ $message }}</div>
+                                  @enderror
                                   @break
 
                                 @case('date')
@@ -376,7 +412,7 @@
                                       id="{{ $fieldId }}"
                                       name="{{ $fieldName }}"
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                       {{ $isReadOnly ? 'disabled' : '' }}
                                     />
@@ -394,7 +430,7 @@
                                       id="{{ $fieldId }}"
                                       name="{{ $fieldName }}"
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                       {{ $isReadOnly ? 'disabled' : '' }}
                                     />
@@ -458,7 +494,7 @@
                                       data-min="{{ (isset($question['min']) && $question['min'] !== null && $question['min'] !== '') ? $question['min'] : 0 }}"
                                       @if(isset($question['max']) && $question['max'] !== null && $question['max'] !== '') data-max="{{ $question['max'] }}" @endif
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       min="{{ (isset($question['min']) && $question['min'] !== null && $question['min'] !== '') ? $question['min'] : 0 }}"
                                       @if(isset($question['max']) && $question['max'] !== null && $question['max'] !== '') max="{{ $question['max'] }}" @endif
                                       @if(isset($question['step']) && $question['step'] !== null && $question['step'] !== '') step="{{ $question['step'] }}" @else step="any" @endif
@@ -484,7 +520,7 @@
                                       data-qtype="{{ $question['type'] }}"
                                       data-allowed-domains="{{ $question['allowed_domains'] ?? '' }}"
                                       value="{{ old($fieldName) }}"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                       {{ $isReadOnly ? 'disabled' : '' }}
                                     />
@@ -710,8 +746,8 @@
       if (qtype === 'number') {
         // Non-negative by default (GV-3831/GV-3453): when the field author
         // set no min, floor at 0 via the data-min attribute rendered by the
-        // number-type input block. linear_scale is untouched — it keeps only
-        // its existing fixed 1-5 <select> and is not qtype="number".
+        // number-type input block. linear_scale is untouched — it renders a
+        // radio group over its authored range and is not qtype="number".
         const numMin = field.dataset.min !== undefined && field.dataset.min !== '' ? Number(field.dataset.min) : 0;
         const numMax = field.dataset.max !== undefined && field.dataset.max !== '' ? Number(field.dataset.max) : null;
         // Real, registered FormValidation.io validators only (GV QA fix):
@@ -998,6 +1034,17 @@
       });
     }
 
+    // A stored target is only meaningful if it is "submit" or "section-<n>".
+    // Older saves wrote an empty string when the builder lost a target
+    // (GV-8351), and anything unrecognised must fall through to "continue"
+    // rather than be treated as a jump.
+    function normalizeLogic(value) {
+      const logic = (value || "").trim();
+      if (logic === "submit") return "submit";
+      if (/^section-\d+$/.test(logic)) return logic;
+      return "continue";
+    }
+
     function getNextLogic(section) {
       let logic = "continue";
       const inputs = section.querySelectorAll(".question-logic");
@@ -1006,11 +1053,11 @@
         let questionLogic = "continue";
         if (input.tagName === "SELECT") {
           const selectedOption = input.options[input.selectedIndex];
-          questionLogic = selectedOption ? (selectedOption.dataset.logic || "continue") : "continue";
+          questionLogic = selectedOption ? normalizeLogic(selectedOption.dataset.logic) : "continue";
         } else if (input.type === "radio" && input.checked) {
-          questionLogic = input.dataset.logic || "continue";
+          questionLogic = normalizeLogic(input.dataset.logic);
         } else if (input.type === "checkbox" && input.checked) {
-          const jumpLogic = input.dataset.logic || "continue";
+          const jumpLogic = normalizeLogic(input.dataset.logic);
           if (jumpLogic !== "continue") questionLogic = jumpLogic;
         }
         if (questionLogic !== "continue") {
@@ -1019,7 +1066,7 @@
       });
 
       if (logic === "continue") {
-        logic = section.dataset.sectionLogic || "continue";
+        logic = normalizeLogic(section.dataset.sectionLogic);
       }
 
       return logic;

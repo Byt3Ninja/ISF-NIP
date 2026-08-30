@@ -118,6 +118,12 @@ Auth::routes(['verify' => true]);
 
 Route::get('/magic-login/{user}/{token}', 'Auth\MagicLoginController@login')->middleware(['signed', 'throttle:6,1'])->name('auth.magic-login');
 
+// Email-change confirmation. Public + signed so the link works from any mail client or
+// device, without requiring an authenticated (or 2FA-satisfied) session on that device.
+Route::get('/confirm-email/{user}/{token}', 'ClientProfileController@confirmEmailUpdate')
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('user.profile_email_confirm');
+
 Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
 Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
 
@@ -146,6 +152,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('judger/screening', 'Judger\JudgerScreeningController@index');
     Route::post('judger/screening/evaluation/save_draft', 'Judger\JudgerScreeningController@save_evaluation_draft')->name('screening.evaluate_save_draft');
     Route::post('judger/screening/evaluation/publish', 'Judger\JudgerScreeningController@publish_evaluation')->name('screening.evaluate_publish');
+    Route::get('judger/screening/export', 'Judger\JudgerScreeningController@export')->name('screening.judger_export');
 
     // Chat
     Route::get('chat', 'ChatController@index');
@@ -166,6 +173,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('chat/groups/{groupId}/messages', 'ChatController@sendMessage')->name('chat.send_group_message');
     Route::delete('chat/messages/{messageId}', 'ChatController@deleteMessage')->name('chat.delete_message');
     Route::post('chat/typing', 'ChatController@typing')->name('chat.typing');
+    Route::post('chat/ping', 'ChatController@ping')->name('chat.ping');
     Route::get('chat/users/search', 'ChatController@searchUser')->name('chat.search_users');
 
     // Hackathon Routes
@@ -177,6 +185,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('hackathon/deleteTeamInfo', 'HackathonController@deleteTeamInfo')->name('hackathon.deleteTeamInfo');
     Route::post('hackathon/invitation', 'HackathonController@invitation')->name('hackathon.invitation');
     Route::post('hackathon/cancelinvitation', 'HackathonController@cancelInvitation')->name('hackathon.Cancelinvitation');
+    Route::post('hackathon/retryInvitation', 'HackathonController@retryInvitation')->name('hackathon.retryInvitation');
     Route::patch('hackathon/acceptInvitation/{id}', 'HackathonController@acceptInvitation')->name('hackathon.acceptInvitation');
     Route::patch('hackathon/rejectInvitation/{id}', 'HackathonController@rejectInvitation')->name('hackathon.rejectInvitation');
     Route::post('hackathon/getOutTeam', 'HackathonController@getOutTeam')->name('hackathon.getOutTeam');
@@ -196,6 +205,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
+    Route::get('hackathon/sharedFile/{id}/download', 'SharedFileController@download')->name('hackathon.downloadSharedFile');
     Route::post('hackathon/AddtodoList', 'TodoListController@store')->name('hackathon.AddtodoList');
     Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
     Route::post('hackathon/EdittodoListStatus', 'TodoListController@changeTodoStatus')->name('hackathon.EdittodoListStatus');
@@ -403,8 +413,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
         Route::post('DeleteFile_Upload', 'InvitationController@deleteFile')->name('invitations.DeleteAttachment');
     });
 
-    // lowercase alias for backward-compatibility / ease of testing
-    Route::get('/confirm-email/{token}', 'ClientProfileController@confirmEmailUpdate')->name('user.profile_email_confirm');
+    // Pending email-change management (requires the session; the confirm link itself is public)
+    Route::post('/myProfile/email/resend', 'ClientProfileController@resendEmailConfirmation')->name('user.profile_email_resend');
+    Route::post('/myProfile/email/cancel', 'ClientProfileController@cancelEmailUpdate')->name('user.profile_email_cancel');
 
     Route::group(['prefix' => '2fa'], function () {
         Route::get('/', 'ClientProfileController@show2faForm');
@@ -452,6 +463,30 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //Client's company
     Route::resource('organizations', 'organizationsController');
+
+    // Custom Landing Pages list
+    Route::get('/landing-pages', 'LandingPagesController@index')->name('landing-pages.index');
+    Route::get('/landing-pages/create', 'LandingPagesController@create')->name('landing-pages.create');
+
+    // Custom landing page URL configuration (availability check + save).
+    // {id} is optional on the check route (must be the trailing segment
+    // for Laravel to omit it cleanly) since the create screen checks slug
+    // availability before any page exists yet.
+    Route::post('/landing-pages/url/check/{id?}', 'LandingPagesController@checkCustomUrl')->name('landing-pages.url.check');
+    Route::post('/landing-pages/{id}/url/save', 'LandingPagesController@saveCustomUrl')->name('landing-pages.url.save');
+
+    Route::get('/landing-pages/{id}/edit', 'LandingPagesController@edit')->name('landing-pages.edit');
+    Route::delete('/landing-pages/{id}', 'LandingPagesController@destroy')->name('landing-pages.destroy');
+
+    Route::put('/landing-pages/{id}/about', 'LandingPagesController@updateAbout')->name('landing-pages.about.update');
+    Route::put('/landing-pages', 'LandingPagesController@store')->name('landing-pages.store');
+    Route::put('/landing-pages/{id}/general', 'LandingPagesController@updateGeneral')->name('landing-pages.general.update');
+    Route::put('/landing-pages/{id}/hero', 'LandingPagesController@updateHero')->name('landing-pages.hero.update');
+    Route::put('/landing-pages/{id}/programs', 'LandingPagesController@updatePrograms')->name('landing-pages.programs.update');
+    Route::put('/landing-pages/{id}/how', 'LandingPagesController@updateHow')->name('landing-pages.how.update');
+    Route::put('/landing-pages/{id}/custom-sections', 'LandingPagesController@updateCustomSections')->name('landing-pages.custom-sections.update');
+    Route::post('/landing-pages/{id}/custom-sections/upload-image', 'LandingPagesController@uploadCustomSectionImage')->name('landing-pages.custom-sections.upload-image');
+
 
     //Assessment
     Route::resource('questions', 'QuestionController');
@@ -1075,6 +1110,11 @@ Route::get('/auth/linkedin-openid/callback', 'SocialController@handleLinkedInCal
 // Public Organization Landing Page
 Route::get('/o/{slug}', 'PublicLandingController@show')->name('organization.landing.public');
 Route::post('/o/{slug}/contact', 'PublicLandingController@submitContact')->name('organization.contact.submit');
+
+
+// Public Custom Landing Page
+Route::get('/lp/{slug}', 'LandingPagesController@show')->name('landing-pages.public');
+
 
 Route::get('/{org_slug}/join/{step_slug}', 'ExternalCyclesController@publicJoin')->name('public.join');
 Route::get('/{org_slug}/program/{program_slug}', 'ExternalCyclesController@publicProgramJoin')->name('public.program_join');

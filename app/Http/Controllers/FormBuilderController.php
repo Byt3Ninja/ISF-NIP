@@ -182,6 +182,17 @@ class FormBuilderController extends Controller
                             'step' => $options->step ?? '',
                         ]
                         : null,
+                    // Re-hydrate the linear scale endpoints/labels so the
+                    // builder repopulates them on edit (the JS reads
+                    // scale.from/to/label_low/label_high).
+                    'scale' => $type === 'linear_scale'
+                        ? [
+                            'from'       => $options->min ?? 1,
+                            'to'         => $options->max ?? 5,
+                            'label_low'  => $options->label_low  ?? '',
+                            'label_high' => $options->label_high ?? '',
+                        ]
+                        : null,
                 ];
             });
 
@@ -206,6 +217,7 @@ class FormBuilderController extends Controller
                                 'logic' => $f['logic'],
                                 'url_config' => $f['url_config'] ?? null,
                                 'number_config' => $f['number_config'] ?? null,
+                                'scale' => $f['scale'] ?? null,
                             ];
                         })->values()->toArray(),
                     ];
@@ -264,11 +276,13 @@ class FormBuilderController extends Controller
                 'section'       => $options['section'] ?? 'بدون قسم',
                 'type'          => $options['type'] ?? null,
                 'is_required'   => (bool)($options['validation']['required'] ?? 0),
-                'options'       => isset($options['values'])
-                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                    : [],
+                'options'       => form_field_options($options['values'] ?? null),
                 'logic'         => $options['logic'] ?? [],
                 'allowed_domains' => $options['allowed_domains'] ?? '',
+                'min'           => $options['min'] ?? null,
+                'max'           => $options['max'] ?? null,
+                'label_low'     => $options['label_low'] ?? '',
+                'label_high'    => $options['label_high'] ?? '',
             ];
         })
         ->groupBy('section')
@@ -289,6 +303,10 @@ class FormBuilderController extends Controller
                         'options'     => $q['options'],
                         'logic'       => $q['logic'],
                         'allowed_domains' => $q['allowed_domains'] ?? '',
+                        'min'         => $q['min'] ?? null,
+                        'max'         => $q['max'] ?? null,
+                        'label_low'   => $q['label_low'] ?? '',
+                        'label_high'  => $q['label_high'] ?? '',
                     ];
                 })->toArray(),
             ];
@@ -507,7 +525,23 @@ class FormBuilderController extends Controller
 
         
         $section_index = 0;
-        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields, &$section_index) {
+
+        // GV-8346: choice options are stored as a comma-joined string. Trim,
+        // drop blanks and de-duplicate before persisting — the builder's
+        // `Add "Other"` button could be clicked repeatedly, and every extra
+        // row was serialized as its own `__OTHER__` entry, so the founder-
+        // facing form rendered one "Other" choice per click. De-duplicating
+        // here also heals questions already saved with duplicates the next
+        // time their form is saved.
+        $normalizeOptions = function ($options) {
+            return collect($options ?? [])
+                ->map(fn($o) => trim((string) $o))
+                ->filter(fn($o) => $o !== '')
+                ->unique()
+                ->implode(',');
+        };
+
+        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields, &$section_index, $normalizeOptions) {
             
             if (($item['type'] ?? null) === 'question') {
                 $section_title = null; 
@@ -527,7 +561,7 @@ class FormBuilderController extends Controller
                 return []; 
             }
 
-            return collect($questions)->map(function ($question) use ($fields, $section_title, $description) {
+            return collect($questions)->map(function ($question) use ($fields, $section_title, $description, $normalizeOptions) {
                 $field_type = $question['question_type'] ?? 'short_answer';
 
                 switch ($field_type) {
@@ -543,31 +577,44 @@ class FormBuilderController extends Controller
 
                     case 'multiple_choice':
                         $field_id = $fields['select'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'multiple_choice', 'values' => $values];
+                        $additional_config = ['type' => 'multiple_choice', 'values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'checkboxes':
                         $field_id = $fields['radio'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'checkboxes','values' => $values];
+                        $additional_config = ['type' => 'checkboxes','values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'dropdown':
                         $field_id = $fields['select'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'dropdown','values' => $values];
+                        $additional_config = ['type' => 'dropdown','values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'linear_scale':
                         $field_id = $fields['input'] ?? 0;
-                        $min = $question['min'] ?? 1;
-                        $max = $question['max'] ?? 5;
+                        // GV-8349: the builder JS nests these under `scale`
+                        // (see extractQuestionData). Reading $question['min']
+                        // never matched, so every scale silently persisted as
+                        // the 1-5 default and the authored endpoint labels
+                        // were dropped entirely.
+                        $scaleConfig = $question['scale'] ?? [];
+                        $min = $scaleConfig['from'] ?? 1;
+                        $max = $scaleConfig['to'] ?? 5;
+                        $min = is_numeric($min) ? (int) $min : 1;
+                        $max = is_numeric($max) ? (int) $max : 5;
+                        // An inverted or zero-width range would render no
+                        // choices at all; fall back to the 1-5 default.
+                        if ($max <= $min) {
+                            $min = 1;
+                            $max = 5;
+                        }
                         $additional_config = [
                             'type' => 'linear_scale',
                             'min' => $min,
                             'max' => $max,
-                            'step' => 1
+                            'step' => 1,
+                            'label_low' => $scaleConfig['label_low'] ?? '',
+                            'label_high' => $scaleConfig['label_high'] ?? '',
                         ];
                         break;
 

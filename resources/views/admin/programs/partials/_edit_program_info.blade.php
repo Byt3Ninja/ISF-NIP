@@ -54,6 +54,27 @@
         name="title" 
         placeholder="{{ __('cycles.Cycle title') }}"
         oninput="this.value = this.value.trimStart()" 
+        value="{{ isset($ccycle) ? $ccycle->title : '' }}"
+      />
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+
+  <!-- Program Title (Arabic) -->
+  <div class="col-md-6">
+    <div class="form-group mb-4">
+      <label for="title_ar" class="form-label fs-6 fw-semibold">
+        {{ $l == 'en' ? 'Program Title in Arabic' : 'عنوان البرنامج باللغة العربية' }}
+      </label>
+      <input 
+        type="text" 
+        class="form-control" 
+        id="title_ar" 
+        name="title_ar" 
+        placeholder="{{ $l == 'en' ? 'Program Title in Arabic' : 'عنوان البرنامج باللغة العربية' }}"
+        oninput="this.value = this.value.trimStart()" 
+        value="{{ isset($ccycle) ? $ccycle->title_ar : '' }}"
+        maxlength="50"
       />
       <div class="invalid-feedback"></div>
     </div>
@@ -187,7 +208,25 @@
         name="description" 
         placeholder="{{ __('cycles.Description') }}"
         oninput="this.value = this.value.trimStart()" 
-        rows="3"></textarea>
+        rows="3">{{ isset($ccycle) ? $ccycle->description : '' }}</textarea>
+      <div class="invalid-feedback"></div>
+    </div>
+  </div>
+
+  <!-- Description (Arabic) -->
+  <div class="col-12">
+    <div class="form-group mb-4">
+      <label for="description_ar" class="form-label fs-6 fw-semibold">
+        {{ $l == 'en' ? 'Description in Arabic' : 'وصف البرنامج باللغة العربية' }}
+      </label>
+      <textarea 
+        class="form-control" 
+        id="description_ar" 
+        name="description_ar" 
+        placeholder="{{ $l == 'en' ? 'Description in Arabic' : 'وصف البرنامج باللغة العربية' }}"
+        oninput="this.value = this.value.trimStart()" 
+        maxlength="250"
+        rows="3">{{ isset($ccycle) ? $ccycle->description_ar : '' }}</textarea>
       <div class="invalid-feedback"></div>
     </div>
   </div>
@@ -293,6 +332,18 @@ $(document).ready(function() {
       isValid = false;
     }
 
+    // Validate title_ar
+    const title_ar = $('#title_ar');
+    if (!title_ar.val().trim()) {
+      title_ar.addClass('is-invalid');
+      title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Program Title in Arabic is required." : "عنوان البرنامج باللغة العربية مطلوب." }}');
+      isValid = false;
+    } else if (title_ar.val().length > 50) {
+      title_ar.addClass('is-invalid');
+      title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed 50 characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز 50 حرف." }}');
+      isValid = false;
+    }
+
     // Validate date range
     const dateRange = $('#date-range-picker');
     if (!dateRange.val()) {
@@ -331,6 +382,18 @@ $(document).ready(function() {
     } else if (description.val().length > 1000) {
       description.addClass('is-invalid');
       description.next('.invalid-feedback').text('{{ $l == "en" ? "Description cannot exceed 1000 characters" : "الوصف لا يمكن أن يتجاوز 1000 حرف" }}');
+      isValid = false;
+    }
+
+    // Validate description_ar
+    const description_ar = $('#description_ar');
+    if (!description_ar.val().trim()) {
+      description_ar.addClass('is-invalid');
+      description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic is required." : "وصف البرنامج باللغة العربية مطلوب." }}');
+      isValid = false;
+    } else if (description_ar.val().length > 250) {
+      description_ar.addClass('is-invalid');
+      description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic cannot exceed 250 characters." : "الوصف باللغة العربية لا يمكن أن يتجاوز 250 حرف." }}');
       isValid = false;
     }
 
@@ -396,6 +459,18 @@ $(document).ready(function() {
     }
   });
 
+  $('#title_ar').on('input', function() {
+    const value = $(this).val().trim();
+    $(this).removeClass('is-invalid');
+    
+    if (value.length > 50) {
+      $(this).addClass('is-invalid');
+      $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed 50 characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز 50 حرف." }}');
+    } else {
+      $(this).next('.invalid-feedback').text('');
+    }
+  });
+
   $('#description').on('input', function() {
     const value = $(this).val().trim();
     $(this).removeClass('is-invalid');
@@ -406,6 +481,18 @@ $(document).ready(function() {
     } else if (value.length > 1000) {
       $(this).addClass('is-invalid');
       $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Description cannot exceed 1000 characters" : "الوصف لا يمكن أن يتجاوز 1000 حرف" }}');
+    } else {
+      $(this).next('.invalid-feedback').text('');
+    }
+  });
+
+  $('#description_ar').on('input', function() {
+    const value = $(this).val().trim();
+    $(this).removeClass('is-invalid');
+    
+    if (value.length > 250) {
+      $(this).addClass('is-invalid');
+      $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic cannot exceed 250 characters." : "الوصف باللغة العربية لا يمكن أن يتجاوز 250 حرف." }}');
     } else {
       $(this).next('.invalid-feedback').text('');
     }

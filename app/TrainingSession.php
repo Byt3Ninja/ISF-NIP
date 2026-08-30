@@ -20,6 +20,27 @@ class TrainingSession extends Model
     protected $casts = ['datetime' => 'date:Y-m-d H:i',];
 
 
+    /**
+     * Training session times are written by `addsession()` as raw unix
+     * timestamps, even though the columns are declared `dateTime`. Callers that
+     * need to compare them against the clock must go through this, which
+     * returns a plain wall-clock string ("Y-m-d H:i:s") the shared
+     * MeetingWindowService can parse. Non-numeric legacy values pass through
+     * untouched (GV-8301).
+     */
+    public static function wallClock($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            return date('Y-m-d H:i:s', (int) $value);
+        }
+
+        return (string) $value;
+    }
+
     // ==========> Attributes <============
     // public function getStartFormatAttribute()
     // {

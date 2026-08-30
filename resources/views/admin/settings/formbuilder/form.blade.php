@@ -18,6 +18,10 @@
       'date' => ['icon' => 'ti ti-calendar-event', 'label' => __('builder.Date')],
       'time' => ['icon' => 'ti ti-clock-hour-4', 'label' => __('builder.Time')],
       'file' => ['icon' => 'ti ti-paperclip', 'label' => __('builder.File_upload')],
+      'url' => ['icon' => 'ti ti-link', 'label' => __('builder.URL')],
+      'link' => ['icon' => 'ti ti-link', 'label' => __('builder.Link')],
+      'number' => ['icon' => 'ti ti-numbers', 'label' => __('builder.Number')],
+      'email' => ['icon' => 'ti ti-mail', 'label' => __('builder.Email')],
   ];
 @endphp
 
@@ -149,7 +153,7 @@
                                         </label>
                                       @endif
                                       <div class="text-muted small">
-                                        {{ $question['is_required'] ? 'Required field' : 'Optional field' }}
+                                        {{ $question['is_required'] ? __('admin.Required field') : __('admin.Optional field') }}
                                       </div>
                                     </div>
                                   </div>
@@ -191,7 +195,7 @@
                                       name="{{ $fieldName }}"
                                       rows="4"
                                       class="form-control @error($fieldName) is-invalid @enderror"
-                                      placeholder="{{ $question['label'] }}"
+                                      placeholder="{{ form_field_placeholder($question) }}"
                                       data-qtype="paragraph"
                                       {{ $question['is_required'] ? 'required' : '' }}
                                     >{{ old($fieldName) }}</textarea>
@@ -244,28 +248,44 @@
                                     @break
 
                                   @case('linear_scale')
-                                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
-                                      <select
-                                        id="{{ $fieldId }}"
-                                        name="{{ $fieldName }}"
-                                        class="form-select w-px-250 @error($fieldName) is-invalid @enderror"
-                                        {{ $question['is_required'] ? 'required' : '' }}
-                                      >
-                                        <option value="">Select a rating</option>
-                                        @for($i = 1; $i <= 5; $i++)
-                                          <option value="{{ $i }}" {{ old($fieldName) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                        @endfor
-                                      </select>
-                                      <div class="d-flex align-items-center gap-2 flex-wrap">
-                                        @for($i = 1; $i <= 5; $i++)
-                                          <span class="badge bg-label-primary rounded-pill px-3 py-2">{{ $i }}</span>
-                                        @endfor
-                                      </div>
+                                    @php
+                                      // GV-8349: render the scale itself, matching the
+                                      // founder-facing form. See the note in
+                                      // admin/settings/cycles/form.blade.php.
+                                      $scaleMin = is_numeric($question['min'] ?? null) ? (int) $question['min'] : 1;
+                                      $scaleMax = is_numeric($question['max'] ?? null) ? (int) $question['max'] : 5;
+                                      if ($scaleMax <= $scaleMin) {
+                                          $scaleMin = 1;
+                                          $scaleMax = 5;
+                                      }
+                                      $scaleLow = trim((string) ($question['label_low'] ?? ''));
+                                      $scaleHigh = trim((string) ($question['label_high'] ?? ''));
+                                      $scaleValue = old($fieldName);
+                                    @endphp
+                                    <div class="linear-scale-group d-flex align-items-center flex-wrap gap-2">
+                                      @if($scaleLow !== '')
+                                        <span class="text-muted small me-1">{{ $scaleLow }}</span>
+                                      @endif
+                                      @for($i = $scaleMin; $i <= $scaleMax; $i++)
+                                        <input
+                                          type="radio"
+                                          class="btn-check"
+                                          name="{{ $fieldName }}"
+                                          id="{{ $fieldId }}_{{ $i }}"
+                                          value="{{ $i }}"
+                                          autocomplete="off"
+                                          {{ (string) $scaleValue === (string) $i ? 'checked' : '' }}
+                                          {{ ($question['is_required'] && $i === $scaleMin) ? 'required' : '' }}
+                                        />
+                                        <label class="btn btn-outline-primary rounded-pill px-3" for="{{ $fieldId }}_{{ $i }}">{{ $i }}</label>
+                                      @endfor
+                                      @if($scaleHigh !== '')
+                                        <span class="text-muted small ms-1">{{ $scaleHigh }}</span>
+                                      @endif
                                     </div>
-                                    <div class="d-flex justify-content-between text-muted small mt-2">
-                                      <span>Low</span>
-                                      <span>High</span>
-                                    </div>
+                                    @error($fieldName)
+                                      <div class="text-danger small mt-2">{{ $message }}</div>
+                                    @enderror
                                     @break
 
                                   @case('date')
@@ -279,7 +299,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="date"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -297,7 +317,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="time"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -333,7 +353,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="number"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -351,7 +371,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="email"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -369,7 +389,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="url"
                                         data-allowed-domains="{{ $question['allowed_domains'] ?? '' }}"
                                         {{ $question['is_required'] ? 'required' : '' }}
@@ -389,7 +409,7 @@
                                         id="{{ $fieldId }}"
                                         name="{{ $fieldName }}"
                                         value="{{ old($fieldName) }}"
-                                        placeholder="{{ $question['label'] }}"
+                                        placeholder="{{ form_field_placeholder($question) }}"
                                         data-qtype="short_answer"
                                         {{ $question['is_required'] ? 'required' : '' }}
                                       />
@@ -444,9 +464,6 @@
                      <div class="d-flex flex-column flex-sm-row gap-2">
                        <button type="button" class="btn btn-outline-secondary btn-prev-submit btn-lg">
                          <i class="ti ti-arrow-left me-2"></i>{{ $l == 'en' ? 'Back' : 'السابق' }}
-                       </button>
-                       <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-form">
-                         <i class="ti ti-send me-2"></i>{{ __('builder.Submit_Form') }}
                        </button>
                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="location.href='/dashboard/show-builder/{{ $id }}'">
                          <i class="ti ti-edit me-2"></i>{{ __('builder.Edit_Form') }}
@@ -735,6 +752,17 @@
     const prevBtns = document.querySelectorAll(".btn-prev");
     const sectionHistory = [0];
 
+    // A stored target is only meaningful if it is "submit" or "section-<n>".
+    // Older saves wrote an empty string when the builder lost a target
+    // (GV-8351), and anything unrecognised must fall through to "continue"
+    // rather than be treated as a jump.
+    function normalizeLogic(value) {
+      const logic = (value || "").trim();
+      if (logic === "submit") return "submit";
+      if (/^section-\d+$/.test(logic)) return logic;
+      return "continue";
+    }
+
     function getNextLogic(section) {
       let logic = "continue";
       const inputs = section.querySelectorAll(".question-logic");
@@ -743,11 +771,11 @@
         let questionLogic = "continue";
         if (input.tagName === "SELECT") {
           const selectedOption = input.options[input.selectedIndex];
-          questionLogic = selectedOption ? (selectedOption.dataset.logic || "continue") : "continue";
+          questionLogic = selectedOption ? normalizeLogic(selectedOption.dataset.logic) : "continue";
         } else if (input.type === "radio" && input.checked) {
-          questionLogic = input.dataset.logic || "continue";
+          questionLogic = normalizeLogic(input.dataset.logic);
         } else if (input.type === "checkbox" && input.checked) {
-          const jumpLogic = input.dataset.logic || "continue";
+          const jumpLogic = normalizeLogic(input.dataset.logic);
           if (jumpLogic !== "continue") questionLogic = jumpLogic;
         }
         if (questionLogic !== "continue") {
@@ -756,7 +784,7 @@
       });
 
       if (logic === "continue") {
-        logic = section.dataset.sectionLogic || "continue";
+        logic = normalizeLogic(section.dataset.sectionLogic);
       }
 
       return logic;
@@ -773,11 +801,11 @@
       if (nextBtn.dataset.action === "submitting") return;
 
       if (logic === "submit") {
-        if (textSpan) textSpan.textContent = "Submit";
+        if (textSpan) textSpan.textContent = "{{ $l == 'en' ? 'Submit' : 'إرسال' }}";
         if (iconSpan) iconSpan.className = "ti ti-send ms-2 btn-next-icon";
         nextBtn.dataset.action = "submit";
       } else {
-        if (textSpan) textSpan.textContent = "Next";
+        if (textSpan) textSpan.textContent = "{{ $l == 'en' ? 'Next' : 'التالي' }}";
         if (iconSpan) iconSpan.className = "ti ti-arrow-right ms-2 btn-next-icon";
         nextBtn.dataset.action = "next";
       }

@@ -19,7 +19,7 @@
       enctype="multipart/form-data"
     >
       {!! csrf_field() !!}
-      <input type="hidden" value="4" name="CompanyN">
+      <input type="hidden" value="{{ \App\Enums\CompanyFormStep::FinancialInfo->value }}" name="CompanyN">
 
       {{-- Financial Overview --}}
       <div class="mb-4">
@@ -139,8 +139,11 @@
 
           <div class="col-md-6 mb-3">
             <label for="stage" class="form-label fw-medium">{{ __('admin.development_stage') }}</label>
+            @php
+              $hasSelectedStage = !empty($client->company) && $Stages->contains('id', $client->company->stage);
+            @endphp
             <select class="form-select select2" required id="stage" name="stage">
-              <option value="" disabled>{{ __('admin.development_stage') }}</option>
+              <option value="" disabled {{ !$hasSelectedStage ? 'selected' : '' }}>{{ __('admin.development_stage') }}</option>
               @foreach ($Stages as $Stage)
               <option value="{{ $Stage->id }}"
                 {{ !empty($client->company) && $client->company->stage == $Stage->id ? 'selected' : '' }}>
@@ -242,7 +245,7 @@
           @if(optional($client->company)->financial_plan != null)
           <div class="col-12 mb-3">
             <a
-              href="{{ URL::to( $client->company->financial_plan ) }}"
+              href="{{ app(\App\Services\FileManagerService::class)->getUrl( $client->company->financial_plan,  'pitch_deck') }}"
               target="_blank"
               download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">

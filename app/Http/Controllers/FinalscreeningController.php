@@ -304,8 +304,13 @@ class FinalscreeningController extends Controller
 						'checked' => false,
 						'date' => $item->session_date,
 						'meeting_link' => $item->meeting_link,
+						// GV-8365: without this the passcode field rendered empty on
+						// every reload, so a saved meeting looked like it had lost its
+						// passcode. The value was never actually cleared in the DB.
+						'meeting_password' => $item->meeting_password,
 						'start_time' => $item->start_time,
 						'end_time' => $item->end_time,
+						'interval' => $item->interval,
 					];
 					$session['checked'] = !is_null($item->session_date) && !is_null($item->meeting_link);
 					return ['companies' => $users, 'session' => $session];
@@ -340,8 +345,14 @@ class FinalscreeningController extends Controller
 						'checked' => $panelData['session']['checked'] ?? false,
 						'date' => $panelData['session']['date'] ?? null,
 						'meeting_link' => $panelData['session']['meeting_link'] ?? null,
+						// GV-8365: carry the saved passcode through to the view.
+						'meeting_password' => $panelData['session']['meeting_password'] ?? null,
 						'start_time' => $panelData['session']['start_time'] ?? null,
-						'end_time' => $panelData['session']['end_time'] ?? null
+						'end_time' => $panelData['session']['end_time'] ?? null,
+						// Interval mode must survive a reload: without these the
+						// blade always rendered the switch OFF (GV-3295).
+						'interval' => $panelData['session']['interval'] ?? null,
+						'interval_checked' => !empty($panelData['session']['interval']),
 					]
 				];
 				$judgingPanels[] = $panelEntry;

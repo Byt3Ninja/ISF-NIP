@@ -25,6 +25,19 @@ class Permissions
         'organizations.logo',
         'organization.landing.asset',
         'organization.landing.public',
+        'landing-pages.public',
+        'landing-pages.about.update',
+        'landing-pages.how.update',
+        'landing-pages.contact.update',
+        'landing-pages.general.update',
+        'landing-pages.hero.update',
+        'landing-pages.store',
+        'landing-pages.programs.update',
+        'landing-pages.custom-sections.update',
+        'landing-pages.custom-sections.upload-image',
+        'landing-pages.url.check',
+        'landing-pages.url.save',
+        'invite_mentor.attachment',
         'organization.wizard.store',
         'organization.wizard.update.step1',
         'organization.wizard.update.step2',
@@ -70,6 +83,8 @@ class Permissions
         'screening.update_step_form',
         'services_providers.edit_profile',
         'services_providers.clients.*',
+        'user.profile_email_resend',
+        'user.profile_email_cancel',
     ];
 
     public $exceptControllers = [

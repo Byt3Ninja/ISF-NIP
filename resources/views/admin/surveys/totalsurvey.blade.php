@@ -153,14 +153,14 @@
 @stop
 
 @section('scripts')
-<script type="text/javascript">
+	<script type="text/javascript">
 		$(document).ready(function() {
 			$('[data-toggle="tooltip"]').tooltip()
 
 			var table = $('.table').DataTable({
 				responsive: true,
-        pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
+				pageLength: 10,
+				lengthMenu: [10, 25, 50, 100],
 				dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
 				'buttons': [
 					{
@@ -203,7 +203,7 @@
 						'sSortAscending': ": تفعيل لترتيب العمود تصاعدياً",
 						'sSortDescending': ": تفعيل ترتيب العمود تنازلياً"
 					}
-				}
+				},
 				@endif
 				initComplete: function() {
 					var table = this.api();
@@ -364,5 +364,5 @@
 				}
 			})
 		});
-</script>
+	</script>
 @stop

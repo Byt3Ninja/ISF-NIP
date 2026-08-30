@@ -193,8 +193,17 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
               @if($assessment != null)
               @foreach ($assessment['subcategories'] as $key => $subcategory)
               <div class="row" style="display: {{ $key == 0 ? 'block' : 'none' }};" id="questionsContainer">
+                @if ($subcategory['questions']->isEmpty())
+                <div class="col-12">
+                  <div class="card shadow-sm">
+                    <div class="card-body text-center text-secondary">
+                      {{ __('admin.No_Questions_Available') }}
+                    </div>
+                  </div>
+                </div>
+                @else
                 @foreach ($subcategory['questions'] as $key => $question)
-                
+
                 <div class="col-12 question-card-bus-con mb-3 " data-category="question-{{ $key }}" >
                   <div class="card shadow-sm">
                     <div class="card-body">
@@ -235,6 +244,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                   </div>
                 </div>
                 @endforeach
+                @endif
               </div>
               @endforeach
               @endif
@@ -247,7 +257,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
             @foreach ($assessment['subcategories'] as $key => $subcategory)
             <div id="submitContainer" style="{{ $key == 0 ? 'display: flex;' : 'display: none;' }}">
               <div class="w-100 d-flex justify-content-end">
-                <button id="submitButton" class="btn btn-primary">{{ __('admin.Next') }}</button>
+                <button id="submitButton" class="btn btn-primary" {{ $subcategory['questions']->isEmpty() ? 'disabled' : '' }}>{{ __('admin.Next') }}</button>
               </div>
             </div>
             @endforeach
@@ -611,6 +621,9 @@ $('.AnswerQuestion').click(function() {
 
   submitContainers.forEach((submitContainer, i) => {
     submitContainer.addEventListener('click', () => {
+      const button = submitContainer.querySelector('#submitButton');
+      if (button && button.disabled) return;
+
       const activeCategoryTabs = document.querySelectorAll('#assessmentContent:not([style*="display: none"]) #category-tab');
       const activeIndex = Array.from(activeCategoryTabs).findIndex(tab => tab.style.border === '1px solid black');
       const nextIndex = (activeIndex + 1) % activeCategoryTabs.length;

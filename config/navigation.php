@@ -209,6 +209,7 @@ return function () {
         ['title' => 'logs_viewer', 'route' => 'audit-logs.index', 'menuOnly' => true],
         ['title' => 'reminder_logs', 'route' => 'organization.ReminderLogs', 'menuOnly' => true],
         ['title' => 'documentations', 'route' => 'documentation.index', 'menuOnly' => true],
+        ['title' => 'custom_landing_pages', 'route' => 'landing-pages.index', 'menuOnly' => true],
         ['title' => 'create_documentation', 'route' => 'documentation.create', 'group' => 'documentation', 'menuOnly' => false],
         ['title' => 'edit_documentation', 'route' => 'documentation.edit', 'group' => 'documentation', 'menuOnly' => false],
 

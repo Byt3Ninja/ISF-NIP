@@ -847,16 +847,24 @@ class MentorsController extends Controller
 				// $this->notifyFounderOfReservedSession($createMentorshipRequest);
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
-					// 
-					$numberOfParties = $parties->count();
+
+					// MentorshipSessionRequestNotification is ShouldQueue, so notify()
+					// only writes a queue row here -- the old sleep(2) between chunks
+					// throttled nothing and simply held the founder's request open for
+					// two seconds per pair of recipients. Keep the same send pacing by
+					// staggering delivery on the queue instead of blocking the response.
 					$allowedPerSecond = 2;
-					$chunks = $parties->chunk( $allowedPerSecond );
-					foreach ($chunks as $chunkParties) {
-						foreach( $chunkParties as $party )
-						{
-							$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
+					$secondsBetweenChunks = 2;
+
+					foreach ($parties->chunk($allowedPerSecond) as $chunkIndex => $chunkParties) {
+						$sendAt = now()->addSeconds($chunkIndex * $secondsBetweenChunks);
+
+						foreach ($chunkParties as $party) {
+							$party->notify(
+								(new MentorshipSessionRequestNotification($startupName, $requestedMentor, $dateTimePayload, $requestNotes))
+									->delay($sendAt)
+							);
 						}
-						sleep(2);
 					}
 				}
 
@@ -1547,7 +1555,8 @@ class MentorsController extends Controller
 			$_sesssion->zoom_date = $session->zoom_date;
 			$_sesssion->period = $session->period;
 			if ($session->zoom_date) {
-				$_sesssion->status = $session->zoom_date > now() ? 'Upcoming' : ($session->zoom_date->addMinutes($session->period) < now() ? 'Completed' : 'In-progress');
+				$meetingStatus = mentorshipMeetingStatus($session->zoom_date, $session->period);
+				$_sesssion->status = $meetingStatus === 'before' ? 'Upcoming' : ($meetingStatus === 'expired' ? 'Completed' : 'In-progress');
 				$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' -30 minutes'));
 				$_sesssion->end_time   = date('Y-m-d H:i', strtotime($session->zoom_date . ' +' . $session->period . ' minutes'));
 			} else {

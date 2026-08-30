@@ -27,6 +27,11 @@ return [
     'start from' => 'start from',
     'to' => 'to',
     'Meeting' => 'Meeting',
+    'Founder' => 'Founder',
+    'Passcode' => 'Passcode',
+    'Evaluation Session' => 'Evaluation Session',
+    'Program' => 'Program',
+    'Step' => 'Step',
     'Actions' => 'Actions',
     'Not added yet' => 'Not added yet',
     'Not started' => 'Not started',
@@ -121,7 +126,7 @@ return [
     'Time from' => 'Time from',
     'Add a Note' => 'Add a Note',
     'sure del schedule' => 'Are you sure, deleting this schedule?',
-    'IncubationList' => 'Programs :: List',
+    'IncubationList' => 'Programs List',
     'Join' => 'Join now',
   	'Join Now' => 'Join Now',
   	'Sorry your submitted data doesn\'t meet the Program requirements' => 'Sorry your submitted data doesn\'t meet the Program requirements',
@@ -233,6 +238,7 @@ return [
     'sp_request_rejected' => 'You rejected a request for :service',
     'sp_service_created' => 'Service ":name" was created',
     'sp_service_updated' => 'Service ":name" was updated',
+    'sp_show_request_details' => 'Show Request Details',
     'sp_service_status_changed' => 'Service ":name" status changed',
 
     // Service Provider Approval Status Banner

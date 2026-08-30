@@ -41,18 +41,25 @@
           <ul class="nav nav-pills">
             @foreach ($pills as $key => $pill)
               <li class="nav-item me-1 mb-3 w-100">
-                <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
-                   class="nav-link {{ $key == 0 ? 'active' : '' }}">
-                  <span>
-                    @if ($pill == 'analysis-assessment')
-                      {{ __('admin.Analysis_Assessment') }}
-                    @elseif($pill == 'question-assessment')
-                      {{ __('admin.Question_assessment') }}
-                    @else
-                      {{ __('admin.History') }}
-                    @endif
+                @if ($pill == 'question-assessment' && !$assessment_user)
+                  <span class="nav-link" style="cursor: not-allowed; opacity: 0.5;"
+                        title="{{ __('admin.No_Questions_Available') }}">
+                    <span>{{ __('admin.Question_assessment') }}</span>
                   </span>
-                </a>
+                @else
+                  <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
+                     class="nav-link {{ $key == 0 ? 'active' : '' }}">
+                    <span>
+                      @if ($pill == 'analysis-assessment')
+                        {{ __('admin.Analysis_Assessment') }}
+                      @elseif($pill == 'question-assessment')
+                        {{ __('admin.Question_assessment') }}
+                      @else
+                        {{ __('admin.History') }}
+                      @endif
+                    </span>
+                  </a>
+                @endif
               </li>
             @endforeach
           </ul>
@@ -66,18 +73,25 @@
             <ul class="nav nav-pills flex-nowrap px-5 py-4">
               @foreach ($pills as $key => $pill)
                 <li class="nav-item me-1">
-                  <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
-                     class="nav-link {{ $key == 0 ? 'active' : '' }}">
-                    <span class="fs-6">
-                      @if ($pill == 'analysis-assessment')
-                        {{ __('admin.Analysis_Assessment') }}
-                      @elseif($pill == 'question-assessment')
-                        {{ __('admin.Question_assessment') }}
-                      @else
-                        {{ __('admin.History') }}
-                      @endif
+                  @if ($pill == 'question-assessment' && !$assessment_user)
+                    <span class="nav-link" style="cursor: not-allowed; opacity: 0.5;"
+                          title="{{ __('admin.No_Questions_Available') }}">
+                      <span class="fs-6">{{ __('admin.Question_assessment') }}</span>
                     </span>
-                  </a>
+                  @else
+                    <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
+                       class="nav-link {{ $key == 0 ? 'active' : '' }}">
+                      <span class="fs-6">
+                        @if ($pill == 'analysis-assessment')
+                          {{ __('admin.Analysis_Assessment') }}
+                        @elseif($pill == 'question-assessment')
+                          {{ __('admin.Question_assessment') }}
+                        @else
+                          {{ __('admin.History') }}
+                        @endif
+                      </span>
+                    </a>
+                  @endif
                 </li>
               @endforeach
             </ul>

@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('style')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/extensions/dragula.min.css">
 <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css">
 {{-- <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css"> --}}
@@ -78,10 +79,10 @@
         <div class="card p-4 p-md-8">
             <form id="modify-app-form" action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="tab_id" value="1">
+                <input type="hidden" name="tab_id" value="{{ \App\Enums\CycleTabAction::CREATE_CYCLE }}">
                 <input type="hidden" name="id" id="cycleid" value="{{ $id }}">
-                <input type="hidden" name="typeedit" id="type" value="1">
-                <input type="hidden" name="type" id="type" value="1">
+                <input type="hidden" name="typeedit" id="type" value="{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}">
+                <input type="hidden" name="type" id="type" value="{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}">
                 <input type="hidden" name="organization_id" value="{{ $ccycle->organization_id ?? 0 }}">
 
                 <!-- Tabs (mobile) -->
@@ -370,6 +371,7 @@
     <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
     <!-- Summernote JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
+    <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 @stop
 
 @section('pagescripts')
@@ -526,7 +528,9 @@
                         $('#start').val(response.start ?? '');
                         $('#end').val(response.end ?? '');
                         $('#title').val(response.title ?? '');
+                        $('#title_ar').val(response.title_ar ?? '');
                         $('#description').val(response.description ?? '');
+                        $('#description_ar').val(response.description_ar ?? '');
                         $('#cycleid').val(cycleId);
                         $('#type').val(1);
                         $('#organization').val(response.organization_id ?? '').trigger('change');
@@ -687,6 +691,18 @@
                     isValid = false;
                 }
 
+                // Validate title_ar
+                const title_ar = $('#title_ar');
+                if (!title_ar.val().trim()) {
+                    title_ar.addClass('is-invalid');
+                    title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Program Title in Arabic is required." : "عنوان البرنامج باللغة العربية مطلوب." }}');
+                    isValid = false;
+                } else if (title_ar.val().length > 50) {
+                    title_ar.addClass('is-invalid');
+                    title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed 50 characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز 50 حرف." }}');
+                    isValid = false;
+                }
+
                 // Validate date range
                 const dateRange = $('#date-range-picker');
                 if (!dateRange.val()) {
@@ -707,6 +723,18 @@
                     isValid = false;
                 }
 
+                // Validate description_ar
+                const description_ar = $('#description_ar');
+                if (!description_ar.val().trim()) {
+                    description_ar.addClass('is-invalid');
+                    description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic is required." : "وصف البرنامج باللغة العربية مطلوب." }}');
+                    isValid = false;
+                } else if (description_ar.val().length > 250) {
+                    description_ar.addClass('is-invalid');
+                    description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic cannot exceed 250 characters." : "الوصف باللغة العربية لا يمكن أن يتجاوز 250 حرف." }}');
+                    isValid = false;
+                }
+
                 return isValid;
                 },
                 
@@ -716,6 +744,7 @@
                 // Clear previous errors
                 $('.form-control', '#pills-Program_Settings-edit').removeClass('is-invalid');
                 $('.invalid-feedback', '#pills-Program_Settings-edit').text('');
+                $('.start-color-error, .end-color-error, .main-color-error').text('').hide();
                 
                 // Validate public URL when visibility is public
                 const isPublic = $('#is_public').val();
@@ -740,6 +769,30 @@
                 if (reminderEnabled && (!hoursReminder || parseInt(hoursReminder) < 1)) {
                     $('#hours_reminder_input').addClass('is-invalid');
                     $('#hours_reminder_input').siblings('.invalid-feedback').text('{{ $l == "en" ? "Hours reminder must be at least 1 hour" : "تذكير الساعات يجب أن يكون ساعة واحدة على الأقل" }}');
+                    isValid = false;
+                }
+
+                // Validate branding colors
+                const startColor = $('#start_color_input').val();
+                const endColor = $('#end_color_input').val();
+                const mainColor = $('#main_color_input').val();
+                const colorRegex = /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
+                // Start Color
+                if (!startColor || !colorRegex.test(startColor.replace(/^#+/, '#'))) {
+                    $('.start-color-error').text('{{ $l == "en" ? "Please enter a valid start color." : "يرجى إدخال لون صالح." }}').show();
+                    isValid = false;
+                }
+
+                // End Color
+                if (!endColor || !colorRegex.test(endColor.replace(/^#+/, '#'))) {
+                    $('.end-color-error').text('{{ $l == "en" ? "Please enter a valid end color." : "يرجى إدخال لون صالح." }}').show();
+                    isValid = false;
+                }
+
+                // Main Color
+                if (!mainColor || !colorRegex.test(mainColor.replace(/^#+/, '#'))) {
+                    $('.main-color-error').text('{{ $l == "en" ? "Please enter a valid button color." : "يرجى إدخال لون صالح." }}').show();
                     isValid = false;
                 }
                 

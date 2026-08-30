@@ -8,6 +8,7 @@ return [
     'Portal Cycles' => 'برامج النظام',
     'Select cycle from list' => 'أختر برنامج من القائمة',
     'Start' => 'تبدأ',
+    'Started' => 'بدأ',
     'Users' => 'المستخدمين',
     'Edit' => 'تحرير',
     'New' => 'جديد',
@@ -588,6 +589,7 @@ return [
     'No_Mentors_Found' => 'لم يتم العثور على مرشدين',
     'No_Mentors_Enrolled' => 'لا يوجد مرشدين مسجلين في برنامج',
     'No_Mentors_For_Selected_Program' => 'لا يوجد مرشدين متاحين للبرنامج المختار',
+    'Mentorship_Not_Available_Yet' => 'الإرشاد غير متاح حالياً. يمكنك طلب الجلسات عند الوصول إلى مرحلة الإرشاد.',
     'Request_Mentorship' => 'طلب ارشاد',
     'Show_Filters' => 'إظهار الفلاتر',
     'Any_Rating' => 'أي تقييم',
@@ -680,4 +682,11 @@ return [
     'evaluation_subcriterion_name_too_long_named' => 'اسم :subcriterion ضمن :criterion طويل جدًا. يُرجى ألا يتجاوز 255 حرفًا.',
     'evaluation_subcriterion_weight_required_named' => 'يُرجى إدخال وزن لـ :subcriterion ضمن :criterion.',
     'evaluation_subcriterion_weight_range_named' => 'يجب أن يكون وزن :subcriterion ضمن :criterion نسبة مئوية بين 0 و100.',
+
+    'Branding_Colors' => 'ألوان العلامة التجارية',
+    'Gradient_Start_Color' => 'لون بداية التدرج',
+    'Gradient_End_Color' => 'لون نهاية التدرج',
+    'Main_Color' => 'اللون الرئيسي',
+    'Gradient_Preview' => 'معاينة التدرج',
+    'Reset_To_Default' => 'إعادة التعيين إلى الافتراضي',
 ];

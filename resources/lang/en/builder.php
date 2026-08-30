@@ -92,6 +92,7 @@ return [
     'Number' => 'Number',
     'Email' => 'Email',
     'URL' => 'URL',
+    'Link' => 'Link',
     'Number_placeholder' => 'Number placeholder',
     'Min_value' => 'Min value',
     'Min_optional' => 'Min value (optional)',
@@ -125,4 +126,18 @@ return [
     'Discard_Create' => 'Discard & Create New',
     'Unsaved_Changes_New_Form' => 'You have unsaved changes. Creating a new form will discard them.',
     'empty_section_error' => 'An empty section cannot be saved. Please add questions to the section or delete it.',
+    // GV-8348 end-user field hints. Distinct from the *_placeholder keys above,
+    // which label the builder's own config inputs rather than guiding a founder.
+    // Format examples (masks, sample address) are intentionally NOT translated —
+    // they read identically in every locale.
+    'hint_enter' => 'Enter',
+    'hint_email' => 'name@example.com',
+    'hint_url' => 'https://example.com',
+    'hint_date' => 'YYYY-MM-DD',
+    'hint_time' => 'HH:MM',
+    'hint_phone' => 'Enter your phone number',
+    'hint_number' => 'Enter a number',
+    'hint_number_between' => 'Enter a number between',
+    'hint_number_from' => 'Enter a number from',
+    'hint_and' => 'and',
 ];

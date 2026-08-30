@@ -349,6 +349,7 @@ return [
 		'logs_viewer' => 'مراقبة السجلات',
 		'settings' => 'الاعدادات',
 		'reminder_logs' => 'سجلات التذكير',
+		'custom_landing_pages' => 'الصفحات الرئيسية المخصصة',
 		'documentations' => 'الوثائق',
 		'documentation' => 'الوثائق',
 		'create_documentation' => 'وثيقة جديدة',

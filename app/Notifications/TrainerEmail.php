@@ -15,11 +15,19 @@ class TrainerEmail extends Notification
     public $data;
 
     /**
+     * The organization the training belongs to, used for SMTP config and branding.
+     *
+     * @var \App\Organization|null
+     */
+    public $organization;
+
+    /**
      * Create a new notification instance.
      */
-    public function __construct($data)
+    public function __construct($data, $organization = null)
     {
         $this->data = $data;
+        $this->organization = $organization;
     }
 
     /**
@@ -29,7 +37,9 @@ class TrainerEmail extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail','database'];
+        // Only mail: this notification is sent to an on-demand notifiable
+        // (Notification::route('mail', $trainer_email)), which has no database record.
+        return ['mail'];
     }
 
     /**
@@ -37,7 +47,9 @@ class TrainerEmail extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $org = $notifiable->organization;
+        // The trainer is an on-demand notifiable (AnonymousNotifiable) and has no
+        // organization of its own, so it is passed in from the dispatching job.
+        $org = $this->organization;
         $smtpSettings = $org?->organizationSettings;
 
         $this->configureSmtp($smtpSettings);

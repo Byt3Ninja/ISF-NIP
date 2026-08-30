@@ -29,3 +29,5 @@ composer.lock
 .codegpt
 .vscode
 .idea
+# dompdf generated font cache (GV-3340)
+/storage/fonts/

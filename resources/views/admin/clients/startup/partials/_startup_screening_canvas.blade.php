@@ -404,7 +404,7 @@
 
 @push('scripts')
   <script>
-    var categories = @json( $evaluationForm->categories );
+    var categories = @json( $evaluationForm->categories ?? [] );
 
     // Warning icon (shown when the evaluation form isn't ready): explain that
     // the criteria haven't been configured yet, so evaluation can't be done.

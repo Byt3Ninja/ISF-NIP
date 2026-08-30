@@ -72,7 +72,14 @@
         <div>{{ __('admin.Dashboard') }}</div>
       </a>
     </li>
-
+    
+    <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
+      <a href="{{ route('user.profile_view') }}" class="menu-link">
+        <i class="ti ti-user me-3 ti-md"></i>
+        <div>{{ __('admin.Profile') }}</div>
+      </a>
+    </li>
+    
     @if(!$spNotApproved)
      @if($_user->hasRole('Judger'))
       <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
@@ -82,13 +89,6 @@
         </a>
       </li>
     @endif
-
-    {{-- <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
-      <a href="{{ route('user.profile_view') }}" class="menu-link">
-        <i class="ti ti-user me-3 ti-md"></i>
-        <div>{{ __('admin.Profile') }}</div>
-      </a>
-    </li> --}}
     
     @if ($_user->ableTo('slots.index', $permissions))
       <li class="{{ Request::is('*availability') ? 'active' : '' }} menu-item">

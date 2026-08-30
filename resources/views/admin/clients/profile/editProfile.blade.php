@@ -268,6 +268,11 @@
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
 
 <script>
+  $(document).on('click', '.change-email-cta-button', function(e) {
+    e.preventDefault();
+    var get_form = $(this).data('form');
+    $("#" + get_form).submit();
+  });
   window.CONFIG = {
     csrf_token: "{{ csrf_token() }}",
     user: @json(Auth::user()),

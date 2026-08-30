@@ -3,6 +3,10 @@
 @section('title', __('dashboard.sp_dashboard'))
 @section('subTitle', __('dashboard.sp_my_dashboard'))
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/spinkit/spinkit.css" />
+@endsection
+
 @section('content')
   <div class="row mb-4">
     <div class="col-6 d-flex align-items-center gap-2">
@@ -19,7 +23,7 @@
     <div class="col-6 d-flex justify-content-end align-items-center">
       {{-- REFRESH BUTTON --}}
       @if($_user->ableTo('service_provider_dashboard.refresh', $permissions))
-        <button id="btn-refresh" class="btn btn-outline-primary" style="height: fit-content;">
+        <button id="btn-refresh" class="btn btn-outline-primary btn-page-block" style="height: fit-content;">
           <i class="ti ti-refresh me-1"></i> {{ __('dashboard.sp_refresh') }}
         </button>
       @endif
@@ -325,8 +329,8 @@
               </div>
               <div style="width:1px;height:28px;background:rgba(0,0,0,0.08);"></div>
               <div class="text-center">
-                <div class="fw-medium" style="font-size:17px;color:{{ !empty( $topService ) ? $topService['color'] : '#000' }};">
-                  {{ $totalRequests > 0 ? ( round($topService['count'] / $totalRequests * 100) ) : 0 }}%
+                <div class="fw-medium" style="font-size:17px;color:{{ !empty($topService) ? $topService['color'] : '#000' }};">
+                  {{ $totalRequests > 0 ? (round($topService['count'] / $totalRequests * 100)) : 0 }}%
                 </div>
                 <div class="text-muted" style="font-size:11px;">{{ __('dashboard.sp_top_share') }}</div>
               </div>
@@ -399,7 +403,7 @@
                       <th style="width: 40px;"><input type="checkbox" id="select-all" class="form-check-input"></th>
                     @endif
                     <th>{{ __('dashboard.sp_startup_name') }}</th>
-                    <th>{{ __('dashboard.sp_note') }}</th>
+                    <th style="max-width: 250px;">{{ __('dashboard.sp_note') }}</th>
                     <th>{{ __('dashboard.sp_service_name') }}</th>
                     <th>{{ __('dashboard.sp_submitted') }}</th>
                     <th>{{ __('dashboard.sp_status') }}</th>
@@ -443,7 +447,8 @@
 
 @section('scripts')
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-
+  <script src="/vuexy/assets/vendor/libs/block-ui/block-ui.js"></script>
+  <script src="/vuexy/assets/js/extended-ui-blockui.js"></script>
   <script>
     (function () {
       'use strict';
@@ -502,7 +507,9 @@
         rejectTitle: @json(__('dashboard.sp_reject_reason')),
         rejectRequired: @json(__('dashboard.sp_reject_reason_required')),
         successTitle: @json(__('dashboard.sp_action_success')),
-        refreshError: @json(__('dashboard.sp_refresh_error'))
+        refreshError: @json(__('dashboard.sp_refresh_error')),
+        cancel: @json(__('admin.Cancel')),
+        showDetails: @json(__('dashboard.sp_show_request_details'))
       };
 
       // Initial data from server
@@ -555,6 +562,17 @@
                             </button>
                         </div>
                     `;
+          } else if (CAN_QUICK_ACTION) {
+            actions = `
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="${escapeHtml(row.details_url)}" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill btn-details"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="${LABELS.showDetails}">
+                                <i class="ti ti-eye"></i>
+                            </a>
+                        </div>
+                    `;
           }
 
           let checkbox = '';
@@ -574,7 +592,7 @@
             escapeHtml(row.startup_company)
             + '</a>'
             + '</td>' +
-            '<td><small class="text-muted">' + escapeHtml(row.comment) + '</small></td>' +
+            '<td style="max-width: 250px; min-width: 150px; white-space: normal; word-break: break-word;"><small class="text-muted">' + escapeHtml(row.comment) + '</small></td>' +
             '<td>' + escapeHtml(row.service_name) + '</td>' +
             '<td><small>' + escapeHtml(row.submitted) + '</small></td>' +
             '<td>' + statusBadge + '</td>' +
@@ -737,7 +755,9 @@
 
       function doRefresh() {
         var $btn = $('#btn-refresh');
-        $btn.prop('disabled', true).find('i').addClass('ti-spin');
+        $btn
+          .prop('disabled', true)
+          .html('<i class="ti ti-loader-2 ti-spin me-1"></i>@lang("admin.refreshing")...')
 
         $.ajax({
           url: ROUTES.refresh,
@@ -745,7 +765,10 @@
           data: getFilterParams(),
           headers: { 'X-CSRF-TOKEN': CSRF_TOKEN },
           success: function (response) {
-            $btn.prop('disabled', false).find('i').removeClass('ti-spin');
+            $btn
+              .prop('disabled', false)
+              .html('<i class="ti ti-refresh me-1"></i> @lang("dashboard.sp_refresh")')
+
             if (response.summary) updateSummaryWidgets(response.summary);
             if (response.inbox) {
               currentInboxData = response.inbox;
@@ -757,7 +780,9 @@
             }
           },
           error: function () {
-            $btn.prop('disabled', false).find('i').removeClass('ti-spin');
+            $btn
+              .prop('disabled', false)
+              .html('<i class="ti ti-refresh me-1"></i> @lang("dashboard.sp_refresh")')
             Swal.fire({ icon: 'error', title: 'Error', text: LABELS.refreshError, timer: 3000 });
           }
         });
@@ -803,8 +828,15 @@
             if (!value || !value.trim()) return LABELS.rejectRequired;
           },
           showCancelButton: true,
+          showDenyButton: false,
           confirmButtonText: LABELS.reject,
-          confirmButtonColor: 'btn btn-danger'
+          cancelButtonText: LABELS.cancel,
+          customClass: {
+            confirmButton: 'btn btn-danger ms-3',
+            cancelButton: 'btn btn-label-secondary'
+          },
+          buttonsStyling: false,
+          reverseButtons: true
         }).then(function (result) {
           if (result.isConfirmed) {
             doQuickAction(id, 'reject', result.value);
@@ -833,8 +865,15 @@
             if (!value || !value.trim()) return LABELS.rejectRequired;
           },
           showCancelButton: true,
+          showDenyButton: false,
           confirmButtonText: LABELS.reject,
-          confirmButtonColor: 'btn btn-danger'
+          cancelButtonText: LABELS.cancel,
+          customClass: {
+            confirmButton: 'btn btn-danger ms-3',
+            cancelButton: 'btn btn-label-secondary'
+          },
+          buttonsStyling: false,
+          reverseButtons: true
         }).then(function (result) {
           if (result.isConfirmed) {
             doBulkAction(ids, 'reject', result.value);
@@ -893,6 +932,7 @@
 
   <script>
     (function () {
+      const lang = @json($l);
       const rvLabels = {!! $rvLabels !!};
       const rvData = {!! $rvData !!};
       const sdLabels = {!! $sdLabels !!};
@@ -931,7 +971,7 @@
         data: {
           labels: rvLabels,
           datasets: [{
-            label: 'Requests',
+            label: lang === 'ar' ? 'الطلبات' : 'Requests',
             data: rvData,
             borderColor: purple,
             borderWidth: 2.5,
@@ -970,7 +1010,7 @@
               boxWidth: 8, boxHeight: 8,
               callbacks: {
                 title: (i) => i[0].label,
-                label: (i) => '  Requests:  ' + i.raw
+                label: (i) => '  ' + (lang === 'ar' ? 'الطلبات' : 'Requests') + ':  ' + i.raw
               }
             }
           },
@@ -1058,7 +1098,7 @@
               displayColors: true,
               boxWidth: 8, boxHeight: 8,
               callbacks: {
-                label: (i) => ' ' + i.raw + ' requests (' + i.raw + '%)'
+                label: (i) => ' ' + i.raw + (lang === 'ar' ? ' طلبات' : ' requests') + ' (' + i.raw + '%)'
               }
             }
           },

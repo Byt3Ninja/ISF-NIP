@@ -7,7 +7,7 @@
 <div>
 	@if (session()->has('message'))
 		<div class="alert alert-{{ session()->get('class') ?? 'danger' }} alert-dismissible" role="alert">
-			{{ __('admin.' . session()->get('message')) }}
+			{{ session()->get('message_resolved') ? session()->get('message') : __('admin.' . session()->get('message')) }}
 			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		</div>
 	@endif
@@ -428,6 +428,7 @@ $(function () {
 
     // ── Field values ───────────────────────────────────────
     $userId.val(isEdit ? $trigger.data('userId') : null).trigger('change');
+    startPicker.set('minDate', isEdit ? null : 'today');
     startPicker.setDate(isEdit ? $trigger.data('startDate') : null, false);
     endPicker.setDate(isEdit  ? $trigger.data('endDate')   : null, false);
 

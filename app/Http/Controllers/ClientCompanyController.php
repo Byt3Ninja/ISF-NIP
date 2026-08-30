@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\City;
+use App\Enums\CompanyFormStep;
 use App\Like;
 use App\Step;
 use App\User;
@@ -282,18 +283,10 @@ class ClientCompanyController extends Controller
             }
 
             $startDate = $cycle->start ? Carbon::parse($cycle->start) : null;
-            $endDate = $cycle->end ? Carbon::parse($cycle->end) : null;
-            $cycleStatus = 'upcoming';
-            if ($startDate && $endDate) {
-                $now = Carbon::now();
-                if ($now->between($startDate, $endDate)) {
-                    $cycleStatus = 'ongoing';
-                } elseif ($now->greaterThan($endDate)) {
-                    $cycleStatus = 'completed';
-                }
-            } elseif ($startDate && Carbon::now()->greaterThanOrEqualTo($startDate)) {
-                $cycleStatus = 'ongoing';
-            }
+            // The company is still assigned to this cycle (hasn't moved to Almuni yet),
+            // so it can only be 'upcoming' or 'ongoing' here — never 'completed'.
+            // A cycle's calendar end date passing doesn't mean this company finished it.
+            $cycleStatus = ($startDate && Carbon::now()->lessThan($startDate)) ? 'upcoming' : 'ongoing';
 
             $custom_form = $cycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
             $submissions = Formdata::where('company_id', $company?->id)->where('step_id', $custom_form?->id)->orderBy('created_at', 'asc')->first();
@@ -353,9 +346,20 @@ class ClientCompanyController extends Controller
             if ($almuni->cycle_id) {
                 $almuniCycle = $almuni->cycle;
                 $custom_form = $almuniCycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
-                $submissions = Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first();
+                // $custom_form may be null when the cycle has no Custom Form step;
+                // guard the step_id lookup so we don't read ->id on null.
+                $submissions = $custom_form
+                    ? Formdata::where('company_id', $company->id)->where('step_id', $custom_form->id)->orderBy('created_at', 'asc')->first()
+                    : null;
                 if ($almuniCycle)
                 {
+                    // screening / final_screening are JSON arrays of step entries.
+                    // Decode defensively (the value may arrive as a JSON string)
+                    // and read the first entry's step_id; missing/empty arrays
+                    // previously threw "Undefined array key 0" (GV-3735).
+                    $screeningEntries = is_array($almuni->screening) ? $almuni->screening : (json_decode($almuni->screening, true) ?: []);
+                    $finalScreeningEntries = is_array($almuni->final_screening) ? $almuni->final_screening : (json_decode($almuni->final_screening, true) ?: []);
+
                     $almuniScreeningScore = null;
                     if( !empty( $almuni->screening ) )
                     {
@@ -576,34 +580,37 @@ class ClientCompanyController extends Controller
           //  ->keyBy('year');
 
         $periods = [];
-        $year = !empty($request->valuation_date)
-                    ? Carbon::parse($request->valuation_date)->year
-                    : (int) date('Y');
-
-                    $desc_valuation = FinancialProjection::where('company_id', $id)
+        $valuation_dateSearch = $request->valuation_date ?? date('Y-m');
+        $desc_valuation = FinancialProjection::where('company_id', $id)
+            ->whereNotNull('valuation_date')
             ->orderBy('valuation_date', 'desc')
             ->first();
-        $valuation_dateSearch = date('Y-m');
-        if( !empty( $desc_valuation?->valuation_date ) )
-        {
-            $valuation_dateSearch = $request->valuation_date ?? Carbon::parse($desc_valuation->valuation_date)->format('Y-m') ?? date('Y-m');
+        if (empty($request->valuation_date) && !empty($desc_valuation?->valuation_date)) {
+            $valuation_dateSearch = Carbon::parse($desc_valuation->valuation_date)->format('Y-m');
         }
-       
-        $valuationYear = (int) date('Y', strtotime($valuation_dateSearch));
-        $yearsRange = range($year - 1, $year + 2);
-        $financialprojectionArray = [];
-        foreach ($yearsRange as $_year) {
-            $financialprojectionArray[$_year] = [];
-        }
+
+        $valuationYear = (int) Carbon::parse($valuation_dateSearch . '-01')->format('Y');
+
         $Historyfinancialprojection = FinancialProjection::where('company_id', $id)
             ->orderBy('valuation_date', 'desc')
             ->get();
-            $availableValuationDates = $Historyfinancialprojection->pluck('valuation_date')->unique();
-            $financials = $Historyfinancialprojection->filter(fn($fp) => $fp->valuation_date->format('Y-m-d') === $valuation_dateSearch.'-01')->keyBy('year');
-            $historicalValuationDates = $availableValuationDates->map(function ($date) {
-                return Carbon::parse($date)->format('Y-m');
-            });
-            $valuationDate = $request->valuation_date ?? $valuation_dateSearch;
+        
+        $availableValuationDates = $Historyfinancialprojection->pluck('valuation_date')->unique();
+        $financials = $Historyfinancialprojection->filter(fn($fp) => $fp->valuation_date->format('Y-m-d') === $valuation_dateSearch.'-01')->keyBy('year');
+        
+        $historicalValuationDates = $availableValuationDates->map(function ($date) {
+            return Carbon::parse($date)->format('Y-m');
+        });
+        
+        $valuationDate = $request->valuation_date ?? $valuation_dateSearch;
+
+        $hasFinancials = !$financials->isEmpty() && $financials->count() === 4 && $financials->every(function ($fp) {
+            return !is_null($fp->revenues) && !is_null($fp->cogs) && !is_null($fp->salaries) && !is_null($fp->other_op_expenses);
+        });
+
+        $firstRecordOverall = $Historyfinancialprojection->whereNotNull('currency')->first();
+        $currencyCode = $firstRecordOverall?->currency ?? $company->Currency ?? 'USD';
+
         $map = function ($fp) {
             return [
                 'revenue'        => (float) ($fp->revenues ?? 0),
@@ -627,22 +634,26 @@ class ClientCompanyController extends Controller
             ];
         };
 
-        // We expect 4 years: Past (Year - 1), Year 1 (Year), Year 2 (Year + 1), Year 3 (Year + 2)
-        // But we should just iterate over what we have and label them relative to valuation year
-        
-        // Define the expected years based on valuation year
+        $v = Carbon::parse($valuationDate . '-01');
+        $dateRanges = [
+            'past' => $v->copy()->subYear()->format('m/Y') . ' – ' . $v->copy()->subDay()->format('m/Y'),
+            'year1' => $v->copy()->format('m/Y') . ' – ' . $v->copy()->addYear()->subDay()->format('m/Y'),
+            'year2' => $v->copy()->addYear()->format('m/Y') . ' – ' . $v->copy()->addYears(2)->subDay()->format('m/Y'),
+            'year3' => $v->copy()->addYears(2)->format('m/Y') . ' – ' . $v->copy()->addYears(3)->subDay()->format('m/Y'),
+        ];
+
         $expectedYears = [
-            $valuationYear - 1 => ['key' => 'past', 'label' => __('startup.financial.past_year')],
-            $valuationYear => ['key' => 'year1', 'label' => __('startup.financial.year_1')],
-            $valuationYear + 1 => ['key' => 'year2', 'label' => __('startup.financial.year_2')],
-            $valuationYear + 2 => ['key' => 'year3', 'label' => __('startup.financial.year_3')],
+            $valuationYear - 1 => ['key' => 'past', 'label' => __('startup.financial.past_year'), 'sub' => $dateRanges['past']],
+            $valuationYear => ['key' => 'year1', 'label' => __('startup.financial.year_1'), 'sub' => $dateRanges['year1']],
+            $valuationYear + 1 => ['key' => 'year2', 'label' => __('startup.financial.year_2'), 'sub' => $dateRanges['year2']],
+            $valuationYear + 2 => ['key' => 'year3', 'label' => __('startup.financial.year_3'), 'sub' => $dateRanges['year3']],
         ];
     
-        foreach ($expectedYears as $year => $meta) {
-            $data = isset($financials[$year]) ? $map($financials[$year]) : $map(new FinancialProjection());
+        foreach ($expectedYears as $_year => $meta) {
+            $data = isset($financials[$_year]) ? $map($financials[$_year]) : $map(new FinancialProjection());
             $periods[$meta['key']] = [
                 'label' => $meta['label'],
-                'sub'   => $year, // Just the year number
+                'sub'   => $meta['sub'],
                 'data'  => $data,
             ];
         }
@@ -833,6 +844,8 @@ class ClientCompanyController extends Controller
         'periods',
         'valuationDate',
         'historicalValuationDates',
+        'hasFinancials',
+        'currencyCode',
         'achievements'));
         // } catch (Exception $e) {
         //     //log what happend
@@ -1162,7 +1175,7 @@ class ClientCompanyController extends Controller
 
                 $valuation_date = Carbon::parse($valuation_date_full)->format('Y-m');
 
-                $getCurrancy = $filtered->first()?->currency;
+                $getCurrancy = $Historyfinancialprojection->whereNotNull('currency')->first()?->currency;
                 $is_currency_disabled = !is_null($getCurrancy);
             }
 
@@ -1324,7 +1337,7 @@ class ClientCompanyController extends Controller
                 $msgtype = 'AddComp';
             }
     
-            if ($data['CompanyN'] == 1) {
+            if ($data['CompanyN'] == CompanyFormStep::BasicInfo->value) {
 
                 $l = $request->input('locale', app()->getLocale());
                 if ($l == 'en') {
@@ -1479,7 +1492,7 @@ class ClientCompanyController extends Controller
                 $result->company_registration_type = $data['company_registration_type'];
                 $result->products_services_description = $data['products_services_description'] ?? null;
             }
-            if ($data['CompanyN'] == 2) {
+            if ($data['CompanyN'] == CompanyFormStep::ContactInfo->value) {
                 $validatedData = $request->validate([
                     'phone' => 'required|numeric|digits_between:8,15',
                     'WhatsApp' => 'nullable',
@@ -1538,7 +1551,7 @@ class ClientCompanyController extends Controller
                 $result->instagram = $data['instagram'];
                 $result->tiktok = $data['tiktok'];
             }
-            if ($data['CompanyN'] == 3) {
+            if ($data['CompanyN'] == CompanyFormStep::AboutDescription->value) {
                 $validatedData = $request->validate([
                     'company_description' => 'nullable|string|max:500',
                     'Sustainable_development' => 'nullable|array',
@@ -1570,7 +1583,7 @@ class ClientCompanyController extends Controller
                 $result->why_this_startup = $data['why_this_startup'] ?? null;
                 $result->startup_expertise = $data['startup_expertise'] ?? null;
             }
-            if ($data['CompanyN'] == 4) {
+            if ($data['CompanyN'] == CompanyFormStep::FinancialInfo->value) {
                 $request->validate([
                     'Currency' => 'nullable',
                     'pre_money_valuation' => 'nullable|numeric|min:0',
@@ -1615,10 +1628,10 @@ class ClientCompanyController extends Controller
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
+                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company?->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
                     }
                 } else {
-                    $uploadedFile = $company->financial_plan;
+                    $uploadedFile = $company?->financial_plan;
                 }
 
                 $data['financial_plan_description'] = $data['financial_plan_description'] == null ? '0' : $data['financial_plan_description'];
@@ -1627,7 +1640,7 @@ class ClientCompanyController extends Controller
                 $result->Pre_money_Valuation = $data['pre_money_valuation'];
                 $result->raised_fund = $data['raised_fund'];
                 $result->Funding_Target = $data['Funding_Target'];
-                $result->stage = $data['stage'];
+                $result->stage = array_key_exists('stage', $data) ? $data['stage'] : null;
                 $result->development_stage = $data['development_stage'];
                 $result->targeted_market = json_encode($data['targeted_market']);
                 $result->business_type = $data['business_type'];
@@ -1638,7 +1651,7 @@ class ClientCompanyController extends Controller
                     ? $data['average_annual_revenues']
                     : null;
             }
-            if ($data['CompanyN'] == 5) {
+            if ($data['CompanyN'] == CompanyFormStep::TeamInfo->value) {
                 $request->validate([
                     'team_num' => 'required|string',
                 ], [
@@ -1648,7 +1661,7 @@ class ClientCompanyController extends Controller
                 $result->team_num = $data['team_num'];
                 $result->working_team_summary = $data['working_team_summary'];
             }
-            if ($data['CompanyN'] == 6) {
+            if ($data['CompanyN'] == CompanyFormStep::PitchDeckInfo->value) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck_info' => 'nullable', // يجب أن يكون إما نعم أو لا
                     'pitch_deck_summary' => 'nullable|string|max:500', // نص من 500 حرف كحد أقصى
@@ -1666,7 +1679,7 @@ class ClientCompanyController extends Controller
                 $result->problem = $data['problem_facing'];
                 $result->solution = $data['solution_problem'];
             }
-            if ($data['CompanyN'] == 8) {
+            if ($data['CompanyN'] == CompanyFormStep::SocialWebsite->value) {
                 $validator = Validator::make($request->all(), [
                     'website' => 'nullable|url', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                     'img_url' => 'nullable', // يجب أن يكون رابط صالح
@@ -1710,7 +1723,7 @@ class ClientCompanyController extends Controller
                 $result->instagram = $data['instagram'];
                 $result->tiktok = $data['tiktok'];
             }
-            if ($data['CompanyN'] == 9) {
+            if ($data['CompanyN'] == CompanyFormStep::PitchDeckFile->value) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck' => 'nullable|mimes:pdf,ppt,pptx|max:10240', // يجب أن يكون ملف PDF أو PPT وحجمه أقل من 10MB
                 ], [
@@ -1727,7 +1740,7 @@ class ClientCompanyController extends Controller
 
                 $result->pitch_deck = $pitch_deck;
             }
-            if ($data['CompanyN'] == 10) {
+            if ($data['CompanyN'] == CompanyFormStep::PitchDeckVideo->value) {
                 $validator = Validator::make($request->all(), [
                     'pitch_deck_video' => 'nullable', // يجب أن يكون ملف PDF او PPT وحجمه لا يتجاوز 20MB
                 ]);
@@ -1737,7 +1750,7 @@ class ClientCompanyController extends Controller
                 }
                 $result->pitch_deck_video = $request->pitch_deck_video;
             }
-            if ($data['CompanyN'] == 11) {
+            if ($data['CompanyN'] == CompanyFormStep::SupplementaryDocuments->value) {
                 if ($request->hasFile('documents')) {
                     $files = $request->file('documents');
                     $oldDocs = json_decode($company->documents ?? '[]', true) ?? [];
@@ -1748,7 +1761,7 @@ class ClientCompanyController extends Controller
 
                 $result->documents = json_encode($uploadedFiles);
             }
-            if ($data['CompanyN'] == 12) {
+            if ($data['CompanyN'] == CompanyFormStep::AboutProblemLegacy->value) {
                 $request->validate([
                     'about_problem' => 'required',
                     'about_market_opportunity' => 'required',
@@ -1769,7 +1782,7 @@ class ClientCompanyController extends Controller
                 $result->about_monetize = $data['about_monetize'];
                 $result->about_challenges = $data['about_challenges'];
             }
-            if ($data['CompanyN'] == 13) {
+            if ($data['CompanyN'] == CompanyFormStep::BusinessModel->value) {
                 $request->validate([
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
@@ -1808,7 +1821,7 @@ class ClientCompanyController extends Controller
             }
             $result->save();
 
-            if ($data['CompanyN'] == 16) {
+            if ($data['CompanyN'] == CompanyFormStep::ExpertiseTags->value) {
                 $rawTags = $request->input('expertise_tags');
                 if (is_string($rawTags)) {
                     $decoded = json_decode($rawTags, true);
@@ -1860,7 +1873,7 @@ class ClientCompanyController extends Controller
                     ->with(['msg' => 'startup_profile_updated', 'class' => 'success']);
             }
 
-            if ($data['CompanyN'] == 14) {
+            if ($data['CompanyN'] == CompanyFormStep::Classification->value) {
                 // Set up debug logging using Laravel's Log facade
                 Log::debug('Starting company update process', [
                     'company_id' => $id,
@@ -2330,7 +2343,7 @@ class ClientCompanyController extends Controller
                         'industry_id' => $data['industry_id'] ?? null
                     ]);
 
-                    if ($data['CompanyN'] == 14 && $request->ajax()) {
+                    if ($data['CompanyN'] == CompanyFormStep::Classification->value && $request->ajax()) {
                         return response()->json([
                             'success' => false,
                             'message' => __('admin.error_updating_company_relations') . ': ' . $e->getMessage()
@@ -2343,7 +2356,7 @@ class ClientCompanyController extends Controller
                         ->withInput();
                 }
             }
-            if ($data['CompanyN'] == 15) {
+            if ($data['CompanyN'] == CompanyFormStep::FinancialProjection->value) {
                
                 if($data['valuation_date'] == null){
                     return redirect()->back()->with(['msg' => 'Please enter the valuation date', 'class' => 'danger']);
@@ -2431,7 +2444,7 @@ class ClientCompanyController extends Controller
                 if( !trim( $redirectId ) ) { $redirectId = $result->id; }
 
                 // Return JSON response for AJAX requests (CompanyN == 14 is classification form)
-                if ($data['CompanyN'] == 14 && $request->ajax()) {
+                if ($data['CompanyN'] == CompanyFormStep::Classification->value && $request->ajax()) {
                     return response()->json([
                         'success' => true,
                         'message' => __('admin.startup_info_updated')
@@ -2440,7 +2453,7 @@ class ClientCompanyController extends Controller
 
                 return redirect()->route('company.profile_view_mine', ['id' => $redirectId])->with(['msg' => __('startup_info_updated'), 'class' => 'success']);
             } else {
-                if ($data['CompanyN'] == 14 && $request->ajax()) {
+                if ($data['CompanyN'] == CompanyFormStep::Classification->value && $request->ajax()) {
                     return response()->json([
                         'success' => false,
                         'message' => __('admin.Startup_Info_Updated_Failed')
@@ -3395,7 +3408,7 @@ class ClientCompanyController extends Controller
                 $founder->initials = $fInitials;
                 return $founder;
             });
-            $sustainable_array = json_decode($company->Sustainable_development ?? '[]');
+            $sustainable_array = json_decode($company->Sustainable_development ?: '[]') ?? [];
             foreach ($sustainable_array as $key => $Sustainable)
             {
                 $icon = $SustainableIcons->where('title', $Sustainable)->first();
@@ -3448,8 +3461,12 @@ class ClientCompanyController extends Controller
         $services    = $almuni?->services ?? [];
 
         $company = $almuni->company;
-        $screeningResultsData = ScreeningEvaluationResults::results( $almuni->screening_data[0]['step_id'] ?? 0, $company->id )[$company->id] ?? [];
-        $finalScreeningResultsData = ScreeningEvaluationResults::results( $almuni->final_screening_data[0]['step_id'] ?? 0, $company->id )[$company->id] ?? [];
+        // Decode defensively and read the first entry's step_id; an empty/missing
+        // screening array previously threw "Undefined array key 0" (GV-3735).
+        $screeningEntries = is_array($almuni->screening) ? $almuni->screening : (json_decode($almuni->screening, true) ?: []);
+        $finalScreeningEntries = is_array($almuni->final_screening) ? $almuni->final_screening : (json_decode($almuni->final_screening, true) ?: []);
+        $screeningResultsData = ScreeningEvaluationResults::results( data_get($screeningEntries, '0.step_id', 0), $company->id )[$company->id] ?? [];
+        $finalScreeningResultsData = ScreeningEvaluationResults::results( data_get($finalScreeningEntries, '0.step_id', 0), $company->id )[$company->id] ?? [];
 
         // ── Stats calculations ──────────────────────────────────────────
         $trainingTotalMin   = collect($training)->sum(fn($t) => (int) ($t['duration'] ?? 0));
@@ -4146,7 +4163,7 @@ class ClientCompanyController extends Controller
             Log::error('Bulk Alumni Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => __('admin.unexpected_error') . ' (Error: ' . $e->getMessage() . ')'
+                'message' => __('admin.unexpected_error') . ' (' . __('admin.Error') . ': ' . $e->getMessage() . ')'
             ], 500);
         }
     }
@@ -4521,25 +4538,25 @@ class ClientCompanyController extends Controller
                     //Final Screening
                 $cycle_id = $company->cycle;
                 $_stepFinal = Step::where('cycle_id', $cycle_id)->where('stype', 5)->get();
-               $screeningsEvaluations = ScreeningEvaluation::whereIn(
-                    'step_id',
-                    $_stepFinal->pluck('id')
-                )->get();
+                $screeningsEvaluations = ScreeningEvaluation::whereIn(
+                        'step_id',
+                        $_stepFinal->pluck('id')
+                    )->get();
 
-            $getCriteria = ScreeningEvaluationCriteria::whereIn(
-                    'evaluation_id',
-                    $screeningsEvaluations->pluck('id')
-                )
-                ->get()
-                ->map(function ($criterion) {
-                    $criterion->criteria_weight = 100;
-                    return $criterion;
-                });
+                $getCriteria = ScreeningEvaluationCriteria::whereIn(
+                        'evaluation_id',
+                        $screeningsEvaluations->pluck('id')
+                    )
+                    ->get()
+                    ->map(function ($criterion) {
+                        $criterion->criteria_weight = 100;
+                        return $criterion;
+                    });
 
-            $getResult = ScreeningEvaluationResults::whereIn(
-                    'evaluation_id',
-                    $screeningsEvaluations->pluck('id')
-                )->where('company_id', $company_id)->get();
+                $getResult = ScreeningEvaluationResults::whereIn(
+                        'evaluation_id',
+                        $screeningsEvaluations->pluck('id')
+                    )->where('company_id', $company_id)->get();
                
             $finalstepsData = $screeningsEvaluations->map(function ($evaluation) use ($getResult) {
                 $evaluationResults = $getResult->where('evaluation_id', $evaluation->id);
@@ -4588,7 +4605,7 @@ class ClientCompanyController extends Controller
 
 
                  // Training
-                 $steps = Step::where('cycle_id', $company->cycle)->get();
+                $steps = Step::where('cycle_id', $company->cycle)->get();
 
                 $startup_training = TrainingSession::whereIn('step_id', $steps->pluck('id'))
                     ->get();
@@ -4676,7 +4693,10 @@ class ClientCompanyController extends Controller
                     })->with(['assignees' => function ($q) use ($company) {
                         $q->where('company_id', $company->id);
                     }, 'creator', 'feedbacks' => function ($q) use ($company) {
-                        $q->where('company_id', $company->id)->orderBy('created_at', 'desc');
+                        $q->where(function($query) use ($company) {
+                            $query->where('company_id', $company->id)
+                                  ->orWhereNull('company_id');
+                        })->orderBy('created_at', 'desc');
                     }, 'feedbacks.user'])->get();
                 $MentorTasks = [];
                 foreach ($startup_ProgramTasks as $ProgramTask) {
@@ -4970,6 +4990,26 @@ class ClientCompanyController extends Controller
                 ], 403);
             }
 
+            if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+                $orgIds = $user->organizations_ids;
+                $cycles = \App\Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
+                $hasAccess = false;
+                foreach ($cycles as $cycle) {
+                    foreach ($cycle->companies as $company) {
+                        if ($company->id == $id) {
+                            $hasAccess = true;
+                            break 2;
+                        }
+                    }
+                }
+                if (!$hasAccess) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('admin.NoHavePermission'),
+                    ], 403);
+                }
+            }
+
             // ----------------------------------------------------------
             // 2. Resolve valuation date
             // ----------------------------------------------------------
@@ -5008,10 +5048,10 @@ class ClientCompanyController extends Controller
                 return Carbon::parse($proj->valuation_date)->format('Y-m') === $valuationDateStr;
             })->keyBy('year');
 
-            // Detect locked currency (if any record already has one)
-            $firstRecord      = $projections->first();
-            $lockedCurrency   = $firstRecord?->currency ?? null;
-            $isCurrencyLocked = !is_null($lockedCurrency);
+            // Detect locked currency (if any record already has one globally for this company)
+            $firstRecordOverall = $allProjections->whereNotNull('currency')->first();
+            $lockedCurrency     = $firstRecordOverall?->currency ?? $user->company->Currency ?? $user->currency;
+            $isCurrencyLocked   = !is_null($firstRecordOverall?->currency);
 
             // ----------------------------------------------------------
             // 4. Build the 4-year payload
@@ -5099,6 +5139,26 @@ class ClientCompanyController extends Controller
                 ], 403);
             }
 
+            if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
+                $orgIds = $user->organizations_ids;
+                $cycles = \App\Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
+                $hasAccess = false;
+                foreach ($cycles as $cycle) {
+                    foreach ($cycle->companies as $company) {
+                        if ($company->id == $id) {
+                            $hasAccess = true;
+                            break 2;
+                        }
+                    }
+                }
+                if (!$hasAccess) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('admin.NoHavePermission'),
+                    ], 403);
+                }
+            }
+
             // ----------------------------------------------------------
             // 2. Basic validation
             // ----------------------------------------------------------
@@ -5120,9 +5180,6 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
             
-            if($user->company->Currency == $requestedCurrency){
-                         $requestedCurrency = null;
-                     }
                    
 
             // ----------------------------------------------------------
@@ -5266,7 +5323,7 @@ class ClientCompanyController extends Controller
 
             return response()->json([
                 'success'      => true,
-                'message'      => __('admin.financial_projection_saved_successfully'),
+                'message'      => __('admin.financial_data_saved'),
                 'recalculated' => $recalculated,
             ]);
 

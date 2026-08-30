@@ -88,7 +88,12 @@ class AssessmentController extends Controller
             'user_id' => 'required|exists:users,id', // يجب أن يكون موجودًا في جدول المستخدمين
             'start_date' => 'required|date', // تاريخ صالح وأقل أو يساوي end_date
         ]);
-        
+
+        if( \Carbon\Carbon::parse($request->start_date)->startOfDay()->lt(now()->startOfDay()) )
+        {
+            return redirect()->back()->with(['class'=>'danger', 'message'=>__('admin.StartDateCannotBeInPast'), 'message_resolved' => true]);
+        }
+
         $userid = $request->user_id;
         $l = app()->getLocale();
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
@@ -105,46 +110,73 @@ class AssessmentController extends Controller
                 $company = Company::find($companyid);
                 
                 $title = $company?->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
-               
-                $assessment = Assessment::create([
-                    'user_id' => $userid,
-                    'title' => $title,
-                    'start_date' => $request->start_date,
-                    'is_published' => 0,
-                ]);
 
-                $assessmentId = $assessment->id;
-                
-                $questions = QuestionsBank::where('group', 'assessment')->get();
-
-                if( $company?->stage == null )
+                if( $company?->stage == null || !is_numeric($company->stage) )
                 {
-                    $assessment = Assessment::find($assessmentId);
-                    $assessment->delete();
-                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('NotStage')]);
-                }
+                    $founderName = trim($user->{'first_name_'.$l} .' '. $user->{'last_name_'.$l});
 
-                foreach( $questions as $question )
-                {
-                    $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
-                    if( $weight == null ){
-                        return redirect()->back()->with(['class'=>'danger', 'message'=>__('please_correct_stage_or_category_or_subcategory_in_your_company')]);
-                    }
-                    UserScore::create([
-                        'user_id' => $userid,
-                        'category_id' => $question->ascategory_id,
-                        'subcategory_id' => $question->subcategory_id,
-                        'stage_id' => $company->stage,
-                        'weight' => $weight->weight ?? null,
-                        'assessment_id' => $assessmentId,
-                        'QuestionBank' => $question->question,
-                        'explanation_QA_ar' => $question->explanation_QA_ar,
-                        'explanation_QA_en' => $question->explanation_QA_en,
-                        'Answers' => $question->answers,
-                        'company_id' => $companyid,
+                    return redirect()->back()->with([
+                        'class' => 'danger',
+                        'message' => __('admin.ChooseStageForCompany', [
+                            'founder' => $founderName,
+                        ]),
+                        'message_resolved' => true,
                     ]);
                 }
 
+                $company_weights = Weight::where('stage_id', $company->stage)->get();
+                $weightsByKey = $company_weights->keyBy(fn($w) => $w->category_id . '-' . $w->subcategory_id);
+                $questions = QuestionsBank::where('group', 'assessment')->whereIn('ascategory_id', $company_weights->pluck('category_id'))->get();
+
+                if( $questions->isEmpty() )
+                {
+                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('please_correct_stage_or_category_or_subcategory_in_your_company')]);
+                }
+
+                try {
+                    DB::beginTransaction();
+
+                    $assessment = Assessment::create([
+                        'user_id' => $userid,
+                        'title' => $title,
+                        'start_date' => $request->start_date,
+                        'is_published' => 0,
+                    ]);
+
+                    $userScores = [];
+                    foreach( $questions as $question )
+                    {
+                        $weight = $weightsByKey->get($question->ascategory_id . '-' . $question->subcategory_id);
+
+                        if( $weight == null ){
+                            DB::rollBack();
+                            return redirect()->back()->with(['class'=>'danger', 'message'=>__('please_correct_stage_or_category_or_subcategory_in_your_company')]);
+                        }
+
+                        $userScores[] = [
+                            'user_id' => $userid,
+                            'category_id' => $question->ascategory_id,
+                            'subcategory_id' => $question->subcategory_id,
+                            'stage_id' => $company->stage,
+                            'weight' => $weight->weight,
+                            'assessment_id' => $assessment->id,
+                            'QuestionBank' => $question->question,
+                            'explanation_QA_ar' => $question->explanation_QA_ar,
+                            'explanation_QA_en' => $question->explanation_QA_en,
+                            'Answers' => $question->answers,
+                            'company_id' => $companyid,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+
+                    UserScore::insert($userScores);
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error('Error creating assessment: ' . $e->getMessage());
+                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('Failed to create assessment. Please try again.')]);
+                }
 
                 return redirect()->back()->with('class', 'success')->with('message', 'Assessment_Created_successfully');
             } else { return redirect()->back()->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]); }
@@ -217,8 +249,7 @@ class AssessmentController extends Controller
 
     public function assessment(Request $request)
     {
-        if( Auth::user()->hasRole('Registered') )
-        {
+        if( Auth::user()->hasRole('Registered') ){
             $l = app()->getLocale();
             $userid = auth()->user()->id;
             $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();

@@ -47,10 +47,6 @@
           @include('partials.profile_reminder_modal')
           <!-- /Profile Reminder Modal -->
 
-          <!-- Profile Reminder Modal -->
-          @include('partials.profile_reminder_modal')
-          <!-- /Profile Reminder Modal -->
-
           <!-- Survey Reminder Modal -->
           @include('partials.survey_reminder_modal')
           <!-- /Survey Reminder Modal -->
@@ -586,6 +582,9 @@
         return config;
       };
     </script>
+
+    <!-- Keeps bootstrap-daterangepicker dropdowns inside modals/offcanvas on screen -->
+    <script src="/js/daterangepicker-viewport.js"></script>
 
     <!-- BEGIN: Page JS-->
     @yield('pagescripts')

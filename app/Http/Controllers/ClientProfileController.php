@@ -18,6 +18,7 @@ use App\MentorshipTask;
 use App\Notifications\ConfirmEmailUpdateNotification;
 use App\Otp;
 use App\Schedule;
+use App\Services\MentorshipAvailabilityService;
 use App\Services\NotificationSettingsService;
 use App\Services\WhatsAppService;
 use App\Settings;
@@ -40,6 +41,9 @@ use Storage, Hash, Exception, Session, URL, File;
 
 class ClientProfileController extends Controller
 {
+    /** How long a staged email-change confirmation link stays valid. */
+    const EMAIL_CONFIRMATION_TTL_HOURS = 24;
+
     protected $whatsAppService;
     /**
      * Create a new controller instance.
@@ -48,7 +52,9 @@ class ClientProfileController extends Controller
      */
     public function __construct(WhatsAppService $whatsAppService, NotificationSettingsService $notificationSettingsService)
     {
-        $this->middleware('auth');
+        // confirmEmailUpdate is reached from a mailed link, which may be opened on a
+        // device with no session; it is protected by a signed URL instead.
+        $this->middleware('auth')->except('confirmEmailUpdate');
         $this->whatsAppService = $whatsAppService;
         $this->notificationSettingsService = $notificationSettingsService;
     }
@@ -144,6 +150,10 @@ class ClientProfileController extends Controller
     public function show( $id = null )
     {
         $client = is_null( $id ) ? Auth::user() : User::find($id);
+
+        if (!$client) {
+            abort(404);
+        }
 
         $mentors = CyclesMentors::where('user_id', $client->id ?? 0)->get();
 
@@ -263,122 +273,149 @@ class ClientProfileController extends Controller
             }
             $updateArray = $request->except($excludeArray) + ['img_url' => $img_url];
 
-            $result = $user->update($updateArray);
+            $user->update($updateArray);
             $user->first_name_ar = $first_name_ar;
             $user->last_name_ar = $last_name_ar;
 
-            if( $request->email != $user->email )
-            {
-                $user->new_email = $request->email;
-                $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-                Notification::route('mail', $user->new_email)->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
+            // The email column is never written directly (it is in $excludeArray above).
+            // A change is staged on new_email and only applied once the owner of the new
+            // address confirms it via the signed link we mail them.
+            $emailChangeRequested = false;
+            $newEmail = strtolower(trim((string) $request->email));
+
+            if ($newEmail !== strtolower((string) $user->email)) {
+                $user->new_email = $newEmail;
+                $user->new_email_requested_at = now();
+                $emailChangeRequested = true;
             }
+
             $user->save();
-            return redirect()->route('user.profile_view')->with(['msg' => 'UpdateSuccess', 'class' => 'success']);
 
-            // Debug: Dump request data and company info
-            \Log::info('Full request data:', $request->all());
-            \Log::info('Current user ID: ' . $user->id);
-            \Log::info('Tech tags received:', ['tech_tags' => $request->tech_tags]);
-            
-            if ($request->has('tech_tags') && !empty($request->tech_tags)) {                
-                // If it's a string, try to decode it as JSON
-                if (is_string($techTags)) {
-                    $techTags = json_decode($techTags, true);
-                    \Log::info('Tech tags after JSON decode:', ['techTags' => $techTags]);
-                }
-                
-                // If we have a valid array of technologies
-                if (is_array($techTags) && !empty($techTags)) {
-                    \Log::info('Processing tech tags array:', $techTags);
-                    // Filter out any empty values and trim whitespace
-                    $technologies = array_filter(array_map('trim', $techTags));
-                    
-                    // Eager load the company relationship if not already loaded
-                    if (!$user->relationLoaded('company')) {
-                        $user->load('company');
-                    }
-                    
-                    // Update or create company with technologies
-                    if ($user->company) {
-                        // Log before update
-                        \Log::info('Current technologies_used in DB:', [
-                            'before' => $user->company->technologies_used,
-                            'will_update_to' => $technologies
-                        ]);
-                        
-                        // Force update to bypass any model events
-                        $updateResult = \DB::table('companies')
-                            ->where('id', $user->company->id)
-                            ->update(['technologies_used' => implode(',', $technologies)]);
-                            
-                        \Log::info('Direct DB update result:', ['success' => $updateResult]);
-                        
-                        // Refresh the company model
-                        $user->load('company');
-                        \Log::info('After update - technologies_used in DB:', [
-                            'after' => $user->company->technologies_used
-                        ]);
-                        $techString = implode(',', array_unique($technologies));
-                        \Log::info('Updating company with technologies:', ['company_id' => $user->company->id, 'technologies' => $techString]);
-                        $result = $user->company->update([
-                            'technologies_used' => $techString
-                        ]);
-                        \Log::info('Update result:', ['success' => $result]);
-                    } else {
-                        // If company doesn't exist, create it with the user_id
-                        $techString = implode(',', array_unique($technologies));
-                        \Log::info('Creating new company with technologies:', ['user_id' => $user->id, 'technologies' => $techString]);
-                        $company = new \App\Company([
-                            'user_id' => $user->id,
-                            'name_en' => $user->name,
-                            'technologies_used' => $techString
-                        ]);
-                        $result = $user->company()->save($company);
-                        \Log::info('Create company result:', ['success' => (bool)$result, 'company_id' => $company->id ?? null]);
-                    }
-                } else if ($user->company) {
-                    // If technologies_used is empty, clear the field
-                    $user->company->update(['technologies_used' => null]);
-                }
+            if ($emailChangeRequested) {
+                $this->sendEmailUpdateConfirmation($user);
+
+                return redirect()->route('user.profile_view')->with([
+                    'msg'   => 'UpdateEmailSent',
+                    'class' => 'success',
+                    'pending_email' => $user->new_email,
+                ]);
             }
 
-            if ($result)
-                return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
-            else
-                return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+            return redirect()->route('user.profile_view')->with(['msg' => 'ProfileUpdatedSuccessfully', 'class' => 'success']);
         } catch (Exception $e) {
-            //log what happend
-            dd($e);
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
     }
 
-    public function confirmEmailUpdate($token)
+    /**
+     * Mail the signed confirmation link for a staged email change.
+     */
+    private function sendEmailUpdateConfirmation($user)
     {
-        try {
-            $newEmail = decrypt($token);
+        $verificationUrl = URL::temporarySignedRoute(
+            'user.profile_email_confirm',
+            now()->addHours(self::EMAIL_CONFIRMATION_TTL_HOURS),
+            ['user' => $user->id, 'token' => sha1($user->new_email)]
+        );
 
-        } catch (\Exception $e) {
+        Notification::route('mail', $user->new_email)
+            ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
+    }
 
-            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+    /**
+     * Apply a staged email change.
+     *
+     * Public + signed route: the link must work from whatever device the founder reads
+     * their new mailbox on, so it cannot sit behind auth/verified/2fa. The signature
+     * carries the expiry; the token binds the link to the specific staged address so a
+     * link becomes void as soon as the pending change is altered or cancelled.
+     */
+    public function confirmEmailUpdate($userId, $token)
+    {
+        $user = User::find($userId);
 
+        if (!$user || !$user->new_email || !hash_equals(sha1($user->new_email), (string) $token)) {
+            return redirect()->route('login')->with(['msg' => 'WrongLink', 'class' => 'danger']);
         }
 
-        $user = auth()->user();
+        if ($user->new_email_requested_at
+            && $user->new_email_requested_at->addHours(self::EMAIL_CONFIRMATION_TTL_HOURS)->isPast()) {
+            $this->clearPendingEmail($user);
 
-        // تحقق من وجود البريد الجديد
-        if ($user->new_email != $newEmail) {
-            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+            return redirect()->route('login')->with(['msg' => 'EmailConfirmationExpired', 'class' => 'danger']);
         }
 
-        // تحديث البريد الإلكتروني
-        $user->email = $newEmail;
+        // The address may have been claimed by another account between staging and
+        // confirming, so re-check uniqueness before committing.
+        $taken = User::where('id', '!=', $user->id)
+            ->where(function ($q) use ($user) {
+                $q->where('email', $user->new_email)->orWhere('new_email', $user->new_email);
+            })
+            ->exists();
+
+        if ($taken) {
+            $this->clearPendingEmail($user);
+
+            return redirect()->route('login')->with(['msg' => 'EmailAlreadyTaken', 'class' => 'danger']);
+        }
+
+        $user->email = $user->new_email;
         $user->new_email = null;
+        $user->new_email_requested_at = null;
+        // The address has just proven it is reachable and owned by this user.
+        $user->email_verified_at = now();
         $user->save();
 
-        return redirect()->route('user.profile_view')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
+        $route = auth()->check() && auth()->id() === $user->id ? 'user.profile_view' : 'login';
+
+        return redirect()->route($route)->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
+    }
+
+    /**
+     * Re-send the confirmation mail for the currently staged email change.
+     */
+    public function resendEmailConfirmation()
+    {
+        $user = Auth::user();
+
+        if (!$user->new_email) {
+            return redirect()->route('user.profile_view')->with(['msg' => 'NoPendingEmailChange', 'class' => 'danger']);
+        }
+
+        $user->new_email_requested_at = now();
+        $user->save();
+
+        $this->sendEmailUpdateConfirmation($user);
+
+        return redirect()->route('user.profile_view')->with([
+            'msg'   => 'UpdateEmailSent',
+            'class' => 'success',
+            'pending_email' => $user->new_email,
+        ]);
+    }
+
+    /**
+     * Discard a staged email change.
+     */
+    public function cancelEmailUpdate()
+    {
+        $user = Auth::user();
+
+        if (!$user->new_email) {
+            return redirect()->route('user.profile_view')->with(['msg' => 'NoPendingEmailChange', 'class' => 'danger']);
+        }
+
+        $this->clearPendingEmail($user);
+
+        return redirect()->route('user.profile_view')->with(['msg' => 'EmailUpdateCancelled', 'class' => 'success']);
+    }
+
+    private function clearPendingEmail($user)
+    {
+        $user->new_email = null;
+        $user->new_email_requested_at = null;
+        $user->save();
     }
     /**
      * Update the specified resource in storage.
@@ -654,7 +691,11 @@ class ClientProfileController extends Controller
                 
                     
                 // $mentors = User::role('mentor')->get();
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter'));
+                // GV-3554: founders only see mentor cards once their program has
+                // reached the mentorship stage.
+                $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany($user->company);
+
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter', 'mentorshipActive'));
             }
         } else {
 
@@ -783,7 +824,9 @@ class ClientProfileController extends Controller
                     return $mentor;
                 });
                 // $mentors = User::role('mentor')->get();
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
+                $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany(Auth::user()->company);
+
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'mentorshipActive'));
             } else {
                 return redirect()->route('core.dashboard_view');
             }

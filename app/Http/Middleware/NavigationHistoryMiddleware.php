@@ -329,6 +329,10 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
         'list_mine_cycle' => app()->getLocale() == 'en' ? 'My Submission' : 'عرض مشاركتى',
         'render_view_form' => app()->getLocale() == 'en' ? 'Form Details' : 'تفاصيل النموذج',
         'organization_manage_setting' => app()->getLocale() == 'en' ? 'Org Manage Settings' : 'إدارة إعدادات المؤسسة',
+        'questions_manage_assessment' => app()->getLocale() == 'en' ? 'Manage Assessment' : 'إدارة التقييم',
+        'attendance_offline_view_training' => app()->getLocale() == 'en' ? 'Offline View Training' : 'حضور التدريب',
+        'custom_landing_pages' => app()->getLocale() == 'en' ? 'Custom Landing Pages' : 'الصفحات رئيسية مخصصة',
+        'profile_view_client' => app()->getLocale() == 'en' ? 'Client Profile' : 'الملف الشخصي للعميل',
         
     ];
     if (isset($customReplacements[$cleanTitle])) {
@@ -407,6 +411,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
             'logout',
             '_debugbar/*',
             'livewire/*',
+            'dashboard/notifications/*',
             // Static files and images
             '*/logo/*',
             'organizations/logo/*',

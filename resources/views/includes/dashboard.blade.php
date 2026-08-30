@@ -164,114 +164,137 @@
 
 		<div class="row">
 			@if( array_intersect(['dashboard.widgets_tables_latest_services_view'], $permissions) )
-			@if( $_user->hasRole('Registered') )
-			@if($_user->company?->cycle != null)
-			<div class="col-sm-6 col-12 mb-6">
-				<div class="card">
-					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
-						<div class="d-flex align-items-center py-2">
-							<i class="ti ti-devices-question ti-24px"></i>
-							<h5 class="card-title mb-0 mx-2">{{ __('dashboard.Latest services') }}</h5>
-						</div>
-					</div>
-					<div class="card-body">
-						@if( count($latest_services) > 0 )
-						@foreach( $latest_services as $service )
-						<div class="d-flex justify-content-between align-items-center my-2">
-							<div class="widget-todo-title-area d-flex align-items-center">
-								<a href="/dashboard/directory?find={{ $service->{'name_' . $l} }}">
-									<span class="widget-todo-title ml-50 text-secondary">
-										<i class="ti ti-link"></i>
-										{{ $service->{'name_' . $l}  }}</span>
-								</a>
-							</div>
-							<div class="widget-todo-item-action d-flex align-items-center">
-								<div class="btn btn-label-primary py-1 rounded d-flex align-items-center justify-content-center"
-									style="width: 200px; height: 30px">
-									<a href="/dashboard/directory?type={{ $service->category->id }}">
-										{{ $service->category->{'name_' . $l}  }}
-									</a>
+				@if( $_user->hasRole('Registered') )
+					@if($_user->company?->cycle != null)
+					<div class="col-sm-6 col-12 mb-6">
+						<div class="card h-100">
+							<div class="card-header border-bottom">
+								<div class="d-flex align-items-center">
+									<i class="ti ti-devices-question ti-24px me-2"></i>
+									<h5 class="card-title mb-0">{{ __('dashboard.Latest services') }}</h5>
 								</div>
 							</div>
-						</div>
-						@endforeach
-						@else
-						<div class="widget-todo-title-wrapper d-flex justify-content-between align-items-center mb-75">
-							<div class="widget-todo-title-area d-flex align-items-center">
-								<span class="widget-todo-title ml-50"> <i class="bx bxs-bell-ring text-danger"></i> 
-								{{ __('dashboard.No services added') }}.
-								</span>
+							<div class="card-body p-0">
+								@if( count($latest_services) > 0 )
+									<div id="latestServicesPages">
+										@foreach( $latest_services->chunk(7) as $pageIndex => $servicesChunk )
+										<div class="service-page list-group list-group-flush @if($pageIndex > 0) d-none @endif">
+											@foreach( $servicesChunk as $service )
+											<div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+												<a href="/dashboard/directory?find={{ $service->{'name_' . $l} }}"
+													class="d-flex align-items-center gap-2 text-body text-decoration-none text-truncate">
+													<i class="ti ti-link"></i>
+													<span class="text-truncate">{{ $service->{'name_' . $l}  }}</span>
+												</a>
+												<a href="/dashboard/directory?type={{ $service->category->id }}"
+													class="badge bg-label-primary rounded-pill text-decoration-none flex-shrink-0">
+													{{ $service->category->{'name_' . $l}  }}
+												</a>
+											</div>
+											@endforeach
+										</div>
+										@endforeach
+									</div>
+								@if( $latest_services->count() > 7 )
+									<div class="card-footer d-flex justify-content-between align-items-center border-top">
+										<button type="button" id="servicesPrevBtn" class="btn btn-outline-primary btn-sm" disabled>
+											<i class="ti ti-chevron-left"></i> {{ __('admin.Previous') }}
+										</button>
+										<button type="button" id="servicesNextBtn" class="btn btn-outline-primary btn-sm">
+											{{ __('admin.Next') }} <i class="ti ti-chevron-right"></i>
+										</button>
+									</div>
+								@endif
+								@else
+								<div>
+									@include('includes.no-result', ['message' => __('dashboard.No services added')])
+								</div>
+								@endif
 							</div>
 						</div>
-						@endif
 					</div>
-				</div>
-			</div>
-			@endif
-			@endif
+					@endif
+				@endif
 			@endif
 
 			@if( array_intersect(['dashboard.widgets_tables_available_surveys_view'], $permissions) )
-			@if( $_user->hasRole('Registered') )
-			@if($_user->company?->cycle != null)
-			<div class="col-sm-6 col-12 mb-6" style="height: 300px; overflow-y: auto; border-radius: 1rem;">
-				<div class="card">
-					<div class="d-flex justify-content-between align-items-center px-6 mt-2 border-bottom" style="width: '100%">
-						<div class="d-flex align-items-center py-2">
-							<i class="ti ti-user-question mr-1"></i>
-							<h5 class="card-title mb-0 mx-2">{{ __('dashboard.availableSurveysList') }}</h5>
-						</div>
-					</div>
-					<div class="card-body py-6">
-						<div class="container-fluid px-0">
-							@foreach( $available_surveys as $survey )
-							<div class="row border-bottom mb-2 pb-2 d-flex align-items-center">
-								<div class="col-9 py-1 line-clamp-1">
-									@if( $survey->triggered_on == 'mentorship' )
-									<i class="ti ti-bulb mx-1"></i>
-									@elseif( $survey->triggered_on == 'training' )
-									<i class="ti ti-presentation mx-1"></i>
-									@endif
-									{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on)
-									. ucFirst($survey->triggered_by) ) }}
-
-									@if( $survey->triggered_by == 'due' ) {{ __('dashboard.surveyStepName' .
-									ucFirst($survey->triggered_on) ) }} @endif
-									@if( $survey->triggered_on == 'mentorship' )
-									@if( $survey->triggered_by == 'session' )
-									{{ __('dashboard.with') }}
-									@php $mentor = $survey->middleware->mentor; @endphp
-									{{ $mentor->name ?? '' }}
-									@elseif( $survey->triggered_by == 'due' )
-									- {{ $survey->middleware->title }}
-									@else
-									-
-									@endif
-									@elseif( $survey->triggered_on == 'training' )
-									@if( $survey->triggered_by == 'session' )
-									{{ '(' . __('cycles.' . $survey->middleware->type ) . ')' }} {{ $survey->middleware->title }}
-									@elseif( $survey->triggered_by == 'due' )
-									- {{ $survey->middleware->title }}
-									@elseif( $survey->triggered_by == 'quiz' )
-									- {{ $survey->middleware->title }}
-									@else
-									-
-									@endif
-									@endif
+				@if( $_user->hasRole('Registered') )
+					@if( $_user->company?->cycle != null )
+						<div class="col-sm-6 col-12 mb-6">
+							<div class="card h-100">
+								<div class="card-header border-bottom">
+									<div class="d-flex align-items-center">
+										<i class="ti ti-user-question ti-24px me-2"></i>
+										<h5 class="card-title mb-0">{{ __('dashboard.availableSurveysList') }}</h5>
+									</div>
 								</div>
-								<div class="col-3 text-end">
-									<a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-label-primary">{{
-										__('dashboard.startSurvey') }}</a>
+								<div class="card-body p-0">
+									@if( count( $available_surveys ) > 0 )
+										<div id="availableSurveysPages">
+											@foreach( $available_surveys->chunk(7) as $pageIndex => $surveysChunk )
+												<div class="survey-page list-group list-group-flush @if($pageIndex > 0) d-none @endif">
+													@foreach( $surveysChunk as $survey )
+														<div class="list-group-item d-flex justify-content-between align-items-center gap-3">
+															<div class="text-truncate">
+																@if($survey->triggered_on == 'mentorship')
+																	<i class="ti ti-bulb mx-1"></i>
+																@elseif($survey->triggered_on == 'training')
+																	<i class="ti ti-presentation mx-1"></i>
+																@endif
+																{{ __('dashboard.surveyAbout') . ' ' . __('dashboard.surveyTriggerBy' . ucFirst($survey->triggered_on) . ucFirst($survey->triggered_by)) }}
+																@if($survey->triggered_by == 'due') {{ __('dashboard.surveyStepName' . ucFirst($survey->triggered_on)) }} @endif
+																@if($survey->triggered_on == 'mentorship')
+																	@if($survey->triggered_by == 'session')
+																		{{ __('dashboard.with') }}
+																		@php $mentor = $survey->middleware->mentor; @endphp
+																		{{ $mentor->name ?? '' }}
+																	@elseif($survey->triggered_by == 'due')
+																		- {{ $survey->middleware->title }}
+																	@else
+																		-
+																	@endif
+																@elseif($survey->triggered_on == 'training')
+																	@if($survey->triggered_by == 'session')
+																		{{ '(' . __('cycles.' . $survey->middleware->type) . ')' }} {{ $survey->middleware->title }}
+																	@elseif($survey->triggered_by == 'due')
+																		- {{ $survey->middleware->title }}
+																	@elseif($survey->triggered_by == 'quiz')
+																		- {{ $survey->middleware->title }}
+																	@else
+																		-
+																	@endif
+																@endif
+															</div>
+															<a href="{{ route('surveys.take', ['id' => $survey->id]) }}" class="btn btn-sm btn-primary flex-shrink-0">
+																{{ __('dashboard.startSurvey') }}
+															</a>
+														</div>
+													@endforeach
+												</div>
+											@endforeach
+										</div>
+										@if( $available_surveys->count() > 7 )
+											<div class="card-footer d-flex justify-content-between align-items-center border-top">
+												<button type="button" id="surveysPrevBtn" class="btn btn-outline-primary btn-sm" disabled>
+													<i class="ti ti-chevron-left"></i> {{ __('admin.Previous') }}
+												</button>
+												<button type="button" id="surveysNextBtn" class="btn btn-outline-primary btn-sm">
+													{{ __('admin.Next') }} <i class="ti ti-chevron-right"></i>
+												</button>
+											</div>
+										@endif
+									@else
+										<div>
+											@include('includes.no-result', ['message' => __('admin.No surveys found')])
+										</div>
+									@endif
 								</div>
 							</div>
-							@endforeach
 						</div>
-					</div>
-				</div>
-			</div>
+					@endif
+				@endif
 			@endif
-			@endif
-			@endif
+
 			@if( array_intersect(['dashboard.widgets_tables_latest_events_view'], $permissions) )
 			@if( $_user->hasRole('Registered') )
 			@if($_user->company?->cycle != null)
@@ -564,14 +587,24 @@
 						<div class="col-md-12">
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<h5 class="card-title mb-0">{{ __("admin.Final_Session") }}</h5>
+									<div>
+										<h5 class="card-title mb-0">{{ __("admin.Final_Session") }}</h5>
+										{{-- GV-3320/3321: program + step the session belongs to --}}
+										@if( !empty($evaluation_program_title) || !empty($evaluation_step_title) )
+											<small class="text-muted">
+												@if( !empty($evaluation_program_title) ){{ __('dashboard.Program') }}: {{ $evaluation_program_title }}@endif
+												@if( !empty($evaluation_program_title) && !empty($evaluation_step_title) ) &middot; @endif
+												@if( !empty($evaluation_step_title) ){{ __('dashboard.Step') }}: {{ $evaluation_step_title }}@endif
+											</small>
+										@endif
+									</div>
 								</div>
 								@if( !is_null( $myFinal ) && $myFinal->join_url )
 								<div class="card-datatable table-responsive">
 									<table class="table mb-0 sessonsTable">
 										<thead class="table-light">
 											<tr>
-												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('dashboard.Founder')}}</th>
 												<th>{{__('admin.Judger')}}</th>
 												<th>{{__('cycles.Date/Time')}}</th>
 												<th>{{__('cycles.Done')}}</th>
@@ -595,30 +628,42 @@
 													</div>
 												</td>
 												<td>
-													@foreach( $myFinal->judges as $judger )
-													@if(!empty($judge))
-													<div style="cursor: pointer;" class="d-flex align-items-center">
-														<div class="chip-body">
-															<div class="avatar">
-																<img class="img-fluid rounded-circle me-3" src="{{ $judger->img_url }}" alt="photo"
-																	height="20" width="20">
-															</div>
-															<span class="chip-text text-nowrap"> {{ $judger->name }} </span>
-														</div>
-													</div>
-													@endif
-													@endforeach
+													{{-- GV-8357: all of the panel's judges in one cell, capped with a +N overflow --}}
+													@include('includes.partials.judges-cell', ['judges' => $myFinal->judges])
 												</td>
-												<td> {{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M) </td>
+												{{-- GV-3321: per-startup slot derived from the panel interval --}}
+												<td>
+													@if( !empty( $myFinal->meeting_time ) )
+														{{ $myFinal->meeting_date }} <br>
+														<small class="text-muted">{{ $myFinal->meeting_time }}</small>
+													@else
+														{{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M)
+													@endif
+												</td>
 												<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
-												<td> 
+												<td>
 													@php
-														$startTime = \Carbon\Carbon::parse($myFinal->datetime);
-														$endTime = \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
+														// GV-8363: compare in the viewer's own timezone. Slots are stored as
+														// bare wall-clock times, so comparing them against the raw server
+														// clock opened/closed the window at the wrong moment for anyone whose
+														// profile timezone differed from the server's.
+														$startTime = $myFinal->meeting_start ?? \Carbon\Carbon::parse($myFinal->datetime);
+														$endTime = $myFinal->meeting_end
+															?? \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
+														// Join Now + passcode unlock 10 minutes before the slot starts
+														// and stay available until an hour after it ends.
+														$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
 													@endphp
-													@if( $startTime->format('Y-m-d') == date('Y-m-d') )
+													@if( $canJoin )
 														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
-													@elseif(now() > $endTime)
+														@if( !empty( $myFinal->passcode ) )
+															<button title="{{ __('dashboard.Passcode') }}" type="button"
+																data-passcode="{{ $myFinal->passcode }}"
+																class="btn btn-label-warning btn-sm show-passcode rounded ms-1">
+																<i class="ti ti-key"></i>
+															</button>
+														@endif
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $endTime, $_user ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -647,14 +692,24 @@
 						<div class="col-md-12">
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<h5 class="card-title mb-0">{{ __("admin.Screening_Sessions") }}</h5>
+									<div>
+										<h5 class="card-title mb-0">{{ __("admin.Screening_Sessions") }}</h5>
+										{{-- GV-3320/3321: program + step the session belongs to --}}
+										@if( !empty($evaluation_program_title) || !empty($evaluation_step_title) )
+											<small class="text-muted">
+												@if( !empty($evaluation_program_title) ){{ __('dashboard.Program') }}: {{ $evaluation_program_title }}@endif
+												@if( !empty($evaluation_program_title) && !empty($evaluation_step_title) ) &middot; @endif
+												@if( !empty($evaluation_step_title) ){{ __('dashboard.Step') }}: {{ $evaluation_step_title }}@endif
+											</small>
+										@endif
+									</div>
 								</div>
 								@if( !is_null( $myInitial ) )
 								<div class="card-datatable table-responsive">
 									<table class="table mb-0 initialScreeningTable">
 										<thead class="table-light">
 											<tr>
-												<th>{{__('cycles.User/Title')}}</th>
+												<th>{{__('dashboard.Founder')}}</th>
 												<th>{{__('admin.Judger')}}</th>
 												<th>{{__('cycles.Date/Time')}}</th>
 												<th>{{__('cycles.Done')}}</th>
@@ -679,17 +734,15 @@
 													</div>
 												</td>
 												<td>
-													@if(!empty($screening->judge))
-														<div style="cursor: pointer;" class="d-flex align-items-center">
-															<img class="img-fluid rounded-circle me-3" src="{{ $screening->judge->image_url }}" alt="photo" height="20" width="20">
-															<div class="media-body">
-																<h6 class="media-heading mb-0 text-nowrap">{{ $screening->judge->name }}</h6>
-															</div>
-														</div>
-													@endif
+													{{-- GV-8357: all of the panel's judges in one cell, capped with a +N overflow --}}
+													@include('includes.partials.judges-cell', ['judges' => $screening->judges ?? []])
 												</td>
+												{{-- GV-3320: per-startup slot derived from the panel interval --}}
 												<td>
-													@if( !is_null( $screening->dateTime ) )
+													@if( !empty( $screening->meeting_time ) )
+														{{ $screening->meeting_date }} <br>
+														<small class="text-muted">{{ $screening->meeting_time }}</small>
+													@elseif( !is_null( $screening->dateTime ) )
 														{{ $screening->dateTime }} <br>({{ $screening->duration }}M)
 													@else
 														-
@@ -697,9 +750,27 @@
 												</td>
 												<td> {{ !is_null( $screening->dateTime ) && $screening->dateTime < now() ? __('Yes') : __('No') }} </td>
 												<td>
-													@if( !is_null( $screening->dateTime ) && !is_null( $screening->meeting_link ) && \Carbon\Carbon::parse( $screening->dateTime )->format('Y-m-d') == date('Y-m-d') )
+													@php
+														$slotStart = $screening->meeting_start
+															?? ( !is_null( $screening->dateTime ) ? \Carbon\Carbon::parse( $screening->dateTime ) : null );
+														$slotEnd = $screening->meeting_end
+															?? ( !is_null( $screening->endTime ) ? \Carbon\Carbon::parse( $screening->endTime ) : null );
+														// GV-8363: Join Now + passcode unlock 10 minutes before the slot
+														// starts and stay available until an hour after it ends, compared
+														// in the viewer's own timezone rather than the server clock.
+														$canJoin = !is_null( $screening->meeting_link )
+															&& \App\Services\MeetingWindowService::isOpen( $slotStart, $slotEnd, $_user, 'founder' );
+													@endphp
+													@if( $canJoin )
 														<a href="{{ $screening->meeting_link }}" target="_blank">({{__('dashboard.Join now')}})</a>
-													@elseif( !is_null( $screening->endTime ) && now() > $screening->endTime)
+														@if( !empty( $screening->meeting_password ) )
+															<button title="{{ __('dashboard.Passcode') }}" type="button"
+																data-passcode="{{ $screening->meeting_password }}"
+																class="btn btn-label-warning btn-sm show-passcode rounded ms-1">
+																<i class="ti ti-key"></i>
+															</button>
+														@endif
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $slotEnd, $_user ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -760,11 +831,15 @@
 												<td>
 													@if( $session->type == 'sessions' )
 													{{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+													@if( $session->can_join ?? false )
 													<a href="{{ $session->join_url }}" target="_blank">
 														<button title="Join only" type="button"
 															class="btn btn-icon rounded-circle btn-light-primary"> <i class="ti ti-brand-zoom"></i>
 														</button>
 													</a>
+													@else
+													{{ __('admin.Finished') }}
+													@endif
 													@elseif ($session->type == 'offline')
 													<b>{{ __('cycles.trainer name') }}:</b> {{ $session->trainer_name }}<br>
 													<b>{{ __('cycles.training location') }}:</b>
@@ -921,7 +996,8 @@
 			</div>
 			@endif
 			
-			@if( array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null($cycle_id) )
+			{{-- GV-3691: hide the mentors widget until the program reaches the mentorship stage --}}
+			@if( array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null($cycle_id) && ($mentorshipActive ?? true) )
 			<div class="col-12">
 				<div class="card mb-6">
 					<div class="card-header border-bottom">
@@ -1212,15 +1288,17 @@
 												<thead>
 													<tr>
 													  <th>{{ __('dashboard.Company') }}</th>
-													  <th>{{ __('dashboard.User/Title') }}</th>
+													  <th>{{ __('dashboard.Founder') }}</th>
 													  <th>{{ __('dashboard.Screening completed') }}</th>
+													  <th>{{ __('dashboard.Meeting') }}</th>
+													  <th>{{ __('dashboard.Actions') }}</th>
 													  {{--  <th>{{ __('dashboard.AVG degree') }}</th>  --}}
 													</tr>
 												  </thead>
 												  <tbody>
 													@if( $step->companies->count() == 0 )
 														<tr>
-															<td class="text-center" colspan="4">{{ __('cycles.No data available in table') }}</td>
+															<td class="text-center" colspan="5">{{ __('cycles.No data available in table') }}</td>
 														</tr>
 													@else
 														@foreach( $step->companies as $company )
@@ -1263,6 +1341,40 @@
 																<span class="badge bg-label-danger">
 																	<i class="ti ti-exclamation-circle me-2"></i> {{ __('dashboard.evaluation_not_evaluated') }}
 																</span>
+																@endif
+															</td>
+															{{-- GV-3311: per-startup meeting slot derived from the panel interval --}}
+															<td>
+																@if( !empty( $company->meeting_time ) )
+																	<div>{{ $company->meeting_date }}</div>
+																	<small class="text-muted">{{ $company->meeting_time }}</small>
+																	@if( !empty( $company->passcode ) )
+																		<div>
+																			<button title="{{ __('dashboard.Passcode') }}" type="button"
+																				data-passcode="{{ $company->passcode }}"
+																				class="btn btn-label-warning btn-sm show-passcode rounded mt-1">
+																				<i class="ti ti-key"></i>
+																			</button>
+																		</div>
+																	@endif
+																@else
+																	{{ __('dashboard.Not added yet') }}
+																@endif
+															</td>
+															<td>
+																{{-- GV-8361/8364: Join Now opens 24h before the judge's slot and
+																	 closes an hour after it ends, compared in the viewer's own
+																	 timezone. The old gate used an unbounded subDay() on the
+																	 server clock, so it stayed visible past the end time. --}}
+																@if( !empty( $company->join_url )
+																	&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																	<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
+																		<i class="ti ti-video"></i> {{ __('dashboard.Join') }}
+																	</a>
+																@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																	<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+																@else
+																	-
 																@endif
 															</td>
 														</tr>
@@ -1324,7 +1436,7 @@
 														<thead>
 															<tr>
 																<th>{{ __('dashboard.Company') }}</th>
-																<th>{{ __('dashboard.User/Title') }}</th>
+																<th>{{ __('dashboard.Founder') }}</th>
 																<th>{{ __('dashboard.Screening completed') }}</th>
 																<th>{{ __('dashboard.Meeting') }}</th>
 																<th>{{ __('dashboard.Actions') }}</th>
@@ -1380,14 +1492,27 @@
 																			</span>
 																			@endif
 																		</td>
-																		<td> {{ $company->datetime ?? __('dashboard.Not added yet') }} </td>
+																		{{-- GV-3312: per-startup meeting slot derived from the panel interval --}}
 																		<td>
-																			@if( $company->join_url )
+																			@if( !empty( $company->meeting_time ) )
+																				<div>{{ $company->meeting_date }}</div>
+																				<small class="text-muted">{{ $company->meeting_time }}</small>
+																			@else
+																				{{ $company->datetime ?? __('dashboard.Not added yet') }}
+																			@endif
+																		</td>
+																		<td>
+																			{{-- GV-8364: Join Now opens 24h before the judge's slot and closes
+																				 an hour after it ends, in the viewer's own timezone. The old gate
+																				 fell open whenever meeting_start was missing and used an
+																				 unbounded subDay() on the server clock. --}}
+																			@if( $company->join_url
+																				&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
 																				<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																					<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
 																				</a>
 																				@if( !empty( $company->passcode ) )
-																						| <button title="Show Passcode" type="button" data-passcode="{{ $company->passcode }}" type="button" class="btn btn-label-warning show-passcode rounded">
+																						| <button title="{{ __('dashboard.Passcode') }}" type="button" data-passcode="{{ $company->passcode }}" class="btn btn-label-warning show-passcode rounded">
 																						<i class="ti ti-key"></i>
 																					</button>
 																				@endif
@@ -1396,6 +1521,8 @@
 																					<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
 																				</a>
 																				@endif  --}}
+																			@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																				<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 																			@else
 																				{{ __('dashboard.Not started') }}
 																			@endif
@@ -1678,6 +1805,119 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 <!-- Respond Invitation Modal -->
 @if($team_member->count() > 0)
+<style>
+	/* Scoped hackathon-invitation popup (hxi-*) — self-contained, theme-aware. */
+	.hxi-dialog { max-width: 430px; }
+	.hxi-content {
+		border: 0; border-radius: 20px; overflow: hidden;
+		box-shadow: 0 24px 60px -18px rgba(47, 43, 61, .38);
+		background: var(--bs-card-bg, #fff);
+	}
+	.hxi-body { padding: 0; max-height: 82vh; overflow-y: auto; }
+	.hxi-card + .hxi-card { border-top: 8px solid var(--bs-border-color, #ecebf1); }
+
+	.hxi-head {
+		position: relative; text-align: center; padding: 30px 28px 0;
+		background: radial-gradient(120% 120% at 50% -20%, rgba(115,103,240,.16), transparent 62%);
+	}
+	.hxi-medallion {
+		position: relative; width: 76px; height: 76px; margin: 0 auto;
+		border-radius: 22px; display: grid; place-items: center;
+		background: linear-gradient(145deg, #7367f0, #5a4fd6);
+		color: #fff; font-size: 30px; font-weight: 800;
+		box-shadow: 0 10px 22px -6px rgba(115,103,240,.55);
+	}
+	.hxi-medallion::after {
+		content: ""; position: absolute; inset: -5px; border-radius: 26px;
+		border: 2px solid #7367f0; opacity: .22;
+	}
+	.hxi-initial { position: relative; z-index: 0; }
+	/* An uploaded image overlays the initial; a broken one is caught by onerror. */
+	.hxi-medallion img {
+		position: absolute; inset: 0; z-index: 1;
+		width: 100%; height: 100%; object-fit: cover; border-radius: 22px;
+	}
+	/* Broken/missing file swapped to the app's default team SVG: drop the gradient
+	   so the grey icon reads on a light surface, matching the manage-team page. */
+	.hxi-medallion--fallback {
+		background: var(--bs-secondary-bg, #f1f0f7);
+		box-shadow: 0 8px 18px -8px rgba(47,43,61,.25);
+	}
+	.hxi-medallion--fallback::after { opacity: .12; }
+	.hxi-medallion--fallback img { object-fit: contain; padding: 16px; }
+
+	.hxi-eyebrow {
+		margin: 16px 0 0; font-size: 11.5px; font-weight: 700;
+		letter-spacing: .12em; text-transform: uppercase; color: #7367f0;
+	}
+	.hxi-team {
+		margin: 5px 0 0; font-size: 23px; font-weight: 800; line-height: 1.2;
+		color: var(--bs-heading-color, #2f2b3d); text-wrap: balance;
+	}
+
+	.hxi-content-body { padding: 18px 28px 26px; text-align: center; }
+	.hxi-inviter {
+		display: inline-flex; align-items: center; gap: 8px;
+		padding: 6px 14px 6px 6px; border-radius: 999px;
+		background: var(--bs-tertiary-bg, #f8f7ff);
+		border: 1px solid var(--bs-border-color, #ecebf1);
+		font-size: 13.5px; color: var(--bs-secondary-color, #5d596c);
+	}
+	.hxi-who {
+		width: 24px; height: 24px; border-radius: 50%;
+		background: rgba(115,103,240,.14); color: #7367f0;
+		display: grid; place-items: center; font-weight: 800; font-size: 12px;
+	}
+	.hxi-inviter strong { color: var(--bs-heading-color, #2f2b3d); font-weight: 700; }
+
+	.hxi-lead {
+		margin: 16px 0 0; font-size: 15px; font-weight: 600;
+		color: var(--bs-heading-color, #2f2b3d);
+	}
+	.hxi-perks {
+		list-style: none; margin: 16px auto 0; padding: 0; max-width: 260px;
+		display: flex; flex-direction: column; gap: 9px; text-align: start;
+	}
+	.hxi-perks li {
+		display: flex; align-items: center; gap: 10px;
+		font-size: 13px; color: var(--bs-secondary-color, #5d596c);
+	}
+	.hxi-tick {
+		flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%;
+		background: rgba(40,199,111,.14); color: #28c76f;
+		display: grid; place-items: center; font-size: 11px; font-weight: 900;
+	}
+
+	.hxi-actions {
+		display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px;
+	}
+	.hxi-actions form { margin: 0; display: block; }
+	.hxi-btn {
+		width: 100%; height: 46px; border: 0; border-radius: 12px; cursor: pointer;
+		font-family: inherit; font-size: 14.5px; font-weight: 700;
+		display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+		transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+	}
+	.hxi-btn i { font-size: 18px; }
+	.hxi-btn-accept {
+		color: #fff; background: linear-gradient(145deg, #28c76f, #1f9d57);
+		box-shadow: 0 8px 18px -6px rgba(40,199,111,.6);
+	}
+	.hxi-btn-accept:hover { transform: translateY(-1px); box-shadow: 0 12px 22px -6px rgba(40,199,111,.7); }
+	.hxi-btn-reject {
+		color: #ea5455; background: rgba(234,84,85,.10);
+		box-shadow: inset 0 0 0 1px rgba(234,84,85,.24);
+	}
+	.hxi-btn-reject:hover { transform: translateY(-1px); background: rgba(234,84,85,.16); }
+	.hxi-btn:focus-visible { outline: 3px solid #7367f0; outline-offset: 2px; }
+
+	.hxi-expiry {
+		margin: 16px 0 0; font-size: 12px; color: var(--bs-tertiary-color, #a5a3ae);
+		display: inline-flex; align-items: center; gap: 6px;
+	}
+	@media (prefers-reduced-motion: reduce) { .hxi-btn { transition: none; } }
+	@media (max-width: 380px) { .hxi-actions { grid-template-columns: 1fr; } }
+</style>
 <div
 	class="modal fade"
 	id="teamInvitationModal"
@@ -1685,59 +1925,79 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 	aria-labelledby="teamInvitationLabel"
 	aria-modal="true"
 	role="dialog">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content overflow-hidden position-relative">
+	<div class="modal-dialog modal-dialog-centered hxi-dialog">
+		<div class="modal-content hxi-content">
 
-			<!-- Optional Background Gradient Overlay -->
-			<div
-				style="position: absolute; inset: 0; background: linear-gradient(135deg, #f5f7fa, #c3cfe2); opacity: 0.3;"
-			></div>
+			<!-- Static accessible name for the modal (per-invite titles below are not unique) -->
+			<h2 id="teamInvitationLabel" class="visually-hidden">{{ $l == 'en' ? 'Team Invitation' : 'دعوة الفريق' }}</h2>
 
-			<div class="modal-body position-relative text-center py-12 px-12">
+			<div class="modal-body hxi-body">
 				@foreach($team_member as $join)
-				<!-- Team & Inviter Avatar -->
-				<div class="position-relative d-inline-block mb-4">
-					<img
-						src="{{ $join->tf_img_team ? asset($join->tf_img_team) : 'https://placehold.co/400x200?text='.$join->tf_name }}"
-						alt="Team Avatar"
-						class="rounded-circle border-4 shadow"
-						style="width: 64px; height: 64px; object-fit: cover;"
-					/>
-				</div>
-				
-				<!-- Title -->
-				<h5 id="teamInvitationLabel" class="fw-bold mb-2">{{ $join->tf_name }}</h5>
+				@php
+					$hxiTeamName = trim($join->tf_name);
+					$hxiTeamInitial = mb_strtoupper(mb_substr($hxiTeamName, 0, 1));
+					$hxiInviter = trim($join->{'user_name_' . $l} ?? '');
+					$hxiInviterInitial = $hxiInviter !== '' ? mb_strtoupper(mb_substr($hxiInviter, 0, 1)) : '?';
+				@endphp
+				<div class="hxi-card">
 
-				<!-- Description -->
-				<p class="mb-2">
-					<strong>{{ $join->{'user_name_' . $l} }}</strong> {{ $l == 'en' ? 'invited you to join their team' : 'تم دعوتك للانضمام لفريقه' }}
-				</p>
-				<p class="fst-italic text-muted small">
-					{{ $l == 'en' ? 'Joining this team will allow you to collaborate on projects, share resources, and participate in discussions.' : 'الانضمام للفريق سوف تسمح لك بالتعاون في المشاريع، والمشاركة في الموارد، والتشارك في النقاشات.' }}
-				</p>
+					<!-- Header: team monogram medallion. Priority: uploaded team image ->
+						 (on broken/missing file) app's default team SVG -> branded team initial. -->
+					<div class="hxi-head">
+						<div class="hxi-medallion" aria-hidden="true">
+							<span class="hxi-initial">{{ $hxiTeamInitial }}</span>
+							@if($join->tf_img_team)
+								<img src="{{ asset($join->tf_img_team) }}" alt=""
+									onerror="this.onerror=null;this.src='/icons/team-default.svg';this.closest('.hxi-medallion').classList.add('hxi-medallion--fallback');">
+							@endif
+						</div>
+						<p class="hxi-eyebrow">{{ $l == 'en' ? 'Team Invitation' : 'دعوة فريق' }}</p>
+						<h3 class="hxi-team">{{ $hxiTeamName }}</h3>
+					</div>
 
-				<!-- Buttons -->
-				<div class="d-flex flex-column flex-sm-row gap-2">
+					<div class="hxi-content-body">
+						<!-- Inviter chip: the relationship at a glance -->
+						<span class="hxi-inviter">
+							<span class="hxi-who" aria-hidden="true">{{ $hxiInviterInitial }}</span>
+							<span><strong>{{ $hxiInviter }}</strong> {{ $l == 'en' ? 'invited you' : 'قام بدعوتك' }}</span>
+						</span>
 
-					<form action="{{ route('hackathon.acceptInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
-						@csrf
-						@method('PATCH')
-						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
-						<button class="btn btn-success btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
-							<i class="ti ti-users me-2 me-2"></i>
-							{{ $l == 'en' ? 'Accept Invitation' : ' قبول الدعوة ' }}
-						</button>
-					</form>
-					<form action="{{ route('hackathon.rejectInvitation', $join->tm_id) }}" class="d-inline-block" method="post">
-						@csrf
-						@method('PATCH')
-						<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
-						<button class="btn btn-danger btn-lg px-4 py-2 me-3" style="border-radius: 50px; font-weight: 600;">
-							<i class="ti ti-users me-2 me-2"></i>
-							{{ $l == 'en' ? 'Reject Invitation' : ' رفض الدعوة ' }}
-						</button>
-                	</form>
+						<p class="hxi-lead">{{ $l == 'en' ? 'Join them to build together.' : 'انضم إليهم للبناء معًا.' }}</p>
 
+						<!-- What joining gives you -->
+						<ul class="hxi-perks">
+							<li><span class="hxi-tick" aria-hidden="true">✓</span>{{ $l == 'en' ? "Collaborate on the team's project" : 'التعاون في مشروع الفريق' }}</li>
+							<li><span class="hxi-tick" aria-hidden="true">✓</span>{{ $l == 'en' ? 'Share files and resources' : 'مشاركة الملفات والموارد' }}</li>
+							<li><span class="hxi-tick" aria-hidden="true">✓</span>{{ $l == 'en' ? 'Join the team discussion' : 'الانضمام إلى نقاش الفريق' }}</li>
+						</ul>
+
+						<!-- Actions: equal-width, accept leads, decline recedes. Forms unchanged. -->
+						<div class="hxi-actions">
+							<form action="{{ route('hackathon.acceptInvitation', $join->tm_id) }}" method="post">
+								@csrf
+								@method('PATCH')
+								<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
+								<button type="submit" class="hxi-btn hxi-btn-accept">
+									<i class="ti ti-check"></i>
+									{{ $l == 'en' ? 'Accept' : 'قبول' }}
+								</button>
+							</form>
+							<form action="{{ route('hackathon.rejectInvitation', $join->tm_id) }}" method="post">
+								@csrf
+								@method('PATCH')
+								<input type="hidden" name="cycle_id" value="{{ $join->tf_cycle_id }}">
+								<button type="submit" class="hxi-btn hxi-btn-reject">
+									<i class="ti ti-x"></i>
+									{{ $l == 'en' ? 'Decline' : 'رفض' }}
+								</button>
+							</form>
+						</div>
+
+						<p class="hxi-expiry">
+							<i class="ti ti-clock"></i>
+							{{ $l == 'en' ? 'This invitation expires in 24 hours' : 'تنتهي صلاحية هذه الدعوة خلال 24 ساعة' }}
+						</p>
+					</div>
 				</div>
 				@endforeach
 			</div>
@@ -1801,40 +2061,6 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 	$('#teamInvitationModal').modal('show');
-
-	$('#acceptInvitationBtn').on('click', function() {
-		var btn = $(this);
-		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Accepting...');
-		// Simulate AJAX request
-		setTimeout(function() {
-			btn.prop('disabled', false).html('<i class="ti ti-circle-check"></i> Accept Invitation');
-			$('#teamInvitationModal').modal('hide');
-			$('body').prepend(`
-				<div class="alert alert-success alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
-					<i class="ti ti-check-circle me-2"></i>
-					Invitation accepted! You have joined the team.
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-				</div>
-			`);
-		}, 1200);
-	});
-
-	$('#declineInvitationBtn').on('click', function() {
-		var btn = $(this);
-		btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Declining...');
-		// Simulate AJAX request
-		setTimeout(function() {
-			btn.prop('disabled', false).html('<i class="ti ti-circle-x"></i> Decline');
-			$('#teamInvitationModal').modal('hide');
-			$('body').prepend(`
-				<div class="alert alert-warning alert-dismissible fade show" role="alert" style="position:fixed;top:20px;right:20px;z-index:9999;">
-					<i class="ti ti-info-circle me-2"></i>
-					Invitation declined. The team organizer has been notified.
-					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-				</div>
-			`);
-		}, 1200);
-	});
 });
 </script>
 
@@ -1884,28 +2110,28 @@ document.addEventListener('DOMContentLoaded', function() {
 	// -------------------------------------------------------
 	function populatePrerequisiteModal(preRequests) {
 		console.log('Populating prerequisites modal with:', preRequests);
-    const list = document.getElementById('prerequisitesList');
-    list.innerHTML = '';
+	const list = document.getElementById('prerequisitesList');
+	list.innerHTML = '';
 
-    preRequests.forEach(pr => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex align-items-center';
-        li.innerHTML = `
-            <i class="ti ti-circle-check me-2 text-warning"></i>
-            <a href="${pr.url}?action=complete-profile" 
-               target="_blank" 
-               class="text-decoration-none flex-grow-1">
-               ${pr.label}
-            </a>`;
-        list.appendChild(li);
-    });
+	preRequests.forEach(pr => {
+		const li = document.createElement('li');
+		li.className = 'list-group-item d-flex align-items-center';
+		li.innerHTML = `
+			<i class="ti ti-circle-check me-2 text-warning"></i>
+			<a href="${pr.url}?action=complete-profile" 
+			   target="_blank" 
+			   class="text-decoration-none flex-grow-1">
+			   ${pr.label}
+			</a>`;
+		list.appendChild(li);
+	});
 
-    // ----------------------------------------
-    // Attach modal action button link
-    // ----------------------------------------
-    const modalBtn = document.getElementById('completePrerequisitesBtn');
+	// ----------------------------------------
+	// Attach modal action button link
+	// ----------------------------------------
+	const modalBtn = document.getElementById('completePrerequisitesBtn');
 
-    if (preRequests.length > 0) {
+	if (preRequests.length > 0) {
 			const firstUrl = `${preRequests[0].url}?action=complete-profile`;
 
 			modalBtn.setAttribute('href', firstUrl);
@@ -1914,7 +2140,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			modalBtn.onclick = function () {
 				localStorage.setItem('prerequisitesOpened', 'true');
 			};
-    }
+	}
 	}
 
 
@@ -1952,51 +2178,51 @@ document.addEventListener('DOMContentLoaded', function() {
 	// -------------------------------------------------------
 
 	function updateUIWithCompletionStatus(data) {
-    const hasPreRequests = data.has_pre_requests;
-    const preRequests = data.pre_requests || [];
+	const hasPreRequests = data.has_pre_requests;
+	const preRequests = data.pre_requests || [];
 
-    // Only update the active cycle's button, not all buttons
-    if (activeCycleId) {
-        const joinButton = document.querySelector('button[data-cycle-id="' + activeCycleId + '"]');
-        if (joinButton) {
-            joinButton.className = 'btn btn-primary';
-            joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
+	// Only update the active cycle's button, not all buttons
+	if (activeCycleId) {
+		const joinButton = document.querySelector('button[data-cycle-id="' + activeCycleId + '"]');
+		if (joinButton) {
+			joinButton.className = 'btn btn-primary';
+			joinButton.innerHTML = '<span class="me-2">{{ __("dashboard.Join now") }}</span><i class="ti ti-arrows-join"></i>';
 
-            joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
-            joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
-                url: `${pr.url}?action=complete-profile`,
-                label: pr.label,
-            }))));
+			joinButton.setAttribute('data-has-pre', hasPreRequests ? 'true' : 'false');
+			joinButton.setAttribute('data-pre-requests', JSON.stringify(preRequests.map(pr => ({
+				url: `${pr.url}?action=complete-profile`,
+				label: pr.label,
+			}))));
 
-            // Update the alert box for this cycle's card only
-            const card = joinButton.closest('.card') || joinButton.closest('[class*="cycle"]') || joinButton.parentElement.parentElement;
-            if (card) {
-                const alertDiv = card.querySelector('.alert.alert-info');
-                if (alertDiv) {
-                    if (hasPreRequests) {
-                        const listElement = alertDiv.querySelector('.list-unstyled');
-                        if (listElement) {
-                            listElement.innerHTML = '';
-                            preRequests.forEach(pr => {
-                                const li = document.createElement('li');
-                                li.className = 'pre-request-item';
-                                li.innerHTML = `
-                                    <a href="${pr.url}?action=complete-profile"
-                                       class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
-                                       <i class="ti ti-external-link"></i>
-                                       <span>${pr.label}</span>
-                                    </a>`;
-                                listElement.appendChild(li);
-                            });
-                        }
-                        alertDiv.style.display = 'block';
-                    } else {
-                        alertDiv.style.display = 'none';
-                    }
-                }
-            }
-        }
-    }
+			// Update the alert box for this cycle's card only
+			const card = joinButton.closest('.card') || joinButton.closest('[class*="cycle"]') || joinButton.parentElement.parentElement;
+			if (card) {
+				const alertDiv = card.querySelector('.alert.alert-info');
+				if (alertDiv) {
+					if (hasPreRequests) {
+						const listElement = alertDiv.querySelector('.list-unstyled');
+						if (listElement) {
+							listElement.innerHTML = '';
+							preRequests.forEach(pr => {
+								const li = document.createElement('li');
+								li.className = 'pre-request-item';
+								li.innerHTML = `
+									<a href="${pr.url}?action=complete-profile"
+									   class="btn btn-sm btn-outline-info d-flex align-items-center gap-2">
+									   <i class="ti ti-external-link"></i>
+									   <span>${pr.label}</span>
+									</a>`;
+								listElement.appendChild(li);
+							});
+						}
+						alertDiv.style.display = 'block';
+					} else {
+						alertDiv.style.display = 'none';
+					}
+				}
+			}
+		}
+	}
 	}
 
 	// -------------------------------------------------------
@@ -2449,4 +2675,56 @@ document.addEventListener('DOMContentLoaded', function() {
 @endif
 @endif
 @endif
+
+<script>
+	(function () {
+		function initPagination(containerId, pageSelector, prevId, nextId) {
+			const container = document.getElementById(containerId);
+			if (!container) return;
+
+			const pages = container.querySelectorAll(pageSelector);
+			if (pages.length <= 1) return;
+
+			const prevBtn = document.getElementById(prevId);
+			const nextBtn = document.getElementById(nextId);
+			let current = 0;
+
+			function render() {
+				pages.forEach(function (page, index) {
+					page.classList.toggle('d-none', index !== current);
+				});
+				if (prevBtn) prevBtn.disabled = current === 0;
+				if (nextBtn) nextBtn.disabled = current === pages.length - 1;
+			}
+
+			if (prevBtn) {
+				prevBtn.addEventListener('click', function () {
+					if (current > 0) {
+						current--;
+						render();
+					}
+				});
+			}
+
+			if (nextBtn) {
+				nextBtn.addEventListener('click', function () {
+					if (current < pages.length - 1) {
+						current++;
+						render();
+					}
+				});
+			}
+
+			render();
+		}
+
+		@if(count($latest_services) > 0)
+			initPagination('latestServicesPages', '.service-page', 'servicesPrevBtn', 'servicesNextBtn');
+		@endif
+
+		@if(count($available_surveys) > 0)
+			initPagination('availableSurveysPages', '.survey-page', 'surveysPrevBtn', 'surveysNextBtn');
+		@endif
+	})();
+</script>
 @stop

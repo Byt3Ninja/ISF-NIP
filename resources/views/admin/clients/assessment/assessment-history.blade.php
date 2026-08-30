@@ -45,7 +45,7 @@
 
 @php
 $pills = ['analysis-assessment', 'question-assessment', 'history'];
-$mobilePills = ['analysis', 'questions', 'history'];
+$assessment_user = $assessmentsopen->first();
 
 // $assessments = [
 // ['title' => 'business-concept', 'progress' => 50, 'status' => 'in-progress'],
@@ -62,11 +62,27 @@ $mobilePills = ['analysis', 'questions', 'history'];
     <div class="row mb-4 d-block d-md-none">
       <div class="col-12">
         <ul class="nav nav-pills">
-          @foreach($mobilePills as $key => $pill)
+          @foreach($pills as $key => $pill)
           <li class="nav-item me-1">
-            <a href="/dashboard/{{ $pill }}" class="nav-link {{ $key == 2 ? 'active' : '' }}">
-              <span>{{ $pill }}</span>
-            </a>
+            @if ($pill == 'question-assessment' && !$assessment_user)
+              <span class="nav-link" style="cursor: not-allowed; opacity: 0.5;"
+                    title="{{ __('admin.No_Questions_Available') }}">
+                <span>{{ __('admin.Question_assessment') }}</span>
+              </span>
+            @else
+              <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
+                class="nav-link {{ $key == 2 ? 'active' : '' }}">
+                <span>
+                  @if($pill == 'analysis-assessment')
+                    {{ __('admin.Analysis_Assessment') }}
+                  @elseif($pill == 'question-assessment')
+                    {{ __('admin.Question_assessment') }}
+                  @else
+                    {{ __('admin.History') }}
+                  @endif
+                </span>
+              </a>
+            @endif
           </li>
           @endforeach
         </ul>
@@ -80,18 +96,25 @@ $mobilePills = ['analysis', 'questions', 'history'];
           <ul class="nav nav-pills flex-nowrap px-2 py-3">
             @foreach($pills as $key => $pill)
             <li class="nav-item me-1">
-              <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
-                class="nav-link {{ $key == 2 ? 'active' : '' }}">
-                <span class="fs-6">
-                  @if($pill == 'analysis-assessment')
-                {{ __('admin.Analysis_Assessment') }}
-            @elseif($pill == 'question-assessment')
-                {{ __('admin.Question_assessment') }}
-            @else
-                {{ __('admin.History') }}
-            @endif
+              @if ($pill == 'question-assessment' && !$assessment_user)
+                <span class="nav-link" style="cursor: not-allowed; opacity: 0.5;"
+                      title="{{ __('admin.No_Questions_Available') }}">
+                  <span class="fs-6">{{ __('admin.Question_assessment') }}</span>
                 </span>
-              </a>
+              @else
+                <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
+                  class="nav-link {{ $key == 2 ? 'active' : '' }}">
+                  <span class="fs-6">
+                    @if($pill == 'analysis-assessment')
+                  {{ __('admin.Analysis_Assessment') }}
+              @elseif($pill == 'question-assessment')
+                  {{ __('admin.Question_assessment') }}
+              @else
+                  {{ __('admin.History') }}
+              @endif
+                  </span>
+                </a>
+              @endif
             </li>
             @endforeach
           </ul>

@@ -105,6 +105,16 @@
   .card-datatable {
     padding-top: 0 !important;
   }
+
+  /* Daterangepicker dropdowns inside a modal/offcanvas are positioned by
+     /js/daterangepicker-viewport.js using viewport-fixed coordinates, so they
+     stay fully visible instead of drifting off-screen after a date is picked.
+     The margin-top override neutralises the per-page offsets that fought it. */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
+  }
 </style>
 <!-- END: Page CSS-->
 

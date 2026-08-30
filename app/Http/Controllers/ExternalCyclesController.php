@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use App\Services\WhatsAppService;
+use App\Services\FormSectionStructurer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -166,31 +167,10 @@ class ExternalCyclesController extends Controller
 				if( $_step == 'register' )
 				{
 					$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-					$formFields = Formfield::where('step_id', $step->id)->get();
-					$fields_ids = $formFields->pluck('id')->toArray();
-					$fields = $step->fields()->orderBy('form_fields.id', 'asc')->get();
-					$builderFields = DB::table('builder_fields')->whereIn('builder_form_id', $formFields->pluck('builder_forms_id')->unique()->toArray())->get();
-					$fields = $fields->map(function( $field, $loop ) use ( $builderFields ) {
-						$options = $field->pivot->options ? json_decode($field->pivot->options) : null;
-						$label = trim( strtolower( $options?->label ?? '' ) );
-						$check = $builderFields->filter(function( $item ) use ( $label ) {
-							$_options = is_string( $item->options ) ? json_decode( $item->options ) : $item->options;
-							$_label = trim( strtolower( $_options?->label ?? '' ) );
-							return $label == $_label;
-						})->where('field_id', $field->pivot->field_id)->where('builder_form_id', $field->pivot->builder_forms_id)->first();
-						if( !empty( $check ) )
-						{
-							if( is_string( $check->options ) ) { $options = json_decode( $check->options ); }
-						}
-						$output = new stdClass;
-						$output->field_name = 'field_' . $field->pivot->id;
-						$output->type = $field->field_type;
-						$output->options = $options;
-						$output->id_for = 'input-fld-'. $loop;
-						return $output;
-					});
-				} else { $fields = null; $fields_ids = null; }
-				return response()->json(['status' => true, 'message' => __('cycles.email_checked_successfully'), 'step' => $_step, 'fields' => $fields, 'fields_ids' => $fields_ids]);
+					$formFields = Formfield::where('step_id', $step->id)->orderBy('id')->get();
+					$sections = FormSectionStructurer::structure($formFields);
+				} else { $sections = null; }
+				return response()->json(['status' => true, 'message' => __('cycles.email_checked_successfully'), 'step' => $_step, 'sections' => $sections]);
 			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
@@ -247,16 +227,32 @@ class ExternalCyclesController extends Controller
 				// creating any records, so a rejected submission never leaves an
 				// orphaned user/company.
 				$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-				$fields = Formfield::where('step_id', $step->id)->get();
+				$fields = Formfield::where('step_id', $step->id)->orderBy('id')->get();
+
+				// Recompute the visited section path SERVER-SIDE from the submitted
+				// answers (never trust a client-declared path) so that fields from
+				// sections the wizard never showed are neither required nor saved,
+				// even if a tampered request includes them.
+				$sections = FormSectionStructurer::structure($fields);
+				$visitedSectionIndexes = FormSectionStructurer::resolveVisitedPath(
+					$sections,
+					fn ($fieldName) => $request->input($fieldName)
+				);
+				$visitedFieldIds = collect(FormSectionStructurer::visitedFieldIds($sections, $visitedSectionIndexes));
+				$fields = $fields->whereIn('id', $visitedFieldIds->all())->values();
 
 				$l = app()->getLocale();
+				// GV-3679: "positive number" is only accurate when the floor is 0
+				// (the default). When an author sets a non-zero min, state the
+				// actual bound instead. Mirrors numberMinMessage() on the client.
 				$number_min_msg = $l == 'ar' ? 'يرجى إدخال رقم موجب صحيح.' : 'Please enter a valid positive number.';
+				$number_min_msg_tpl = $l == 'ar' ? 'يرجى إدخال رقم لا يقل عن :min.' : 'Please enter a number no less than :min.';
 				$number_max_msg_tpl = $l == 'ar' ? 'يرجى إدخال رقم لا يتجاوز :max.' : 'Please enter a number no greater than :max.';
 				$numeric_msg = $l == 'ar' ? 'يرجى إدخال رقم صحيح.' : 'Please enter a valid number.';
 				$email_regex_msg = $l == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com).' : 'Please enter a valid email address (e.g. name@example.com).';
 				$dynamic_field_messages = [];
 
-				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields, &$dynamic_field_messages, $number_min_msg, $number_max_msg_tpl, $numeric_msg, $email_regex_msg ) {
+				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields, &$dynamic_field_messages, $number_min_msg, $number_min_msg_tpl, $number_max_msg_tpl, $numeric_msg, $email_regex_msg ) {
 					$field_options = $fields->where('id', $id)->first()->options;
 					$field_name = 'field_' . $id;
 					$required = isset($field_options->validation->required) && $field_options->validation->required == 1;
@@ -279,7 +275,9 @@ class ExternalCyclesController extends Controller
 						$rules[] = 'numeric';
 						$rules[] = 'min:' . $min;
 						$dynamic_field_messages[$field_name . '.numeric'] = $numeric_msg;
-						$dynamic_field_messages[$field_name . '.min'] = $number_min_msg;
+						$dynamic_field_messages[$field_name . '.min'] = ((float) $min == 0.0)
+							? $number_min_msg
+							: str_replace(':min', $min, $number_min_msg_tpl);
 						if (isset($field_options->max) && $field_options->max !== '') {
 							$rules[] = 'max:' . $field_options->max;
 							$dynamic_field_messages[$field_name . '.max'] = str_replace(':max', $field_options->max, $number_max_msg_tpl);
@@ -417,7 +415,15 @@ class ExternalCyclesController extends Controller
                 			'form_id' => $step->id,
                 			'step_id' => $step->id,
                 			'question' => $field_options->label,
-                			'answer' => is_array($request->{$field_name}) ? implode(',', $request->{$field_name}) : $request->{$field_name},
+                			// Store multi-value answers as JSON, matching
+                			// CyclesController@saveForm. implode(',') was lossy and
+                			// ambiguous: a checkbox answer came back as one opaque
+                			// string, so the portal's read-only view could not tell
+                			// the selected options apart from the "Other" free text
+                			// (it showed everything as Other), and any free text
+                			// containing a comma was silently truncated. The reader
+                			// still accepts the legacy comma format for existing rows.
+                			'answer' => is_array($request->{$field_name}) ? json_encode($request->{$field_name}) : $request->{$field_name},
                 			'screening' => '{}',
                 			'comments' => '{}',
                 			'created_at' => now(),
@@ -489,6 +495,9 @@ class ExternalCyclesController extends Controller
 				'p.is_public',
 				'p.winners_announcement AS announced',
 				'p.winners_visibility AS visibility',
+				'p.start_color',
+				'p.end_color',
+				'p.main_color',
 				'o.slug AS org_slug',
 				'o.name_en AS en_org_name',
 				'o.name_ar AS ar_org_name',
@@ -523,6 +532,10 @@ class ExternalCyclesController extends Controller
 			$program->registration_end = $end . ' 23:59:59';
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
 			$program->ranges = date_ranges( $start, $end );
+
+			$program->start_color = preg_replace('/^#+/', '#', $program->start_color ?: '#6366f114');
+			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: '#0891b214');
+			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: '#6366f1');
 		}
 		return $program;
 	}

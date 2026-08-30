@@ -321,11 +321,11 @@
                       
                       {{-- Social Media Links --}}
                       <div class="d-flex justify-content-center gap-2">
-                        @if($member->email)
+                        {{-- @if($member->email)
                         <a href="mailto:{{ $member->email }}" class="btn btn-sm btn-outline-primary rounded-pill">
                           <i class="ti ti-mail"></i>
                         </a>
-                        @endif
+                        @endif --}}
                         @if($member->linkedin)
                         <a href="{{ $member->linkedin }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
                           <i class="ti ti-brand-linkedin"></i>
@@ -413,14 +413,14 @@
                 </div>
                 @endif
                 
-                @if($team->project->region)
+                {{-- @if($team->project->region)
                 <div class="col-md-4 mb-3">
                   <label class="form-label fw-semibold">{{ $l == 'ar' ? 'منطقة المشروع' : ' Project Region' }}</label>
                   <div>
                     <span class="badge bg-label-secondary fs-6">{{ __('admin.'.$team->project->region) }}</span>
                   </div>
                 </div>
-                @endif
+                @endif --}}
                 
                 <div class="col-md-4 mb-3">
                   <label class="form-label fw-semibold">{{ $l == 'ar' ? 'تاريخ الإنشاء' : 'Created Date' }}</label>

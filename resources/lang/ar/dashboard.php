@@ -27,6 +27,11 @@ return [
     'start from' => 'تبدأ في',
     'to' => 'إلى',
     'Meeting' => 'موعد الاجتماع',
+    'Founder' => 'المؤسس',
+    'Passcode' => 'رمز الدخول',
+    'Evaluation Session' => 'جلسة التقييم',
+    'Program' => 'البرنامج',
+    'Step' => 'المرحلة',
     'Actions' => 'الإجراءات',
     'Not added yet' => 'لم يضاف بعد',
     'Not started' => 'لم تبدأ',
@@ -234,6 +239,7 @@ return [
     'sp_service_created' => 'تم إنشاء الخدمة ":name"',
     'sp_service_updated' => 'تم تحديث الخدمة ":name"',
     'sp_service_status_changed' => 'تم تغيير حالة الخدمة ":name"',
+    'sp_show_request_details' => 'عرض تفاصيل الطلب',
 
     // بانر حالة الموافقة لمزود الخدمة
     'sp_pending_status_title' => 'الحالة المعلقة',

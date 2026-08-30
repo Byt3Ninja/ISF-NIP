@@ -101,7 +101,7 @@
 													<div class="quick-info mt-3 d-flex flex-wrap gap-3">
 														<div class="d-flex align-items-center text-muted">
 															<i class="ti ti-calendar-event me-2 text-primary"></i>
-															<small class="fw-medium">Started: {{ $cstep->from->format('M d, Y') ?? '-' }}</small>
+															<small class="fw-medium">{{ __('cycles.Started') }}: {{ $cstep->from->format('M d, Y') ?? '-' }}</small>
 														</div>
 														<div class="d-flex align-items-center text-muted">
 															<i class="ti ti-building me-2 text-success"></i>
@@ -136,7 +136,7 @@
 													</div>
 
 													<div class="stat-item d-flex align-items-center justify-content-between">
-														<span class="stat-label opacity-90">{{ __('cycles.Active Cycle') }}</span>
+														<span class="stat-label opacity-90">{{ __('admin.Prorgam_name') }}</span>
 														<span class="stat-value fw-bold line-clamp-1" style="max-width: 300px" title="{{ $cstep->cycle->title }}">
 															{{ Str::limit($cstep->cycle->title, 100) }}
 														</span>

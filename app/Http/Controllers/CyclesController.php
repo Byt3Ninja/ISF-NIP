@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CycleModifyAction;
+use App\Enums\CycleTabAction;
+use App\Enums\StepType;
 use App\Country;
 use App\Sector;
 use App\Stage;
@@ -259,9 +262,9 @@ class CyclesController extends Controller
         $getSteps = Step::where('stype', '!=', '7')->get();
         $companies = $companies->map(function ($company) use ($alumniCompanyIds, $l, $getSteps) {
             $company->isAlumni = $alumniCompanyIds->contains($company->id);
-            $goAlumni = $getSteps->where('cycle_id', $company->cycle)
-                            ->where('stype', '=', '5')
-                            ->sortByDesc('arr')
+            $finalScreeningSteps = $getSteps->where('cycle_id', $company->cycle)
+                            ->where('stype', '=', '5');
+            $goAlumni = $finalScreeningSteps->sortByDesc('arr')
                             ->first();
 
             $currentStepTitle = $getSteps->where('cycle_id', $company->cycle)
@@ -271,7 +274,7 @@ class CyclesController extends Controller
                             ->implode(', ');
 
             $company->goAlumni         = $goAlumni;
-            $company->atAlumniStep     = $goAlumni && $company->step == $goAlumni->id;
+            $company->atAlumniStep     = $finalScreeningSteps->pluck('id')->contains($company->step);
             $company->currentStepTitle = $currentStepTitle;
             $company->userName         = trim(($company->user->{'first_name_'.$l} ?? '').' '.($company->user->{'last_name_'.$l} ?? ''));
             $company->companyName      = $company->{'name_'.$l};
@@ -304,6 +307,16 @@ class CyclesController extends Controller
 
     public function modify(Request $request)
     {
+        if ($request->has('start_color')) {
+            $request->merge(['start_color' => preg_replace('/^#+/', '#', trim($request->start_color))]);
+        }
+        if ($request->has('end_color')) {
+            $request->merge(['end_color' => preg_replace('/^#+/', '#', trim($request->end_color))]);
+        }
+        if ($request->has('main_color')) {
+            $request->merge(['main_color' => preg_replace('/^#+/', '#', trim($request->main_color))]);
+        }
+
         $isEdit = false;
         $isCreate = false;
         if( $request->has('typeedit') && $request->has('id') && intval( $request->id ) > 0 ) { $isEdit = true; }
@@ -331,13 +344,16 @@ class CyclesController extends Controller
             ]);
         }
 
-        if ($type == 1 || $isEdit == true)
+        if ($type == CycleModifyAction::EDIT_CYCLE || $isEdit == true)
         {
             /// Edit Cycle (to be moved to standalone controller)
+            $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => ['required', 'string', 'max:250', Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
+                'title_ar' => 'required|string|max:50',
                 'description' => 'required|string|max:100',
+                'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
                 // 'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
                 'public_slug' => [
@@ -356,11 +372,22 @@ class CyclesController extends Controller
                 'cohort' => 'required|string|max:250',
                 'offline_location_address' => 'nullable|string|max:250',
                 'offline_location_map' => 'nullable|string|max:500',
+                'start_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'end_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'main_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
                 'public_slug.regex' => __('cycles.Public URL must be alphanumeric'),
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
+                'title_ar.required' => $isAr ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
+                'description_ar.required' => $isAr ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
+                'start_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'start_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'end_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'end_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'main_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
+                'main_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
             ]);
                 
             $cycle = Cycle::find($id);
@@ -400,7 +427,9 @@ class CyclesController extends Controller
             $cycle->public_slug = $public_slug;
             $cycle->organization_id = $request->organization_id2;
             $cycle->title = $request->title;
+            $cycle->title_ar = $request->title_ar;
             $cycle->description = $request->description;
+            $cycle->description_ar = $request->description_ar;
             $cycle->start = Carbon::parse($request->start);
             $cycle->end = Carbon::parse($request->end);
             $cycle->private = $private;
@@ -409,6 +438,9 @@ class CyclesController extends Controller
             $cycle->step_type = $request->program_step_type;
             $cycle->offline_location_address = $request->offline_location_address;
             $cycle->offline_location_map = $request->offline_location_map;
+            $cycle->start_color = $request->start_color;
+            $cycle->end_color = $request->end_color;
+            $cycle->main_color = $request->main_color;
 
 
             $fileManager = app(\App\Services\FileManagerService::class);
@@ -462,14 +494,14 @@ class CyclesController extends Controller
            
             return redirect()->back()->with('message', 'Saved');
         }
-        elseif ($type == 2) {
+        elseif ($type == CycleModifyAction::SAVE_CYCLE_NOOP) {
 
             /// Save Cycle
 
 
 
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($type == 3) {
+        } elseif ($type == CycleModifyAction::DELETE_CYCLE) {
             /// Delete Cycle steps contents
             $delsteps = Step::where('cycle_id', $id)->get();
             foreach ($delsteps as $onestep) {
@@ -485,14 +517,14 @@ class CyclesController extends Controller
             /// Delete Cycle
             Cycle::destroy($id);
             return Response()->json('Cycle deleted');
-        } elseif ($type == 4) {
+        } elseif ($type == CycleModifyAction::ARRANGE_STEPS) {
             /// arrange steps
             $i = 1;
             foreach ($request->steps as $id) {
                 Step::where('id', $id)->update(['arr' => $i++]);
             }
             return Response()->json('Arranged ');
-        } elseif ($type == 5) {
+        } elseif ($type == CycleModifyAction::ADD_STEP) {
             if (is_null($request->fromDate) || is_null($request->toDate)) {
                 return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
             }
@@ -501,7 +533,7 @@ class CyclesController extends Controller
             
             $data = null;
            
-            if ($stype == 1) {
+            if ($stype == StepType::CUSTOM_FORM) {
                 $data = $request->FormSelect;
                 $id = Step::insertGetId([
                     'cycle_id' => $request->cid,
@@ -529,7 +561,7 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
-            }elseif ($stype == 2) {
+            }elseif ($stype == StepType::SCREENING) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -544,7 +576,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            }elseif ($stype == 3) {
+            }elseif ($stype == StepType::MENTORSHIP) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -559,7 +591,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            }elseif ($stype == 4) {
+            }elseif ($stype == StepType::TRAINING) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -575,7 +607,7 @@ class CyclesController extends Controller
                     'from' => $request->fromDate,
                     'to' => $request->toDate
                 ]);
-            }elseif ($stype == 5) {
+            }elseif ($stype == StepType::FINAL_EVALUATION) {
                 if (is_null($request->fromDate) || is_null($request->toDate)) {
                     return redirect()->back()->with(['message2' => 'add start and end date first', 'class' => 'danger']);
                 }
@@ -612,7 +644,7 @@ class CyclesController extends Controller
                         ]);
                     }
                 }
-            }elseif ($stype == 6) {
+            }elseif ($stype == StepType::TEAM_FORMATION) {
                $validator = Validator::make($request->all(), [
                     'title' => 'required|string|max:100',
                     'description' => 'required|string|max:100',
@@ -644,7 +676,7 @@ class CyclesController extends Controller
                 'to' => $request->toDate,
                 'count_team_number' => $request->count_team_number ??0,
                 ]);
-            }elseif ($stype == 7) {
+            }elseif ($stype == StepType::GENERIC) {
                 
                 $validator = Validator::make($request->all(), [
                     'title' => 'required|string|max:100',
@@ -674,7 +706,7 @@ class CyclesController extends Controller
                 ]);
             }
             return redirect()->back()->with('message', 'Saved');
-        } elseif ($type == 6) {
+        } elseif ($type == CycleModifyAction::DELETE_STEP) {
             /// Delete step
             $cid = $request->stepid;
             if ($request->steps) {
@@ -698,12 +730,12 @@ class CyclesController extends Controller
                 Step::where('id', $id)->update(['arr' => $i++]);
             }
             return Response()->json('Step deleted');
-        } elseif ($type == 7) {
+        } elseif ($type == CycleModifyAction::FETCH_STEP) {
             // Modify step
             $step = Step::where('id', $request->sid)->first()->toArray();
 
             return response()->json($step);
-        } elseif ($type == 8) {
+        } elseif ($type == CycleModifyAction::UPDATE_STEP) {
             /// deleted saved data if type changed
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
@@ -733,12 +765,12 @@ class CyclesController extends Controller
                     'from' => Carbon::parse($request->fromDate),
                     'to' => Carbon::parse($request->toDate)
                 ];
-                if( $step8->stype == 1 )
+                if( $step8->stype == StepType::CUSTOM_FORM )
                 {
                     $counter = 0;
                     $organization_id = $step8->cycle->organization_id;
                     $cycles_ids = Cycle::where('organization_id', $organization_id)->pluck('id')->toArray();
-                    $slugs = Step::whereIn('cycle_id', $cycles_ids)->where('stype', 1)->pluck('public_slug')->unique()->filter(function($value) { return !empty($value); })->values()->toArray();
+                    $slugs = Step::whereIn('cycle_id', $cycles_ids)->where('stype', StepType::CUSTOM_FORM)->pluck('public_slug')->unique()->filter(function($value) { return !empty($value); })->values()->toArray();
 
                     $updatedArray['is_public'] = $request->is_public;
                     if( $updatedArray['is_public'] == 1 && ( empty( $request->public_slug ) || !trim( $request->public_slug ) ) )
@@ -784,13 +816,16 @@ class CyclesController extends Controller
             }
             return redirect()->back()->with('message', 'Saved');
         }
-        elseif ($request->tab_id == 1)
+        elseif ($request->tab_id == CycleTabAction::CREATE_CYCLE)
         {
             // create new cycle (to be moved to standalone controller)
+            $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:250',
+                'title_ar' => 'required|string|max:50',
                 'description' => 'required|string|max:100',
+                'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
                 'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9_-]+$/',
                 'start' => 'required|date|before:end',
@@ -803,7 +838,9 @@ class CyclesController extends Controller
                 'program_step_type' => ['required', 'in:cycle,time'],
                 'offline_location_address' => 'nullable|string|max:250',
                 'offline_location_map' => 'nullable|string|max:500',
-
+                'start_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'end_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
+                'main_color' => ['required', 'string', 'regex:/^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/'],
             ], [
                 'public_slug.required_if' => __('cycles.Public URL required'),
                 'public_slug.unique' => __('cycles.Public URL already exist'),
@@ -811,6 +848,14 @@ class CyclesController extends Controller
                 'program_step_type.required' => __('cycles.please_select_program_step_type'),
                 'offline_location_address.max' => __('cycles.offline_location_address_max'),
                 'offline_location_map.max' => __('cycles.offline_location_map_max'),
+                'title_ar.required' => $isAr ? 'عنوان البرنامج باللغة العربية مطلوب.' : 'Program Title in Arabic is required.',
+                'description_ar.required' => $isAr ? 'وصف البرنامج باللغة العربية مطلوب.' : 'Description in Arabic is required.',
+                'start_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'start_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid start color.',
+                'end_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'end_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid end color.',
+                'main_color.required' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
+                'main_color.regex' => $isAr ? 'يرجى إدخال لون صالح.' : 'Please enter a valid button color.',
             ]);
             
             $cycles = Cycle::where('organization_id', $request->organization_id2)->get();
@@ -856,7 +901,9 @@ class CyclesController extends Controller
                 $cycle->organization_id = $request->organization_id2;
                 $cycle->type = $request->program_type;
                 $cycle->title = $request->title;
+                $cycle->title_ar = $request->title_ar;
                 $cycle->description = $request->description;
+                $cycle->description_ar = $request->description_ar;
                 $cycle->start = Carbon::parse($request->start);
                 $cycle->end = Carbon::parse($request->end);
                 $cycle->private = $private;
@@ -865,6 +912,9 @@ class CyclesController extends Controller
                 $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
                 $cycle->offline_location_address = $request->offline_location_address;
                 $cycle->offline_location_map = $request->offline_location_map;
+                $cycle->start_color = $request->start_color;
+                $cycle->end_color = $request->end_color;
+                $cycle->main_color = $request->main_color;
                 // Check if file is uploaded
 
                 $fileManager = app(\App\Services\FileManagerService::class);
@@ -1087,20 +1137,15 @@ class CyclesController extends Controller
             $id = $step->id;
 
             $the_form = BuilderForm::findOrFail( $step->data );
-            $fields = $the_form->fields()
-                ->withPivot('options')
-                ->orderBy('builder_fields.id', 'asc')
-                ->get();
-
-            /* $field_map_ids = Formfield::where('step_id', $id)
-                ->where('builder_forms_id', $step->data)
-                ->pluck('id')
-                ->toArray();
-
+            // Step-scoped pivot (`form_fields`), NOT the BuilderForm template
+            // pivot (`builder_fields`) — see the comment in my(). `form_data.
+            // field_id` holds a `form_fields.id`, so reading the template pivot
+            // yields ids from a different id space and the saved answers never
+            // match when one BuilderForm is shared across several steps.
             $fields = $step->fields()
                 ->where('builder_forms_id', $step->data)
                 ->orderBy('form_fields.id', 'asc')
-                ->get();  */
+                ->get();
 
             $field_map_ids = $fields->pluck('pivot.id')->toArray();
             // تجهيز البيانات بشكل منسق
@@ -1114,13 +1159,13 @@ class CyclesController extends Controller
                     'section'     => $options['section'] ?? 'N/A',
                     'type'        => $options['type'] ?? null,
                     'is_required' => (bool)($options['validation']['required'] ?? 0),
-                    'options'     => isset($options['values'])
-                        ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                        : [],
+                    'options'     => form_field_options($options['values'] ?? null),
                     'logic'       => $options['logic'] ?? 'continue',
                     'min'         => $options['min'] ?? null,
                     'max'         => $options['max'] ?? null,
                     'step'        => $options['step'] ?? null,
+                    'label_low'   => $options['label_low'] ?? '',
+                    'label_high'  => $options['label_high'] ?? '',
                 ];
             })
             ->groupBy('section')
@@ -1142,6 +1187,8 @@ class CyclesController extends Controller
                             'min'         => $q['min'] ?? null,
                             'max'         => $q['max'] ?? null,
                             'step'        => $q['step'] ?? null,
+                            'label_low'   => $q['label_low'] ?? '',
+                            'label_high'  => $q['label_high'] ?? '',
                         ];
                     })->toArray(),
                 ];
@@ -1206,19 +1253,21 @@ class CyclesController extends Controller
         // if ($step->to < now()->format('Y-m-d')){return redirect()->back()->with(['msg' => 'Error can\'t open form, step timed out.', 'class' => 'danger']);}
         $id = $step->id;
 
-        /* $get_fields = Formfield::where('step_id', $id)->where('builder_forms_id', $step->data)->get();
-        $field_map_ids = $get_fields->pluck('id')->toArray();
-
-        // جلب كل الحقول الخاصة بالـ step
-        $fields = $step->fields()
-            ->where('builder_forms_id', $step->data)
-            ->orderBy('form_fields.id', 'asc')
-            ->get(); */
-
+        // Read the field list through the STEP pivot (`form_fields`), not the
+        // BuilderForm template pivot (`builder_fields`).
+        //
+        // `form_data.field_id` stores a `form_fields.id` — the step-scoped copy
+        // of the question. `$the_form->fields()` returns `builder_fields` rows,
+        // which belong to the template and are shared by every step using that
+        // form, so its pivot ids are a completely different id space. When a
+        // BuilderForm is assigned to more than one step, `whereIn('field_id',
+        // $field_map_ids)` below matched nothing: the saved answers never
+        // loaded, so the form rendered blank AND `$isReadOnly = $hasSubmission`
+        // stayed false, letting the founder submit the same form again.
         $the_form = BuilderForm::findOrFail( $step->data );
-        $fields = $the_form->fields()
-                ->withPivot('options')
-                ->orderBy('builder_fields.id', 'asc')
+        $fields = $step->fields()
+                ->where('builder_forms_id', $step->data)
+                ->orderBy('form_fields.id', 'asc')
                 ->get();
 
         $fields = $fields->map(function($field) {
@@ -1237,14 +1286,14 @@ class CyclesController extends Controller
                 'section'     => $options['section'] ?? 'N/A',
                 'type'        => $options['type'] ?? null,
                 'is_required' => (bool)($options['validation']->required ?? 0),
-                'options'     => isset($options['values'])
-                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                    : [],
+                'options'     => form_field_options($options['values'] ?? null),
                 'logic'       => $options['logic'] ?? 'continue',
                 'allowed_domains' => $options['allowed_domains'] ?? '',
                 'min'         => $options['min'] ?? null,
                 'max'         => $options['max'] ?? null,
                 'step'        => $options['step'] ?? null,
+                'label_low'   => $options['label_low'] ?? '',
+                'label_high'  => $options['label_high'] ?? '',
             ];
         })
         ->groupBy('section')
@@ -1266,6 +1315,8 @@ class CyclesController extends Controller
                         'min'         => $q['min'] ?? null,
                         'max'         => $q['max'] ?? null,
                         'step'        => $q['step'] ?? null,
+                        'label_low'   => $q['label_low'] ?? '',
+                        'label_high'  => $q['label_high'] ?? '',
                     ];
                 })->toArray(),
             ];
@@ -1331,10 +1382,15 @@ class CyclesController extends Controller
 
         $field_map_ids = array_filter(array_map('intval', explode(",", $request->input('field_ids'))));
 
+        // Step-scoped pivot (`form_fields`), NOT the BuilderForm template pivot
+        // (`builder_fields`) — must match the id space the form posts and that
+        // `form_data.field_id` stores. See the comment in my(). Reading the
+        // template pivot here made every posted id look "unknown" to the
+        // hardening check below, so a shared BuilderForm aborted with a 422.
         $the_form = BuilderForm::findOrFail( $step->data );
-        $fields = $the_form->fields()
-            ->withPivot('options')
-            ->orderBy('builder_fields.id', 'asc')
+        $fields = $step->fields()
+            ->where('builder_forms_id', $step->data)
+            ->orderBy('form_fields.id', 'asc')
             ->get();
 
         $field_mapper = $fields->map(function ($field) {

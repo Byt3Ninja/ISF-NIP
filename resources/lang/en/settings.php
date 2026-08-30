@@ -345,6 +345,7 @@ return [
 		'system_and_settings' => 'System & Settings',
 		'logs_viewer' => 'Logs Viewer',
 		'reminder_logs' => 'Reminder Logs',
+		'custom_landing_pages' => 'Custom Landing Pages',
 		'settings' => 'Settings',
 		'documentations' => 'Documentations',
 		'documentation' => 'Documentations',

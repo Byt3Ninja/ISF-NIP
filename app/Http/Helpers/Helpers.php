@@ -433,3 +433,113 @@ if (!function_exists('getIndustryIcon')) {
         }
     }
 }
+
+if (! function_exists('form_field_placeholder')) {
+    /**
+     * GV-8348: build the guidance hint shown inside a form-builder input.
+     *
+     * The builder gives authors no placeholder field, and the previous behaviour
+     * — echoing the label back into the box — was redundant with the label
+     * rendered directly above it, so it conveyed nothing about what to type.
+     *
+     * Typed fields therefore get a hint describing the EXPECTED FORMAT, which is
+     * the guidance the founder actually needs before hitting a validation error.
+     * Free-text fields carry no format to hint at, so their label — the only
+     * thing that describes them — becomes an instruction ("Enter <label>").
+     *
+     * This mirrors the JS placeholder logic on the public apply page (GV-3679)
+     * so a question looks the same from every entry point.
+     *
+     * @param  array  $question  A builder question array (type/label/min/max).
+     * @return string            Hint text, or '' when there is nothing to say.
+     */
+    function form_field_placeholder(array $question)
+    {
+        $type  = $question['type'] ?? 'short_answer';
+        $label = trim((string) ($question['label'] ?? ''));
+
+        switch ($type) {
+            case 'email':
+                return __('builder.hint_email');
+            case 'url':
+                return __('builder.hint_url');
+            case 'date':
+                return __('builder.hint_date');
+            case 'time':
+                return __('builder.hint_time');
+            case 'number':
+                return form_number_placeholder($question);
+        }
+
+        // No dedicated `phone` type exists; the client-side validator detects
+        // phone questions by label, so match that rule here or the two would
+        // disagree about which questions are phone questions.
+        if ($label !== '' && stripos($label, 'phone') !== false) {
+            return __('builder.hint_phone');
+        }
+
+        // A label-less free-text field has nothing to say, so leave the box bare
+        // rather than showing a dangling verb ("Enter ").
+        return $label === '' ? '' : __('builder.hint_enter') . ' ' . $label;
+    }
+}
+
+if (! function_exists('form_number_placeholder')) {
+    /**
+     * GV-8348: describe a number field's accepted range so the bound is visible
+     * BEFORE the user trips the validation message, not only after.
+     */
+    function form_number_placeholder(array $question)
+    {
+        $min = $question['min'] ?? null;
+        $max = $question['max'] ?? null;
+
+        $hasMin = $min !== null && $min !== '';
+        $hasMax = $max !== null && $max !== '';
+
+        if ($hasMax) {
+            // Mirrors the renderers, which fall back to a 0 floor when unset.
+            $from = $hasMin ? $min : 0;
+
+            return __('builder.hint_number_between') . ' ' . $from
+                . ' ' . __('builder.hint_and') . ' ' . $max;
+        }
+
+        // Only worth stating when the floor is a real constraint; a min of 0 or
+        // less is the unremarkable default and reads as noise.
+        if ($hasMin && is_numeric($min) && $min > 0) {
+            return __('builder.hint_number_from') . ' ' . $min;
+        }
+
+        return __('builder.hint_number');
+    }
+}
+
+if (!function_exists('form_field_options')) {
+    /**
+     * Normalize a builder question's stored choice list into a clean array.
+     *
+     * `options.values` is persisted as a comma-joined string (older rows may
+     * hold a real array). GV-8346: the builder's `Add "Other"` button had no
+     * guard, so a question could be saved with several `__OTHER__` entries and
+     * every renderer drew one "Other" choice per entry. De-duplicating on read
+     * keeps already-corrupted rows displaying correctly without a data fix,
+     * and blank entries (a trailing comma) never deserved a choice either.
+     *
+     * @param  mixed  $values  Raw `options['values']` (string or array).
+     * @return array<int, string>
+     */
+    function form_field_options($values)
+    {
+        if ($values === null || $values === '') {
+            return [];
+        }
+
+        return collect(is_array($values) ? $values : explode(',', $values))
+            ->map(fn($o) => trim((string) $o))
+            ->filter(fn($o) => $o !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+}
