@@ -323,7 +323,14 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
         submitBtnId: 'submit-button',
         btnTextId: 'button-text',
         btnSpinnerId: 'button-spinner',
-        successMessage: translations[lang].saveSuccess
+        successMessage: translations[lang].saveSuccess,
+        // First-time save (tabs still locked until the startup name exists):
+        // reload so the other tabs unlock without a manual refresh.
+        onSuccess: () => {
+          if (window.RELOAD_AFTER_INFO_SAVE) {
+            setTimeout(() => location.reload(), 700);
+          }
+        }
       });
     });
 

@@ -68,6 +68,9 @@
           'label'  => $tab[2]
       ];
   })->toArray();
+
+  // Lock every tab except "Startup Info" until the startup name has been saved.
+  $lockTabs = ! ($client && $client->company && trim((string) $client->company->name_en) !== '');
 @endphp
 
 @section('content')
@@ -80,7 +83,7 @@
         <ul class="nav nav-pills flex-nowrap" role="tablist">
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
-              <a 
+              <a
                 id="mobile-company-tab"
                 href="#navs-left-{{ $tab['target'] }}"
                 class="nav-link {{ $key == 0 ? 'active' : '' }} {{ $lockTabs && $key != 0 ? 'disabled' : '' }}"
@@ -104,7 +107,7 @@
             <ul class="nav nav-align-left nav-pills flex-column">
               @foreach ($tabs as $key => $tab)
               <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-                <a 
+                <a
                     id="company-tab"
                     href="#navs-left-{{ $tab['target'] }}"
                     class="nav-link py-3 {{ $key == 0 ? 'active' : '' }} {{ $lockTabs && $key != 0 ? 'disabled' : '' }}"
@@ -238,7 +241,7 @@
   </script>
   <script src="/app-assets/js/1.js"></script>
   
-  <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
+  <script src="/vuexy/assets/js/pages-edit-compnay.js?v={{ @filemtime(public_path('vuexy/assets/js/pages-edit-compnay.js')) ?: 1 }}"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -341,6 +344,12 @@
     });
   </script>
   
+  <script>
+    // While the tabs are locked (startup name not saved yet), pages-edit-compnay.js
+    // reloads the page after a successful save so the tabs unlock without a manual refresh.
+    window.RELOAD_AFTER_INFO_SAVE = @json($lockTabs);
+  </script>
+
   <script>
     $(document).ready(function() {
       $('.roundBtn').click(function() {

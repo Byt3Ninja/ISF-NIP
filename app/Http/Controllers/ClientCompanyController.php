@@ -901,6 +901,15 @@ class ClientCompanyController extends Controller
                     }
                 }
 
+                // Fresh registered users get a blank company auto-created above; make sure
+                // $company_instance and $id are set so every tab below (industry/sectors,
+                // employees, milestones, financials, ...) renders against that company
+                // instead of falling back to empty data.
+                $company_instance = $client?->company;
+                if ($company_instance) {
+                    $id = $company_instance->id;
+                }
+
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
