@@ -872,7 +872,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (list) {
         list.innerHTML =
           '<li class="text-center p-4"><small class="text-muted">' +
-          (window.CHAT_I18N ? window.CHAT_I18N.teamChatWaiting : '') +
+          escapeHtml(window.CHAT_I18N?.teamChatWaiting || '') +
           '</small></li>';
       }
       const header = document.querySelector('.chat-history-header .chat-contact-info h6');
@@ -1119,6 +1119,12 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       const messagesContainer = document.getElementById('chat-messages');
       
       if (!messages || messages.length === 0) {
+        // A leader-only team has no one to chat with yet, so the generic
+        // "no messages" copy is wrong here — show the waiting notice instead.
+        if (!window.CHAT_HAS_TEAMMATES) {
+          showTeamWaitingEmptyState();
+          return;
+        }
         messagesContainer.innerHTML = `
           <li class="text-center p-4">
             <small class="text-muted">${escapeHtml(window.CHAT_I18N?.noMessagesInConversation || 'No messages in this conversation yet')}</small>
@@ -2189,7 +2195,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         // Auto-open last conversation and rejoin channel after refresh
         const lastConvIdStr = localStorage.getItem(LS_KEYS.lastConversationId);
         const lastConvId = lastConvIdStr ? parseInt(lastConvIdStr) : null;
-        if (lastConvId) {
+        if (lastConvId && window.CHAT_HAS_TEAMMATES) {
           loadConversation(lastConvId);
         }
       } catch (error) {
