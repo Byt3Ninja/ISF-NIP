@@ -201,7 +201,7 @@
                       {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
                     </h6>
                     <small class="text-muted">
-                      {{ $l == 'en' ? 'Team Member ' . $T : 'عضو الفريق ' . $T }}
+                      {{ $member->u_email }}
                     </small>
                   </div>
                 </div>
