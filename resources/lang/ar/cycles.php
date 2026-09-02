@@ -689,4 +689,10 @@ return [
     'Main_Color' => 'اللون الرئيسي',
     'Gradient_Preview' => 'معاينة التدرج',
     'Reset_To_Default' => 'إعادة التعيين إلى الافتراضي',
+
+    'no_team_for_user' => 'أنت لست جزءاً من أي فريق. يُرجى الاتصال بمسؤول البرنامج للحصول على المساعدة.',
+    'file_upload_success' => 'تم رفع الملف بنجاح',
+    'file_not_found' => 'الملف غير موجود',
+    'file_delete_success' => 'تم حذف الملف بنجاح',
+    'file_delete_unauthorized' => 'أنت غير مصرح لك لحذف هذا الملف',
 ];

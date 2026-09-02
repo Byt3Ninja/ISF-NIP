@@ -695,4 +695,10 @@ return [
     'Main_Color' => 'Main Color',
     'Gradient_Preview' => 'Gradient Preview',
     'Reset_To_Default' => 'Rest to Default',
+
+    'no_team_for_user' => 'You are not part of any team. Please contact your program administrator for assistance.',
+    'file_upload_success' => 'File uploaded successfully',
+    'file_not_found' => 'File not found',
+    'file_delete_success' => 'File deleted successfully',
+    'file_delete_unauthorized' => 'You are not authorized to delete this file',
 ];

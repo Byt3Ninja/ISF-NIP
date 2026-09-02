@@ -36,12 +36,13 @@ class SharedFileController extends Controller
         // Validation
         try {
             $request->validate([
-                'file'        => 'required|file|mimes:pptx,zip,docx,pdf|max:10240',
+                'file'        => 'required|file|mimes:ppt,pptx,rar,zip,doc,docx,pdf|max:10240',
                 'description' => 'nullable|string'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'status' => 'error',
+                'message' => __('validation.mimes'),
                 'errors' => $e->errors(),
             ], 422);
         }
@@ -51,7 +52,7 @@ class SharedFileController extends Controller
         if (empty($team_member)) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'No team found for user'
+                'message' => __('cycles.no_team_for_user'),
             ], 400);
         }
 
@@ -77,7 +78,7 @@ class SharedFileController extends Controller
         // Success Response
         return response()->json([
             'status'        => 'success',
-            'message'       => 'File uploaded successfully',
+            'message'       => __('cycles.file_upload_success'),
             'id'            => $sharedFile->id,
             'file'          => $sharedFile->file,
             'original_name' => $sharedFile->original_name,
@@ -232,13 +233,13 @@ class SharedFileController extends Controller
 
             $file = SharedFile::find($id);
         if (!$file) {
-            return response()->json(['status' => 'error', 'message' => 'File not found'], 404);
+            return response()->json(['status' => 'error', 'message' => __('cycles.file_not_found')], 404);
         }
 
         // Authorization: only the file's uploader, the team leader, or an admin may delete.
         // Mirrors the delete button's visibility rule in manage-team.blade.php.
         if (!$this->canDeleteFile(auth()->user(), $file)) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            return response()->json(['status' => 'error', 'message' => __('cycles.file_delete_unauthorized')], 403);
         }
 
         // Delete the physical file from the private disk
@@ -248,7 +249,7 @@ class SharedFileController extends Controller
 
         $file->delete();
 
-        return response()->json(['status' => 'success', 'message' => 'File deleted successfully']);
+        return response()->json(['status' => 'success', 'message' => __('cycles.file_delete_success')]);
 
     }
 }
