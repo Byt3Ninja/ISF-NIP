@@ -695,4 +695,5 @@ return [
     'file_not_found' => 'الملف غير موجود',
     'file_delete_success' => 'تم حذف الملف بنجاح',
     'file_delete_unauthorized' => 'أنت غير مصرح لك لحذف هذا الملف',
+    'TeamFormationMinMembers' => 'يجب أن يكون لدى الفريق على الأقل :min أعضاء.',
 ];

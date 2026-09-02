@@ -701,4 +701,5 @@ return [
     'file_not_found' => 'File not found',
     'file_delete_success' => 'File deleted successfully',
     'file_delete_unauthorized' => 'You are not authorized to delete this file',
+    'TeamFormationMinMembers' => 'Team formation requires a minimum of :min members.',
 ];

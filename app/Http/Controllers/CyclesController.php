@@ -22,6 +22,7 @@ use App\FinalData;
 use App\Formfield;
 use App\Messenger;
 use App\Screening;
+use App\TeamFormation;
 use Carbon\Carbon;
 use App\BuilderForm;
 use App\BuilderField;
@@ -732,11 +733,28 @@ class CyclesController extends Controller
             return Response()->json('Step deleted');
         } elseif ($type == CycleModifyAction::FETCH_STEP) {
             // Modify step
-            $step = Step::where('id', $request->sid)->first()->toArray();
-
+            $step = Step::where('id', $request->sid)->first();
+            $minimumMembers = 1; // Default minimum members
+            if( !empty( $step ) )
+            {
+                if( $step->stype == StepType::TEAM_FORMATION )
+                {
+                    $minimumMembers = TeamFormation::maxAcceptedMembers($step->id);
+                    $step->minimumMembers = $minimumMembers;
+                }
+            }
+            $step = $step->toArray();
             return response()->json($step);
         } elseif ($type == CycleModifyAction::UPDATE_STEP) {
             /// deleted saved data if type changed
+            if( $request->stype == StepType::TEAM_FORMATION )
+            {
+                $numberOfMembers = TeamFormation::maxAcceptedMembers($request->sid);
+                if( $request->count_team_number < $numberOfMembers )
+                {
+                    return redirect()->back()->with(['failure' => __('cycles.TeamFormationMinMembers', ['min' => $numberOfMembers]), 'class' => 'danger']);
+                }
+            }
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
             }

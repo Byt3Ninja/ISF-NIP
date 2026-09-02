@@ -64,6 +64,12 @@
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @endif
+        @if (session()->has('failure'))
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          {{ session()->get('failure') }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
 
         <div class="row">
           <div class="col-12">
@@ -543,7 +549,7 @@
 
           <div class="form-group mb-4" id="mteam_number" style="display: none;">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='mcount_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input id='mcount_team_number' name='count_team_number' type="number" min="0" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
           </div>
 
 
@@ -584,7 +590,7 @@
 
 <script>
   const currentLang = '{{ $l }}';
-
+  var minimumMembers = 1; // Default minimum members
   const errors = {
     title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
     description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
@@ -640,7 +646,7 @@
     return false;
   } */
 
-  if (stepType.value === '6' && teamNumberInput && (!teamNumberInput.value || teamNumberInput.value < 1)) {
+  if (stepType.value === '6' && teamNumberInput && (!teamNumberInput.value || teamNumberInput.value < minimumMembers)) {
     showError(teamNumberInput, errors.teamNumber);
     return false;
   }
@@ -1022,7 +1028,15 @@ if (editStepForm) {
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
               $('.public-data-form-fields').hide();
-              if( step == 6 ) { $('#mteam_number').show(); }
+              if( step == 6 )
+              {
+                minimumMembers = response.minimumMembers;
+                var minimumMembers = 1; // Default minimum members
+                errors.teamNumber = currentLang == 'en' ? 'Team number must be at least ' + minimumMembers + '.' : 'عدد الفرق يجب أن يكون على الأقل ' + minimumMembers + '.';
+
+                $('#mcount_team_number').attr('min', response.minimumMembers);
+                $('#mteam_number').show();
+              }
               else { $('#mteam_number').hide(); }
 
               if( response.data !== null )

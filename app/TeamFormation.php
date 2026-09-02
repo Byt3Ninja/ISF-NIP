@@ -49,6 +49,17 @@ class TeamFormation extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public static function maxAcceptedMembers($stepId)
+    {
+        $members = self::where('step_id', $stepId)->with(['teamMembers'])->get();
+        $numberOfMembers = $members->map(function ($team) {
+            $teamMembers = $team->teamMembers->where('acceptInvition', 'accepted')->values();
+            return $teamMembers->count();
+        })->max();
+
+        return $numberOfMembers;
+    }
+
     public static function teams( $cycleId )
     {
         $l = app()->getLocale();
