@@ -1202,6 +1202,7 @@
 
 @section('pagescripts')
 <script>
+  var is_upload_in_progress = false;
   const HACKATHON_ID_TEAM_PAGE = new URLSearchParams(window.location.search).get('hackathonId') || '1';
   const HACKATHON_NAME = "{{ $l == 'en' ? 'Future of AI Hackathon' : 'هاكثون مستقبل الذكاء الاصطناعي' }}";
   const IS_TEAM_LEADER = true;
@@ -2040,6 +2041,7 @@
   }
 
   function uploadFile() {
+    if( is_upload_in_progress == true ) { return; }
     const fileInput = document.getElementById('fileInput');
     const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
     const l = '{{ $l }}'; // "en" or "ar"
@@ -2148,6 +2150,7 @@
 
     uploadFileBtnText.classList.add('d-none');
     uploadFileBtnSpinner.classList.remove('d-none');
+    is_upload_in_progress = true;
     // Send request to the route
     fetch('/dashboard/hackathon/addSharedFile', {
       method: 'POST',
@@ -2161,6 +2164,7 @@
     .then(data => {
       uploadFileBtnText.classList.remove('d-none');
       uploadFileBtnSpinner.classList.add('d-none');
+      is_upload_in_progress = false;
       if (data.status === 'success') {
         releaseSuccessAlert({
           title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
@@ -2177,12 +2181,14 @@
     .catch(error => {
       uploadFileBtnText.classList.remove('d-none');
       uploadFileBtnSpinner.classList.add('d-none');
+      is_upload_in_progress = false;
       releaseFailureAlert({
         title: l === 'en' ? "Error" : "خطأ",
         message: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
       });
     })
     .finally(() => {
+      is_upload_in_progress = false;
       uploadFileBtnText.classList.remove('d-none');
       uploadFileBtnSpinner.classList.add('d-none');
       const uploadModalEl = document.getElementById('uploadFileModal');
