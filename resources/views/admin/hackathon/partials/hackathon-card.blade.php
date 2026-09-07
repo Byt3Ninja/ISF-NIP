@@ -73,8 +73,26 @@
               <i class="ti ti-edit me-1"></i>
               <span class="text-nowrap text-sm">{{ $l == 'en' ? 'Manage Hackathon' : 'ادارة الهاكثون' }}</span>
             </a>
+          @elseif($hackathon['show_invitations'] ?? false)
+            {{-- A pending invitation owns the card: Accept/Reject are the only primary
+                 actions, so Apply is withheld until the invitation is resolved. It comes
+                 back on its own once the Founder rejects. (GV-7377) --}}
+          @elseif($hackathon['show_enrolled_badge'] ?? false)
+            {{-- Already holds a seat in this hackathon, so Apply would be a second path to
+                 an outcome they have already reached. (GV-7377) --}}
+            @if($hackathon['team_formation_id'] != null)
+              <a href="/dashboard/hackathon/{{ $hackathon['team_formation_id'] }}/manage" class="btn btn-success"
+                style="flex: 1;">
+                <i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'Manage Team' : 'ادارة الفريق' }}
+              </a>
+            @elseif($hackathon['joined_team_id'] != null)
+              <a href="/dashboard/hackathon/{{ $hackathon['joined_team_id'] }}/manage" class="btn btn-success"
+                style="flex: 1;">
+                <i class="ti ti-users me-1"></i>{{ $l == 'en' ? 'View My Team' : 'مشاهدة الفريق' }}
+              </a>
+            @endif
           @else
-            
+
              @if($isExistinghackathon == true )
            
                 @if($apply && $apply->isEmpty())

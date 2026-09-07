@@ -138,12 +138,16 @@ class HackathonController extends Controller
         // Hackathons this founder already joined as a member, and the ones they lead.
         // A founder may only hold one seat per hackathon, so either state rules out
         // Accept/Reject and instead marks the card as enrolled. (GV-7377)
-        $memberCycles = Team_member::query()
+        // Keyed by cycle so an accepted member can be linked to the team they joined,
+        // which is not the same as $team_formation (the teams they lead).
+        $memberTeams = Team_member::query()
             ->join('team_formations as tf', 'tf.id', '=', 'team_members.team_formation_id')
             ->where('team_members.Email', $user->email)
             ->where('team_members.acceptInvition', 'accepted')
             ->whereIn('tf.cycle_id', $hackathon_ids)
-            ->pluck('tf.cycle_id');
+            ->pluck('tf.id', 'tf.cycle_id');
+
+        $memberCycles = $memberTeams->keys();
 
         $leaderCycles = $team_formation->pluck('cycle_id');
 
@@ -152,7 +156,7 @@ class HackathonController extends Controller
         $isAdminView = $user->hasRole('admin') || $user->hasRole('organizationmanager');
 
         $cardStates = collect($hackathon_ids)->mapWithKeys(function ($cycleId) use (
-            $pendingInvitations, $memberCycles, $leaderCycles, $isAdminView
+            $pendingInvitations, $memberCycles, $memberTeams, $leaderCycles, $isAdminView
         ) {
             $invitations = collect($pendingInvitations[$cycleId] ?? []);
             $isLeader = $leaderCycles->contains($cycleId);
@@ -165,6 +169,8 @@ class HackathonController extends Controller
                 'single_invitation'=> $invitations->count() === 1 ? $invitations->first() : null,
                 'is_enrolled'      => $isEnrolled,
                 'enrolled_as'      => $isLeader ? 'leader' : ($isMember ? 'member' : null),
+                // The team they joined, for members who lead no team of their own.
+                'joined_team_id'   => $memberTeams[$cycleId] ?? null,
                 'show_invitations' => $invitations->isNotEmpty() && !$isEnrolled && !$isAdminView,
                 'show_enrolled_badge' => $isEnrolled && !$isAdminView,
             ]];
