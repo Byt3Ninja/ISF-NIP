@@ -408,7 +408,7 @@
                     <img
                       src="{{ $imageSrc }}"
                       alt="{{ $team->tf_name }}"
-                      class="rounded-circle w-100 h-100 border-3 border-light shadow-sm"
+                      class="rounded-circle w-100 h-100 object-fit-contain bg-light border-3 border-light shadow-sm"
                       onerror="this.onerror=null;this.src='/icons/team-default.svg';"
                       id="team-image-display"
                     >
@@ -670,7 +670,7 @@
                   <img
                     src="{{ $imageSrcModal }}"
                     alt="{{ $team->tf_name }}"
-                    class="rounded-circle w-100 h-100 border-3 border-light shadow"
+                    class="rounded-circle w-100 h-100 object-fit-contain bg-light border-3 border-light shadow"
                     onerror="this.onerror=null;this.src='/icons/team-default.svg';"
                     id="team-image-preview"
                   >

@@ -53,7 +53,7 @@
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.1)'">
           
           <!-- Team Photo with Overlay -->
-          <div class="position-relative overflow-hidden" style="height: 200px;">
+          <div class="position-relative overflow-hidden bg-light" style="height: 200px;">
             @php
             $teamImageSrc = 'https://placehold.co/400x200?text='.$team->name;
             if ($team->photo) {
@@ -62,7 +62,7 @@
             @endphp
             <img 
               src="{{ $teamImageSrc }}"
-              class="w-100 h-100 object-fit-cover" 
+              class="w-100 h-100 object-fit-contain p-2" 
               alt="Team Photo" 
               style="transition: transform 0.3s ease;"
               onerror="this.onerror=null; this.src='https://placehold.co/400x200?text={{ urlencode($team->name) }}';"
