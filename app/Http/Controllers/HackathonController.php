@@ -985,7 +985,10 @@ class HackathonController extends Controller
             $team->desc = $first->tf_description;
             $team->cycle_id = $first->tf_cycle_id;
             $team->step_id = $first->tf_step_id;
-            $team->photo = $first->tf_img_team ?? null;
+            // Logos stream from storage via the authorized route, not a public path.
+            $team->photo = $first->tf_img_team
+                ? route('hackathon.teamLogo', basename($first->tf_img_team))
+                : null;
             $team->max_members = $allSteps->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
             $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
             $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join'])->first()? true : false; //is_user_requested
@@ -2585,7 +2588,10 @@ class HackathonController extends Controller
             $team->desc = $first->tf_description;
             $team->cycle_id = $first->tf_cycle_id;
             $team->step_id = $first->tf_step_id;
-            $team->photo = $first->tf_img_team ?? null;
+            // Logos stream from storage via the authorized route, not a public path.
+            $team->photo = $first->tf_img_team
+                ? route('hackathon.teamLogo', basename($first->tf_img_team))
+                : null;
             $team->region = $first->tf_region;
             $team->winner_status = $first->tf_winner_status;
             $team->max_members = $first->tf_max_teams_members;
@@ -2812,7 +2818,10 @@ class HackathonController extends Controller
                     $team->step_state = 'none';
                     $team->company_step = null;
                 }
-                $team->photo = $leader->tf_img_team ?? null;
+                // Logos stream from storage via the authorized route, not a public path.
+                $team->photo = $leader->tf_img_team
+                    ? route('hackathon.teamLogo', basename($leader->tf_img_team))
+                    : null;
                 $team->count_members = $teamMembers->where('tm_acceptInvition', 'accepted')->count();
                 $team->created_at = $leader->tf_created_at;
                 $team->max_count_members = $step->where('stype', 6)->first()->count_team_number;

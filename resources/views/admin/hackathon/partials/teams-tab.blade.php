@@ -57,7 +57,8 @@
             @php
             $teamImageSrc = 'https://placehold.co/400x200?text='.$team->name;
             if ($team->photo) {
-                $teamImageSrc = '/' . $team->photo . '?t=' . time();
+                // Already a full URL from the controller (authorized logo route).
+                $teamImageSrc = $team->photo;
             }
             @endphp
             <img 

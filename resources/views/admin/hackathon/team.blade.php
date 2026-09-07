@@ -39,7 +39,7 @@
                   {{-- Team Avatar --}}
                   @if($team->photo)
                     <img 
-                      src="{{ '/' . $team->photo }}" 
+                      src="{{ $team->photo }}" 
                       alt="{{ $team->name }}" 
                       class="rounded-circle border-3 border-white"
                       style="width: 120px; height: 120px; object-fit: cover;"
