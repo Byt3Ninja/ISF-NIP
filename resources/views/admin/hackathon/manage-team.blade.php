@@ -499,11 +499,13 @@
                       <p class="small mb-0" id="team-project-idea">{{ $team->tf_projectDescription_en }}</p>
                     </div>
 
+                    @if($isLeader)
                     <button class="btn btn-outline-info btn-sm w-100 mb-3" data-bs-toggle="modal"
                       data-bs-target="#editProjectIdeaModal">
                       <i class="ti ti-edit me-1"></i>
                       {{ $l == 'en' ? 'Edit Project Details' : 'تعديل تفاصيل المشروع' }}
                     </button>
+                    @endif
 
                     <!-- Project Progress -->
                     <div class="mb-3">
@@ -643,6 +645,7 @@
 </div>
 
 <!-- Edit Team Info Modal -->
+@if($isLeader)
 <div class="modal fade" id="editTeamInfoModal" tabindex="-1" aria-labelledby="editTeamInfoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -771,8 +774,10 @@
     </div>
   </div>
 </div>
+@endif
 
 <!-- Edit Project Idea Modal -->
+@if($isLeader)
 <div class="modal fade" id="editProjectIdeaModal" tabindex="-1" aria-labelledby="editProjectIdeaModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -872,6 +877,7 @@
     </div>
   </div>
 </div>
+@endif
 
 <!-- View All Members Modal -->
 <div class="modal fade" id="viewAllMembersModal" tabindex="-1" aria-labelledby="viewAllMembersModalLabel" aria-hidden="true">

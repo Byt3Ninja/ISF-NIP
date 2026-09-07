@@ -10,9 +10,12 @@ use App\Mail\TaskAssignedMail;
 use App\Notifications\TaskNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use App\Traits\AuthorizesTeamAccess;
 
 class TodoListController extends Controller
 {
+    use AuthorizesTeamAccess;
+
     /**
      * Display a listing of the resource.
      */
@@ -112,6 +115,11 @@ class TodoListController extends Controller
         }
 
         $todoList = TodoList::find($request->id);
+        // Tasks belong to a team: any accepted member may manage them, but the
+        // id is client-supplied, so a non-member (or removed member) must not.
+        if (!$todoList || !$this->canViewTeam($user, $todoList->team_formation_id)) {
+            return response()->json(['success' => false, 'message' => __("admin.Task_not_found")], 404);
+        }
         $todoList->title = $request->title;
         $todoList->description = $request->description;
         $todoList->status = $request->status;
@@ -142,6 +150,9 @@ class TodoListController extends Controller
     public function destroy($id)
     {
         $todoList = TodoList::find($id);
+        if (!$todoList || !$this->canViewTeam(auth()->user(), $todoList->team_formation_id)) {
+            return response()->json(['success' => false, 'message' => __("admin.Task_not_found")], 404);
+        }
         $todoList->delete();
         return response()->json(['success' => true, 'message' => __("admin.Task_deleted_successfully.")]);
     }
@@ -149,7 +160,7 @@ class TodoListController extends Controller
     public function changeTodoStatus(Request $request)
     {
         $todoList = TodoList::find($request->id);
-        if (!$todoList) {
+        if (!$todoList || !$this->canViewTeam(auth()->user(), $todoList->team_formation_id)) {
             return response()->json(['success' => false, 'message' => __("admin.Task_not_found")], 404);
         }
 

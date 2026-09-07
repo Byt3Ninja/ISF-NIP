@@ -2235,6 +2235,8 @@ return [
 	'The count team number field is required.' => 'The number of team members is Required.',
 	'Invitation sent successfully. Waiting for user to join.' => 'Invitation sent successfully. Waiting for user to join.',
 	'You are not authorized to send invitations.' => 'You are not authorized to send invitations.',
+	'You are not authorized to view this team.' => 'You are not authorized to view this team.',
+	'You are not authorized to edit the project idea.' => 'You are not authorized to edit the project idea.',
 	'Invitation sent successfully.' => 'Invitation sent successfully.',
 	'hackathon_team_full' => 'You have reached the maximum number of team members allowed for this hackathon.',
 	'hackathon_already_invited' => 'This member has already been invited to the team.',

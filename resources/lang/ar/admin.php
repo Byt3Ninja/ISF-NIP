@@ -2280,6 +2280,8 @@ return [
 	'The count team number field is required.' => 'عدد اعضاء الفريق مطلوب.',
 	'Invitation sent successfully. Waiting for user to join.' => 'تم إرسال الدعوة بنجاح. في انتظار انضمام المستخدم.',
 	'You are not authorized to send invitations.' => 'ليس لديك الصلاحية لإرسال الدعوات.',
+	'You are not authorized to view this team.' => 'غير مصرح لك بعرض هذا الفريق.',
+	'You are not authorized to edit the project idea.' => 'غير مصرح لك بتعديل فكرة المشروع.',
 	'Invitation sent successfully.' => 'تم إرسال الدعوة بنجاح.',
 	'hackathon_team_full' => 'لقد وصلت إلى الحد الأقصى المسموح به لأعضاء الفريق في هذا الهاكاثون.',
 	'hackathon_already_invited' => 'تمت دعوة هذا العضو إلى الفريق بالفعل.',

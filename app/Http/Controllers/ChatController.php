@@ -241,6 +241,14 @@ class ChatController extends Controller
                         'error' => 'You are not a participant in this conversation'
                     ], 403);
                 }
+
+                // GV-7375: block sending into a DM whose peer left / was removed.
+                $conversation->load('participants');
+                if (!$this->conversationIsAllowed($conversation, $this->currentUserTeamContext()['teammateIds'])) {
+                    return response()->json([
+                        'error' => 'You can only chat with your team members'
+                    ], 403);
+                }
             } elseif ($request->user_id) {
                 // Create or get conversation with the specified user
                 $createConversationRequest = new Request(['user_id' => $request->user_id]);
@@ -484,6 +492,45 @@ class ChatController extends Controller
             'teammateIds'      => $teammateIds,
             'teamFormations'   => $teamFormations,
         ];
+    }
+
+    /**
+     * GV-7375: a private DM is only valid while BOTH users are still accepted
+     * members of a shared team. When a leader removes a member, the DM row and
+     * its participants survive (getOutTeam only detaches the group conversation),
+     * so without this gate the removed member's chat keeps showing in the list
+     * and stays readable/writable.
+     *
+     * Returns true when the conversation is still allowed for the current user:
+     *  - group conversations: allowed (participant-ship is maintained on removal)
+     *  - private conversations: allowed only if every other participant is a
+     *    current accepted teammate.
+     */
+    private function conversationIsAllowed(Conversation $conversation, \Illuminate\Support\Collection $teammateIds): bool
+    {
+        // NOTE: WireChat casts `type` to the ConversationType enum, so compare on
+        // the backing value rather than the raw attribute.
+        $type = $conversation->type instanceof \Namu\WireChat\Enums\ConversationType
+            ? $conversation->type->value
+            : (string) $conversation->type;
+
+        if ($type !== \Namu\WireChat\Enums\ConversationType::PRIVATE->value) {
+            return true;
+        }
+
+        $currentUserId = auth()->id();
+
+        $peerIds = $conversation->participants
+            ->where('participantable_type', 'App\User')
+            ->pluck('participantable_id')
+            ->reject(fn ($id) => (int) $id === (int) $currentUserId)
+            ->values();
+
+        if ($peerIds->isEmpty()) {
+            return false;
+        }
+
+        return $peerIds->every(fn ($id) => $teammateIds->contains((int) $id));
     }
 
     /**
@@ -755,6 +802,13 @@ class ChatController extends Controller
                 $query->latest()->limit(1);
             }])->get();
 
+            // GV-7375: drop DMs whose peer is no longer an accepted teammate, so a
+            // removed member's conversation disappears from the list immediately.
+            $teammateIds = $this->currentUserTeamContext()['teammateIds'];
+            $conversations = $conversations
+                ->filter(fn ($conversation) => $this->conversationIsAllowed($conversation, $teammateIds))
+                ->values();
+
             $conversations->each(function ($conversation) use ($user) {
                 // Preserve the eager-loaded last message (limit(1)) for the sidebar preview,
                 // then UNSET the truncated `messages` relation before counting unread.
@@ -822,6 +876,17 @@ class ChatController extends Controller
             if (!$isParticipant) {
                 return response()->json([
                     'error' => 'You are not a participant in this conversation',
+                    'messages' => []
+                ], 403);
+            }
+
+            // GV-7375: participant-ship alone is not enough — a DM with a removed
+            // teammate must not be re-openable (the client restores the last
+            // conversation id from localStorage).
+            $conversation->load('participants');
+            if (!$this->conversationIsAllowed($conversation, $this->currentUserTeamContext()['teammateIds'])) {
+                return response()->json([
+                    'error' => 'You can only chat with your team members',
                     'messages' => []
                 ], 403);
             }

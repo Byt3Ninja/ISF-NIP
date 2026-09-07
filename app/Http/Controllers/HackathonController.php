@@ -36,9 +36,11 @@ use App\Notifications\StatusHackathonInvitation;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\AuthorizesTeamAccess;
 
 class HackathonController extends Controller
 {
+    use AuthorizesTeamAccess;
 
     public function get_team_media( $path = null )
     {
@@ -227,6 +229,14 @@ class HackathonController extends Controller
     public function manage($id)
     {
         $user = Auth::user();
+
+        // The team id comes straight from the URL: without this check any
+        // authenticated founder could open (and, via the write endpoints below,
+        // edit) another team's page, and a removed member kept their old access.
+        if (!$this->canViewTeam($user, $id)) {
+            abort(404, __('admin.You are not authorized to view this team.'));
+        }
+
         $l = app()->getLocale();
                  
         $team_Formation = "SELECT 
@@ -440,10 +450,10 @@ class HackathonController extends Controller
         // ---- View-model (all logic moved out of the Blade template) ----
         $team = $team_Formation_raw->first();
 
-        $isLeader = $team_Formation_raw
-            ->where('tm_isTeamLeader', 1)
-            ->where('tm_user_id', $user->id)
-            ->isNotEmpty();
+        // Single source of truth for leader-only UI, matching the server-side
+        // guards (canManageTeam) so the page never renders a control the
+        // endpoint will reject.
+        $isLeader = $this->canManageTeam($user, $team->tf_id);
 
         $teamLeaderRow = $team_Formation_raw->firstWhere('tm_isTeamLeader', 1);
 
@@ -1565,9 +1575,14 @@ class HackathonController extends Controller
         ]);
         $user = Auth::user();
         $team_q = TeamFormation::where('id', $request->team_formation_id)->first();
-        // if (!$team_q) {
-        //     return redirect()->back()->with('error', 'You are not authorized to edit the project idea.');
-        // }
+        if (!$team_q) {
+            return redirect()->back()->with('error', __('admin.Team_not_found.'));
+        }
+        // Leader-only: the project idea is team-owned data. Previously this
+        // endpoint trusted the posted team_formation_id outright.
+        if (!$this->canManageTeam($user, $team_q->id)) {
+            return redirect()->back()->with('error', __('admin.You are not authorized to edit the project idea.'));
+        }
         $team_q->project_name_ar = $request->Project_Name_ar;
         $team_q->project_name_en = $request->Project_Name_en;
         $team_q->project_description_ar = $request->Project_Description_ar;
@@ -1599,11 +1614,10 @@ class HackathonController extends Controller
             return response()->json(['error' => 'Team not found.'], 404);
         }
 
-        // Check if the current user is the team leader
-        $isLeader = Team_member::where('team_formation_id', $teamFormation->id)
-                               ->where('user_id', $user->id)
-                               ->where('isTeamLeader', 1)
-                               ->exists();
+        // Check if the current user is the team leader. Uses the shared helper so
+        // that acceptInvition is honoured — the previous inline query matched a
+        // leader row in ANY state, including one already removed from the team.
+        $isLeader = $this->canManageTeam($user, $teamFormation->id);
 
         if (!$isLeader) {
             return response()->json(['error' => 'You are not authorized to edit team information.'], 403);
@@ -1808,9 +1822,13 @@ class HackathonController extends Controller
     public function deleteTeamInfo(Request $request)
     {
         
-        $teamFormation = TeamFormation::where('id', $request->team_formation_id)->where('user_id', Auth::user()->id)->first();
+        $teamFormation = TeamFormation::where('id', $request->team_formation_id)->first();
         if (!$teamFormation) {
             return response()->json(['success' => false, 'message' => __("admin.Team_not_found.")]);
+        }
+        // Leader-only, and only while still on the team.
+        if (!$this->canManageTeam(Auth::user(), $teamFormation->id)) {
+            return response()->json(['success' => false, 'message' => __("admin.Team_not_found.")], 404);
         }
         $team_member = Team_member::where('team_formation_id', $teamFormation->id)->delete();
        
@@ -1825,7 +1843,7 @@ class HackathonController extends Controller
         // failed to send (they can abandon it instead of retrying).
         $teamMember = Team_member::where('id', $request->id)
             ->whereIn('acceptInvition', ['pending', 'failed'])->first();
-        if (!$teamMember) {
+        if (!$teamMember || !$this->canManageTeam($user, $teamMember->team_formation_id)) {
             return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")]);
         }
         $teamMember->acceptInvition = 'cancelled';
@@ -2092,29 +2110,35 @@ class HackathonController extends Controller
         if (!$teamMember) {
             return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")]);
         }
+        // Only the leader of THAT team may remove one of its members: the row id
+        // is client-supplied, so without this anyone could remove any member of
+        // any team.
+        if (!$this->canManageTeam($user, $teamMember->team_formation_id)) {
+            return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")], 404);
+        }
         $teamMember->acceptInvition = 'removed';
         $teamMember->save();
 
         $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
         $groupId = $teams->group_id_chat;
 
-        if($groupId != null){
-        
-        $conversation = Conversation::findOrFail($groupId);
+        if($groupId != null)
+        {
+            $conversation = Conversation::findOrFail($groupId);
             $user = User::findOrFail($teamMember->user_id);
-            
+
             $participant = $conversation->participants()
                 ->where('participantable_id', $user->id)
                 ->where('participantable_type', get_class($user))
                 ->first();
-                
-            if (!$participant) {
-                return response()->json([
-                    'error' => 'User is not in this conversation'
-                ], 404);
-            }
 
-            $participant->delete();
+            // GV-7375: the member has already been marked 'removed' above. Not being
+            // a group participant (group never created, or already detached) is not
+            // a failure — returning 404 here made the UI show "delete failed" and
+            // keep the row on screen even though the removal had been saved.
+            if ($participant) {
+                $participant->delete();
+            }
         }
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
@@ -2153,6 +2177,10 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
+            // Only that team's leader may approve a join request.
+            if (!$teamMember || !$this->canManageTeam(Auth::user(), $teamMember->team_formation_id)) {
+                return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")], 404);
+            }
             $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
                 if($teams->group_id_chat == null){
                     $team_leader = Team_member::where('team_formation_id', $teams->id)->where('isTeamLeader', 1)->first();
@@ -2223,7 +2251,8 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
-            if(!$teamMember) {
+            // Only that team's leader may reject a join request.
+            if(!$teamMember || !$this->canManageTeam(Auth::user(), $teamMember->team_formation_id)) {
                 return redirect()->back()->with('error', 'Request not found.');
             }
                 $teamMember->acceptInvition = 'rejected';

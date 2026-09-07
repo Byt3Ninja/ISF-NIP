@@ -2196,7 +2196,17 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         const lastConvIdStr = localStorage.getItem(LS_KEYS.lastConversationId);
         const lastConvId = lastConvIdStr ? parseInt(lastConvIdStr) : null;
         if (lastConvId && window.CHAT_HAS_TEAMMATES) {
-          loadConversation(lastConvId);
+          // GV-7375: the stored id may point at a DM with a member who has since
+          // been removed from the team. Only restore it if the server still lists
+          // it (or it is one of my team groups); otherwise forget it.
+          const stillListed =
+            (conversations || []).some(c => c.id === lastConvId) ||
+            (groups || []).some(g => g.id === lastConvId);
+          if (stillListed) {
+            loadConversation(lastConvId);
+          } else {
+            try { localStorage.removeItem(LS_KEYS.lastConversationId); } catch (e) {}
+          }
         }
       } catch (error) {
         console.error('Failed to initialize chat system:', error);

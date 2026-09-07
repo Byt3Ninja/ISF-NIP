@@ -47,8 +47,13 @@ class SharedFileController extends Controller
             ], 422);
         }
 
-        // Ensure user belongs to a team
-        $team_member = DB::select("SELECT id, team_formation_id FROM team_members WHERE user_id = ?", [$user->id]);
+        // Ensure user belongs to a team — and is still ON it. Without the
+        // acceptInvition filter a removed member kept uploading into their old
+        // team, attributed to the stale membership row.
+        $team_member = DB::select(
+            "SELECT id, team_formation_id FROM team_members WHERE user_id = ? AND acceptInvition = 'accepted'",
+            [$user->id]
+        );
         if (empty($team_member)) {
             return response()->json([
                 'status'  => 'error',
@@ -142,10 +147,13 @@ class SharedFileController extends Controller
             return false;
         }
 
-        // Team member of this team formation.
+        // Team member of this team formation. Must still be ON the team:
+        // acceptInvition filters out removed / rejected / cancelled / pending
+        // rows, which previously kept granting access after a member was removed.
         $isMember = DB::table('team_members')
             ->where('team_formation_id', $teamFormationId)
             ->where('user_id', $user->id)
+            ->where('acceptInvition', 'accepted')
             ->exists();
         if ($isMember) {
             return true;
