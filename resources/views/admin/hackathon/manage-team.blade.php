@@ -403,7 +403,7 @@
                 <div class="mb-3">
                   <div class="avatar avatar-xl mx-auto mb-3 position-relative">
                     @php
-                    $imageSrc = ($team && $team->tf_img_team) ? '/' . $team->tf_img_team . '?t=' . time() : '/icons/team-default.svg';
+                    $imageSrc = ($team && $team->tf_img_team) ? route('hackathon.teamLogo', basename($team->tf_img_team)) : '/icons/team-default.svg';
                     @endphp
                     <img
                       src="{{ $imageSrc }}"
@@ -668,7 +668,7 @@
               <div class="text-center mb-4">
                 <div class="avatar avatar-xl mx-auto mb-3 position-relative">
                   @php
-                  $imageSrcModal = ($team && $team->tf_img_team) ? '/' . $team->tf_img_team . '?t=' . time() : '/icons/team-default.svg';
+                  $imageSrcModal = ($team && $team->tf_img_team) ? route('hackathon.teamLogo', basename($team->tf_img_team)) : '/icons/team-default.svg';
                   @endphp
                   <img
                     src="{{ $imageSrcModal }}"

@@ -133,7 +133,17 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
 
             return (new MailMessage)
             ->subject(__('admin.Status_Invitation'))
-            ->markdown('emails.acceptInviteHackathon', array_merge(['user' => $this->user, 'teams' => $this->teams, 'status' => $this->status], $orgData));
+            ->markdown('emails.acceptInviteHackathon', array_merge([
+                'user' => $this->user,
+                'teams' => $this->teams,
+                'status' => $this->status,
+                // The recipient is the team leader; $this->user is the member who
+                // acted. Greeting the recipient by the member's name was the
+                // "dear test member" line in GV-7355.
+                'leaderName' => $this->displayName($notifiable),
+                'leaderGender' => $notifiable->gender ?? null,
+                'memberName' => $this->displayName($this->user),
+            ], $orgData));
     }
 
     /**
@@ -146,7 +156,7 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
         // guard every id read to avoid "Attempt to read property id on null".
         return [
             'subject' => __('admin.Status_Invitation'),
-            'message' => __('admin.Status_Invitation'),
+            'message' => $this->statusMessage(),
             'user'   => $this->user?->id,
             'userteam'   => $this->userteam?->id,
             'member' => $this->teams?->id,
@@ -156,12 +166,9 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
 
     public function toWhatsapp(object $notifiable): string
     {
-        // $userteam is null for email invites with no registered user yet;
-        // guard the reads so an enabled WhatsApp channel does not crash.
-        return __('notifications.hackathon_invite.whatsapp', [
-            'leader' => ($this->teamLeader->first_name_en ?? '').' '.($this->teamLeader->last_name_en ?? ''),
-            'team' => trim(($this->userteam->first_name_en ?? '') . ' ' . ($this->userteam->last_name_en ?? '')),
-        ]);
+        // This notification has no $teamLeader property -- the recipient IS the
+        // leader. Reading it threw as soon as the WhatsApp channel was enabled.
+        return $this->statusMessage();
     }
 
     /**
@@ -171,8 +178,51 @@ class StatusHackathonInvitation extends Notification implements ShouldQueue
     {
         return new BroadcastMessage([
             'subject' => __('admin.Status_Invitation'),
-            'message' => __('notifications.hackathon_invite.broadcast', ['team' => optional($this->userteam)->name ?? '']),
+            'message' => $this->statusMessage(),
             'time' => now()->toDateTimeString(),
+        ]);
+    }
+
+    /**
+     * Human-readable name for a user in the current locale, falling back to the
+     * other locale and then the email so the greeting is never blank.
+     */
+    private function displayName($user): string
+    {
+        if (!$user) {
+            return '';
+        }
+
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $other = $locale === 'ar' ? 'en' : 'ar';
+
+        $first = $user->{'first_name_'.$locale} ?: $user->{'first_name_'.$other};
+        $last = $user->{'last_name_'.$locale} ?: $user->{'last_name_'.$other};
+
+        return trim($first.' '.$last) ?: (string) ($user->email ?? '');
+    }
+
+    /**
+     * The sentence shown in the bell / broadcast / WhatsApp. Previously every
+     * status stored the bare label admin.Status_Invitation ("حالة الدعوة"),
+     * which is what the leader saw instead of real content (GV-7355).
+     */
+    private function statusMessage(): string
+    {
+        $key = match ($this->status) {
+            'Accept' => 'accepted',
+            'Reject' => 'rejected',
+            'cancelled' => 'cancelled',
+            default => null,
+        };
+
+        if ($key === null) {
+            return __('admin.Status_Invitation');
+        }
+
+        return __('notifications.hackathon_status.'.$key, [
+            'member' => $this->displayName($this->user),
+            'team' => $this->teams->name ?? '',
         ]);
     }
 

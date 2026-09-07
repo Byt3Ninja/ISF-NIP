@@ -1947,7 +1947,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 						<div class="hxi-medallion" aria-hidden="true">
 							<span class="hxi-initial">{{ $hxiTeamInitial }}</span>
 							@if($join->tf_img_team)
-								<img src="{{ asset($join->tf_img_team) }}" alt=""
+								<img src="{{ route('hackathon.teamLogo', basename($join->tf_img_team)) }}" alt=""
 									onerror="this.onerror=null;this.src='/icons/team-default.svg';this.closest('.hxi-medallion').classList.add('hxi-medallion--fallback');">
 							@endif
 						</div>

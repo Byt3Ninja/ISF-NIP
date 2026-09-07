@@ -28,6 +28,7 @@ use App\Notifications\TemplateEmail;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\FileManagerService;
 use App\Services\NextSessionsService;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
@@ -42,17 +43,70 @@ class HackathonController extends Controller
 {
     use AuthorizesTeamAccess;
 
-    public function get_team_media( $path = null )
+    /**
+     * Stream a team logo from the `programTeams` disk
+     * (storage/app/public/programs/teams -- OUTSIDE the web root).
+     *
+     * Replaces the old public `programs/teams/{files?}` route, which served the
+     * same disk with no authentication and a raw `.*` path segment. Logos are
+     * team collateral, so viewing is gated on team membership/oversight, and the
+     * filename comes from the DB rather than the URL so a caller can never
+     * address an arbitrary path.
+     */
+    /**
+     * Stream a team logo from the `programTeams` disk
+     * (storage/app/public/programs/teams -- OUTSIDE the web root).
+     *
+     * Served by filename with NO database lookup: logos render in team lists and
+     * chat, so a per-image query would add one round-trip per rendered logo for
+     * data that is deliberately not access-controlled -- a team logo is
+     * competitor-visible branding, not confidential. Access control is therefore
+     * "authenticated user" only; the security that matters for this endpoint is
+     * at UPLOAD time (FileManagerService enforces the extension/MIME blacklist
+     * and generates the filename), plus the strict filename validation below so
+     * no caller-supplied string can escape the disk root.
+     *
+     * Replaces the old UNAUTHENTICATED `programs/teams/{files?}` route, which
+     * accepted a raw `.*` path segment.
+     */
+    public function teamLogo($filename)
     {
-		try {
-			$instance = Storage::disk('programTeams');
-			if( $instance->directoryExists( $path ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
-			$file = $instance->response( $path );
-			$mimeType = $instance->mimeType($path);
-			if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
-			$file->headers->set('Content-Type', $mimeType);
-			return $file;
-		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+        // Reject anything that is not a bare, server-generated upload name.
+        // basename() alone would still admit e.g. ".env"; this whitelist admits
+        // only the "<time>_<uniqid>.<ext>" shape FileManagerService produces.
+        if (!preg_match('/^[A-Za-z0-9._-]+\.(jpg|jpeg|png|gif|webp)$/i', $filename)
+            || str_contains($filename, '..')) {
+            abort(404);
+        }
+
+        $filename = basename($filename);
+
+        try {
+            $disk = Storage::disk('programTeams');
+
+            if (!$disk->fileExists($filename)) {
+                abort(404);
+            }
+
+            $response = $disk->response($filename);
+            $mimeType = $disk->mimeType($filename);
+            if ($mimeType === 'image/svg') {
+                $mimeType = 'image/svg+xml';
+            }
+            $response->headers->set('Content-Type', $mimeType);
+
+            // Every upload gets a fresh server-generated filename and the old
+            // file is deleted, so a given URL's bytes never change -- the name
+            // is effectively the cache key. Cache hard (and privately: these
+            // are served to authenticated users, so no shared/proxy caching).
+            $response->setMaxAge(31536000);
+            $response->setPrivate();
+            $response->headers->addCacheControlDirective('immutable');
+
+            return $response;
+        } catch (\Throwable $th) {
+            abort(404);
+        }
     }
 
     public function index(Request $request)
@@ -1076,7 +1130,14 @@ class HackathonController extends Controller
             'field_ids' => implode(",", $field_map_ids)
         ];
 
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_fields.id', 'ASC')->get();
+        // Mirrors CyclesController's answers query: scope by step so a BuilderForm
+        // shared across several steps does not leak another step's answers.
+        $answers = Formfield::rightJoin('form_data', 'form_fields.id', 'form_data.field_id')
+            ->where('user_id', Auth::id())
+            ->where('form_data.step_id', $id)
+            ->whereIn('form_data.field_id', $field_map_ids)
+            ->orderBy('form_data.id', 'ASC')
+            ->get();
         $days = request()->query('days', 14);
         $company = $user->company;
         $stepData = $company?->stepdata;
@@ -1318,9 +1379,15 @@ class HackathonController extends Controller
         $id = $step->id;
 
         $the_form = BuilderForm::findOrFail( $step->data );
-        $fields = $the_form->fields()
-            ->withPivot('options')
-            ->orderBy('builder_fields.id', 'asc')
+        // Step-scoped pivot (`form_fields`), NOT the BuilderForm template pivot
+        // (`builder_fields`). `$the_form->fields()` walks `builder_fields`, whose
+        // ids live in a different id space than `form_data.field_id` and than the
+        // list CyclesController@saveForm validates against -- so this form posted
+        // template ids (83..90) while the step's real pivot ids were 389..396 and
+        // every submission aborted with 422 "Data error" (GV-7355 follow-up).
+        $fields = $step->fields()
+            ->where('builder_forms_id', $step->data)
+            ->orderBy('form_fields.id', 'asc')
             ->get();
 
         $field_map_ids = $fields->pluck('pivot.id')->toArray();
@@ -1514,10 +1581,15 @@ class HackathonController extends Controller
         $teamformation->region = $request->Region ?? '';
 
         if ($request->hasFile('team_image')) {
-            $image = $request->file('team_image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('programs/teams/'), $imageName);
-            $teamformation->img_team = 'programs/teams/' . $imageName;
+            // Store on the `programTeams` disk (storage/, outside the web root)
+            // via FileManagerService, which enforces the extension/MIME
+            // blacklist and generates the filename server-side. The old code
+            // move()d the file into public/ using the CLIENT-supplied
+            // extension, so an uploaded .phtml landed in a web-served,
+            // executable directory.
+            $imageName = app(FileManagerService::class)
+                ->upload($request->file('team_image'), '', 'programTeams');
+            $teamformation->img_team = 'programs/teams/' . basename($imageName);
         }
 
         $teamformation->save();
@@ -1644,14 +1716,15 @@ class HackathonController extends Controller
                 }
             }
             
-            // Upload new image
-            $image = $request->file('team_image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            // $image->move(public_path('programs/teams/'), $imageName);
-            $path = Storage::disk('programTeams')->putFileAs('', $image, $imageName);
-            
+            // Upload new image through FileManagerService (extension/MIME
+            // blacklist + server-generated filename), same as createTeam().
+            $imageName = basename(
+                app(FileManagerService::class)
+                    ->upload($request->file('team_image'), '', 'programTeams')
+            );
+
             $teamFormation->img_team = 'programs/teams/' . $imageName;
-            $newImageUrl = '/programs/teams/' . $imageName;
+            $newImageUrl = route('hackathon.teamLogo', $imageName);
         } elseif ($request->remove_image) {
             // Remove existing image
             if ($teamFormation->img_team) {
@@ -1849,11 +1922,10 @@ class HackathonController extends Controller
         $teamMember->acceptInvition = 'cancelled';
         $teamMember->save();
 
-        $userteam = User::where('id', $teamMember->user_id)->first();
-        $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
-
-        // Send cancel invitation email logic here
-         $user->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'cancelled'));
+        // Cancelling an invitation is a silent action: the leader performing it
+        // must not be notified about their own action. Notifying $user (which is
+        // Auth::user(), the leader) is what mailed the leader a "Status
+        // Invitation" message on every cancel (GV-7355).
 
         $team_q = TeamFormation::find($teamMember->team_formation_id);
         $occupied = $team_q ? Team_member::where('team_formation_id', $team_q->id)

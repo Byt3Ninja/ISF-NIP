@@ -121,7 +121,10 @@ class TeamFormation extends Model
             $team->region = $t->team_region;
             $team->name = $t->team_name;
             $team->winner = $t->team_winner_status;
-            $team->img = $t->team_img_team;
+            // Team logos live outside the web root; expose the authorized route.
+            $team->img = $t->team_img_team
+                ? route('hackathon.teamLogo', basename($t->team_img_team))
+                : null;
             $team->project = new stdClass;
             $team->project->name = $t->{'team_project_name_' . $l};
             $team->project->description = $t->{'team_project_description_' . $l};

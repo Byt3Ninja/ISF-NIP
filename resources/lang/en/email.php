@@ -71,6 +71,26 @@ return [
         'regards' => 'Best regards,',
     ],
 
+    'hackathon_invite_email' => [
+        'invited' => 'You have been invited to join the hackathon team ":team".',
+        'invited_by' => 'Invited by:',
+        'team' => 'Team:',
+        'expires' => 'This invitation link will expire in 24 hours.',
+        'cta_hint' => 'Please use the button below to accept or reject the invitation.',
+        'cta' => 'View Invitation',
+    ],
+
+    'hackathon_email' => [
+        'title' => 'Hackathon Team Invitation Update',
+        'dear' => 'Dear',
+        'in_body_1' => ':member has accepted your invitation to join your hackathon team.',
+        'in_body_2' => ':member has declined your invitation to join your hackathon team.',
+        'in_body_3' => 'Team:',
+        'member' => 'Member:',
+        'in_body_4' => 'The invitation to join your hackathon team has been cancelled.',
+        'regards' => 'Best regards,',
+    ],
+
     'trainer_email' => [
         'subject' => 'New Trainer Assignment',
         'title' => 'Kindly note you have a new online training session, with Title :',

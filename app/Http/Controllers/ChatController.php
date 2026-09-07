@@ -277,16 +277,11 @@ class ChatController extends Controller
             // Load the message with sender information
             $message->load('sendable');
 
-            // Broadcast the message synchronously so real-time works without a queue worker.
-            // App\Events\MessageCreated is ShouldBroadcastNow (fires immediately to Pusher)
-            // on PrivateChannel('conversation.'.$id) with the full message payload.
-            try {
-                broadcast(new \App\Events\MessageCreated($message));
-                Log::info('MessageCreated broadcast (sync) for message: ' . $message->id);
-            } catch (\Exception $e) {
-                // Never fail the send if broadcasting fails.
-                Log::error('Failed to broadcast message: ' . $e->getMessage());
-            }
+            // NOTE: do NOT broadcast MessageCreated here. WireChatMessageObserver
+            // already fires it on the model's "created" event (registered in
+            // AppServiceProvider), which covers every creation path. Dispatching
+            // again here delivered each message to Pusher twice, which is what
+            // made the header notification counter jump by 2 (GV-7355).
 
             return response()->json([
                 'message' => $message,
@@ -634,7 +629,11 @@ class ChatController extends Controller
             }
 
             // Transient team identity for the response (not persisted on the conversation).
-            $conversation->team_img       = $team->img_team;
+            // Team logos live outside the web root; expose the authorized route
+            // rather than the raw storage path.
+            $conversation->team_img       = $team->img_team
+                ? route('hackathon.teamLogo', basename($team->img_team))
+                : null;
             $conversation->team_name      = $team->name;
             $conversation->team_member_ids = $memberIds->values()->all();
             $conversation->team_leader_id = $leaderIdByTeam->get($team->id);
@@ -761,7 +760,7 @@ class ChatController extends Controller
                 return [
                     'id'                 => $conversation->id,
                     'name'               => $conversation->team_name ?: $conversation->name,
-                    'avatar_url'         => $teamImg ? '/' . ltrim($teamImg, '/') : null,
+                    'avatar_url'         => $teamImg ?: null,
                     'initials'           => $this->initialsFor($conversation->team_name ?: $conversation->name),
                     'participants'       => $participants,
                     'participants_count' => $participants->count(),

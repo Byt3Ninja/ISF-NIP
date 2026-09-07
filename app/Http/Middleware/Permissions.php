@@ -60,6 +60,7 @@ class Permissions
         'organization.wizard.publish',
         'provider-registration',
         'hackathon.trackShare',
+        'hackathon.teamLogo',
         'filemanager*',
         'dashboard',
         'dashboard/dashboard',

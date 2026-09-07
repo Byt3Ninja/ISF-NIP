@@ -72,7 +72,6 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 
 
 /// Frontend routes ///
-Route::get('programs/teams/{files?}', 'HackathonController@get_team_media')->where('files', '.*');
 Route::get('lang/{locale}', 'IndexController@lang');
 Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
@@ -190,6 +189,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::patch('hackathon/rejectInvitation/{id}', 'HackathonController@rejectInvitation')->name('hackathon.rejectInvitation');
     Route::post('hackathon/getOutTeam', 'HackathonController@getOutTeam')->name('hackathon.getOutTeam');
     Route::get('hackathon/my-team', 'HackathonController@myTeam')->name('hackathon.myTeam');
+    // Team logos live OUTSIDE the web root (storage/app/public/programs/teams),
+    // so they are streamed through this action rather than served directly by
+    // the webserver. Keyed on the stored filename (no DB lookup) -- see
+    // HackathonController@teamLogo for why.
+    Route::get('hackathon/team-logo/{filename}', 'HackathonController@teamLogo')->name('hackathon.teamLogo');
     Route::post('hackathon/EditProjectIdea', 'HackathonController@EditProjectIdea')->name('hackathon.EditProjectIdea');
     Route::post('hackathon/EditTeamInfo', 'HackathonController@EditTeamInfo')->name('hackathon.EditTeamInfo');
     Route::post('hackathon/RequestJoin', 'HackathonController@RequestJoin')->name('hackathon.RequestJoinTeam');
