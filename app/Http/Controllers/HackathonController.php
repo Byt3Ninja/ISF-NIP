@@ -122,6 +122,53 @@ class HackathonController extends Controller
 
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
         $team_formation = TeamFormation::whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->where('user_id', Auth::user()->id)->get();
+
+        // Pending team invitations addressed to this founder, grouped by hackathon cycle,
+        // so the card can offer Accept/Reject instead of Apply only. (GV-7377)
+        $pendingInvitations = Team_member::query()
+            ->select('team_members.*', 'tf.name as team_name', 'tf.cycle_id as cycle_id')
+            ->join('team_formations as tf', 'tf.id', '=', 'team_members.team_formation_id')
+            ->where('team_members.Email', $user->email)
+            ->where('team_members.acceptInvition', 'pending')
+            ->whereIn('tf.cycle_id', $hackathon_ids)
+            ->orderByDesc('team_members.created_at')
+            ->get()
+            ->groupBy('cycle_id');
+
+        // Hackathons this founder already joined as a member, and the ones they lead.
+        // A founder may only hold one seat per hackathon, so either state rules out
+        // Accept/Reject and instead marks the card as enrolled. (GV-7377)
+        $memberCycles = Team_member::query()
+            ->join('team_formations as tf', 'tf.id', '=', 'team_members.team_formation_id')
+            ->where('team_members.Email', $user->email)
+            ->where('team_members.acceptInvition', 'accepted')
+            ->whereIn('tf.cycle_id', $hackathon_ids)
+            ->pluck('tf.cycle_id');
+
+        $leaderCycles = $team_formation->pluck('cycle_id');
+
+        // Everything the card needs to decide what to show, resolved here so the view
+        // stays free of query/branching logic. (GV-7377)
+        $isAdminView = $user->hasRole('admin') || $user->hasRole('organizationmanager');
+
+        $cardStates = collect($hackathon_ids)->mapWithKeys(function ($cycleId) use (
+            $pendingInvitations, $memberCycles, $leaderCycles, $isAdminView
+        ) {
+            $invitations = collect($pendingInvitations[$cycleId] ?? []);
+            $isLeader = $leaderCycles->contains($cycleId);
+            $isMember = $memberCycles->contains($cycleId);
+            $isEnrolled = $isLeader || $isMember;
+
+            return [$cycleId => [
+                'invitations'      => $invitations,
+                'invitation_count' => $invitations->count(),
+                'single_invitation'=> $invitations->count() === 1 ? $invitations->first() : null,
+                'is_enrolled'      => $isEnrolled,
+                'enrolled_as'      => $isLeader ? 'leader' : ($isMember ? 'member' : null),
+                'show_invitations' => $invitations->isNotEmpty() && !$isEnrolled && !$isAdminView,
+                'show_enrolled_badge' => $isEnrolled && !$isAdminView,
+            ]];
+        });
         $hackathons = $hackathons_raw->map(function ($item, $key) use ($step, $team_formation) {
         $now = now();
         $start = \Carbon\Carbon::parse($item->c_start_date);
@@ -137,6 +184,8 @@ class HackathonController extends Controller
                 'date' => $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d'),
                 'location' => $item->o_name_en ?? 'Unknown',
                 'status' => $status,
+                // Fallback placeholder colour used when the cycle has no image. (GV-7377)
+                'placeholder_color' => $status === 'Upcoming' ? '696cff' : '28c76f',
                 'description' => $item->c_description,
                 'cycle_id' => $item->c_id,
                 'cycle_end' => $end ,
@@ -150,7 +199,12 @@ class HackathonController extends Controller
             ];
          });
 
-         
+        // Fold the invitation/enrollment state into each hackathon so the card can read it
+        // straight off $hackathon, with no lookup or logic in the view. (GV-7377)
+        $hackathons = $hackathons->map(function ($item) use ($cardStates) {
+            return $item + ($cardStates[$item['id']] ?? []);
+        });
+
         $pastHackathons = $hackathons->where('status', 'Finished')
         ->sortByDesc('cycle_end')
         ->values();
@@ -1850,9 +1904,10 @@ class HackathonController extends Controller
         $user = Auth::user();
         $isExpired = Team_member::where('id', $id)
             ->where('acceptInvition', 'pending')
+            ->where('created_at', '<', now()->subHours(24))
             ->first();
-           
-            if($isExpired && $isExpired->created_at < $isExpired->created_at->subHours(24)) {
+
+            if($isExpired) {
                 $isExpired->acceptInvition = 'expired';
                 $isExpired->Name = $user->first_name . ' ' . $user->last_name;
                 $isExpired->TeamMember = 'hackathon';
@@ -1869,8 +1924,27 @@ class HackathonController extends Controller
                 return redirect()->back()->with('error', 'Invitation_not_found.');
             }
 
-            
-            
+            // A founder may hold only one seat per hackathon, whether as a team leader
+            // or as an accepted member of someone else's team. (GV-7377)
+            $cycleId = $teamMember->teamFormation?->cycle_id;
+            if ($cycleId) {
+                $leadsATeam = TeamFormation::where('cycle_id', $cycleId)
+                    ->where('user_id', $user->id)
+                    ->exists();
+
+                $alreadyJoined = Team_member::where('team_members.Email', $user->email)
+                    ->where('team_members.acceptInvition', 'accepted')
+                    ->where('team_members.id', '!=', $teamMember->id)
+                    ->whereHas('teamFormation', function ($query) use ($cycleId) {
+                        $query->where('cycle_id', $cycleId);
+                    })
+                    ->exists();
+
+                if ($leadsATeam || $alreadyJoined) {
+                    return redirect()->back()->with('error', 'Already_in_a_team_for_this_hackathon');
+                }
+            }
+
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
