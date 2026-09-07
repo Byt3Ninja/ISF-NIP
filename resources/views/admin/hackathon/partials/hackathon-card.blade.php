@@ -67,7 +67,11 @@
           <i class="ti ti-info-circle me-1"></i>
           {{ $l == 'en' ? 'Details' : 'التفاصيل' }}
         </a>
-          @if($user->hasRole('admin') || $user->hasRole('organizationmanager'))
+          {{-- Gated on the permission that guards the destination route rather than
+               on hardcoded role names: the role check silently excluded Sub-Admins,
+               who do hold hackathon.viewAdminHackaton by default, and it ignored any
+               custom role an admin grants the permission to. (GV-3798 / GV-3799) --}}
+          @if($_user->ableTo('hackathon.viewAdminHackaton', $permissions))
 
             <a href="hackathon/dashboard/{{$hackathon['id']}}" class="btn btn-outline-success me-2" style="flex: 1;">
               <i class="ti ti-edit me-1"></i>
