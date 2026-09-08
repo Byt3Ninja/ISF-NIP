@@ -379,27 +379,29 @@
     <div class="card h-100 border-0 shadow-sm">
       <div class="card-header d-flex justify-content-between align-items-center border-bottom mb-6">
         <h5 class="card-title mb-0">{{ __('startup.about_challenges') }}</h5>
-        <div class="d-flex align-items-center gap-2">
-          @if (($_user->ableTo('company.profile_view_mine', $permissions) ?? false) && !empty($company->id))
+        @if ($_user->hasAnyRole('registered'))
+          <div class="d-flex align-items-center gap-2">
+            @if (($_user->ableTo('company.profile_view_mine', $permissions) ?? false) && !empty($company->id))
+              <button
+                class="btn btn-sm btn-outline-primary"
+                onclick="localStorage.setItem('activeCompanyTab', 3); window.location.href = '/dashboard/myCompany/{{ $company->id }}'"
+              >
+                <i class="ti ti-pencil me-1"></i>
+                {{ __('admin.Edit') }}
+              </button>
+            @endif
             <button
-              class="btn btn-sm btn-outline-primary"
-              onclick="localStorage.setItem('activeCompanyTab', 3); window.location.href = '/dashboard/myCompany/{{ $company->id }}'"
+              class="btn btn-sm btn-primary"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasRight"
+              aria-controls="offcanvasRight"
             >
-              <i class="ti ti-pencil me-1"></i>
-              {{ __('admin.Edit') }}
+              <i class="ti ti-eye me-1"></i>
+              {{ __('admin.View') }}
             </button>
-          @endif
-          <button
-            class="btn btn-sm btn-primary"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasRight"
-            aria-controls="offcanvasRight"
-          >
-            <i class="ti ti-eye me-1"></i>
-            {{ __('admin.View') }}
-          </button>
-        </div>
+          </div>
+        @endif
       </div>
       <div class="card-body">
         <ul class="nav widget-nav-tabs d-flex gap-2 border-0 pb-4 nav-tabs flex-nowrap overflow-auto" role="tablist">
