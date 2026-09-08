@@ -521,19 +521,19 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
     });
 
     /* Show/Hide Average Annual Revenues */
-    function syncRevenueField() {
+    function syncRevenueField(triggerValidation) {
       const isYes = $generateRevenue.val() === 'yes';
       $('#average_annual_revenues_wrapper').toggle(isYes);
       if (!isYes) {
         $('#average_annual_revenues').val('');
         financialFV.resetField('average_annual_revenues');
-      } else {
+      } else if (triggerValidation) {
         financialFV.revalidateField('average_annual_revenues');
       }
     }
-    syncRevenueField();
+    syncRevenueField(false);
     $generateRevenue.on('change', () => {
-      syncRevenueField();
+      syncRevenueField(true);
       financialFV.revalidateField('generate_revenue');
     });
 
