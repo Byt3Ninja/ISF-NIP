@@ -36,6 +36,14 @@
   $fundingProgress = $target > 0 ? min(100, (int) round(($raised / $target) * 100)) : 0;
   $valuation       = (float) ($co->Pre_money_Valuation ?? 0);
 
+  // Render a money value with thousands separator + currency suffix, or "N/A"
+  // when it is null / empty / non-numeric (avoids showing a bare "0 EGP").
+  $fmtMoney = function ($v) use ($currencyCode) {
+    return $v !== null && $v !== '' && is_numeric($v)
+      ? number_format((float) $v) . ' ' . $currencyCode
+      : __('admin.N/A');
+  };
+
   // --- Development Stage Mapping ---
   $stageModel  = is_numeric($co->stage ?? null) ? App\Stage::find((int) $co->stage) : null;
   $devStageName = $stageModel
@@ -63,9 +71,15 @@
   // --- Sustainability & Market Logic ---
   $sustainable_array = json_decode($co->Sustainable_development ?? '[]') ?? [];
 
-  $countryIds = is_string($co->targeted_market ?? null)
-    ? (json_decode($co->targeted_market, true) ?? [])
-    : (is_array($co->targeted_market ?? null) ? $co->targeted_market : []);
+  $countryIds = collect(
+      is_string($co->targeted_market ?? null)
+        ? (json_decode($co->targeted_market, true) ?? [])
+        : (is_array($co->targeted_market ?? null) ? $co->targeted_market : [])
+    )
+    ->filter(fn($id) => is_numeric($id))
+    ->map(fn($id) => (int) $id)
+    ->values()
+    ->all();
   $marketCount = count($countryIds);
 
   $targetedMarketNames = $marketCount > 0
@@ -203,8 +217,8 @@
   $productsDesc   = $registrationOfferingDetails['products_desc'] ?? null;
   $hasRegOffering = (bool) ($registrationOfferingDetails['has_any'] ?? false);
 
-  $generatesRevenue = (bool) ($co->generates_revenue ?? false);
-  $revenueAmount    = (float) ($co->revenue_amount ?? 0);
+  $generatesRevenue = ($co->generate_revenue ?? null) === 'yes';
+  $revenueAmount    = is_numeric($co->average_annual_revenues ?? null) ? (float) $co->average_annual_revenues : 0;
 
   // --- Locale-aware helpers ---
   $isEn          = $l === 'en';
@@ -338,7 +352,7 @@
             <i class="ti ti-currency-dollar ti-lg"></i>
           </div>
           <div>
-            <h5 class="mb-0 fw-bold">{{ number_format($raised) }} {{ $currencyCode }}</h5>
+            <h5 class="mb-0 fw-bold">{{ $fmtMoney($co->raised_fund) }}</h5>
             <small class="text-muted mb-0">{{ __('admin.raised_fund_egp') }}</small>
           </div>
         </div>
@@ -355,7 +369,7 @@
         <ul class="mb-0 list-unstyled">
           <li class="mb-3 d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.Funding_Target') }}</span>
-            <span class="small fw-bold">{{ number_format($target) }} {{ $currencyCode }}</span>
+            <span class="small fw-bold">{{ $fmtMoney($co->Funding_Target) }}</span>
           </li>
           <li class="mb-3 d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.Funding_Stage') }}</span>
@@ -363,11 +377,11 @@
           </li>
           <li class="mb-3 d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.Pre_money_Valuation') }}</span>
-            <span class="small fw-bold">{{ number_format($valuation) }} {{ $currencyCode }}</span>
+            <span class="small fw-bold">{{ $fmtMoney($co->Pre_money_Valuation) }}</span>
           </li>
           <li class="d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.average_annual_revenues') }}</span>
-            <span class="small fw-bold">{{ $average_annual_revenues ?? 'N/A' }}</span>
+            <span class="small fw-bold">{{ $fmtMoney($co->average_annual_revenues) }}</span>
           </li>
         </ul>
       </div>
