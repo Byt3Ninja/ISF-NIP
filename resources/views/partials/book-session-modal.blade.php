@@ -127,6 +127,7 @@
       organizationId: null,
       userId: null,
       staleCheckTimer: null,
+      reloadOnClose: false,
     };
 
     const SESSION_TYPES = {
@@ -211,6 +212,40 @@
       return { success: true, message: '{{ __('mentor.session_booked_successfully') }}' };
     };
 
+    // ─── Render the per-slot failure list from addWait's JSON summary ─────────
+    const formatFailedSlots = (failed) => {
+      if (!Array.isArray(failed) || !failed.length) return '';
+      const rows = failed.map(f => {
+        const when = [
+          f.date ? formatDate(f.date) : '',
+          (f.time_from && f.time_to)
+            ? `${formatTime12(f.time_from)} - ${formatTime12(f.time_to)}`
+            : ''
+        ].filter(Boolean).join(', ');
+        const reason = escapeHtml(f.reason || '');
+        return `<li>${when ? `<strong>${escapeHtml(when)}</strong> — ` : ''}${reason}</li>`;
+      }).join('');
+      return `<ul class="mb-0 mt-1 ps-3">${rows}</ul>`;
+    };
+
+    // Normalise addWait's response: structured JSON (AJAX path) or, as a
+    // fallback, the scraped redirect HTML.
+    const readBookingOutcome = (res) => {
+      if (res && typeof res === 'object') {
+        return {
+          status:  res.status || 'success',
+          message: res.message || '',
+          failedHtml: formatFailedSlots(res.failed),
+        };
+      }
+      const parsed = parseFlashFromHtml(res);
+      return {
+        status: parsed.success ? 'success' : 'error',
+        message: parsed.message,
+        failedHtml: '',
+      };
+    };
+
     // ─── Build FormData ───────────────────────────────────────────────────────
     const buildFormData = () => {
       const fd   = new FormData();
@@ -229,7 +264,7 @@
         fd.append('user_id', selectedUserId);
 
         state.selectedSlots.forEach((slot, index) => {
-          fd.append(`selected_dates[${index}][date]`,         state.selectedDate);
+          fd.append(`selected_dates[${index}][date]`,         slot.date);
           fd.append(`selected_dates[${index}][time_from]`,    slot.start_time);
           fd.append(`selected_dates[${index}][time_to]`,      slot.end_time);
           fd.append(`selected_dates[${index}][session_type]`, slot.session_type);
@@ -302,7 +337,11 @@
     };
 
     const filterSlots = (slots, filterType) => {
-      let available = slots.filter(s => !isSlotBlocked(s, s.date) && !isSlotPast(s, s.date));
+      // Past slots are dropped; already-booked slots are kept but tagged so the
+      // list can render them locked/disabled instead of hiding them (prevents
+      // rebooking before submit rather than erroring after).
+      let available = slots.filter(s => !isSlotPast(s, s.date));
+      available.forEach(s => { s._blocked = isSlotBlocked(s, s.date); });
       if (state.offlineDisabled) available = available.filter(s => s.session_type === 'Online');
       if (filterType === 'online')  return available.filter(s => s.session_type === 'Online');
       if (filterType === 'offline') return available.filter(s => s.session_type === 'Offline');
@@ -314,6 +353,7 @@
     // different time ranges, but only one session type per time range.
     const conflictsWithSelection = (slot) =>
       state.selectedSlots.some(s =>
+        s.date         === slot.date       &&
         s.start_time   === slot.start_time &&
         s.end_time     === slot.end_time   &&
         s.session_type !== slot.session_type);
@@ -338,13 +378,15 @@
         const location    = slot?.location || '';
         const showMap     = location && (slot.session_type === 'Offline' || slot.session_type === 'Both');
 
+        const isBlocked   = !!slot._blocked;
         const inputType   = isAdmin ? 'checkbox' : 'radio';
         const isChecked   = isAdmin
-          ? state.selectedSlots.some(s => s._key === slot._key)
-          : (state.selectedSlot && state.selectedSlot.start_time === slot.start_time && state.selectedSlot.end_time === slot.end_time);
-        const isConflict  = isAdmin && !isChecked && conflictsWithSelection(slot);
+          ? (!isBlocked && state.selectedSlots.some(s => s._key === slot._key))
+          : (!isBlocked && state.selectedSlot && state.selectedSlot.start_time === slot.start_time && state.selectedSlot.end_time === slot.end_time);
+        const isConflict  = isAdmin && !isChecked && !isBlocked && conflictsWithSelection(slot);
+        const isDisabled  = isBlocked || isConflict;
         const borderClass = isChecked ? 'border-primary' : '';
-        const stateClass  = isConflict ? 'opacity-50 slot-conflict' : '';
+        const stateClass  = isBlocked ? 'opacity-50 slot-booked' : (isConflict ? 'opacity-50 slot-conflict' : '');
 
         return `
           <div class="card shadow-none mb-2 border slot-card ${borderClass} ${stateClass}" data-slot-index="${i}">
@@ -369,13 +411,21 @@
                         <span>@lang('mentor.google_maps')</span>
                       </a>` : ''}
                   </div>
+                  ${isBlocked ? `
+                    <div class="small text-muted mt-1">
+                      <i class="ti ti-lock ti-14px me-1"></i>@lang('mentor.slot_booked_unavailable_hint')
+                    </div>` : ''}
                   ${isConflict ? `
                     <div class="small text-muted mt-1">
                       <i class="ti ti-info-circle ti-14px me-1"></i>@lang('mentor.slot_type_conflict_hint')
                     </div>` : ''}
                 </div>
-                <input type="${inputType}" class="form-check-input ms-2" name="slot" value="${i}"
-                       ${isChecked ? 'checked' : ''} ${isConflict ? 'disabled' : ''}>
+                ${isBlocked ? `
+                  <span class="badge bg-light-subtle text-dark d-flex align-items-center gap-1 rounded px-2 ms-2">
+                    <i class="ti ti-lock ti-14px"></i>@lang('mentor.slot_booked_unavailable')
+                  </span>` : `
+                  <input type="${inputType}" class="form-check-input ms-2" name="slot" value="${i}"
+                         ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>`}
               </div>
             </div>
           </div>`;
@@ -396,7 +446,11 @@
 
       $container.find('input[name="slot"]').on('change', function () {
         if (isAdmin) {
-          state.selectedSlots = [];
+          // Keep picks from other days (and drop any that went stale), then
+          // rebuild this day's picks from its checked inputs. Selection is
+          // per-request, accumulating across calendar days until submit.
+          state.selectedSlots = state.selectedSlots.filter(s =>
+            s.date !== dateStr && !isSlotBlocked(s, s.date) && !isSlotPast(s, s.date));
           $container.find('input[name="slot"]:checked').each(function () {
             state.selectedSlots.push(slots[parseInt($(this).val())]);
           });
@@ -525,11 +579,18 @@
         return;
       }
 
-      const html = state.selectedSlots
-        .map(slot => renderSessionGrid(slot, state.selectedDate))
+      const items = [...state.selectedSlots].sort((a, b) =>
+        (a.date + a.start_time).localeCompare(b.date + b.start_time));
+
+      const header = `<div class="fw-semibold mb-3">${
+        '{{ __('mentor.selected_sessions_count', ['count' => ':n']) }}'.replace(':n', items.length)
+      }</div>`;
+
+      const html = items
+        .map(slot => renderSessionGrid(slot, slot.date))
         .join('<hr class="my-3">');
 
-      $('#sessionDetailsBody').html(html);
+      $('#sessionDetailsBody').html(header + html);
       $('#sessionDetails').show();
       checkSubmitState();
     };
@@ -554,13 +615,19 @@
         enable: dates,
         onChange: ([date], dateStr) => {
           state.selectedDate = dateStr;
-          state.selectedSlot = null;
-          state.selectedSlots = [];
           renderSlots(dateStr);
-          $('#sessionDetails').hide();
           hideMessages();
           $('#slotsDate').text(formatDate(dateStr));
-          $('#submit-button').prop('disabled', true);
+          if (isAdmin) {
+            // Admin multi-select accumulates across days — keep prior picks and
+            // just refresh the summary / submit state for the new day.
+            updateSelectedSlotsDisplay();
+          } else {
+            state.selectedSlot = null;
+            state.selectedSlots = [];
+            $('#sessionDetails').hide();
+            $('#submit-button').prop('disabled', true);
+          }
         },
         onDayCreate: (dObj, dStr, fp, dayElem) => {
           const dateStr     = dayElem.dateObj.toISOString().split('T')[0];
@@ -591,6 +658,13 @@
     const startStaleCheckTimer = () => {
       stopStaleCheckTimer();
       state.staleCheckTimer = setInterval(() => {
+        if (isAdmin && state.selectedSlots.length) {
+          // Drop cross-day picks that another booking has since taken.
+          const before = state.selectedSlots.length;
+          state.selectedSlots = state.selectedSlots.filter(s =>
+            !isSlotBlocked(s, s.date) && !isSlotPast(s, s.date));
+          if (state.selectedSlots.length !== before) updateSelectedSlotsDisplay();
+        }
         if (state.selectedDate) renderSlots(state.selectedDate);
       }, 30000);
     };
@@ -607,6 +681,7 @@
       state.selectedSlots = [];
       state.selectedDate = getToday();
       state.fileValid    = true;
+      state.reloadOnClose = false;
       $('#fileUpload').val('');
       $('#additionalNotes').val('');
       $('#fileName, #fileError, #sessionDetails').hide();
@@ -759,23 +834,37 @@
         processData: false,
         contentType: false,
       })
-      .done(function (html) {
-        const result = parseFlashFromHtml(html);
+      .done(function (res) {
+        const outcome = readBookingOutcome(res);
+        const submitLabel = '<i class="ti ti-send me-2"></i>{{ __('admin.Submit') }}';
 
-        if (result.success) {
+        if (outcome.status === 'success') {
           releaseSuccessAlert({
             title: "{{ __('admin.Success') }}",
-            message: result.message || "{{ __('mentor.request_sent_success') }}",
+            message: outcome.message || "{{ __('mentor.request_sent_success') }}",
           });
           setTimeout(() => {
             $('#bookingModal').modal('hide');
             window.location.reload();
           }, 1500);
-        } else {
-          showError(result.message);
-          $btn.prop('disabled', false)
-              .html('<i class="ti ti-send me-2"></i>{{ __('admin.Submit') }}');
+          return;
         }
+
+        if (outcome.status === 'partial') {
+          // Some sessions booked, some failed — never show a bare success.
+          showError(`<div class="fw-semibold">${escapeHtml(outcome.message)}</div>${outcome.failedHtml}`);
+          // The successful bookings are already saved; refresh once the manager
+          // dismisses the modal so they show up.
+          state.reloadOnClose = true;
+          $btn.prop('disabled', true).html(submitLabel);
+          return;
+        }
+
+        // Full failure — surface the real per-slot reason(s).
+        showError(outcome.failedHtml
+          ? `<div class="fw-semibold">${escapeHtml(outcome.message)}</div>${outcome.failedHtml}`
+          : (outcome.message || '{{ __('admin.unexpected_error') }}'));
+        $btn.prop('disabled', false).html(submitLabel);
       })
       .fail(function (xhr) {
         let msg = '{{ __('admin.unexpected_error') }}';
@@ -804,6 +893,10 @@
     // ─── Reset on modal close ─────────────────────────────────────────────────
     $('#bookingModal').on('hidden.bs.modal', function () {
       stopStaleCheckTimer();
+      if (state.reloadOnClose) {
+        window.location.reload();
+        return;
+      }
       resetForm();
     });
 
