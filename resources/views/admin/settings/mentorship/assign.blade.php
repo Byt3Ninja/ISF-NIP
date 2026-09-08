@@ -95,13 +95,20 @@
         <section>
           <div class="card">
             <div class="card-header d-flex flex-column flex-md-row flex-wrap justify-content-between align-items-lg-center border-bottom">
-              <div class="w-100 mb-6">
+              <div class="d-flex flex-wrap align-items-center justify-content-between w-100 mb-8">
                 <h5 class="card-title mb-6 mb-lg-0">
                   {{ __('cycles.assign_mentors_to') }}
                   <span class="fw-bold ms-1">
                     {{ $cycles->where('id', request('id'))->pluck('title')->implode(', ') }}
                   </span>
                 </h5>
+                @if ($_user->hasAnyRole('subadmin'))
+                <div class="mb-6 mb-lg-0">
+                  <a class="btn btn-primary" href="{{ route('users.create', ['role' => 'mentor']) }}" target="_blank" rel="noopener">
+                    <i class="ti ti-user-plus me-2"></i>{{ __('admin.add_new_mentor') }}
+                  </a>
+                </div>
+                @endif
               </div>
               
               <!-- PHP Logic for Filters -->
