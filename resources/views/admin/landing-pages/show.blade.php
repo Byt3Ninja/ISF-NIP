@@ -537,7 +537,7 @@
           @endif
           @php $howDescription = $l == 'ar' ? $page->how_description_ar : $page->how_description; @endphp
           @if($howDescription)
-            <p class="text-secondary mb-0 mt-3">{{ $howDescription }}</p>
+            <p class="text-secondary mb-0 mt-3" style="overflow-wrap:break-word; word-break:break-word;">{{ $howDescription }}</p>
           @endif
         </div>
       </div>
