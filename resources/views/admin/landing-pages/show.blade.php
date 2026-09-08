@@ -36,11 +36,24 @@
       border-radius: 4px;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     /* ---------- Nav ---------- */
     .gl-nav {
       background: rgba(3, 0, 20, 0.35);
       backdrop-filter: blur(14px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1030;
+    }
+
+    .gl-nav .navbar-brand {
+      cursor: pointer;
     }
 
     .brand-mark {
@@ -101,7 +114,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      padding-top: 0;
+      padding-top: 76px;
       padding-bottom: 0;
       position: relative;
       overflow: hidden;
@@ -144,6 +157,11 @@
     }
 
     /* ---------- Section scaffolding ---------- */
+    section[id],
+    header[id] {
+      scroll-margin-top: 76px;
+    }
+
     .eyebrow-mono {
       font-size: .76rem;
       text-transform: uppercase;
@@ -278,12 +296,12 @@
 <body>
 
   <!-- ===== Hero ===== -->
-  <header class="gl-hero">
+  <header class="gl-hero" id="hero">
 
     <!-- ===== Nav ===== -->
     <nav class="navbar navbar-expand-lg gl-nav py-3">
       <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="#hero">
         <span class="brand-mark">
           @if($page->logo_url)
             <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
@@ -733,7 +751,7 @@
     <div class="container py-3">
       <div class="row g-4">
         <div class="col-lg-4">
-          <a class="d-flex align-items-center gap-2 mb-3" href="#">
+          <a class="d-flex align-items-center gap-2 mb-3" href="#hero">
             <span class="brand-mark">
               @if($page->logo_url)
                 <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
