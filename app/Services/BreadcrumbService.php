@@ -205,7 +205,9 @@ class BreadcrumbService
         // Normalize legacy session entries that stored the rendered label
         // (e.g. "My Profile") instead of a snake_case translation key,
         // so they still resolve to the right lang key regardless of locale.
-        if (preg_match('/[A-Z\s]/', $titleKey)) {
+        // Only ASCII labels are converted: Str::snake() strips whitespace,
+        // which would collapse already-translated non-ASCII titles (e.g. Arabic).
+        if (!preg_match('/[^\x00-\x7F]/', $titleKey) && preg_match('/[A-Z\s]/', $titleKey)) {
             $titleKey = Str::snake(trim($titleKey));
         }
 

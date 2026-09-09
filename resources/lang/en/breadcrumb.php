@@ -172,4 +172,11 @@ return [
     'profile_view_user' => 'View Profile',
     'view_profile' => 'View Profile',
     'profile_service_provider' => 'Service Provider Profile',
+
+    // Landing Pages
+    'custom_landing_pages' => 'Custom Landing Pages',
+    'public_landing-page' => 'Public Landing Page',
+
+    // Programs
+    'view_program' => 'View Program',
 ];

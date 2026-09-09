@@ -331,7 +331,6 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
         'organization_manage_setting' => app()->getLocale() == 'en' ? 'Org Manage Settings' : 'إدارة إعدادات المؤسسة',
         'questions_manage_assessment' => app()->getLocale() == 'en' ? 'Manage Assessment' : 'إدارة التقييم',
         'attendance_offline_view_training' => app()->getLocale() == 'en' ? 'Offline View Training' : 'حضور التدريب',
-        'custom_landing_pages' => app()->getLocale() == 'en' ? 'Custom Landing Pages' : 'الصفحات رئيسية مخصصة',
         'profile_view_client' => app()->getLocale() == 'en' ? 'Client Profile' : 'الملف الشخصي للعميل',
         
     ];
