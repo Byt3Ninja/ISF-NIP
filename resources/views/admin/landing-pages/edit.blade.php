@@ -829,20 +829,9 @@
         });
       };
 
-      // FormValidation wiring for the custom-URL card.
+      // FormValidation wiring for the custom-URL card. The card only has
+      // the slug input now; the Page Title lives in the General section.
       const lpUrlFvFields = {
-        lpUrlTitle: {
-          validators: {
-            notEmpty: { message: lpUrlI18n.titleRequired },
-            stringLength: { max: 100, message: lpUrlI18n.titleMax },
-          },
-        },
-        lpUrlName: {
-          validators: {
-            notEmpty: { message: lpUrlI18n.nameRequired },
-            stringLength: { max: 100, message: lpUrlI18n.nameMax },
-          },
-        },
         lpUrlSlug: {
           validators: {
             notEmpty: { message: lpUrlI18n.slugRequired },
@@ -950,18 +939,15 @@
       });
 
       $('#lpUrlGenerateBtn').on('click', function () {
-        const $title = $('#lpUrlTitle');
-        if (lpUrlFv) {
-          lpUrlFv.revalidateField('lpUrlTitle');
-          if (!$title.val().trim()) return;
-        } else {
-          if (!$title.val().trim()) {
-            lpUrlShowFieldError($title, lpUrlI18n.titleRequired);
-            return;
-          }
-          lpUrlClearFieldError($title);
+        // The Page Title lives in the General section form (#general_title),
+        // not in this card — the card's own title input was removed. If
+        // General has no title yet, there's nothing to generate from, so
+        // the button is a no-op.
+        const title = ($('#general_title').val() || '').trim();
+        if (!title) {
+          return;
         }
-        $('#lpUrlSlug').val(lpUrlSlugify($title.val()));
+        $('#lpUrlSlug').val(lpUrlSlugify(title));
         lpUrlSlugChecked = false;
         lpUrlSlugAvailable = false;
         lpUrlSetAvailability('', '');
@@ -983,8 +969,6 @@
       $('#lpUrlForm').on('submit', function (e) {
         e.preventDefault();
         const $btn = $('#lpUrlSaveBtn');
-        // const $title = $('#lpUrlTitle');
-        // const $name = $('#lpUrlName');
         const $slug = $('#lpUrlSlug');
 
         const proceedSave = function () {
@@ -1047,16 +1031,6 @@
             lpUrlShowFieldError($input, message);
             if (!firstError) firstError = message;
           };
-          if (!$title.val().trim()) {
-            mark($title, lpUrlI18n.titleRequired);
-          } else {
-            lpUrlClearFieldError($title);
-          }
-          if (!$name.val().trim()) {
-            mark($name, lpUrlI18n.nameRequired);
-          } else {
-            lpUrlClearFieldError($name);
-          }
           if (!slug) {
             mark($slug, lpUrlI18n.slugRequired);
           } else if (!lpUrlIsValidSlug(slug)) {
