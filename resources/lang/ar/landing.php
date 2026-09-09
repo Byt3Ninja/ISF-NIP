@@ -134,6 +134,7 @@ return [
         'step_description_ar_required' => 'يرجى إدخال وصف الخطوة باللغة العربيه.',
         'field_required' => 'هذا الحقل مطلوب.',
         'custom_section_field_required' => 'هذا الحقل مطلوب.',
+        'custom_section_field_max' => 'يجب ألا يتجاوز هذا الحقل :max حرف.',
         'button_link_invalid' => 'يرجى إدخال رابط زر صالح.',
         'custom_image_type_invalid' => 'نوع الملف غير مدعوم. يرجى رفع صورة بصيغة JPG أو PNG أو WEBP.',
         'custom_image_size_exceeded' => 'حجم الصورة يتجاوز 5 ميجابايت.',

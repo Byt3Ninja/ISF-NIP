@@ -134,6 +134,7 @@ return [
         'step_description_ar_required' => 'Please enter the step description in Arabic.',
         'field_required' => 'This field is required.',
         'custom_section_field_required' => 'This field is required.',
+        'custom_section_field_max' => 'This field must not exceed :max characters.',
         'button_link_invalid' => 'Please enter a valid button link.',
         'custom_image_type_invalid' => 'Unsupported file type. Please upload a JPG, PNG, or WEBP image.',
         'custom_image_size_exceeded' => 'Image size exceeds 5 MB.',

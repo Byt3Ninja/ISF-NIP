@@ -683,6 +683,7 @@
         howStepDescription:     "{{ __('landing.validation.step_description_required') }}",
         howStepDescriptionArabic: "{{ __('landing.validation.step_description_ar_required') }}",
         customRequired:         "{{ __('landing.validation.custom_section_field_required') }}",
+        customMaxLength:        "{{ __('landing.validation.custom_section_field_max', ['max' => 225]) }}",
         customUnsupportedType:  "{{ __('landing.validation.custom_image_type_invalid') }}",
         customImageSize:        "{{ __('landing.validation.custom_image_size_exceeded') }}",
         customButtonLink:       "{{ __('landing.validation.button_link_invalid') }}",
@@ -1383,6 +1384,7 @@
       // ─────────────────────────────────────────────────────────────
       const customQuills = new Map();
       const customRequiredFields = ['title', 'title_tag', 'content', 'title_ar', 'title_tag_ar', 'content_ar'];
+      const customFieldMaxLengths = { title: 225, title_ar: 225, title_tag: 225, title_tag_ar: 225 };
       const customMaxSections = 5;
       let customSectionCounter = 0;
 
@@ -1406,22 +1408,26 @@
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title">
                   <label class="form-label">${"{{ __('landing.Title') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title]" maxlength="225" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} 225 ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_ar">
                   <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_ar]" maxlength="225" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} 225 ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag">
                   <label class="form-label">${"{{ __('landing.Title_tag') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="225" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} 225 ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
                   <label class="form-label">${"{{ __('landing.Title_tag_ar') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="225" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} 225 ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="content">
@@ -1494,9 +1500,23 @@
 
         let valid = true;
         customRequiredFields.forEach(function (field) {
-          const filled = customFieldValue($card, field) !== '';
-          setCustomFieldError($card.find('.custom-field-group[data-field="' + field + '"]'), filled ? '' : validationMessages.customRequired);
-          if (!filled) valid = false;
+          const $group = $card.find('.custom-field-group[data-field="' + field + '"]');
+          const value = customFieldValue($card, field);
+          const max = customFieldMaxLengths[field];
+
+          if (value === '') {
+            setCustomFieldError($group, validationMessages.customRequired);
+            valid = false;
+            return;
+          }
+
+          if (max && value.length > max) {
+            setCustomFieldError($group, validationMessages.customMaxLength);
+            valid = false;
+            return;
+          }
+
+          setCustomFieldError($group, '');
         });
         return valid;
       };
