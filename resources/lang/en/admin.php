@@ -1504,6 +1504,7 @@ return [
 	'Inactive' => 'Inactive',
 	'Add_New' => 'Add New',
 	'No_Data_Found' => 'No data found',
+	'No_Programs_Found' => 'No programs found.',
 	'Organization Manager English Last Name' => 'Organization Manager English Last Name',
 	'Organization Manager Arabic Last Name' => 'Organization Manager Arabic Last Name',
 	'Score' => 'Score',

@@ -316,7 +316,7 @@
           {{ $cycles->links('pagination::bootstrap-5') }}
         </div>
       @else 
-        @include('includes.no-result', ['message' => __('admin.No_Data_Found')])
+        @include('includes.no-result', ['message' => __('admin.No_Programs_Found')])
       @endif
     </div>
   </div>

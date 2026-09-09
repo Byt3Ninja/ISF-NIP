@@ -1512,6 +1512,7 @@ return [
 	'Inactive' => 'غير نشط',
 	'Add_New' => 'اضافة جديد',
 	'No_Data_Found' => 'لا يوجد بيانات',
+	'No_Programs_Found' => 'لم يتم العثور على برامج.',
 	'Organization Manager English Last Name' => 'اسم العائلة لمدير المؤسسة باللغة الإنجليزية',
 	'Organization Manager Arabic Last Name' => 'اسم العائلة لمدير المؤسسة باللغة العربية',
 	'Score' => 'النقاط',
