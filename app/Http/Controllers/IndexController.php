@@ -434,9 +434,31 @@ class IndexController extends Controller
                         );
                     }
                     if ($request->user) {
-                        $request->user->notify(
-                            new MentorshipRequestNotification($data)
-                        );
+                        $startupLocale = $request->user->preferredLocale() ?? 'en';
+                        $mentorFullName = $request->mentor ? ($request->mentor->first_name_en . " " . $request->mentor->last_name_en) : '';
+                        $startupFullName_user = $request->user->first_name_en . " " . $request->user->last_name_en;
+
+                        $userMessage = [
+                            __("messages.mentorship_session_subject", [], $startupLocale),
+                            __("messages.dear", ['name' => $startupFullName_user], $startupLocale),
+                            $request->approved == 'Yes'
+                                ? __("messages.approved_message", ['other_party' => $mentorFullName], $startupLocale)
+                                : __("messages.denied_message", ['other_party' => $mentorFullName], $startupLocale),
+                            "/dashboard",
+                            $request->approved == 'Yes'
+                                ? __("messages.mentorship_session_action", ['action' => __('messages.Approved', [], $startupLocale), 'name' => $mentorFullName], $startupLocale)
+                                : __("messages.mentorship_session_action", ['action' => __('messages.Rejected', [], $startupLocale), 'name' => $mentorFullName], $startupLocale),
+                        ];
+
+                        if ($request->approved == 'Yes') {
+                            $request->user->notify(
+                                new \App\Notifications\StartupNotifyMentorshipApprovalNotification($userMessage, $request)
+                            );
+                        } else {
+                            $request->user->notify(
+                                new \App\Notifications\StartupNotifyMentorshipNotification($userMessage, $request)
+                            );
+                        }
                     }
                     $status = ($request->cycle && $request->cycle->is_active_Rminder == 1) ? 'sent' : 'failed';
                     $mentor = User::find($request->mentor_id);
