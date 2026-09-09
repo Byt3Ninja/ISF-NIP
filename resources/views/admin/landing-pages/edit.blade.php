@@ -779,7 +779,12 @@
           .replace(/[^\w\s-]/g, '')
           .replace(/[\s_]+/g, '-')
           .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '');
+          .replace(/^-+|-+$/g, '')
+          // Keep the generated slug within the same limit the backend
+          // enforces (see LandingPage::SLUG_MAX_LENGTH); a programmatic
+          // .val() would otherwise bypass the field's maxlength attribute.
+          .slice(0, {{ \App\LandingPage::SLUG_MAX_LENGTH }})
+          .replace(/-+$/g, '');
       };
 
       const lpUrlIsValidSlug = function (slug) {
@@ -1097,6 +1102,7 @@
 
        const validationMessages = {
         pageTitle:          "{{ __('landing.validation.page_title_required') }}",
+        pageTitleMax:       "{{ __('landing.validation.page_title_max', ['max' => \App\LandingPage::TITLE_MAX_LENGTH]) }}",
         logoRequired:       "{{ __('landing.validation.logo_required') }}",
         logoUnsupported:    "{{ __('landing.validation.image_format_invalid') }}",
         logoSize:           "{{ __('landing.validation.logo_size_exceeded') }}",
@@ -1184,6 +1190,7 @@
           'general[title]': {
             validators: {
               notEmpty: { message: validationMessages.pageTitle },
+              stringLength: { max: {{ \App\LandingPage::TITLE_MAX_LENGTH }}, message: validationMessages.pageTitleMax },
             },
           },
           'general[logo]': buildImageField(

@@ -105,6 +105,7 @@ return [
     'validation' => [
         'please_correct_fields' => 'يرجى تصحيح الحقول المميزة.',
         'page_title_required' => 'يرجى إدخال عنوان الصفحة.',
+        'page_title_max' => 'يجب ألا يتجاوز عنوان الصفحة :max حرف.',
         'logo_required' => 'يرجى تحميل الشعار.',
         'image_format_invalid' => 'صيغة الملف غير مدعومة. يرجى تحميل ملف بصيغة PNG أو JPG أو JPEG أو WEBP.',
         'logo_size_exceeded' => 'يجب ألا يتجاوز حجم الشعار 5 ميجابايت.',
@@ -143,6 +144,7 @@ return [
         'custom_url_available' => 'هذا الرابط متاح.',
         'custom_url_title_required' => 'يرجى إدخال العنوان.',
         'custom_url_slug_required' => 'يرجى إدخال الرابط.',
+        'custom_url_slug_max' => 'يجب ألا يتجاوز الرابط :max حرف.',
         'custom_url_name_required' => 'يرجى إدخال الاسم.',
         'checking_url_availability' => 'جاري التحقق من توفر الرابط...',
         'cannot_preview_invalid_url' => 'لا يمكن معاينة صفحة الهبوط قبل حفظ رابط مخصص صالح.',

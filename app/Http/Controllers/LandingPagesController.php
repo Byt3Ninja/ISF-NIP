@@ -172,7 +172,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'عنوان الصفحة',
             'value'     => $currentPage?->title,
             'required'  => true,
-            'maxlength' => 255,
+            'maxlength' => LandingPage::TITLE_MAX_LENGTH,
             'col'       => 12,
           ],
           [
@@ -678,7 +678,7 @@ class LandingPagesController extends Controller
     $user = auth()->user();
 
     $validator = Validator::make($request->all(), [
-      'general.title' => 'required|string|max:255',
+      'general.title' => 'required|string|max:' . LandingPage::TITLE_MAX_LENGTH,
       'general.logo' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
       'general.description' => 'required|string|max:500',
       'general.description_ar' => 'required|string|max:500',
@@ -690,6 +690,7 @@ class LandingPagesController extends Controller
       'general.youtube' => 'nullable|url|max:255',
     ], [
       'general.title.required' => __('landing.validation.page_title_required'),
+      'general.title.max' => __('landing.validation.page_title_max', ['max' => LandingPage::TITLE_MAX_LENGTH]),
       'general.logo.required' => __('landing.validation.logo_required'),
       'general.logo.image' => __('landing.validation.image_format_invalid'),
       'general.logo.mimes' => __('landing.validation.image_format_invalid'),
@@ -788,7 +789,7 @@ class LandingPagesController extends Controller
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 
 		$validator = Validator::make($request->all(), [
-			'general.title' => 'required|string|max:255',
+			'general.title' => 'required|string|max:' . LandingPage::TITLE_MAX_LENGTH,
 			'general.logo' => [
 				$page->logo ? 'nullable' : 'required',
 				'image',
@@ -805,6 +806,7 @@ class LandingPagesController extends Controller
 			'general.youtube' => 'nullable|url|max:255',
 		], [
 			'general.title.required' => __('landing.validation.page_title_required'),
+			'general.title.max' => __('landing.validation.page_title_max', ['max' => LandingPage::TITLE_MAX_LENGTH]),
 			'general.logo.required' => __('landing.validation.logo_required'),
 			'general.logo.image' => __('landing.validation.image_format_invalid'),
 			'general.logo.mimes' => __('landing.validation.image_format_invalid'),
@@ -1415,7 +1417,8 @@ class LandingPagesController extends Controller
 		$page = $id ? $this->scopedLandingPagesQuery()->findOrFail($id) : null;
 
 		$slug = strtolower(trim((string) $request->input('slug')));
-		$isValid = (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug);
+		$isValid = (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)
+			&& mb_strlen($slug) <= LandingPage::SLUG_MAX_LENGTH;
 
 		if (!$isValid) {
 			return response()->json([
@@ -1456,10 +1459,11 @@ class LandingPagesController extends Controller
 
 		$validator = Validator::make(['title' => $request->input('title'), 'slug' => $slug], [
 			// 'title' => 'required|string|max:100',
-			'slug' => ['required', 'string', 'max:100', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
+			'slug' => ['required', 'string', 'max:' . LandingPage::SLUG_MAX_LENGTH, 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/'],
 		], [
 			// 'title.required' => __('landing.validation.custom_url_title_required'),
 			'slug.required' => __('landing.validation.custom_url_slug_required'),
+			'slug.max' => __('landing.validation.custom_url_slug_max', ['max' => LandingPage::SLUG_MAX_LENGTH]),
 			'slug.regex' => __('landing.validation.custom_url_invalid'),
 		]);
 

@@ -652,6 +652,7 @@
 
       const validationMessages = {
         pageTitle:          "{{ __('landing.validation.page_title_required') }}",
+        pageTitleMax:       "{{ __('landing.validation.page_title_max', ['max' => \App\LandingPage::TITLE_MAX_LENGTH]) }}",
         logoRequired:       "{{ __('landing.validation.logo_required') }}",
         logoUnsupported:    "{{ __('landing.validation.image_format_invalid') }}",
         logoSize:           "{{ __('landing.validation.logo_size_exceeded') }}",
@@ -732,6 +733,7 @@
           'general[title]': {
             validators: {
               notEmpty: { message: validationMessages.pageTitle },
+              stringLength: { max: {{ \App\LandingPage::TITLE_MAX_LENGTH }}, message: validationMessages.pageTitleMax },
             },
           },
           'general[logo]': buildImageField(

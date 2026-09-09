@@ -105,6 +105,7 @@ return [
     'validation' => [
         'please_correct_fields' => 'Please correct the highlighted fields.',
         'page_title_required' => 'Please enter the page title.',
+        'page_title_max' => 'The page title must not exceed :max characters.',
         'logo_required' => 'Please upload a logo.',
         'image_format_invalid' => 'Unsupported file format. Please upload a PNG, JPG, JPEG, or WEBP file.',
         'logo_size_exceeded' => 'Logo size must not exceed 5 MB.',
@@ -143,6 +144,7 @@ return [
         'custom_url_available' => 'This URL is available.',
         'custom_url_title_required' => 'Please enter the title.',
         'custom_url_slug_required' => 'Please enter the URL.',
+        'custom_url_slug_max' => 'The URL slug must not exceed :max characters.',
         'custom_url_name_required' => 'Please enter the name.',
         'checking_url_availability' => 'Checking URL availability...',
         'cannot_preview_invalid_url' => 'Cannot preview the landing page before saving a valid custom URL.',
