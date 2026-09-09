@@ -141,7 +141,10 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
 
      public function toDatabase(object $notifiable): array
     {
-       $isMentor = method_exists($notifiable, 'hasRole') && ($notifiable->hasRole('Mentor') || $notifiable->hasRole('mentor'));
+       $isMentor = method_exists($notifiable, 'hasActualRole') 
+           ? ($notifiable->hasActualRole('Mentor') || $notifiable->hasActualRole('mentor'))
+           : (method_exists($notifiable, 'hasRole') && ($notifiable->hasRole('Mentor') || $notifiable->hasRole('mentor')));
+
        if ($isMentor) {
            $message = ($this->data['company_name'] ?? 'N/A') . 
                       ' has sent you a mentorship request. They are eager to learn from your expertise and guidance.';
