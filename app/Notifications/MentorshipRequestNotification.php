@@ -120,9 +120,28 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
             ->markdown('emails.mentorship_request_reminder', array_merge(['data' => $this->data], $orgData));
            Log::info('Mail data:', ['company_name' => $this->data['company_name']]);
         }else{
+            $sessionTimestamp = strtotime($this->data['date'] ?? 'now');
+            $sessionDate = date('Y-m-d', $sessionTimestamp);
+            $sessionTime = date('h:i A', $sessionTimestamp);
+            if (app()->getLocale() == 'ar') {
+                $sessionTime = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $sessionTime);
+            }
+
             return (new MailMessage)
             ->subject(__('admin.mentorship_request_subject', ['startup' => $this->data['company_name']]))
-            ->markdown('emails.mentorship_request', array_merge(['data' => $this->data], $orgData));
+            ->view('emails.mentorship_notify_startup_approval_email', array_merge([
+                'party'        => $notifiable,
+                'mentorName'   => $this->data['Mentorname'] ?? '',
+                'sessionType'  => 'online',
+                'sessionDate'  => $sessionDate,
+                'sessionTime'  => $sessionTime,
+                'sessionLink'  => $this->data['join_url'] ?? '',
+                'platformName' => $orgData['org_name'] ?? config('app.name'),
+                'location'     => '-',
+                'mapLink'      => '-',
+                'attachments'  => [],
+                'sessionNotes' => '-',
+            ], $orgData));
         }
     }
 
