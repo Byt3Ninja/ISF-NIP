@@ -268,4 +268,26 @@ return [
         'database' => 'You have been invited to judge an evaluation.',
         'whatsapp' => 'Hello :name, you have been invited to judge the :program_name evaluation process, running from :start_date to :end_date. Check your account for more details.',
     ],
+    'startup_meeting_changed_email' => [
+        'greeting' => 'Hello :name,',
+        'new_meeting_time' => 'Your New Meeting Time:',
+        'date' => 'Date',
+        'time' => 'Time',
+        'open_dashboard' => 'Open Dashboard',
+        'inquiry_suggest' => 'If you have any questions or need assistance, please feel free to contact us.',
+        'rescheduled' => [
+            'subject' => 'Your Screening Meeting Time Has Changed',
+            'intro' => 'The schedule for the :program_name screening has been updated, and the meeting time for :startup_name has changed.',
+            'please_check' => 'Please make a note of your new meeting time. You can review the full details, including the meeting link, from your dashboard.',
+            'database' => 'Your screening meeting has been rescheduled to :date at :time.',
+            'whatsapp' => 'Hello :name, your screening meeting for :program_name has been rescheduled to :date at :time. Check your account for more details.',
+        ],
+        'cancelled' => [
+            'subject' => 'Your Screening Meeting Has Been Cancelled',
+            'intro' => 'The schedule for the :program_name screening has been updated, and the meeting previously arranged for :startup_name is no longer scheduled.',
+            'please_check' => 'No action is needed from you right now. If a new meeting is arranged, you will be notified with the new time.',
+            'database' => 'Your screening meeting scheduled for :date at :time has been cancelled.',
+            'whatsapp' => 'Hello :name, your screening meeting for :program_name, scheduled for :date at :time, has been cancelled. Check your account for more details.',
+        ],
+    ],
 ];

@@ -287,7 +287,13 @@
                     <button type="button"
                       class="btn btn-outline-primary d-flex align-items-center justify-content-between w-100 companies-picker-trigger"
                       data-panel-index="{{ $index }}" data-off-step='{{ json_encode($panelOffStepIds->values()->all()) }}'
-                      data-selected='{{ json_encode($panelSelectedIds) }}'>
+                      data-selected='{{ json_encode($panelSelectedIds) }}'
+                      {{-- The startup list as SAVED, in submission order (off-step hidden
+                           inputs render first, then the picker's selections). Compared
+                           against the live inputs on submit to detect an add, a removal
+                           or a REORDER, any of which reflows interval slots
+                           (GV-8892 / GV-8893). --}}
+                      data-companies-baseline='{{ json_encode($panelOffStepIds->values()->concat($panelSelectedIds)->all()) }}'>
                       <span class="companies-summary text-truncate me-2">{{ __('admin.select_startups') }}</span>
                       <i class="ti ti-chevron-down"></i>
                     </button>
@@ -1141,6 +1147,15 @@
         $clone.find('.meeting-link-input, .meeting-password-input').val('');
         $clone.find('.copy-meeting-link, .copy-meeting-password').hide();
 
+        // The resets above clear the VALUE PROPERTY, but a clone also inherits
+        // the source panel's `value` ATTRIBUTES — which panelChangeKind() reads
+        // as "what the server rendered". Left in place, a new panel would carry
+        // the copied panel's date/time/interval as its baseline and compare
+        // against values it never had. A new panel has no saved state, so its
+        // baselines are cleared to match (GV-8892 / GV-8893).
+        $clone.find('.session-date, .session-time, .interval-duration').attr('value', '');
+        $clone.find('.companies-picker-trigger').attr('data-companies-baseline', '[]');
+
         if (!$clone.find('.remove-panel').length) {
           $clone.find('.accordion-header').append('<button type="button" class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
         }
@@ -1227,7 +1242,10 @@
         $(this).closest('.accordion-body').find('.error-interval').text('');
       });
 
-      $(document).on('submit', '#judging-panels-form', function (e) {
+      // async: the startup-assignment confirmation below awaits the admin's answer
+      // before the panels are posted (GV-8892 / GV-8893). e.preventDefault() runs
+      // synchronously at the top, so the native submit is still cancelled.
+      $(document).on('submit', '#judging-panels-form', async function (e) {
         e.preventDefault();
         let valid = true;
 
@@ -1333,8 +1351,147 @@
           return;
         }
 
-        submitPanels($(this).attr('action'), new FormData(this));
+        const action = $(this).attr('action');
+        const formData = new FormData(this);
+
+        // GV-8892 / GV-8893: warn before a save that moves meeting times.
+        //
+        // Only interval panels are gated. With the interval off every startup in
+        // a panel shares one panel-wide window, so nothing here moves a time and
+        // the warning would be untrue. With it on, each slot is derived from the
+        // startup's POSITION and the panel's date/start/interval, so editing any
+        // of them shifts real meetings.
+        //
+        // Purely client-side, unlike the judge-conflict round-trip below: the
+        // browser already rendered the saved values, so it can see the change
+        // without asking the server.
+        //
+        // A roster change wins over a schedule change when both are present: its
+        // wording is the more specific of the two.
+        const changeKinds = $('.accordion-item').toArray()
+          .map(el => panelChangeKind($(el)))
+          .filter(Boolean);
+
+        const changeKind = changeKinds.includes('startup_assignment')
+          ? 'startup_assignment'
+          : (changeKinds[0] || null);
+
+        if (changeKind) {
+          const copy = {
+            startup_assignment: {
+              title: '{{ __("admin.screening.startup_assignment_change_title") }}',
+              body: '{{ __("admin.screening.startup_assignment_change_body") }}'
+            },
+            schedule: {
+              title: '{{ __("admin.screening.schedule_change_title") }}',
+              body: '{{ __("admin.screening.schedule_change_body") }}'
+            }
+          }[changeKind];
+
+          const { isConfirmed } = await Swal.fire({
+            icon: 'warning',
+            title: copy.title,
+            text: copy.body,
+            showCancelButton: true,
+            confirmButtonText: '{{ __("admin.Confirm") }}',
+            cancelButtonText: '{{ __("admin.Cancel") }}',
+            customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
+            buttonsStyling: false
+          });
+
+          // Cancel leaves the form exactly as the admin left it, so the panel can
+          // be corrected before retrying.
+          if (!isConfirmed) return;
+        }
+
+        submitPanels(action, formData);
       });
+
+      // Which kind of change a panel carries, or null when nothing that moves a
+      // meeting time was touched.
+      //
+      // Three inputs drive ScreeningSlotService — the session date, the start
+      // time and the interval — plus the startup list, whose ORDER decides each
+      // slot's position. Any of them reflows the schedule, so all four are
+      // compared against the values the server rendered.
+      //
+      // end_time is deliberately NOT compared: with the interval on it is
+      // derived by computeEndTime() from the start time and interval, so it
+      // would only restate a change already detected here.
+      //
+      // The baseline for the schedule fields is the `value` ATTRIBUTE, which
+      // keeps what blade rendered, while .val() reads what the admin now has.
+      // flatpickr writes the property, never the attribute, so the two stay
+      // independent. The startup list needs an explicit baseline attribute
+      // instead, because its inputs are rebuilt from a Set on every change.
+      const panelChangeKind = ($p) => {
+        // A history panel's inputs are disabled and its stored values are
+        // restored server-side, so it cannot have changed.
+        if ($p.attr('data-history') === '1') return null;
+
+        // An unscheduled panel has no meeting times to move.
+        if (!$p.find('.session-toggle').is(':checked')) return null;
+
+        // The dialog promises "affected startups will be notified", and with
+        // "Notify now" off the server deliberately emails nobody. Warning about
+        // a notification that will not be sent would be a false promise, so a
+        // quiet edit stays quiet — matching the backend gate in
+        // notifyAffectedStartups().
+        if (!$p.find('.notify-toggle').is(':checked')) return null;
+
+        // Per-startup slots only exist in interval mode. Without it every
+        // startup shares the panel window, so a roster edit moves nobody.
+        if (!$p.find('.interval-toggle').is(':checked')) return null;
+
+        // Roster first: it is the case the ticket names, and its wording is the
+        // more specific of the two.
+        if (companiesChanged($p)) return 'startup_assignment';
+
+        const scheduleFields = ['session_date', 'start_time', 'interval'];
+        const scheduleMoved = scheduleFields.some((name) => {
+          const $input = $p.find(`[name*="[${name}]"]`).first();
+          if (!$input.length) return false;
+
+          const rendered = ($input.attr('value') || '').trim();
+          const now = ($input.val() || '').trim();
+
+          return rendered !== now;
+        });
+
+        return scheduleMoved ? 'schedule' : null;
+      };
+
+      // True when a panel's startup list differs from the one that was rendered
+      // — in membership OR in order.
+      //
+      // Order matters as much as membership: ScreeningSlotService derives slot N
+      // from start + (N * interval), so dragging startup 3 above startup 1
+      // changes both of their times while the set stays identical.
+      const companiesChanged = ($p) => {
+        const $trig = $p.find('.companies-picker-trigger');
+        if (!$trig.length) return false;
+
+        // parseIdList yields STRINGS, so both sides are normalised to numbers
+        // before comparing — otherwise 3 !== '3' would report a change on every
+        // save and the dialog would fire even when nothing moved.
+        const toIds = (values) => values
+          .map(v => parseInt(v, 10))
+          .filter(id => !isNaN(id));
+
+        const baseline = toIds(parseIdList($trig.attr('data-companies-baseline')));
+
+        // Read the inputs that will actually be posted, so this compares exactly
+        // what the server will store — including submission order.
+        const current = toIds(
+          $p.find('input[type="hidden"][name*="[companies][]"]')
+            .toArray()
+            .map(input => input.value)
+        );
+
+        if (baseline.length !== current.length) return true;
+
+        return baseline.some((id, i) => id !== current[i]);
+      };
 
       // Posts the panels, handling the judge-conflict round-trip.
       //

@@ -2787,6 +2787,16 @@ return [
 		'judge_conflict_same_step' => 'Judge :judge is already assigned to panel ":panel" on :date from :start to :end. Please change the judge or schedule.',
 		'judge_conflict_other_step' => 'Judge :judge is already assigned to panel ":panel" in the ":step" on :date from :start to :end. Please change the judge or schedule.',
 		'judge_conflict_title' => 'Judge scheduling conflict',
+		// GV-8892 / GV-8893: shown before saving when startups are added, removed
+		// or reordered on an interval panel, because each startup's slot is
+		// derived from its position and therefore shifts.
+		'startup_assignment_change_title' => 'Confirm startup assignment change',
+		'startup_assignment_change_body' => 'Changing the startup assignment may update scheduled meeting times. Affected startups will be notified of their new meeting time. Do you want to continue?',
+		// Same warning for a change to the interval, start time or session date:
+		// those reflow every startup's slot exactly like a reorder does, but the
+		// wording above ("startup assignment") would not describe what changed.
+		'schedule_change_title' => 'Confirm schedule change',
+		'schedule_change_body' => 'Changing the schedule will update scheduled meeting times. Affected startups will be notified of their new meeting time. Do you want to continue?',
 		// History panels (past meetings) — read-only records.
 		'panel_history' => 'History',
 		'panel_history_notice' => 'This panel\'s scheduled screening time has passed. It is kept as a read-only record and can no longer be edited.',
