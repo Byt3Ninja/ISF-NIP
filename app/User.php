@@ -401,7 +401,7 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         $roles = array_map(function($n){ return trim( strtolower($n) ); }, $roles);
         return in_array($name, $roles);
     }
-    public function hasActualRole( $name )
+    public function hasActualRole( $name ) 
     {
         $name = trim( strtolower($name) );
         $roles = $this->roles->pluck('default_for')->toArray();

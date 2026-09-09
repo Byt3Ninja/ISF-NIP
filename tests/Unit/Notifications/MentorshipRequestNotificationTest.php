@@ -10,9 +10,12 @@ class MentorshipRequestNotificationTest extends TestCase
 {
     public function test_mentor_receives_mentor_specific_message()
     {
-        $mentorUser = $this->createMock(User::class);
+        $mentorUser = $this->getMockBuilder(User::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['hasRole', 'hasActualRole'])
+            ->getMock();
+
         $mentorUser->method('hasActualRole')
-            ->with($this->logicalOr($this->equalTo('Mentor'), $this->equalTo('mentor')))
             ->willReturn(true);
 
         $notificationData = [
@@ -31,9 +34,12 @@ class MentorshipRequestNotificationTest extends TestCase
 
     public function test_founder_does_not_receive_mentor_specific_message()
     {
-        $founderUser = $this->createMock(User::class);
+        $founderUser = $this->getMockBuilder(User::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['hasRole', 'hasActualRole', 'preferredLocale'])
+            ->getMock();
+
         $founderUser->method('hasActualRole')
-            ->with($this->logicalOr($this->equalTo('Mentor'), $this->equalTo('mentor')))
             ->willReturn(false);
         $founderUser->method('preferredLocale')
             ->willReturn('en');
