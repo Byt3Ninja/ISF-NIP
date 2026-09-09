@@ -1486,7 +1486,8 @@ class LandingPagesController extends Controller
 
 		return response()->json([
 			'message' => __('landing.success.custom_url_saved'),
-      'slug' => url('/lp/' . $slug),
+			'slug' => $slug,
+			'url' => url('/lp/' . $slug),
 		]);
 	}
 }
