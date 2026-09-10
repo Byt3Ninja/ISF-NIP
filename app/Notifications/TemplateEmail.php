@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Traits\ConfiguresSmtp;
+use App\Services\GlobalNotificationSettingsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
@@ -13,7 +15,7 @@ use Throwable;
 
 class TemplateEmail extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ConfiguresSmtp;
 
     /**
      * The number of times the job may be attempted.
@@ -77,6 +79,10 @@ class TemplateEmail extends Notification implements ShouldQueue
     public function via($notifiable)
     {
         Log::info('via() called for user: ' . $notifiable->id);
+        $org = $notifiable->organization ?? null;
+        $smtpSettings = $org?->organizationSettings ?? null;
+        $this->configureSmtp($smtpSettings);
+
         return ['mail', 'database'];
     }
 
@@ -88,9 +94,16 @@ class TemplateEmail extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $locale = $this->preferredLocale ?? 'en';
+        $org = $notifiable->organization ?? null;
+        $smtpSettings = $org?->organizationSettings ?? null;
+        $from = $this->getFromAddress($smtpSettings);
+
+        $locale = $this->preferredLocale 
+            ?? (method_exists($notifiable, 'preferredLocale') ? $notifiable->preferredLocale() : ($notifiable->language ?? 'en'));
+
         $url = is_null($this->ActionUrl) ? url($this->Message[3]) : $this->ActionUrl;
-        return (new MailMessage)
+
+        $mail = (new MailMessage)
             ->subject($this->Message[0])
             ->greeting($this->Message[1])
             ->level('info')
@@ -98,6 +111,12 @@ class TemplateEmail extends Notification implements ShouldQueue
             ->action($this->ActionText, $url)
             ->line(__('admin.email_thank_you', [], $locale))
             ->salutation(__('admin.email_salutation', [], $locale));
+
+        if (!empty($from['address'])) {
+            $mail->from($from['address'], $from['name'] ?? config('app.name'));
+        }
+
+        return $mail;
     }
 
     /**

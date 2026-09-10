@@ -796,17 +796,18 @@ class ServiceController extends Controller
 	 */
 	private function sendServiceRequestNotification(ServicesRequests $serviceRequest, string $action, ?string $providerMessage = null): void
 	{
-		if (in_array(env('APP_ENV', 'local'), ['local'])) {
-			return;
-		}
-
 		try {
 			$founder  = $serviceRequest->user;
+			if (!$founder) {
+				return;
+			}
 			$service  = $serviceRequest->service;
 			$provider = $service->provider;
 
-			$founderLang  = $founder->language ?? 'en';
-			$founderName  = trim($founder->first_name_en . ' ' . $founder->last_name_en);
+			$founderLang  = method_exists($founder, 'preferredLocale') ? $founder->preferredLocale() : ($founder->language ?? 'en');
+			$firstName    = $founder->{"first_name_{$founderLang}"} ?? $founder->first_name_en;
+			$lastName     = $founder->{"last_name_{$founderLang}"} ?? $founder->last_name_en;
+			$founderName  = trim($firstName . ' ' . $lastName);
 			$serviceName  = $founderLang === 'ar' ? ($service->name_ar ?: $service->name_en) : $service->name_en;
 			$providerName = $provider->company_name ?? '';
 
