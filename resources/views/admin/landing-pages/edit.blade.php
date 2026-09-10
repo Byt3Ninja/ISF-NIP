@@ -482,7 +482,7 @@
                           <tr
                             class="programs-list-row @if($program->is_expired) program-row-ended @endif"
                             data-program-id="{{ $program->id }}"
-                            data-search-title="{{ $program->title }} {{ $program->organization->name ?? '' }}"
+                            data-search-title="{{ $program->title }} {{ $program->title_ar }} {{ $program->organization->name ?? '' }}"
                             data-program-visibility="{{ $program->is_expired ? 'hidden' : ($program->landing_visible ? 'visible' : 'hidden') }}"
                             data-program-organization="{{ $program->organization_id }}"
                             data-program-type="{{ $program->type }}"
@@ -490,7 +490,7 @@
                             <td>
                               <div class="d-flex align-items-center gap-3">
                                 <div class="avatar avatar-sm">
-                                  <img src="{{ $program->logo }}" alt="{{ $program->title }}" class="rounded-circle">
+                                  <img src="{{ $program->logo }}" alt="{{ $program->name }}" class="rounded-circle">
                                 </div>
                                 <div class="flex-grow-1" style="min-width: 0;">
                                   <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -500,7 +500,7 @@
                                       rel="noopener"
                                       class="fw-medium d-inline-flex align-items-center gap-1"
                                     >
-                                      {{ $program->title }}
+                                      {{ $program->name }}
                                       <i class="ti ti-external-link text-muted"></i>
                                     </a>
                                     @if($program->is_expired)
