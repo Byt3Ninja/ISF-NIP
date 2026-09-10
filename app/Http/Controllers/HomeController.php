@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Almuni;
 use App\Step;
 use App\User;
+use App\Role;
 use stdClass;
 use App\Cycle;
 use App\Sector;
@@ -678,7 +679,22 @@ class HomeController extends Controller
             });
             $step->companies = $groupedSteps->filter(function ($step) {
                 return !is_null($step->company_id);
-            })->groupBy('company_id')->map(function ($oneStep) use ($l) {
+            })
+                // Keyed by (company, PANEL), not by company alone.
+                //
+                // A judge may sit on several panels of one step, each with its
+                // own date, window and meeting link, and the same startup can be
+                // scheduled in all of them. Grouping on company_id alone
+                // collapsed those panels into a single row and ->first() kept
+                // whichever came back first, so a judge with three panels saw
+                // only one -- typically the earliest, already finished, showing
+                // "Session Completed" while the upcoming panels were invisible.
+                //
+                // One row per panel matches how the startup side already renders
+                // and how `screenings` actually stores the data.
+                ->groupBy(function ($row) {
+                    return $row->company_id . ':' . $row->screening_panel;
+                })->map(function ($oneStep) use ($l) {
                 $c = $oneStep->first();
                 $company = new stdClass;
                 $company->id = $c->company_id;
@@ -787,9 +803,11 @@ class HomeController extends Controller
                         -- empty one, which never expires and leaves the row stuck
                         -- reading as not started.
                         --
-                        -- Prefer a panel that is actually scheduled, then the
-                        -- earliest one, then the lowest id, so the choice is stable
-                        -- across requests.
+                        -- Prefer a panel that is actually scheduled; among those,
+                        -- the NEXT ONE that has not finished yet, falling back to
+                        -- the most recent past panel when every panel is over.
+                        -- Picking the earliest outright would surface a finished
+                        -- 09:00 session and hide a live 19:50 one.
                         SELECT sc2.id
                         FROM screenings sc2
                         WHERE sc2.step_id = fs.step_id
@@ -797,8 +815,8 @@ class HomeController extends Controller
                             AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
                         ORDER BY
                             (sc2.session_date IS NULL) ASC,
-                            sc2.session_date ASC,
-                            sc2.start_time ASC,
+                            (TIMESTAMP(sc2.session_date, COALESCE(sc2.end_time, '23:59:59')) < NOW()) ASC,
+                            TIMESTAMP(sc2.session_date, COALESCE(sc2.start_time, '00:00:00')) ASC,
                             sc2.panel ASC,
                             sc2.id ASC
                         LIMIT 1
@@ -1340,9 +1358,11 @@ class HomeController extends Controller
                         -- empty one, which never expires and leaves the row stuck
                         -- reading as not started.
                         --
-                        -- Prefer a panel that is actually scheduled, then the
-                        -- earliest one, then the lowest id, so the choice is stable
-                        -- across requests.
+                        -- Prefer a panel that is actually scheduled; among those,
+                        -- the NEXT ONE that has not finished yet, falling back to
+                        -- the most recent past panel when every panel is over.
+                        -- Picking the earliest outright would surface a finished
+                        -- 09:00 session and hide a live 19:50 one.
                         SELECT sc2.id
                         FROM screenings sc2
                         WHERE sc2.step_id = fs.step_id
@@ -1350,8 +1370,8 @@ class HomeController extends Controller
                             AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
                         ORDER BY
                             (sc2.session_date IS NULL) ASC,
-                            sc2.session_date ASC,
-                            sc2.start_time ASC,
+                            (TIMESTAMP(sc2.session_date, COALESCE(sc2.end_time, '23:59:59')) < NOW()) ASC,
+                            TIMESTAMP(sc2.session_date, COALESCE(sc2.start_time, '00:00:00')) ASC,
                             sc2.panel ASC,
                             sc2.id ASC
                         LIMIT 1
@@ -2401,8 +2421,8 @@ class HomeController extends Controller
             'href' => '/dashboard/companies',
             'icon' => 'ti-building',
             'text' => 'Founders',
-            'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
-            'count' => $companies->count(),
+            'permissions' => ['users.index', 'users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => Role::_users('registered')->count(),
             'isRating' => false,
         ];
         $data['countCards'][] = [
