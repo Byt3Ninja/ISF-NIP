@@ -501,7 +501,7 @@
 
                 {{-- Title --}}
                 @if($programTitle)
-                  <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35;">{{ $programTitle }}</h5>
+                  <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35; overflow-wrap:break-word; word-break:break-word; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ $programTitle }}</h5>
                 @endif
 
                 {{-- Description --}}
