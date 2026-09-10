@@ -775,9 +775,34 @@ class HomeController extends Controller
                 LEFT JOIN
                     cycles cy ON s.cycle_id = cy.id
                 LEFT JOIN
-                    screenings sc ON sc.step_id = fs.step_id
-                        AND sc.deleted_at IS NULL
-                        AND JSON_CONTAINS(sc.users, CAST(fs.company_id AS CHAR))
+                    screenings sc ON sc.id = (
+                        -- One panel per company, chosen deterministically.
+                        --
+                        -- `screenings` holds ONE ROW PER JUDGE PER PANEL, and a
+                        -- company may sit in several panels of the same step, so
+                        -- joining on (step_id, JSON_CONTAINS(users)) alone matched
+                        -- many rows carrying DIFFERENT meeting windows. Which one
+                        -- won was down to arbitrary row order, so a judge could be
+                        -- shown another panel window -- or an unscheduled panel
+                        -- empty one, which never expires and leaves the row stuck
+                        -- reading as not started.
+                        --
+                        -- Prefer a panel that is actually scheduled, then the
+                        -- earliest one, then the lowest id, so the choice is stable
+                        -- across requests.
+                        SELECT sc2.id
+                        FROM screenings sc2
+                        WHERE sc2.step_id = fs.step_id
+                            AND sc2.deleted_at IS NULL
+                            AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
+                        ORDER BY
+                            (sc2.session_date IS NULL) ASC,
+                            sc2.session_date ASC,
+                            sc2.start_time ASC,
+                            sc2.panel ASC,
+                            sc2.id ASC
+                        LIMIT 1
+                    )
                 WHERE
                     fs.deleted_at IS NULL
                     AND c.step = fs.step_id
@@ -1303,9 +1328,34 @@ class HomeController extends Controller
                 LEFT JOIN
                     users u ON u.company_id = c.id AND u.id = ?
                 LEFT JOIN
-                    screenings sc ON sc.step_id = fs.step_id
-                        AND sc.deleted_at IS NULL
-                        AND JSON_CONTAINS(sc.users, CAST(fs.company_id AS CHAR))
+                    screenings sc ON sc.id = (
+                        -- One panel per company, chosen deterministically.
+                        --
+                        -- `screenings` holds ONE ROW PER JUDGE PER PANEL, and a
+                        -- company may sit in several panels of the same step, so
+                        -- joining on (step_id, JSON_CONTAINS(users)) alone matched
+                        -- many rows carrying DIFFERENT meeting windows. Which one
+                        -- won was down to arbitrary row order, so a judge could be
+                        -- shown another panel window -- or an unscheduled panel
+                        -- empty one, which never expires and leaves the row stuck
+                        -- reading as not started.
+                        --
+                        -- Prefer a panel that is actually scheduled, then the
+                        -- earliest one, then the lowest id, so the choice is stable
+                        -- across requests.
+                        SELECT sc2.id
+                        FROM screenings sc2
+                        WHERE sc2.step_id = fs.step_id
+                            AND sc2.deleted_at IS NULL
+                            AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
+                        ORDER BY
+                            (sc2.session_date IS NULL) ASC,
+                            sc2.session_date ASC,
+                            sc2.start_time ASC,
+                            sc2.panel ASC,
+                            sc2.id ASC
+                        LIMIT 1
+                    )
                 WHERE
                     fs.company_id = ?
                 AND fs.step_id = ?
