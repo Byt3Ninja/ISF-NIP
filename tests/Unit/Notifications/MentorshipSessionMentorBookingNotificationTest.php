@@ -131,4 +131,76 @@ class MentorshipSessionMentorBookingNotificationTest extends TestCase
         $this->assertStringContainsString('الموقع:', $rendered);
         $this->assertStringContainsString('Riyadh HQ', $rendered);
     }
+
+    public function test_notification_database_representation_in_english()
+    {
+        $notifiable = new User();
+        $notifiable->language = 'en';
+
+        $founder = User::factory()->make([
+            'first_name_en' => 'Jane',
+            'last_name_en' => 'Doe',
+            'name' => 'Jane Doe',
+        ]);
+
+        $sessions = [
+            [
+                'date' => '2026-07-12',
+                'start_time' => '10:00',
+                'end_time' => '11:00',
+            ]
+        ];
+
+        $notification = new MentorshipSessionMentorBookingNotification($founder, $sessions);
+
+        $data = $notification->toDatabase($notifiable);
+
+        $this->assertEquals(
+            'You have a new mentorship session with Jane Doe on 2026-07-12 at 10:00 – 11:00 (AM/PM).',
+            $data['message']
+        );
+    }
+
+    public function test_notification_database_representation_in_arabic()
+    {
+        $notifiable = new User();
+        $notifiable->language = 'ar';
+
+        $founder = User::factory()->make([
+            'first_name_en' => 'Jane',
+            'last_name_en' => 'Doe',
+            'first_name_ar' => 'Jane',
+            'last_name_ar' => 'Doe',
+            'name' => 'Jane Doe',
+        ]);
+
+        $sessions = [
+            [
+                'date' => '2026-07-12',
+                'start_time' => '10:00',
+                'end_time' => '11:00',
+            ]
+        ];
+
+        $notification = new MentorshipSessionMentorBookingNotification($founder, $sessions);
+
+        $data = $notification->toDatabase($notifiable);
+
+        $this->assertEquals(
+            'لديك جلسة إرشاد جديدة مع Jane Doe بتاريخ 2026-07-12 في 10:00 – 11:00 (AM/PM).',
+            $data['message']
+        );
+    }
+
+    public function test_via_returns_database_channel()
+    {
+        $notifiable = new User();
+        $founder = User::factory()->make();
+        $sessions = [];
+        
+        $notification = new MentorshipSessionMentorBookingNotification($founder, $sessions);
+
+        $channels = $notification->via($notifiable);
+        $this->assertContains('database', $channels);
+    }
 }
