@@ -1783,14 +1783,20 @@ class ClientCompanyController extends Controller
                 $result->about_challenges = $data['about_challenges'];
             }
             if ($data['CompanyN'] == CompanyFormStep::BusinessModel->value) {
+                // Business plan attachment is mandatory only when the company has none on file yet;
+                // once uploaded it can be kept without re-uploading on every save.
+                $businessPlanRules = ['file', 'mimes:pdf,doc,docx,ppt,pptx', 'max:20480']; // max limit to be defined later from admin panel settings
+                $businessPlanRules[] = empty($company?->business_plan) ? 'required' : 'nullable';
+
                 $request->validate([
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
-                    'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:20480', // max limit to be defined later from admin panel settings
+                    'business_plan' => $businessPlanRules,
                     'mvp_prototype_link' => 'nullable|url|max:500',
                 ], [
                     'business_model.required' => __('admin.business_model is required'),
                     'business_model_description.required' => __('admin.business_model_description is required'),
+                    'business_plan.required' => __('admin.this_field_is_required'),
                     'mvp_prototype_link.url' => __('startup.mvp_prototype_link_invalid_url'),
                     'mvp_prototype_link.max' => __('startup.mvp_prototype_link_invalid_url'),
                 ]);

@@ -83,19 +83,24 @@
           </label>
 
           <div class="" style="display: grid; place-items: center;">
-            <input 
-              id="business_plan" 
-              class="form-control" 
+            <input
+              id="business_plan"
+              class="form-control @error('business_plan') is-invalid @enderror"
               type="file" name="business_plan"
-              value="{{ old('business_plan') }}"
+              accept=".pdf,.doc,.docx,.ppt,.pptx"
+              @if(optional($client->company)->business_plan == null) required @endif
             />
 
           </div>
+          @error('business_plan')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+          @enderror
           <div class="position-relative mt-2">
             @if (optional($client->company)->business_plan != null)
-            <a 
-              href="{{ URL::to( $client->company->business_plan ) }}"
-              target="_blank" 
+            <a
+              id="business_plan_card"
+              href="{{ app(\App\Services\FileManagerService::class)->getUrl($client->company->business_plan, 'pitch_deck') }}"
+              target="_blank"
               download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
               <i class="ti ti-file text-warning"></i>

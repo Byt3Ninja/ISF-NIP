@@ -888,8 +888,10 @@
                   </td>
                   <td class="text-end">
                     <a
-                      @if( $field == 'financial_plan' )
+                      @if( in_array($field, ['financial_plan', 'business_plan']) )
                       href="{{ app(\App\Services\FileManagerService::class)->getUrl( $co->$field,  'pitch_deck') }}"
+                      @elseif( in_array($field, ['Commercial_Register', 'Tax_Card']) )
+                      href="{{ app(\App\Services\FileManagerService::class)->getUrl( $co->$field,  'document') }}"
                       @else
                       href="{{ $co->$field }}"
                       @endif
