@@ -83,34 +83,67 @@ class LandingPagesController extends Controller
 		$now = now();
 
 		$visiblePrograms = $page->cycles->reject->is_expired->values()->map(function ($program) use ($now, $l) {
-			// Programs attached to a custom landing page are general cycles
-			// (via scopedCycles()) and typically have no configured
-			// application steps, so status is derived from the cycle's own
-			// start/end dates. If a form step IS configured, prefer its
-			// dates since that's the actual application window.
+			// Keep the application status identical to the Organization's public
+			// Program page (PublicLandingController): it is driven solely by the
+			// first form step (stype = 1). When no form step is configured the
+			// program is treated as Closed, exactly like that page.
 			$firstFormStep = $program->steps->where('stype', 1)->sortBy('arr')->first();
-			$stepStart = $firstFormStep && $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : $program->start;
-			$stepEnd = $firstFormStep && $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : $program->end;
 
-			$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
-			$isUpcoming = $stepStart !== null && $now->lt($stepStart);
+			if ($firstFormStep) {
+				$stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
+				$stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
+
+				$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+				$isUpcoming = $stepStart !== null && $now->lt($stepStart);
+				$isClosed = $stepEnd !== null && $now->gt($stepEnd);
+			} else {
+				$isOpen = false;
+				$isUpcoming = false;
+				$isClosed = true;
+				$stepStart = null;
+				$stepEnd = null;
+			}
 
 			if ($isOpen) {
-				$statusLabel = $l == 'ar' ? ('مفتوح حتى ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.') : ('Open Till ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.');
-				$btnText = $l == 'ar' ? 'تقدم الآن' : 'Apply now';
+				$statusClass = 'bg-label-success';
+				$statusIcon = 'hourglass';
+				$statusLabel = $l == 'ar'
+					? 'مفتوح حتى ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.'
+					: 'Open Till ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.';
+				$btnText = $l == 'ar' ? 'تقدم الآن.' : 'Apply Now.';
 			} elseif ($isUpcoming) {
-				$statusLabel = $l == 'ar' ? ('سيفتح في ' . $stepStart->format('Y-m-d') . '.') : ('Will open on ' . $stepStart->format('Y-m-d') . '.');
-				$btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications open soon';
+				$statusClass = 'bg-label-warning';
+				$statusIcon = 'hourglass-empty';
+				$statusLabel = $l == 'ar'
+					? 'سيفتح في ' . ($stepStart ? $stepStart->format('Y-m-d') : '') . '.'
+					: 'Will open in ' . ($stepStart ? $stepStart->format('Y-m-d') : '') . '.';
+				$btnText = $l == 'ar' ? 'التقديم يفتح قريباً' : 'Applications Open Soon';
 			} else {
+				$statusClass = 'bg-label-danger';
+				$statusIcon = 'lock';
 				$statusLabel = $l == 'ar' ? 'مغلق.' : 'Closed.';
-				$btnText = $l == 'ar' ? 'التقديم مغلق' : 'Applications closed';
+				$btnText = $l == 'ar' ? 'التقديم مغلق.' : 'Applications Closed.';
 			}
 
 			$program->isOpen = $isOpen;
 			$program->isUpcoming = $isUpcoming;
+			$program->isClosed = $isClosed;
+			$program->statusClass = $statusClass;
+			$program->statusIcon = $statusIcon;
 			$program->statusLabel = $statusLabel;
 			$program->btnText = $btnText;
 			$program->canApply = $isOpen && !empty($program->public_slug) && !empty($program->organization) && !empty($program->organization->short_code);
+
+			// Program is within its application window but has no public
+			// application page yet (not published as a public program). Say so
+			// on the CTA instead of a dead "Apply Now" button.
+			$program->applyUnavailable = $isOpen && !$program->canApply;
+			if ($program->applyUnavailable) {
+				$program->statusIcon = 'clock-hour-4';
+				$program->btnText = $l == 'ar'
+					? 'صفحة التقديم قيد الإعداد'
+					: 'Application page coming soon';
+			}
 
 			return $program;
 		});

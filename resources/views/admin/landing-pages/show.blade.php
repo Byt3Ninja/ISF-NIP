@@ -445,7 +445,7 @@
 
   <!-- ===== Programs ===== -->
   @if($page->programs_is_enabled)
-  <section class="bg-label-secondary py-5" id="programs">
+  <section class="py-5" id="programs">
     <div class="container py-4">
       <div class="row section-head mb-4">
         <div class="col-lg-7">
@@ -473,41 +473,94 @@
 
       <div class="row g-4">
         @forelse($visiblePrograms as $program)
+          @php
+            $programTitle = $l == 'ar' ? ($program->title_ar ?: $program->title) : $program->title;
+            $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description;
+          @endphp
           <div class="col-md-6 col-lg-4" data-type="{{ $program->type }}">
-            <div class="card h-100 {{ !$program->isOpen ? 'opacity-50' : '' }}">
-              <div class="card-header d-flex justify-content-between align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2 min-w-0">
-                  <div class="avatar avatar-md flex-shrink-0">
-                    <img class="rounded" src="{{ $program->logo }}" alt="{{ $l == 'ar' ? $program->title_ar : $program->title }}">
-                  </div>
-                  <div class="min-w-0">
-                    <h5 class="mb-1 text-truncate">{{ $l == 'ar' ? $program->title_ar : $program->title }}</h5>
+            <div class="card h-100 border shadow-none">
+              <div class="card-body d-flex flex-column p-4">
+
+                {{-- Logo + Type badge --}}
+                @if($program->logo || $program->type)
+                  <div class="d-flex justify-content-between align-items-start mb-3">
+                    @if($program->logo)
+                      <div class="rounded-3 border bg-body-secondary d-flex align-items-center justify-content-center p-1"
+                          style="width: 56px; height: 56px; flex-shrink: 0;">
+                        <img src="{{ $program->logo }}" alt="{{ $programTitle }}"
+                            style="width: 40px; height: 40px; object-fit: contain;" />
+                      </div>
+                    @endif
                     @if($program->type)
-                      <span class="badge bg-label-primary rounded-pill text-uppercase">{{ \App\Cycle::programTypes()[$program->type] ?? $program->type }}</span>
+                      <span class="badge bg-label-secondary rounded-pill">
+                        {{ \App\Cycle::programTypes()[$program->type] ?? __('cycles.' . $program->type) }}
+                      </span>
                     @endif
                   </div>
-                </div>
-              </div>
-              <div class="card-body">
-                @php $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description; @endphp
+                @endif
+
+                {{-- Title --}}
+                @if($programTitle)
+                  <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35;">{{ $programTitle }}</h5>
+                @endif
+
+                {{-- Description --}}
                 @if($programDescription)
-                  <p class="desc text-secondary">{{ $programDescription }}</p>
+                  <p class="line-clamp-3 mb-0">{{ $programDescription }}</p>
                 @endif
-                @if($program->start || $program->end)
-                  <div class="d-flex justify-content-between mt-3">
-                    @if($program->start)<span class="small"><i class="ti ti-calendar-event"></i> {{ __('landing.start') }}: {{ $program->start->format('M d, Y') }}</span>@endif
-                    @if($program->end)<span class="small"><i class="ti ti-calendar-x"></i> {{ __('landing.end') }}: {{ $program->end->format('M d, Y') }}</span>@endif
+
+                <div class="mt-auto">
+                  <hr class="opacity-25 my-3">
+
+                  {{-- Program Duration --}}
+                  @if($program->start)
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                      <div class="avatar">
+                        <div class="avatar-initial rounded"><i class="ti ti-calendar text-dark"></i></div>
+                      </div>
+                      <div>
+                        <div class="small text-secondary">{{ __('admin.Program Duration') }}</div>
+                        <div class="fw-semibold">
+                          {{ \Carbon\Carbon::parse($program->start)->format('M d') }}
+                          @if($program->end)
+                            – {{ \Carbon\Carbon::parse($program->end)->format('M d, Y') }}
+                          @else
+                            , {{ \Carbon\Carbon::parse($program->start)->format('Y') }}
+                          @endif
+                        </div>
+                      </div>
+                    </div>
+                  @endif
+
+                  {{-- Application Status --}}
+                  <div class="d-flex align-items-center gap-2 mb-6">
+                    <div class="avatar">
+                      <div class="avatar-initial rounded"><i class="ti ti-{{ $program->statusIcon }} text-dark"></i></div>
+                    </div>
+                    <div>
+                      <div class="small text-secondary">{{ __('admin.application_status') }}</div>
+                      <div class="fw-semibold">{{ $program->statusLabel }}</div>
+                    </div>
                   </div>
-                @endif
-                <div class="mt-3">
-                  <span class="badge {{ $program->isOpen ? 'bg-label-success' : ($program->isUpcoming ? 'bg-label-warning' : 'bg-label-secondary') }}">{{ $program->statusLabel }}</span>
+
+                  {{-- CTA: real link only while open with a public application page --}}
+                  @if($program->isOpen && $program->canApply)
+                    <a href="{{ route('public.program_join', ['org_slug' => $program->organization->short_code, 'program_slug' => $program->public_slug]) }}"
+                      class="btn btn-primary w-100 fw-semibold" style="border-radius: 10px; padding: 10px;">
+                      {{ $program->btnText }}
+                      <i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'left' : 'right' }} ms-2"></i>
+                    </a>
+                  @elseif($program->applyUnavailable)
+                    <button class="btn btn-label-info w-100 fw-semibold" disabled>
+                      <i class="ti ti-clock-hour-4 {{ $l == 'ar' ? 'ms-2' : 'me-2' }}"></i>{{ $program->btnText }}
+                    </button>
+                  @elseif($program->isUpcoming)
+                    <button class="btn btn-label-warning w-100 fw-semibold" disabled>{{ $program->btnText }}</button>
+                  @else
+                    <button class="btn btn-label-secondary w-100 fw-semibold" disabled>{{ $program->btnText }}</button>
+                  @endif
                 </div>
-                @if($program->canApply)
-                  <a href="{{ route('public.program_join', ['org_slug' => $program->organization->short_code, 'program_slug' => $program->public_slug]) }}"
-                     class="btn btn-primary rounded-pill w-100 mt-3">{{ $program->btnText }}</a>
-                @else
-                  <span class="btn btn-disabled rounded-pill border border-dashed w-100 mt-3">{{ $program->btnText }}</span>
-                @endif
+
               </div>
             </div>
           </div>
