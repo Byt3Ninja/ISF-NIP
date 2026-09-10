@@ -30,4 +30,14 @@ class Role extends Model
 	{
 		return $this->belongsToMany(User::class, 'model_has_roles', 'role_id', 'model_id');
 	}
+
+	public static function _users( $role )
+	{
+		$role = strtolower($role);
+		$get_role = Role::where('default_for', $role)->with(['users', 'users.roles'])->get();
+		$get_role = $get_role->flatMap(function ($r) {
+			return $r->users;
+		})->unique('id')->values();
+		return $get_role;
+	}
 }
