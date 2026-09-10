@@ -392,7 +392,7 @@ $menuItems = [
         'icon' => 'ti ti-layout',
         'route' => 'landing-pages.index',
         'permission' => 'landing-pages.index',
-        'isVisible' => $_user->hasAnyRole('organizationManager|Admin') && $_user->ableTo('landing-pages.index', $permissions),
+        'isVisible' => $_user->hasAnyRole('subAdmin|Admin') && $_user->ableTo('landing-pages.index', $permissions),
         'subItems' => []
     ],
 
