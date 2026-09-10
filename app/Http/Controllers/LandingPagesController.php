@@ -82,7 +82,13 @@ class LandingPagesController extends Controller
 		$l = app()->getLocale();
 		$now = now();
 
-		$visiblePrograms = $page->cycles->reject->is_expired->values()->map(function ($program) use ($now, $l) {
+		// Only keep programs whose organization is still within the page
+		// creator's organization access. The landing_page_cycles pivot is
+		// otherwise reconciled only when the Programs tab is explicitly
+		// re-saved (see updatePrograms()), so without this an Organization
+		// removed from a Sub Admin would keep showing its programs here —
+		// and accepting applications — until that manual save.
+		$visiblePrograms = $this->accessibleCycles($page)->reject->is_expired->values()->map(function ($program) use ($now, $l) {
 			// Keep the application status identical to the Organization's public
 			// Program page (PublicLandingController): it is driven solely by the
 			// first form step (stype = 1). When no form step is configured the
@@ -677,6 +683,30 @@ class LandingPagesController extends Controller
     }
 
     return $query->where('created_by', $user->id);
+  }
+
+  /**
+   * The programs attached to a landing page, minus any whose
+   * organization is no longer within the page creator's organization
+   * access. Used to keep both the public page and the editor in step
+   * with the creator's current Sub Admin / Organization Manager scope
+   * without waiting for the Programs tab to be re-saved (the only thing
+   * that reconciles the landing_page_cycles pivot — see updatePrograms()).
+   */
+  protected function accessibleCycles(LandingPage $page)
+  {
+    $creator = $page->createdBy;
+
+    // No creator on record (e.g. the account was removed) or an Admin
+    // creator: leave every attachment in place rather than blanking a
+    // published page.
+    if (!$creator || $creator->hasRole('admin')) {
+      return $page->cycles;
+    }
+
+    $orgIds = $creator->organizations_ids;
+
+    return $page->cycles->whereIn('organization_id', $orgIds)->values();
   }
 
   /**
