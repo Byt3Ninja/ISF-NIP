@@ -102,6 +102,27 @@ return [
     'Step_Description' => 'وصف الخطوة',
     'Step_Description_ar' => 'وصف الخطوة بالعربية',
 
+    'icons' => [
+        'rocket' => 'صاروخ',
+        'bulb' => 'فكرة',
+        'target' => 'هدف',
+        'chart_line' => 'نمو',
+        'users' => 'مجتمع',
+        'trophy' => 'إنجاز',
+        'shield' => 'حماية',
+        'heart' => 'عناية',
+        'star' => 'جودة',
+        'book' => 'تعليم',
+        'code' => 'برمجة',
+        'cpu' => 'تقنية',
+        'world' => 'عالمي',
+        'flag' => 'علم',
+        'crown' => 'قيادة',
+        'gift' => 'مكافأة',
+        'briefcase' => 'مهنة',
+        'cloud' => 'سحابة',
+    ],
+
     'validation' => [
         'please_correct_fields' => 'يرجى تصحيح الحقول المميزة.',
         'page_title_required' => 'يرجى إدخال عنوان الصفحة.',

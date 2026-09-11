@@ -1409,24 +1409,24 @@
         description_ar: validationMessages.cardDescriptionArabic,
       };
       const aboutIcons = [
-        { value: 'ti-rocket', label: 'Rocket' },
-        { value: 'ti-bulb', label: 'Idea' },
-        { value: 'ti-target', label: 'Target' },
-        { value: 'ti-chart-line', label: 'Growth' },
-        { value: 'ti-users', label: 'Community' },
-        { value: 'ti-trophy', label: 'Achievement' },
-        { value: 'ti-shield', label: 'Protection' },
-        { value: 'ti-heart', label: 'Care' },
-        { value: 'ti-star', label: 'Quality' },
-        { value: 'ti-book', label: 'Education' },
-        { value: 'ti-code', label: 'Code' },
-        { value: 'ti-cpu', label: 'Technology' },
-        { value: 'ti-world', label: 'Global' },
-        { value: 'ti-flag', label: 'Goal' },
-        { value: 'ti-crown', label: 'Leadership' },
-        { value: 'ti-gift', label: 'Reward' },
-        { value: 'ti-briefcase', label: 'Career' },
-        { value: 'ti-cloud', label: 'Cloud' },
+        { value: 'ti-rocket', label: "{{ __('landing.icons.rocket') }}" },
+        { value: 'ti-bulb', label: "{{ __('landing.icons.bulb') }}" },
+        { value: 'ti-target', label: "{{ __('landing.icons.target') }}" },
+        { value: 'ti-chart-line', label: "{{ __('landing.icons.chart_line') }}" },
+        { value: 'ti-users', label: "{{ __('landing.icons.users') }}" },
+        { value: 'ti-trophy', label: "{{ __('landing.icons.trophy') }}" },
+        { value: 'ti-shield', label: "{{ __('landing.icons.shield') }}" },
+        { value: 'ti-heart', label: "{{ __('landing.icons.heart') }}" },
+        { value: 'ti-star', label: "{{ __('landing.icons.star') }}" },
+        { value: 'ti-book', label: "{{ __('landing.icons.book') }}" },
+        { value: 'ti-code', label: "{{ __('landing.icons.code') }}" },
+        { value: 'ti-cpu', label: "{{ __('landing.icons.cpu') }}" },
+        { value: 'ti-world', label: "{{ __('landing.icons.world') }}" },
+        { value: 'ti-flag', label: "{{ __('landing.icons.flag') }}" },
+        { value: 'ti-crown', label: "{{ __('landing.icons.crown') }}" },
+        { value: 'ti-gift', label: "{{ __('landing.icons.gift') }}" },
+        { value: 'ti-briefcase', label: "{{ __('landing.icons.briefcase') }}" },
+        { value: 'ti-cloud', label: "{{ __('landing.icons.cloud') }}" },
       ];
       let aboutCardCounter = 0;
 
@@ -1541,13 +1541,23 @@
           updateAboutCardButtons();
         });
 
-      // About main fields are only mandatory while the section is enabled.
-      $('#about_is_enabled').on('change', function () {
-        const fv = sectionValidations.about;
+      // For the section enable switches: main fields are only mandatory
+      // while the section is enabled. The state is applied both on toggle
+      // and on initial load, so saving a disabled section never surfaces
+      // required-field messages for its (empty) main fields.
+      const sectionRequiredFields = {
+        about:    ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
+        how:      ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
+        programs: ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
+      };
+
+      const setSectionRequiredState = function (sectionKey) {
+        const fv = sectionValidations[sectionKey];
         if (!fv) return;
-        const enabled = this.checked;
-        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
-          const fieldName = 'about[' + name + ']';
+        const $switch = $('#' + sectionKey + '_is_enabled');
+        const enabled = $switch.is(':checked');
+        (sectionRequiredFields[sectionKey] || []).forEach(function (name) {
+          const fieldName = sectionKey + '[' + name + ']';
           if (enabled) {
             fv.enableValidator(fieldName, 'notEmpty');
           } else {
@@ -1555,7 +1565,12 @@
           }
           fv.revalidateField(fieldName);
         });
-      });
+      };
+
+      $('#about_is_enabled').on('change', function () { setSectionRequiredState('about'); });
+      $('#how_is_enabled').on('change', function () { setSectionRequiredState('how'); });
+      $('#programs_is_enabled').on('change', function () { setSectionRequiredState('programs'); });
+      ['about', 'how', 'programs'].forEach(setSectionRequiredState);
 
       // ─────────────────────────────────────────────────────────────
       // How It Works section — process steps repeater (max 3 steps)
@@ -1685,38 +1700,6 @@
           $step.remove();
           updateHowStepButtons();
         });
-
-      // How It Works main fields are only mandatory while the section is enabled.
-      $('#how_is_enabled').on('change', function () {
-        const fv = sectionValidations.how;
-        if (!fv) return;
-        const enabled = this.checked;
-        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
-          const fieldName = 'how[' + name + ']';
-          if (enabled) {
-            fv.enableValidator(fieldName, 'notEmpty');
-          } else {
-            fv.disableValidator(fieldName, 'notEmpty');
-          }
-          fv.revalidateField(fieldName);
-        });
-      });
-
-      // Programs main fields are only mandatory while the section is enabled.
-      $('#programs_is_enabled').on('change', function () {
-        const fv = sectionValidations.programs;
-        if (!fv) return;
-        const enabled = this.checked;
-        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
-          const fieldName = 'programs[' + name + ']';
-          if (enabled) {
-            fv.enableValidator(fieldName, 'notEmpty');
-          } else {
-            fv.disableValidator(fieldName, 'notEmpty');
-          }
-          fv.revalidateField(fieldName);
-        });
-      });
 
       // ─────────────────────────────────────────────────────────────
       // Programs selection list — client-side search + filters +
@@ -2400,6 +2383,17 @@
           if (!validateCustomSections()) return;
           submitViaAjax();
           return;
+        }
+
+        // Sections with an Enable switch are not required to have content
+        // while disabled: submit straight away so no required-field
+        // messages surface for their empty main fields.
+        if (sectionRequiredFields[sectionKey]) {
+          const $sectionSwitch = $('#' + sectionKey + '_is_enabled');
+          if ($sectionSwitch.length && !$sectionSwitch.is(':checked')) {
+            submitViaAjax();
+            return;
+          }
         }
 
         // Block the save until client-side validation passes.

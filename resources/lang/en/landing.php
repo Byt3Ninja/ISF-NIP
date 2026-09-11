@@ -102,6 +102,27 @@ return [
     'Step_Description' => 'Step Description',
     'Step_Description_ar' => 'Step Description (Arabic)',
 
+    'icons' => [
+        'rocket' => 'Rocket',
+        'bulb' => 'Idea',
+        'target' => 'Target',
+        'chart_line' => 'Growth',
+        'users' => 'Community',
+        'trophy' => 'Achievement',
+        'shield' => 'Protection',
+        'heart' => 'Care',
+        'star' => 'Quality',
+        'book' => 'Education',
+        'code' => 'Code',
+        'cpu' => 'Technology',
+        'world' => 'Global',
+        'flag' => 'Goal',
+        'crown' => 'Leadership',
+        'gift' => 'Reward',
+        'briefcase' => 'Career',
+        'cloud' => 'Cloud',
+    ],
+
     'validation' => [
         'please_correct_fields' => 'Please correct the highlighted fields.',
         'page_title_required' => 'Please enter the page title.',
