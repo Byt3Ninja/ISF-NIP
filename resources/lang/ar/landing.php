@@ -180,7 +180,7 @@ return [
     'start' => 'البداية',
     'all_programs' => 'كل البرامج',
     'see_how_it_works' => 'شاهد كيف يعمل',
-    'browse_open_programs' => 'تصفح البرامج المتاحة',
+    'browse_open_programs' => 'عرض البرامج',
     'apply_now' => 'قدّم الآن',
     'about' => 'من نحن',
     'how_it_works' => 'كيف يعمل',

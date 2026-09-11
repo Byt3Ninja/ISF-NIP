@@ -180,7 +180,7 @@ return [
     'start' => 'Start',
     'all_programs' => 'All programs',
     'see_how_it_works' => 'See how it works',
-    'browse_open_programs' => 'Browse open programs',
+    'browse_open_programs' => 'View Programs',
     'apply_now' => 'Apply now',
     'about' => 'About',
     'how_it_works' => 'How it works',

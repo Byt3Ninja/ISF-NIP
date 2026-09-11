@@ -286,6 +286,19 @@
       .stat-strip {
         gap: 1.6rem;
       }
+
+      .hero-image-wrapper {
+        aspect-ratio: 4/3 !important;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+    }
+
+    @media (max-width:575.98px) {
+      .hero-image-wrapper {
+        aspect-ratio: 4/3 !important;
+        max-width: 320px;
+      }
     }
   </style>
 
@@ -357,7 +370,7 @@
 
     <div class="container position-relative"
       style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-      <div class="row align-items-center g-5">
+      <div class="row align-items-center gy-5 gx-lg-5">
         <div class="col-lg-6">
           @php $heroTag = $l == 'ar' ? $page->hero_title_tag_ar : $page->hero_title_tag; @endphp
           @if($heroTag)
@@ -369,11 +382,11 @@
           @endif
           @php $heroDescription = $l == 'ar' ? $page->hero_description_ar : $page->hero_description; @endphp
           @if($heroDescription)
-            <p class="mt-6" style="font-size:1.08rem; line-height:1.7; max-width:520px; color: rgba(255,255,255,.78);">
+            <p class="mt-4" style="font-size:1.08rem; line-height:1.7; max-width:460px; color: rgba(255,255,255,.78);">
               {{ $heroDescription }}
             </p>
           @endif
-          <div class="d-flex flex-wrap gap-3 mt-6">
+          <div class="d-flex flex-wrap gap-3 mt-5">
             @if($page->programs_is_enabled)
               <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ __('landing.browse_open_programs') }} <i
                   class="ti ti-arrow-up-right ms-1"></i></a>
@@ -384,10 +397,9 @@
           </div>
         </div>
 
-        <div class="col-lg-6">
-          <div class="ratio ratio-4x3 rounded-4 overflow-hidden shadow-lg">
-            <img src="{{ $page->hero_image_url ?: asset('images/form-illustration.svg') }}" alt="{{ $page->title }}" class="w-100 h-100"
-              style="object-fit: contain;">
+        <div class="col-lg-5 ms-auto d-flex align-items-center justify-content-end">
+          <div class="hero-image-wrapper" style="width:100%; max-width:400px; aspect-ratio:1/1; border-radius:1rem; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.35);">
+            <img src="{{ $page->hero_image_url ?: '' }}" alt="hero-image" style="width:100%; height:100%; object-fit:cover; display:block;">
           </div>
         </div>
       </div>
