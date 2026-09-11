@@ -86,9 +86,33 @@
         <i class="ti ti-layout-dashboard"></i>{{ __('admin.Landing Page Sections') }}
       </h6>
     </div>
+    
+    <div style="max-width: 100%; overflow-x: auto;" class="p-4 d-md-none">
+      <ul class="nav nav-pills flex-nowrap" role="tablist">
+        @foreach ($sections as $index => $section)
+          <li class="nav-item py-1" role="presentation">
+            <button
+              type="button"
+              class="nav-link waves-effect @if($index === 0) active @endif"
+              role="tab"
+              data-bs-toggle="tab"
+              data-bs-target="#navs-{{ $section['key'] }}"
+              aria-controls="navs-{{ $section['key'] }}"
+              aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+              @if($index !== 0) tabindex="-1" @endif
+              @if(!empty($section['locked'])) disabled title="{{ __('landing.Save_General_First') }}" @endif
+            >
+              <i class="ti {{ $section['icon'] }} me-2"></i>
+              {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
+            </button>
+          </li>
+        @endforeach
+      </ul>
+    </div>
+    
     <div class="card-body p-0">
       <div class="nav-align-left">
-        <ul class="nav nav-tabs py-4" role="tablist">
+        <ul class="nav nav-tabs d-none d-md-block py-4" role="tablist">
           @foreach ($sections as $index => $section)
             <li class="nav-item py-1" role="presentation">
               <button
