@@ -829,14 +829,14 @@
             <p class="text-secondary small" style="max-width:280px;">{{ $footerDescription }}</p>
           @endif
           @php
-$socialLinks = array_filter([
-  'x' => $page->x,
-  'linkedin' => $page->linkedin,
-  'instagram' => $page->instagram,
-  'youtube' => $page->youtube,
-  'tiktok' => $page->tiktok,
-  'facebook' => $page->facebook,
-]);
+            $socialLinks = array_filter([
+              'x' => $page->x,
+              'linkedin' => $page->linkedin,
+              'instagram' => $page->instagram,
+              'youtube' => $page->youtube,
+              'tiktok' => $page->tiktok,
+              'facebook' => $page->facebook,
+            ]);
           @endphp
           @if(count($socialLinks) > 0)
             <div class="d-flex gap-2 mt-3">
