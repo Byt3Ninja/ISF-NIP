@@ -653,7 +653,7 @@
 
       const urlTab = new URLSearchParams(window.location.search).get('tab');
       if (urlTab) {
-        const $targetBtn = $('button[data-bs-target="#' + urlTab + '"]');
+        const $targetBtn = $('button[data-bs-target="#' + urlTab + '"]').filter(':visible');
         if ($targetBtn.length) {
           new bootstrap.Tab($targetBtn[0]).show();
         }
