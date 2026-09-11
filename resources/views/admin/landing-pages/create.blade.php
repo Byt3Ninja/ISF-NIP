@@ -1650,6 +1650,30 @@
         }
       };
 
+      const markCustomButtonAnchors = function (quill, html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const matched = tmp.querySelectorAll('a[href]');
+        const anchors = quill.root.querySelectorAll('a[href]');
+        for (let m = 0; m < matched.length; m++) {
+          const src = matched[m];
+          if (!/(?:^|\s)btn(?:\s|$)/.test(src.getAttribute('class') || '')) continue;
+          const href = src.getAttribute('href');
+          const text = src.textContent.trim();
+          let target = null;
+          for (let i = 0; i < anchors.length; i++) {
+            if (anchors[i].getAttribute('href') === href && anchors[i].textContent.trim() === text) {
+              target = anchors[i];
+            }
+          }
+          if (target) {
+            target.setAttribute('class', 'btn btn-primary');
+            target.setAttribute('target', '_blank');
+            target.setAttribute('rel', 'noopener noreferrer');
+          }
+        }
+      };
+
       let activeButtonQuill = null;
 
       const openCustomButtonModal = function (quill) {
@@ -1680,6 +1704,7 @@
           const index = range ? range.index : activeButtonQuill.getLength();
           const html = '<a class="btn btn-primary" href="' + escapeCustomAttr(link) + '" target="_blank" rel="noopener">' + escapeCustomHtml(text || link) + '</a>&nbsp;';
           activeButtonQuill.clipboard.dangerouslyPasteHTML(index, html, 'user');
+          markCustomButtonAnchors(activeButtonQuill, html);
           activeButtonQuill.setSelection(index + 1);
         }
         const modalEl = document.getElementById('customButtonModal');

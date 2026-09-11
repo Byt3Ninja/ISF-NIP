@@ -636,10 +636,7 @@
         @if($sectionTitle)
           <h2>{{ $sectionTitle }}</h2>
         @endif
-        <div class="mt-3">{!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
-        @if($customSection->button_text && $customSection->button_link)
-          <a href="{{ $customSection->button_link }}" class="btn btn-primary rounded-pill mt-4">{{ $customSection->button_text }}</a>
-        @endif
+        <div class="mt-3" style="white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;">{!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
       </div>
     </section>
   @endforeach
