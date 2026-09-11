@@ -486,8 +486,8 @@
       <div class="row g-4">
         @forelse($visiblePrograms as $program)
           @php
-            $programTitle = $l == 'ar' ? ($program->title_ar ?: $program->title) : $program->title;
-            $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description;
+    $programTitle = $l == 'ar' ? ($program->title_ar ?: $program->title) : $program->title;
+    $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description;
           @endphp
           <div class="col-md-6 col-lg-4" data-type="{{ $program->type }}">
             <div class="card h-100 border shadow-none">
@@ -588,40 +588,40 @@
 
   <!-- ===== How it works ===== -->
   @if($page->how_is_enabled)
-  <section class="py-5" id="how-it-works">
-    <div class="container py-4">
-      <div class="row section-head mb-5 text-center">
-        <div class="col-lg-7 mx-auto">
-          @php $howTag = $l == 'ar' ? $page->how_title_tag_ar : $page->how_title_tag; @endphp
-          @if($howTag)
-            <p class="eyebrow-mono mb-2">{{ $howTag }}</p>
-          @endif
-          @php $howTitle = $l == 'ar' ? $page->how_title_ar : $page->how_title; @endphp
-          @if($howTitle)
-            <h2>{{ $howTitle }}</h2>
-          @endif
-          @php $howDescription = $l == 'ar' ? $page->how_description_ar : $page->how_description; @endphp
-          @if($howDescription)
-            <p class="text-secondary mb-0 mt-3" style="overflow-wrap:break-word; word-break:break-word;">{{ $howDescription }}</p>
-          @endif
+    <section class="py-5" id="how-it-works">
+      <div class="container py-4">
+        <div class="row section-head mb-5 text-center">
+          <div class="col-lg-7 mx-auto">
+            @php $howTag = $l == 'ar' ? $page->how_title_tag_ar : $page->how_title_tag; @endphp
+            @if($howTag)
+              <p class="eyebrow-mono mb-2">{{ $howTag }}</p>
+            @endif
+            @php $howTitle = $l == 'ar' ? $page->how_title_ar : $page->how_title; @endphp
+            @if($howTitle)
+              <h2>{{ $howTitle }}</h2>
+            @endif
+            @php $howDescription = $l == 'ar' ? $page->how_description_ar : $page->how_description; @endphp
+            @if($howDescription)
+              <p class="text-secondary mb-0 mt-3" style="overflow-wrap:break-word; word-break:break-word;">{{ $howDescription }}</p>
+            @endif
+          </div>
+        </div>
+
+        <div class="row pipeline-wrap">
+          <div class="pipeline-line d-none d-lg-block"></div>
+
+          @foreach($page->how_steps ?? [] as $step)
+            <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
+              <span class="pipeline-node">
+                @if(!empty($step['icon']))<i class="ti {{ $step['icon'] }}"></i>@endif
+              </span>
+              <h5 class="fw-bold mt-3" style="overflow-wrap:break-word; word-break:break-word;">{{ $l == 'ar' ? ($step['title_ar'] ?? '') : ($step['title'] ?? '') }}</h5>
+              <p class="text-secondary small mx-auto" style="max-width:260px; overflow-wrap:break-word; word-break:break-word;">{{ $l == 'ar' ? ($step['description_ar'] ?? '') : ($step['description'] ?? '') }}</p>
+            </div>
+          @endforeach
         </div>
       </div>
-
-      <div class="row pipeline-wrap">
-        <div class="pipeline-line d-none d-lg-block"></div>
-
-        @foreach($page->how_steps ?? [] as $step)
-          <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
-            <span class="pipeline-node">
-              @if(!empty($step['icon']))<i class="ti {{ $step['icon'] }}"></i>@endif
-            </span>
-            <h5 class="fw-bold mt-3">{{ $l == 'ar' ? ($step['title_ar'] ?? '') : ($step['title'] ?? '') }}</h5>
-            <p class="text-secondary small mx-auto" style="max-width:260px;">{{ $l == 'ar' ? ($step['description_ar'] ?? '') : ($step['description'] ?? '') }}</p>
-          </div>
-        @endforeach
-      </div>
-    </div>
-  </section>
+    </section>
   @endif
 
   <!-- ===== Custom sections ===== -->
@@ -829,14 +829,14 @@
             <p class="text-secondary small" style="max-width:280px;">{{ $footerDescription }}</p>
           @endif
           @php
-            $socialLinks = array_filter([
-              'x' => $page->x,
-              'linkedin' => $page->linkedin,
-              'instagram' => $page->instagram,
-              'youtube' => $page->youtube,
-              'tiktok' => $page->tiktok,
-              'facebook' => $page->facebook,
-            ]);
+$socialLinks = array_filter([
+  'x' => $page->x,
+  'linkedin' => $page->linkedin,
+  'instagram' => $page->instagram,
+  'youtube' => $page->youtube,
+  'tiktok' => $page->tiktok,
+  'facebook' => $page->facebook,
+]);
           @endphp
           @if(count($socialLinks) > 0)
             <div class="d-flex gap-2 mt-3">
