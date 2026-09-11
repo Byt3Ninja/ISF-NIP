@@ -778,11 +778,11 @@
               notEmpty: { message: validationMessages.heroSubtitleArabic },
             },
           },
-          'hero[description_ar]': {
-            validators: {
-              notEmpty: { message: validationMessages.descriptionArabic },
-            },
-          },
+          // 'hero[description_ar]': {
+          //   validators: {
+          //     notEmpty: { message: validationMessages.descriptionArabic },
+          //   },
+          // },
           'hero[hero_image]': buildImageField(
             validationMessages.heroImageRequired,
             validationMessages.heroImageFormat,
