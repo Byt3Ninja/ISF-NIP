@@ -121,6 +121,7 @@
                 target="_blank"
                 rel="noopener"
                 class="fw-medium text-primary"
+                style="overflow-wrap:break-word; word-break:break-word;"
               >{{ $currentPage->slug ? url('/lp/' . $currentPage->slug) : '' }}</a>
             </small>
           </div>
