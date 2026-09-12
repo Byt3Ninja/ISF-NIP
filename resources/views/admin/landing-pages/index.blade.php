@@ -86,7 +86,7 @@
                       <img
                         src="{{ $page->logo_url }}"
                         alt="logo"
-                        class="rounded object-fit-contain"
+                        class="rounded object-fit-cover w-px-50 h-px-50 flex-shrink-0"
                       />
                     @else
                       <div class="avatar-initial rounded">
