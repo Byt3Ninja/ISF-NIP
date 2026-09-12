@@ -66,6 +66,24 @@
     .localized-file-input-name {
       min-width: 0;
     }
+    /* Programs table — drag-to-reorder handle */
+    .program-drag-handle {
+      cursor: grab;
+      touch-action: none;
+    }
+    .program-drag-handle:active {
+      cursor: grabbing;
+    }
+    .program-drag-ghost {
+      opacity: 0.4;
+    }
+    .program-drag-chosen {
+      background-color: rgba(105, 108, 255, 0.06);
+    }
+    /* Keep the handle in step with the rest of an ended row's dimming */
+    .program-row-ended td:first-child .program-drag-handle {
+      opacity: 0.6;
+    }
   </style>
 @endsection
 
@@ -514,6 +532,7 @@
                           >
                             <td>
                               <div class="d-flex align-items-center gap-3">
+                                <i class="ti ti-grip-vertical program-drag-handle text-muted" title="{{ __('landing.Drag_to_reorder') }}"></i>
                                 <div class="avatar avatar-sm">
                                   <img src="{{ $program->logo }}" alt="{{ $program->name }}" class="rounded-circle">
                                 </div>
@@ -714,6 +733,7 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 @endsection
 
 @section('pagescripts')
@@ -1864,6 +1884,67 @@
       });
 
       renderProgramsPagination();
+
+      // ─────────────────────────────────────────────────────────────
+      // Programs selection list — drag-to-reorder (AJAX, client-side)
+      // Sortable moves the actual <tr> nodes; on drop we read the new
+      // DOM order straight off the row `data-program-id` attributes and
+      // fire it to the backend immediately, independent of the section's
+      // own Save button. Only rows visible on the current page/filter
+      // are valid drop targets, so this reorders within what's on screen.
+      // ─────────────────────────────────────────────────────────────
+      const programsReorderUrl = "{{ route('landing-pages.programs.reorder', $currentPage->id) }}";
+      let programsReorderInFlight = null;
+
+      const programsReorderErrorText = isArabic
+        ? 'تعذر حفظ الترتيب الجديد. يرجى المحاولة مرة أخرى.'
+        : 'Could not save the new order. Please try again.';
+
+      const sendProgramsReorder = function () {
+        const order = $('#programsListBody .programs-list-row').map(function () {
+          return $(this).attr('data-program-id');
+        }).get();
+
+        // Cancel any reorder request already in flight so a rapid second
+        // drag doesn't race an earlier one and overwrite it with a stale order.
+        if (programsReorderInFlight && programsReorderInFlight.abort) {
+          programsReorderInFlight.abort();
+        }
+
+        programsReorderInFlight = $.ajax({
+          url: programsReorderUrl,
+          method: 'POST',
+          data: {
+            _token: "{{ csrf_token() }}",
+            order: order,
+          },
+          dataType: 'json',
+        })
+          .fail(function (xhr) {
+            if (xhr.statusText === 'abort') return;
+            const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || programsReorderErrorText;
+            releaseFailureAlert({
+              title: "{{ __('admin.Error') }}",
+              message: message,
+            });
+          })
+          .always(function () {
+            programsReorderInFlight = null;
+          });
+      };
+
+      if (typeof Sortable !== 'undefined') {
+        Sortable.create(document.getElementById('programsListBody'), {
+          handle: '.program-drag-handle',
+          animation: 150,
+          ghostClass: 'program-drag-ghost',
+          chosenClass: 'program-drag-chosen',
+          onEnd: function (evt) {
+            if (evt.oldIndex === evt.newIndex) return;
+            sendProgramsReorder();
+          },
+        });
+      }
 
       // ─────────────────────────────────────────────────────────────
       // Custom sections — block repeater with rich-text (Quill) editors

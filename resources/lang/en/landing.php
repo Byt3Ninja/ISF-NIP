@@ -79,6 +79,7 @@ return [
     'Program_Type' => 'Program Type',
     'Program' => 'Program',
     'Type' => 'Type',
+    'Drag_to_reorder' => 'Drag to reorder',
     'Ended' => 'Ended',
     'Program_ended_hint' => 'This program has ended and can no longer be shown on the landing page.',
     'Program_not_public_hint' => "This program isn't Public and has no URL slug, so its Apply button won't work on the landing page until that's set in the program's Visibility settings.",
