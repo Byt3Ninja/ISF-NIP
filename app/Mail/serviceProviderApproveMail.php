@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Bus\Queueable;
 use App\Traits\ConfiguresSmtp;
@@ -14,7 +15,7 @@ use Throwable;
 
 class serviceProviderApproveMail extends Mailable implements ShouldQueue
 {
-	use Queueable, SerializesModels, ConfiguresSmtp;
+	use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
 	public $contact_name;
 	public $login_url;

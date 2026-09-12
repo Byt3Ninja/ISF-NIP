@@ -22,6 +22,8 @@ class OrganizationSettings extends Model
         'smtp_password',
         'smtp_from_address',
         'smtp_from_name',
+        'smtp_last_error',
+        'smtp_failed_at',
         'accept_email',
         'accept_whatsapp',
         'accept_pusher',
@@ -31,6 +33,7 @@ class OrganizationSettings extends Model
         'accept_email' => 'boolean',
         'accept_whatsapp' => 'boolean',
         'accept_pusher' => 'boolean',
+        'smtp_failed_at' => 'datetime',
     ];
 
     /**

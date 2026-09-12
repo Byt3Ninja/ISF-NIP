@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ProgramCreatedNotification extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels, ConfiguresSmtp;
+    use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
     public $cycle;
     public $admin; 

@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
@@ -15,7 +16,7 @@ use Throwable;
 
 class serviceProviderRejectMail extends Mailable implements ShouldQueue
 {
-	use Queueable, SerializesModels, ConfiguresSmtp;
+	use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
 	public $reason;
 	public $contact_name;

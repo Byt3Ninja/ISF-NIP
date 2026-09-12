@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Listeners\ConfigureTenantMailTransport;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Notifications\Events\NotificationSending;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
@@ -17,6 +21,18 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+
+        // Route every email through the involved organization's SMTP account,
+        // falling back to the platform configuration.
+        NotificationSending::class => [
+            [ConfigureTenantMailTransport::class, 'sending'],
+        ],
+        NotificationSent::class => [
+            [ConfigureTenantMailTransport::class, 'sent'],
+        ],
+        MessageSending::class => [
+            [ConfigureTenantMailTransport::class, 'messageSending'],
         ],
     ];
 

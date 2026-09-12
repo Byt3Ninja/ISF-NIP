@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Password;
 
 class CustomEmail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels, ConfiguresSmtp;
+    use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
     public $user;
     public $resetUrl;

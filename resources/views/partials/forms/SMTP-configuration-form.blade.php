@@ -1,10 +1,10 @@
 <div>
   {{-- Provider Selector --}}
-  <div class="form-group mb-3">
-    <label class="form-label mb-1">{{ __('settings.email_provider') }}</label>
-    <select id="emailProviderSelect" class="form-control" name="email_provider">
+  <div class="mb-3">
+    <label class="form-label">{{ __('settings.email_provider') }}</label>
+    <select id="emailProviderSelect" class="form-select" name="email_provider">
       <option value="smtp" {{ ($Title->email_provider ?? 'smtp') === 'smtp' ? 'selected' : '' }}>SMTP</option>
-      <option value="gmail" {{ ($Title->email_provider ?? 'gmail') === 'gmail' ? 'selected' : '' }}>Gmail SMTP</option>
+      <option value="gmail" {{ ($Title->email_provider ?? '') === 'gmail' ? 'selected' : '' }}>Gmail SMTP</option>
       <option value="resend" {{ ($Title->email_provider ?? 'smtp') === 'resend' ? 'selected' : '' }}>Resend</option>
     </select>
   </div>
@@ -13,7 +13,7 @@
   <div
     id="smtp-fields"
     class="provider-panel"
-    style="{{ ($Title->email_provider ?? 'smtp') === 'resend' ? 'display:none' : '' }}"
+    style="{{ in_array($Title->email_provider ?? 'smtp', ['resend', 'gmail'], true) ? 'display:none' : '' }}"
   >
     <form
       id="smtpForm"
@@ -27,9 +27,9 @@
       <input type="hidden" name="id" value="{{ $Title->id }}" />
       <input type="hidden" name="email_provider" value="smtp" />
 
-      <div class="form-content flex-grow-1">
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="host">{{ __('settings.host') }}</label>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="host">{{ __('settings.host') }}</label>
           <input
             id="host"
             type="text"
@@ -40,33 +40,8 @@
           />
         </div>
 
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="Mail">{{ __('settings.Mail') }}</label>
-          <input
-            id="Mail"
-            type="text"
-            class="form-control"
-            name="Mail"
-            value="{{ $Title->Mail }}"
-            placeholder="e.g. no-reply@example.com"
-          />
-        </div>
-
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="Mailpassword">{{ __('settings.Mailpassword') }}</label>
-          <input
-            id="Mailpassword"
-            type="text"
-            class="form-control"
-            name="Mailpassword"
-            value="{{ $Title->Mailpassword }}"
-            placeholder="e.g. your SMTP password"
-            autocomplete="off"
-          />
-        </div>
-
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="Port">{{ __('settings.Port') }}</label>
+        <div class="col-md-3">
+          <label class="form-label" for="Port">{{ __('settings.Port') }}</label>
           <input
             id="Port"
             type="text"
@@ -77,29 +52,41 @@
           />
         </div>
 
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="Encryption">{{ __('settings.Encryption') }}</label>
-          <select id="Encryption" class="form-control" name="Encryption">
+        <div class="col-md-3">
+          <label class="form-label" for="Encryption">{{ __('settings.Encryption') }}</label>
+          <select id="Encryption" class="form-select" name="Encryption">
             <option value="tls" {{ $Title->Encryption == 'tls' ? 'selected' : '' }}>TLS</option>
             <option value="ssl" {{ $Title->Encryption == 'ssl' ? 'selected' : '' }}>SSL</option>
           </select>
         </div>
-      </div>
 
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="mail_from_name">{{ __('settings.mailSenderName') }}</label>
+        <div class="col-md-6">
+          <label class="form-label" for="Mail">{{ __('settings.Mail') }}</label>
           <input
-            id="mail_from_name"
+            id="Mail"
             type="text"
             class="form-control"
-            name="mail_from_name"
-            value="{{ $Title->mail_from_name }}"
-            placeholder="Platform Name by default"
+            name="Mail"
+            value="{{ $Title->Mail }}"
+            placeholder="e.g. no-reply@example.com"
           />
         </div>
 
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="mail_from_address">{{ __('settings.mailSenderAddress') }}</label>
+        <div class="col-md-6">
+          <label class="form-label" for="Mailpassword">{{ __('settings.Mailpassword') }}</label>
+          <input
+            id="Mailpassword"
+            type="password"
+            class="form-control"
+            name="Mailpassword"
+            value="{{ $Title->Mailpassword }}"
+            placeholder="e.g. your SMTP password"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="mail_from_address">{{ __('settings.mailSenderAddress') }}</label>
           <input
             id="mail_from_address"
             type="text"
@@ -110,10 +97,104 @@
           />
         </div>
 
-      <div class="form-group d-flex justify-content-end mt-auto">
-        <button type="submit" class="btn btn-primary mr-1 mb-1">
-          {{ __('settings.Submit') }}
-        </button>
+        <div class="col-md-6">
+          <label class="form-label" for="mail_from_name">{{ __('settings.mailSenderName') }}</label>
+          <input
+            id="mail_from_name"
+            type="text"
+            class="form-control"
+            name="mail_from_name"
+            value="{{ $Title->mail_from_name }}"
+            placeholder="Platform Name by default"
+          />
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-device-floppy"></i> {{ __('settings.Submit') }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {{-- Gmail Panel --}}
+  {{-- GmailTransport hardcodes smtp.gmail.com:587, so only credentials and the
+       sender identity are configurable here. --}}
+  <div
+    id="gmail-fields"
+    class="provider-panel"
+    style="{{ ($Title->email_provider ?? '') !== 'gmail' ? 'display:none' : '' }}"
+  >
+    <form
+      id="gmailForm"
+      action="{{ route('settings.system_mail_update') }}"
+      method="POST"
+    >
+      @csrf
+      @method('PUT')
+
+      <input type="hidden" name="id" value="{{ $Title->id }}" />
+      <input type="hidden" name="email_provider" value="gmail" />
+      <input type="hidden" name="host" value="smtp.gmail.com" />
+      <input type="hidden" name="Port" value="587" />
+      <input type="hidden" name="Encryption" value="tls" />
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="gmail_Mail">{{ __('settings.Mail') }}</label>
+          <input
+            id="gmail_Mail"
+            type="text"
+            class="form-control"
+            name="Mail"
+            value="{{ $Title->Mail }}"
+            placeholder="e.g. you@gmail.com"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="gmail_Mailpassword">{{ __('settings.Mailpassword') }}</label>
+          <input
+            id="gmail_Mailpassword"
+            type="password"
+            class="form-control"
+            name="Mailpassword"
+            value="{{ $Title->Mailpassword }}"
+            placeholder="Gmail App Password"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="gmail_from_address">{{ __('settings.mailSenderAddress') }}</label>
+          <input
+            id="gmail_from_address"
+            type="text"
+            class="form-control"
+            name="mail_from_address"
+            value="{{ $Title->mail_from_address }}"
+            placeholder="e.g. you@gmail.com"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="gmail_from_name">{{ __('settings.mailSenderName') }}</label>
+          <input
+            id="gmail_from_name"
+            type="text"
+            class="form-control"
+            name="mail_from_name"
+            value="{{ $Title->mail_from_name }}"
+            placeholder="Platform Name by default"
+          />
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">
+            <i class="ti ti-device-floppy"></i> {{ __('settings.Submit') }}
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -136,9 +217,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
 
-      <div class="form-content flex-grow-1">
-        <div class="form-group mb-3">
-          <label class="form-label mb-1" for="resend_api_key">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="resend_api_key">
             {{ __('settings.resend_api_key') }}
           </label>
           <input
@@ -152,18 +233,20 @@
             autocomplete="off"
           />
         </div>
-      </div>
 
-      <div class="form-group d-flex justify-content-end mt-auto">
-        <button type="submit" id="resendSaveBtn" class="btn btn-primary mr-1 mb-1">
-          <span id="resendBtnText">{{ __('settings.connect_and_save') }}</span>
-          <span
-            id="resendBtnSpinner"
-            class="spinner-border spinner-border-sm ms-1"
-            role="status"
-            style="display: none"
-          ></span>
-        </button>
+        <div class="col-12">
+          <button type="submit" id="resendSaveBtn" class="btn btn-primary">
+            <span id="resendBtnText">
+              <i class="ti ti-device-floppy"></i> {{ __('settings.connect_and_save') }}
+            </span>
+            <span
+              id="resendBtnSpinner"
+              class="spinner-border spinner-border-sm ms-1"
+              role="status"
+              style="display: none"
+            ></span>
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -219,7 +302,7 @@
           trigger: new FormValidation.plugins.Trigger(),
           bootstrap5: new FormValidation.plugins.Bootstrap5({
             eleValidClass: '',
-            rowSelector: '.mb-3',
+            rowSelector: '.col-md-3, .col-md-6',
           }),
           submitButton: new FormValidation.plugins.SubmitButton(),
           defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
@@ -257,7 +340,7 @@
           trigger: new FormValidation.plugins.Trigger(),
           bootstrap5: new FormValidation.plugins.Bootstrap5({
             eleValidClass: '',
-            rowSelector: '.form-group',
+            rowSelector: '.col-md-6',
           }),
           autoFocus: new FormValidation.plugins.AutoFocus(),
         },

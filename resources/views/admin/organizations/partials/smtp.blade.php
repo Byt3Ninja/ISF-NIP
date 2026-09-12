@@ -9,6 +9,18 @@
   </div>
 @endif
 
+{{-- Warning when the organization's own transport is currently failing --}}
+@if($smtp && $smtp->smtp_last_error)
+  <div class="alert alert-warning mb-3">
+    <i class="ti ti-alert-triangle me-1"></i>
+    {{ __('settings.org_email_failing') }}
+    @if($smtp->smtp_failed_at)
+      <small class="d-block mt-1">{{ $smtp->smtp_failed_at->diffForHumans() }}</small>
+    @endif
+    <small class="d-block text-muted mt-1">{{ $smtp->smtp_last_error }}</small>
+  </div>
+@endif
+
 <div>
   {{-- Provider Selector --}}
   <div class="mb-3">
