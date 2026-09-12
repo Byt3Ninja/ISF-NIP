@@ -856,6 +856,24 @@
       }
     });
 
+    // The `callback_*` validator names used in the `fields` map above are not
+    // part of the popular bundle. FormValidation silently treats an unregistered
+    // validator name as always-valid (it short-circuits to `Valid`), so the URL,
+    // phone and file rules never actually ran. Register them as aliases of the
+    // built-in `callback` validator so they execute.
+    ['callback_phone', 'callback_url', 'callback_file_type', 'callback_file_size'].forEach(function (name) {
+      fv.registerValidator(name, function () {
+        return {
+          validate: function (input) {
+            const response = typeof input.options.callback === 'function'
+              ? input.options.callback(input)
+              : true;
+            return typeof response === 'boolean' ? { valid: response } : response;
+          },
+        };
+      });
+    });
+
     window._formValidation = fv;
 
     fv.on('plugins.message.placed', function (e) {

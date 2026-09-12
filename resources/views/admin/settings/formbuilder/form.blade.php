@@ -754,6 +754,24 @@
       }
     });
 
+    // The `callback_*` validator names used in the `fields` map above are not
+    // part of the popular bundle. FormValidation silently treats an unregistered
+    // validator name as always-valid (it short-circuits to `Valid`), so the URL,
+    // numeric, time and file rules never actually ran. Register them as aliases
+    // of the built-in `callback` validator so they execute.
+    ['callback_numeric', 'callback_time', 'callback_url', 'callback_file_type', 'callback_file_size'].forEach(function (name) {
+      fv.registerValidator(name, function () {
+        return {
+          validate: function (input) {
+            const response = typeof input.options.callback === 'function'
+              ? input.options.callback(input)
+              : true;
+            return typeof response === 'boolean' ? { valid: response } : response;
+          },
+        };
+      });
+    });
+
     fv.on('plugins.message.placed', function (e) {
       if (e.element.closest('.application-field-control')) {
         e.element.closest('.application-field-control').insertAdjacentElement('afterend', e.messageElement);
