@@ -3,6 +3,17 @@
 @section('title', __('admin.Custom Landing Pages'))
 @section('subTitle', __('admin.Custom Landing Pages'))
 
+@section('style')
+  <style>
+  .line-clamp-5 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+  }
+  </style>
+@endsection
+
 @section('content')
   {{-- Header --}}
   <div class="card mb-6">
@@ -96,7 +107,7 @@
                   </div>
                 <div>
 
-                  <h5 class="card-title mb-1">
+                  <h5 class="card-title mb-1 line-clamp-1">
                     {{ $page->title }}
                   </h5>
 
@@ -109,7 +120,7 @@
 
               </div>
 
-              <p class="card-text text-secondary">
+              <p class="card-text text-secondary line-clamp-5">
                 {{ ($l == 'ar' ? $page->description_ar : $page->description) ?: (__('landing.No_Description') . '...') }}
               </p>
 
