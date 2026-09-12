@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use App\InviteMentor;
 use App\Organization;
 use App\Traits\ConfiguresSmtp;
@@ -16,7 +17,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class InviteMentorMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels, ConfiguresSmtp;
+    use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
    public InviteMentor $invitation;
 

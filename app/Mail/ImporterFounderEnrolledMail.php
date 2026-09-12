@@ -2,13 +2,14 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class ImporterFounderEnrolledMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, RoutesTenantMail;
 
     public array $payload;
 

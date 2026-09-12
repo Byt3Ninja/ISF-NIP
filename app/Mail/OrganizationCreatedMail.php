@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use App\User;
 use App\Organization;
 use App\Traits\ConfiguresSmtp;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 
 class OrganizationCreatedMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels, ConfiguresSmtp;
+    use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
     public $organization;
     public $user;
