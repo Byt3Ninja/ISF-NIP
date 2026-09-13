@@ -88,6 +88,10 @@ const translations = {
     stepType: 'Step Type',
     allProgramTypes: 'All Program Types',
     allStepTypes: 'All Step Types',
+    // Step-type filter labels. The option VALUE stays the raw 'initial'/'final'
+    // so search and the server-side export keep matching. (GV-9492)
+    initial: 'Initial Screening',
+    final: 'Final Screening',
     noRowsToExport: 'There are no rows to export with the current filters.',
     reset: 'Reset',
     criteriaNotConfiguredTitle: "{{ __('admin.criteria_not_configured_title') }}",
@@ -126,6 +130,8 @@ const translations = {
     stepType: 'نوع المرحلة',
     allProgramTypes: 'جميع أنواع البرامج',
     allStepTypes: 'جميع أنواع المراحل',
+    initial: 'التقييم الأولي',
+    final: 'التقييم النهائي',
     noRowsToExport: 'لا توجد صفوف للتصدير بالفلاتر الحالية.',
     reset: 'إعادة تعيين',
     criteriaNotConfiguredTitle: "{{ __('admin.criteria_not_configured_title') }}",
