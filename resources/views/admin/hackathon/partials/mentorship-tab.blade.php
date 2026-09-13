@@ -13,7 +13,7 @@
               <div class="border-bottom pb-2 mb-4">
                 <h5 style="text-transform: capitalize">
                   <i class="ti ti-clipboard-list ti-28px"></i>
-                  <span class="mx-2"> {{ __('dashboard.My Latest training') }} ::
+                  <span class="mx-2"> {{ __('dashboard.My Latest training') }}
                     <a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
                   </span>
                 </h5>

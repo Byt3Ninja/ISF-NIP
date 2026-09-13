@@ -803,7 +803,7 @@
 								<div class="card-header border-bottom">
 									<div class="d-flex align-items-center">
 										<h5 style="text-transform: capitalize">
-											{{ __('dashboard.My Latest training') }} ::
+											{{ __('dashboard.My Latest training') }}
 										</h5>
 										<a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
 									</div>
