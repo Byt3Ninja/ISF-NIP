@@ -647,8 +647,53 @@
       });
 
       $(document).on('change', '.localized-file-input-native', function () {
+        const $imageField = $(this).closest('.image-field');
         const $name = $(this).closest('.localized-file-input').find('.localized-file-input-name');
-        $name.text(this.files && this.files.length ? this.files[0].name : $name.data('placeholder'));
+        const files = this.files;
+
+        $name.text(files && files.length ? files[0].name : $name.data('placeholder'));
+
+        if (!$imageField.length) {
+          return;
+        }
+
+        let $preview = $imageField.children('img');
+        const originalSrc = $preview.data('original-src');
+
+        if (files && files.length) {
+          if (!$preview.length) {
+            $preview = $('<img class="rounded application-image-preview" alt="" style="width:64px;height:64px;object-fit:cover;">');
+            $imageField.prepend($preview);
+          }
+          if (originalSrc === undefined) {
+            $preview.data('original-src', $preview.attr('src') || '');
+          }
+          const previousUrl = $preview.data('object-url');
+          if (previousUrl) {
+            URL.revokeObjectURL(previousUrl);
+          }
+          const objectUrl = URL.createObjectURL(files[0]);
+          $preview
+            .data('object-url', objectUrl)
+            .attr('src', objectUrl)
+            .attr('alt', files[0].name || '');
+          return;
+        }
+
+        if (!$preview.length || originalSrc === undefined) {
+          return;
+        }
+
+        const objectUrl = $preview.data('object-url');
+        if (objectUrl) {
+          URL.revokeObjectURL(objectUrl);
+        }
+        $preview.removeData('object-url');
+        if (originalSrc) {
+          $preview.attr('src', originalSrc);
+        } else {
+          $preview.remove();
+        }
       });
 
       const urlTab = new URLSearchParams(window.location.search).get('tab');
