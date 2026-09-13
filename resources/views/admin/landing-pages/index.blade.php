@@ -59,14 +59,14 @@
       </form>
     </div>
   </div>
-  
+
   {{-- Cards --}}
   <div class="row g-4">
     @if ($pages->isEmpty())
       <div class="col-12">
         <div class="card">
           <div class="card-body text-center">
-            <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
+            <img src="/icons/empty-state.svg" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
             <h4 class="mb-2">
               {{ __('landing.No_LandingPages') }}
             </h4>
