@@ -486,8 +486,8 @@
       <div class="row g-4">
         @forelse($visiblePrograms as $program)
           @php
-    $programTitle = $l == 'ar' ? ($program->title_ar ?: $program->title) : $program->title;
-    $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description;
+            $programTitle = $l == 'ar' ? ($program->title_ar ?: $program->title) : $program->title;
+            $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description;
           @endphp
           <div class="col-md-6 col-lg-4" data-type="{{ $program->type }}">
             <div class="card h-100 border shadow-none">
