@@ -30,8 +30,8 @@ use Throwable;
  * the startups whose time actually changed; this class just renders for
  * whoever it is given.
  *
- * The notifiable is the company OWNER (`companies.user_id`), since a Company is
- * not itself notifiable.
+ * The notifiable is the company OWNER (the user whose `users.company_id` points
+ * at the company), since a Company is not itself notifiable.
  */
 class StartupMeetingTimeChangedNotification extends Notification implements ShouldQueue
 {

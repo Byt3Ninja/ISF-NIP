@@ -1184,8 +1184,9 @@ class ScreeningController extends Controller
 	/**
 	 * Deliver one batch of startup meeting notifications.
 	 *
-	 * The notifiable is the company OWNER (`companies.user_id`) — a Company is
-	 * not itself notifiable.
+	 * The notifiable is the company OWNER — a Company is not itself notifiable.
+	 * Ownership lives on `users.company_id` (there is no `companies.user_id`),
+	 * so the owners are resolved from the users side in a single query.
 	 *
 	 * @param  array<int, string>  $companies  company id => slot start
 	 */
@@ -1195,18 +1196,12 @@ class ScreeningController extends Controller
 			return;
 		}
 
-		$owners = Company::whereIn('id', array_keys($companies))
-			->get(['id', 'user_id', 'title'])
-			->keyBy('id');
+		$owners = User::whereIn('company_id', array_keys($companies))
+			->get()
+			->keyBy('company_id');
 
 		foreach ($companies as $companyId => $slotStart) {
-			$company = $owners->get($companyId);
-
-			if (!$company || !$company->user_id) {
-				continue;
-			}
-
-			$owner = User::find($company->user_id);
+			$owner = $owners->get($companyId);
 
 			if (!$owner) {
 				continue;
