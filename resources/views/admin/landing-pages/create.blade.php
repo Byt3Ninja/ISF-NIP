@@ -1429,14 +1429,14 @@
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag">
                   <label class="form-label">${"{{ __('landing.Title_tag') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="{{ App\LandingPage::TITLE_TAG_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
-                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_TAG_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
+                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
                   <label class="form-label">${"{{ __('landing.Title_tag_ar') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="{{ App\LandingPage::TITLE_TAG_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
-                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_TAG_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
+                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="content">
@@ -1453,11 +1453,11 @@
                 </div>
                 {{-- <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Button_text') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
-                  <input type="text" name="custom_sections[${id}][button_text]" maxlength="250" class="form-control">
+                  <input type="text" name="custom_sections[${id}][button_text]" maxlength="35" class="form-control">
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="button_link">
                   <label class="form-label">${"{{ __('landing.Button_link') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
-                  <input type="url" name="custom_sections[${id}][button_link]" maxlength="500" class="form-control" placeholder="https://" data-custom-field>
+                  <input type="url" name="custom_sections[${id}][button_link]" maxlength="250" class="form-control" placeholder="https://" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div> --}}
               </div>
