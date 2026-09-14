@@ -188,23 +188,23 @@
       <input type="hidden" name="screening_type" value="{{ $screening_type }}">
 
       @php
-$l = app()->getLocale();
-// Off-step references: startups already saved into a panel that have since
-// moved to another step. Rendered as disabled (read-only) options so they
-// remain visible in their panel but cannot be added/removed until they
-// return to this step. Keyed by id for quick lookup.
-$offStepCompanies = ($offStepCompanies ?? collect());
-$offStepById = collect($offStepCompanies)->keyBy('id');
-$offStepIds = $offStepById->keys()->map(fn($i) => (int) $i)->all();
+        $l = app()->getLocale();
+        // Off-step references: startups already saved into a panel that have since
+        // moved to another step. Rendered as disabled (read-only) options so they
+        // remain visible in their panel but cannot be added/removed until they
+        // return to this step. Keyed by id for quick lookup.
+        $offStepCompanies = ($offStepCompanies ?? collect());
+        $offStepById = collect($offStepCompanies)->keyBy('id');
+        $offStepIds = $offStepById->keys()->map(fn($i) => (int) $i)->all();
       @endphp
 
       <div class="accordion mb-4" id="panels-container">
         @foreach($judgingPanels as $index => $panel)
           @php
-  // A finished panel is History: read-only and preserved as a record of
-  // what took place. Collapsed by default so live panels stay in view.
-  $isHistory = !empty($panel['is_history']);
-  $expanded = $index === 0 && !$isHistory;
+            // A finished panel is History: read-only and preserved as a record of
+            // what took place. Collapsed by default so live panels stay in view.
+            $isHistory = !empty($panel['is_history']);
+            $expanded = $index === 0 && !$isHistory;
           @endphp
           <div class="accordion-item border {{ $isHistory ? 'panel-history' : '' }}" data-index="{{ $index }}"
             @if($isHistory) data-history="1" @endif>
@@ -276,13 +276,13 @@ $offStepIds = $offStepById->keys()->map(fn($i) => (int) $i)->all();
                         class="select-all-toggle small fw-medium {{ $isHistory ? 'd-none' : '' }}">{{ __('admin.select_all') }}</a>
                     </div>
                     @php
-  // Off-step companies saved in THIS panel (read-only references).
-  $panelOffStepIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
-    ->filter(fn($i) => in_array($i, $offStepIds, true))->unique()->values();
-  // Companies available at this step that are selected in this panel.
-  $availableCompanyIds = collect($companies)->pluck('id')->map(fn($x) => (int) $x)->all();
-  $panelSelectedIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
-    ->filter(fn($i) => in_array($i, $availableCompanyIds, true))->values()->all();
+                      // Off-step companies saved in THIS panel (read-only references).
+                      $panelOffStepIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
+                        ->filter(fn($i) => in_array($i, $offStepIds, true))->unique()->values();
+                      // Companies available at this step that are selected in this panel.
+                      $availableCompanyIds = collect($companies)->pluck('id')->map(fn($x) => (int) $x)->all();
+                      $panelSelectedIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
+                        ->filter(fn($i) => in_array($i, $availableCompanyIds, true))->values()->all();
                     @endphp
                     <button type="button"
                       class="btn btn-outline-primary d-flex align-items-center justify-content-between w-100 companies-picker-trigger"
