@@ -102,7 +102,7 @@
                     {{ $cycles->where('id', request('id'))->pluck('title')->implode(', ') }}
                   </span>
                 </h5>
-                @if ($_user->hasAnyRole('subadmin'))
+                @if ($_user->hasAnyRole('admin'))
                 <div class="mb-6 mb-lg-0">
                   <a class="btn btn-primary" href="{{ route('users.create', ['role' => 'mentor']) }}" target="_blank" rel="noopener">
                     <i class="ti ti-user-plus me-2"></i>{{ __('admin.add_new_mentor') }}
