@@ -332,7 +332,14 @@ class FinalscreeningController extends Controller
 		}
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
+		// Only startups that have actually progressed to THIS step belong here.
+		// Including the form id in the step filter compared a builder_forms id
+		// against companies.step (a steps FK), so startups sitting at an
+		// unrelated step were listed as selectable AND — failing the
+		// current-step test below — rendered a second time as "moved (no longer
+		// at this step)" (GV-9556). Same rule the initial screening already
+		// applies (GV-3237).
+		if( $cstep ) { $companies = Company::where('step', $cstep->id)->get(); } else { $cstep = []; }
 
 		/** Prepare Judging Panels for View (Clean Code) */
 		$judgingPanels = [];
@@ -373,7 +380,9 @@ class FinalscreeningController extends Controller
 		// another step is dropped here (its evaluation still shows on the results
 		// page). Keep it as the cstep's current companies intersected with the
 		// panel assignments.
-		$currentStepCompanyIds = Company::where('step', $cstep->id)->pluck('id')->map(fn ($i) => (int) $i)->all();
+		// Derived from $companies itself so the selectable list and the off-step
+		// list can never disagree about the same startup (GV-9556).
+		$currentStepCompanyIds = collect($companies)->pluck('id')->map(fn ($i) => (int) $i)->all();
 		$allPanelCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()->map(fn ($i) => (int) $i)->filter()->unique()->values();
 		$assignedCompanyIds = $allPanelCompanyIds->intersect($currentStepCompanyIds)->values();
 
