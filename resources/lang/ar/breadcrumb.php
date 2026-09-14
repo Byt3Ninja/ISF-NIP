@@ -174,7 +174,7 @@ return [
     'profile_service_provider' => 'ملف مقدم الخدمة',
 
     // Landing Pages
-    'custom_landing_pages' => 'الصفحات الرئيسية المخصصة',
+    'custom_landing_pages' => 'الصفحات الرئيسية العامة',
     'public_landing-page' => 'الصفحات الرئيسية العامة',
 
     // Programs
