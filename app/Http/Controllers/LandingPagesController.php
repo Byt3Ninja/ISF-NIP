@@ -196,6 +196,10 @@ class LandingPagesController extends Controller
    */
   protected function buildSections(?LandingPage $currentPage = null): array
   {
+    $title_max_length = LandingPage::TITLE_MAX_LENGTH;
+	$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
+	$program_description_max_length = LandingPage::PROGRAM_DESCRIPTION_MAX_LENGTH;
+
     $sections = [
       [
         'key'      => 'general',
@@ -211,7 +215,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'عنوان الصفحة',
             'value'     => $currentPage?->title,
             'required'  => true,
-            'maxlength' => LandingPage::TITLE_MAX_LENGTH,
+            'maxlength' => $title_max_length,
             'col'       => 12,
           ],
           [
@@ -232,7 +236,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف',
             'value'     => $currentPage?->description,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
           [
@@ -242,7 +246,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف بالعربية',
             'value'     => $currentPage?->description_ar,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
           [
@@ -321,7 +325,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان',
             'value'     => $currentPage?->hero_title,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -331,7 +335,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان بالعربية',
             'value'     => $currentPage?->hero_title_ar,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -341,7 +345,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي',
             'value'     => $currentPage?->hero_title_tag,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -351,7 +355,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي بالعربية',
             'value'     => $currentPage?->hero_title_tag_ar,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -361,7 +365,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف',
             'value'     => $currentPage?->hero_description,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
           [
@@ -371,7 +375,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف بالعربية',
             'value'     => $currentPage?->hero_description_ar,
             'required'  => false,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
           [
@@ -409,7 +413,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان',
             'value'     => $currentPage?->about_title,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -419,7 +423,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان بالعربية',
             'value'     => $currentPage?->about_title_ar,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -429,7 +433,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي',
             'value'     => $currentPage?->about_title_tag,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -439,7 +443,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي بالعربية',
             'value'     => $currentPage?->about_title_tag_ar,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -449,7 +453,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف',
             'value'     => $currentPage?->about_description,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
           [
@@ -459,7 +463,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف بالعربية',
             'value'     => $currentPage?->about_description_ar,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
         ],
@@ -486,7 +490,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان',
             'value'     => $currentPage?->programs_title,
             'required'  => true,
-            'maxlength' => 50,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -496,7 +500,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان بالعربية',
             'value'     => $currentPage?->programs_title_ar,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -506,7 +510,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي',
             'value'     => $currentPage?->programs_title_tag,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -516,7 +520,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي بالعربية',
             'value'     => $currentPage?->programs_title_tag_ar,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -526,7 +530,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف',
             'value'     => $currentPage?->programs_description,
             'required'  => true,
-            'maxlength' => 100,
+            'maxlength' => $program_description_max_length,
             'col'       => 6,
           ],
           [
@@ -536,7 +540,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف بالعربية',
             'value'     => $currentPage?->programs_description_ar,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $program_description_max_length,
             'col'       => 6,
           ],
         ],
@@ -563,7 +567,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان',
             'value'     => $currentPage?->how_title,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -573,7 +577,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان بالعربية',
             'value'     => $currentPage?->how_title_ar,
             'required'  => true,
-            'maxlength' => 100,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -583,7 +587,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي',
             'value'     => $currentPage?->how_title_tag,
             'required'  => true,
-            'maxlength' => 225,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -593,7 +597,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'العنوان الفرعي بالعربية',
             'value'     => $currentPage?->how_title_tag_ar,
             'required'  => true,
-            'maxlength' => 150,
+            'maxlength' => $title_max_length,
             'col'       => 6,
           ],
           [
@@ -603,7 +607,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف',
             'value'     => $currentPage?->how_description,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
           [
@@ -613,7 +617,7 @@ class LandingPagesController extends Controller
             'label_ar'  => 'الوصف بالعربية',
             'value'     => $currentPage?->how_description_ar,
             'required'  => true,
-            'maxlength' => 500,
+            'maxlength' => $description_max_length,
             'col'       => 6,
           ],
         ],
@@ -739,12 +743,14 @@ class LandingPagesController extends Controller
             return abort(401);
         }
     $user = auth()->user();
+    $title_max_length = LandingPage::TITLE_MAX_LENGTH;
+	$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
 
     $validator = Validator::make($request->all(), [
-      'general.title' => 'required|string|max:' . LandingPage::TITLE_MAX_LENGTH,
+      'general.title' => 'required|string|max:' . $title_max_length,
       'general.logo' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
-      'general.description' => 'required|string|max:500',
-      'general.description_ar' => 'required|string|max:500',
+      'general.description' => 'required|string|max:' . $description_max_length,
+      'general.description_ar' => 'required|string|max:' . $description_max_length,
       'general.linkedin' => 'nullable|url|max:255',
       'general.facebook' => 'nullable|url|max:255',
       'general.instagram' => 'nullable|url|max:255',
@@ -753,7 +759,7 @@ class LandingPagesController extends Controller
       'general.youtube' => 'nullable|url|max:255',
     ], [
       'general.title.required' => __('landing.validation.page_title_required'),
-      'general.title.max' => __('landing.validation.page_title_max', ['max' => LandingPage::TITLE_MAX_LENGTH]),
+      'general.title.max' => __('landing.validation.page_title_max', ['max' => $title_max_length]),
       'general.logo.required' => __('landing.validation.logo_required'),
       'general.logo.image' => __('landing.validation.image_format_invalid'),
       'general.logo.mimes' => __('landing.validation.image_format_invalid'),
@@ -850,17 +856,19 @@ class LandingPagesController extends Controller
             return abort(401);
         } 
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
+		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
 
 		$validator = Validator::make($request->all(), [
-			'general.title' => 'required|string|max:' . LandingPage::TITLE_MAX_LENGTH,
+			'general.title' => 'required|string|max:' . $title_max_length,
 			'general.logo' => [
 				$page->logo ? 'nullable' : 'required',
 				'image',
 				'mimes:png,jpg,jpeg,webp',
 				'max:5120',
 			],
-			'general.description' => 'required|string|max:500',
-			'general.description_ar' => 'required|string|max:500',
+			'general.description' => 'required|string|max:' . $description_max_length,
+			'general.description_ar' => 'required|string|max:' . $description_max_length,
 			'general.linkedin' => 'nullable|url|max:255',
 			'general.facebook' => 'nullable|url|max:255',
 			'general.instagram' => 'nullable|url|max:255',
@@ -869,7 +877,7 @@ class LandingPagesController extends Controller
 			'general.youtube' => 'nullable|url|max:255',
 		], [
 			'general.title.required' => __('landing.validation.page_title_required'),
-			'general.title.max' => __('landing.validation.page_title_max', ['max' => LandingPage::TITLE_MAX_LENGTH]),
+			'general.title.max' => __('landing.validation.page_title_max', ['max' => $title_max_length]),
 			'general.logo.required' => __('landing.validation.logo_required'),
 			'general.logo.image' => __('landing.validation.image_format_invalid'),
 			'general.logo.mimes' => __('landing.validation.image_format_invalid'),
@@ -930,14 +938,16 @@ class LandingPagesController extends Controller
             return abort(401);
         }
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
+		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
 
 		$validator = Validator::make($request->all(), [
-			'hero.title' => 'required|string|max:100',
-			'hero.title_ar' => 'required|string|max:100',
-			'hero.title_tag' => 'required|string|max:150',
-			'hero.title_tag_ar' => 'required|string|max:150',
-			'hero.description' => 'required|string|max:500',
-			'hero.description_ar' => 'required|string|max:500',
+			'hero.title' => 'required|string|max:' . $title_max_length,
+			'hero.title_ar' => 'required|string|max:' . $title_max_length,
+			'hero.title_tag' => 'required|string|max:' . $title_max_length,
+			'hero.title_tag_ar' => 'required|string|max:' . $title_max_length,
+			'hero.description' => 'required|string|max:' . $description_max_length,
+			'hero.description_ar' => 'required|string|max:' . $description_max_length,
 			'hero.hero_image' => [
 				$page->hero_image ? 'nullable' : 'required',
 				'image',
@@ -1003,17 +1013,19 @@ class LandingPagesController extends Controller
             return abort(401);
         }
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
+		$program_description_max_length = LandingPage::PROGRAM_DESCRIPTION_MAX_LENGTH;
 
 		$validator = Validator::make($request->all(), [
 			'programs.selected_programs' => 'nullable|array',
 			'programs.selected_programs.*' => 'in:0,1',
 			'programs.is_enabled' => 'nullable|boolean',
-			'programs.title' => 'nullable|string|max:50',
-			'programs.title_ar' => 'nullable|string|max:50',
-			'programs.title_tag' => 'nullable|string|max:50',
-			'programs.title_tag_ar' => 'nullable|string|max:50',
-			'programs.description' => 'nullable|string|max:100',
-			'programs.description_ar' => 'nullable|string|max:100',
+			'programs.title' => 'nullable|string|max:' . $title_max_length,
+			'programs.title_ar' => 'nullable|string|max:' . $title_max_length,
+			'programs.title_tag' => 'nullable|string|max:' . $title_max_length,
+			'programs.title_tag_ar' => 'nullable|string|max:' . $title_max_length,
+			'programs.description' => 'nullable|string|max:' . $program_description_max_length,
+			'programs.description_ar' => 'nullable|string|max:' . $program_description_max_length,
 		]);
 
 		$requiredMsg = __('landing.validation.field_required');
@@ -1076,19 +1088,21 @@ class LandingPagesController extends Controller
             return abort(401);
         }
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
+		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
 
 		$validator = Validator::make($request->all(), [
 			'about.is_enabled' => 'nullable|boolean',
-			'about.title' => 'nullable|string|max:100',
-			'about.title_ar' => 'nullable|string|max:100',
-			'about.title_tag' => 'nullable|string|max:150',
-			'about.title_tag_ar' => 'nullable|string|max:150',
-			'about.description' => 'nullable|string|max:500',
-			'about.description_ar' => 'nullable|string|max:500',
+			'about.title' => 'nullable|string|max:' . $title_max_length,
+			'about.title_ar' => 'nullable|string|max:' . $title_max_length,
+			'about.title_tag' => 'nullable|string|max:' . $title_max_length,
+			'about.title_tag_ar' => 'nullable|string|max:' . $title_max_length,
+			'about.description' => 'nullable|string|max:' . $description_max_length,
+			'about.description_ar' => 'nullable|string|max:' . $description_max_length,
 			'about.cards' => 'nullable|array|max:3',
 			'about.cards.*.icon' => 'nullable|string|max:50',
-			'about.cards.*.title' => 'nullable|string|max:100',
-			'about.cards.*.title_ar' => 'nullable|string|max:100',
+			'about.cards.*.title' => 'nullable|string|max:' . $title_max_length,
+			'about.cards.*.title_ar' => 'nullable|string|max:' . $title_max_length,
 			'about.cards.*.description' => 'nullable|string|max:300',
 			'about.cards.*.description_ar' => 'nullable|string|max:300',
 		]);
@@ -1211,21 +1225,24 @@ class LandingPagesController extends Controller
             return abort(401);
         }
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
+		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
+		$steps_description_max_length = LandingPage::STEPS_DESCRIPTION_MAX_LENGTH;
 
 		$validator = Validator::make($request->all(), [
 			'how.is_enabled' => 'nullable|boolean',
-			'how.title' => 'nullable|string|max:100',
-			'how.title_ar' => 'nullable|string|max:100',
-			'how.title_tag' => 'nullable|string|max:150',
-			'how.title_tag_ar' => 'nullable|string|max:150',
-			'how.description' => 'nullable|string|max:500',
-			'how.description_ar' => 'nullable|string|max:500',
+			'how.title' => 'nullable|string|max:' . $title_max_length,
+			'how.title_ar' => 'nullable|string|max:' . $title_max_length,
+			'how.title_tag' => 'nullable|string|max:' . $title_max_length,
+			'how.title_tag_ar' => 'nullable|string|max:' . $title_max_length,
+			'how.description' => 'nullable|string|max:' . $description_max_length,
+			'how.description_ar' => 'nullable|string|max:' . $description_max_length,
 			'how.steps' => 'nullable|array|max:3',
 			'how.steps.*.icon' => 'nullable|string|max:50',
-			'how.steps.*.title' => 'nullable|string|max:100',
-			'how.steps.*.title_ar' => 'nullable|string|max:100',
-			'how.steps.*.description' => 'nullable|string|max:300',
-			'how.steps.*.description_ar' => 'nullable|string|max:300',
+			'how.steps.*.title' => 'nullable|string|max:' . $title_max_length,
+			'how.steps.*.title_ar' => 'nullable|string|max:' . $title_max_length,
+			'how.steps.*.description' => 'nullable|string|max:' . $steps_description_max_length,
+			'how.steps.*.description_ar' => 'nullable|string|max:' . $steps_description_max_length,
 		]);
 
 		$validator->after(function ($validator) use ($request) {
@@ -1349,18 +1366,19 @@ class LandingPagesController extends Controller
             return abort(401);
         }
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 
 		$requiredMsg = __('landing.validation.custom_section_field_required');
 		$buttonLinkMsg = __('landing.validation.button_link_invalid');
-		$titleMaxMsg = __('landing.validation.custom_section_field_max', ['max' => 225]);
+		$titleMaxMsg = __('landing.validation.custom_section_field_max', ['max' => $title_max_length]);
 
 		$validator = Validator::make($request->all(), [
 			'custom_sections' => 'nullable|array',
 			'custom_sections.*.id' => 'nullable|integer',
-			'custom_sections.*.title' => 'nullable|string|max:225',
-			'custom_sections.*.title_ar' => 'nullable|string|max:225',
-			'custom_sections.*.title_tag' => 'nullable|string|max:225',
-			'custom_sections.*.title_tag_ar' => 'nullable|string|max:225',
+			'custom_sections.*.title' => 'nullable|string|max:' . $title_max_length,
+			'custom_sections.*.title_ar' => 'nullable|string|max:' . $title_max_length,
+			'custom_sections.*.title_tag' => 'nullable|string|max:' . $title_max_length,
+			'custom_sections.*.title_tag_ar' => 'nullable|string|max:' . $title_max_length,
 			'custom_sections.*.content' => 'nullable|string',
 			'custom_sections.*.content_ar' => 'nullable|string',
 			'custom_sections.*.button_text' => 'nullable|string|max:255',

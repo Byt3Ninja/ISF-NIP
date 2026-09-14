@@ -14,8 +14,11 @@ class LandingPage extends Model
      * 100, so the title must not be allowed to exceed the same limit or it
      * would produce an unsaveable slug.
      */
-    public const TITLE_MAX_LENGTH = 100;
-    public const SLUG_MAX_LENGTH = 100;
+    public const TITLE_MAX_LENGTH = 50;
+    public const SLUG_MAX_LENGTH = 50;
+    public const DESCRIPTION_MAX_LENGTH = 500;
+    public const PROGRAM_DESCRIPTION_MAX_LENGTH = 100;
+    public const STEPS_DESCRIPTION_MAX_LENGTH = 300;
 
     protected $fillable = [
         'created_by',

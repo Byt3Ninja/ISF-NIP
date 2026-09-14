@@ -1467,11 +1467,11 @@
                 </div>
                 <div class="col-md-8">
                   <label class="form-label">${"{{ __('landing.Title') }}"}</label>
-                  <input type="text" name="about[cards][${id}][title]" maxlength="100" class="form-control" data-card-field>
+                  <input type="text" name="about[cards][${id}][title]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
-                  <input type="text" name="about[cards][${id}][title_ar]" maxlength="100" class="form-control" data-card-field>
+                  <input type="text" name="about[cards][${id}][title_ar]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Description') }}"}</label>
