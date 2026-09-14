@@ -1475,11 +1475,11 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Description') }}"}</label>
-                  <textarea name="about[cards][${id}][description]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
+                  <textarea name="about[cards][${id}][description]" maxlength="300" rows="4" class="form-control" data-card-field></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Description_ar') }}"}</label>
-                  <textarea name="about[cards][${id}][description_ar]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
+                  <textarea name="about[cards][${id}][description_ar]" maxlength="300" rows="4" class="form-control" data-card-field></textarea>
                 </div>
               </div>
             </div>

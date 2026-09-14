@@ -300,6 +300,44 @@
         max-width: 320px;
       }
     }
+
+    /* ---- Section striping ---- */
+    .section-py {
+      padding: 5rem 0;
+    }
+
+    @media (max-width:991.98px) {
+      .section-py { padding: 3.5rem 0; }
+    }
+
+    @media (max-width:575.98px) {
+      .section-py { padding: 2.5rem 0; }
+    }
+
+    /* ---- Overflow protection ---- */
+    body {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .gl-nav .navbar-brand span.fw-bold {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 200px;
+    }
+
+    .gl-hero h1 {
+      overflow-wrap: anywhere;
+    }
+
+    .section-head p.text-secondary {
+      overflow-wrap: anywhere;
+    }
+
+    .gl-footer p {
+      overflow-wrap: anywhere;
+    }
   </style>
 
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
@@ -336,12 +374,6 @@
             @if($page->how_is_enabled)
               <li class="nav-item"><a class="nav-link text-white" href="#how-it-works">{{ __('landing.how_it_works') }}</a></li>
             @endif
-            {{-- Stories/Impact/FAQ nav links: their sections are commented out below (see Success stories / Impact / FAQ comment block) --}}
-            {{--
-            <li class="nav-item"><a class="nav-link text-white" href="#success-stories">{{ $l == 'ar' ? 'قصص النجاح' : 'Stories' }}</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#impact">{{ $l == 'ar' ? 'الأثر' : 'Impact' }}</a></li>
-            <li class="nav-item"><a class="nav-link text-white" href="#faq">{{ $l == 'ar' ? 'الأسئلة الشائعة' : 'FAQ' }}</a></li>
-            --}}
             <li class="nav-item dropdown-language dropdown ms-lg-3">
               <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                 <i class="ti ti-language text-white fs-5"></i>
@@ -406,9 +438,12 @@
     </div>
   </header>
 
+  @php $landingBg = false; @endphp
+
   <!-- ===== About / Value props ===== -->
   @if($page->about_is_enabled)
-  <section class="py-5 py-lg-5" id="about">
+  <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="about">
+    @php $landingBg = !$landingBg; @endphp
     <div class="container py-4">
       <div class="row section-head mb-4">
         <div class="col-lg-7">
@@ -457,7 +492,8 @@
 
   <!-- ===== Programs ===== -->
   @if($page->programs_is_enabled)
-  <section class="py-5" id="programs">
+  <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="programs">
+    @php $landingBg = !$landingBg; @endphp
     <div class="container py-4">
       <div class="row section-head mb-4">
         <div class="col-lg-7">
@@ -588,7 +624,8 @@
 
   <!-- ===== How it works ===== -->
   @if($page->how_is_enabled)
-    <section class="py-5" id="how-it-works">
+    <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="how-it-works">
+      @php $landingBg = !$landingBg; @endphp
       <div class="container py-4">
         <div class="row section-head mb-5 text-center">
           <div class="col-lg-7 mx-auto">
@@ -602,7 +639,7 @@
             @endif
             @php $howDescription = $l == 'ar' ? $page->how_description_ar : $page->how_description; @endphp
             @if($howDescription)
-              <p class="text-secondary mb-0 mt-3" style="overflow-wrap:break-word; word-break:break-word;">{{ $howDescription }}</p>
+              <p class="text-secondary mb-0 mt-3">{{ $howDescription }}</p>
             @endif
           </div>
         </div>
@@ -615,8 +652,8 @@
               <span class="pipeline-node">
                 @if(!empty($step['icon']))<i class="ti {{ $step['icon'] }}"></i>@endif
               </span>
-              <h5 class="fw-bold mt-3" style="overflow-wrap:break-word; word-break:break-word;">{{ $l == 'ar' ? ($step['title_ar'] ?? '') : ($step['title'] ?? '') }}</h5>
-              <p class="text-secondary small mx-auto" style="max-width:260px; overflow-wrap:break-word; word-break:break-word;">{{ $l == 'ar' ? ($step['description_ar'] ?? '') : ($step['description'] ?? '') }}</p>
+              <h5 class="fw-bold mt-3">{{ $l == 'ar' ? ($step['title_ar'] ?? '') : ($step['title'] ?? '') }}</h5>
+              <p class="text-secondary small mx-auto" style="max-width:260px;">{{ $l == 'ar' ? ($step['description_ar'] ?? '') : ($step['description'] ?? '') }}</p>
             </div>
           @endforeach
         </div>
@@ -626,7 +663,8 @@
 
   <!-- ===== Custom sections ===== -->
   @foreach($customSections as $customSection)
-    <section class="py-5" id="custom-{{ $customSection->id }}">
+    <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="custom-{{ $customSection->id }}">
+      @php $landingBg = !$landingBg; @endphp
       <div class="container py-4">
         @php $sectionTag = $l == 'ar' ? $customSection->title_tag_ar : $customSection->title_tag; @endphp
         @if($sectionTag)
@@ -636,13 +674,14 @@
         @if($sectionTitle)
           <h2>{{ $sectionTitle }}</h2>
         @endif
-        <div class="mt-3" style="white-space:pre-wrap; overflow-wrap:anywhere; word-break:break-word;">{!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
+        <div class="mt-3" style="white-space:pre-wrap;">{!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
       </div>
     </section>
   @endforeach
 
   <!-- ===== CTA ===== -->
-  <section class="py-5">
+  <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}">
+    @php $landingBg = !$landingBg; @endphp
     <div class="container">
       <div class="gl-cta text-center">
         <p class="eyebrow-mono text-primary mb-3 position-relative">{{ __('landing.lets_get_started') }}</p>
@@ -656,157 +695,6 @@
       </div>
     </div>
   </section>
-
-  {{-- Success stories / Impact / FAQ: static/fabricated demo content, kept
-  here commented out rather than deleted. This kind of content is now meant
-  to be added by admins through the working Custom Sections feature (see
-  the @foreach($customSections as $customSection) loop above), the same way
-  How it works / About / Programs are admin-configurable. --}}
-  {{--
-  <!-- ===== Success stories ===== -->
-  <section class="py-5" id="success-stories">
-    <div class="container py-4">
-      <p class="eyebrow-mono mb-2">// what founders say</p>
-      <div class="row section-head mb-4">
-        <div class="col-lg-7">
-          <h2>Founders who found their fit</h2>
-        </div>
-        <div class="col-lg-4 offset-lg-1 d-flex align-items-end">
-          <p class="text-secondary mb-0">Track record matters. 68% of founders who applied through Growth Labs secured a
-            spot in their top-choice program.</p>
-        </div>
-      </div>
-
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="h-100 p-4 rounded-4"
-            style="background:rgba(79, 57, 187, 0.05); border:1px solid rgba(79, 57, 187, 0.1);">
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <div class="avatar">
-                <div class="avatar-initial bg-label-primary rounded-circle fw-bold">SM</div>
-              </div>
-              <div>
-                <h6 class="mb-0">Sarah M.</h6>
-                <span class="text-secondary small">Fintech, Pre-seed</span>
-              </div>
-            </div>
-            <p class="text-secondary small mb-0">"Matched into a program I didn't even know existed. Two weeks later I
-              had
-              my first term sheet conversation."</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="h-100 p-4 rounded-4"
-            style="background:rgba(79, 57, 187, 0.05); border:1px solid rgba(79, 57, 187, 0.1);">
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <div class="avatar">
-                <div class="avatar-initial bg-label-primary rounded-circle fw-bold">OK</div>
-              </div>
-              <div>
-                <h6 class="mb-0">Omar K.</h6>
-                <span class="text-secondary small">Healthtech, MVP</span>
-              </div>
-            </div>
-            <p class="text-secondary small mb-0">"The deadline tracker saved us. We applied in the last 24 hours and got
-              in — barely."</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="h-100 p-4 rounded-4"
-            style="background:rgba(79, 57, 187, 0.05); border:1px solid rgba(79, 57, 187, 0.1);">
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <div class="avatar">
-                <div class="avatar-initial bg-label-primary rounded-circle fw-bold">LN</div>
-              </div>
-              <div>
-                <h6 class="mb-0">Lina N.</h6>
-                <span class="text-secondary small">Edtech, Revenue</span>
-              </div>
-            </div>
-            <p class="text-secondary small mb-0">"One profile, five applications. It cut our application time from days
-              to
-              an afternoon."</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Impact ===== -->
-  <section class="bg-label-secondary py-5" id="impact">
-    <div class="container py-4">
-      <p class="eyebrow-mono mb-2">// the numbers</p>
-      <div class="row section-head mb-4">
-        <div class="col-lg-7">
-          <h2>Outcomes you can measure</h2>
-        </div>
-        <div class="col-lg-5 d-flex align-items-end justify-content-lg-end">
-          <p class="text-secondary mb-0">Real numbers from the last two cohorts — not vanity metrics.</p>
-        </div>
-      </div>
-
-      <div class="row g-4 text-center">
-        <div class="col-sm-4">
-          <div class="h-100 py-5 px-4 rounded-4 bg-white" style="border:1px solid rgba(33, 37, 41, 0.08);">
-            <h1 class="text-primary fw-bold mb-1" style="font-size:2.8rem;">4,300+</h1>
-            <p class="text-secondary small mb-0">founders matched to programs</p>
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="h-100 py-5 px-4 rounded-4 bg-white" style="border:1px solid rgba(33, 37, 41, 0.08);">
-            <h1 class="text-primary fw-bold mb-1" style="font-size:2.8rem;">$12M</h1>
-            <p class="text-secondary small mb-0">raised by matched founders</p>
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="h-100 py-5 px-4 rounded-4 bg-white" style="border:1px solid rgba(33, 37, 41, 0.08);">
-            <h1 class="text-primary fw-bold mb-1" style="font-size:2.8rem;">120+</h1>
-            <p class="text-secondary small mb-0">vetted programs listed</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== FAQ ===== -->
-  <section class="py-5" id="faq">
-    <div class="container py-4">
-      <div class="row section-head mb-4 text-center">
-        <div class="col-lg-7 mx-auto">
-          <p class="eyebrow-mono mb-2">// faq</p>
-          <h2>Questions founders ask us</h2>
-          <p class="text-secondary mb-0 mt-3">Short answers to the things we hear most before someone applies.</p>
-        </div>
-      </div>
-
-      <div class="row g-3 mx-lg-auto" style="max-width:860px;">
-        <div class="col-12">
-          <div class="p-4 rounded-4 bg-label-primary" style="border:1px solid rgba(13, 110, 253, 0.2);">
-            <h6 class="fw-bold mb-2"><i class="ti ti-question-mark me-2"></i>Is there a fee to apply?</h6>
-            <p class="text-secondary small mb-0">No. Growth Labs is free for founders — programs cover the platform cost
-              when you join through us.</p>
-          </div>
-        </div>
-        <div class="col-12">
-          <div class="p-4 rounded-4 bg-label-primary" style="border:1px solid rgba(13, 110, 253, 0.2);">
-            <h6 class="fw-bold mb-2"><i class="ti ti-question-mark me-2"></i>How do you pick which programs to list?
-            </h6>
-            <p class="text-secondary small mb-0">Every program is reviewed for real mentorship, transparent terms, and
-              verifiable cohort outcomes before it goes live.</p>
-          </div>
-        </div>
-        <div class="col-12">
-          <div class="p-4 rounded-4 bg-label-primary" style="border:1px solid rgba(13, 110, 253, 0.2);">
-            <h6 class="fw-bold mb-2"><i class="ti ti-question-mark me-2"></i>Can I apply with the same profile
-              everywhere?</h6>
-            <p class="text-secondary small mb-0">Yes — build one founder profile and reuse it across every application,
-              then track responses in a single inbox.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  --}}
 
   <!-- ===== Footer ===== -->
   <footer class="gl-footer py-5 mt-3">
