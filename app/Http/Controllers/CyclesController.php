@@ -1658,9 +1658,11 @@ class CyclesController extends Controller
             $rules_array[$field_name] = $hasClosureRule ? $rules : implode('|', $rules);
             $custom_messages[$field_name . '.required'] = $L['required'];
 
-            // "Other" free-text is mandatory once picked. The `values` option
-            // list is stored as a comma-joined string (see FormBuilderController),
-            // so normalize before checking for the __OTHER__ sentinel.
+            // "Other" free-text is optional by default; it's only required
+            // when the question was explicitly configured with
+            // validation.other_required (see FormBuilderController). The
+            // `values` option list is stored as a comma-joined string, so
+            // normalize before checking for the __OTHER__ sentinel.
             //
             // Detection keys off the SUBMITTED ANSWER still carrying the
             // "__OTHER__" marker — NOT the mere presence of the `{field}_other`
@@ -1681,8 +1683,11 @@ class CyclesController extends Controller
                     : $answer === '__OTHER__';
                 if ($answerHasOther) {
                     $otherKey = $field_name . '_other';
-                    $rules_array[$otherKey] = 'required|string';
-                    $custom_messages[$otherKey . '.required'] = $L['other_required'];
+                    $otherRequired = intval($field['validation']['other_required'] ?? 0) === 1;
+                    $rules_array[$otherKey] = $otherRequired ? 'required|string' : 'nullable|string';
+                    if ($otherRequired) {
+                        $custom_messages[$otherKey . '.required'] = $L['other_required'];
+                    }
                 }
             }
         }

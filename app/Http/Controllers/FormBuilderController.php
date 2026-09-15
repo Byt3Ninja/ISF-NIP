@@ -674,7 +674,10 @@ class FormBuilderController extends Controller
                     'section' => $section_title,
                     'description' => $description,
                     'validation' => [
-                        'required' => !empty($question['required']) ? 1 : 0
+                        'required' => !empty($question['required']) ? 1 : 0,
+                        // Optional by default; only enforced when the builder
+                        // explicitly marks the "Other" free-text as required.
+                        'other_required' => !empty($question['other_required']) ? 1 : 0,
                     ],
                     'logic' => $question['logic'] ?? [],
                 ];
