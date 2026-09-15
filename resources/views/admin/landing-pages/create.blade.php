@@ -1553,6 +1553,34 @@
         });
       };
 
+      const quillTooltipMap = {
+        '.ql-bold':          "{{ __('landing.quill_bold') }}",
+        '.ql-italic':        "{{ __('landing.quill_italic') }}",
+        '.ql-underline':     "{{ __('landing.quill_underline') }}",
+        '.ql-ordered':       "{{ __('landing.quill_ordered_list') }}",
+        '.ql-bullet':        "{{ __('landing.quill_bullet_list') }}",
+        '.ql-link':          "{{ __('landing.quill_insert_link') }}",
+        '.ql-image':         "{{ __('landing.quill_insert_image') }}",
+        '.ql-clean':         "{{ __('landing.quill_clear_formatting') }}",
+        '.ql-custom-button': "{{ __('landing.quill_insert_button') }}",
+      };
+
+      const applyQuillTooltips = function (quill) {
+        if (!quill || !quill.container) return;
+        const toolbar = quill.container.previousElementSibling;
+        if (!toolbar) return;
+        Object.entries(quillTooltipMap).forEach(function ([selector, label]) {
+          const btn = toolbar.querySelector(selector);
+          if (!btn || btn.hasAttribute('title')) return;
+          btn.setAttribute('data-bs-toggle', 'tooltip');
+          btn.setAttribute('data-bs-placement', 'top');
+          btn.setAttribute('title', label);
+          if (typeof bootstrap !== 'undefined') {
+            bootstrap.Tooltip.getOrCreateInstance(btn);
+          }
+        });
+      };
+
       const initCustomQuill = function ($scope) {
         if (typeof Quill === 'undefined') return;
         $scope.find('.custom-quill-editor').each(function () {
@@ -1585,6 +1613,7 @@
           });
 
           customQuills.set(el, quill);
+          applyQuillTooltips(quill);
 
           const $group = $(el).closest('.custom-field-group');
           const $input = $group.find('.custom-hidden-content');
