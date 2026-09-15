@@ -3955,7 +3955,7 @@ return [
   'company_assigned_other_panel' => 'This startup is already assigned to another screening panel. Are you sure you want to assign it to this panel as well?',
   // Bulk variant (Select All / Select Startup Range). Asking once per startup
   // would fire a dialog storm, so the affected startups are listed in one prompt.
-  'companies_assigned_other_panel' => 'The following startups are already assigned to another screening panel. Are you sure you want to assign them to this panel as well?',
+  'companies_assigned_other_panel' => 'The following startup(s) are already assigned to another screening panel. Are you sure you want to assign them to this panel as well?',
 
 	// GV-3340: judge screening export
 	'Founder Name' => 'Founder Name',
