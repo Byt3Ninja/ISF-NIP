@@ -351,9 +351,9 @@ class CyclesController extends Controller
             $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => ['required', 'string', 'max:250', Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
+                'title' => ['required', 'string', 'max:50', Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
                 'title_ar' => 'required|string|max:50',
-                'description' => 'required|string|max:100',
+                'description' => 'required|string|max:250',
                 'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
                 // 'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
