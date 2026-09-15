@@ -1003,7 +1003,7 @@
             }
             pending.ids.add(id);
             clearTimeout(pending.timer);
-            pending.timer = setTimeout(() => flushDuplicateConfirm(panelIndex), 1000);
+            pending.timer = setTimeout(() => flushDuplicateConfirm(panelIndex), 1500);
           }
         } else {
           selected.delete(id);
