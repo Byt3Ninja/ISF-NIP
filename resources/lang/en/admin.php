@@ -2890,7 +2890,7 @@ return [
 	'select_all' => 'Select All',
 	'deselect_all' => 'Deselect All',
 	'auto_select_range' => 'Select Startup Range',
-	'clear_range' => 'Clear Range',
+	'clear_range' => 'Clear Selected',
 	'range_required' => 'Please enter a range.',
 	'range_numbers_only' => 'Range values accept numbers only.',
 	'range_invalid' => 'Invalid range. The start number must be less than or equal to the end number.',

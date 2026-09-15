@@ -631,8 +631,7 @@
       };
 
       const buildCompaniesPopoverHtml = ($trig) => {
-        const rangeValues = $trig.data('range-values') || {};
-        const hasRange = rangeValues.from != null || rangeValues.to != null;
+        const hasSelection = ($trig.data('selected') || new Set()).size > 0;
         const total = allCompanies.length;
         const search = String($trig.data('search') || '');
         return `
@@ -646,7 +645,7 @@
           <div class="auto-range p-3 border-bottom bg-card ${$trig.attr('data-readonly') === '1' ? 'd-none' : ''}">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-semibold small text-uppercase">${rangeLabels.title}</span>
-              <a href="javascript:void(0);" class="clear-range small fw-medium ${hasRange ? '' : 'd-none'}">${rangeLabels.clear}</a>
+              <a href="javascript:void(0);" class="clear-range small fw-medium ${hasSelection ? '' : 'd-none'}">${rangeLabels.clear}</a>
             </div>
             <div class="d-flex align-items-end flex-wrap gap-2">
               <div class="flex-grow-1" style="min-width: 70px;">
@@ -725,8 +724,7 @@
         const $pop = $(`.companies-popover[data-panel-index="${panelIndex}"]`);
         if (!$pop.length) return;
         $pop.find('.companies-list').html(buildCompaniesRows($trig));
-        const rangeValues = $trig.data('range-values') || {};
-        $pop.find('.clear-range').toggleClass('d-none', rangeValues.from == null && rangeValues.to == null);
+        $pop.find('.clear-range').toggleClass('d-none', ($trig.data('selected') || new Set()).size === 0);
       };
 
       // Select All acts on what the user can currently SEE. With a search active
@@ -1032,7 +1030,6 @@
         $trig.data('selected', new Set());
         syncCompaniesState($trig);
         refreshCompaniesPopover($trig);
-        $(this).addClass('d-none');
         $pop.find('.range-from, .range-to').val('');
         $pop.find('.range-error').text('').addClass('d-none');
         $pop.find('.range-from, .range-to').removeClass('is-invalid');
