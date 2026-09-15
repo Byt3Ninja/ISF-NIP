@@ -584,44 +584,44 @@
       </div>
     </div>
   </div>
-@endsection
-
-{{-- Button-link modal for the custom section rich-text content --}}
-<div class="modal fade" id="customButtonModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          {{ __('landing.Add_Button') }}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label" for="customButtonText">
-            {{ __('landing.Button_text') }}
-          </label>
-          <input type="text" class="form-control" id="customButtonText" maxlength="50">
+  
+  {{-- Button-link modal for the custom section rich-text content --}}
+  <div class="modal fade" id="customButtonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ __('landing.Add_Button') }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="mb-3">
-          <label class="form-label" for="customButtonLink">
-            {{ __('landing.Button_link') }}
-          </label>
-          <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
-          <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label" for="customButtonText">
+              {{ __('landing.Button_text') }}
+            </label>
+            <input type="text" class="form-control" id="customButtonText" maxlength="35">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="customButtonLink">
+              {{ __('landing.Button_link') }}
+            </label>
+            <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
+            <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
+          </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-          {{ __('landing.Cancel') }}
-        </button>
-        <button type="button" class="btn btn-primary" id="customButtonSave">
-          {{ __('landing.Add') }}
-        </button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+            {{ __('landing.Cancel') }}
+          </button>
+          <button type="button" class="btn btn-primary" id="customButtonSave">
+            {{ __('landing.Add') }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+@endsection
 
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
