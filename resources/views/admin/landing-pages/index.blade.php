@@ -126,24 +126,25 @@
                 {{ ($l == 'ar' ? $page->description_ar : $page->description) ?: (__('landing.No_Description') . '...') }}
               </p>
 
-              <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
-                <div class="avatar">
-                  <div class="avatar-initial rounded-circle overflow-hidden">
-                    @if($page->createdBy && $page->createdBy->img_url)
-                      <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
-                    @else
-                      <i class="ti ti-user text-dark"></i>
-                    @endif
+              @if ($_user->hasAnyRole('admin'))
+                <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
+                  <div class="avatar">
+                    <div class="avatar-initial rounded-circle overflow-hidden">
+                      @if($page->createdBy && $page->createdBy->img_url)
+                        <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
+                      @else
+                        <i class="ti ti-user text-dark"></i>
+                      @endif
+                    </div>
                   </div>
-                </div>
-                <span class="text-body">{{ __('admin.created_by') }}</span>
-                <span
-                  class="fw-semibold text-dark"
-                >
-                  {{ $page->createdBy->name ?? '' }}
-                </span>
-              </a>
-
+                  <span class="text-body">{{ __('admin.created_by') }}</span>
+                  <span
+                    class="fw-semibold text-dark"
+                  >
+                    {{ $page->createdBy->name ?? '' }}
+                  </span>
+                </a>
+              @endif
             </div>
 
             <div class="card-footer bg-card border-top pt-6 d-flex justify-content-between align-items-center">
