@@ -702,73 +702,81 @@
       <div class="row g-4">
         <div class="col-lg-4">
           <a class="d-flex align-items-center gap-2 mb-3" href="#hero">
-            <span class="brand-mark"><img src="/images/growthlab.jpeg" alt="Growth Labs logo"></span>
-            <span class="fw-bold text-white fs-5">Growth Labs</span>
+            <!-- use this to change the logo: $page->logo_url -->
+            <span class="brand-mark"><img src="{{ $page->logo_url ?? '/images/growthlab.jpeg' }}" alt="Growth Labs logo"></span>
+            <!-- use this to change the title: $page->title -->
+            <span class="fw-bold text-white fs-5">{{ $page->title ?? 'Growth Labs' }}</span>
           </a>
+          <!-- use this to change the tagline: $page->description -->
           <p class="text-secondary small" style="max-width:280px;">A curated path from founder to funded — accelerators,
             incubators, and hackathons, matched to your stage.</p>
           <div class="d-flex gap-2 mt-3">
-            <a href="{{ $page->x ?: 'https://x.com/your-profile' }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $page->x ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
               <i class="ti ti-brand-x"></i>
             </a>
 
-            <a href="{{ $page->linkedin ?: 'https://www.linkedin.com/company/your-company' }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $page->linkedin ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
               <i class="ti ti-brand-linkedin"></i>
             </a>
 
-            <a href="{{ $page->instagram ?: 'https://www.instagram.com/your-profile' }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $page->instagram ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
               <i class="ti ti-brand-instagram"></i>
             </a>
 
-            <a href="{{ $page->youtube ?: 'https://www.youtube.com/@your-channel' }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $page->youtube ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
               <i class="ti ti-brand-youtube"></i>
             </a>
 
-            <a href="{{ $page->tiktok ?: 'https://www.tiktok.com/@your-profile' }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $page->tiktok ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
               <i class="ti ti-brand-tiktok"></i>
             </a>
 
-            <a href="{{ $page->facebook ?: 'https://www.facebook.com/your-page' }}" target="_blank" rel="noopener noreferrer"
+            <a href="{{ $page->facebook ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
               <i class="ti ti-brand-facebook"></i>
             </a>
           </div>
         </div>
+        <!-- use this to change 
+          $page->about_is_enabled
+          $page->programs_is_enabled
+          $page->how_is_enabled
+        -->
         <div class="col-6 col-lg-2 offset-lg-2">
-          <h6 class="mb-3">Navigate</h6>
+          <h6 class="mb-3">{{ __('landing.footer_navigate') }}</h6>
           <div class="d-flex flex-column gap-2">
-            <a href="#about" class="flink">About</a>
-            <a href="#programs" class="flink">Programs</a>
-            <a href="#how-it-works" class="flink">Process</a>
+            <a href="#about" class="flink">{{ __('landing.about') }}</a>
+            <a href="#programs" class="flink">{{ __('landing.programs') }}</a>
+            <a href="#how-it-works" class="flink">{{ __('landing.footer_process') }}</a>
           </div>
         </div>
         <div class="col-6 col-lg-2">
-          <h6 class="mb-3">Programs</h6>
+          <h6 class="mb-3">{{ __('landing.programs') }}</h6>
           <div class="d-flex flex-column gap-2">
-            <a href="#" class="flink">Accelerators</a>
-            <a href="#" class="flink">Incubators</a>
-            <a href="#" class="flink">Hackathons</a>
+            <a href="#" class="flink">{{ __('landing.footer_accelerators') }}</a>
+            <a href="#" class="flink">{{ __('landing.footer_incubators') }}</a>
+            <a href="#" class="flink">{{ __('landing.footer_hackathons') }}</a>
           </div>
         </div>
         <div class="col-6 col-lg-2">
-          <h6 class="mb-3">Company</h6>
+          <h6 class="mb-3">{{ __('landing.footer_company') }}</h6>
           <div class="d-flex flex-column gap-2">
-            <a href="#" class="flink">Contact</a>
-            <a href="#" class="flink">Partners</a>
-            <a href="#" class="flink">Privacy</a>
+            <a href="#" class="flink">{{ __('landing.footer_contact') }}</a>
+            <a href="#" class="flink">{{ __('landing.footer_partners') }}</a>
+            <a href="#" class="flink">{{ __('landing.footer_privacy') }}</a>
           </div>
         </div>
       </div>
       <hr class="border-secondary mt-5">
       <div class="d-flex flex-wrap justify-content-between gap-2">
-        <p class="text-secondary small mb-0">© 2025 Growth Labs. All rights reserved.</p>
+        <p class="text-secondary small mb-0">© 2025 Growth Labs. {{ __('landing.footer_rights_reserved') }}</p>
         <p class="text-secondary small mb-0" style="letter-spacing: 0.01em">
-          Built for founders, by founders.
+          {{ __('landing.footer_built_for_founders') }}
         </p>
       </div>
     </div>
