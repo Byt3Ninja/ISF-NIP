@@ -108,7 +108,9 @@
                 <div>
 
                   <h5 class="card-title mb-1 line-clamp-1">
-                    {{ $page->title }}
+                    <a href="{{ route('landing-pages.edit', $page->id) }}" class="text-dark">
+                      {{ $page->title }}
+                    </a>
                   </h5>
 
                   <div class="badge rounded-pill bg-label-{{ $page->status ? 'info' : 'danger' }} mb-3 pb-1">
