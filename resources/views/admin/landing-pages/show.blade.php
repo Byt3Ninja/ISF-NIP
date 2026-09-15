@@ -702,12 +702,9 @@
       <div class="row g-4">
         <div class="col-lg-4">
           <a class="d-flex align-items-center gap-2 mb-3" href="#hero">
-            <!-- use this to change the logo: $page->logo_url -->
             <span class="brand-mark"><img src="{{ $page->logo_url ?? '/images/growthlab.jpeg' }}" alt="Growth Labs logo"></span>
-            <!-- use this to change the title: $page->title -->
             <span class="fw-bold text-white fs-5">{{ $page->title ?? 'Growth Labs' }}</span>
           </a>
-          <!-- use this to change the tagline: $page->description -->
           <p class="text-secondary small" style="max-width:280px;">A curated path from founder to funded — accelerators,
             incubators, and hackathons, matched to your stage.</p>
           <div class="d-flex gap-2 mt-3">
@@ -715,38 +712,28 @@
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
               <i class="ti ti-brand-x"></i>
             </a>
-
             <a href="{{ $page->linkedin ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
               <i class="ti ti-brand-linkedin"></i>
             </a>
-
             <a href="{{ $page->instagram ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
               <i class="ti ti-brand-instagram"></i>
             </a>
-
             <a href="{{ $page->youtube ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
               <i class="ti ti-brand-youtube"></i>
             </a>
-
             <a href="{{ $page->tiktok ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
               <i class="ti ti-brand-tiktok"></i>
             </a>
-
             <a href="{{ $page->facebook ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
               <i class="ti ti-brand-facebook"></i>
             </a>
           </div>
         </div>
-        <!-- use this to change 
-          $page->about_is_enabled
-          $page->programs_is_enabled
-          $page->how_is_enabled
-        -->
         <div class="col-6 col-lg-2 offset-lg-2">
           <h6 class="mb-3">{{ __('landing.footer_navigate') }}</h6>
           <div class="d-flex flex-column gap-2">
