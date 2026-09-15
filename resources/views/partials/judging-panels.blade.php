@@ -7,6 +7,10 @@
   .companies-picker-popover .popover-body {
     padding: 0;
   }
+  
+  .swal2-container {
+    z-index: 9999 !important;
+  }
 
   /* The picker trigger is a <button>, so Bootstrap's .is-invalid (which only
      styles form controls) leaves it unmarked. Border it explicitly so the
@@ -188,23 +192,23 @@
       <input type="hidden" name="screening_type" value="{{ $screening_type }}">
 
       @php
-        $l = app()->getLocale();
-        // Off-step references: startups already saved into a panel that have since
-        // moved to another step. Rendered as disabled (read-only) options so they
-        // remain visible in their panel but cannot be added/removed until they
-        // return to this step. Keyed by id for quick lookup.
-        $offStepCompanies = ($offStepCompanies ?? collect());
-        $offStepById = collect($offStepCompanies)->keyBy('id');
-        $offStepIds = $offStepById->keys()->map(fn($i) => (int) $i)->all();
+$l = app()->getLocale();
+// Off-step references: startups already saved into a panel that have since
+// moved to another step. Rendered as disabled (read-only) options so they
+// remain visible in their panel but cannot be added/removed until they
+// return to this step. Keyed by id for quick lookup.
+$offStepCompanies = ($offStepCompanies ?? collect());
+$offStepById = collect($offStepCompanies)->keyBy('id');
+$offStepIds = $offStepById->keys()->map(fn($i) => (int) $i)->all();
       @endphp
 
       <div class="accordion mb-4" id="panels-container">
         @foreach($judgingPanels as $index => $panel)
           @php
-            // A finished panel is History: read-only and preserved as a record of
-            // what took place. Collapsed by default so live panels stay in view.
-            $isHistory = !empty($panel['is_history']);
-            $expanded = $index === 0 && !$isHistory;
+  // A finished panel is History: read-only and preserved as a record of
+  // what took place. Collapsed by default so live panels stay in view.
+  $isHistory = !empty($panel['is_history']);
+  $expanded = $index === 0 && !$isHistory;
           @endphp
           <div class="accordion-item border {{ $isHistory ? 'panel-history' : '' }}" data-index="{{ $index }}"
             @if($isHistory) data-history="1" @endif>
@@ -276,13 +280,13 @@
                         class="select-all-toggle small fw-medium {{ $isHistory ? 'd-none' : '' }}">{{ __('admin.select_all') }}</a>
                     </div>
                     @php
-                      // Off-step companies saved in THIS panel (read-only references).
-                      $panelOffStepIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
-                        ->filter(fn($i) => in_array($i, $offStepIds, true))->unique()->values();
-                      // Companies available at this step that are selected in this panel.
-                      $availableCompanyIds = collect($companies)->pluck('id')->map(fn($x) => (int) $x)->all();
-                      $panelSelectedIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
-                        ->filter(fn($i) => in_array($i, $availableCompanyIds, true))->values()->all();
+  // Off-step companies saved in THIS panel (read-only references).
+  $panelOffStepIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
+    ->filter(fn($i) => in_array($i, $offStepIds, true))->unique()->values();
+  // Companies available at this step that are selected in this panel.
+  $availableCompanyIds = collect($companies)->pluck('id')->map(fn($x) => (int) $x)->all();
+  $panelSelectedIds = collect($panel['companies'] ?? [])->map(fn($i) => (int) $i)
+    ->filter(fn($i) => in_array($i, $availableCompanyIds, true))->values()->all();
                     @endphp
                     <button type="button"
                       class="btn btn-outline-primary d-flex align-items-center justify-content-between w-100 companies-picker-trigger"
@@ -310,14 +314,18 @@
 
                 <hr class="my-4">
 
-                <!-- Session -->
+                @php
+  $sessionEnabled = !empty($panel['session']) && ($panel['session']['checked'] ?? false) == true;
+                @endphp
+
                 <div class="form-check form-switch mb-3">
-                  <input class="form-check-input session-toggle" type="checkbox" id="session-toggle-{{ $index + 1 }}" {{ (!empty($panel['session']) && $panel['session']['checked'] == true) ? 'checked' : '' }}>
+                  <input class="form-check-input session-toggle" type="checkbox" id="session-toggle-{{ $index + 1 }}"
+                    {{ $sessionEnabled ? 'checked' : '' }}>
                   <label class="form-check-label fw-semibold">{{ __('admin.screening.schedule_session') }}</label>
                 </div>
 
                 <div class="session-inputs border rounded p-4"
-                  style="display: {{ !empty($panel['session']) ? 'block' : 'none' }}">
+                  style="display: {{ $sessionEnabled ? 'block' : 'none' }}">
 
                   <label class="switch switch-square mb-3">
                     <input type="checkbox" class="switch-input interval-toggle" id="interval-toggle-{{ $index + 1 }}" {{ !empty($panel['session']['interval_checked']) ? 'checked' : '' }}>
@@ -634,6 +642,7 @@
         const hasSelection = ($trig.data('selected') || new Set()).size > 0;
         const total = allCompanies.length;
         const search = String($trig.data('search') || '');
+        const rangeValues = $trig.data('range-values') || {};
         return `
         <div class="companies-popover" data-panel-index="${$trig.data('panel-index')}">
           <div class="p-3 border-bottom">
@@ -795,6 +804,18 @@
       // shown) rather than private instance internals, so this reliably finds only
       // popovers that are actually open right now.
       $(document).on('click.companiesPickerOutside', (e) => {
+        // A Swal dialog (duplicate-assignment confirm, range confirm) renders in its
+        // own container appended to <body>, outside both the trigger and the popover's
+        // tip element. Without this guard, clicking Confirm/Cancel registers as an
+        // "outside" click and closes the popover out from under the dialog.
+        if ($(e.target).closest('.swal2-container').length) return;
+
+        // "Select all" / "Deselect all" sits next to the label, above the picker
+        // button — outside the trigger and outside the popover's tip element, same
+        // as the Swal buttons above. Without this guard, clicking it closes the
+        // popover before toggleAllCompanies() finishes updating it.
+        if ($(e.target).closest('.select-all-toggle').length) return;
+
         $('.companies-picker-trigger').each(function () {
           const tipId = this.getAttribute('aria-describedby');
           if (!tipId) return; // this trigger's popover isn't open
@@ -805,7 +826,7 @@
           if (instance) instance.hide();
         });
       });
-
+      
       // True for controls inside a finished (History) panel.
       const inHistoryPanel = (el) => $(el).closest('.accordion-item').attr('data-history') === '1';
 
@@ -910,39 +931,90 @@
         $select.val(curr.length === allOpts.length ? null : allOpts).trigger('change');
       });
 
+      // Duplicate-selection confirms are debounced per panel: checking several
+      // duplicate startups within a short window queues ONE Swal for all of them
+      // instead of interrupting after every checkbox, so multi-selecting doesn't
+      // mean clicking through a dialog per startup.
+      const pendingDuplicateConfirms = {}; // panelIndex -> { ids: Set<string>, timer }
+
+      const flushDuplicateConfirm = async (panelIndex) => {
+        const pending = pendingDuplicateConfirms[panelIndex];
+        if (!pending) return;
+        delete pendingDuplicateConfirms[panelIndex];
+
+        const $trig = getCompaniesTrigger(panelIndex);
+        if (!$trig.length) return;
+        const selected = $trig.data('selected') || new Set();
+
+        // Only ids still checked when the timer fires need confirming — one may
+        // have been unchecked again inside the window.
+        const ids = [...pending.ids].filter(id => selected.has(id));
+        if (!ids.length) return;
+
+        const names = ids
+          .map(id => companiesMap[id] ? companyDisplayName(companiesMap[id]) : id)
+          .map(n => `<li class="text-start">${esc(n)}</li>`)
+          .join('');
+
+        const { isConfirmed } = await Swal.fire({
+          icon: 'warning',
+          html: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
+          showCancelButton: true,
+          confirmButtonText: '{{ __("admin.Confirm") }}',
+          cancelButtonText: '{{ __("admin.Cancel") }}',
+          customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
+          buttonsStyling: false
+        });
+
+        if (!isConfirmed) {
+          ids.forEach(id => selected.delete(id));
+          $trig.data('selected', selected);
+          syncCompaniesState($trig);
+          refreshCompaniesPopover($trig);
+        }
+      };
+
       // Companies popover: keep selection state in sync when a checkbox is toggled.
-      // If the startup is already assigned to another panel, ask for confirmation
-      // before allowing the duplicate assignment.
-      $(document).on('change', '.company-check', async function () {
+      // Duplicate assignments (already sitting in another panel) are confirmed via
+      // flushDuplicateConfirm() on a 3s debounce rather than inline here, so the
+      // admin can check several before the warning appears.
+      $(document).on('change', '.company-check', function () {
         const panelIndex = $(this).closest('.companies-popover').data('panel-index');
         const $trig = getCompaniesTrigger(panelIndex);
         if (!$trig.length) return;
         // A history panel's picker is view-only; never mutate its selection.
         if ($trig.attr('data-readonly') === '1') return;
         const selected = $trig.data('selected') || new Set();
+        const id = this.value;
 
         if (this.checked) {
-          if (isSelectedInOtherPanel(panelIndex, this.value)) {
-            const { isConfirmed } = await Swal.fire({
-              icon: 'warning',
-              text: '{{ __("admin.company_assigned_other_panel") }}',
-              showCancelButton: true,
-              confirmButtonText: '{{ __("admin.Confirm") }}',
-              cancelButtonText: '{{ __("admin.Cancel") }}',
-              customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-              buttonsStyling: false
-            });
-            if (!isConfirmed) {
-              this.checked = false;
-              return;
+          // Add right away so the checkbox, summary, and count reflect the click
+          // immediately; duplicates are only ever confirmed AFTER selection, on the
+          // debounce, never blocked before it.
+          selected.add(id);
+          $trig.data('selected', selected);
+          syncCompaniesState($trig);
+
+          if (isSelectedInOtherPanel(panelIndex, id)) {
+            let pending = pendingDuplicateConfirms[panelIndex];
+            if (!pending) {
+              pending = { ids: new Set(), timer: null };
+              pendingDuplicateConfirms[panelIndex] = pending;
             }
+            pending.ids.add(id);
+            clearTimeout(pending.timer);
+            pending.timer = setTimeout(() => flushDuplicateConfirm(panelIndex), 1000);
           }
-          selected.add(this.value);
         } else {
-          selected.delete(this.value);
+          selected.delete(id);
+          $trig.data('selected', selected);
+          syncCompaniesState($trig);
+          // No longer selected, so it no longer needs confirming — drop it from
+          // any pending batch so an unchecked startup can't still show up in the
+          // dialog a moment later.
+          const pending = pendingDuplicateConfirms[panelIndex];
+          if (pending) pending.ids.delete(id);
         }
-        $trig.data('selected', selected);
-        syncCompaniesState($trig);
       });
 
       // Auto Select Range: numbers only, reject anything else while typing.
