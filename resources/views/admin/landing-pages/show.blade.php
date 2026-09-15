@@ -702,56 +702,74 @@
       <div class="row g-4">
         <div class="col-lg-4">
           <a class="d-flex align-items-center gap-2 mb-3" href="#hero">
-            <span class="brand-mark">
-              @if($page->logo_url)
-                <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
-              @endif
-            </span>
-            <span class="fw-bold text-white fs-5">{{ $page->title }}</span>
+            <span class="brand-mark"><img src="/images/growthlab.jpeg" alt="Growth Labs logo"></span>
+            <span class="fw-bold text-white fs-5">Growth Labs</span>
           </a>
-          @php $footerDescription = $l == 'ar' ? $page->description_ar : $page->description; @endphp
-          @if($footerDescription)
-            <p class="text-secondary small" style="max-width:280px;">{{ $footerDescription }}</p>
-          @endif
-          @php
-            $socialLinks = array_filter([
-              'x' => $page->x,
-              'linkedin' => $page->linkedin,
-              'instagram' => $page->instagram,
-              'youtube' => $page->youtube,
-              'tiktok' => $page->tiktok,
-              'facebook' => $page->facebook,
-            ]);
-          @endphp
-          @if(count($socialLinks) > 0)
-            <div class="d-flex gap-2 mt-3">
-              @foreach($socialLinks as $icon => $link)
-                <a href="{{ $link }}" target="_blank" rel="noopener noreferrer"
-                  class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="{{ ucfirst($icon) }}">
-                  <i class="ti ti-brand-{{ $icon }}"></i>
-                </a>
-              @endforeach
-            </div>
-          @endif
+          <p class="text-secondary small" style="max-width:280px;">A curated path from founder to funded — accelerators,
+            incubators, and hackathons, matched to your stage.</p>
+          <div class="d-flex gap-2 mt-3">
+            <a href="https://x.com/your-profile" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
+              <i class="ti ti-brand-x"></i>
+            </a>
+
+            <a href="https://www.linkedin.com/company/your-company" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
+              <i class="ti ti-brand-linkedin"></i>
+            </a>
+
+            <a href="https://www.instagram.com/your-profile" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
+              <i class="ti ti-brand-instagram"></i>
+            </a>
+
+            <a href="https://www.youtube.com/@your-channel" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
+              <i class="ti ti-brand-youtube"></i>
+            </a>
+
+            <a href="https://www.tiktok.com/@your-profile" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
+              <i class="ti ti-brand-tiktok"></i>
+            </a>
+
+            <a href="https://www.facebook.com/your-page" target="_blank" rel="noopener noreferrer"
+              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
+              <i class="ti ti-brand-facebook"></i>
+            </a>
+          </div>
         </div>
         <div class="col-6 col-lg-2 offset-lg-2">
-          <h6 class="mb-3">{{ $l == 'ar' ? 'تصفح' : 'Navigate' }}</h6>
+          <h6 class="mb-3">Navigate</h6>
           <div class="d-flex flex-column gap-2">
-            @if($page->about_is_enabled)
-              <a href="#about" class="flink">{{ $l == 'ar' ? 'من نحن' : 'About' }}</a>
-            @endif
-            @if($page->programs_is_enabled)
-              <a href="#programs" class="flink">{{ $l == 'ar' ? 'البرامج' : 'Programs' }}</a>
-            @endif
-            @if($page->how_is_enabled)
-              <a href="#how-it-works" class="flink">{{ $l == 'ar' ? 'كيف يعمل' : 'Process' }}</a>
-            @endif
+            <a href="#about" class="flink">About</a>
+            <a href="#programs" class="flink">Programs</a>
+            <a href="#how-it-works" class="flink">Process</a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="mb-3">Programs</h6>
+          <div class="d-flex flex-column gap-2">
+            <a href="#" class="flink">Accelerators</a>
+            <a href="#" class="flink">Incubators</a>
+            <a href="#" class="flink">Hackathons</a>
+          </div>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="mb-3">Company</h6>
+          <div class="d-flex flex-column gap-2">
+            <a href="#" class="flink">Contact</a>
+            <a href="#" class="flink">Partners</a>
+            <a href="#" class="flink">Privacy</a>
           </div>
         </div>
       </div>
       <hr class="border-secondary mt-5">
       <div class="d-flex flex-wrap justify-content-between gap-2">
-        <p class="text-secondary small mb-0">© {{ date('Y') }} {{ $page->title }}. All rights reserved.</p>
+        <p class="text-secondary small mb-0">© 2025 Growth Labs. All rights reserved.</p>
+        <p class="text-secondary small mb-0" style="letter-spacing: 0.01em">
+          Built for founders, by founders.
+        </p>
       </div>
     </div>
   </footer>
