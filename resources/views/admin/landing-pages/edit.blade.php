@@ -1056,10 +1056,11 @@
               lpUrlSlugChecked = true;
               lpUrlSlugAvailable = true;
               lpUrlRenderSavedLink();
-              releaseSuccessAlert({
+              {{--  releaseSuccessAlert({
                 title: "{{ __('admin.success') }}",
                 message: res.message || lpUrlI18n.saved,
-              });
+              });  --}}
+              toastr.success(res.message || lpUrlI18n.saved, "{{ __('admin.success') }}");
               $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
               setTimeout(function () {
                 $btn.removeClass('btn-success').addClass('btn-primary').html(originalHtml);
