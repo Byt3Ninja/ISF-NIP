@@ -492,7 +492,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('/landing-pages/{id}/custom-sections/{sectionId}', 'LandingPagesController@destroyCustomSection')->name('landing-pages.custom-sections.destroy');
     Route::post('/landing-pages/{id}/custom-sections/upload-image', 'LandingPagesController@uploadCustomSectionImage')->name('landing-pages.custom-sections.upload-image');
 
-    Route::post('dashboard/landing-pages/{id}/programs/reorder', [LandingPageController::class, 'reorderPrograms'])
+    Route::post('dashboard/landing-pages/{id}/programs/reorder', 'LandingPagesController@reorderPrograms')
       ->name('landing-pages.programs.reorder');
       
     //Assessment

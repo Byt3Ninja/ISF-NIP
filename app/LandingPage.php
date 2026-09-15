@@ -69,6 +69,7 @@ class LandingPage extends Model
         'programs_title_tag_ar',
         'programs_description',
         'programs_description_ar',
+        'programs_order',
     ];
 
     protected $casts = [
@@ -78,6 +79,7 @@ class LandingPage extends Model
         'how_is_enabled' => 'boolean',
         'how_steps' => 'array',
         'programs_is_enabled' => 'boolean',
+        'programs_order' => 'array',
     ];
 
     public function createdBy()

@@ -704,13 +704,29 @@ class LandingPagesController extends Controller
     // No creator on record (e.g. the account was removed) or an Admin
     // creator: leave every attachment in place rather than blanking a
     // published page.
-    if (!$creator || $creator->hasRole('admin')) {
-      return $page->cycles;
+    $cycles = (!$creator || $creator->hasRole('admin'))
+      ? $page->cycles
+      : $page->cycles->whereIn('organization_id', $creator->organizations_ids)->values();
+
+    return $this->applyProgramsOrder($cycles, $page->programs_order ?? []);
+  }
+
+  /**
+   * Reorder a collection of programs/cycles according to a saved list of
+   * IDs (see LandingPagesController::reorderPrograms()), placing anything
+   * not present in that list — new or never-reordered programs — after
+   * the ones it does cover, in their original order.
+   */
+  protected function applyProgramsOrder($cycles, array $order)
+  {
+    if (empty($order)) {
+      return $cycles->values();
     }
 
-    $orgIds = $creator->organizations_ids;
+    $cyclesById = $cycles->keyBy('id');
+    $ordered = collect($order)->map(fn ($id) => $cyclesById->get($id))->filter();
 
-    return $page->cycles->whereIn('organization_id', $orgIds)->values();
+    return $ordered->merge($cycles->whereNotIn('id', $order))->values();
   }
 
   /**
@@ -814,6 +830,7 @@ class LandingPagesController extends Controller
   {
     $cycles = $this->scopedCycles();
     $currentPage = $this->scopedLandingPagesQuery()->with('cycles', 'customSections')->findOrFail($id);
+    $cycles = $this->applyProgramsOrder($cycles, $currentPage->programs_order ?? []);
 
     $programOrganizations = $this->programOrganizations($cycles);
     $programTypes = Cycle::programTypes();
@@ -1076,6 +1093,38 @@ class LandingPagesController extends Controller
 			'success' => true,
 			'message' => __('landing.success.programs_saved'),
 		]);
+	}
+
+	/**
+	 * Persist the drag-and-drop order of the Programs list for a custom
+	 * landing page (see edit.blade.php's Sortable wiring).
+	 */
+	public function reorderPrograms(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+            return abort(401);
+        }
+
+		$request->validate([
+			'order' => 'required|array',
+			'order.*' => 'integer',
+		]);
+
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+		// The order applies to the whole admin-table list (selected and
+		// not-yet-selected programs alike), so it can't live on the
+		// landing_page_cycles pivot — that only tracks selected/featured
+		// programs, and a page with nothing selected yet would have no
+		// pivot rows to update. Persist it on the page itself instead,
+		// scoped to programs the current user is actually allowed to see.
+		$allowedIds = $this->scopedCycles()->pluck('id')->toArray();
+		$orderedIds = array_values(array_intersect($request->input('order'), $allowedIds));
+
+		$page->programs_order = $orderedIds;
+		$page->save();
+
+		return response()->json(['success' => true]);
 	}
 
 	/**

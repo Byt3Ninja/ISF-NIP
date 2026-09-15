@@ -40,6 +40,7 @@ class Permissions
         'landing-pages.url.save',
         'landing-pages.programs.reorder'.
         'invite_mentor.attachment',
+        'landing-pages.programs.reorder',
         'organization.wizard.store',
         'organization.wizard.update.step1',
         'organization.wizard.update.step2',
