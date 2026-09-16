@@ -1445,7 +1445,40 @@
         // Re-apply when a switch is toggled so the Visible/Hidden filter
         // (driven by the switch's checked state) stays accurate live.
         $('#programsListBody').on('change', '.program-visibility-switch', function () {
-          if (!noFilterValue($visibility.val())) applyProgramsFilter();
+          const $switch = $(this);
+          const $row = $switch.closest('.programs-list-row');
+          const programId = $row.data('program-id');
+
+          if (!$switch.is(':checked')) {
+            if (!noFilterValue($visibility.val())) applyProgramsFilter();
+            return;
+          }
+
+          // Ask the server for the program's CURRENT availability state, so
+          // a program fixed in another tab doesn't keep triggering the
+          // warning from stale row data.
+          const visibilityCheckUrl = "{{ url('dashboard/programlist') }}/" + programId + '/visibility-check';
+          $.getJSON(visibilityCheckUrl, function (data) {
+            if (data.is_public) {
+              if (!noFilterValue($visibility.val())) applyProgramsFilter();
+              return;
+            }
+
+            if (!$switch.is(':checked')) return; // user changed their mind while checking
+
+            $switch.prop('checked', false);
+            const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '#program-settings-visibility';
+            releaseWarningAlert({
+              title: "{{ __('admin.Warning') }}",
+              message: "{{ __('landing.Program_not_public_hint') }}",
+              confirmText: "{{ __('landing.Go_to_program_visibility') }}",
+              cancelText: "{{ __('landing.Cancel') }}",
+              confirmColor: 'primary',
+              onConfirm: function () {
+                window.open(programSettingsUrl, '_blank');
+              },
+            });
+          });
         });
 
         applyProgramsFilter();

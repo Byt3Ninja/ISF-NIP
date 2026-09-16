@@ -539,6 +539,15 @@ class ProgramController extends Controller
         //
     }
 
+    public function checkProgramPublic(Request $request, string $id)
+    {
+        $program = Cycle::find($id);
+
+        return response()->json([
+            'is_public' => (bool) ($program && !empty($program->is_public) && !empty($program->public_slug)),
+        ]);
+    }
+
     public function SentEmail(Request $request)
     {
 

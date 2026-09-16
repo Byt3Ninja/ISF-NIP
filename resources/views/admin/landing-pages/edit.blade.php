@@ -534,7 +534,7 @@
                               <div class="d-flex align-items-center gap-3">
                                 <i class="ti ti-grip-vertical program-drag-handle text-muted" title="{{ __('landing.Drag_to_reorder') }}"></i>
                                 <div class="avatar avatar-sm">
-                                  <img src="{{ $program->logo }}" alt="{{ $program->name }}" class="rounded-circle">
+                                  <img src="{{ $program->logo }}" alt="logo" class="rounded-circle border">
                                 </div>
                                 <div class="flex-grow-1" style="min-width: 0;">
                                   <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -544,7 +544,7 @@
                                       rel="noopener"
                                       class="fw-medium d-inline-flex align-items-center gap-1"
                                     >
-                                      {{ $program->name }}
+                                      {{ Str::limit($program->name, 50) }}
                                       <i class="ti ti-external-link text-muted"></i>
                                     </a>
                                     @if($program->is_expired)
@@ -576,21 +576,27 @@
                               </div>
                             </td>
                             <td>
-                              <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
-                                {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
-                              </span>
-                              @if(($program->steps_count ?? 0) == 0)
-                                <a href="{{ url('dashboard/programlist/show/' . $program->id) }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
-                                  <span
-                                    class="badge bg-label-secondary"
+                              <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
+                                  <i class="ti ti-{{ $program->type == 'Hackathon' ? 'trophy' : 'layout-grid' }} me-1"></i>
+                                  {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
+                                </span>
+
+                                @if(($program->steps_count ?? 0) == 0)
+                                  <a
+                                    href="{{ url('dashboard/programlist/show/' . $program->id) }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="badge bg-label-secondary text-decoration-none"
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
                                     title="{{ __('landing.No_steps_hint') }}"
                                   >
+                                    <i class="ti ti-alert-circle me-1"></i>
                                     {{ __('landing.No_steps') }}
-                                  </span>
-                                </a>
-                              @endif
+                                  </a>
+                                @endif
+                              </div>
                             </td>
                             <td>
                               @if($program->organization)
@@ -1858,7 +1864,40 @@
       // Visible/Hidden filter (read live above) stays accurate without a
       // page reload.
       $('#programsListBody').on('change', '.program-visibility-switch', function () {
-        if (programsFilters.visibility !== 'all') renderProgramsPagination();
+        const $switch = $(this);
+        const $row = $switch.closest('.programs-list-row');
+        const programId = $row.data('program-id');
+
+        if (!$switch.is(':checked')) {
+          if (programsFilters.visibility !== 'all') renderProgramsPagination();
+          return;
+        }
+
+        // Ask the server for the program's CURRENT availability state, so a
+        // program fixed in another tab doesn't keep triggering the warning
+        // from stale row data.
+        const visibilityCheckUrl = "{{ url('dashboard/programlist') }}/" + programId + '/visibility-check';
+        $.getJSON(visibilityCheckUrl, function (data) {
+          if (data.is_public) {
+            if (programsFilters.visibility !== 'all') renderProgramsPagination();
+            return;
+          }
+
+          if (!$switch.is(':checked')) return; // user changed their mind while checking
+
+          $switch.prop('checked', false);
+          const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '#program-settings-visibility';
+          releaseWarningAlert({
+            title: "{{ __('admin.Warning') }}",
+            message: "{{ __('landing.Program_not_public_hint') }}",
+            confirmText: "{{ __('landing.Go_to_program_visibility') }}",
+            cancelText: "{{ __('landing.Cancel') }}",
+            confirmColor: 'primary',
+            onConfirm: function () {
+              window.open(programSettingsUrl, '_blank');
+            },
+          });
+        });
       });
 
       $('#programsPaginationList').on('click', '.page-link', function (e) {

@@ -38,7 +38,8 @@ class Permissions
         'landing-pages.custom-sections.upload-image',
         'landing-pages.url.check',
         'landing-pages.url.save',
-        'landing-pages.programs.reorder'.
+        'landing-pages.programs.reorder',
+        'programs.check_public',
         'invite_mentor.attachment',
         'landing-pages.programs.reorder',
         'organization.wizard.store',
