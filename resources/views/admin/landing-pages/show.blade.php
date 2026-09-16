@@ -392,9 +392,11 @@
                 </li>
               </ul>
             </li>
-            <li class="nav-item mt-2 mt-lg-0">
-              <a href="#programs" class="btn btn-primary rounded-pill">{{ __('landing.apply_now') }} </a>
-            </li>
+            @if ($page->programs_is_enabled)
+              <li class="nav-item mt-2 mt-lg-0">
+                <a href="#programs" class="btn btn-primary rounded-pill">{{ __('landing.apply_now') }} </a>
+              </li>
+            @endif
           </ul>
         </div>
       </div>
