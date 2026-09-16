@@ -120,13 +120,21 @@ class SendMentorshipRequestJob implements ShouldQueue
                         ? __("messages.mentorship_session_notification_message", ['name' => $startupFullName_user, 'session_date' => $sessionDate, 'session_time' => $sessionTimeMentor], $mentorLocale)
                         : __("messages.mentorship_session_action", ['action' => __('messages.Rejected', [], $mentorLocale), 'name' => $startupFullName_user], $mentorLocale),
                 ];
-                $mentor->notify(
-                    new MentorNotifyMentorshipNotification(
-                        $mentorMessage,
-                        $session
-                    )
-                );
-                log::info('Sent New Mentorship Request notification to ' . $mentor->email);
+                // Atomically claim the "notify mentor of booked session" step so a
+                // retry of this job never double-emails the mentor.
+                $claimedMentorNotify = MentorshipRequest::where('id', $session->id)
+                    ->whereNull('mentor_notified_at')
+                    ->update(['mentor_notified_at' => now()]);
+
+                if ($claimedMentorNotify) {
+                    $mentor->notify(
+                        new MentorNotifyMentorshipNotification(
+                            $mentorMessage,
+                            $session
+                        )
+                    );
+                    log::info('Sent New Mentorship Request notification to ' . $mentor->email);
+                }
 
                 // notify the startup to the directly assigned session
                 $userMessage = [
