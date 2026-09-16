@@ -1897,12 +1897,26 @@
         })
         .on('click', '.remove-custom-section', function () {
           const $card = $(this).closest('.custom-section-card');
-          $card.find('.custom-quill-editor').each(function () {
-            customQuills.delete(this);
+
+          releaseWarningAlert({
+            title: "{{ __('landing.Delete_Custom_Section') }}",
+            message: "{{ __('landing.Delete_Custom_Section_Confirm') }}",
+            confirmText: "{{ __('landing.Delete') }}",
+            cancelText: "{{ __('landing.Cancel') }}",
+            confirmColor: 'danger',
+            onConfirm: function () {
+              $card.find('.custom-quill-editor').each(function () {
+                customQuills.delete(this);
+              });
+              $card.remove();
+              updateCustomSectionsEmpty();
+              updateCustomSectionLabels();
+              releaseSuccessAlert({
+                title: "{{ __('admin.success') }}",
+                message: "{{ __('landing.success.custom_deleted') }}",
+              });
+            },
           });
-          $card.remove();
-          updateCustomSectionsEmpty();
-          updateCustomSectionLabels();
         });
 
       // Each section saves independently via AJAX so switching tabs never

@@ -2335,17 +2335,20 @@
             updateCustomSectionLabels();
           };
 
-          // Unsaved card: nothing on the server to delete, drop it silently.
-          if ($card.attr('data-persisted') !== 'true') {
-            removeCard();
-            return;
-          }
+          const flashDeleted = function (message) {
+            releaseSuccessAlert({
+              title: "{{ __('admin.success') }}",
+              message: message || "{{ __('landing.success.custom_deleted') }}",
+            });
+          };
 
           const dbId = $card.find('.custom-section-db-id').val();
 
           const deleteFromServer = function () {
+            // Unsaved card: nothing on the server to delete, drop it locally.
             if (!dbId) {
               removeCard();
+              flashDeleted();
               return;
             }
             $btn.prop('disabled', true);
@@ -2355,11 +2358,9 @@
               data: { _token: "{{ csrf_token() }}", _method: 'DELETE' },
             })
               .done(function (res) {
+                $btn.prop('disabled', false);
                 removeCard();
-                releaseSuccessAlert({
-                  title: "{{ __('admin.success') }}",
-                  message: (res && res.message) ? res.message : "{{ __('landing.success.custom_deleted') }}",
-                });
+                flashDeleted(res && res.message);
               })
               .fail(function (xhr) {
                 $btn.prop('disabled', false);
@@ -2411,7 +2412,6 @@
       customSections.forEach(function (section) {
         const id = addCustomSection();
         const $card = $('#customSectionsContainer .custom-section-card[data-section-id="' + id + '"]');
-        $card.attr('data-persisted', 'true');
         $card.find('[name="custom_sections[' + id + '][id]"]').val(section.id || '');
         $card.find('[name="custom_sections[' + id + '][visibility]"]').prop('checked', !!section.visibility);
         $card.find('[name="custom_sections[' + id + '][title]"]').val(section.title || '');
