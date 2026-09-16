@@ -781,11 +781,15 @@ class MentorsController extends Controller
 		{
 			$startupName = $user?->company?->name ?: $user->name;
 			$cycle = $user?->company?->cycledata;
-			$parties = $cycle->organization->assignedUsers;
-			$platform_admins = User::role('admin')->get()->filter(function ($admin) {
-				return $admin->hasRole('admin');
-			})->values();
-			$parties = $parties->merge($platform_admins)->unique('id');
+			// Recipients: the organization manager(s) of the organization that
+			// manages the program (cycle) the founder is currently enrolled in,
+			// the sub-admin(s) that organization is assigned to, and the
+			// platform's super admin(s). One role query covers both roles.
+			$roledUsers = User::role(['organizationManager', 'admin'])->get();
+			$orgManagers = $roledUsers->filter(fn ($u) => $u->hasRole('organizationManager') && $u->organization_id == $cycle->organization_id);
+			$superAdmins = $roledUsers->filter(fn ($u) => $u->hasRole('admin'));
+			$subAdmins = $cycle->organization->assignedUsers;
+			$parties = $orgManagers->merge($subAdmins)->merge($superAdmins)->unique('id');
 
 			$this->meetingService = OnlineMeetingFactory::create();
 			$datefrom = $request->date . ' ' . $request->session_start_time;
@@ -901,22 +905,49 @@ class MentorsController extends Controller
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
 
-					// MentorshipSessionRequestNotification is ShouldQueue, so notify()
-					// only writes a queue row here -- the old sleep(2) between chunks
-					// throttled nothing and simply held the founder's request open for
-					// two seconds per pair of recipients. Keep the same send pacing by
-					// staggering delivery on the queue instead of blocking the response.
-					$allowedPerSecond = 2;
-					$secondsBetweenChunks = 2;
+					// Atomically claim the "notify org manager" step so a retry/duplicate
+					// call for this same request can never send the email twice.
+					$claimedNotify = MentorshipRequest::where('id', $createMentorshipRequest->id)
+						->whereNull('manager_notified_at')
+						->update(['manager_notified_at' => now()]);
 
-					foreach ($parties->chunk($allowedPerSecond) as $chunkIndex => $chunkParties) {
-						$sendAt = now()->addSeconds($chunkIndex * $secondsBetweenChunks);
+					if ($claimedNotify) {
+						$isOnlineRequest = strtolower($request->session_type ?? '') == 'online';
+						$requestAttachments = $fileName ? [[
+							'url'  => app(\App\Services\FileManagerService::class)->getUrl($fileName, 'UsersDiskInviteMentor'),
+							'name' => basename($fileName),
+						]] : [];
 
-						foreach ($chunkParties as $party) {
-							$party->notify(
-								(new MentorshipSessionRequestNotification($startupName, $requestedMentor, $dateTimePayload, $requestNotes))
-									->delay($sendAt)
-							);
+						// MentorshipSessionRequestNotification is ShouldQueue, so notify()
+						// only writes a queue row here -- the old sleep(2) between chunks
+						// throttled nothing and simply held the founder's request open for
+						// two seconds per pair of recipients. Keep the same send pacing by
+						// staggering delivery on the queue instead of blocking the response.
+						$allowedPerSecond = 2;
+						$secondsBetweenChunks = 2;
+
+						foreach ($parties->chunk($allowedPerSecond) as $chunkIndex => $chunkParties) {
+							$sendAt = now()->addSeconds($chunkIndex * $secondsBetweenChunks);
+
+							foreach ($chunkParties as $party) {
+								$party->notify(
+									(new MentorshipSessionRequestNotification(
+										$startupName,
+										$requestedMentor,
+										$dateTimePayload,
+										$requestNotes,
+										$user,
+										$user->company,
+										$request->session_type,
+										$isOnlineRequest ? $joinUrl : null,
+										$isOnlineRequest ? $passcode : null,
+										!$isOnlineRequest ? ($cycle->offline_location_address ?? optional($cycle->organization)->address) : null,
+										!$isOnlineRequest ? ($cycle->offline_location_map ?? optional($cycle->organization)->google_map_url) : null,
+										!$isOnlineRequest ? (optional($cycle->organization)->address) : null,
+										$requestAttachments
+									))->delay($sendAt)
+								);
+							}
 						}
 					}
 				}
@@ -1272,8 +1303,8 @@ class MentorsController extends Controller
 	{
 		$sessions = MentorshipRequest::with(['user', 'mentor', 'organization', 'cycle'])->where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
 		$sessions = $sessions->map(function ( $session ) {
-			$session->address = $session->cycle->offline_location_address ? $session->cycle->offline_location_address : $session->organization->address;
-			$session->google_map_url = $session->cycle->offline_location_map ? $session->cycle->offline_location_map : $session->organization->google_map_url;
+			$session->address = $session->cycle && $session->cycle->offline_location_address ? $session->cycle->offline_location_address : optional($session->organization)->address;
+			$session->google_map_url = $session->cycle && $session->cycle->offline_location_map ? $session->cycle->offline_location_map : optional($session->organization)->google_map_url;
 			$session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
 			return $session;
 		});
