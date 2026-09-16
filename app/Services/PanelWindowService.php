@@ -24,6 +24,23 @@ use Carbon\Carbon;
 class PanelWindowService
 {
     /**
+     * Fallback length for a scheduled panel that stored neither an interval nor
+     * an end time (GV-9568).
+     *
+     * `end_time` is rendered DISABLED whenever interval mode is on, so browsers
+     * omit it from the submission; the end is then derived from the interval. If
+     * the interval is also blank, both columns land NULL and the panel books no
+     * time at all — so it never became History and stayed editable forever, which
+     * is the "status change is delayed" in the report.
+     *
+     * A panel that has a date and a start time HAS taken place. Measuring it as
+     * one nominal hour is the same default addJudgingPanels() already applies when
+     * it books the meeting without a known end, so the lock agrees with the
+     * meeting that was actually created.
+     */
+    public const DEFAULT_PANEL_MINUTES = 60;
+
+    /**
      * Window for a submitted panel (raw request shape).
      *
      * @return array{start: Carbon, end: Carbon}|null  null when the panel books no time
@@ -98,7 +115,10 @@ class PanelWindowService
             } elseif (!empty($endTime)) {
                 $end = Carbon::parse($date . ' ' . $endTime);
             } else {
-                return null;
+                // Neither interval nor end time stored. The panel is still
+                // scheduled — it has a date and a start — so it must eventually
+                // become History rather than staying editable forever (GV-9568).
+                $end = (clone $start)->addMinutes(self::DEFAULT_PANEL_MINUTES);
             }
         } catch (\Exception $e) {
             return null;

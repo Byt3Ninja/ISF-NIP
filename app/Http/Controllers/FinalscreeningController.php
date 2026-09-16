@@ -13,6 +13,7 @@ use App\Notifications\WelcomeJudgerNotification;
 use App\Screening;
 use App\ScreeningEvaluation;
 use App\ScreeningEvaluationResults;
+use App\Services\PanelWindowService;
 use App\Step;
 use App\User;
 use Carbon\Carbon;
@@ -345,9 +346,24 @@ class FinalscreeningController extends Controller
 		$judgingPanels = [];
 		if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
 			foreach ($judgers_list as $panelId => $panelData) {
+				// Same History rule as the initial screening (GV-8300): once a
+				// panel's meeting has ended it is read-only. The flag was only
+				// ever computed on the initial-screening path, so a finished
+				// FINAL panel stayed editable and never showed the badge — the
+				// "status change is delayed" in GV-9568. Derived from the saved
+				// row, not request input, so it cannot be spoofed.
+				$screening = Screening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
 				$panelEntry = [
 					'judges' => (array) ($panelData['judgers'] ?? []),
 					'companies' => (array) ($panelData['companies'] ?? []),
+					'is_history' => PanelWindowService::isPast(
+						PanelWindowService::fromScreening($screening),
+						auth()->user()
+					),
+					// The panel number this record is STORED under. Deleting an
+					// earlier panel renumbers the accordion, so the loop index is
+					// not identity — carry the real number through.
+					'panel_number' => (int) $panelId,
 					'session' => [
 						'checked' => $panelData['session']['checked'] ?? false,
 						'date' => $panelData['session']['date'] ?? null,
