@@ -801,11 +801,8 @@
         </div>
       </div>
       <hr class="border-secondary mt-5">
-      <div class="d-flex flex-wrap justify-content-between gap-2">
+      <div class="text-center">
         <p class="text-secondary small mb-0">© 2026 {{ __('landing.footer_rights_reserved') }}</p>
-        {{-- <p class="text-secondary small mb-0" style="letter-spacing: 0.01em">
-          {{ __('landing.footer_built_for_founders') }}
-        </p> --}}
       </div>
     </div>
   </footer>
