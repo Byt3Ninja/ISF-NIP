@@ -218,6 +218,8 @@ return [
     'programs' => 'Programs',
     'footer_tagline' => 'A curated path from founder to funded — accelerators, incubators, and hackathons, matched to your stage.',
     'footer_navigate' => 'Navigate',
+    'footer_quick_links' => 'Quick Links',
+    'footer_program_links' => 'Program Links',
     'footer_process' => 'Process',
     'footer_company' => 'Company',
     'footer_accelerators' => 'Accelerators',

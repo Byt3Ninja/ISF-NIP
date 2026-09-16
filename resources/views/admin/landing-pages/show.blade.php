@@ -707,66 +707,105 @@
             <span class="brand-mark"><img src="{{ $page->logo_url ?? '/images/growthlab.jpeg' }}" alt="Growth Labs logo"></span>
             <span class="fw-bold text-white fs-5">{{ $page->title ?? 'Growth Labs' }}</span>
           </a>
-          <p class="text-secondary small" style="max-width:280px;">A curated path from founder to funded — accelerators,
-            incubators, and hackathons, matched to your stage.</p>
+          <p class="text-secondary small" style="max-width:280px;">
+            {{ $page->description }}
+          </p>
           <div class="d-flex gap-2 mt-3">
-            <a href="{{ $page->x ?: '#' }}" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
-              <i class="ti ti-brand-x"></i>
-            </a>
-            <a href="{{ $page->linkedin ?: '#' }}" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
-              <i class="ti ti-brand-linkedin"></i>
-            </a>
+            @if ($page->x)
+              <a href="{{ $page->x ?: '#' }}" target="_blank" rel="noopener noreferrer"
+                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
+                <i class="ti ti-brand-x"></i>
+              </a>
+            @endif
+            @if ($page->linkedin)
+              <a href="{{ $page->linkedin ?: '#' }}" target="_blank" rel="noopener noreferrer"
+                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
+                <i class="ti ti-brand-linkedin"></i>
+              </a>
+            @endif
+            @if ($page->instagram)
             <a href="{{ $page->instagram ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
               <i class="ti ti-brand-instagram"></i>
             </a>
+            @endif
+            @if ($page->youtube)
             <a href="{{ $page->youtube ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
               <i class="ti ti-brand-youtube"></i>
             </a>
+            @endif
+            @if ($page->tiktok)
             <a href="{{ $page->tiktok ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
               <i class="ti ti-brand-tiktok"></i>
             </a>
+            @endif
+            @if ($page->facebook)
             <a href="{{ $page->facebook ?: '#' }}" target="_blank" rel="noopener noreferrer"
               class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
               <i class="ti ti-brand-facebook"></i>
             </a>
+            @endif
           </div>
         </div>
-        <div class="col-6 col-lg-2 offset-lg-2">
-          <h6 class="mb-3">{{ __('landing.footer_navigate') }}</h6>
+        <div class="col-6 col-lg-3 offset-lg-2">
+          <h6 class="mb-3">{{ __('landing.footer_quick_links') }}</h6>
           <div class="d-flex flex-column gap-2">
-            <a href="#about" class="flink">{{ __('landing.about') }}</a>
-            <a href="#programs" class="flink">{{ __('landing.programs') }}</a>
-            <a href="#how-it-works" class="flink">{{ __('landing.footer_process') }}</a>
+            @php
+              $footerQuickLinks = collect();
+              if ($page->about_is_enabled) {
+                $footerQuickLinks->push(['label' => __('landing.about'), 'url' => '#about']);
+              }
+              if ($page->programs_is_enabled) {
+                $footerQuickLinks->push(['label' => __('landing.programs'), 'url' => '#programs']);
+              }
+              if ($page->how_is_enabled) {
+                $footerQuickLinks->push(['label' => __('landing.how_it_works'), 'url' => '#how-it-works']);
+              }
+              foreach ($customSections as $footerSection) {
+                $footerSectionLabel = $l == 'ar'
+                  ? ($footerSection->title_ar ?: $footerSection->title)
+                  : ($footerSection->title ?: $footerSection->title_ar);
+                $footerSectionLabel = trim(strip_tags((string) $footerSectionLabel));
+                if ($footerSectionLabel === '') {
+                  $footerSectionLabel = __('landing.custom_section');
+                }
+                $footerQuickLinks->push(['label' => $footerSectionLabel, 'url' => '#custom-' . $footerSection->id]);
+              }
+              $footerQuickLinks = $footerQuickLinks->take(5);
+            @endphp
+            @foreach($footerQuickLinks as $footerLink)
+              <a href="{{ $footerLink['url'] }}" class="flink">{{ $footerLink['label'] }}</a>
+            @endforeach
           </div>
         </div>
-        <div class="col-6 col-lg-2">
-          <h6 class="mb-3">{{ __('landing.programs') }}</h6>
+        <div class="col-6 col-lg-3">
+          <h6 class="mb-3">{{ __('landing.footer_program_links') }}</h6>
           <div class="d-flex flex-column gap-2">
-            <a href="#" class="flink">{{ __('landing.footer_accelerators') }}</a>
-            <a href="#" class="flink">{{ __('landing.footer_incubators') }}</a>
-            <a href="#" class="flink">{{ __('landing.footer_hackathons') }}</a>
-          </div>
-        </div>
-        <div class="col-6 col-lg-2">
-          <h6 class="mb-3">{{ __('landing.footer_company') }}</h6>
-          <div class="d-flex flex-column gap-2">
-            <a href="#" class="flink">{{ __('landing.footer_contact') }}</a>
-            <a href="#" class="flink">{{ __('landing.footer_partners') }}</a>
-            <a href="#" class="flink">{{ __('landing.footer_privacy') }}</a>
+            @php $footerPrograms = $visiblePrograms->sortByDesc('created_at')->take(5); @endphp
+            @forelse($footerPrograms as $footerProgram)
+              @php
+                $footerProgramTitle = $l == 'ar'
+                  ? ($footerProgram->title_ar ?: $footerProgram->title)
+                  : ($footerProgram->title ?: $footerProgram->title_ar);
+                $footerProgramUrl = ($footerProgram->public_slug && $footerProgram->organization && $footerProgram->organization->short_code)
+                  ? route('public.program_join', ['org_slug' => $footerProgram->organization->short_code, 'program_slug' => $footerProgram->public_slug])
+                  : '#programs';
+              @endphp
+              <a href="{{ $footerProgramUrl }}" class="flink" target="_blank" rel="noopener noreferrer">{{ $footerProgramTitle }}</a>
+            @empty
+              <span class="text-secondary small">{{ __('landing.No_Programs') }}</span>
+            @endforelse
           </div>
         </div>
       </div>
       <hr class="border-secondary mt-5">
       <div class="d-flex flex-wrap justify-content-between gap-2">
-        <p class="text-secondary small mb-0">© 2025 Growth Labs. {{ __('landing.footer_rights_reserved') }}</p>
-        <p class="text-secondary small mb-0" style="letter-spacing: 0.01em">
+        <p class="text-secondary small mb-0">© 2026 {{ __('landing.footer_rights_reserved') }}</p>
+        {{-- <p class="text-secondary small mb-0" style="letter-spacing: 0.01em">
           {{ __('landing.footer_built_for_founders') }}
-        </p>
+        </p> --}}
       </div>
     </div>
   </footer>

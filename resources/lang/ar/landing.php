@@ -218,6 +218,8 @@ return [
     'programs' => 'البرامج',
     'footer_tagline' => 'مسار مُنتقى من فكرة إلى تمويل — مسرّعات، حاضنات، وهاكاثونات، تُطابق مرحلتك.',
     'footer_navigate' => 'تصفح',
+    'footer_quick_links' => 'روابط سريعة',
+    'footer_program_links' => 'روابط البرامج',
     'footer_process' => 'كيف يعمل',
     'footer_company' => 'الشركة',
     'footer_accelerators' => 'المسرّعات',
