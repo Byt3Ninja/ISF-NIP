@@ -2,15 +2,20 @@
 
 @section('content')
 @php
-    // A cancelled meeting is an alert, a reschedule is informational, so the
-    // accent bar changes colour while the layout stays identical.
-    $mainColor = $cancelled ? '#DC2626' : '#4F46E5';
+    // A cancelled meeting is an alert, a newly scheduled one is good news, and
+    // a reschedule is informational, so the accent bar changes colour while the
+    // layout stays identical.
+    //
+    // $variant is defaulted for queued jobs serialized before it existed, which
+    // restore with only the boolean $cancelled set.
+    $variant = $variant ?? ($cancelled ? 'cancelled' : 'rescheduled');
+    $mainColor = ['cancelled' => '#DC2626', 'scheduled' => '#059669'][$variant] ?? '#4F46E5';
     $bgColor = '#F3F4F6';
     $isRtl = app()->getLocale() === 'ar';
     $dirAttr = $isRtl ? 'rtl' : 'ltr';
     $alignStart = $isRtl ? 'right' : 'left';
     $alignEnd = $isRtl ? 'left' : 'right';
-    $key = $cancelled ? 'cancelled' : 'rescheduled';
+    $key = $variant;
 @endphp
 
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: {{ $bgColor }}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px 0;">
@@ -30,7 +35,7 @@
                             <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F9FAFB; border-radius: 6px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
                                 <tr>
                                     <td style="padding: 20px; direction: {{ $dirAttr }}; text-align: {{ $alignStart }};">
-                                        <p style="margin: 0 0 15px 0; font-size: 14px; color: #111827; font-weight: bold;">{{ __('email.startup_meeting_changed_email.new_meeting_time') }}</p>
+                                        <p style="margin: 0 0 15px 0; font-size: 14px; color: #111827; font-weight: bold;">{{ __('email.startup_meeting_changed_email.' . ($variant === 'scheduled' ? 'meeting_time' : 'new_meeting_time')) }}</p>
                                         <table width="100%" cellspacing="0" cellpadding="0" border="0">
                                             <tr>
                                                 <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_meeting_changed_email.date') }}:</td>

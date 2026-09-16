@@ -1001,15 +1001,20 @@ class ScreeningController extends Controller
 	/**
 	 * Snapshot the scheduled meeting slot of every startup on a step.
 	 *
-	 * Keyed by company id => ['start' => 'Y-m-d H:i'|null, 'panel' => int].
-	 * A company sitting in several panels keeps its EARLIEST slot, so the diff
-	 * compares like with like however the panels are ordered in the payload.
+	 * Keyed "companyId:panel" => ['company' => int, 'start' => 'Y-m-d H:i'|null,
+	 * 'panel' => int]. A company sitting in several panels holds ONE ENTRY PER
+	 * PANEL, because each panel is a separate meeting with its own time.
+	 *
+	 * Collapsing a company to a single (earliest) slot silently hid every change
+	 * to its other panels (GV-8892 follow-up): editing panel 2's interval, date
+	 * or roster left the company's earliest slot — on panel 3 — untouched, so the
+	 * diff saw no change and nobody was emailed.
 	 *
 	 * `screenings` holds one row PER JUDGE PER PANEL, so the rows are collapsed
 	 * to one entry per panel first — otherwise a panel with three judges would
 	 * compute every one of its companies' slots three times.
 	 *
-	 * @return array<int, array{start: ?string, panel: int}>
+	 * @return array<string, array{company: int, start: ?string, panel: int}>
 	 */
 	private function snapshotCompanySlots(int $stepId): array
 	{
@@ -1039,14 +1044,15 @@ class ScreeningController extends Controller
 
 				$start = !empty($slot['start']) ? $slot['start']->format('Y-m-d H:i') : null;
 
-				// Earliest slot wins, so the comparison is stable regardless of the
-				// order the panels happen to be iterated in.
-				if (isset($slots[$companyId]) && $slots[$companyId]['start'] !== null
-					&& ($start === null || $start >= $slots[$companyId]['start'])) {
-					continue;
-				}
+				// One entry per (company, panel): each panel is its own meeting, so
+				// a company in several panels must be diffed panel by panel.
+				$panelNumber = (int) $row->panel;
 
-				$slots[$companyId] = ['start' => $start, 'panel' => (int) $row->panel];
+				$slots[$companyId . ':' . $panelNumber] = [
+					'company' => $companyId,
+					'start'   => $start,
+					'panel'   => $panelNumber,
+				];
 			}
 		}
 
@@ -1116,7 +1122,7 @@ class ScreeningController extends Controller
 	 * reordering startups with the switch off is making a quiet correction, and
 	 * the confirmation dialog is suppressed to match.
 	 *
-	 * @param  array<int, array{start: ?string, panel: int}>  $slotsBefore
+	 * @param  array<string, array{company: int, start: ?string, panel: int}>  $slotsBefore
 	 */
 	private function notifyAffectedStartups(int $stepId, array $panels, array $slotsBefore): void
 	{
@@ -1128,11 +1134,15 @@ class ScreeningController extends Controller
 
 		$slotsAfter = $this->snapshotCompanySlots($stepId);
 
+		$scheduled = [];
 		$rescheduled = [];
 		$cancelled = [];
 
-		foreach ($slotsAfter as $companyId => $after) {
-			$before = $slotsBefore[$companyId] ?? null;
+		// Compared per (company, panel): a company in several panels holds one
+		// meeting per panel, and a change to any of them must reach it.
+		foreach ($slotsAfter as $key => $after) {
+			$companyId = $after['company'];
+			$before = $slotsBefore[$key] ?? null;
 
 			// Newly scheduled, or moved to a different time. A company that had no
 			// slot before and still has none is not a change.
@@ -1145,7 +1155,37 @@ class ScreeningController extends Controller
 				continue;
 			}
 
-			if ($before === null || $before['start'] !== $after['start']) {
+			// The panel this slot belongs to must itself be notifying, otherwise a
+			// quiet edit to panel 2 would ride out on panel 3's switch.
+			if (!in_array($after['panel'], $notifyingPanelNumbers, true)) {
+				continue;
+			}
+
+			if ($before !== null && $before['start'] === $after['start']) {
+				continue;
+			}
+
+			// "Rescheduled" is only true of a meeting the startup ALREADY had at a
+			// different time. Two cases are a first booking, not a move:
+			//
+			//  - the startup had no meeting on this step at all;
+			//  - it holds this slot on a panel it was not on before. A panel is
+			//    ONE meeting, so a second panel is an ADDITIONAL meeting (another
+			//    round) and any earlier one stays exactly where it was. Calling
+			//    that a reschedule reads as the first meeting having moved, and
+			//    the founder stops attending it.
+			//
+			// Only a slot on a panel the startup was already sitting on is a
+			// genuine move: that panel's times reflowed underneath it.
+			$bucket = ($before === null) ? 'scheduled' : 'rescheduled';
+
+			// Earliest changed slot wins when several of a company's panels moved,
+			// so it receives one mail naming its next meeting.
+			if ($bucket === 'scheduled') {
+				if (!isset($scheduled[$companyId]) || $after['start'] < $scheduled[$companyId]) {
+					$scheduled[$companyId] = $after['start'];
+				}
+			} elseif (!isset($rescheduled[$companyId]) || $after['start'] < $rescheduled[$companyId]) {
 				$rescheduled[$companyId] = $after['start'];
 			}
 		}
@@ -1154,12 +1194,14 @@ class ScreeningController extends Controller
 		// returns 0 for a company it cannot find, so a removed startup and one
 		// moved into the first slot produce identical slot data. Only the
 		// company's absence from the rebuilt step distinguishes them.
-		foreach ($slotsBefore as $companyId => $before) {
+		foreach ($slotsBefore as $key => $before) {
+			$companyId = $before['company'];
+
 			if ($before['start'] === null) {
 				continue;
 			}
 
-			if (array_key_exists($companyId, $slotsAfter)) {
+			if (array_key_exists($key, $slotsAfter)) {
 				continue;
 			}
 
@@ -1170,15 +1212,31 @@ class ScreeningController extends Controller
 				continue;
 			}
 
+			// Losing THIS panel's meeting is a cancellation even when the company
+			// still sits on another panel: the two are separate meetings, and the
+			// one in hand is genuinely gone.
+			//
+			// A reschedule already queued for this company wins, though: the same
+			// save moved another of its meetings, and one mail naming the new time
+			// says more than a bare cancellation.
+			if (isset($rescheduled[$companyId]) || isset($scheduled[$companyId])) {
+				continue;
+			}
+
 			$cancelled[$companyId] = $before['start'];
 		}
 
-		if (empty($rescheduled) && empty($cancelled)) {
+		// A move reported for the same company wins over a first booking: one mail
+		// per save, naming the change to the meeting it already knew about.
+		$scheduled = array_diff_key($scheduled, $rescheduled);
+
+		if (empty($scheduled) && empty($rescheduled) && empty($cancelled)) {
 			return;
 		}
 
-		$this->sendStartupMeetingNotifications($stepId, $rescheduled, false);
-		$this->sendStartupMeetingNotifications($stepId, $cancelled, true);
+		$this->sendStartupMeetingNotifications($stepId, $scheduled, 'scheduled');
+		$this->sendStartupMeetingNotifications($stepId, $rescheduled, 'rescheduled');
+		$this->sendStartupMeetingNotifications($stepId, $cancelled, 'cancelled');
 	}
 
 	/**
@@ -1189,8 +1247,9 @@ class ScreeningController extends Controller
 	 * so the owners are resolved from the users side in a single query.
 	 *
 	 * @param  array<int, string>  $companies  company id => slot start
+	 * @param  string  $variant  'scheduled', 'rescheduled' or 'cancelled'
 	 */
-	private function sendStartupMeetingNotifications(int $stepId, array $companies, bool $cancelled): void
+	private function sendStartupMeetingNotifications(int $stepId, array $companies, string $variant): void
 	{
 		if (empty($companies)) {
 			return;
@@ -1212,7 +1271,7 @@ class ScreeningController extends Controller
 					$stepId,
 					(int) $companyId,
 					$slotStart,
-					$cancelled
+					$variant
 				));
 			} catch (\Throwable $th) {
 				// A mail failure must never fail the save: the schedule is already
@@ -1221,7 +1280,7 @@ class ScreeningController extends Controller
 				Log::error('Failed to notify startup of screening meeting change', [
 					'company_id' => $companyId,
 					'step_id'    => $stepId,
-					'cancelled'  => $cancelled,
+					'variant'    => $variant,
 					'error'      => $th->getMessage(),
 				]);
 			}

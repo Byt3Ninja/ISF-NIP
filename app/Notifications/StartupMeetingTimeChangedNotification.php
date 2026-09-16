@@ -18,8 +18,8 @@ use App\Services\GlobalNotificationSettingsService;
 use Throwable;
 
 /**
- * Tells a startup that its screening meeting time moved, or that its meeting
- * was cancelled (GV-8892 / GV-8893).
+ * Tells a startup that its screening meeting was newly scheduled, that its time
+ * moved, or that it was cancelled (GV-8892 / GV-8893).
  *
  * Sent for both initial screening (stype 2) and final screening (stype 5).
  *
@@ -70,8 +70,8 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
     public $companyId;
 
     /**
-     * The slot start as 'Y-m-d H:i' — the NEW time when rescheduled, or the
-     * time the cancelled meeting had been set for.
+     * The slot start as 'Y-m-d H:i' — the NEW time when scheduled or
+     * rescheduled, or the time the cancelled meeting had been set for.
      *
      * Passed as a plain string rather than a Carbon so the queued payload does
      * not depend on Carbon's serialization format.
@@ -81,18 +81,49 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
     public $slotStart;
 
     /**
+     * Which of the three events this is: 'scheduled', 'rescheduled' or
+     * 'cancelled'. Doubles as the lang-file key for every channel.
+     *
+     * Adding a startup to a NEW panel is not a reschedule — a panel is one
+     * meeting, so a second panel is an ADDITIONAL meeting (another round),
+     * leaving any existing one exactly where it was. Telling the founder their
+     * meeting "has been rescheduled" would read as the first one having moved,
+     * and they would not attend it.
+     *
+     * @var string
+     */
+    public $variant;
+
+    /**
      * Whether the meeting was cancelled rather than moved.
+     *
+     * Kept as a derived property because the email blade branches on it for
+     * the accent colour and the "new meeting time" panel.
      *
      * @var bool
      */
     public $cancelled;
 
-    public function __construct(int $stepId, int $companyId, ?string $slotStart, bool $cancelled = false)
+    /**
+     * @param  string  $variant  'scheduled', 'rescheduled' or 'cancelled'. Also
+     *                           accepts the legacy boolean $cancelled flag.
+     */
+    public function __construct(int $stepId, int $companyId, ?string $slotStart, $variant = 'rescheduled')
     {
         $this->stepId = $stepId;
         $this->companyId = $companyId;
         $this->slotStart = $slotStart;
-        $this->cancelled = $cancelled;
+
+        // Tolerate the previous bool signature: queued jobs serialized before a
+        // deploy restore with a boolean here and must still render.
+        if (is_bool($variant)) {
+            $variant = $variant ? 'cancelled' : 'rescheduled';
+        }
+
+        $this->variant = in_array($variant, ['scheduled', 'rescheduled', 'cancelled'], true)
+            ? $variant
+            : 'rescheduled';
+        $this->cancelled = $this->variant === 'cancelled';
     }
 
     /**
@@ -164,7 +195,7 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
         app()->setLocale($this->resolveLocale($setting, $notifiable));
 
         $step = Step::with('cycle')->find($this->stepId);
-        $key = $this->cancelled ? 'cancelled' : 'rescheduled';
+        $key = $this->variant;
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])
@@ -176,6 +207,7 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
                 'meetingDate'   => $this->formatDate(),
                 'meetingTime'   => $this->formatTime(),
                 'cancelled'     => $this->cancelled,
+                'variant'       => $this->variant,
                 'dashboardUrl'  => url('/dashboard'),
                 'platformName'  => $platformName,
             ], $orgData));
@@ -188,7 +220,7 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
      */
     public function toDatabase(object $notifiable): array
     {
-        $key = $this->cancelled ? 'cancelled' : 'rescheduled';
+        $key = $this->variant;
 
         return [
             'message' => __('email.startup_meeting_changed_email.' . $key . '.database', [
@@ -204,7 +236,7 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
     public function toWhatsapp(object $notifiable): string
     {
         $step = Step::with('cycle')->find($this->stepId);
-        $key = $this->cancelled ? 'cancelled' : 'rescheduled';
+        $key = $this->variant;
 
         return __('email.startup_meeting_changed_email.' . $key . '.whatsapp', [
             'name'         => trim($notifiable->name ?? ''),
@@ -219,7 +251,7 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        $key = $this->cancelled ? 'cancelled' : 'rescheduled';
+        $key = $this->variant;
 
         return new BroadcastMessage([
             'subject' => __('email.startup_meeting_changed_email.' . $key . '.subject'),
