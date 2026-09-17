@@ -691,6 +691,7 @@ class MentorsController extends Controller
 						'user_id' => $userid,
 						'comment' => $request->notes,
 						'approved' => $approved,
+						'admin_id' => Auth::id(),
 						'start_url' => $startUrl,
 						'join_url' => $joinUrl,
 						'zoom_id' => $meetingId,

@@ -64,7 +64,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             // $mentor = User::find($this->mentorId);
             try {
                 // ======> notify Mentor <=================
-                $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
+                $session = MentorshipRequest::with(['user', 'mentor', 'admin', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
                 $session->attachments = $session->fileurl ? [
                     [
                         'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
@@ -144,13 +144,21 @@ class SendMentorshipRequestJob implements ShouldQueue
                     "/dashboard",
                     __("messages.mentorship_session_notification_message", ['name' => $mentorFullName, 'session_date' => $sessionDate, 'session_time' => $sessionTimeStartup], $startupLocale),
                 ];
-                $startup->notify(
-                    new StartupNotifyMentorshipNotification(
-                        $userMessage,
-                        $session
-                    )
-                );
-                log::info('Sent New Mentorship Request notification to ' . $startup->email);
+                // Atomically claim the "notify founder of scheduled session" step
+                // so a retry of this job never double-emails the founder.
+                $claimedFounderNotify = MentorshipRequest::where('id', $session->id)
+                    ->whereNull('founder_notified_at')
+                    ->update(['founder_notified_at' => now()]);
+
+                if ($claimedFounderNotify) {
+                    $startup->notify(
+                        new StartupNotifyMentorshipNotification(
+                            $userMessage,
+                            $session
+                        )
+                    );
+                    log::info('Sent New Mentorship Request notification to ' . $startup->email);
+                }
             } catch (\Throwable $th) {
                 Log::error('add wait Notification Error: ' . $th->getMessage());
                 throw $th;
