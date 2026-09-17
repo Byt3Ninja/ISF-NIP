@@ -19,332 +19,21 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
-
-  <style>
-    a {
-      text-decoration: none;
-    }
-
-    ::selection {
-      background-color: var(--bs-primary);
-      color: var(--bs-white);
-    }
-
-    :focus-visible {
-      outline: 2px solid var(--bs-primary);
-      outline-offset: 3px;
-      border-radius: 4px;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    /* ---------- Nav ---------- */
-    .gl-nav {
-      background: rgba(3, 0, 20, 0.35);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1030;
-    }
-
-    .gl-nav .navbar-brand {
-      cursor: pointer;
-    }
-
-    .brand-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      overflow: hidden;
-      background-color: var(--bs-white);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .brand-mark img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .live-pulse {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--bs-primary);
-      display: inline-block;
-      box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.6);
-      animation: pulse 2.2s infinite;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-    .live-pulse {
-        animation: none;
-      }
-    }
-
-    @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.55);
-      }
-
-      70% {
-        box-shadow: 0 0 0 8px rgba(13, 110, 253, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
-      }
-    }
-
-    /* ---------- Hero ---------- */
-    .gl-hero {
-      background:
-        radial-gradient(ellipse 900px 620px at 82% -12%, rgba(99, 102, 241, 0.38), transparent 62%),
-        radial-gradient(ellipse 760px 520px at -8% 108%, rgba(236, 72, 153, 0.24), transparent 60%),
-        radial-gradient(ellipse 640px 640px at 112% 82%, rgba(34, 211, 238, 0.16), transparent 62%),
-        radial-gradient(ellipse 500px 400px at 45% 0%, rgba(13, 110, 253, 0.2), transparent 60%),
-        linear-gradient(135deg, #030014 0%, #0b0530 55%, #1a1140 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding-top: 76px;
-      padding-bottom: 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .gl-hero::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(248, 249, 250, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(248, 249, 250, 0.035) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: linear-gradient(to bottom, black, transparent 75%);
-      pointer-events: none;
-    }
-
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      background: rgba(13, 110, 253, 0.08);
-      border: 1px solid rgba(13, 110, 253, 0.25);
-      color: var(--bs-primary);
-      font-size: .78rem;
-      padding: .4rem .9rem;
-      border-radius: 999px;
-    }
-
-    .gl-hero h1 {
-      color: var(--bs-light);
-      font-weight: 700;
-      font-size: clamp(2.4rem, 4.6vw, 3.85rem);
-      line-height: 1.08;
-    }
-
-    .gl-hero h1 em {
-      font-style: normal;
-      color: var(--bs-primary);
-    }
-
-    /* ---------- Section scaffolding ---------- */
-    section[id],
-    header[id] {
-      scroll-margin-top: 76px;
-    }
-
-    .eyebrow-mono {
-      font-size: .76rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--bs-primary);
-      background: rgba(13, 110, 253, 0.08);
-      border: 1px solid rgba(13, 110, 253, 0.25);
-      display: inline-block;
-      padding: .35rem .8rem;
-      border-radius: 999px;
-    }
-
-    .section-head h2 {
-      font-weight: 700;
-      font-size: clamp(1.9rem, 3vw, 2.5rem);
-      letter-spacing: -0.02em;
-      color: var(--bs-dark);
-    }
-
-    .value-item {
-      transition: background .2s ease;
-    }
-
-    .value-item:hover {
-      background: rgba(79, 57, 187, 0.07);
-    }
-
-    .value-index {
-      color: var(--bs-secondary);
-      font-size: .85rem;
-    }
-
-    .value-item h5 {
-      font-weight: 700;
-      font-size: 1.15rem;
-    }
-
-    /* ---------- How it works ---------- */
-    .pipeline-wrap {
-      position: relative;
-    }
-
-    .pipeline-line {
-      position: absolute;
-      top: 33px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: repeating-linear-gradient(to right, rgba(33, 37, 41, 0.18) 0 8px, transparent 8px 16px);
-      z-index: 0;
-    }
-
-    .pipeline-step {
-      position: relative;
-      z-index: 1;
-    }
-
-    .pipeline-node {
-      width: 66px;
-      height: 66px;
-      border-radius: 50%;
-      background-color: var(--bs-light);
-      color: var(--bs-primary);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      border: 6px solid var(--bs-white);
-    }
-
-    /* ---------- CTA ---------- */
-    .gl-cta {
-      background-color: #000;
-      border-radius: 28px;
-      padding: 3.5rem 2.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .gl-cta::before {
-      content: "";
-      position: absolute;
-      width: 480px;
-      height: 480px;
-      background: radial-gradient(circle, rgba(13, 110, 253, 0.18), transparent 70%);
-      top: -160px;
-      right: -120px;
-    }
-
-    .gl-cta h2 {
-      color: var(--bs-light);
-      font-weight: 700;
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-    }
-
-    /* ---------- Footer ---------- */
-    .gl-footer {
-      background-color: #000;
-    }
-
-    .gl-footer h6 {
-      color: var(--bs-light);
-      font-size: .74rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-    }
-
-    .gl-footer a.flink {
-      color: var(--bs-secondary);
-      font-size: .9rem;
-    }
-
-    .gl-footer .flink:hover {
-      color: var(--bs-primary);
-    }
-
-    @media (max-width:991.98px) {
-      .pipeline-line {
-        display: none;
-      }
-
-      .stat-strip {
-        gap: 1.6rem;
-      }
-
-      .hero-image-wrapper {
-        aspect-ratio: 4/3 !important;
-        max-width: 400px;
-        margin: 0 auto;
-      }
-    }
-
-    @media (max-width:575.98px) {
-      .hero-image-wrapper {
-        aspect-ratio: 4/3 !important;
-        max-width: 320px;
-      }
-    }
-
-    /* ---- Section striping ---- */
-    .section-py {
-      padding: 5rem 0;
-    }
-
-    @media (max-width:991.98px) {
-      .section-py { padding: 3.5rem 0; }
-    }
-
-    @media (max-width:575.98px) {
-      .section-py { padding: 2.5rem 0; }
-    }
-
-    /* ---- Overflow protection ---- */
-    body {
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    .gl-nav .navbar-brand span.fw-bold {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 200px;
-    }
-
-    .gl-hero h1 {
-      overflow-wrap: anywhere;
-    }
-
-    .section-head p.text-secondary {
-      overflow-wrap: anywhere;
-    }
-
-    .gl-footer p {
-      overflow-wrap: anywhere;
-    }
-  </style>
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/custom-lp.css" />
 
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
   <script src="/vuexy/assets/js/config.js"></script>
 </head>
 
 <body>
+
+  @php
+    $lpProgramsCount = $visiblePrograms->count();
+    $lpOpenCount = $visiblePrograms->filter(function ($program) {
+        return $program->isOpen;
+    })->count();
+    $lpStepCount = count($page->how_steps ?? []);
+  @endphp
 
   <!-- ===== Hero ===== -->
   <header class="gl-hero" id="hero">
@@ -353,14 +42,15 @@
     <nav class="navbar navbar-expand-lg gl-nav py-3">
       <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="#hero">
-        <span class="brand-mark">
-          @if($page->logo_url)
-            <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
-          @endif
-        </span>
-        <span class="fw-bold text-white fs-5">{{ $page->title }}</span>
+          <span class="brand-mark">
+            @if($page->logo_url)
+              <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
+            @endif
+          </span>
+          <span class="fw-bold text-white fs-5">{{ $page->title }}</span>
         </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+          aria-label="Toggle navigation">
           <i class="ti ti-menu-2 text-white fs-3"></i>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navMenu">
@@ -372,7 +62,8 @@
               <li class="nav-item"><a class="nav-link text-white" href="#programs">{{ __('landing.programs') }}</a></li>
             @endif
             @if($page->how_is_enabled)
-              <li class="nav-item"><a class="nav-link text-white" href="#how-it-works">{{ __('landing.how_it_works') }}</a></li>
+              <li class="nav-item"><a class="nav-link text-white"
+                  href="#how-it-works">{{ __('landing.how_it_works') }}</a></li>
             @endif
             <li class="nav-item dropdown-language dropdown ms-lg-3">
               <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -402,8 +93,10 @@
       </div>
     </nav>
 
-    <div class="container position-relative"
-      style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+    <span class="lp-orb lp-orb--one" aria-hidden="true"></span>
+    <span class="lp-orb lp-orb--two" aria-hidden="true"></span>
+
+    <div class="gl-hero__inner container position-relative">
       <div class="row align-items-center gy-5 gx-lg-5">
         <div class="col-lg-6">
           @php $heroTag = $l == 'ar' ? $page->hero_title_tag_ar : $page->hero_title_tag; @endphp
@@ -416,7 +109,7 @@
           @endif
           @php $heroDescription = $l == 'ar' ? $page->hero_description_ar : $page->hero_description; @endphp
           @if($heroDescription)
-            <p class="mt-4" style="font-size:1.08rem; line-height:1.7; max-width:460px; color: rgba(255,255,255,.78);">
+            <p class="mt-4 hero-desc">
               {{ $heroDescription }}
             </p>
           @endif
@@ -426,14 +119,43 @@
                   class="ti ti-arrow-up-right ms-1"></i></a>
             @endif
             @if($page->how_is_enabled)
-              <a href="#how-it-works" class="btn btn-outline-dark text-white rounded-pill btn-lg">{{ __('landing.see_how_it_works') }}</a>
+              <a href="#how-it-works"
+                class="btn btn-outline-light rounded-pill btn-lg">{{ __('landing.see_how_it_works') }}</a>
             @endif
           </div>
+
+          @if($lpProgramsCount > 0)
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <i class="ti ti-layout-grid text-primary" aria-hidden="true"></i>
+                <div>
+                  <strong>{{ $lpProgramsCount }}</strong>
+                  <span>{{ __('landing.all_programs') }}</span>
+                </div>
+              </div>
+              <div class="hero-stat">
+                <i class="ti ti-badge text-primary" aria-hidden="true"></i>
+                <div>
+                  <strong>{{ $lpOpenCount }}</strong>
+                  <span>{{ __('landing.browse_open_programs') }}</span>
+                </div>
+              </div>
+              @if($lpStepCount > 0)
+                <div class="hero-stat">
+                  <i class="ti ti-route-2 text-primary" aria-hidden="true"></i>
+                  <div>
+                    <strong>{{ $lpStepCount }}</strong>
+                    <span>{{ __('landing.how_it_works') }}</span>
+                  </div>
+                </div>
+              @endif
+            </div>
+          @endif
         </div>
 
         <div class="col-lg-5 ms-auto d-flex align-items-center justify-content-end">
-          <div class="hero-image-wrapper" style="width:100%; max-width:400px; aspect-ratio:1/1; border-radius:1rem; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.35);">
-            <img src="{{ $page->hero_image_url ?: '' }}" alt="hero-image" style="width:100%; height:100%; object-fit:cover; display:block;">
+          <div class="hero-image-wrapper">
+            <img src="{{ $page->hero_image_url ?: '' }}" alt="hero-image" class="hero-img">
           </div>
         </div>
       </div>
@@ -444,184 +166,242 @@
 
   <!-- ===== About / Value props ===== -->
   @if($page->about_is_enabled)
-  <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="about">
-    @php $landingBg = !$landingBg; @endphp
-    <div class="container py-4">
-      <div class="row section-head mb-4">
-        <div class="col-lg-7">
-          @php $aboutTag = $l == 'ar' ? $page->about_title_tag_ar : $page->about_title_tag; @endphp
-          @if($aboutTag)
-            <p class="eyebrow-mono mb-2">{{ $aboutTag }}</p>
-          @endif
-          @php $aboutTitle = $l == 'ar' ? $page->about_title_ar : $page->about_title; @endphp
-          @if($aboutTitle)
-            <h2>{{ $aboutTitle }}</h2>
-          @endif
+    <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="about">
+      @php $landingBg = !$landingBg; @endphp
+      <div class="container py-4">
+        <div class="row section-head mb-5">
+          <div class="col-lg-7">
+            @php $aboutTag = $l == 'ar' ? $page->about_title_tag_ar : $page->about_title_tag; @endphp
+            @if($aboutTag)
+              <p class="eyebrow-mono mb-2">{{ $aboutTag }}</p>
+            @endif
+            @php $aboutTitle = $l == 'ar' ? $page->about_title_ar : $page->about_title; @endphp
+            @if($aboutTitle)
+              <h2>{{ $aboutTitle }}</h2>
+            @endif
+            @php $aboutDescription = $l == 'ar' ? $page->about_description_ar : $page->about_description; @endphp
+            @if($aboutDescription)
+              <div class="mt-3">
+                <p class="text-secondary mb-0" style="max-width:620px;">{{ $aboutDescription }}</p>
+              </div>
+            @endif
+          </div>
         </div>
-        @php $aboutDescription = $l == 'ar' ? $page->about_description_ar : $page->about_description; @endphp
-        @if($aboutDescription)
-          <div class="col-lg-4 offset-lg-1 d-flex align-items-end">
-            <p class="text-secondary mb-0">{{ $aboutDescription }}</p>
+
+        @if(!empty($page->about_cards))
+          <div class="row g-4">
+            @foreach($page->about_cards as $index => $card)
+              @php
+                $cardTitle = $l == 'ar' ? ($card['title_ar'] ?? '') : ($card['title'] ?? '');
+                $cardDesc = $l == 'ar' ? ($card['description_ar'] ?? '') : ($card['description'] ?? '');
+              @endphp
+              @if($cardTitle || $cardDesc)
+                <div class="col-md-6 col-xl-4">
+                  <div class="card h-100 border value-card">
+                    <div class="card-body position-relative p-4">
+                      {{-- <span class="value-watermark" aria-hidden="true">{{ sprintf('%02d', $index + 1) }}</span> --}}
+                      <div class="avatar avatar-lg mb-3">
+                        <div class="avatar-initial bg-label-primary rounded">
+                          @if(!empty($card['icon']))<i class="ti {{ $card['icon'] }}"></i>@endif
+                        </div>
+                      </div>
+                      @if($cardTitle)
+                        <h5 class="mb-2">{{ $cardTitle }}</h5>
+                      @endif
+                      @if($cardDesc)
+                        <p class="text-secondary small mb-0">{{ $cardDesc }}</p>
+                      @endif
+                    </div>
+                  </div>
+                </div>
+              @endif
+            @endforeach
           </div>
         @endif
       </div>
-
-      @if(!empty($page->about_cards))
-        <div class="border-top">
-          @foreach($page->about_cards as $index => $card)
-            <div class="row value-item border-bottom py-6 g-3 align-items-center">
-              <div class="col-auto"><span class="text-secondary">{{ sprintf('%02d', $index + 1) }}</span></div>
-              <div class="col-lg-1 col-2">
-                <div class="avatar">
-                  <div class="avatar-initial bg-label-primary rounded">
-                    @if(!empty($card['icon']))<i class="ti {{ $card['icon'] }}"></i>@endif
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 col-10">
-                <h5 class="mb-0">{{ $l == 'ar' ? ($card['title_ar'] ?? '') : ($card['title'] ?? '') }}</h5>
-              </div>
-              <div class="col-lg-6">
-                <p class="text-secondary mb-0 small">{{ $l == 'ar' ? ($card['description_ar'] ?? '') : ($card['description'] ?? '') }}</p>
-              </div>
-            </div>
-          @endforeach
-        </div>
-      @endif
-    </div>
-  </section>
+    </section>
   @endif
 
   <!-- ===== Programs ===== -->
   @if($page->programs_is_enabled)
-  <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="programs">
-    @php $landingBg = !$landingBg; @endphp
-    <div class="container py-4">
-      <div class="row section-head mb-4">
-        <div class="col-lg-7">
-          @php $programsTag = $l == 'ar' ? $page->programs_title_tag_ar : $page->programs_title_tag; @endphp
-          @if($programsTag)
-            <p class="eyebrow-mono mb-2">{{ $programsTag }}</p>
-          @endif
-          @php $programsTitle = $l == 'ar' ? $page->programs_title_ar : $page->programs_title; @endphp
-          @if($programsTitle)
-            <h2>{{ $programsTitle }}</h2>
-          @endif
-          @php $programsDescription = $l == 'ar' ? $page->programs_description_ar : $page->programs_description; @endphp
-          @if($programsDescription)
-            <p class="text-secondary mb-0 mt-3" style="max-width:560px;">{{ $programsDescription }}</p>
-          @endif
+    <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="programs">
+      @php $landingBg = !$landingBg; @endphp
+      <div class="container py-4">
+        <div class="row section-head mb-5">
+          <div class="col-lg-7">
+            @php $programsTag = $l == 'ar' ? $page->programs_title_tag_ar : $page->programs_title_tag; @endphp
+            @if($programsTag)
+              <p class="eyebrow-mono mb-2">{{ $programsTag }}</p>
+            @endif
+            @php $programsTitle = $l == 'ar' ? $page->programs_title_ar : $page->programs_title; @endphp
+            @if($programsTitle)
+              <h2>{{ $programsTitle }}</h2>
+            @endif
+            @php $programsDescription = $l == 'ar' ? $page->programs_description_ar : $page->programs_description; @endphp
+            @if($programsDescription)
+              <p class="text-secondary mb-0 mt-3" style="max-width:560px;">{{ $programsDescription }}</p>
+            @endif
+          </div>
         </div>
-      </div>
 
-      <ul class="nav nav-pills mb-4" role="tablist" id="programFilters">
-        <li class="nav-item"><a class="nav-link active" href="#" data-filter="all">{{ __('landing.all_programs') }}</a></li>
-        @foreach(\App\Cycle::programTypes() as $typeValue => $typeLabel)
-          <li class="nav-item"><a class="nav-link" href="#" data-filter="{{ $typeValue }}">{{ $typeLabel }}</a></li>
-        @endforeach
-      </ul>
+        @php
+          $typePalette = ['primary', 'info', 'success', 'warning', 'secondary'];
 
-      <div class="row g-4">
-        @forelse($visiblePrograms as $program)
-          @php
-            $programTitle = $l == 'ar' ? ($program->title_ar ?: $program->title) : $program->title;
-            $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description;
-          @endphp
-          <div class="col-md-6 col-lg-4" data-type="{{ $program->type }}">
-            <div class="card h-100 border shadow-none">
-              <div class="card-body d-flex flex-column p-4">
+          $openPrograms = $visiblePrograms->filter(function ($program) {
+              return $program->isOpen;
+          });
+          $pastPrograms = $visiblePrograms->reject(function ($program) {
+              return $program->isOpen;
+          });
 
-                {{-- Logo + Type badge --}}
-                @if($program->logo || $program->type)
-                  <div class="d-flex justify-content-between align-items-start mb-3">
-                    @if($program->logo)
-                      <div class="rounded-3 border bg-body-secondary d-flex align-items-center justify-content-center p-1"
-                          style="width: 56px; height: 56px; flex-shrink: 0;">
-                        <img src="{{ $program->logo }}" alt="{{ $programTitle }}"
-                            style="width: 40px; height: 40px; object-fit: contain;" />
-                      </div>
-                    @endif
-                    @if($program->type)
-                      <span class="badge bg-label-secondary rounded-pill">
-                        {{ \App\Cycle::programTypes()[$program->type] ?? __('cycles.' . $program->type) }}
-                      </span>
-                    @endif
-                  </div>
-                @endif
+          $programGroups = [
+              [
+                  'label' => $l == 'ar' ? 'مفتوح للتقديم' : 'Open for application',
+                  'icon' => 'ti-badge',
+                  'items' => $openPrograms,
+              ],
+              [
+                  'label' => $l == 'ar' ? 'البرامج السابقة' : 'Past Programs',
+                  'icon' => 'ti-history',
+                  'items' => $pastPrograms,
+              ],
+          ];
+        @endphp
 
-                {{-- Title --}}
-                @if($programTitle)
-                  <h5 class="fw-semibold mb-2" style="font-size: 16px; line-height: 1.35; overflow-wrap:break-word; word-break:break-word; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ $programTitle }}</h5>
-                @endif
+        @if($lpProgramsCount === 0)
+          <div class="text-center py-6">
+            <p class="text-secondary mb-0">{{ __('landing.No_Programs') }}</p>
+          </div>
+        @endif
 
-                {{-- Description --}}
-                @if($programDescription)
-                  <p class="line-clamp-3 mb-0">{{ $programDescription }}</p>
-                @endif
+        @foreach($programGroups as $programGroup)
+          @if($programGroup['items']->count() > 0)
+            <div class="programs-group">
+              <h3 class="programs-group-title">
+                <span class="programs-group-ic"><i class="ti {{ $programGroup['icon'] }}" aria-hidden="true"></i></span>
+                <span>{{ $programGroup['label'] }}</span>
+                <span class="programs-group-count">{{ $programGroup['items']->count() }}</span>
+              </h3>
 
-                <div class="mt-auto">
-                  <hr class="opacity-25 my-3">
+              <div class="row g-4">
+                @foreach($programGroup['items'] as $program)
+                  @php
+                    $programTitle = $l == 'ar' ? ($program->title_ar ?: $program->title) : $program->title;
+                    $programDescription = $l == 'ar' ? ($program->description_ar ?: $program->description) : $program->description;
+                    $typeColor = $typePalette[abs(crc32((string) $program->type)) % count($typePalette)];
+                    $statusColor = $program->isOpen && $program->canApply
+                        ? 'success'
+                        : ($program->applyUnavailable
+                            ? 'info'
+                            : ($program->isUpcoming ? 'warning' : 'secondary'));
+                  @endphp
+                  <div class="col-md-6 col-lg-4"
+                    style="--program-accent-rgb: var(--bs-{{ $typeColor }}-rgb);">
+                    <div class="card h-100 border shadow-none program-card">
+                      <div class="card-body d-flex flex-column p-4">
 
-                  {{-- Program Duration --}}
-                  @if($program->start)
-                    <div class="d-flex align-items-center gap-2 mb-4">
-                      <div class="avatar">
-                        <div class="avatar-initial rounded"><i class="ti ti-calendar text-dark"></i></div>
-                      </div>
-                      <div>
-                        <div class="small text-secondary">{{ __('admin.Program Duration') }}</div>
-                        <div class="fw-semibold">
-                          {{ \Carbon\Carbon::parse($program->start)->format('M d') }}
-                          @if($program->end)
-                            – {{ \Carbon\Carbon::parse($program->end)->format('M d, Y') }}
-                          @else
-                            , {{ \Carbon\Carbon::parse($program->start)->format('Y') }}
-                          @endif
+                        {{-- Logo + Type badge --}}
+                        @if($program->logo || $program->type)
+                          <div class="d-flex justify-content-between align-items-start mb-3">
+                            @if($program->logo)
+                              <div class="program-logo rounded-3 border bg-body-secondary d-flex align-items-center justify-content-center p-1"
+                                style="width: 56px; height: 56px; flex-shrink: 0;">
+                                <img src="{{ $program->logo }}" alt="{{ $programTitle }}"
+                                  style="width: 40px; height: 40px; object-fit: contain;" />
+                              </div>
+                            @else
+                              <div class="program-logo d-flex align-items-center justify-content-center rounded-3 border bg-lighter"
+                                style="width: 56px; height: 56px; flex-shrink: 0;">
+                                <i class="ti ti-rocket fs-4 text-primary" aria-hidden="true"></i>
+                              </div>
+                            @endif
+                            @if($program->type)
+                              <span class="badge bg-label-{{ $typeColor }} rounded-pill">
+                                {{ \App\Cycle::programTypes()[$program->type] ?? __('cycles.' . $program->type) }}
+                              </span>
+                            @endif
+                          </div>
+                        @endif
+
+                  {{-- Title --}}
+                  @if($programTitle)
+                    <h5 class="fw-semibold mb-2 program-title line-clamp-2">{{ $programTitle }}</h5>
+                  @endif
+
+                  {{-- Description --}}
+                  @if($programDescription)
+                    <p class="line-clamp-3 mb-0">{{ $programDescription }}</p>
+                  @endif
+
+                  <div class="mt-auto">
+                    <div class="program-divider" aria-hidden="true"></div>
+
+                    {{-- Duration + Status --}}
+                    <div class="program-meta mb-5">
+                      @if($program->start)
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                          <div class="avatar">
+                            <div class="avatar-initial rounded bg-lighter"><i class="ti ti-calendar text-dark"></i></div>
+                          </div>
+                          <div class="min-w-0">
+                            <div class="small text-secondary">{{ __('admin.Program Duration') }}</div>
+                            <div class="fw-semibold">
+                              {{ \Carbon\Carbon::parse($program->start)->format('M d') }}
+                              @if($program->end)
+                                – {{ \Carbon\Carbon::parse($program->end)->format('M d, Y') }}
+                              @else
+                                , {{ \Carbon\Carbon::parse($program->start)->format('Y') }}
+                              @endif
+                            </div>
+                          </div>
+                        </div>
+                      @endif
+
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="avatar">
+                          <div class="avatar-initial rounded bg-lighter"><i
+                              class="ti ti-{{ $program->statusIcon }} text-dark"></i></div>
+                        </div>
+                        <div class="min-w-0">
+                          <div class="small text-secondary">{{ __('admin.application_status') }}</div>
+                          <div class="fw-semibold d-flex align-items-center gap-2">
+                            <span class="status-dot bg-{{ $statusColor }}"></span>
+                            <span class="text-{{ $statusColor }}">{{ $program->statusLabel }}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  @endif
 
-                  {{-- Application Status --}}
-                  <div class="d-flex align-items-center gap-2 mb-6">
-                    <div class="avatar">
-                      <div class="avatar-initial rounded"><i class="ti ti-{{ $program->statusIcon }} text-dark"></i></div>
-                    </div>
-                    <div>
-                      <div class="small text-secondary">{{ __('admin.application_status') }}</div>
-                      <div class="fw-semibold">{{ $program->statusLabel }}</div>
-                    </div>
+                    {{-- CTA: real link only while open with a public application page --}}
+                    @if($program->isOpen && $program->canApply)
+                      <a href="{{ route('public.program_join', ['org_slug' => $program->organization->short_code, 'program_slug' => $program->public_slug]) }}"
+                        class="btn btn-primary w-100 fw-semibold" style="border-radius: 12px; padding: 10px;">
+                        {{ $program->btnText }}
+                        <i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'left' : 'right' }} ms-2"></i>
+                      </a>
+                    @elseif($program->applyUnavailable)
+                      <button class="btn btn-label-info w-100 fw-semibold" disabled style="border-radius: 12px;">
+                        <i class="ti ti-clock-hour-4 {{ $l == 'ar' ? 'ms-2' : 'me-2' }}"></i>{{ $program->btnText }}
+                      </button>
+                    @elseif($program->isUpcoming)
+                      <button class="btn btn-label-warning w-100 fw-semibold" disabled
+                        style="border-radius: 12px;">{{ $program->btnText }}</button>
+                    @else
+                      <button class="btn btn-label-secondary w-100 fw-semibold" disabled
+                        style="border-radius: 12px;">{{ $program->btnText }}</button>
+                    @endif
                   </div>
 
-                  {{-- CTA: real link only while open with a public application page --}}
-                  @if($program->isOpen && $program->canApply)
-                    <a href="{{ route('public.program_join', ['org_slug' => $program->organization->short_code, 'program_slug' => $program->public_slug]) }}"
-                      class="btn btn-primary w-100 fw-semibold" style="border-radius: 10px; padding: 10px;">
-                      {{ $program->btnText }}
-                      <i class="ti ti-arrow-narrow-{{ $l == 'ar' ? 'left' : 'right' }} ms-2"></i>
-                    </a>
-                  @elseif($program->applyUnavailable)
-                    <button class="btn btn-label-info w-100 fw-semibold" disabled>
-                      <i class="ti ti-clock-hour-4 {{ $l == 'ar' ? 'ms-2' : 'me-2' }}"></i>{{ $program->btnText }}
-                    </button>
-                  @elseif($program->isUpcoming)
-                    <button class="btn btn-label-warning w-100 fw-semibold" disabled>{{ $program->btnText }}</button>
-                  @else
-                    <button class="btn btn-label-secondary w-100 fw-semibold" disabled>{{ $program->btnText }}</button>
-                  @endif
                 </div>
-
               </div>
             </div>
-          </div>
-        @empty
-          <div class="col-12 text-center py-6">
-            <p class="text-secondary mb-0">{{ __('landing.No_Programs') }}</p>
-          </div>
-        @endforelse
+                  @endforeach
+                </div>
+              </div>
+            @endif
+          @endforeach
       </div>
-    </div>
-  </section>
+    </section>
   @endif
 
   <!-- ===== How it works ===== -->
@@ -641,24 +421,32 @@
             @endif
             @php $howDescription = $l == 'ar' ? $page->how_description_ar : $page->how_description; @endphp
             @if($howDescription)
-              <p class="text-secondary mb-0 mt-3">{{ $howDescription }}</p>
+              <p class="text-secondary mb-0 mt-3 mx-auto" style="max-width:600px;">{{ $howDescription }}</p>
             @endif
           </div>
         </div>
 
-        <div class="row pipeline-wrap">
-          <div class="pipeline-line d-none d-lg-block"></div>
+        @php $howStepsCount = count($page->how_steps ?? []); @endphp
 
-          @foreach($page->how_steps ?? [] as $step)
-            <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
-              <span class="pipeline-node">
-                @if(!empty($step['icon']))<i class="ti {{ $step['icon'] }}"></i>@endif
-              </span>
-              <h5 class="fw-bold mt-3">{{ $l == 'ar' ? ($step['title_ar'] ?? '') : ($step['title'] ?? '') }}</h5>
-              <p class="text-secondary small mx-auto" style="max-width:260px;">{{ $l == 'ar' ? ($step['description_ar'] ?? '') : ($step['description'] ?? '') }}</p>
-            </div>
-          @endforeach
-        </div>
+        @if($howStepsCount > 0)
+          <div class="row pipeline-wrap">
+            <div class="pipeline-line d-none d-lg-block"></div>
+
+            @foreach($page->how_steps ?? [] as $index => $step)
+              <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
+                <span class="pipeline-node-wrap">
+                  <span class="pipeline-node">
+                    @if(!empty($step['icon']))<i class="ti {{ $step['icon'] }}"></i>@endif
+                  </span>
+                  <span class="pipeline-num" aria-hidden="true">{{ sprintf('%02d', $index + 1) }}</span>
+                </span>
+                <h5 class="fw-bold mt-4">{{ $l == 'ar' ? ($step['title_ar'] ?? '') : ($step['title'] ?? '') }}</h5>
+                <p class="text-secondary small mx-auto" style="max-width:260px;">
+                  {{ $l == 'ar' ? ($step['description_ar'] ?? '') : ($step['description'] ?? '') }}</p>
+              </div>
+            @endforeach
+          </div>
+        @endif
       </div>
     </section>
   @endif
@@ -667,7 +455,7 @@
   @foreach($customSections as $customSection)
     <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="custom-{{ $customSection->id }}">
       @php $landingBg = !$landingBg; @endphp
-      <div class="container py-4">
+      <div class="container section-head py-4">
         @php $sectionTag = $l == 'ar' ? $customSection->title_tag_ar : $customSection->title_tag; @endphp
         @if($sectionTag)
           <p class="eyebrow-mono mb-2">{{ $sectionTag }}</p>
@@ -676,7 +464,8 @@
         @if($sectionTitle)
           <h2>{{ $sectionTitle }}</h2>
         @endif
-        <div class="mt-3" style="white-space:pre-wrap;">{!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
+        <div class="mt-3 lp-rich" style="white-space:pre-wrap;">
+          {!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
       </div>
     </section>
   @endforeach
@@ -692,19 +481,28 @@
         @if($ctaDescription)
           <p class="text-secondary mt-3 position-relative mx-auto" style="max-width:480px;">{{ $ctaDescription }}</p>
         @endif
-        <a href="#programs" class="btn btn-primary mt-3 position-relative">{{ __('landing.find_my_program') }} <i
-            class="ti ti-arrow-up-right ms-1"></i></a>
+        <div class="d-flex flex-wrap gap-3 justify-content-center mt-4 position-relative">
+          @if($page->programs_is_enabled)
+            <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ __('landing.find_my_program') }} <i
+                class="ti ti-arrow-up-right ms-1"></i></a>
+          @endif
+          @if($page->how_is_enabled)
+            <a href="#how-it-works"
+              class="btn btn-outline-light rounded-pill btn-lg">{{ __('landing.see_how_it_works') }}</a>
+          @endif
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ===== Footer ===== -->
-  <footer class="gl-footer py-5 mt-3">
+  <footer class="gl-footer py-5">
     <div class="container py-3">
       <div class="row g-4">
         <div class="col-lg-4">
           <a class="d-flex align-items-center gap-2 mb-3" href="#hero">
-            <span class="brand-mark"><img src="{{ $page->logo_url ?? '/images/growthlab.jpeg' }}" alt="Growth Labs logo"></span>
+            <span class="brand-mark"><img src="{{ $page->logo_url ?? '/images/growthlab.jpeg' }}"
+                alt="Growth Labs logo"></span>
             <span class="fw-bold text-white fs-5">{{ $page->title ?? 'Growth Labs' }}</span>
           </a>
           <p class="text-secondary small" style="max-width:280px;">
@@ -724,28 +522,28 @@
               </a>
             @endif
             @if ($page->instagram)
-            <a href="{{ $page->instagram ?: '#' }}" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
-              <i class="ti ti-brand-instagram"></i>
-            </a>
+              <a href="{{ $page->instagram ?: '#' }}" target="_blank" rel="noopener noreferrer"
+                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
+                <i class="ti ti-brand-instagram"></i>
+              </a>
             @endif
             @if ($page->youtube)
-            <a href="{{ $page->youtube ?: '#' }}" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
-              <i class="ti ti-brand-youtube"></i>
-            </a>
+              <a href="{{ $page->youtube ?: '#' }}" target="_blank" rel="noopener noreferrer"
+                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
+                <i class="ti ti-brand-youtube"></i>
+              </a>
             @endif
             @if ($page->tiktok)
-            <a href="{{ $page->tiktok ?: '#' }}" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
-              <i class="ti ti-brand-tiktok"></i>
-            </a>
+              <a href="{{ $page->tiktok ?: '#' }}" target="_blank" rel="noopener noreferrer"
+                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
+                <i class="ti ti-brand-tiktok"></i>
+              </a>
             @endif
             @if ($page->facebook)
-            <a href="{{ $page->facebook ?: '#' }}" target="_blank" rel="noopener noreferrer"
-              class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
-              <i class="ti ti-brand-facebook"></i>
-            </a>
+              <a href="{{ $page->facebook ?: '#' }}" target="_blank" rel="noopener noreferrer"
+                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
+                <i class="ti ti-brand-facebook"></i>
+              </a>
             @endif
           </div>
         </div>
@@ -793,16 +591,27 @@
                   ? route('public.program_join', ['org_slug' => $footerProgram->organization->short_code, 'program_slug' => $footerProgram->public_slug])
                   : '#programs';
               @endphp
-              <a href="{{ $footerProgramUrl }}" class="flink" target="_blank" rel="noopener noreferrer">{{ $footerProgramTitle }}</a>
+              <a href="{{ $footerProgramUrl }}" class="flink" target="_blank"
+                rel="noopener noreferrer">{{ $footerProgramTitle }}</a>
             @empty
               <span class="text-secondary small">{{ __('landing.No_Programs') }}</span>
             @endforelse
           </div>
         </div>
       </div>
-      <hr class="border-secondary mt-5">
-      <div class="text-center">
+
+      <hr class="border-secondary my-5">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
         <p class="text-secondary small mb-0">© 2026 {{ __('landing.footer_rights_reserved') }}</p>
+        @if ($l == 'ar')
+          <a href="/lang/en" data-language="en" data-text-direction="ltr" class="flink small">
+            <i class="ti ti-world me-1"></i>English
+          </a>
+        @else
+          <a href="/lang/ar" data-language="ar" data-text-direction="rtl" class="flink small">
+            <i class="ti ti-world me-1"></i>عربي
+          </a>
+        @endif
       </div>
     </div>
   </footer>
@@ -813,23 +622,37 @@
   <script src="/vuexy/assets/js/main.js"></script>
 
   <script>
-    document.querySelectorAll('#programFilters .nav-link').forEach(function (pill) {
-      pill.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.querySelectorAll('#programFilters .nav-link').forEach(function (p) {
-          p.classList.remove('active');
-        });
-        pill.classList.add('active');
-        var filter = pill.getAttribute('data-filter');
-        document.querySelectorAll('#programs .row.g-4 > .col-md-6').forEach(function (col) {
-          if (filter === 'all' || !col.dataset.type || col.dataset.type === filter) {
-            col.style.display = '';
-          } else {
-            col.style.display = 'none';
-          }
-        });
+    (function () {
+      var glNav = document.querySelector('.gl-nav');
+      function toggleNavState() {
+        if (glNav) glNav.classList.toggle('scrolled', window.scrollY > 10);
+      }
+      window.addEventListener('scroll', toggleNavState, { passive: true });
+      toggleNavState();
+
+      var spyLinks = Array.prototype.slice.call(
+        document.querySelectorAll('.gl-nav .nav-link[href^="#"]:not(.btn)')
+      );
+      var spyTargets = [];
+      spyLinks.forEach(function (link) {
+        var el = document.querySelector(link.getAttribute('href'));
+        if (el) {
+          el._spyLink = link;
+          spyTargets.push(el);
+        }
       });
-    });
+      if ('IntersectionObserver' in window && spyTargets.length) {
+        var spy = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting || !entry.target._spyLink) return;
+            spyLinks.forEach(function (l) { l.classList.remove('active'); });
+            entry.target._spyLink.classList.add('active');
+          });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        spyTargets.forEach(function (t) { spy.observe(t); });
+      }
+    })();
+
   </script>
 </body>
 
