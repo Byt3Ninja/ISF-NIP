@@ -291,7 +291,10 @@ class SendMentorshipRequestJob implements ShouldQueue
 
         if ($this->action == 'modifySession') {
             /// Notify Mentor
-            $session = MentorshipRequest::with('orgnization', 'cycle')->findOrFail($this->id);
+            $session = MentorshipRequest::with('orgnization', 'cycle', 'cycle.organization', 'user', 'user.company', 'mentor')->findOrFail($this->id);
+            // Tie the dedupe claim below to this exact update -- a later
+            // reschedule bumps updated_at again and is allowed to re-notify.
+            $mentorUpdateVersion = $session->updated_at;
             $rName = User::findOrFail($session->mentor_id);
             $rName_usr = User::findOrFail($session->user_id);
             $user = new User();
@@ -304,8 +307,8 @@ class SendMentorshipRequestJob implements ShouldQueue
             $userLocale = $rName_usr->preferredLocale();
 
             $mentorSubject = $mentorLocale === 'ar'
-                ? "جلسة إرشاد مع {$rFullName_usr}."
-                : "Mentorship Session with {$rFullName_usr}.";
+                ? "تم تحديث جلسة الإرشاد – {$rFullName_usr}"
+                : "Mentorship Session Updated – {$rFullName_usr}";
 
             $is_hackathon = $session->cycle ? (strtolower($session->cycle->type) === 'hackathon') : false;
 
@@ -326,7 +329,9 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'mentorName' => $rFullName,
                 'mentorGender' => $rName->gender ?? '',
                 'startupOwnerName' => $rFullName_usr,
+                'startupOwnerId' => $rName_usr->id,
                 'startupName' => $session->user->company->name_en ?? '',
+                'startupId' => $session->user->company->id ?? null,
                 'sessionDate' => $sessionDate,
                 'sessionTime' => $sessionTime,
                 'is_hackathon' => $is_hackathon,
@@ -334,8 +339,9 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'sessionType' => $session->session_type ?? 'Online',
                 'meetingLink' => $session->start_url ?? '',
                 'meetingPass' => $session->zoom_passcode ?? '',
-                'location' => $session->orgnization->address ?? '',
-                'mapLink' => $session->orgnization->google_map_url ?? '',
+                'location' => $session->cycle->offline_location_address ?? '',
+                'address' => $session->orgnization->address ?? '',
+                'mapLink' => $session->cycle->offline_location_map ?? $session->orgnization->google_map_url ?? '',
                 'notes' => $session->comment ?? '',
                 'attachments' => $session->fileurl ? [['url' => env('APP_URL').'/dashboard/uploads/InviteMentor/'.$session->fileurl, 'name' => basename($session->fileurl), 'path' => $session->fileurl]] : [],
                 'status' => $session->approved ?? '',
@@ -346,7 +352,18 @@ class SendMentorshipRequestJob implements ShouldQueue
             $MSGM = new MentorshipSessionMentor($mentorMessage);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                     $rName->notify($MSGM);
+                    // Claim this specific update -- a later reschedule bumps
+                    // updated_at again, so this comparison lets it notify again.
+                    $claimedMentorUpdateNotify = MentorshipRequest::where('id', $session->id)
+                        ->where(function ($q) use ($mentorUpdateVersion) {
+                            $q->whereNull('mentor_update_notified_at')
+                              ->orWhere('mentor_update_notified_at', '!=', $mentorUpdateVersion);
+                        })
+                        ->update(['mentor_update_notified_at' => $mentorUpdateVersion]);
+
+                    if ($claimedMentorUpdateNotify) {
+                        $rName->notify($MSGM);
+                    }
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 1: ' . $th->getMessage());
