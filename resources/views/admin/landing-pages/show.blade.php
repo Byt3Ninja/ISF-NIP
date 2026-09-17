@@ -169,8 +169,8 @@
     <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="about">
       @php $landingBg = !$landingBg; @endphp
       <div class="container py-4">
-        <div class="row section-head mb-5">
-          <div class="col-lg-7">
+        <div class="row section-head mb-5 text-center">
+          <div class="col-lg-7 mx-auto">
             @php $aboutTag = $l == 'ar' ? $page->about_title_tag_ar : $page->about_title_tag; @endphp
             @if($aboutTag)
               <p class="eyebrow-mono mb-2">{{ $aboutTag }}</p>
@@ -227,8 +227,8 @@
     <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="programs">
       @php $landingBg = !$landingBg; @endphp
       <div class="container py-4">
-        <div class="row section-head mb-5">
-          <div class="col-lg-7">
+        <div class="row section-head mb-5 text-center">
+          <div class="col-lg-7 mx-auto">
             @php $programsTag = $l == 'ar' ? $page->programs_title_tag_ar : $page->programs_title_tag; @endphp
             @if($programsTag)
               <p class="eyebrow-mono mb-2">{{ $programsTag }}</p>
@@ -239,7 +239,7 @@
             @endif
             @php $programsDescription = $l == 'ar' ? $page->programs_description_ar : $page->programs_description; @endphp
             @if($programsDescription)
-              <p class="text-secondary mb-0 mt-3" style="max-width:560px;">{{ $programsDescription }}</p>
+              <p class="text-secondary mb-0 mt-3 mx-auto" style="max-width:560px;">{{ $programsDescription }}</p>
             @endif
           </div>
         </div>
@@ -455,7 +455,7 @@
   @foreach($customSections as $customSection)
     <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="custom-{{ $customSection->id }}">
       @php $landingBg = !$landingBg; @endphp
-      <div class="container section-head py-4">
+      <div class="container section-head py-4 text-center">
         @php $sectionTag = $l == 'ar' ? $customSection->title_tag_ar : $customSection->title_tag; @endphp
         @if($sectionTag)
           <p class="eyebrow-mono mb-2">{{ $sectionTag }}</p>
