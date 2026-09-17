@@ -1547,10 +1547,16 @@ class LandingPagesController extends Controller
 		$page = $id ? $this->scopedLandingPagesQuery()->findOrFail($id) : null;
 
 		$slug = strtolower(trim((string) $request->input('slug')));
-		$isValid = (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)
-			&& mb_strlen($slug) <= LandingPage::SLUG_MAX_LENGTH;
 
-		if (!$isValid) {
+		if (mb_strlen($slug) > LandingPage::SLUG_MAX_LENGTH) {
+			return response()->json([
+				'valid' => false,
+				'available' => false,
+				'message' => __('landing.validation.custom_url_slug_max', ['max' => LandingPage::SLUG_MAX_LENGTH]),
+			]);
+		}
+
+		if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
 			return response()->json([
 				'valid' => false,
 				'available' => false,
