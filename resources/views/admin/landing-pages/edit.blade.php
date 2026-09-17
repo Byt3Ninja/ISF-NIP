@@ -866,6 +866,7 @@
       const lpUrlBase = "{{ url('/lp/') }}/";
       let lpUrlSlugChecked = false;   // current slug value verified against the backend
       let lpUrlSlugAvailable = false; // result of the last availability check
+      let lpUrlCheckErrorMessage = ''; // last error message returned by the check endpoint
       let lpUrlSavedSlug = "{{ $currentPage->slug ? $currentPage->slug : '' }}"; // slug of the currently saved configuration
       let lpUrlActive = true;         // mirrors the Active toggle
 
@@ -894,11 +895,13 @@
       };
 
       const lpUrlShowFieldError = function ($input, message) {
+        if (lpUrlFv) return;
         $input.addClass('is-invalid');
         lpUrlFindFeedback($input).text(message).addClass('d-block');
       };
 
       const lpUrlClearFieldError = function ($input) {
+        if (lpUrlFv) return;
         $input.removeClass('is-invalid');
         lpUrlFindFeedback($input).text('').removeClass('d-block');
       };
@@ -943,8 +946,9 @@
                 if (!lpUrlSlugChecked) return { valid: true };
                 if (!lpUrlSlugAvailable) {
                   $('#lpUrlAvailabilityFeedback').text('').removeClass('text-success text-danger').hide();
+                  return { valid: false, message: lpUrlCheckErrorMessage || lpUrlI18n.taken };
                 }
-                return { valid: lpUrlSlugAvailable };
+                return { valid: true };
               },
             },
           },
@@ -982,29 +986,41 @@
         lpUrlSlugAvailable = false;
 
         if (!slug) {
-          lpUrlSetAvailability('taken', lpUrlI18n.slugRequired);
-          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugRequired, empty: true });
+          lpUrlCheckErrorMessage = lpUrlI18n.slugRequired;
+          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage, empty: true });
           return d.promise();
         }
         if (!lpUrlIsValidSlug(slug)) {
-          lpUrlSetAvailability('taken', lpUrlI18n.slugInvalid);
-          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugInvalid });
+          lpUrlCheckErrorMessage = lpUrlI18n.slugInvalid;
+          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage });
           return d.promise();
         }
 
         lpUrlSetAvailability('checking', lpUrlI18n.checking);
+        lpUrlClearFieldError($slug);
 
         lpUrlAjax("{{ route('landing-pages.url.check', $currentPage->id) }}", { slug: slug })
           .done(function (res) {
             lpUrlSlugChecked = true;
             lpUrlSlugAvailable = !!res.available;
             lpUrlSetAvailability(res.available ? 'available' : 'taken', res.message);
+            if (res.available) {
+              lpUrlClearFieldError($slug);
+            } else {
+              lpUrlCheckErrorMessage = res.message || lpUrlI18n.taken;
+              lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+            }
             d.resolve({ valid: !!res.valid, available: !!res.available, message: res.message });
           })
           .fail(function (xhr) {
-            const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
-            lpUrlSetAvailability('taken', message);
-            d.resolve({ valid: false, available: false, message: message });
+            lpUrlCheckErrorMessage = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
+            lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+            lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+            d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage });
           });
         return d.promise();
       };
@@ -1046,6 +1062,7 @@
         $('#lpUrlSlug').val(lpUrlSlugify(title));
         lpUrlSlugChecked = false;
         lpUrlSlugAvailable = false;
+        lpUrlClearFieldError($('#lpUrlSlug'));
         lpUrlSetAvailability('', '');
         if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
       });
@@ -1059,6 +1076,7 @@
       $('#lpUrlSlug').on('input', function () {
         lpUrlSlugChecked = false;
         lpUrlSlugAvailable = false;
+        lpUrlClearFieldError($(this));
         lpUrlSetAvailability('', '');
       });
 
