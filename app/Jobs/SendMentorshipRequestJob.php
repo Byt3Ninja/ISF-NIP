@@ -496,12 +496,20 @@ class SendMentorshipRequestJob implements ShouldQueue
                     }
                     else
                     {
-                        $startup_user->notify(
-                            new StartupNotifyMentorshipRejectionNotification(
-                                $userMessage,
-                                $session
-                            )
-                        );
+                        // Atomically claim the "notify founder of decline" step
+                        // so a retry of this job never double-emails the founder.
+                        $claimedRejectionNotify = MentorshipRequest::where('id', $session->id)
+                            ->whereNull('rejection_notified_at')
+                            ->update(['rejection_notified_at' => now()]);
+
+                        if ($claimedRejectionNotify) {
+                            $startup_user->notify(
+                                new StartupNotifyMentorshipRejectionNotification(
+                                    $userMessage,
+                                    $session
+                                )
+                            );
+                        }
                     }
                 } catch (\Throwable $th) {
                     Log::error('modify user Notification Error: ' . $th->getMessage());

@@ -206,10 +206,10 @@ return [
             'wishes' => 'We wish you a productive and successful session.',
         ],
         'rejection' => [
-            'subject' => 'Your Mentorship Session Request Has Been Rejected',
+            'subject' => 'Your Mentorship Session Request Has Been Declined',
             'thanking' => 'Thank you for submitting your mentorship session request.',
-            'informing' => 'After review, we regret to inform you that your request could not be approved at this time.',
-            'suggestion' => 'If needed, you may submit a new mentorship request through the platform or contact your program manager for further assistance.',
+            'informing' => 'After reviewing your request, we regret to inform you that it could not be approved at this time.',
+            'suggestion' => 'You can submit a new mentorship request through the platform when appropriate.',
         ],
         'subject' => 'Mentorship Session Scheduled',
         'informing' => 'A mentorship session has been scheduled for your startup by :admin_name.',
@@ -321,5 +321,6 @@ return [
     'cta' => [
         'review_request' => 'Review Request',
         'view_session' => 'View Session',
+        'submit_new_request' => 'Submit New Request',
     ],
 ];
