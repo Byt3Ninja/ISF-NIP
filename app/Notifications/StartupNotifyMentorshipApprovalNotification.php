@@ -13,7 +13,6 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
-use App\Services\FileManagerService;
 use Throwable;
 
 class StartupNotifyMentorshipApprovalNotification extends Notification implements ShouldQueue
@@ -134,21 +133,13 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
             $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
         }
         $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
-        $location = $sessionType == 'offline' ? ($cycle->offline_location_address ?: optional($cycle->organization)->address ?: '-') : '-';
-        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: '-') : '-';
-        $attachments = $mentorship_session->attachments;
-        if( empty( $attachments ) )
-        {
-            $attachments = $mentorship_session->fileurl ? [
-                [
-                    'url' => app(FileManagerService::class)->getUrl($mentorship_session->fileurl, 'UsersDiskInviteMentor'),
-                    'name' => basename($mentorship_session->fileurl),
-                    'path' => $mentorship_session->fileurl
-                ]
-            ] : [];
-        }
+        $locationName = $sessionType == 'offline' ? ($cycle->offline_location_address ?: null) : null;
+        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: null) : null;
+        $address = $sessionType == 'offline' ? (optional($cycle->organization)->address ?: null) : null;
 
         $mentorName = $mentorship_session?->mentor?->name ?? '';
+        $signOffName = $orgData['org_name'] ?? $platformName;
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
             ->subject( __('email.startup_mentorship_session_notify_email.approval.subject') )
@@ -159,11 +150,12 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
                 'sessionDate'       => $sessionDate,
                 'sessionTime'       => $sessionTime,
                 'sessionLink'       => $mentorship_session?->join_url ?? '',
-                'platformName'      => $platformName,
-                'location'          => $location,
+                'passcode'          => $mentorship_session?->zoom_passcode ?? '',
+                'platformName'      => $signOffName,
+                'locationName'      => $locationName,
                 'mapLink'           => $mapLink,
-                'attachments'       => $attachments,
-                'sessionNotes'      => $mentorship_session?->comment ?? '-',
+                'address'           => $address,
+                'viewSessionUrl'    => route('mentorships.list_mine'),
             ], $orgData));
     }
 

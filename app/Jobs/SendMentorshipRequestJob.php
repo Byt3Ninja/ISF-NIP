@@ -479,12 +479,20 @@ class SendMentorshipRequestJob implements ShouldQueue
                     $status = strtolower( (string) $this->stat ) == 'yes' ? true : false;
                     if( $status )
                     {
-                        $startup_user->notify(
-                            new StartupNotifyMentorshipApprovalNotification(
-                                $userMessage,
-                                $session
-                            )
-                        );
+                        // Atomically claim the "notify founder of approval" step
+                        // so a retry of this job never double-emails the founder.
+                        $claimedApprovalNotify = MentorshipRequest::where('id', $session->id)
+                            ->whereNull('approval_notified_at')
+                            ->update(['approval_notified_at' => now()]);
+
+                        if ($claimedApprovalNotify) {
+                            $startup_user->notify(
+                                new StartupNotifyMentorshipApprovalNotification(
+                                    $userMessage,
+                                    $session
+                                )
+                            );
+                        }
                     }
                     else
                     {

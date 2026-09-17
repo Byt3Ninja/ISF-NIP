@@ -190,16 +190,19 @@ return [
     'startup_mentorship_session_notify_email' => [
         'approval' => [
             'subject' => 'Your Mentorship Session Request Has Been Approved',
-            'informing' => 'We’re pleased to inform you that your mentorship session request has been approved.',
+            'informing' => 'Your mentorship session request has been approved.',
             'session_details' => 'Session Details',
             'mentor' => 'Mentor',
             'date' => 'Date',
             'time' => 'Time',
+            'session_type' => 'Session Type',
+            'session_type_online' => 'Online',
+            'session_type_in_person' => 'In Person',
+            'meeting_link' => 'Meeting Link',
             'session_link' => 'Session Link',
             'session_address' => 'Session Address',
             'map_location_link' => 'Map/Location Link',
-            'session_type' => 'Session Type',
-            'ensure_on_time' => 'Please make sure to attend the session on time. You can access additional details by logging into the platform.',
+            'ensure_on_time' => 'Please attend the session on time. You can review the complete session details through the platform.',
             'wishes' => 'We wish you a productive and successful session.',
         ],
         'rejection' => [
