@@ -5,15 +5,21 @@
 
 @extends('emails.layout.master')
 @section('content')
+@php
+    $isRtl = app()->getLocale() === 'ar';
+    $dirAttr = $isRtl ? 'rtl' : 'ltr';
+    $alignStart = $isRtl ? 'right' : 'left';
+@endphp
 
     <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-4" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
         <tr>
             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-                    <p style="margin: 0;">{{__('email.welcome_email.dear')}} {{ $user->first_name_en . ' ' . $user->last_name_en }},</p>
-                    <p style="margin: 0;"> {{__('email.welcome_email.m1')}}</p>
-                    <p style="margin: 0;"> {{__('email.welcome_email.m2')}} <strong>{{ $user->email }}</strong></p>
-                    <p style="margin: 0 0 10px;">{{__('email.welcome_email.m3')}}</p>
+                <div dir="{{ $dirAttr }}" style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:{{ $alignStart }};mso-line-height-alt:22.5px;">
+                    <p style="margin: 0;">{{ trim(strtolower($user->gender ?? '')) == 'female' ? __('email.new_user_welcome_email.dear_female') : __('email.new_user_welcome_email.dear_male') }} {{ $user->first_name_en . ' ' . $user->last_name_en }}{{ $isRtl ? '،' : ',' }}</p>
+                    <p style="margin: 15px 0px;"></p>
+                    <p style="margin: 0;"> {{ __('email.new_user_welcome_email.m1', ['platform_name' => $platformName]) }}</p>
+                    <p style="margin: 15px 0px;"></p>
+                    <p style="margin: 0;"> {{ __('email.new_user_welcome_email.m2') }}</p>
                 </div>
             </td>
         </tr>
@@ -29,14 +35,14 @@
                             <!--[if mso]>
                             <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ $magicLoginUrl }}" style="height:46px;v-text-anchor:middle;width:240px;" arcsize="11%" stroke="f" fillcolor="#1aa19c">
                                 <w:anchorlock/>
-                                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{{ __('email.welcome_email.login_button') }}</center>
+                                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{{ __('email.new_user_welcome_email.login_button') }}</center>
                             </v:roundrect>
                             <![endif]-->
                             <!--[if !mso]><!-- -->
                             <a href="{{ $magicLoginUrl }}"
                                target="_blank"
                                style="background-color:#1aa19c;border-radius:5px;color:#ffffff;display:inline-block;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;font-weight:bold;line-height:46px;text-align:center;text-decoration:none;width:240px;-webkit-text-size-adjust:none;mso-hide:all;">
-                                {{ __('email.welcome_email.login_button') }}
+                                {{ __('email.new_user_welcome_email.login_button') }}
                             </a>
                             <!--<![endif]-->
                         </td>
@@ -60,9 +66,10 @@
     <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-7" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
         <tr>
             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-                    <p style="margin: 0;">{{__('email.welcome_email.best_regards')}}</p>
-                    <p style="margin: 0;">{{ $platformName }}</p>
+                <div dir="{{ $dirAttr }}" style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:{{ $alignStart }};mso-line-height-alt:22.5px;">
+                    <p style="margin: 0 0 16px;"> {{ __('email.new_user_welcome_email.m3', ['platform_name' => $platformName]) }}</p>
+                    <p style="margin: 0;">{{ __('email.new_user_welcome_email.best_regards') }}</p>
+                    <p style="margin: 0; font-weight: 600;">{{ __('email.new_user_welcome_email.team', ['platform_name' => $platformName]) }}</p>
                 </div>
             </td>
         </tr>

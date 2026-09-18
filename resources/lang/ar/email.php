@@ -11,6 +11,16 @@ return [
         'login_link_note'=>"لحماية حسابك، هذا الرابط صالح لمدة 24 ساعة ويمكن استخدامه مرة واحدة فقط.",
         'best_regards'=>"Best regards,"
     ],
+    'new_user_welcome_email' => [
+        'dear_male' => 'عزيزي',
+        'dear_female' => 'عزيزتي',
+        'm1' => 'مرحباً بك في :platform_name! يسعدنا انضمامك إلى مجتمعنا.',
+        'm2' => 'تم إنشاء حسابك بنجاح. يمكنك الدخول إلى المنصة باستخدام الرابط أدناه.',
+        'm3' => 'نتطلع إلى وجودك معنا ونتمنى لك تجربة رائعة على :platform_name.',
+        'login_button' => 'الدخول إلى حسابك',
+        'best_regards' => 'مع أطيب التحيات،',
+        'team' => 'فريق :platform_name',
+    ],
     'mentor_welcome_email' => [
         'subject' => 'مرحباً بك في :platform_name',
         'dear_male' => 'عزيزي',

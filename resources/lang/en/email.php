@@ -11,6 +11,16 @@ return [
         'login_link_note' => 'For your security, this link expires in 24 hours and can be used only once.',
         'best_regards' => 'Best regards,',
     ],
+    'new_user_welcome_email' => [
+        'dear_male' => 'Dear',
+        'dear_female' => 'Dear',
+        'm1' => 'Welcome to :platform_name! We’re excited to have you join our community.',
+        'm2' => 'Your account has been successfully created. You can access the platform using the link below.',
+        'm3' => 'We look forward to having you with us and hope you have a great experience on :platform_name.',
+        'login_button' => 'Access Your Account',
+        'best_regards' => 'Best regards,',
+        'team' => ':platform_name Team',
+    ],
     'mentor_welcome_email' => [
         'subject' => 'Welcome to :platform_name',
         'dear_male' => 'Dear Mr. ',

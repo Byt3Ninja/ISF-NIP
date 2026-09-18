@@ -142,8 +142,14 @@ class UserService
 						$user->notify(new WelcomeMentorNotification($user, $data['password']));
 					}
 				}
-				else { 
-					$user->notify(new WelcomeUserNotification($user, $data['password'])); 
+				else {
+					$claimedUserWelcome = \App\User::where('id', $user->id)
+						->whereNull('user_welcome_sent_at')
+						->update(['user_welcome_sent_at' => now()]);
+
+					if ($claimedUserWelcome) {
+						$user->notify(new WelcomeUserNotification($user, $data['password']));
+					}
 				}
 			}
 			return $result;

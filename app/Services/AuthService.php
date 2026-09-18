@@ -99,7 +99,13 @@ class AuthService
                 }
             }
             else {
-                $user->notify(new WelcomeUserNotification($user, $data['password']));
+                $claimedUserWelcome = \App\User::where('id', $user->id)
+                    ->whereNull('user_welcome_sent_at')
+                    ->update(['user_welcome_sent_at' => now()]);
+
+                if ($claimedUserWelcome) {
+                    $user->notify(new WelcomeUserNotification($user, $data['password']));
+                }
             }
             DB::commit();
 
