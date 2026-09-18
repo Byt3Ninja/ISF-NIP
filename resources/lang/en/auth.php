@@ -101,4 +101,22 @@ return [
 	'validate_password_regexp' => 'Password must include uppercase, lowercase, numbers, and symbols',
 	'validate_job_title_string_length' => 'Job title must be between 2 and 100 characters',
 	'validate_job_title_regexp' => 'Job title must contain only letters and spaces',
+
+	'placeholder_first_name' => 'Enter your first name',
+	'placeholder_last_name' => 'Enter your last name',
+	'placeholder_gender' => 'Select your gender',
+	'placeholder_email' => 'Enter your email',
+	'placeholder_phone' => 'Enter your phone number',
+	'placeholder_job_title' => 'Enter your job title',
+	'placeholder_bio' => 'Tell us about your experience and what you can help founders with',
+
+	'registeringAs' => 'I\'m registering as',
+	'area_of_expertise' => 'Area of expertise',
+	'linkedin_profile' => 'LinkedIn Profile',
+	'create_account' => 'Create your account',
+	'sign_up_subheading' => 'Sign up to unlock your dashboard, community and more.',
+	'welcome_community' => 'Welcome to the community',
+	'connect_text' => 'Connect with founders, mentors and service providers who are shaping the future of work.',
+	'sign_in_continue' => 'Sign in to continue where you left off.',
+	'Sign In' => 'Sign In',
 ];
