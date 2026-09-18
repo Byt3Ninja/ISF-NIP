@@ -31,10 +31,11 @@ class Role extends Model
 		return $this->belongsToMany(User::class, 'model_has_roles', 'role_id', 'model_id');
 	}
 
-	public static function _users( $role )
+	public static function _users( $roles )
 	{
-		$role = strtolower($role);
-		$get_role = Role::where('default_for', $role)->with(['users', 'users.roles'])->get();
+        if( !is_array( $roles ) ) { $roles = explode('|', $roles); }
+        $roles = array_map(function($n){ return trim( strtolower( $n ) ); }, $roles);
+		$get_role = Role::whereIn('default_for', $roles)->with(['users', 'users.roles'])->get();
 		$get_role = $get_role->flatMap(function ($r) {
 			return $r->users;
 		})->unique('id')->values();

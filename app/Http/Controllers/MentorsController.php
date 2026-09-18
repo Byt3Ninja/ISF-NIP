@@ -27,6 +27,7 @@ use App\SurveyResponses;
 use App\Surveys;
 use App\SurveyScopes;
 use App\User;
+use App\Role;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -785,9 +786,9 @@ class MentorsController extends Controller
 			// manages the program (cycle) the founder is currently enrolled in,
 			// the sub-admin(s) that organization is assigned to, and the
 			// platform's super admin(s). One role query covers both roles.
-			$roledUsers = User::role(['organizationManager', 'admin'])->get();
-			$orgManagers = $roledUsers->filter(fn ($u) => $u->hasRole('organizationManager') && $u->organization_id == $cycle->organization_id);
-			$superAdmins = $roledUsers->filter(fn ($u) => $u->hasRole('admin'));
+			$rolesUsers = Role::_users(['organizationManager', 'admin'])->get();
+			$orgManagers = $rolesUsers->filter(fn ($u) => $u->hasRole('organizationManager') && $u->organization_id == $cycle->organization_id);
+			$superAdmins = $rolesUsers->filter(fn ($u) => $u->hasRole('admin'));
 			$subAdmins = $cycle->organization->assignedUsers;
 			$parties = $orgManagers->merge($subAdmins)->merge($superAdmins)->unique('id');
 
