@@ -1,25 +1,27 @@
 @extends('emails.layout.master')
 @section('content')
+@php
+    $isRtl = app()->getLocale() === 'ar';
+    $dirAttr = $isRtl ? 'rtl' : 'ltr';
+    $alignStart = $isRtl ? 'right' : 'left';
+@endphp
 
     <table border="0" cellpadding="0" cellspacing="0" class="paragraph_block block-4" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
         <tr>
             <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-                    <p style="margin: 0;">{{ trim( strtolower( $user->gender ) ) == 'male' ? __('email.mentor_welcome_email.dear_male') : __('email.mentor_welcome_email.dear_female') }} {{ $user->name }},</p>
-                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.message1', ['platform_name' => $platformName]) }}</p>
+                <div dir="{{ $dirAttr }}" style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:{{ $alignStart }};mso-line-height-alt:22.5px;">
+                    <p style="margin: 0;">{{ trim( strtolower( $user->gender ) ) == 'male' ? __('email.mentor_welcome_email.dear_male') : __('email.mentor_welcome_email.dear_female') }} {{ $user->name }}{{ $isRtl ? '،' : ',' }}</p>
+                    <p style="margin: 15px 0px;"></p>
+                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.message1', ['platform_name' => $mentorWelcomePlatformName]) }}</p>
+                    <p style="margin: 15px 0px;"></p>
                     <p style="margin: 0;"> {{ __('email.mentor_welcome_email.message2') }}</p>
                     <p style="margin: 15px 0px;"></p>
-                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.platform_details') }}</p>
-                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.platform_link') }} <a href="{{ $platformLink }}" target="_blank">{{ $platformLink }}</a></p>
-                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.email') }} <strong>{{ $user->email }}</strong></p>
-                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.password') }} <strong>{{ $password }}</strong></p>
-                    <p style="margin: 15px 0px;"></p>
-                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.recommendation') }}</p>
+                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.access_intro') }}</p>
                     <p style="margin: 15px 0px;"></p>
                     <p style="margin: 0;"> {{ __('email.mentor_welcome_email.support') }}</p>
                     <p style="margin: 15px 0px;"></p>
                     <p style="margin: 0;"> {{ __('email.mentor_welcome_email.regards') }}</p>
-                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.team', ['platform_name' => $platformName]) }}</p>
+                    <p style="margin: 0;"> {{ __('email.mentor_welcome_email.team', ['platform_name' => $mentorWelcomePlatformName]) }}</p>
                 </div>
             </td>
         </tr>
@@ -35,14 +37,14 @@
                             <!--[if mso]>
                             <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ $magicLoginUrl }}" style="height:46px;v-text-anchor:middle;width:240px;" arcsize="11%" stroke="f" fillcolor="#1aa19c">
                                 <w:anchorlock/>
-                                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{{ __('email.welcome_email.login_button') }}</center>
+                                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{{ __('email.mentor_welcome_email.login_button') }}</center>
                             </v:roundrect>
                             <![endif]-->
                             <!--[if !mso]><!-- -->
                             <a href="{{ $magicLoginUrl }}"
                                target="_blank"
                                style="background-color:#1aa19c;border-radius:5px;color:#ffffff;display:inline-block;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;font-weight:bold;line-height:46px;text-align:center;text-decoration:none;width:240px;-webkit-text-size-adjust:none;mso-hide:all;">
-                                {{ __('email.welcome_email.login_button') }}
+                                {{ __('email.mentor_welcome_email.login_button') }}
                             </a>
                             <!--<![endif]-->
                         </td>

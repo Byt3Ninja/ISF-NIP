@@ -124,9 +124,27 @@ class UserService
 				Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
 				Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
 
-				if($user->hasRole('Judger')) { $user->notify(new WelcomeJudgerNotification($user)); }
-				elseif($user->hasRole('mentor')) { $user->notify(new WelcomeMentorNotification($user, $data['password'])); }
-				else { $user->notify(new WelcomeUserNotification($user, $data['password'])); }
+				$isJudge = $user->hasRole('Judger')
+					|| $user->hasRole('judge')
+					|| in_array(strtolower($data['role'] ?? ''), ['judger', 'judge']);
+
+				if($isJudge) { 
+					$user->notify(new WelcomeJudgerNotification($user)); 
+				}
+				elseif($user->hasRole('mentor') || strtolower($data['role'] ?? '') === 'mentor') {
+					// Atomically claim the "send mentor welcome email" step so a
+					// retry of this flow never double-emails the new mentor.
+					$claimedMentorWelcome = \App\User::where('id', $user->id)
+						->whereNull('mentor_welcome_sent_at')
+						->update(['mentor_welcome_sent_at' => now()]);
+
+					if ($claimedMentorWelcome) {
+						$user->notify(new WelcomeMentorNotification($user, $data['password']));
+					}
+				}
+				else { 
+					$user->notify(new WelcomeUserNotification($user, $data['password'])); 
+				}
 			}
 			return $result;
 		} catch (\Throwable $e) {

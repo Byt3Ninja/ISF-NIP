@@ -87,7 +87,16 @@ class AuthService
 
                     DB::table('mentor_expertise')->insert($expertiseInsert);
                 }
-                $user->notify(new WelcomeMentorNotification($user, $data['password']));
+
+                // Atomically claim the "send mentor welcome email" step so a
+                // retry of this flow never double-emails the new mentor.
+                $claimedMentorWelcome = \App\User::where('id', $user->id)
+                    ->whereNull('mentor_welcome_sent_at')
+                    ->update(['mentor_welcome_sent_at' => now()]);
+
+                if ($claimedMentorWelcome) {
+                    $user->notify(new WelcomeMentorNotification($user, $data['password']));
+                }
             }
             else {
                 $user->notify(new WelcomeUserNotification($user, $data['password']));

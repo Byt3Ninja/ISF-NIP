@@ -73,8 +73,10 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
-        
+        // This is a platform-branded email (platform logo/name), not the
+        // mentor's organization -- SMTP routing still uses the org, above.
+        $orgData = $this->buildEmailOrganizationData(null);
+
         $this->configureSmtp($smtpSettings);
         $magicLoginUrl = $notifiable->generateMagicLoginUrl();
 
@@ -83,8 +85,10 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
             ->subject(__('email.mentor_welcome_email.subject' , ['platform_name' => $platformName]))
             ->view('emails.welcome_mentor_email', array_merge([
                 'user'          => $this->user,
-                'password'      => $this->password,
-                'platformName'  => $platformName,
+                // Named distinctly from 'platformName': a global view composer
+                // (AppServiceProvider) sets that key on every view and would
+                // silently override this value.
+                'mentorWelcomePlatformName' => $platformName,
                 'platformLink'  => config('app.url'),
                 'magicLoginUrl' => $magicLoginUrl,
             ], $orgData));
