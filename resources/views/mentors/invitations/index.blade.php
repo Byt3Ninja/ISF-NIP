@@ -288,7 +288,7 @@ $tabs = [
 
         <div class="col-12 mb-4">
           <label for="invitationSubject" class="form-label">
-            @lang('admin.invitation_subject') <span class="text-danger">*</span>
+            @lang('admin.invitation_subject')
           </label>
           <input
             type="text"
@@ -296,7 +296,6 @@ $tabs = [
             id="invitationSubject"
             name="invitation_subject"
             placeholder="@lang('admin.enter_invitation_subject')"
-            required
             maxlength="255"
           >
           <div class="invalid-feedback" id="invitationSubjectError"></div>
@@ -304,7 +303,7 @@ $tabs = [
 
         <div class="col-12 mb-4">
           <label for="invitationMessage" class="form-label">
-            @lang('admin.invitation_message') <span class="text-danger">*</span>
+            @lang('admin.invitation_message')
           </label>
           <div id="invitationMessageEditor" style="height: 150px; overflow-y: scroll;"></div>
           <textarea
@@ -312,7 +311,6 @@ $tabs = [
             id="invitationMessage"
             name="invitation_message"
             maxlength="10000"
-            required
           ></textarea>
           <div class="invalid-feedback" id="invitationMessageError"></div>
         </div>
@@ -497,7 +495,6 @@ $(function () {
 
   quill.on('text-change', () => {
     $('#invitationMessage').val(quill.root.innerHTML);
-    fv && fv.revalidateField('invitation_message');
     clearTimeout(_deleteDebounceTimer);
     _deleteDebounceTimer = setTimeout(detectAndDeleteRemovedFiles, 900);
   });
@@ -764,13 +761,7 @@ $(function () {
       },
       invitation_subject: {
         validators: {
-          notEmpty:     { message: '{{ __("admin.invitation_subject_required") }}' },
           stringLength: { max: 255, message: '{{ __("admin.invitation_subject_max_length") }}' }
-        }
-      },
-      invitation_message: {
-        validators: {
-          notEmpty: { message: '{{ __("admin.invitation_message_required") }}' }
         }
       }
     },
