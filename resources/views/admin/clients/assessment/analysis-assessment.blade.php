@@ -23,9 +23,13 @@
     <div class="">
       <!-- Alert -->
       @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible" role="alert">
-          {{ __('admin.' . session()->get('message')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {{-- The controller flashes an already-translated string plus a bootstrap
+             variant in 'class'; fall back to success when none was supplied. --}}
+        <div class="alert alert-{{ session()->get('class', 'success') }} alert-dismissible d-flex align-items-center"
+          role="alert">
+          <i class="ti ti-info-circle me-2 flex-shrink-0"></i>
+          <span>{{ session()->get('message') }}</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('admin.Close') }}"></button>
         </div>
       @endif
       @if (session()->has('message2'))
@@ -127,12 +131,42 @@
                 </div>
                 <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
                   @if (!$assessment_user)
-                  <form action="{{ route('assessments.assign') }}" method="post">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-primary">
-                      {{ __('admin.Make_a_new_assessment') }}
-                    </button>
-                  </form>
+                    @php
+                      // canStartAssessment() ran in the controller; 'reason' tells us
+                      // which precondition is unmet so we can name it for the founder.
+                      $canStart = $startCheck['can_proceed'] ?? false;
+                      $blockedReason = $startCheck['reason'] ?? null;
+
+                      // Reasons the founder can act on carry a link to the fix.
+                      $blockedAction = [
+                          'no_company' => ['route' => route('company.profile_view_mine'), 'label' => __('admin.GoToMyStartup')],
+                          'no_stage' => ['route' => route('company.profile_view_mine'), 'label' => __('admin.GoToMyStartup')],
+                      ][$blockedReason] ?? null;
+                    @endphp
+
+                    <div class="d-flex flex-column align-items-start align-items-md-end gap-2">
+                      <form action="{{ route('assessments.assign') }}" method="post">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-primary" @disabled(!$canStart)
+                          @if (!$canStart) aria-describedby="assessment-blocked-hint" @endif>
+                          {{ __('admin.Make_a_new_assessment') }}
+                        </button>
+                      </form>
+
+                      @unless ($canStart)
+                        <div id="assessment-blocked-hint"
+                          class="d-flex align-items-start gap-2 text-start text-md-end justify-content-md-end"
+                          style="max-width: 42ch;">
+                          <i class="ti ti-alert-circle ti-16px text-warning flex-shrink-0 mt-1"></i>
+                          <span class="text-xs text-muted">
+                            {{ __('admin.CannotStartAssessment_' . ($blockedReason ?? 'generic')) }}
+                            @if ($blockedAction)
+                              <a href="{{ $blockedAction['route'] }}" class="fw-semibold">{{ $blockedAction['label'] }}</a>
+                            @endif
+                          </span>
+                        </div>
+                      @endunless
+                    </div>
                   @endif
 
                   @if ($assessment && $assessment->end_date)

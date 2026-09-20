@@ -4026,4 +4026,17 @@ return [
 	'Step Type' => 'نوع المرحلة',
 	'All Program Types' => 'جميع أنواع البرامج',
 	'All Step Types' => 'جميع أنواع المراحل',
+  'Add_Cofounders' => 'أضف الشركاء المؤسسين',
+  'msg_attachment_hint' => 'الحد الأقصى 10 ميجابايت — PDF، DOC، PNG، JPG',
+  'hist_reply_attachment_hint' => 'الحد الأقصى 10 ميجابايت — PNG، JPG، JPEG، WEBP، DOC، DOCX، XLS، XLSX، PPT، PPTX، ZIP، RAR',
+  'Upload File' => 'رفع ملف',
+  // شروط بدء التقييم (AssessmentController::canStartAssessment)
+  'AssessmentNotConfiguredForStage' => 'لم يتم إعداد التقييم لمرحلة التطوير الخاصة بك بعد.',
+  'CannotStartAssessment_no_company' => 'أضف شركتك الناشئة قبل أن تتمكن من بدء التقييم.',
+  'CannotStartAssessment_no_stage' => 'حدد مرحلة التطوير الخاصة بشركتك الناشئة قبل أن تتمكن من بدء التقييم.',
+  'CannotStartAssessment_assessment_in_progress' => 'لديك تقييم قيد التنفيذ بالفعل. أكمله قبل بدء تقييم جديد.',
+  'CannotStartAssessment_not_configured' => 'التقييم غير متاح لمرحلة التطوير الخاصة بك بعد. تواصل مع الدعم لإعداده.',
+  'CannotStartAssessment_generic' => 'لا يمكنك بدء تقييم في الوقت الحالي.',
+  'GoToMyStartup' => 'الذهاب إلى شركتي الناشئة',
+  'AssessmentCreateFailed' => 'تعذر إنشاء التقييم. حاول مرة أخرى.',
 ];

@@ -91,12 +91,10 @@ $mobilePills = ['analysis'];
             <div class="card-body">
               <div class="d-flex flex-column align-items-center justify-content-center gap-3">
                 <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
+                {{-- Admin-only view of a founder's assessment. Only the founder can
+                     start one (MakeAssessment() requires the Registered role), so no
+                     CTA is offered here. --}}
                 <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
-                <a 
-                  href="{{ route('assessments.assign') }}"
-                  class="btn btn-lg btn-primary">
-                  {{ __('admin.Make_a_new_assessment') }}
-                </a>
               </div>
             </div>
           </div>

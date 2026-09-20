@@ -3982,4 +3982,17 @@ return [
 	'Step Type' => 'Step Type',
 	'All Program Types' => 'All Program Types',
 	'All Step Types' => 'All Step Types',
+  'Add_Cofounders' => 'Add your CoFounders',
+  'msg_attachment_hint' => 'Max 10 MB — PDF, DOC, PNG, JPG',
+  'hist_reply_attachment_hint' => 'Max 10 MB — PNG, JPG, JPEG, WEBP, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR',
+  'Upload File' => 'Upload File',
+  // Assessment start preconditions (AssessmentController::canStartAssessment)
+  'AssessmentNotConfiguredForStage' => 'The assessment is not set up for your development stage yet.',
+  'CannotStartAssessment_no_company' => 'Add your startup before you can start an assessment.',
+  'CannotStartAssessment_no_stage' => 'Set your development stage before you can start an assessment.',
+  'CannotStartAssessment_assessment_in_progress' => 'You already have an assessment in progress. Finish it before starting a new one.',
+  'CannotStartAssessment_not_configured' => 'The assessment is not available for your development stage yet. Contact support to get it set up.',
+  'CannotStartAssessment_generic' => 'You cannot start an assessment right now.',
+  'GoToMyStartup' => 'Go to my startup',
+  'AssessmentCreateFailed' => 'Could not create the assessment. Try again.',
 ];
