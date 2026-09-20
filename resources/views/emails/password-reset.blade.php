@@ -1,47 +1,63 @@
-@php
-    $setting = App\Settings::first();
-    $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-@endphp
-
 @extends('emails.layout.master')
 
 @section('content')
-    <tr>
-        <td class="content-block" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-            <h1 style="font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; box-sizing: border-box; font-size: 24px; color: #000; line-height: 1.2; font-weight: 400; margin: 20px 0 30px; padding: 0;">
-                Reset Your Password
-            </h1>
-            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; line-height: 1.6; margin: 0 0 20px; padding: 0;">
-                Hello {{ $user->name ?? 'there' }},
-            </p>
-            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; line-height: 1.6; margin: 0 0 20px; padding: 0;">
-                You are receiving this email because we received a password reset request for your account.
-            </p>
-            <table border="0" cellpadding="0" cellspacing="0" style="margin: 20px 0 30px;">
-                <tr>
-                    <td align="center" style="border-radius: 3px;" bgcolor="#1aa19c">
-                        <a href="{{ $resetUrl }}" target="_blank" style="font-size: 15px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 3px; padding: 12px 25px; border: 1px solid #1aa19c; display: inline-block; font-weight: 500;">
-                            Reset Password
-                        </a>
-                    </td>
-                </tr>
-            </table>
-            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 20px; padding: 0; color: #666;">
-                This password reset link will expire in {{ $expire }} minutes.
-            </p>
-            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 20px; padding: 0; color: #666;">
-                If you did not request a password reset, no further action is required.
-            </p>
-            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 20px; padding: 0; color: #666;">
-                If you're having trouble clicking the "Reset Password" button, copy and paste the URL below into your web browser:
-            </p>
-            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 12px; line-height: 1.6; margin: 0 0 20px; padding: 10px; background: #f5f5f5; border-radius: 3px; word-break: break-all;">
-                {{ $resetUrl }}
-            </p>
-            <p style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
-                Thank you,<br>
-                {{ $platformName }}
-            </p>
-        </td>
-    </tr>
+@php
+    $isRtl = ($resetLocale ?? 'en') === 'ar';
+    $dirAttr = $isRtl ? 'rtl' : 'ltr';
+    $alignStart = $isRtl ? 'right' : 'left';
+    $t = fn ($key, $replace = []) => __('email.password_reset_email.' . $key, $replace, $isRtl ? 'ar' : 'en');
+    $font = 'Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif';
+@endphp
+    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+        <tr>
+            <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
+                <div dir="{{ $dirAttr }}" style="color:#555555;font-family:{{ $font }};font-size:15px;line-height:150%;text-align:{{ $alignStart }};mso-line-height-alt:22.5px;">
+                    <p style="margin: 0;">{{ $t('hello', ['name' => $resetUserName]) }}</p>
+                    <p style="margin: 15px 0px;"></p>
+                    <p style="margin: 0;">{{ $t('intro') }}</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+        <tr>
+            <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;text-align:center;">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+                    <tr>
+                        <td align="center">
+                            <!--[if mso]>
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ $resetUrl }}" style="height:46px;v-text-anchor:middle;width:240px;" arcsize="11%" stroke="f" fillcolor="#1aa19c">
+                                <w:anchorlock/>
+                                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{{ $t('button') }}</center>
+                            </v:roundrect>
+                            <![endif]-->
+                            <!--[if !mso]><!-- -->
+                            <a href="{{ $resetUrl }}"
+                               target="_blank"
+                               style="background-color:#1aa19c;border-radius:5px;color:#ffffff;display:inline-block;font-family:{{ $font }};font-size:15px;font-weight:bold;line-height:46px;text-align:center;text-decoration:none;width:240px;-webkit-text-size-adjust:none;mso-hide:all;">
+                                {{ $t('button') }}
+                            </a>
+                            <!--<![endif]-->
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+        <tr>
+            <td class="pad" style="padding-bottom:20px;padding-left:40px;padding-right:40px;padding-top:10px;">
+                <div dir="{{ $dirAttr }}" style="color:#555555;font-family:{{ $font }};font-size:15px;line-height:150%;text-align:{{ $alignStart }};mso-line-height-alt:22.5px;">
+                    <p style="margin: 0 0 16px;">{{ $t('expire', ['count' => $resetExpireMinutes]) }}</p>
+                    <p style="margin: 0 0 16px;">{{ $t('ignore') }}</p>
+                    <p style="margin: 0 0 8px;">{{ $t('fallback') }}</p>
+                    <p dir="ltr" style="margin: 0 0 16px; font-size:13px; word-break: break-all; text-align:{{ $alignStart }};"><a href="{{ $resetUrl }}" target="_blank" style="color:#1aa19c;">{{ $resetUrl }}</a></p>
+                    <p style="margin: 0;">{{ $t('regards') }}</p>
+                    <p style="margin: 0; font-weight: 600;">{{ $t('team', ['platform_name' => $resetPlatformName]) }}</p>
+                </div>
+            </td>
+        </tr>
+    </table>
 @endsection

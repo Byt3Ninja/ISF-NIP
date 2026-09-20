@@ -89,6 +89,17 @@ return [
         'regards' => 'Best regards,',
         'team' => ':platform_name Team',
     ],
+    'password_reset_email' => [
+        'subject' => 'Reset Your Password',
+        'hello' => 'Hello :name,',
+        'intro' => 'You are receiving this email because we received a password-reset request for your account.',
+        'button' => 'Reset Password',
+        'expire' => 'This password-reset link will expire in :count minutes.',
+        'ignore' => 'If you did not request a password reset, no further action is required.',
+        'fallback' => 'If you have trouble using the button, copy and paste the link below into your browser:',
+        'regards' => 'Thank you,',
+        'team' => ':platform_name Team',
+    ],
     'custom_mail' => [
         'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
         'dear_participant' => 'Dear Participant',
