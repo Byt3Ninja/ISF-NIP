@@ -20,8 +20,6 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
-<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
-<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 @stop
 @section('content')
 @if (!$_user->first_name_ar)
@@ -2074,7 +2072,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
-<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 @section('pagescripts')
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
@@ -2259,16 +2256,16 @@ document.addEventListener('DOMContentLoaded', function() {
 	<script>
 		// Initialize DataTable with pagination configuration
 		$(document).on('click', '.show-passcode', function(e) {
-		e.preventDefault();
-		let passcode = $(this).data('passcode');
-		alertify.defaults.transition = 'zoom';
-		alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-		alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-		alertify.defaults.theme.input = 'form-control';
-
-		alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+      e.preventDefault();
+      let passcode = $(this).data('passcode');
+      releaseAlert({
+        icon: 'info',
+        title: '{{ __('dashboard.meeting_passcode') }}',
+        message: `{!! __('dashboard.passcode_is', ['code' => '<strong>${passcode}</strong>']) !!}`,
+      });
 		});
-
+    
+		// Initialize DataTable with pagination configuration
 		$(document).ready(function() {
 			$("#ratingsTable").DataTable({
 				"pageLength": 5,

@@ -555,6 +555,21 @@
           buttonsStyling: false,
         });
       }
+      
+      window.releaseAlert = ({icon, title, message}) => {
+        Swal.fire({
+          icon,
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
 
       window.getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
         const config = {

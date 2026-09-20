@@ -255,5 +255,8 @@ return [
     'sp_requests' => 'Requests',
     'sp_top_share' => 'Top Share',
     'sp_total' => 'Total',
-    'sp_completion_rate' => 'Completion Rate'
+    'sp_completion_rate' => 'Completion Rate',
+    
+    'meeting_passcode' => 'Meeting Passcode',
+    'passcode_is' => 'The passcode for this meeting is: ":code"',
 ];

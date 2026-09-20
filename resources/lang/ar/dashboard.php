@@ -255,5 +255,8 @@ return [
     'sp_requests' => 'الطلبات',
     'sp_top_share' => 'أعلى مشاركة',
     'sp_total' => 'إجمالي',
-    'sp_completion_rate' => 'معدل الإنجاز'
+    'sp_completion_rate' => 'معدل الإنجاز',
+
+  'meeting_passcode' => 'رمز مرور الاجتماع',
+  'passcode_is' => 'رمز المرور لهذا الاجتماع هو: ":code"',
 ];
