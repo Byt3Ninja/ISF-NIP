@@ -354,7 +354,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 try {
                     // Claim this specific update -- a later reschedule bumps
                     // updated_at again, so this comparison lets it notify again.
-                    $claimedMentorUpdateNotify = MentorshipRequest::where('id', $session->id)
+                    $claimedMentorUpdateNotify = \Illuminate\Support\Facades\DB::table('mentorship_requests')->where('id', $session->id)
                         ->where(function ($q) use ($mentorUpdateVersion) {
                             $q->whereNull('mentor_update_notified_at')
                               ->orWhere('mentor_update_notified_at', '!=', $mentorUpdateVersion);
@@ -408,11 +408,47 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'action' => 'modifySession',
                 'user' => 'user',
                 'lang' => $userLocale,
+                // Raw values for the founder "session updated" email, which is
+                // localized to the platform default language when it is built.
+                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
+                'startAt' => Carbon::parse($session->zoom_date)->format('Y-m-d H:i:s'),
+                'periodMinutes' => $session->period,
+                'joinUrl' => $session->join_url ?? '',
+                'passcode' => $session->zoom_passcode ?? '',
+                'offlineLocation' => $session->cycle->offline_location_address ?? '',
+                'offlineMapLink' => $session->cycle->offline_location_map
+                    ?? optional($session->cycle->organization ?? $session->orgnization)->google_map_url ?? '',
+                'offlineAddress' => optional($session->cycle->organization ?? $session->orgnization)->address ?? '',
+                'founderNotes' => $session->admin_comment ?: ($session->comment ?? ''),
+                'startupNameEn' => $session->user->company->name_en ?? '',
+                'startupNameAr' => $session->user->company->name_ar ?? '',
+                'attachmentLinks' => $session->fileurl ? [[
+                    'name' => basename($session->fileurl),
+                    'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
+                ]] : [],
             ];
             $MSG = new MentorshipSession($message);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $rName_usr->notify($MSG);
+                    // Claim this specific update -- a later reschedule bumps
+                    // updated_at again, so this comparison lets it notify again.
+                    // Uses the query builder: an Eloquent update() would itself
+                    // bump updated_at and make a retry look like a new update.
+                    $claimedFounderUpdateNotify = \Illuminate\Support\Facades\DB::table('mentorship_requests')->where('id', $session->id)
+                        ->where(function ($q) use ($mentorUpdateVersion) {
+                            $q->whereNull('founder_update_notified_at')
+                              ->orWhere('founder_update_notified_at', '!=', $mentorUpdateVersion);
+                        })
+                        ->update(['founder_update_notified_at' => $mentorUpdateVersion]);
+
+                    if ($claimedFounderUpdateNotify) {
+                        try {
+                            $rName_usr->notify($MSG);
+                        } catch (\Throwable $th) {
+                            \Illuminate\Support\Facades\DB::table('mentorship_requests')->where('id', $session->id)->update(['founder_update_notified_at' => null]);
+                            throw $th;
+                        }
+                    }
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 2: ' . $th->getMessage());
