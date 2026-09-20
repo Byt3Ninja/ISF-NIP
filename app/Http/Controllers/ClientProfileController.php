@@ -319,6 +319,21 @@ class ClientProfileController extends Controller
             ['user' => $user->id, 'token' => sha1($user->new_email)]
         );
 
+        // Claim this exact request (new_email_requested_at is its version) so a
+        // retry/duplicate call for it can't send twice, while a fresh request or
+        // an explicit resend -- which bumps new_email_requested_at -- still sends.
+        $version = $user->new_email_requested_at;
+        $claimed = User::where('id', $user->id)
+            ->where(function ($q) use ($version) {
+                $q->whereNull('email_change_notified_at')
+                  ->orWhere('email_change_notified_at', '!=', $version);
+            })
+            ->update(['email_change_notified_at' => $version]);
+
+        if (!$claimed) {
+            return;
+        }
+
         Notification::route('mail', $user->new_email)
             ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
     }
