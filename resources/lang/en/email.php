@@ -100,6 +100,17 @@ return [
         'regards' => 'Thank you,',
         'team' => ':platform_name Team',
     ],
+    'verify_email_account' => [
+        'subject' => 'Welcome to :platform_name – Verify Your Email Address',
+        'dear' => 'Dear',
+        'intro' => 'Welcome to :platform_name! We’re excited to have you join our community and begin your journey with us.',
+        'cta_intro' => 'Please verify your email address by clicking the button below:',
+        'button' => 'Verify Email Address',
+        'closing' => 'Welcome to the beginning of something great. We can’t wait to see what you’ll achieve.',
+        'fallback' => 'If you have trouble clicking the button, copy and paste the link below into your browser:',
+        'regards' => 'Warmest regards,',
+        'team' => ':sender_name Team',
+    ],
     'custom_mail' => [
         'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
         'dear_participant' => 'Dear Participant',

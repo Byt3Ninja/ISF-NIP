@@ -84,10 +84,15 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         {
             if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
-                try {
-                    $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
-                } catch (\Throwable $th) {
-                    // throw $th;
+                // Swallow double-submits so one action never sends two verification emails.
+                $lockKey = 'verify-email-notify:' . $this->getKey();
+                if (\Illuminate\Support\Facades\Cache::add($lockKey, true, 10)) {
+                    try {
+                        $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
+                    } catch (\Throwable $th) {
+                        \Illuminate\Support\Facades\Cache::forget($lockKey);
+                        // throw $th;
+                    }
                 }
             }
             else
