@@ -98,7 +98,10 @@
 
     <div class="gl-hero__inner container position-relative">
       <div class="row align-items-center gy-5 gx-lg-5">
-        <div class="col-lg-6">
+        {{-- Without a Hero Image the text column takes the full width: the
+             image column is dropped entirely below, so leaving this at
+             col-lg-6 would strand the copy in half an empty row. --}}
+        <div class="{{ $page->hero_image_url ? 'col-lg-6' : 'col-12' }}">
           @php $heroTag = $l == 'ar' ? $page->hero_title_tag_ar : $page->hero_title_tag; @endphp
           @if($heroTag)
             <span class="hero-eyebrow"><span class="live-pulse"></span> {{ $heroTag }}</span>
@@ -153,11 +156,13 @@
           @endif
         </div>
 
-        <div class="col-lg-5 ms-auto d-flex align-items-center justify-content-end">
-          <div class="hero-image-wrapper">
-            <img src="{{ $page->hero_image_url ?: '' }}" alt="hero-image" class="hero-img">
+        @if($page->hero_image_url)
+          <div class="col-lg-5 ms-auto d-flex align-items-center justify-content-end">
+            <div class="hero-image-wrapper">
+              <img src="{{ $page->hero_image_url }}" alt="hero-image" class="hero-img">
+            </div>
           </div>
-        </div>
+        @endif
       </div>
     </div>
   </header>
