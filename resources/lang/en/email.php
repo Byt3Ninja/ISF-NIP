@@ -111,6 +111,18 @@ return [
         'regards' => 'Warmest regards,',
         'team' => ':sender_name Team',
     ],
+    'startup_join_program_email' => [
+        'subject' => 'Welcome to :program_name!',
+        'dear' => 'Dear',
+        'congrats' => 'Congratulations! You have successfully joined :program_name.',
+        'excited' => 'We’re excited to welcome you to the program and look forward to supporting you throughout your journey.',
+        'login_before' => 'You can now log in to',
+        'login_after' => 'to access the program details, activities, resources, and upcoming sessions.',
+        'help' => 'If you have any questions or need assistance, please feel free to reach out to us.',
+        'closing' => 'We’re looking forward to seeing you make the most of this opportunity!',
+        'regards' => 'Best regards,',
+        'team' => ':organization_name Team',
+    ],
     'custom_mail' => [
         'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
         'dear_participant' => 'Dear Participant',

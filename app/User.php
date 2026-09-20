@@ -138,6 +138,21 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     }
 
     /**
+     * Claim the "joined a program" email for a cycle. True only for the first
+     * caller per cycle, so re-submitting steps of the same program never
+     * re-sends it while joining a different program still does.
+     */
+    public function claimProgramJoinSlot(int $cycleId): bool
+    {
+        return static::where('id', $this->id)
+            ->where(function ($q) use ($cycleId) {
+                $q->whereNull('program_join_notified_cycle')
+                  ->orWhere('program_join_notified_cycle', '!=', $cycleId);
+            })
+            ->update(['program_join_notified_cycle' => $cycleId]) > 0;
+    }
+
+    /**
      * Generate a fresh single-use magic-login nonce, mark this user as needing
      * a password change, persist, and return a signed 24h URL pointing at the
      * magic-login route. Each call rotates the nonce, invalidating any link

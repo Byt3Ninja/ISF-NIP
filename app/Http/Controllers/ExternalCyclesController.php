@@ -440,13 +440,13 @@ class ExternalCyclesController extends Controller
             			'email' => $user->email,
             			'step' => $step->title,
             			'cycle' => $program->title,
+            			'cycle_id' => $program->id,
         			];
 
 					if( !in_array(env('APP_ENV', 'local'), ['local']) )
 					{
             			try {
                 			broadcast(new StartupJoining($data));
-                			$user->notify(new StartupJoiningNotification($data));
                 			log::info('Sent notification to ' . $user->email);
             			} catch (\Throwable $th) {
 							DB::rollBack();
@@ -467,6 +467,18 @@ class ExternalCyclesController extends Controller
 						}
         			}
 					DB::commit();
+
+					// Sent only once the join is committed, and once per program.
+					if( !in_array(env('APP_ENV', 'local'), ['local']) && $user->claimProgramJoinSlot((int) $program->id) )
+					{
+						try {
+							$user->notify(new StartupJoiningNotification($data));
+						} catch (\Throwable $th) {
+							User::where('id', $user->id)->update(['program_join_notified_cycle' => null]);
+							Log::error('StartupJoiningNotification failed: ' . $th->getMessage());
+						}
+					}
+
 					Auth::login( $user );
 					$url = URL::to("dashboard/");
 					return response()->json(['status' => true, 'message' => 'You have successfully joined the program', 'url' => $url]);

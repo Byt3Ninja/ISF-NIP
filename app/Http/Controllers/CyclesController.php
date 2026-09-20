@@ -1818,13 +1818,22 @@ class CyclesController extends Controller
             'email' => $user->email,
             'step' => $company->stepdata->title,
             'cycle' => $company->cycledata->title,
+            'cycle_id' => $company->cycledata->id,
         ];
 
         // إرسال الإشعار
         if (!in_array(env('APP_ENV', 'local'), ['local'])) {
             try {
                 broadcast(new StartupJoining($data));
-                $user->notify(new StartupJoiningNotification($data));
+                // Once per program: re-submitting steps must not re-send it.
+                if ($user->claimProgramJoinSlot((int) $company->cycledata->id)) {
+                    try {
+                        $user->notify(new StartupJoiningNotification($data));
+                    } catch (\Throwable $th) {
+                        \App\User::where('id', $user->id)->update(['program_join_notified_cycle' => null]);
+                        throw $th;
+                    }
+                }
                 log::info('Sent notification to ' . $user->email);
             } catch (\Throwable $th) {
                 throw $th;
