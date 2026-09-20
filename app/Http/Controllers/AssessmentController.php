@@ -533,11 +533,35 @@ class AssessmentController extends Controller
     {
         if( Auth::user()->hasRole('Registered') )
         {
-            $l = app()->getLocale();
             $userid = auth()->user()->id;
-            $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->get();
-            $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->get();
-            return view('admin/clients/assessment/assessment-history', compact('assessmentsopen', 'assessments'));
+            $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->orderBy('id')->get();
+            $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->orderBy('end_date')->orderBy('id')->get();
+
+            // Total weighted score per assessment, in one query, so the view
+            // does not run a UserScore lookup per rendered card.
+            $weightedScores = UserScore::whereIn('assessment_id', $assessmentsopen->pluck('id')->merge($assessments->pluck('id')))
+                ->groupBy('assessment_id')
+                ->selectRaw('assessment_id, SUM(weighted_score) as total')
+                ->pluck('total', 'assessment_id');
+
+            // Compare chart: one point per completed assessment, ordered oldest
+            // to newest, spanning the real dates of those assessments.
+            $historySeries = $assessments->map(function ($assessment) use ($weightedScores) {
+                return round((float) ($weightedScores[$assessment->id] ?? 0), 2);
+            })->values();
+
+            $historyRangeStart = optional($assessments->first())->start_date
+                ?: optional($assessments->first())->created_at;
+            $historyRangeEnd = optional($assessments->last())->end_date;
+
+            return view('admin/clients/assessment/assessment-history', compact(
+                'assessmentsopen',
+                'assessments',
+                'weightedScores',
+                'historySeries',
+                'historyRangeStart',
+                'historyRangeEnd'
+            ));
         } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 

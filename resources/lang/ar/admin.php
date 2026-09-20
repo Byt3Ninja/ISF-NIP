@@ -1175,6 +1175,8 @@ return [
 	'Assessment_Created_successfully' => 'تم انشاء التقييم بنجاح',
 	'Assessment_updated_successfully' => 'تم تعديل التقييم بنجاح',
 	'Ended' => 'انتهت',
+	'No_History_Available' => 'لا يوجد سجل تقييمات حتى الآن',
+	'No_History_Available_Hint' => 'ستظهر هنا التقييمات المكتملة والجارية الخاصة بك.',
 	'Compare' => 'مقارنة',
 	'Assessment_deleted_successfully' => 'تم مسح التقييم',
 	'EmailUpdatedSuccessfully' => 'تم تحديث البريد الالكتروني بنجاح',

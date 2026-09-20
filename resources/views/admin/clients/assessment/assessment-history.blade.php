@@ -2,42 +2,138 @@
 
 @section('style')
 <style>
-  .rounded,
-  .card,
-  .nav-link,
-  .btn {
-    border-radius: 1rem !important;
+  /* Assessment history — layout tokens follow the admin theme (Bootstrap vars)
+     rather than fixed hex, so the page tracks the rest of the dashboard. */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   .history-card {
-    border: 1px solid #dfdfe3;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.875rem;
+    background-color: var(--bs-body-bg);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
 
   .history-card:hover {
-    background-color: #F2F1F3;
-    border: 1px solid #7367f0;
-  }
-  .history-card:hover .badge.bg-label-secondary {
-    background-color: #fff !important;
+    border-color: var(--bs-primary);
+    box-shadow: 0 0.125rem 0.5rem rgba(var(--bs-primary-rgb), 0.12);
   }
 
-  .radius-10 {
-    border-radius: 10px !important;
+  /* The score is why this page exists, so it leads the card. */
+  .history-card__score {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 6.5rem;
+    padding-inline-end: 1.5rem;
+    border-inline-end: 1px solid var(--bs-border-color);
   }
 
-  .text-sm {
-    font-size: 0.85rem;
+  .history-card__score-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--bs-info);
+    font-variant-numeric: tabular-nums;
   }
 
-  .text-xs {
-    font-size: 0.65rem;
+  .history-card__score-label {
+    font-size: 0.6875rem;
+    line-height: 1.3;
+    color: var(--bs-secondary-color);
   }
-  .history-chart {
-    margin-top: 0;
+
+  .history-card__recommendation-label {
+    margin-bottom: 0.125rem;
+    font-size: 0.6875rem;
+    color: var(--bs-secondary-color);
   }
-  @media screen and (min-width: 768px) {
-    .history-chart {
-      margin-top: -6rem;
+
+  .history-card__recommendation {
+    margin-bottom: 0;
+    font-size: 0.9375rem;
+    color: var(--bs-body-color);
+  }
+
+  .history-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .history-card__status {
+    padding: 0.25rem 0.625rem;
+    border-radius: 1rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--bs-warning);
+    background-color: rgba(var(--bs-warning-rgb), 0.12);
+  }
+
+  .history-card__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+  }
+
+  .history-card__date i {
+    color: var(--bs-secondary-color);
+  }
+
+  .history-card__date time {
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-body-color);
+  }
+
+  /* Compare chart sits beside the list at desktop width and stacks below it
+     on small screens. No negative margins. */
+  .history-compare .card-title {
+    margin-bottom: 0.125rem;
+  }
+
+  .history-compare__range {
+    display: block;
+    font-size: 0.6875rem;
+    color: var(--bs-secondary-color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media screen and (max-width: 767.98px) {
+    .history-card {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+    }
+
+    .history-card__score {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding-inline-end: 0;
+      padding-bottom: 0.875rem;
+      border-inline-end: 0;
+      border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    .history-card__meta {
+      flex-wrap: wrap;
+      white-space: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .history-card {
+      transition: none;
     }
   }
 </style>
@@ -46,6 +142,7 @@
 @php
 $pills = ['analysis-assessment', 'question-assessment', 'history'];
 $assessment_user = $assessmentsopen->first();
+$hasHistory = $assessmentsopen->isNotEmpty() || $assessments->isNotEmpty();
 
 // $assessments = [
 // ['title' => 'business-concept', 'progress' => 50, 'status' => 'in-progress'],
@@ -124,125 +221,67 @@ $assessment_user = $assessmentsopen->first();
     <!-- / Pills -->
 
     <!-- Assessment History -->
+    @if(!$hasHistory)
     <div class="row">
       <div class="col-12">
         <div class="card">
-          <div class="card-body">
-            <h6 class="text-secondary">{{ __('admin.History') }}</h6>
-            <div class="row">
-
-              @foreach($assessmentsopen as $key => $assessmentopen)
-              @php
-              if($assessmentopen != null){
-                  $scoresTotalop = App\UserScore::where('assessment_id', $assessmentopen->id)
-                    ->get();
-                    $scoresTotalsop = $scoresTotalop->sum('weighted_score');
-                  }else{
-                    $scoresTotalsop = 0;
-                  }
-              @endphp
-              <div class="col-12 col-md-10">
-                <div class="card card-body history-card mb-4">
-                  <div class="row">
-                    <div class="col-12 col-md-8">
-                      <div class="d-flex flex-column gap-3">
-                        <div class="d-flex flex-column flex-md-row gap-2">
-                          <h6 class="text-sm text-muted mb-0 text-nowrap">{{ __('admin.Overall_Recommendation') }}</h6>
-                          <div class="badge bg-label-secondary text-dark radius-10 py-2 fs-6">
-                            Good progress, but room for scaling
-                          </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                          <h6 class="text-sm text-muted mb-0">{{ __('admin.Overall_Weighted_Score') }}</h6>
-                          <div class="badge bg-label-info text-info radius-10 fs-6">
-                            {{ $scoresTotalsop > 0 ? $scoresTotalsop : 0 }}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                      <div class="d-flex align-items-center justify-content-between h-100 gap-2 mt-2">
-                        <div class="d-flex align-items-center justify-content-center gap-2">
-                          <span class="text-xs text-dark">{{ __('admin.Created') }}</span>
-                          <div class="badge bg-label-secondary radius-10 date">
-                            <i class="ti ti-calendar ti-18px text-danger"></i>
-                            <span class="fw-semibold text-xs text-dark mx-2">{{ $assessmentopen == null ? 'None' : $assessmentopen->created_at }}</span>
-                          </div>
-                          
-                        </div>
-                        <a onclick="history.back()" href="#"><button class="btn btn-sm btn-primary">{{ __('admin.Back') }}</button></a>
-                      </div>
-                    </div>
-                    
-                  </div>
-                </div>
-              </div>
-              @endforeach
-
-              @foreach($assessments as $key => $assessment)
-              @php
-              if($assessment != null){
-                  $scoresTotal = App\UserScore::where('assessment_id', $assessment->id)
-                    ->get();
-                    $scoresTotals = $scoresTotal->sum('weighted_score');
-                  }else{
-                    $scoresTotals = 0;
-                  }
-              @endphp
-              <div class="col-12 col-md-10">
-                <div class="card card-body history-card mb-4">
-                  <div class="row">
-                    <div class="col-12 col-md-8">
-                      <div class="d-flex flex-column gap-3">
-                        <div class="d-flex flex-column flex-md-row gap-2">
-                          <h6 class="text-sm text-muted mb-0 text-nowrap">{{ __('admin.Overall_Recommendation') }}</h6>
-                          <div class="badge bg-label-secondary text-dark radius-10 py-2 fs-6">
-                            Good progress, but room for scaling
-                          </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                          <h6 class="text-sm text-muted mb-0">{{ __('admin.Overall_Weighted_Score') }}</h6>
-                          <div class="badge bg-label-info text-info radius-10 fs-6">
-                            {{ $scoresTotals > 0 ? $scoresTotals : 0 }}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                      <div class="d-flex align-items-center justify-content-end h-100 gap-2 mt-2">
-                        <span class="text-xs text-dark">{{ __('admin.Ended') }}</span>
-                        <div class="badge bg-label-secondary radius-10 date">
-                          <i class="ti ti-calendar ti-18px text-info"></i>
-                          <span class="fw-semibold text-xs text-dark mx-2">{{ $assessment == null ? 'None' : $assessment->end_date }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              @endforeach
-
-              <div class="col-12 col-md-2">
-                <!-- Assessment History Chart -->
-                <div class="history-chart mt-1">
-                  <div class="card">
-                    <div class="card-header pb-0">
-                      <h6 class="mb-0 card-title">{{ __('admin.Compare') }}</h6>
-                      <span class="text-muted" style="font-size: 10px;">2024-3-4 / 2024-9-6</span>
-                    </div>
-                    <div class="card-body px-0">
-                      <div id="historyChart"></div>
-                    </div>
-                  </div>
-                </div>
-                <!-- / Assessment History Chart -->
-              </div>
-            </div>
+          <div class="card-body text-center py-5">
+            <i class="ti ti-history ti-48px text-muted mb-3"></i>
+            <h5 class="mb-1">{{ __('admin.No_History_Available') }}</h5>
+            <p class="text-muted mb-0">{{ __('admin.No_History_Available_Hint') }}</p>
           </div>
         </div>
       </div>
     </div>
+    @else
+    <div class="row g-4">
+      <div class="col-12 {{ $historySeries->isNotEmpty() ? 'col-lg-9' : '' }}">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h6 class="text-secondary mb-0">{{ __('admin.History') }}</h6>
+              <a href="/dashboard/analysis-assessment" class="btn btn-sm btn-label-secondary">{{ __('admin.Back') }}</a>
+            </div>
+            <div class="history-list">
+              @foreach($assessmentsopen as $assessmentopen)
+                @include('admin.clients.assessment.partials.history-card', [
+                  'assessment' => $assessmentopen,
+                  'score' => $weightedScores[$assessmentopen->id] ?? 0,
+                  'state' => 'open',
+                ])
+              @endforeach
+
+              @foreach($assessments as $assessment)
+                @include('admin.clients.assessment.partials.history-card', [
+                  'assessment' => $assessment,
+                  'score' => $weightedScores[$assessment->id] ?? 0,
+                  'state' => 'done',
+                ])
+              @endforeach
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @if($historySeries->isNotEmpty())
+      <div class="col-12 col-lg-3">
+        <div class="card h-100 history-compare">
+          <div class="card-header pb-0">
+            <h6 class="mb-0 card-title">{{ __('admin.Compare') }}</h6>
+            <span class="history-compare__range">
+              {{ $historyRangeStart ? \Carbon\Carbon::parse($historyRangeStart)->format('Y-m-d') : '—' }}
+              &ndash;
+              {{ $historyRangeEnd ? \Carbon\Carbon::parse($historyRangeEnd)->format('Y-m-d') : '—' }}
+            </span>
+          </div>
+          <div class="card-body px-0 d-flex align-items-end">
+            <div id="historyChart" class="w-100" data-series="{{ json_encode($historySeries) }}"></div>
+          </div>
+        </div>
+      </div>
+      @endif
+    </div>
+    @endif
     <!-- / Assessment History -->
   </div>
 </div>
@@ -256,8 +295,20 @@ $assessment_user = $assessmentsopen->first();
   document.addEventListener('DOMContentLoaded', () => {
     // History Chart
     // --------------------------------------------------------------------
-    const historyChartEl = document.querySelector('#historyChart'),
-      historyChartConfig = {
+    const historyChartEl = document.getElementById('historyChart');
+
+    if (historyChartEl === null) {
+      return;
+    }
+
+    let historySeriesData = [];
+    try {
+      historySeriesData = JSON.parse(historyChartEl.dataset.series || '[]');
+    } catch (e) {
+      historySeriesData = [];
+    }
+
+    const historyChartConfig = {
         chart: {
           height: 123,
           type: 'area',
@@ -294,7 +345,8 @@ $assessment_user = $assessmentsopen->first();
         },
         series: [
           {
-            data: [400, 200, 650, 500]
+            name: @json(__('admin.Overall_Weighted_Score')),
+            data: historySeriesData
           }
         ],
         xaxis: {
@@ -319,7 +371,8 @@ $assessment_user = $assessmentsopen->first();
           show: false
         },
         tooltip: {
-          enabled: false
+          enabled: true,
+          x: { show: false }
         },
         responsive: [
           {
@@ -341,10 +394,8 @@ $assessment_user = $assessmentsopen->first();
         ]
       };
 
-    if (typeof historyChartEl !== undefined && historyChartEl !== null) {
-      const chart = new ApexCharts(historyChartEl, historyChartConfig);
-      chart.render();
-    }
+    const chart = new ApexCharts(historyChartEl, historyChartConfig);
+    chart.render();
   });
 
   

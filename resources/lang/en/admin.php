@@ -1179,6 +1179,8 @@ return [
 	'Assessment_Created_successfully' => 'Assessment Created Successfully',
 	'Assessment_updated_successfully' => 'Assessment Updated Successfully',
 	'Ended' => 'Ended',
+	'No_History_Available' => 'No assessment history yet',
+	'No_History_Available_Hint' => 'Your completed and in-progress assessments will appear here.',
 	'Compare' => 'Compare',
 	'Assessment_deleted_successfully' => 'Assessment Deleted Successfully',
 	'EmailUpdatedSuccessfully' => 'Email Updated Successfully',
