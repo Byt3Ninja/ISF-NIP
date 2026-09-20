@@ -1671,7 +1671,7 @@
 
       const renderOverflowBadge = (hiddenNames, count) => {
         const tooltip = hiddenNames.join('\n');
-        return `<span class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-wide" title="${tooltip}">+${count}</span>`;
+        return `<span class="badge badge-center bg-label-primary p-4 rounded-circle fw-semibold d-flex justify-content-center align-items-center mt-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-wide" title="${tooltip}">+${count}</span>`;
       };
 
       const updateStepAssignees = (newAssignees) => {

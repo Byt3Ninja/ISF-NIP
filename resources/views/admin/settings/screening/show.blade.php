@@ -227,8 +227,8 @@
 
                   @if ($hiddenJudgeIds->count() > 0)
                     <span
-                      class="badge bg-label-primary rounded-circle fw-semibold d-inline-flex align-items-center justify-content-center align-self-center p-0"
-                      style="width: 2.25rem; height: 2.25rem;" data-bs-toggle="tooltip" data-bs-placement="top"
+                      class="badge badge-center bg-label-primary p-4 rounded-circle fw-semibold d-flex justify-content-center align-items-center mt-1"
+                       data-bs-toggle="tooltip" data-bs-placement="top"
                       data-bs-custom-class="tooltip-wide"
                       title="{{ $hiddenJudgeNames }}">+{{ $hiddenJudgeIds->count() }}</span>
                   @endif
