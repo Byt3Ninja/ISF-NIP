@@ -376,11 +376,7 @@ class ExternalCyclesController extends Controller
 					$user->save();
 					$user->allotRole('registered');
 					// $user->sendEmailVerificationNotification();
-					$claimedUserWelcome = \App\User::where('id', $user->id)
-						->whereNull('user_welcome_sent_at')
-						->update(['user_welcome_sent_at' => now()]);
-
-					if ($claimedUserWelcome) {
+					if ($user->claimEmailSlot('user_welcome_sent_at')) {
 						$user->notify(new WelcomeUserNotification($user, $password));
 					}
 					$company = new Company();

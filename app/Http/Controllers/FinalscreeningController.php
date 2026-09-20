@@ -449,11 +449,13 @@ class FinalscreeningController extends Controller
 				// إرسال الإشعار
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
-					try {
-						$result->notify(new WelcomeJudgerNotification($data));
-					} catch (\Throwable $th) {
-						//throw $th;
-					}
+					// Disabled for now: this is not an account-creation event. A
+					// separate "assigned to screening" email will replace it.
+					// try {
+					// 	$result->notify(new WelcomeJudgerNotification($data));
+					// } catch (\Throwable $th) {
+					// 	//throw $th;
+					// }
 				}
 			}
 			
@@ -607,11 +609,13 @@ class FinalscreeningController extends Controller
 				// إرسال الإشعار
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
-					try {
-						$result->notify(new WelcomeJudgerNotification($data));
-					} catch (\Throwable $th) {
-						// throw $th;
-					}
+					// Disabled for now: this is not an account-creation event. A
+					// separate "assigned to screening" email will replace it.
+					// try {
+					// 	$result->notify(new WelcomeJudgerNotification($data));
+					// } catch (\Throwable $th) {
+					// 	// throw $th;
+					// }
 				}
 			}
 			

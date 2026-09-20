@@ -121,6 +121,18 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     ];
 
     /**
+     * Atomically claim a one-time "email sent" marker column (e.g.
+     * `mentor_welcome_sent_at`). Returns true only for the single caller that
+     * flips it from NULL, so a retried flow never double-emails the user.
+     */
+    public function claimEmailSlot(string $column): bool
+    {
+        return static::where('id', $this->id)
+            ->whereNull($column)
+            ->update([$column => now()]) > 0;
+    }
+
+    /**
      * Generate a fresh single-use magic-login nonce, mark this user as needing
      * a password change, persist, and return a signed 24h URL pointing at the
      * magic-login route. Each call rotates the nonce, invalidating any link

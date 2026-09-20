@@ -128,26 +128,18 @@ class UserService
 					|| $user->hasRole('judge')
 					|| in_array(strtolower($data['role'] ?? ''), ['judger', 'judge']);
 
-				if($isJudge) { 
-					$user->notify(new WelcomeJudgerNotification($user)); 
+				if($isJudge) {
+					if ($user->claimEmailSlot('judge_welcome_sent_at')) {
+						$user->notify(new WelcomeJudgerNotification($user));
+					}
 				}
 				elseif($user->hasRole('mentor') || strtolower($data['role'] ?? '') === 'mentor') {
-					// Atomically claim the "send mentor welcome email" step so a
-					// retry of this flow never double-emails the new mentor.
-					$claimedMentorWelcome = \App\User::where('id', $user->id)
-						->whereNull('mentor_welcome_sent_at')
-						->update(['mentor_welcome_sent_at' => now()]);
-
-					if ($claimedMentorWelcome) {
+					if ($user->claimEmailSlot('mentor_welcome_sent_at')) {
 						$user->notify(new WelcomeMentorNotification($user, $data['password']));
 					}
 				}
 				else {
-					$claimedUserWelcome = \App\User::where('id', $user->id)
-						->whereNull('user_welcome_sent_at')
-						->update(['user_welcome_sent_at' => now()]);
-
-					if ($claimedUserWelcome) {
+					if ($user->claimEmailSlot('user_welcome_sent_at')) {
 						$user->notify(new WelcomeUserNotification($user, $data['password']));
 					}
 				}

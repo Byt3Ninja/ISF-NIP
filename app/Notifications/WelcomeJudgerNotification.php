@@ -115,7 +115,11 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
         $setting = Settings::first();
         $platformName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
 
-        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
+        // The judge welcome email follows the platform's default language
+        // (General Settings), not the recipient's personal preference.
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
+            ? $setting->Default_Language
+            : 'en';
 
         if ($this->data['role'] !== 'Judger') {
             // emails.welcome is shared with WelcomeUserNotification and expects
@@ -128,25 +132,50 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
                     'user'          => $notifiable,
                     'magicLoginUrl' => $notifiable->generateMagicLoginUrl(),
                 ], $orgData));
+
+            if (!empty($fromAddress)) {
+                $mail->from($fromAddress, $fromName);
+            }
+
+            return $mail;
         }
 
-        // Single-use, 24h signed link that logs the judge in and lands them on
-        // the profile page with a forced password change.
-        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+        $judgerName = $this->data['name'] ?? null;
+        if (empty($judgerName) && is_object($notifiable)) {
+            $judgerName = trim(($notifiable->first_name_en ?? '') . ' ' . ($notifiable->last_name_en ?? ''));
+            if (empty($judgerName)) {
+                $judgerName = $notifiable->name ?? 'Judge';
+            }
+        }
 
-        return (new MailMessage)
-            ->from($from['address'], $from['name'])
-            ->subject(Lang::get('email.judger_welcome_email.subject', [], $locale))
+        $judgerEmail = $this->data['email'] ?? ($notifiable->email ?? '');
+        $judgerGender = $this->data['gender'] ?? ($notifiable->gender ?? null);
+
+        // Platform-branded email: platform logo/name, never the organization's.
+        // (SMTP routing above still uses the organization.)
+        $platformOrgData = $this->buildEmailOrganizationData(null);
+
+        $mail = (new MailMessage)
+            ->subject(Lang::get('email.judge_account_welcome_email.subject', [], $locale))
             ->view('emails.welcome_judger', array_merge([
                 'data'          => $this->data,
                 'locale'        => $locale,
-                'platformName'  => $platformName,
-                'judgerName'    => $this->data['name'] ?? $notifiable->name,
-                'judgerEmail'   => $this->data['email'] ?? $notifiable->email,
-                'judgerGender'  => $this->data['gender'] ?? $notifiable->gender ?? null,
+                // Named distinctly from 'platformName': a global view composer
+                // (AppServiceProvider) sets that key on every view and would
+                // silently override this value.
+                'judgeWelcomePlatformName' => $platformName,
+                'judgerName'    => $judgerName,
+                'judgerEmail'   => $judgerEmail,
+                'judgerGender'  => $judgerGender,
                 'assignedBy'    => $this->data['assigned_by'] ?? null,
                 'magicLoginUrl' => $magicLoginUrl,
-            ], $orgData));
+            ], $platformOrgData));
+
+        if (!empty($fromAddress)) {
+            $mail->from($fromAddress, $fromName);
+        }
+
+        return $mail;
     }
 
     /**
@@ -156,8 +185,14 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
-        $key = $this->data['role'] === 'Judger'
+        // The judge welcome email follows the platform's default language
+        // (General Settings), not the recipient's personal preference.
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
+            ? $setting->Default_Language
+            : 'en';
+        $role = strtolower($this->data['role'] ?? '');
+        $isJudge = in_array($role, ['judger', 'judge']);
+        $key = $isJudge
             ? 'notifications.welcome_judger.database'
             : 'notifications.welcome.database';
 
@@ -172,8 +207,14 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
      */
     public function toWhatsapp(object $notifiable): string
     {
-        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
-        $key = $this->data['role'] === 'Judger'
+        // The judge welcome email follows the platform's default language
+        // (General Settings), not the recipient's personal preference.
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
+            ? $setting->Default_Language
+            : 'en';
+        $role = strtolower($this->data['role'] ?? '');
+        $isJudge = in_array($role, ['judger', 'judge']);
+        $key = $isJudge
             ? 'notifications.welcome_judger.whatsapp'
             : 'notifications.welcome.whatsapp';
 
@@ -187,8 +228,14 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
-        $group = $this->data['role'] === 'Judger' ? 'welcome_judger' : 'welcome';
+        // The judge welcome email follows the platform's default language
+        // (General Settings), not the recipient's personal preference.
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
+            ? $setting->Default_Language
+            : 'en';
+        $role = strtolower($this->data['role'] ?? '');
+        $isJudge = in_array($role, ['judger', 'judge']);
+        $group = $isJudge ? 'welcome_judger' : 'welcome';
 
         return new BroadcastMessage([
             'subject' => Lang::get("notifications.{$group}.subject", [], $locale),
