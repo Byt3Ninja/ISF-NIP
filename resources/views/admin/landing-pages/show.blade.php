@@ -194,7 +194,7 @@
             @php $aboutDescription = $l == 'ar' ? $page->about_description_ar : $page->about_description; @endphp
             @if($aboutDescription)
               <div class="mt-3">
-                <p class="text-secondary mb-0" style="max-width:620px;">{{ $aboutDescription }}</p>
+                <p class="text-secondary mb-0 mx-auto" style="max-width:620px;">{{ $aboutDescription }}</p>
               </div>
             @endif
           </div>
