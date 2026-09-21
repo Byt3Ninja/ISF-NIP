@@ -33,6 +33,11 @@
         return $program->isOpen;
     })->count();
     $lpStepCount = count($page->how_steps ?? []);
+
+    // Stats belong to a section only while that section is enabled: a disabled
+    // Programs / How It Works section must not leak its numbers into the hero.
+    $lpShowProgramStats = $page->programs_is_enabled && $lpProgramsCount > 0;
+    $lpShowStepStat = $page->how_is_enabled && $lpStepCount > 0;
   @endphp
 
   <!-- ===== Hero ===== -->
@@ -127,23 +132,25 @@
             @endif
           </div>
 
-          @if($lpProgramsCount > 0)
+          @if($lpShowProgramStats || $lpShowStepStat)
             <div class="hero-stats">
-              <div class="hero-stat">
-                <i class="ti ti-layout-grid text-primary" aria-hidden="true"></i>
-                <div>
-                  <strong>{{ $lpProgramsCount }}</strong>
-                  <span>{{ __('landing.all_programs') }}</span>
+              @if($lpShowProgramStats)
+                <div class="hero-stat">
+                  <i class="ti ti-layout-grid text-primary" aria-hidden="true"></i>
+                  <div>
+                    <strong>{{ $lpProgramsCount }}</strong>
+                    <span>{{ __('landing.all_programs') }}</span>
+                  </div>
                 </div>
-              </div>
-              <div class="hero-stat">
-                <i class="ti ti-badge text-primary" aria-hidden="true"></i>
-                <div>
-                  <strong>{{ $lpOpenCount }}</strong>
-                  <span>{{ __('landing.browse_open_programs') }}</span>
+                <div class="hero-stat">
+                  <i class="ti ti-badge text-primary" aria-hidden="true"></i>
+                  <div>
+                    <strong>{{ $lpOpenCount }}</strong>
+                    <span>{{ __('landing.open_programs') }}</span>
+                  </div>
                 </div>
-              </div>
-              @if($lpStepCount > 0)
+              @endif
+              @if($lpShowStepStat)
                 <div class="hero-stat">
                   <i class="ti ti-route-2 text-primary" aria-hidden="true"></i>
                   <div>
@@ -510,8 +517,9 @@
                 alt="Growth Labs logo"></span>
             <span class="fw-bold text-white fs-5">{{ $page->title ?? 'Growth Labs' }}</span>
           </a>
+          @php $footerDescription = $l == 'ar' ? $page->description_ar : $page->description; @endphp
           <p class="text-secondary small" style="max-width:280px;">
-            {{ $page->description }}
+            {{ $footerDescription }}
           </p>
           <div class="d-flex gap-2 mt-3">
             @if ($page->x)
@@ -552,7 +560,9 @@
             @endif
           </div>
         </div>
-        <div class="col-6 col-lg-3 offset-lg-2">
+        {{-- Without the Programs column the row is only two columns wide, so the
+             offset grows to keep Quick Links aligned to the right as in the design. --}}
+        <div class="col-6 col-lg-3 {{ $page->programs_is_enabled ? 'offset-lg-2' : 'offset-lg-5' }}">
           <h6 class="mb-3">{{ __('landing.footer_quick_links') }}</h6>
           <div class="d-flex flex-column gap-2">
             @php
@@ -583,6 +593,7 @@
             @endforeach
           </div>
         </div>
+        @if($page->programs_is_enabled)
         <div class="col-6 col-lg-3">
           <h6 class="mb-3">{{ __('landing.footer_program_links') }}</h6>
           <div class="d-flex flex-column gap-2">
@@ -603,20 +614,12 @@
             @endforelse
           </div>
         </div>
+        @endif
       </div>
 
       <hr class="border-secondary my-5">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-        <p class="text-secondary small mb-0">© 2026 {{ __('landing.footer_rights_reserved') }}</p>
-        @if ($l == 'ar')
-          <a href="/lang/en" data-language="en" data-text-direction="ltr" class="flink small">
-            <i class="ti ti-world me-1"></i>English
-          </a>
-        @else
-          <a href="/lang/ar" data-language="ar" data-text-direction="rtl" class="flink small">
-            <i class="ti ti-world me-1"></i>عربي
-          </a>
-        @endif
+      <div class="text-center">
+        <p class="text-secondary small mb-0">© {{ date('Y') }} {{ __('landing.footer_rights_reserved') }}</p>
       </div>
     </div>
   </footer>

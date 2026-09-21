@@ -211,6 +211,7 @@ return [
     'end' => 'النهاية',
     'start' => 'البداية',
     'all_programs' => 'كل البرامج',
+    'open_programs' => 'البرامج المفتوحة',
     'see_how_it_works' => 'شاهد كيف يعمل',
     'browse_open_programs' => 'عرض البرامج',
     'apply_now' => 'قدّم الآن',

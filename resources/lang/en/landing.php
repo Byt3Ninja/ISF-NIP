@@ -211,6 +211,7 @@ return [
     'end' => 'End',
     'start' => 'Start',
     'all_programs' => 'All programs',
+    'open_programs' => 'Open programs',
     'see_how_it_works' => 'See how it works',
     'browse_open_programs' => 'View Programs',
     'apply_now' => 'Apply now',
