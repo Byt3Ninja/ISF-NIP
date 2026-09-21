@@ -19,6 +19,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\MentorNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipNotification;
@@ -354,7 +355,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 try {
                     // Claim this specific update -- a later reschedule bumps
                     // updated_at again, so this comparison lets it notify again.
-                    $claimedMentorUpdateNotify = \Illuminate\Support\Facades\DB::table('mentorship_requests')->where('id', $session->id)
+                    $claimedMentorUpdateNotify = DB::table('mentorship_requests')->where('id', $session->id)
                         ->where(function ($q) use ($mentorUpdateVersion) {
                             $q->whereNull('mentor_update_notified_at')
                               ->orWhere('mentor_update_notified_at', '!=', $mentorUpdateVersion);
@@ -434,7 +435,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                     // updated_at again, so this comparison lets it notify again.
                     // Uses the query builder: an Eloquent update() would itself
                     // bump updated_at and make a retry look like a new update.
-                    $claimedFounderUpdateNotify = \Illuminate\Support\Facades\DB::table('mentorship_requests')->where('id', $session->id)
+                    $claimedFounderUpdateNotify = DB::table('mentorship_requests')->where('id', $session->id)
                         ->where(function ($q) use ($mentorUpdateVersion) {
                             $q->whereNull('founder_update_notified_at')
                               ->orWhere('founder_update_notified_at', '!=', $mentorUpdateVersion);
@@ -445,7 +446,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                         try {
                             $rName_usr->notify($MSG);
                         } catch (\Throwable $th) {
-                            \Illuminate\Support\Facades\DB::table('mentorship_requests')->where('id', $session->id)->update(['founder_update_notified_at' => null]);
+                            DB::table('mentorship_requests')->where('id', $session->id)->update(['founder_update_notified_at' => null]);
                             throw $th;
                         }
                     }
