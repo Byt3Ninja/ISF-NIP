@@ -345,14 +345,15 @@ class CyclesController extends Controller
             ]);
         }
 
+        $title_max_length = Cycle::TITLE_MAX_LENGTH;
         if ($type == CycleModifyAction::EDIT_CYCLE || $isEdit == true)
         {
             /// Edit Cycle (to be moved to standalone controller)
             $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => ['required', 'string', 'max:50', Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
-                'title_ar' => 'required|string|max:50',
+                'title' => ['required', 'string', 'max:' . $title_max_length, Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
+                'title_ar' => ['required', 'string', 'max:' . $title_max_length],
                 'description' => 'required|string|max:250',
                 'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
@@ -840,8 +841,8 @@ class CyclesController extends Controller
             $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => 'required|string|max:50',
-                'title_ar' => 'required|string|max:50',
+                'title' => 'required|string|max:' . $title_max_length,
+                'title_ar' => 'required|string|max:' . $title_max_length,
                 'description' => 'required|string|max:100',
                 'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
