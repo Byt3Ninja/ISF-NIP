@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
 
@@ -1933,7 +1934,7 @@ class ScreeningController extends Controller
 		{
 			$cName = isset($criterion['name']) ? trim((string) $criterion['name']) : '';
 			$cLabel = $cName !== ''
-				? __('cycles.evaluation_named_criterion', ['name' => $cName])
+				? __('cycles.evaluation_named_criterion', ['name' => Str::limit($cName, 40)])
 				: __('cycles.evaluation_named_criterion_position', ['position' => $i + 1]);
 			$cWeightPresent = isset($criterion['weight']) && $criterion['weight'] !== '' && $criterion['weight'] !== null;
 
@@ -1941,9 +1942,9 @@ class ScreeningController extends Controller
 			{
 				if( $requireComplete ) { return __('cycles.evaluation_criterion_name_required_named', ['criterion' => $cLabel]); }
 			}
-			elseif( mb_strlen($cName) > 255 )
+			elseif( mb_strlen($cName) > ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH )
 			{
-				return __('cycles.evaluation_criterion_name_too_long_named', ['criterion' => $cLabel]);
+				return __('cycles.evaluation_criterion_name_too_long_named', ['criterion' => $cLabel, 'max' => ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]);
 			}
 			if( !$cWeightPresent )
 			{
@@ -1964,7 +1965,7 @@ class ScreeningController extends Controller
 			{
 				$sName = isset($sub['name']) ? trim((string) $sub['name']) : '';
 				$sLabel = $sName !== ''
-					? __('cycles.evaluation_named_subcriterion', ['name' => $sName])
+					? __('cycles.evaluation_named_subcriterion', ['name' => Str::limit($sName, 40)])
 					: __('cycles.evaluation_named_subcriterion_position', ['position' => $j + 1]);
 				$sWeightPresent = isset($sub['weight']) && $sub['weight'] !== '' && $sub['weight'] !== null;
 
@@ -1972,9 +1973,9 @@ class ScreeningController extends Controller
 				{
 					if( $requireComplete ) { return __('cycles.evaluation_subcriterion_name_required_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]); }
 				}
-				elseif( mb_strlen($sName) > 255 )
+				elseif( mb_strlen($sName) > ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH )
 				{
-					return __('cycles.evaluation_subcriterion_name_too_long_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]);
+					return __('cycles.evaluation_subcriterion_name_too_long_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel, 'max' => ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]);
 				}
 				if( !$sWeightPresent )
 				{

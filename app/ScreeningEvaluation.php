@@ -11,6 +11,13 @@ class ScreeningEvaluation extends Model
 {
 	use HasFactory;
 
+	/**
+	 * Max length of an evaluation criterion / sub-criterion name.
+	 * Single source of truth: the controller validates against it and the
+	 * evaluation-model editor renders its maxlength / client rules from it.
+	 */
+	public const CRITERION_NAME_MAX_LENGTH = 100;
+
 	protected $table = 'screening_evaluation';
 	protected $fillable = ['step_id', 'status', 'screening_guidelines'];
 	protected $casts = [
