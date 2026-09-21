@@ -9,59 +9,37 @@
     $salutation = $isRtl
         ? ($verifyGender === 'female' ? $t('dear_female') : $t('dear_male'))
         : $t('dear');
-    $font = 'Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif';
 @endphp
-    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F3F4F6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px 0;">
+    <tr>
+        <td align="center" style="padding: 0 16px;">
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
+                <tr>
+                    <td height="6" style="background-color: #4F46E5;"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 40px 40px 20px 40px; text-align: {{ $alignStart }}; direction: {{ $dirAttr }};">
+    <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ $salutation }} {{ $verifyUserName }}{{ $isRtl ? '،' : ',' }}</h1>
+    <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $t('intro', ['platform_name' => $verifyPlatformName]) }}</p>
+    <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $t('cta_intro') }}</p>
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
         <tr>
-            <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                <div dir="{{ $dirAttr }}" style="color:#555555;font-family:{{ $font }};font-size:15px;line-height:150%;text-align:{{ $alignStart }};mso-line-height-alt:22.5px;">
-                    <p style="margin: 0;">{{ $salutation }} {{ $verifyUserName }}{{ $isRtl ? '،' : ',' }}</p>
-                    <p style="margin: 15px 0px;"></p>
-                    <p style="margin: 0;">{{ $t('intro', ['platform_name' => $verifyPlatformName]) }}</p>
-                    <p style="margin: 15px 0px;"></p>
-                    <p style="margin: 0;">{{ $t('cta_intro') }}</p>
-                </div>
+            <td align="center">
+                <a href="{{ $verifyUrl }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ $t('button') }}</a>
             </td>
         </tr>
     </table>
-
-    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-        <tr>
-            <td class="pad" style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;text-align:center;">
-                <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                    <tr>
-                        <td align="center">
-                            <!--[if mso]>
-                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ $verifyUrl }}" style="height:46px;v-text-anchor:middle;width:240px;" arcsize="11%" stroke="f" fillcolor="#1aa19c">
-                                <w:anchorlock/>
-                                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{{ $t('button') }}</center>
-                            </v:roundrect>
-                            <![endif]-->
-                            <!--[if !mso]><!-- -->
-                            <a href="{{ $verifyUrl }}"
-                               target="_blank"
-                               style="background-color:#1aa19c;border-radius:5px;color:#ffffff;display:inline-block;font-family:{{ $font }};font-size:15px;font-weight:bold;line-height:46px;text-align:center;text-decoration:none;width:240px;-webkit-text-size-adjust:none;mso-hide:all;">
-                                {{ $t('button') }}
-                            </a>
-                            <!--<![endif]-->
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-
-    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-        <tr>
-            <td class="pad" style="padding-bottom:20px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                <div dir="{{ $dirAttr }}" style="color:#555555;font-family:{{ $font }};font-size:15px;line-height:150%;text-align:{{ $alignStart }};mso-line-height-alt:22.5px;">
-                    <p style="margin: 0 0 16px;">{{ $t('closing') }}</p>
-                    <p style="margin: 0 0 8px; font-size:13px; color:#777777;">{{ $t('fallback') }}</p>
-                    <p dir="ltr" style="margin: 0 0 16px; font-size:12px; word-break: break-all; text-align:{{ $alignStart }};"><a href="{{ $verifyUrl }}" target="_blank" style="color:#1aa19c;">{{ $verifyUrl }}</a></p>
-                    <p style="margin: 0;">{{ $t('regards') }}</p>
-                    <p style="margin: 0; font-weight: 600;">{{ $t('team', ['sender_name' => $verifySenderName]) }}</p>
-                </div>
-            </td>
-        </tr>
-    </table>
+    <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $t('closing') }}</p>
+    <p style="margin: 0 0 8px 0; font-size: 13px; color: #6B7280;">{{ $t('fallback') }}</p>
+    <p dir="ltr" style="margin: 0 0 20px 0; font-size: 12px; word-break: break-all; text-align: {{ $alignStart }};"><a href="{{ $verifyUrl }}" target="_blank" style="color: #4F46E5;">{{ $verifyUrl }}</a></p>
+    <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
+        {{ $t('regards') }}<br>
+        <strong>{{ $t('team', ['sender_name' => $verifySenderName]) }}</strong>
+    </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 @endsection
