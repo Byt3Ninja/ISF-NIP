@@ -544,7 +544,7 @@
                                       rel="noopener"
                                       class="fw-medium d-inline-flex align-items-center gap-1"
                                     >
-                                      {{ Str::limit($program->name, 50) }}
+                                      {{ Str::limit($l == 'ar' ? ($program->title_ar ?: $program->title) : ($program->title ?: $program->title_ar), 50) }}
                                       <i class="ti ti-external-link text-muted"></i>
                                     </a>
                                     @if($program->is_expired)
