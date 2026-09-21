@@ -88,9 +88,7 @@ class AuthService
                     DB::table('mentor_expertise')->insert($expertiseInsert);
                 }
 
-                if ($user->claimEmailSlot('mentor_welcome_sent_at')) {
-                    $user->notify(new WelcomeMentorNotification($user, $data['password']));
-                }
+                $sendMentorWelcome = true;
             }
             else {
                 if ($user->claimEmailSlot('user_welcome_sent_at')) {
@@ -98,6 +96,15 @@ class AuthService
                 }
             }
             DB::commit();
+
+            // Only once the account is committed, and once per account.
+            if (! empty($sendMentorWelcome) && $user->claimEmailSlot('mentor_welcome_sent_at')) {
+                try {
+                    $user->notify(new WelcomeMentorNotification($user, $data['password']));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
 
             $token = $user->createToken('auth-register')->plainTextToken;
 

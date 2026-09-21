@@ -78,19 +78,30 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
         $orgData = $this->buildEmailOrganizationData(null);
 
         $this->configureSmtp($smtpSettings);
-        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+
+        // Follow the platform's default language (General Settings).
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+
+        $firstName = $locale === 'ar' ? trim((string) $this->user->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $this->user->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $this->user->first_name_en);
+            $lastName = trim((string) $this->user->last_name_en);
+        }
 
         return (new MailMessage)
             ->from(config('mail.from.address'), config('mail.from.name'))
-            ->subject(__('email.mentor_welcome_email.subject' , ['platform_name' => $platformName]))
+            ->subject(__('email.mentor_welcome_email.subject', ['platform_name' => $platformName], $locale))
             ->view('emails.welcome_mentor_email', array_merge([
-                'user'          => $this->user,
                 // Named distinctly from 'platformName': a global view composer
                 // (AppServiceProvider) sets that key on every view and would
                 // silently override this value.
                 'mentorWelcomePlatformName' => $platformName,
-                'platformLink'  => config('app.url'),
-                'magicLoginUrl' => $magicLoginUrl,
+                'mentorWelcomeLocale' => $locale,
+                'mentorWelcomeName' => trim($firstName . ' ' . $lastName),
+                'mentorWelcomeGender' => strtolower(trim((string) $this->user->gender)),
+                // The platform link opens the login page.
+                'mentorWelcomeUrl' => route('login'),
             ], $orgData));
     }
 

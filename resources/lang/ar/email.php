@@ -35,8 +35,8 @@ return [
     ],
     'judger_welcome_email' => [
         'subject' => 'حسابك جاهز',
-        'dear_male' => 'مرحباً السيد ',
-        'dear_female' => 'مرحباً السيدة ',
+        'dear_male' => ' عزيزي ',
+        'dear_female' => ' عزيزتي ',
         'dear_neutral' => 'مرحباً ',
         'intro' => 'أهلاً بك في :platform_name. تم إنشاء حساب لك بصفتك محكماً.',
         'account_details' => 'تفاصيل حسابك',
