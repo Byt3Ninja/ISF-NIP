@@ -109,7 +109,7 @@
 
                   <h5 class="card-title mb-1 line-clamp-1">
                     <a href="{{ route('landing-pages.edit', $page->id) }}" class="text-dark">
-                      {{ $page->title }}
+                      {{ Str::limit($page->title, 35) }}
                     </a>
                   </h5>
 
