@@ -237,6 +237,10 @@ $tabs = [
             title.addClass('is-invalid');
             title.next('.invalid-feedback').text('{{ $l == "en" ? "Title must be at least 3 characters" : "العنوان يجب أن يكون 3 أحرف على الأقل" }}');
             isValid = false;
+          } else if (title.val().length > 50) {
+            title.addClass('is-invalid');
+            title.next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 50 characters" : "العنوان لا يمكن أن يتجاوز 50 حرف" }}');
+            isValid = false;
           }
 
           // Validate title_ar

@@ -55,6 +55,7 @@
         placeholder="{{ __('cycles.Cycle title') }}"
         oninput="this.value = this.value.trimStart()" 
         value="{{ isset($ccycle) ? $ccycle->title : '' }}"
+        maxlength="50"
       />
       <div class="invalid-feedback"></div>
     </div>
@@ -326,9 +327,9 @@ $(document).ready(function() {
       title.addClass('is-invalid');
       title.next('.invalid-feedback').text('{{ $l == "en" ? "Title must be at least 3 characters" : "العنوان يجب أن يكون 3 أحرف على الأقل" }}');
       isValid = false;
-    } else if (title.val().length > 100) {
+    } else if (title.val().length > 50) {
       title.addClass('is-invalid');
-      title.next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 100 characters" : "العنوان لا يمكن أن يتجاوز 100 حرف" }}');
+      title.next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 50 characters" : "العنوان لا يمكن أن يتجاوز 50 حرف" }}');
       isValid = false;
     }
 
@@ -451,9 +452,9 @@ $(document).ready(function() {
     if (value.length > 0 && value.length < 3) {
       $(this).addClass('is-invalid');
       $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Title must be at least 3 characters" : "العنوان يجب أن يكون 3 أحرف على الأقل" }}');
-    } else if (value.length > 100) {
+    } else if (value.length > 50) {
       $(this).addClass('is-invalid');
-      $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 100 characters" : "العنوان لا يمكن أن يتجاوز 100 حرف" }}');
+      $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 50 characters" : "العنوان لا يمكن أن يتجاوز 50 حرف" }}');
     } else {
       $(this).next('.invalid-feedback').text('');
     }

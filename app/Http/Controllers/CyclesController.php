@@ -840,7 +840,7 @@ class CyclesController extends Controller
             $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => 'required|string|max:250',
+                'title' => 'required|string|max:50',
                 'title_ar' => 'required|string|max:50',
                 'description' => 'required|string|max:100',
                 'description_ar' => 'required|string|max:250',
