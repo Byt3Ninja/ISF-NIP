@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('landing_pages', function (Blueprint $table) {
             // About Us Section
-            $table->boolean('about_is_enabled')->default(true);
+            $table->boolean('about_is_enabled')->default(false);
             $table->string('about_title', 100)->nullable();
             $table->string('about_title_ar', 100)->nullable();
             $table->string('about_title_tag', 150)->nullable();
