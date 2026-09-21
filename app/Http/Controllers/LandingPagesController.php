@@ -374,7 +374,7 @@ class LandingPagesController extends Controller
             'label_en'  => 'Description (Arabic)',
             'label_ar'  => 'الوصف بالعربية',
             'value'     => $currentPage?->hero_description_ar,
-            'required'  => false,
+            'required'  => true,
             'maxlength' => $description_max_length,
             'col'       => 6,
           ],
