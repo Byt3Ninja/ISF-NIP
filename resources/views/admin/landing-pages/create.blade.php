@@ -1108,11 +1108,11 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Description') }}"}</label>
-                  <textarea name="about[cards][${id}][description]" maxlength="{{ App\LandingPage::DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-card-field></textarea>
+                  <textarea name="about[cards][${id}][description]" maxlength="{{ App\LandingPage::STEPS_DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-card-field></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Description_ar') }}"}</label>
-                  <textarea name="about[cards][${id}][description_ar]" maxlength="{{ App\LandingPage::DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-card-field></textarea>
+                  <textarea name="about[cards][${id}][description_ar]" maxlength="{{ App\LandingPage::STEPS_DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-card-field></textarea>
                 </div>
               </div>
             </div>
