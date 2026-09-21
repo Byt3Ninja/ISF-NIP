@@ -32,6 +32,15 @@ header[id] {
   min-width: 0;
 }
 
+.gl-nav > .container,
+.gl-hero__inner.container,
+.section-py > .container,
+.gl-footer > .container {
+  --lp-page-padding-x: clamp(2rem, 6vw, 5.5rem);
+  max-width: 1480px;
+  padding-inline: var(--lp-page-padding-x);
+}
+
 /* ---------- Nav ---------- */
 .gl-nav {
   background: rgba(10, 6, 24, 0.58);
@@ -1067,6 +1076,13 @@ header[id] {
 }
 
 @media (max-width: 575.98px) {
+  .gl-nav > .container,
+  .gl-hero__inner.container,
+  .section-py > .container,
+  .gl-footer > .container {
+    --lp-page-padding-x: 1.25rem;
+  }
+
   .hero-primary-cta {
     width: 100%;
     min-height: 52px;
