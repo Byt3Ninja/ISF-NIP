@@ -42,6 +42,8 @@
 
   <!-- ===== Hero ===== -->
   <header class="gl-hero" id="hero">
+    <span class="hero-gradient" aria-hidden="true"></span>
+    <span class="hero-grid" aria-hidden="true"></span>
 
     <!-- ===== Nav ===== -->
     <nav class="navbar navbar-expand-lg gl-nav py-3">
@@ -50,9 +52,11 @@
           <span class="brand-mark">
             @if($page->logo_url)
               <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
+            @else
+              <span class="brand-mark-placeholder"></span>
             @endif
           </span>
-          <span class="fw-bold text-white fs-5">{{ $page->title }}</span>
+          <span class="brand-title">{{ $page->title }}</span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
           aria-label="Toggle navigation">
@@ -61,13 +65,13 @@
         <div class="collapse navbar-collapse justify-content-end" id="navMenu">
           <ul class="navbar-nav align-items-lg-center gap-lg-1">
             @if($page->about_is_enabled)
-              <li class="nav-item"><a class="nav-link text-white" href="#about">{{ __('landing.about') }}</a></li>
+              <li class="nav-item"><a class="nav-link" href="#about">{{ __('landing.about') }}</a></li>
             @endif
             @if($page->programs_is_enabled)
-              <li class="nav-item"><a class="nav-link text-white" href="#programs">{{ __('landing.programs') }}</a></li>
+              <li class="nav-item"><a class="nav-link" href="#programs">{{ __('landing.programs') }}</a></li>
             @endif
             @if($page->how_is_enabled)
-              <li class="nav-item"><a class="nav-link text-white"
+              <li class="nav-item"><a class="nav-link"
                   href="#how-it-works">{{ __('landing.how_it_works') }}</a></li>
             @endif
             <li class="nav-item dropdown-language dropdown ms-lg-3">
@@ -90,7 +94,7 @@
             </li>
             @if ($page->programs_is_enabled)
               <li class="nav-item mt-2 mt-lg-0">
-                <a href="#programs" class="btn btn-primary rounded-pill">{{ __('landing.apply_now') }} </a>
+                <a href="#programs" class="btn hero-nav-cta">{{ __('landing.apply_now') }} </a>
               </li>
             @endif
           </ul>
@@ -98,15 +102,9 @@
       </div>
     </nav>
 
-    <span class="lp-orb lp-orb--one" aria-hidden="true"></span>
-    <span class="lp-orb lp-orb--two" aria-hidden="true"></span>
-
     <div class="gl-hero__inner container position-relative">
       <div class="row align-items-center gy-5 gx-lg-5">
-        {{-- Without a Hero Image the text column takes the full width: the
-             image column is dropped entirely below, so leaving this at
-             col-lg-6 would strand the copy in half an empty row. --}}
-        <div class="{{ $page->hero_image_url ? 'col-lg-6' : 'col-12' }}">
+        <div class="col-lg-6">
           @php $heroTag = $l == 'ar' ? $page->hero_title_tag_ar : $page->hero_title_tag; @endphp
           @if($heroTag)
             <span class="hero-eyebrow"><span class="live-pulse"></span> {{ $heroTag }}</span>
@@ -123,13 +121,13 @@
           @endif
           <div class="d-flex flex-wrap gap-3 mt-5">
             @if($page->programs_is_enabled)
-              <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ __('landing.browse_open_programs') }} <i
+              <a href="#programs" class="btn hero-primary-cta btn-lg">{{ __('landing.browse_open_programs') }} <i
                   class="ti ti-arrow-up-right ms-1"></i></a>
             @endif
-            @if($page->how_is_enabled)
+            {{-- @if($page->how_is_enabled)
               <a href="#how-it-works"
                 class="btn btn-outline-light rounded-pill btn-lg">{{ __('landing.see_how_it_works') }}</a>
-            @endif
+            @endif --}}
           </div>
 
           @if($lpShowProgramStats || $lpShowStepStat)
@@ -163,13 +161,20 @@
           @endif
         </div>
 
-        @if($page->hero_image_url)
-          <div class="col-lg-5 ms-auto d-flex align-items-center justify-content-end">
+        <div class="col-lg-5 ms-auto d-flex align-items-center justify-content-center justify-content-lg-end">
+          <div class="hero-visual" aria-label="{{ $heroTitle ?? $page->title }}">
             <div class="hero-image-wrapper">
-              <img src="{{ $page->hero_image_url }}" alt="hero-image" class="hero-img">
+              @if($page->hero_image_url)
+                <img src="{{ $page->hero_image_url }}" alt="hero-image" class="hero-img">
+              @else
+                <span class="hero-image-placeholder">image</span>
+              @endif
             </div>
+            <span class="hero-chip hero-chip--one"><i class="ti ti-square-rounded"></i></span>
+            <span class="hero-chip hero-chip--two"><i class="ti ti-circle"></i></span>
+            <span class="hero-chip hero-chip--three"><i class="ti ti-diamond"></i></span>
           </div>
-        @endif
+        </div>
       </div>
     </div>
   </header>
