@@ -115,7 +115,7 @@
                 <div class="badge bg-label-secondary">
                   <i class="ti ti-calendar ti-18px text-info"></i>
                   <span class="fw-semibold text-xs text-dark ms-1">
-                    {{ $assessment == null ? 'None' : $assessment->created_at }}
+                    {{ $assessment == null ? __('startup.none') : $assessment->created_at }}
                   </span>
                 </div>
               </div>
@@ -130,44 +130,47 @@
                   </div>
                 </div>
                 <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
-                  @if (!$assessment_user)
-                    @php
-                      // canStartAssessment() ran in the controller; 'reason' tells us
-                      // which precondition is unmet so we can name it for the founder.
-                      $canStart = $startCheck['can_proceed'] ?? false;
-                      $blockedReason = $startCheck['reason'] ?? null;
+                  @php
+                    // canStartAssessment() ran in the controller; 'reason' tells us
+                    // which precondition is unmet so we can name it for the founder.
+                    // The button always renders -- disabled with the reason spelled
+                    // out underneath -- so it never silently disappears (GV-9668).
+                    $canStart = $startCheck['can_proceed'] ?? false;
+                    $blockedReason = $startCheck['reason'] ?? null;
 
-                      // Reasons the founder can act on carry a link to the fix.
-                      $blockedAction = [
-                          'no_company' => ['route' => route('company.profile_view_mine'), 'label' => __('admin.GoToMyStartup')],
-                          'no_stage' => ['route' => route('company.profile_view_mine'), 'label' => __('admin.GoToMyStartup')],
-                      ][$blockedReason] ?? null;
-                    @endphp
+                    // Reasons the founder can act on carry a link to the fix.
+                    $blockedAction = [
+                        // Deep-link to the tab that owns the missing field:
+                        // Development Stage lives on the Financial Info tab.
+                        'no_company' => ['route' => route('company.profile_view_mine', ['tab' => 'company-info']), 'label' => __('admin.GoToMyStartup')],
+                        'no_stage' => ['route' => route('company.profile_view_mine', ['tab' => 'company-financial-info']), 'label' => __('admin.GoToMyStartup')],
+                        'assessment_in_progress' => ['route' => route('assessments.take'), 'label' => __('admin.ContinueAssessment')],
+                    ][$blockedReason] ?? null;
+                  @endphp
 
-                    <div class="d-flex flex-column align-items-start align-items-md-end gap-2">
-                      <form action="{{ route('assessments.assign') }}" method="post">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-primary" @disabled(!$canStart)
-                          @if (!$canStart) aria-describedby="assessment-blocked-hint" @endif>
-                          {{ __('admin.Make_a_new_assessment') }}
-                        </button>
-                      </form>
+                  <div class="d-flex flex-column align-items-start align-items-md-end gap-2">
+                    <form action="{{ route('assessments.assign') }}" method="post">
+                      @csrf
+                      <button type="submit" class="btn btn-sm btn-primary" @disabled(!$canStart)
+                        @if (!$canStart) aria-describedby="assessment-blocked-hint" @endif>
+                        {{ __('admin.Make_a_new_assessment') }}
+                      </button>
+                    </form>
 
-                      @unless ($canStart)
-                        <div id="assessment-blocked-hint"
-                          class="d-flex align-items-start gap-2 text-start text-md-end justify-content-md-end"
-                          style="max-width: 42ch;">
-                          <i class="ti ti-alert-circle ti-16px text-warning flex-shrink-0 mt-1"></i>
-                          <span class="text-xs text-muted">
-                            {{ __('admin.CannotStartAssessment_' . ($blockedReason ?? 'generic')) }}
-                            @if ($blockedAction)
-                              <a href="{{ $blockedAction['route'] }}" class="fw-semibold">{{ $blockedAction['label'] }}</a>
-                            @endif
-                          </span>
-                        </div>
-                      @endunless
-                    </div>
-                  @endif
+                    @unless ($canStart)
+                      <div id="assessment-blocked-hint"
+                        class="d-flex align-items-start gap-2 text-start text-md-end justify-content-md-end"
+                        style="max-width: 42ch;">
+                        <i class="ti ti-alert-circle ti-16px text-warning flex-shrink-0 mt-1"></i>
+                        <span class="text-xs text-muted">
+                          {{ __('admin.CannotStartAssessment_' . ($blockedReason ?? 'generic')) }}
+                          @if ($blockedAction)
+                            <a href="{{ $blockedAction['route'] }}" class="fw-semibold">{{ $blockedAction['label'] }}</a>
+                          @endif
+                        </span>
+                      </div>
+                    @endunless
+                  </div>
 
                   @if ($assessment && $assessment->end_date)
                     <a href="{{ route('assessments.results_export_pdf') }}" class="btn btn-sm btn-primary ms-3">

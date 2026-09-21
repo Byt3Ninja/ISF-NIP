@@ -3996,5 +3996,7 @@ return [
   'CannotStartAssessment_not_configured' => 'The assessment is not available for your development stage yet. Contact support to get it set up.',
   'CannotStartAssessment_generic' => 'You cannot start an assessment right now.',
   'GoToMyStartup' => 'Go to my startup',
+  'ContinueAssessment' => 'Continue assessment',
+  'tabs_locked_until_startup_saved' => 'Save your Startup Info first. The remaining sections unlock once your startup has been created.',
   'AssessmentCreateFailed' => 'Could not create the assessment. Try again.',
 ];

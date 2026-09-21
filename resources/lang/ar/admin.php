@@ -4040,5 +4040,7 @@ return [
   'CannotStartAssessment_not_configured' => 'التقييم غير متاح لمرحلة التطوير الخاصة بك بعد. تواصل مع الدعم لإعداده.',
   'CannotStartAssessment_generic' => 'لا يمكنك بدء تقييم في الوقت الحالي.',
   'GoToMyStartup' => 'الذهاب إلى شركتي الناشئة',
+  'ContinueAssessment' => 'متابعة التقييم',
+  'tabs_locked_until_startup_saved' => 'احفظ معلومات الشركة أولاً. يتم فتح باقي الأقسام بعد إنشاء شركتك الناشئة.',
   'AssessmentCreateFailed' => 'تعذر إنشاء التقييم. حاول مرة أخرى.',
 ];

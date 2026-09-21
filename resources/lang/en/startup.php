@@ -676,4 +676,5 @@ return [
   'Export CSV' => 'Export CSV',
   'no_feedback_provided_yet' => 'No feedback provided yet.',
   'all_segments' => 'All Segments',
+  'none' => 'None',
 ];
