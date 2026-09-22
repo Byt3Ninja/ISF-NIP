@@ -919,8 +919,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::prefix('programs')->group(function () {
         Route::post('general', 'ProgramController@store')->name('programs.general');
         Route::post('{id}/general', 'ProgramController@store')->name('programs.generalEdit')->where('id', '[0-9]+');
-    
-        foreach (['schedule', 'content', 'mentorship', 'location', 'publish'] as $step) {
+
+        foreach (['schedule', 'mentorship', 'location', 'publish'] as $step) {
             Route::post("{id}/{$step}", 'ProgramController@update')->name("programs.{$step}")->where('id', '[0-9]+');
         }
     });
