@@ -139,6 +139,7 @@ return [
   	'Your training sessions ready, click links to join upcoming sessions' => 'الجلسة التدريبية متاحة الآن، إضغط على الرابط للإنضمام للجلسة',
   	'Your traditional training' => 'لديك تدريب تقليدي',
   	'Join now' => 'إنضم الآن',
+  	'Meeting link unavailable' => 'رابط الاجتماع غير متاح',
     'Rate' => 'قيم',
     'service' => 'خدمة',
     'Did you get this service?' => 'هل تم تلقي هذه الخدمة؟',

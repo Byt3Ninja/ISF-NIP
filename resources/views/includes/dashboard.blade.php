@@ -597,7 +597,11 @@
 										@endif
 									</div>
 								</div>
-								@if( !is_null( $myFinal ) && $myFinal->join_url )
+								{{-- GV-9620: the guard used to also require $myFinal->join_url, so a
+									 meeting whose link failed to generate hid the WHOLE table and the
+									 founder was told the session would "start soon". The row now renders
+									 without a link and the Actions cell says the link is unavailable. --}}
+								@if( !is_null( $myFinal ) && count( $myFinal ) )
 								<div class="card-datatable table-responsive">
 									<table class="table mb-0 sessonsTable">
 										<thead class="table-light">
@@ -610,24 +614,26 @@
 											</tr>
 										</thead>
 										<tbody>
+											{{-- GV-9620: one row per final panel. A startup can sit in several. --}}
+											@foreach( $myFinal as $final )
 											<tr>
 												<td>
 													<div class="d-flex align-items-center">
-														<a class="media-left" href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
-															<img src="{{ $myFinal->company->user->image_url }}" alt="avatar"
+														<a class="media-left" href="/dashboard/users/{{ $final->company->user->id }}/edit">
+															<img src="{{ $final->company->user->image_url }}" alt="avatar"
 																class="rounded-circle me-3" height="40" width="40">
 														</a>
-														<a href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
+														<a href="/dashboard/users/{{ $final->company->user->id }}/edit">
 															<div class="media-body">
-																<h6 class="media-heading mb-0 text-nowrap">{{ $myFinal->company->user->name }}</h6>
-																<span class="font-small-2 text-nowrap">{{ $myFinal->company->user->title }}</span>
+																<h6 class="media-heading mb-0 text-nowrap">{{ $final->company->user->name }}</h6>
+																<span class="font-small-2 text-nowrap">{{ $final->company->user->title }}</span>
 															</div>
 														</a>
 													</div>
 												</td>
 												<td>
 													{{-- GV-8357: all of the panel's judges in one cell, capped with a +N overflow --}}
-													@include('includes.partials.judges-cell', ['judges' => $myFinal->judges])
+													@include('includes.partials.judges-cell', ['judges' => $final->judges])
 												</td>
 												@php
 													// GV-8363: compare in the viewer's own timezone. Slots are stored as
@@ -637,8 +643,8 @@
 													// GV-7381: session_start/session_end are resolved in the controller so
 													// the schedule, the Completed flag and the Join window all agree --
 													// previously the end time was derived from the floored `duration`.
-													$startTime = $myFinal->session_start;
-													$endTime = $myFinal->session_end;
+													$startTime = $final->session_start;
+													$endTime = $final->session_end;
 													// Join Now + passcode unlock 10 minutes before the slot starts
 													// and stay available until an hour after it ends.
 													$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
@@ -648,9 +654,9 @@
 													 used to echo the raw `datetime` column (Y-m-d H:i:s), so an unscheduled
 													 row read "2026-09-23 22:00:00" next to a scheduled row's "23-09-2026". --}}
 												<td>
-													@if( !empty( $myFinal->meeting_time ) )
-														{{ $myFinal->meeting_date }} <br>
-														<small class="text-muted">{{ $myFinal->meeting_time }}</small>
+													@if( !empty( $final->meeting_time ) )
+														{{ $final->meeting_date }} <br>
+														<small class="text-muted">{{ $final->meeting_time }}</small>
 													@elseif( !is_null( $startTime ) )
 														{{ $startTime->format('d-m-Y') }} <br>
 														<small class="text-muted">
@@ -666,11 +672,17 @@
 													 PHP, so every such row reported "Yes"). --}}
 												<td> {{ \App\Services\MeetingWindowService::hasEnded( $endTime, $_user ) ? __('Yes') : __('No') }} </td>
 												<td>
-													@if( $canJoin )
-														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
-														@if( !empty( $myFinal->passcode ) )
+													{{-- GV-9620: the meeting row is shown even when the online-meeting
+														 link failed to generate (ScreeningController catches and logs the
+														 failure, leaving join_url null). Join is disabled rather than the
+														 whole table being hidden. --}}
+													@if( empty( $final->join_url ) )
+														<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
+													@elseif( $canJoin )
+														<a href="{{ $final->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+														@if( !empty( $final->passcode ) )
 															<button title="{{ __('dashboard.Passcode') }}" type="button"
-																data-passcode="{{ $myFinal->passcode }}"
+																data-passcode="{{ $final->passcode }}"
 																class="btn btn-label-warning btn-sm show-passcode rounded ms-1">
 																<i class="ti ti-key"></i>
 															</button>
@@ -682,6 +694,7 @@
 													@endif
 												</td>
 											</tr>
+											@endforeach
 										</tbody>
 									</table>
 								</div>

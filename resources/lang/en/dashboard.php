@@ -139,6 +139,7 @@ return [
   	'Your training sessions ready, click links to join upcoming sessions' => 'Your training sessions ready, click links to join upcoming sessions',
   	'Your traditional training' => 'Your traditional training',
   	'Join now' => 'Join now',
+  	'Meeting link unavailable' => 'Meeting link unavailable',
     'Rate' => 'Rate',
     'service' => 'service',
     'Did you get this service?' => 'Did you get this service?',
