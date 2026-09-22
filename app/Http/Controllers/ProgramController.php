@@ -21,12 +21,17 @@ use App\SessionReport;
 use App\ScreeningEvaluation;
 use App\Enums\CycleModifyAction;
 use App\Services\TimezoneService;
-use Illuminate\Http\Request;
 use App\Jobs\ExportCycleData;
-use Illuminate\Support\Facades\DB;
-use App\ScreeningEvaluationResults;
 use App\Notifications\TemplateEmail;
+use App\ScreeningEvaluationResults;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use URL, stdClass;
 
 class ProgramController extends Controller
@@ -171,12 +176,104 @@ class ProgramController extends Controller
         return view('admin.programs.create', compact('cycles'));
     }
 
+   // Drop these into ProgramController, replacing the existing store(), update(),
+// updateProgram*(), applyProgram*() and normalizeProgramColor() methods.
+//
+// Imports needed at the top of the controller:
+//   use Carbon\Carbon;
+//   use Illuminate\Http\Request;
+//   use Illuminate\Support\Facades\DB;
+//   use Illuminate\Support\Facades\Storage;
+//   use Illuminate\Support\Str;
+//   use Illuminate\Validation\Rule;
+//   use Illuminate\Validation\ValidationException;
+ 
+    // Keep DESCRIPTION_MAX in sync with the blades ($descMax) and app-edit-program.js
+    private const DESCRIPTION_MAX = 100;
+    private const LOGO_RULE = 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048';
+    private const HEX_COLOR_RULE = 'regex:/^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/';
+    // TODO: derive from the organization / logged-in user instead of a hard-coded incubator
+    private const DEFAULT_INCUBATOR_ID = 1;
+ 
     /**
-     * Store a newly created resource in storage.
+     * Wizard steps 1-3 (General + optionally Schedule and Content).
+     * Routes: programs.general (create) / programs.generalEdit (update).
      */
     public function store(Request $request)
     {
-        //
+        $cycle = null;
+        if ($request->route('id')) {
+            $cycle = Cycle::find($request->route('id'));
+            if (!$cycle) {
+                return $this->jsonError('Program not found.', 404);
+            }
+            if (!$this->canManageOrganization($cycle->organization_id)) {
+                return $this->jsonError('You are not allowed to manage this program.', 403);
+            }
+        }
+ 
+        $scheduleProvided = $request->has('programDateRange') || $request->has('programStepType') || $request->hasFile('programLogo');
+        $contentProvided = $request->has('programDescription') || $request->has('programDescriptionAr');
+ 
+        $rules = [
+            'programOrganization' => 'required|integer|exists:organizations,id',
+            'programType' => 'required|in:hackathon,general',
+            'programTitle' => 'required|string|min:3|max:50',
+            'programTitleAr' => 'required|string|min:3|max:50',
+            'programCohort' => 'nullable|string|max:20',
+        ];
+        if ($scheduleProvided) {
+            $rules += $this->scheduleRules();
+        }
+        if ($contentProvided) {
+            $rules += $this->contentRules();
+        }
+        $request->validate($rules);
+ 
+        $organizationId = (int) $request->input('programOrganization');
+        if (!$this->canManageOrganization($organizationId)) {
+            return $this->jsonError('You are not allowed to use this organization.', 403);
+        }
+ 
+        $extra = [];
+        DB::transaction(function () use ($request, &$cycle, $organizationId, $scheduleProvided, $contentProvided, &$extra) {
+            $general = [
+                'organization_id' => $organizationId,
+                'type' => $request->input('programType') === 'hackathon' ? 'Hackathon' : 'General_Program',
+                'title' => trim($request->input('programTitle')),
+                'title_ar' => trim($request->input('programTitleAr')),
+                'cohort' => $request->filled('programCohort') ? trim($request->input('programCohort')) : null,
+            ];
+ 
+            if ($cycle) {
+                $organizationChanged = (int) $cycle->organization_id !== $organizationId;
+                $cycle->forceFill($general);
+            } else {
+                $organizationChanged = false;
+                $cycle = new Cycle();
+                $cycle->forceFill($general + ['incubator_id' => self::DEFAULT_INCUBATOR_ID]);
+            }
+ 
+            if ($scheduleProvided) {
+                $extra = $this->applyProgramSchedule($request, $cycle);
+            }
+            if ($contentProvided) {
+                $this->applyProgramContent($request, $cycle);
+            }
+            $cycle->save();
+ 
+            if ($organizationChanged) {
+                DB::table('mentorship_schedules')
+                    ->where('cycle_id', $cycle->id)
+                    ->update(['organization_id' => $organizationId, 'updated_at' => now()]);
+            }
+        });
+ 
+        return response()->json(array_merge([
+            'success' => true,
+            'id' => $cycle->id,
+            'message' => 'Program saved successfully.',
+        ], $extra));
     }
 
     /**
@@ -527,12 +624,382 @@ class ProgramController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Wizard steps 2-5 (one route per step, see routes).
      */
     public function update(Request $request, string $id)
     {
-        //
+        $cycle = Cycle::find($id);
+        if (!$cycle) {
+            return $this->jsonError('Program not found.', 404);
+        }
+        if (!$this->canManageOrganization($cycle->organization_id)) {
+            return $this->jsonError('You are not allowed to manage this program.', 403);
+        }
+ 
+        $handlers = [
+            'programs.schedule' => 'updateProgramSchedule',
+            'programs.content' => 'updateProgramContent',
+            'programs.mentorship' => 'updateProgramMentorship',
+            'programs.location' => 'updateProgramLocation',
+            'programs.publish' => 'updateProgramPublish',
+        ];
+        $routeName = $request->route()->getName();
+        if (!isset($handlers[$routeName])) {
+            return $this->jsonError('Unknown program step.', 400);
+        }
+ 
+        $extra = DB::transaction(function () use ($handlers, $routeName, $request, $cycle) {
+            return $this->{$handlers[$routeName]}($request, $cycle);
+        });
+ 
+        return response()->json(array_merge([
+            'success' => true,
+            'message' => 'Program saved successfully.',
+        ], (array) $extra));
     }
+ 
+    // ------------------------------------------------------------------
+    // Authorization / responses
+    // ------------------------------------------------------------------
+ 
+    /** Admins may manage everything; everyone else only their own organizations. */
+    protected function canManageOrganization($organizationId): bool
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+        return $user->organizations->contains('id', (int) $organizationId);
+    }
+ 
+    protected function jsonError(string $message, int $status)
+    {
+        return response()->json(['success' => false, 'message' => $message], $status);
+    }
+ 
+    // ------------------------------------------------------------------
+    // Step 2: Configuration & Media
+    // ------------------------------------------------------------------
+ 
+    protected function scheduleRules(): array
+    {
+        return [
+            'programDateRange' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (!$this->parseDateRange($value)) {
+                        $fail('Please select a start date and an end date (the end can not be before the start).');
+                    }
+                },
+            ],
+            'programStepType' => 'required|in:step,time',
+            'programLogo' => self::LOGO_RULE,
+        ];
+    }
+ 
+    protected function updateProgramSchedule(Request $request, Cycle $cycle): array
+    {
+        $request->validate($this->scheduleRules());
+        $extra = $this->applyProgramSchedule($request, $cycle);
+        // Content & Options now live on this step: persist them when present
+        if ($request->has('programNonCompanyParticipation') || $request->has('programPrivateLink')) {
+            $this->applyProgramContentOptions($request, $cycle);
+        }
+        $cycle->save();
+        return $extra;
+    }
+ 
+    /** @return array extra payload for the JSON response (e.g. logo_url) */
+    protected function applyProgramSchedule(Request $request, Cycle $cycle): array
+    {
+        $extra = [];
+ 
+        // Already validated by scheduleRules(); no silent "keep old dates" fallback anymore
+        [$start, $end] = $this->parseDateRange($request->input('programDateRange'));
+        $cycle->start = $start->format('Y-m-d');
+        $cycle->end = $end->format('Y-m-d');
+        $cycle->step_type = $request->input('programStepType') === 'step' ? 'cycle' : 'time';
+ 
+        if ($request->hasFile('programLogo')) {
+            $fileManager = app(\App\Services\FileManagerService::class);
+            $cycle->img_url = $fileManager->update($request->file('programLogo'), $cycle->img_url, 'programs', 'public_uploads');
+            $extra['logo_url'] = Storage::disk('public_uploads')->url($cycle->img_url);
+        }
+ 
+        return $extra;
+    }
+ 
+    /** "2026-01-01 to 2026-02-01" (also accepts " - ", en/em dash and the Arabic "إلى"). */
+    protected function parseDateRange($range): ?array
+    {
+        $parts = preg_split('/\s+(?:to|-|–|—|إلى)\s+/iu', trim((string) $range));
+        if (!$parts || count($parts) !== 2) {
+            return null;
+        }
+ 
+        $dates = [];
+        foreach ($parts as $part) {
+            $part = trim($part);
+            try {
+                $date = Carbon::createFromFormat('Y-m-d', $part);
+            } catch (\Exception $e) {
+                return null;
+            }
+            // Rejects overflow such as 2026-02-31
+            if (!$date || $date->format('Y-m-d') !== $part) {
+                return null;
+            }
+            $dates[] = $date->startOfDay();
+        }
+ 
+        return $dates[1]->lt($dates[0]) ? null : $dates;
+    }
+ 
+    // ------------------------------------------------------------------
+    // Step 3: Content & Options
+    // ------------------------------------------------------------------
+ 
+    protected function contentRules(): array
+    {
+        return [
+            'programDescription' => 'required|string|max:' . self::DESCRIPTION_MAX,
+            'programDescriptionAr' => 'required|string|max:' . self::DESCRIPTION_MAX,
+        ];
+    }
+ 
+    protected function updateProgramContent(Request $request, Cycle $cycle): array
+    {
+        $request->validate($this->contentRules());
+        $this->applyProgramContent($request, $cycle);
+        $cycle->save();
+        return [];
+    }
+ 
+protected function applyProgramContent(Request $request, Cycle $cycle): void
+    {
+        $cycle->description = $request->input('programDescription');
+        $cycle->description_ar = $request->input('programDescriptionAr');
+        $this->applyProgramContentOptions($request, $cycle);
+    }
+
+    protected function applyProgramContentOptions(Request $request, Cycle $cycle): void
+    {
+        $cycle->allow_non_company = $request->boolean('programNonCompanyParticipation') ? 1 : 0;
+
+        // Keep the existing token so links that were already shared keep working;
+        // only mint a new (unguessable) one when the link is switched on for the first time.
+        if ($request->boolean('programPrivateLink')) {
+            $cycle->private = $cycle->private ?: sha1(Str::random(40));
+        } else {
+            $cycle->private = null;
+        }
+    }
+ 
+// ------------------------------------------------------------------
+    // Step 3: Mentorship Settings (mentorship + offline session location)
+    // ------------------------------------------------------------------
+
+    protected function updateProgramMentorship(Request $request, Cycle $cycle): array
+    {
+        $remindersOn = $request->boolean('programMentorshipReminders');
+
+        $request->validate([
+            'programAddress' => 'nullable|string|max:250',
+            // http(s) only: this value ends up in an href on public pages
+            'programGoogleMapsUrl' => ['nullable', 'string', 'max:250', 'regex:/^https?:\/\/\S+$/i'],
+            'programMentorshipReminderTimes' => [$remindersOn ? 'required' : 'nullable', 'array'],
+            'programMentorshipReminderTimes.*' => 'in:1,6,24',
+        ], [
+            'programGoogleMapsUrl.regex' => 'The Google Maps URL must start with http:// or https://.',
+            'programMentorshipReminderTimes.required' => 'Select at least one reminder time.',
+        ]);
+
+        $extra = [];
+        $cycle->auto_approve_mentorship_requests = $request->boolean('programAutoApproveMentorship') ? 1 : 0;
+        $cycle->is_active_Rminder = $remindersOn ? 1 : 0;
+        $cycle->offline_location_address = $request->filled('programAddress') ? trim($request->input('programAddress')) : null;
+        $cycle->offline_location_map = $request->filled('programGoogleMapsUrl') ? trim($request->input('programGoogleMapsUrl')) : null;
+
+        $cycle->save();
+        $this->syncMentorshipReminders($cycle, $remindersOn ? (array) $request->input('programMentorshipReminderTimes', []) : []);
+
+        return $extra;
+    }
+ 
+    /** Diff-based sync so unchanged rows keep their ids (anything referencing them stays valid). */
+    protected function syncMentorshipReminders(Cycle $cycle, array $hours): void
+    {
+        $wanted = array_values(array_unique(array_map('intval', $hours)));
+ 
+        $base = DB::table('mentorship_schedules')
+            ->where('cycle_id', $cycle->id)
+            ->where('unit', 'hours');
+ 
+        $existing = array_map('intval', (clone $base)->pluck('value')->all());
+ 
+        $stale = array_diff($existing, $wanted);
+        if ($stale) {
+            (clone $base)->whereIn('value', $stale)->delete();
+        }
+ 
+        $rows = [];
+        foreach (array_diff($wanted, $existing) as $value) {
+            $rows[] = [
+                'cycle_id' => $cycle->id,
+                'value' => $value,
+                'unit' => 'hours',
+                'is_active' => 1,
+                'organization_id' => $cycle->organization_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        if ($rows) {
+            DB::table('mentorship_schedules')->insert($rows);
+        }
+    }
+ 
+// ------------------------------------------------------------------
+    // Step 4: Landing & Branding (visibility + branding colors)
+    // ------------------------------------------------------------------
+
+    protected function updateProgramLocation(Request $request, Cycle $cycle): array
+    {
+        $isPublic = $request->input('programVisibility') === 'public';
+
+        $request->validate([
+            'programVisibility' => 'required|in:public,private',
+            'programPublicUrl' => ['nullable', 'string', 'max:250', Rule::requiredIf($isPublic)],
+            // strict hex: these values end up in inline CSS on public pages
+            'programColorGradientStartVal' => ['nullable', 'string', self::HEX_COLOR_RULE],
+            'programColorGradientEndVal' => ['nullable', 'string', self::HEX_COLOR_RULE],
+            'programColorMainVal' => ['nullable', 'string', self::HEX_COLOR_RULE],
+        ], [
+            'programPublicUrl.required' => 'Public URL is required for a public program.',
+        ]);
+
+        $extra = [];
+        if ($isPublic) {
+            $base = (string) url_slugify(trim($request->input('programPublicUrl')));
+            if ($base === '') {
+                throw ValidationException::withMessages([
+                    'programPublicUrl' => 'The public URL must contain letters or numbers.',
+                ]);
+            }
+
+            $taken = Cycle::where('organization_id', $cycle->organization_id)
+                ->where('id', '!=', $cycle->id)
+                ->whereNotNull('public_slug')
+                ->pluck('public_slug')
+                ->all();
+            $slug = $base;
+            $counter = 0;
+            while (in_array($slug, $taken, true)) {
+                $slug = $base . '-' . (++$counter);
+            }
+            // NOTE: also add a unique index on (organization_id, public_slug) to close the race window.
+
+            $cycle->is_public = 1;
+            $cycle->public_slug = $slug;
+            $extra['public_slug'] = $slug;
+        } else {
+            $cycle->is_public = 0;
+        }
+
+        foreach ([
+            'programColorGradientStartVal' => 'start_color',
+            'programColorGradientEndVal' => 'end_color',
+            'programColorMainVal' => 'main_color',
+        ] as $field => $column) {
+            if ($request->has($field)) {
+                $cycle->{$column} = $this->normalizeProgramColor($request->input($field));
+            }
+        }
+
+        $cycle->save();
+        return $extra;
+    }
+ 
+    /** Normalize a branding color value (single leading '#'). */
+    protected function normalizeProgramColor($color)
+    {
+        if (!is_string($color) || trim($color) === '') {
+            return null;
+        }
+        return preg_replace('/^#*/', '#', trim($color));
+    }
+ 
+    // ------------------------------------------------------------------
+    // Step 6: Custom Pages & Publish
+    // ------------------------------------------------------------------
+ 
+    protected function updateProgramPublish(Request $request, Cycle $cycle): array
+    {
+        $request->validate([
+            'programConfirmed' => 'accepted',
+            'programPages' => 'nullable|array|max:50',
+            'programPages.*.programPageName' => 'nullable|string|max:150',
+            'programPages.*.programPageVisibility' => 'nullable|in:public,participants,admins-only',
+            'programPages.*.programPageStatus' => 'nullable',
+            'programPages.*.programPageDescription' => 'nullable|string',
+        ], [
+            'programConfirmed.accepted' => 'Please confirm the program details before publishing.',
+        ]);
+ 
+        $visibilityMap = ['public' => 'public', 'participants' => 'private', 'admins-only' => 'admins'];
+        $rows = [];
+        $errors = [];
+        $rowNo = 1;
+ 
+        foreach ((array) $request->input('programPages', []) as $index => $page) {
+            $title = trim($page['programPageName'] ?? '');
+            $content = trim($page['programPageDescription'] ?? '');
+ 
+            if ($title === '') {
+                // A page with content but no name used to be dropped silently
+                if ($this->hasVisibleContent($content)) {
+                    $errors["programPages.{$index}.programPageName"] = 'Every custom page needs a name.';
+                }
+                continue;
+            }
+ 
+            $rows[] = [
+                'cycle_id' => $cycle->id,
+                'title' => $title,
+                'content' => $content,
+                'visibility' => $visibilityMap[$page['programPageVisibility'] ?? 'public'] ?? 'public',
+                'is_active' => !empty($page['programPageStatus']) ? 1 : 0,
+                'row_no' => $rowNo++,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+ 
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
+ 
+        // TODO: sanitize page HTML (e.g. mews/purifier) before it is rendered on public program pages.
+        // TODO: this step never flags the program as published; add that here if a status column exists.
+        DB::table('cycle_custom_pages')->where('cycle_id', $cycle->id)->delete();
+        if ($rows) {
+            DB::table('cycle_custom_pages')->insert($rows);
+        }
+ 
+        return [];
+    }
+ 
+    /** Summernote sends "<p><br></p>" for an empty editor. */
+    protected function hasVisibleContent(string $html): bool
+    {
+        $text = html_entity_decode(strip_tags($html, '<img><iframe><video>'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return preg_replace('/[\s\x{00A0}]+/u', '', $text) !== '';
+    }
+ 
 
     /**
      * Remove the specified resource from storage.

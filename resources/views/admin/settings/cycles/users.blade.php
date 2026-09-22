@@ -41,7 +41,7 @@
                 @foreach ($cycles as $cycle)
                   <option value="{{ $cycle->id }}" @selected($cycle->id == $id)>
                     {{ $cycle->title }}
-                    ({{ $cycle->start->format('d-m-Y') ?? '-' }} - {{ $cycle->end->format('d-m-Y') ?? '-' }})
+                    ({{ $cycle->start?->format('d-m-Y') ?? '-' }} - {{ $cycle->end?->format('d-m-Y') ?? '-' }})
                     — {{ optional($cycle->organization)->name }}
                   </option>
                 @endforeach

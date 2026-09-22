@@ -492,7 +492,7 @@
 
       const RESET_DEFAULTS = {
         start: '#6366f114',
-        end: '##0891b214',
+        end: '#0891b214',
         main: '#6366f1'
       };
 

@@ -915,6 +915,16 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/export-Prog', 'ProgramController@exportProg')->name('programs.export');
     Route::get('programlist/report/{id}', 'ProgramController@programReport')->name('programs.report');
 
+    // Program Wizard stepper endpoints (shared by the create & edit flows).
+    Route::prefix('programs')->group(function () {
+        Route::post('general', 'ProgramController@store')->name('programs.general');
+        Route::post('{id}/general', 'ProgramController@store')->name('programs.generalEdit')->where('id', '[0-9]+');
+    
+        foreach (['schedule', 'content', 'mentorship', 'location', 'publish'] as $step) {
+            Route::post("{id}/{$step}", 'ProgramController@update')->name("programs.{$step}")->where('id', '[0-9]+');
+        }
+    });
+
     /* Start of Currencies Routes */
     Route::patch('currencies/UpdateCurrency', 'CurrencyController@UpdateAllCurrency')->name('currencies.rates_update_all');
     Route::resource('currencies', 'CurrencyController')->except(['show']);
