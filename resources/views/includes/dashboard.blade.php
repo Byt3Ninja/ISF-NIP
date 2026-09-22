@@ -629,29 +629,43 @@
 													{{-- GV-8357: all of the panel's judges in one cell, capped with a +N overflow --}}
 													@include('includes.partials.judges-cell', ['judges' => $myFinal->judges])
 												</td>
-												{{-- GV-3321: per-startup slot derived from the panel interval --}}
+												@php
+													// GV-8363: compare in the viewer's own timezone. Slots are stored as
+													// bare wall-clock times, so comparing them against the raw server
+													// clock opened/closed the window at the wrong moment for anyone whose
+													// profile timezone differed from the server's.
+													// GV-7381: session_start/session_end are resolved in the controller so
+													// the schedule, the Completed flag and the Join window all agree --
+													// previously the end time was derived from the floored `duration`.
+													$startTime = $myFinal->session_start;
+													$endTime = $myFinal->session_end;
+													// Join Now + passcode unlock 10 minutes before the slot starts
+													// and stay available until an hour after it ends.
+													$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
+												@endphp
+												{{-- GV-3321: per-startup slot derived from the panel interval.
+													 GV-7381: both branches render d-m-Y + a formatted time. The fallback
+													 used to echo the raw `datetime` column (Y-m-d H:i:s), so an unscheduled
+													 row read "2026-09-23 22:00:00" next to a scheduled row's "23-09-2026". --}}
 												<td>
 													@if( !empty( $myFinal->meeting_time ) )
 														{{ $myFinal->meeting_date }} <br>
 														<small class="text-muted">{{ $myFinal->meeting_time }}</small>
+													@elseif( !is_null( $startTime ) )
+														{{ $startTime->format('d-m-Y') }} <br>
+														<small class="text-muted">
+															{{ $startTime->format('h:i A') }}@if( !is_null( $endTime ) ) - {{ $endTime->format('h:i A') }}@endif
+														</small>
 													@else
-														{{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M)
+														-
 													@endif
 												</td>
-												<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
+												{{-- GV-7381: a session is Completed once its end time passes, read in the
+													 viewer's timezone. This used to compare the raw `datetime` (the session
+													 START, and NULL for unscheduled rows -- where `null < now()` is true in
+													 PHP, so every such row reported "Yes"). --}}
+												<td> {{ \App\Services\MeetingWindowService::hasEnded( $endTime, $_user ) ? __('Yes') : __('No') }} </td>
 												<td>
-													@php
-														// GV-8363: compare in the viewer's own timezone. Slots are stored as
-														// bare wall-clock times, so comparing them against the raw server
-														// clock opened/closed the window at the wrong moment for anyone whose
-														// profile timezone differed from the server's.
-														$startTime = $myFinal->meeting_start ?? \Carbon\Carbon::parse($myFinal->datetime);
-														$endTime = $myFinal->meeting_end
-															?? \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
-														// Join Now + passcode unlock 10 minutes before the slot starts
-														// and stay available until an hour after it ends.
-														$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
-													@endphp
 													@if( $canJoin )
 														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
 														@if( !empty( $myFinal->passcode ) )

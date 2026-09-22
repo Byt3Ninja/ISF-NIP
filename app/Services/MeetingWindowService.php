@@ -130,6 +130,24 @@ class MeetingWindowService
     }
 
     /**
+     * Is the session itself over? (GV-7381)
+     *
+     * Unlike hasExpired(), this ignores the LATE_MINUTES grace: the grace keeps
+     * an over-running meeting reachable, but for reporting purposes a session is
+     * "Completed" the moment its end time passes.
+     */
+    public static function hasEnded($end, $user = null): bool
+    {
+        $end = self::inUserZone($end, $user);
+
+        if (is_null($end)) {
+            return false;
+        }
+
+        return self::now($user)->gt($end);
+    }
+
+    /**
      * Has the joinable window closed for good?
      * Used to show "Session Completed" instead of "Session Not Started Yet".
      */

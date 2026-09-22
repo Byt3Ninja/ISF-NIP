@@ -819,7 +819,12 @@ class ScreeningController extends Controller
 					if (!empty($endTime)) {
 						$start = \Carbon\Carbon::parse($startDateTime);
 						$end = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $endTime);
-						$duration = max($start->diffInMinutes($end), 30);
+						// GV-7381: store the window the admin actually entered. This
+						// used to floor the value at 30, so a 22:00-22:15 session was
+						// booked with Zoom -- and shown to the founder -- as 30 minutes.
+						// Sub-30 windows are routine (5/10/20-minute intervals are in
+						// active use), so the floor only ever corrupted the duration.
+						$duration = max($start->diffInMinutes($end), 1);
 					}
 
 					$meetingService = OnlineMeetingFactory::create();

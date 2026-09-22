@@ -1396,6 +1396,33 @@ class HomeController extends Controller
                 $myFinal->meeting_time = \App\Services\ScreeningSlotService::formatRange($finalSlot);
                 $myFinal->passcode = $myFinal->zoom_passcode ?? null;
 
+                // GV-7381: when the panel carries no schedule the row falls back to
+                // finalscreenings.datetime/duration -- but `duration` is floored to
+                // 30 on write (ScreeningController), so a 22:00-22:15 session was
+                // shown as "(30M)" and stayed joinable until 22:30. Prefer the
+                // panel's real end_time, and only fall back to the stored duration
+                // when there is genuinely nothing better to use.
+                $myFinal->session_start = $finalSlot['start']
+                    ?: (!empty($myFinal->datetime) ? \Carbon\Carbon::parse($myFinal->datetime) : null);
+
+                $myFinal->session_end = $finalSlot['end'];
+                if (is_null($myFinal->session_end) && !empty($myFinal->datetime)) {
+                    if (!empty($myFinal->panel_session_date) && !empty($myFinal->panel_end_time)) {
+                        try {
+                            $myFinal->session_end = \Carbon\Carbon::parse(
+                                $myFinal->panel_session_date . ' ' . $myFinal->panel_end_time
+                            );
+                        } catch (\Exception $e) {
+                            $myFinal->session_end = null;
+                        }
+                    }
+
+                    if (is_null($myFinal->session_end) && !empty($myFinal->duration)) {
+                        $myFinal->session_end = \Carbon\Carbon::parse($myFinal->datetime)
+                            ->addMinutes((int) $myFinal->duration);
+                    }
+                }
+
                 $judges = json_decode($myFinal->judges, true) ?? [];
                 if (!is_array($judges)) {
                     $judges = [];
