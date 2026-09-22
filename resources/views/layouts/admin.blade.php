@@ -85,13 +85,15 @@
     <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
     @include('partials.flatpickr-locale')
-    <script>
-      // Do NOT set a global moment locale here. The bundled Arabic locale has a
-      // postformat() that rewrites Latin digits to Arabic-Indic ones (١٢٣), which
-      // corrupts every machine-readable format() we post to the backend (e.g. the
-      // daterangepicker MM/DD/YYYY value parsed by Carbon::createFromFormat).
-      // Views that need localized, human-facing dates call .locale(...) per moment.
-    </script>
+    {{-- Do NOT set a global moment locale here (moment.locale('ar')). The bundled
+         Arabic moment locale has a postformat() that rewrites Latin digits to
+         Arabic-Indic ones (١٢٣), which corrupts every machine-readable format()
+         we post to the backend -- e.g. the MM/DD/YYYY date_range value parsed by
+         Carbon in CyclesController::modify().
+
+         Widgets are localized individually instead, and views that need localized
+         human-facing dates call .locale(...) on the individual moment. --}}
+    @include('partials.daterangepicker-locale')
 
     <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
