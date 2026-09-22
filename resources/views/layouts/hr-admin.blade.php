@@ -78,6 +78,7 @@
     <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
     <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+    @include('partials.flatpickr-locale')
 
     <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>

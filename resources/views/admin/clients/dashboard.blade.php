@@ -1449,6 +1449,7 @@
 
   
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  @include('partials.flatpickr-locale')
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
   <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>

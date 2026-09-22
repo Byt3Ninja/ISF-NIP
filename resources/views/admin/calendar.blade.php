@@ -246,6 +246,7 @@
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
   <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  @include('partials.flatpickr-locale')
 @stop
 
 <!-- Page JS -->
