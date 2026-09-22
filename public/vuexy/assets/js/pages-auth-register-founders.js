@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
         plugins: {
           trigger: new FormValidation.plugins.Trigger(),
           bootstrap5: new FormValidation.plugins.Bootstrap5({
-            rowSelector: ".mb-6, .my-8",
+            rowSelector: ".form-group-tight, .mb-6, .my-8",
             eleValidClass: "", // removes the green "is-valid" styling
           }),
           submitButton: new FormValidation.plugins.SubmitButton(),

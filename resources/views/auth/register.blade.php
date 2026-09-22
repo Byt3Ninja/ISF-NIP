@@ -67,9 +67,29 @@
       display: block;
       width: 100%;
     }
+    
+    .iti__country-list {
+			direction: ltr !important;
+      text-align: left !important;
+			position: absolute;
+			left: 1rem;
+			/* right: 0; */
+			z-index: 9999;
+			list-style: none;
+			padding: 0;
+			margin: 0 0 0 -1px;
+			box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+			background-color: white;
+			border: 1px solid #CCC;
+			white-space: nowrap;
+			max-height: 200px;
+			width: 350px;
+			overflow-y: scroll;
+			overflow-x: auto -webkit-overflow-scrolling: touch;
+			background-color: #fff;
+		}
 
-    /* Prevent the form column from stretching wider than its grid share when
-       mentor fields (select2 multi-select) become visible */
+    /* Lock the form column to a max width so it can never stretch, whatever its children render at */
     .authentication-wrapper.authentication-cover .authentication-inner > .d-flex {
       min-width: 0;
     }
@@ -95,15 +115,16 @@
 
 <body>
   @php
-$setting = App\Settings::first();
-$logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
-$accountRoles = [
-  ['label' => 'Founder', 'icon' => 'ti ti-businessplan'],
-  ['label' => 'Mentor', 'icon' => 'ti ti-user'],
-  // ['label' => 'Service Provider', 'icon' => 'ti ti-briefcase'],
-];
-$termsUrl = setting('terms_url', $setting->terms_url ?? '#');
-$privacyUrl = setting('privacy_url', $setting->privacy_url ?? '#');
+    $setting = App\Settings::first();
+    $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
+    $appName = $setting->app_name ?? $setting->site_name ?? config('app.name');
+    $accountRoles = [
+      ['label' => 'Founder', 'icon' => 'ti ti-businessplan'],
+      ['label' => 'Mentor', 'icon' => 'ti ti-user'],
+      // ['label' => 'Service Provider', 'icon' => 'ti ti-briefcase'],
+    ];
+    $termsUrl = setting('terms_url', $setting->terms_url ?? '#');
+    $privacyUrl = setting('privacy_url', $setting->privacy_url ?? '#');
   @endphp
   <!-- Content -->
 
@@ -479,11 +500,10 @@ $privacyUrl = setting('privacy_url', $setting->privacy_url ?? '#');
               {{ __('auth.connect_text') }}
             </p>
 
-            <!-- Sign in -->
-            <div class="bg-white rounded-3 p-6 text-center shadow-none">
-              <p class="fw-medium text-heading mb-1">{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</p>
-              <p class="text-muted small mb-6">{{ __('auth.sign_in_continue') }}</p>
-              <a href="{{ route('login') }}" class="btn btn-primary d-grid w-100">{{ __('auth.Sign In') }}</a>
+            <!-- Sign in, integrated (no boxed card) -->
+            <div class="auth-signin-row">
+              <p class="text-white opacity-75 mb-1">{{ __('Already have an account') }}{{ $l == 'ar' ? '؟' : '?' }}</p>
+              <a href="{{ route('login') }}" class="text-white">{{ __('auth.Sign In') }}</a>
             </div>
             <!-- /Sign in -->
           </div>
