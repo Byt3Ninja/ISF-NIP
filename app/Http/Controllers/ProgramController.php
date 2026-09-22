@@ -416,6 +416,7 @@ class ProgramController extends Controller
         $cycles = $cycles->with(['custom_pages'])->get();
         $id = request()->route('id');
         $ccycle = $cycles->where('id', $id)->first();
+        if( empty($ccycle) ) { return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']); }
         $final_step = $ccycle->steps->where('stype', 5)->values()->last();
         $results = collect([]);
         if( !empty( $final_step ) )
