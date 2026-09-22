@@ -8,6 +8,7 @@ use App\Company;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TrainerEmail;
+use App\TrainingSession;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -32,8 +33,9 @@ class SendTrainingNotificationJob implements ShouldQueue
     protected $trainer_email;
     protected $addOrEdit;
     protected $endDatetime;
+    protected $hostUrl;
 
-    public function __construct($step, $trainingSession, $title, $datetime, $join_url, $address, $type, $lang = 'en', $trainer_name = null, $trainer_email = null, $addOrEdit, $endDatetime = null)
+    public function __construct($step, $trainingSession, $title, $datetime, $join_url, $address, $type, $lang = 'en', $trainer_name = null, $trainer_email = null, $addOrEdit, $endDatetime = null, $hostUrl = null)
     {
         $this->step = $step;
         $this->trainingSession = $trainingSession;
@@ -47,6 +49,61 @@ class SendTrainingNotificationJob implements ShouldQueue
         $this->trainer_name = $trainer_name;
         $this->trainer_email = $trainer_email;
         $this->endDatetime = $endDatetime;
+        // For the 'sessions' (Zoom) type only: the host/start link, kept
+        // separate from $join_url so the trainer gets host controls while
+        // founders get the plain join link.
+        $this->hostUrl = $hostUrl;
+    }
+
+    /**
+     * Trainer "you have been invited" email: only when a trainer is set, once
+     * per (training instance, trainer email) so re-saving the same trainer
+     * never re-sends, while assigning a different trainer does.
+     */
+    protected function notifyTrainerOfAssignment($step, array $extra = []): void
+    {
+        if (!$this->trainer_email) {
+            return;
+        }
+
+        $trainingSessionId = is_object($this->trainingSession)
+            ? ($this->trainingSession->id ?? null)
+            : $this->trainingSession;
+
+        if ($trainingSessionId) {
+            $claimed = DB::table('training_sessions')->where('id', $trainingSessionId)
+                ->where(function ($q) {
+                    $q->whereNull('trainer_notified_email')
+                      ->orWhere('trainer_notified_email', '!=', $this->trainer_email);
+                })
+                ->update([
+                    'trainer_notified_at' => now(),
+                    'trainer_notified_email' => $this->trainer_email,
+                ]);
+
+            if (!$claimed) {
+                return; // already notified this trainer for this training
+            }
+        }
+
+        $organization = optional($step->cycle)->organization;
+        $mail = array_merge([
+            'trainer_name' => $this->trainer_name ?? '',
+            'title' => $this->title ?? '',
+            'type' => $this->type ?? '',
+            'program_name' => optional($step->cycle)->title ?? '',
+        ], $extra);
+
+        try {
+            Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail, $organization));
+            Log::info('Trainer notified: ' . $this->trainer_email);
+        } catch (\Throwable $th) {
+            if ($trainingSessionId) {
+                DB::table('training_sessions')->where('id', $trainingSessionId)
+                    ->update(['trainer_notified_at' => null, 'trainer_notified_email' => null]);
+            }
+            Log::error('Failed to notify trainer: ' . $th->getMessage());
+        }
     }
 
     /**
@@ -138,25 +195,14 @@ class SendTrainingNotificationJob implements ShouldQueue
         Log::info("SendTrainingNotificationJob: org_name: " . $org_name);
         if ($this->type == 'offline') {
             // Notify Trainer
-            if ($this->trainer_email) {
-                $mail = [
-                    'trainer_name' => $this->trainer_name ?? 'Unknown Trainer',
-                    'title' => $this->title ?? 'Unknown Title',
-                    'date' => $this->datetime ?? 'Unknown Date',
-                    'type' => $this->type ?? 'Unknown Type',
-                    'join_url' => $this->join_url ?? 'Unknown Join URL',
-                    'organization_name_en' => $organization->name_en ?? 'Unknown Organization',
-                    'organization_name_ar' => $organization->name_ar ?? 'Unknown Organization',
-                    'Address' => $this->address ?? 'Unknown Address',
-                ];
-
-                try {
-                    Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail, $organization));
-                    Log::info('Trainer notified: ' . $this->trainer_email);
-                } catch (\Throwable $th) {
-                    Log::error('Failed to notify trainer: ' . $th->getMessage());
-                }
-            }
+            $offlineStart = strtotime((string) $this->datetime);
+            $this->notifyTrainerOfAssignment($step, [
+                'session_date' => $offlineStart ? date('Y-m-d', $offlineStart) : ($this->datetime ?? ''),
+                'start_time' => $offlineStart ? date('h:i A', $offlineStart) : '',
+                'end_time' => $this->endDatetime ? date('h:i A', strtotime((string) $this->endDatetime)) : '',
+                'join_url' => $this->join_url ?? '',
+                'Address' => $this->address ?? '',
+            ]);
 
             $companies = Company::where('cycle', $step->cycle_id)->where('step', $step->id)
                 ->with(['user', 'cycledata', 'stepdata'])
@@ -218,24 +264,15 @@ class SendTrainingNotificationJob implements ShouldQueue
             }
         } elseif ($this->type == 'sessions') {
             // Notify Trainer
-            if ($this->trainer_email) {
-                $mail = [
-                    'trainer_name' => $this->trainer_name ?? 'Unknown Trainer',
-                    'title' => $this->title ?? 'Unknown Title',
-                    'date' => $this->datetime ?? 'Unknown Date',
-                    'type' => $this->type ?? 'Unknown Type',
-                    'join_url' => $this->join_url ?? 'Unknown Join URL',
-                    'organization_name_en' => $organization->name_en ?? 'Unknown Organization',
-                    'organization_name_ar' => $organization->name_ar ?? 'Unknown Organization',
-                ];
-
-                try {
-                    Notification::route('mail', $this->trainer_email)->notify(new TrainerEmail($mail, $organization));
-                    Log::info('Trainer notified: ' . $this->trainer_email);
-                } catch (\Throwable $th) {
-                    Log::error('Failed to notify trainer: ' . $th->getMessage());
-                }
-            }
+            $sessionsStart = strtotime((string) $this->datetime);
+            $this->notifyTrainerOfAssignment($step, [
+                'session_date' => $sessionsStart ? date('Y-m-d', $sessionsStart) : ($this->datetime ?? ''),
+                'start_time' => $sessionsStart ? date('h:i A', $sessionsStart) : '',
+                'end_time' => $this->endDatetime ? date('h:i A', strtotime((string) $this->endDatetime)) : '',
+                // The trainer hosts the meeting, so they get the start/host
+                // link; founders (below) get the plain join link instead.
+                'join_url' => $this->hostUrl ?? $this->join_url ?? '',
+            ]);
 
             $companies = Company::where('cycle', $step->cycle_id)->where('step', $step->id)
                 ->with(['user', 'cycledata', 'stepdata'])

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -56,9 +57,32 @@ class TrainerEmail extends Notification
         $from = $this->getFromAddress($smtpSettings);
         $orgData = $this->buildEmailOrganizationData($org);
 
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $type = strtolower(trim((string) ($this->data['type'] ?? '')));
+        $isOnline = $type !== 'offline';
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
         return (new MailMessage)
-            ->subject('New Training invitation')
-            ->markdown('emails.emailTrainer', array_merge($this->data, $orgData));
+            ->subject(__('email.trainer_invitation_email.subject', [], $locale))
+            ->view('emails.emailTrainer', array_merge([
+                'trainerLocale' => $locale,
+                'trainerOrgName' => $orgName,
+                'trainerName' => $this->data['trainer_name'] ?? '',
+                'trainerProgramName' => $this->data['program_name'] ?? '',
+                'trainerTrainingTitle' => $this->data['title'] ?? '',
+                'trainerSessionDate' => $this->data['session_date'] ?? '',
+                'trainerStartTime' => $this->data['start_time'] ?? '',
+                'trainerEndTime' => $this->data['end_time'] ?? '',
+                'trainerIsOnline' => $isOnline,
+                'trainerLink' => $this->data['join_url'] ?? '',
+                'trainerAddress' => $this->data['Address'] ?? '',
+                'trainerViewUrl' => $this->data['join_url'] ?? '',
+            ], $orgData));
     }
 
     /**

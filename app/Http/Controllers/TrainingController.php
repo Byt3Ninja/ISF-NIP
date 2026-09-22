@@ -770,7 +770,7 @@ class TrainingController extends Controller
 				}
 				$trainingSession = $_session['message'];
 				// ======> notify Trainer <=================
-				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $original_datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit, $original_end_datetime);
+				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $original_datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit, $original_end_datetime, $trainingSession->start_url);
 				// ==========> End Notify <================
 				return back()->with(['message' => __('cycles.Online_Session_Added_Successfully'), 'class' => 'success']);
 			} elseif ($type == 'online') {
@@ -784,7 +784,7 @@ class TrainingController extends Controller
 				// ======> notify Trainer <=================
 				$join_url = $request->training_location ?? 'No Location';
 				$address  = $request->training_Address ?? 'No Address';
-				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $original_datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
+				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $original_datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit, $original_end_datetime);
 				// ==========> End Notify <================
 				return back()->with(['message' => __('cycles.Offline_Session_Added_Successfully'), 'class' => 'success']);
 			} else {
@@ -863,9 +863,9 @@ class TrainingController extends Controller
 							$trainingSession = $_session['message'];
 							SendTrainingNotificationJob::dispatch(
 									$step, $trainingSession->id, $title, $datetime,
-									$trainingSession->start_url, null, $type,
+									$trainingSession->join_url, null, $type,
 									app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit,
-									$end_datetime
+									$end_datetime, $trainingSession->start_url
 							);
 							return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
 	

@@ -1,64 +1,87 @@
 @extends('emails.layout.master')
+
 @section('content')
+@php
+    $isRtl = ($trainerLocale ?? 'en') === 'ar';
+    $dirAttr = $isRtl ? 'rtl' : 'ltr';
+    $alignStart = $isRtl ? 'right' : 'left';
+    $alignEnd = $isRtl ? 'left' : 'right';
+    $t = fn ($key, $replace = []) => __('email.trainer_invitation_email.' . $key, $replace, $isRtl ? 'ar' : 'en');
+    $labelStyle = 'padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px; vertical-align: top;';
+    $valueStyle = 'padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: ' . $alignEnd . '; word-break: break-word;';
+    $linkStyle = 'color: #4F46E5;';
+@endphp
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F3F4F6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px 0;">
+    <tr>
+        <td align="center" style="padding: 0 16px;">
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
+                <tr>
+                    <td height="6" style="background-color: #4F46E5;"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 40px 40px 20px 40px; text-align: {{ $alignStart }}; direction: {{ $dirAttr }};">
+                        <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ $t('hello') }} {{ $trainerName }}{{ $isRtl ? '،' : ',' }}</h1>
 
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="paragraph_block block-3" role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td class="pad"
-                                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                                                                <div
-                                                                    style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:30px;line-height:150%;text-align:center;mso-line-height-alt:45px;">
-                                                                    <p style="margin: 0; word-break: break-word;"><span
-                                                                            style="word-break: break-word; color: #000000;"><strong>{{__('email.trainer_email.subject')}}</strong></span>
-                                                                    </p>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="paragraph_block block-4" role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td class="pad"
-                                                                style="padding-bottom:10px;padding-left:40px;padding-right:40px;padding-top:10px;">
-                                                                <div
-                                                                    style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-                                                                    <p style="margin: 0;">{{__('email.trainer_email.dear')}} {{$trainer_name}},</p>
-                                                                    <p style="margin: 0;"> </p>
-                                                                    <p style="margin: 0;">{{__('email.trainer_email.title')}}</p>
-                                                                    <p style="margin: 0;">"{{ $title }}"</p>
-                                                                    <p style="margin: 0;"> </p>
-                                                                    <p style="margin: 0;">{{__('email.trainer_email.session_start')}}:
-                                                                        {{ $date }}
-                                                                    </p>
-                                                                    <p style="margin: 0;"> </p>
-                                                                    @if($type == 'sessions')
-                                                                        <p style="margin: 0;">
-                                                                            🔗 **{{__('email.trainer_email.link')}}:** {{ $join_url }}
-                                                                        </p>
-                                                                    @elseif($type == 'online')
-                                                                        <p style="margin: 0;">
-                                                                            🔗 **Link:** {{ $join_url }}
-                                                                        </p>
-                                                                    @elseif($type == 'offline')
-                                                                        <p style="margin: 0;">
-                                                                            🔗 **{{__('email.trainer_email.map_link')}}:** {{ $join_url }}
-                                                                        </p>
-                                                                        <p style="margin: 0;">
-                                                                            🔗 **{{__('email.trainer_email.address')}}:** {{ $Address }}
-                                                                        </p>
-                                                                    @endif
-                                                                    <p style="margin: 0;"> </p>
-                                                                    <p style="margin: 0;">{{__('email.trainer_email.regards')}},
-                                                                    </p>
-                                                                    <p style="margin: 0;">{{ $organization_name_en }}
-                                                                    </p>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
+                        <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $t('invited', ['program_name' => $trainerProgramName, 'title' => $trainerTrainingTitle]) }}</p>
 
+                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #111827; font-weight: 600;">{{ $t('details_title') }}</p>
+
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F9FAFB; border-radius: 6px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
+                            <tr>
+                                <td style="padding: 20px; direction: {{ $dirAttr }}; text-align: {{ $alignStart }};">
+                                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                        <tr>
+                                            <td style="{{ $labelStyle }}">{{ $t('session_date') }}:</td>
+                                            <td style="{{ $valueStyle }}">{{ $trainerSessionDate !== '' ? $trainerSessionDate : '-' }}</td>
+                                        </tr>
+                                        @if($trainerStartTime !== '' || $trainerEndTime !== '')
+                                            <tr>
+                                                <td style="{{ $labelStyle }}">{{ $t('session_time') }}:</td>
+                                                <td style="{{ $valueStyle }}">{{ $trainerStartTime }} – {{ $trainerEndTime }}</td>
+                                            </tr>
+                                        @endif
+                                        @if($trainerIsOnline)
+                                            <tr>
+                                                <td style="{{ $labelStyle }}">{{ $t('link') }}:</td>
+                                                <td style="{{ $valueStyle }}">
+                                                    @if($trainerLink !== '')<a href="{{ $trainerLink }}" target="_blank" style="{{ $linkStyle }}">{{ $trainerLink }}</a>@else - @endif
+                                                </td>
+                                            </tr>
+                                        @else
+                                            <tr>
+                                                <td style="{{ $labelStyle }}">{{ $t('map_link') }}:</td>
+                                                <td style="{{ $valueStyle }}">
+                                                    @if($trainerLink !== '')<a href="{{ $trainerLink }}" target="_blank" style="{{ $linkStyle }}">{{ $trainerLink }}</a>@else - @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="{{ $labelStyle }}">{{ $t('address') }}:</td>
+                                                <td style="{{ $valueStyle }}">{{ $trainerAddress !== '' ? $trainerAddress : '-' }}</td>
+                                            </tr>
+                                        @endif
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        @if($trainerViewUrl !== '')
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{ $trainerViewUrl }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ $t('button') }}</a>
+                                </td>
+                            </tr>
+                        </table>
+                        @endif
+
+                        <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
+                            {{ $t('regards') }}<br>
+                            <strong>{{ $trainerOrgName }}</strong>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 @endsection
