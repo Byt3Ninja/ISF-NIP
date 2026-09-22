@@ -36,6 +36,13 @@ use URL, stdClass;
 
 class ProgramController extends Controller
 {
+  
+    // Keep DESCRIPTION_MAX in sync with the blades ($descMax) and app-edit-program.js
+    private const DESCRIPTION_MAX = 100;
+    private const LOGO_RULE = 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048';
+    private const HEX_COLOR_RULE = 'regex:/^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/';
+    // TODO: derive from the organization / logged-in user instead of a hard-coded incubator
+    private const DEFAULT_INCUBATOR_ID = 1;
 
     public function exportProg(Request $request)
     {
@@ -175,29 +182,12 @@ class ProgramController extends Controller
         $cycles = $cycles->get();
         return view('admin.programs.create', compact('cycles'));
     }
-
-   // Drop these into ProgramController, replacing the existing store(), update(),
-// updateProgram*(), applyProgram*() and normalizeProgramColor() methods.
-//
-// Imports needed at the top of the controller:
-//   use Carbon\Carbon;
-//   use Illuminate\Http\Request;
-//   use Illuminate\Support\Facades\DB;
-//   use Illuminate\Support\Facades\Storage;
-//   use Illuminate\Support\Str;
-//   use Illuminate\Validation\Rule;
-//   use Illuminate\Validation\ValidationException;
  
-    // Keep DESCRIPTION_MAX in sync with the blades ($descMax) and app-edit-program.js
-    private const DESCRIPTION_MAX = 100;
-    private const LOGO_RULE = 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048';
-    private const HEX_COLOR_RULE = 'regex:/^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/';
-    // TODO: derive from the organization / logged-in user instead of a hard-coded incubator
-    private const DEFAULT_INCUBATOR_ID = 1;
- 
-    /**
-     * Wizard steps 1-3 (General + optionally Schedule and Content).
+     /**
+     * Wizard steps 1-2 (General Info + optionally Schedule & Media).
      * Routes: programs.general (create) / programs.generalEdit (update).
+     * A program is only ever created here, on the first id-less POST — every
+     * later call (with an id) edits the same row, never inserts a new one.
      */
     public function store(Request $request)
     {
@@ -211,10 +201,10 @@ class ProgramController extends Controller
                 return $this->jsonError('You are not allowed to manage this program.', 403);
             }
         }
- 
+
         $scheduleProvided = $request->has('programDateRange') || $request->has('programStepType') || $request->hasFile('programLogo');
         $contentProvided = $request->has('programDescription') || $request->has('programDescriptionAr');
- 
+
         $rules = [
             'programOrganization' => 'required|integer|exists:organizations,id',
             'programType' => 'required|in:hackathon,general',
@@ -229,12 +219,12 @@ class ProgramController extends Controller
             $rules += $this->contentRules();
         }
         $request->validate($rules);
- 
+
         $organizationId = (int) $request->input('programOrganization');
         if (!$this->canManageOrganization($organizationId)) {
             return $this->jsonError('You are not allowed to use this organization.', 403);
         }
- 
+
         $extra = [];
         DB::transaction(function () use ($request, &$cycle, $organizationId, $scheduleProvided, $contentProvided, &$extra) {
             $general = [
@@ -244,7 +234,7 @@ class ProgramController extends Controller
                 'title_ar' => trim($request->input('programTitleAr')),
                 'cohort' => $request->filled('programCohort') ? trim($request->input('programCohort')) : null,
             ];
- 
+
             if ($cycle) {
                 $organizationChanged = (int) $cycle->organization_id !== $organizationId;
                 $cycle->forceFill($general);
@@ -253,7 +243,7 @@ class ProgramController extends Controller
                 $cycle = new Cycle();
                 $cycle->forceFill($general + ['incubator_id' => self::DEFAULT_INCUBATOR_ID]);
             }
- 
+
             if ($scheduleProvided) {
                 $extra = $this->applyProgramSchedule($request, $cycle);
             }
@@ -261,14 +251,14 @@ class ProgramController extends Controller
                 $this->applyProgramContent($request, $cycle);
             }
             $cycle->save();
- 
+
             if ($organizationChanged) {
                 DB::table('mentorship_schedules')
                     ->where('cycle_id', $cycle->id)
                     ->update(['organization_id' => $organizationId, 'updated_at' => now()]);
             }
         });
- 
+
         return response()->json(array_merge([
             'success' => true,
             'id' => $cycle->id,
@@ -624,7 +614,8 @@ class ProgramController extends Controller
     }
 
     /**
-     * Wizard steps 2-5 (one route per step, see routes).
+     * Wizard steps 2-5 (Schedule / Mentorship / Location / Publish — one route each, see routes).
+     * Requires an existing program; never creates one.
      */
     public function update(Request $request, string $id)
     {
@@ -635,10 +626,9 @@ class ProgramController extends Controller
         if (!$this->canManageOrganization($cycle->organization_id)) {
             return $this->jsonError('You are not allowed to manage this program.', 403);
         }
- 
+
         $handlers = [
             'programs.schedule' => 'updateProgramSchedule',
-            'programs.content' => 'updateProgramContent',
             'programs.mentorship' => 'updateProgramMentorship',
             'programs.location' => 'updateProgramLocation',
             'programs.publish' => 'updateProgramPublish',
@@ -647,21 +637,21 @@ class ProgramController extends Controller
         if (!isset($handlers[$routeName])) {
             return $this->jsonError('Unknown program step.', 400);
         }
- 
+
         $extra = DB::transaction(function () use ($handlers, $routeName, $request, $cycle) {
             return $this->{$handlers[$routeName]}($request, $cycle);
         });
- 
+
         return response()->json(array_merge([
             'success' => true,
             'message' => 'Program saved successfully.',
         ], (array) $extra));
     }
- 
+
     // ------------------------------------------------------------------
     // Authorization / responses
     // ------------------------------------------------------------------
- 
+
     /** Admins may manage everything; everyone else only their own organizations. */
     protected function canManageOrganization($organizationId): bool
     {
@@ -674,16 +664,16 @@ class ProgramController extends Controller
         }
         return $user->organizations->contains('id', (int) $organizationId);
     }
- 
+
     protected function jsonError(string $message, int $status)
     {
         return response()->json(['success' => false, 'message' => $message], $status);
     }
- 
+
     // ------------------------------------------------------------------
-    // Step 2: Configuration & Media
+    // Step 2: Schedule & Media (also carries the two participation switches)
     // ------------------------------------------------------------------
- 
+
     protected function scheduleRules(): array
     {
         return [
@@ -700,39 +690,44 @@ class ProgramController extends Controller
             'programLogo' => self::LOGO_RULE,
         ];
     }
- 
+
     protected function updateProgramSchedule(Request $request, Cycle $cycle): array
     {
         $request->validate($this->scheduleRules());
         $extra = $this->applyProgramSchedule($request, $cycle);
-        // Content & Options now live on this step: persist them when present
-        if ($request->has('programNonCompanyParticipation') || $request->has('programPrivateLink')) {
-            $this->applyProgramContentOptions($request, $cycle);
-        }
+
+        // FIX: programNonCompanyParticipation / programPrivateLink are checkboxes in this
+        // same step's markup, so they belong to every Schedule-step save — but an unchecked
+        // checkbox is simply absent from the payload, so the old `$request->has(...)` guard
+        // skipped this call whenever both were being turned OFF, leaving stale values in the
+        // DB. applyProgramContentOptions() already uses $request->boolean(), which correctly
+        // treats "absent" as false, so just call it unconditionally.
+        $this->applyProgramContentOptions($request, $cycle);
+
         $cycle->save();
         return $extra;
     }
- 
+
     /** @return array extra payload for the JSON response (e.g. logo_url) */
     protected function applyProgramSchedule(Request $request, Cycle $cycle): array
     {
         $extra = [];
- 
+
         // Already validated by scheduleRules(); no silent "keep old dates" fallback anymore
         [$start, $end] = $this->parseDateRange($request->input('programDateRange'));
         $cycle->start = $start->format('Y-m-d');
         $cycle->end = $end->format('Y-m-d');
         $cycle->step_type = $request->input('programStepType') === 'step' ? 'cycle' : 'time';
- 
+
         if ($request->hasFile('programLogo')) {
             $fileManager = app(\App\Services\FileManagerService::class);
             $cycle->img_url = $fileManager->update($request->file('programLogo'), $cycle->img_url, 'programs', 'public_uploads');
             $extra['logo_url'] = Storage::disk('public_uploads')->url($cycle->img_url);
         }
- 
+
         return $extra;
     }
- 
+
     /** "2026-01-01 to 2026-02-01" (also accepts " - ", en/em dash and the Arabic "إلى"). */
     protected function parseDateRange($range): ?array
     {
@@ -740,7 +735,7 @@ class ProgramController extends Controller
         if (!$parts || count($parts) !== 2) {
             return null;
         }
- 
+
         $dates = [];
         foreach ($parts as $part) {
             $part = trim($part);
@@ -755,14 +750,14 @@ class ProgramController extends Controller
             }
             $dates[] = $date->startOfDay();
         }
- 
+
         return $dates[1]->lt($dates[0]) ? null : $dates;
     }
- 
+
     // ------------------------------------------------------------------
-    // Step 3: Content & Options
+    // Step 1 content (submitted together with General Info, never its own step)
     // ------------------------------------------------------------------
- 
+
     protected function contentRules(): array
     {
         return [
@@ -770,16 +765,8 @@ class ProgramController extends Controller
             'programDescriptionAr' => 'required|string|max:' . self::DESCRIPTION_MAX,
         ];
     }
- 
-    protected function updateProgramContent(Request $request, Cycle $cycle): array
-    {
-        $request->validate($this->contentRules());
-        $this->applyProgramContent($request, $cycle);
-        $cycle->save();
-        return [];
-    }
- 
-protected function applyProgramContent(Request $request, Cycle $cycle): void
+
+    protected function applyProgramContent(Request $request, Cycle $cycle): void
     {
         $cycle->description = $request->input('programDescription');
         $cycle->description_ar = $request->input('programDescriptionAr');
@@ -798,8 +785,8 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
             $cycle->private = null;
         }
     }
- 
-// ------------------------------------------------------------------
+
+    // ------------------------------------------------------------------
     // Step 3: Mentorship Settings (mentorship + offline session location)
     // ------------------------------------------------------------------
 
@@ -829,23 +816,23 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
 
         return $extra;
     }
- 
+
     /** Diff-based sync so unchanged rows keep their ids (anything referencing them stays valid). */
     protected function syncMentorshipReminders(Cycle $cycle, array $hours): void
     {
         $wanted = array_values(array_unique(array_map('intval', $hours)));
- 
+
         $base = DB::table('mentorship_schedules')
             ->where('cycle_id', $cycle->id)
             ->where('unit', 'hours');
- 
+
         $existing = array_map('intval', (clone $base)->pluck('value')->all());
- 
+
         $stale = array_diff($existing, $wanted);
         if ($stale) {
             (clone $base)->whereIn('value', $stale)->delete();
         }
- 
+
         $rows = [];
         foreach (array_diff($wanted, $existing) as $value) {
             $rows[] = [
@@ -862,8 +849,8 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
             DB::table('mentorship_schedules')->insert($rows);
         }
     }
- 
-// ------------------------------------------------------------------
+
+    // ------------------------------------------------------------------
     // Step 4: Landing & Branding (visibility + branding colors)
     // ------------------------------------------------------------------
 
@@ -891,6 +878,8 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
                 ]);
             }
 
+            // NOTE: add a unique index on (organization_id, public_slug) to close the
+            // race window between this uniqueness check and the save below.
             $taken = Cycle::where('organization_id', $cycle->organization_id)
                 ->where('id', '!=', $cycle->id)
                 ->whereNotNull('public_slug')
@@ -901,7 +890,6 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
             while (in_array($slug, $taken, true)) {
                 $slug = $base . '-' . (++$counter);
             }
-            // NOTE: also add a unique index on (organization_id, public_slug) to close the race window.
 
             $cycle->is_public = 1;
             $cycle->public_slug = $slug;
@@ -923,7 +911,7 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
         $cycle->save();
         return $extra;
     }
- 
+
     /** Normalize a branding color value (single leading '#'). */
     protected function normalizeProgramColor($color)
     {
@@ -932,11 +920,11 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
         }
         return preg_replace('/^#*/', '#', trim($color));
     }
- 
+
     // ------------------------------------------------------------------
-    // Step 6: Custom Pages & Publish
+    // Step 5: Custom Pages & Publish
     // ------------------------------------------------------------------
- 
+
     protected function updateProgramPublish(Request $request, Cycle $cycle): array
     {
         $request->validate([
@@ -949,16 +937,16 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
         ], [
             'programConfirmed.accepted' => 'Please confirm the program details before publishing.',
         ]);
- 
+
         $visibilityMap = ['public' => 'public', 'participants' => 'private', 'admins-only' => 'admins'];
         $rows = [];
         $errors = [];
         $rowNo = 1;
- 
+
         foreach ((array) $request->input('programPages', []) as $index => $page) {
             $title = trim($page['programPageName'] ?? '');
             $content = trim($page['programPageDescription'] ?? '');
- 
+
             if ($title === '') {
                 // A page with content but no name used to be dropped silently
                 if ($this->hasVisibleContent($content)) {
@@ -966,7 +954,7 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
                 }
                 continue;
             }
- 
+
             $rows[] = [
                 'cycle_id' => $cycle->id,
                 'title' => $title,
@@ -978,28 +966,27 @@ protected function applyProgramContent(Request $request, Cycle $cycle): void
                 'updated_at' => now(),
             ];
         }
- 
+
         if ($errors) {
             throw ValidationException::withMessages($errors);
         }
- 
+
         // TODO: sanitize page HTML (e.g. mews/purifier) before it is rendered on public program pages.
         // TODO: this step never flags the program as published; add that here if a status column exists.
         DB::table('cycle_custom_pages')->where('cycle_id', $cycle->id)->delete();
         if ($rows) {
             DB::table('cycle_custom_pages')->insert($rows);
         }
- 
+
         return [];
     }
- 
+
     /** Summernote sends "<p><br></p>" for an empty editor. */
     protected function hasVisibleContent(string $html): bool
     {
         $text = html_entity_decode(strip_tags($html, '<img><iframe><video>'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         return preg_replace('/[\s\x{00A0}]+/u', '', $text) !== '';
     }
- 
 
     /**
      * Remove the specified resource from storage.
