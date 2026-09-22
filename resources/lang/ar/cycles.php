@@ -550,6 +550,8 @@ return [
     'Date_Required' => 'التاريخ مطلوب.',
     'Start_Time_Required' => 'وقت البدء مطلوب.',
     'End_Time_Required' => 'وقت الانتهاء مطلوب.',
+    'Program_Required' => 'البرنامج مطلوب.',
+    'Step_Required' => 'الخطوة مطلوبة.',
     'Online_Training_Added_Successfully' => 'تمت إضافة التدريب عبر الإنترنت بنجاح.',
     'Online_Session_Added_Successfully' => 'تمت إضافة الجلسة عبر الإنترنت بنجاح.',
     'Offline_Session_Added_Successfully' => 'تمت إضافة الجلسة الحضورية بنجاح.',

@@ -148,6 +148,18 @@ return [
         'regards' => 'Best regards,',
         'team' => ':organization_name Team',
     ],
+    'new_training_email' => [
+        'subject' => 'New Training Created',
+        'hello' => 'Hello',
+        'intro' => 'We would like to inform you that a new training session has been created: :title. This training will provide valuable insights and skills to help you grow.',
+        'date' => 'Date',
+        'time' => 'Time',
+        'online_link' => 'Link',
+        'map_link' => 'Google Map Link',
+        'address' => 'Address',
+        'regards' => 'Best regards,',
+        'team' => ':organization_name Team',
+    ],
     'custom_mail' => [
         'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
         'dear_participant' => 'Dear Participant',

@@ -556,6 +556,8 @@ return [
     'Date_Required' => 'Date is required.',
     'Start_Time_Required' => 'Start time is required.',
     'End_Time_Required' => 'End time is required.',
+    'Program_Required' => 'Program is required.',
+    'Step_Required' => 'Step is required.',
     'Title_Required' => 'Title is required.',
     'Online_Training_Added_Successfully' => 'Online training added successfully.',
     'Online_Session_Added_Successfully' => 'Online session added successfully.',

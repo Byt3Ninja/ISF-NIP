@@ -154,6 +154,18 @@ return [
         'regards' => 'مع أطيب التحيات،',
         'team' => 'فريق :organization_name',
     ],
+    'new_training_email' => [
+        'subject' => 'تم إنشاء تدريب جديد',
+        'hello' => 'مرحباً',
+        'intro' => 'نود إبلاغك بأنه تم إنشاء جلسة تدريب جديدة بعنوان: :title. سيوفر هذا التدريب معلومات ومهارات قيّمة للمساعدة في النمو.',
+        'date' => 'التاريخ',
+        'time' => 'الوقت',
+        'online_link' => 'الرابط',
+        'map_link' => 'رابط خرائط Google',
+        'address' => 'العنوان',
+        'regards' => 'مع أطيب التحيات،',
+        'team' => 'فريق :organization_name',
+    ],
     'custom_mail'=> [
         'welcome_title'=> 'مرحبا بك في هاكاثونات ومعسكرات نمو السياحة',
         'dear_participant'=> 'عزيزي المشارك',

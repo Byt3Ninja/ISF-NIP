@@ -298,7 +298,7 @@
   </div>
 
   <div class="offcanvas-body d-flex flex-column">
-    <form id="sessionForm" method="POST" autocomplete="off" class="d-flex flex-column flex-grow-1">
+    <form id="sessionForm" method="POST" action="/dashboard/training/addsession" autocomplete="off" class="d-flex flex-column flex-grow-1">
       @csrf
       <input type="hidden" name="_method" id="sessionFormMethod" value="POST">
       <input type="hidden" name="step_id"  id="sessionStepId"   value="{{ $id }}">
@@ -334,6 +334,7 @@
               </option>
             @endforeach
           </select>
+          <div class="invalid-feedback" id="errorProgram"></div>
         </div>
         
         {{-- Step --}}
@@ -350,6 +351,7 @@
               </option>
             @endforeach
           </select>
+          <div class="invalid-feedback" id="errorStep"></div>
         </div>
 
         {{-- Date Range (online only) --}}
@@ -1049,6 +1051,18 @@ $(function () {
     if (!title) {
       $('#sessionTitle').addClass('is-invalid');
       $('#errorTitle').text('{{ __('cycles.Title_Required') }}');
+      isValid = false;
+    }
+
+    if (!$('#program').val()) {
+      $('#program').addClass('is-invalid');
+      $('#errorProgram').text('{{ __('cycles.Program_Required') }}');
+      isValid = false;
+    }
+
+    if (!$('#step').val()) {
+      $('#step').addClass('is-invalid');
+      $('#errorStep').text('{{ __('cycles.Step_Required') }}');
       isValid = false;
     }
 
