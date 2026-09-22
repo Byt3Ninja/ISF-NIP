@@ -119,4 +119,7 @@ return [
 	'connect_text' => 'Connect with founders, mentors and service providers who are shaping the future of work.',
 	'sign_in_continue' => 'Sign in to continue where you left off.',
 	'Sign In' => 'Sign In',
+
+	'founder_or_mentor_q' => 'Are you a founder or mentor?',
+	'register_as_founder_mentor' => 'Register as founder or mentor',
 ];

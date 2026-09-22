@@ -384,6 +384,12 @@
               <p class="text-white opacity-75 mb-1">{{ __('Already have account') }}{{ $l == 'ar' ? '؟' : '?' }}</p>
               <a href="{{ route('login') }}" class="text-white">{{ $l == 'en' ? 'Sign in instead' : 'سجل الدخول' }}</a>
             </div>
+
+            <!-- Founder or mentor? -->
+            <div class="auth-signin-row mt-6">
+              <p class="text-white opacity-75 mb-1">{{ __('auth.founder_or_mentor_q') }}</p>
+              <a href="{{ url('/register') }}" class="text-white">{{ __('auth.register_as_founder_mentor') }}</a>
+            </div>
           </div>
         </div>
       </div>
