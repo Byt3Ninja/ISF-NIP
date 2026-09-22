@@ -12,7 +12,22 @@
       font-size: 13px;
     }
     .ql-toolbar .ql-custom-button::after {
-      content: 'Button';
+      content: "{{ __('landing.Button') }}";
+    }
+    /* Quill's built-in link-tooltip actions are hardcoded in English
+       ("Edit"/"Save"/"Remove") in the vendor CSS; override them so they
+       follow the app locale. `!important` wins over the vendor rules. */
+    .ql-snow .ql-tooltip a.ql-action::after {
+      content: "{{ __('admin.Edit') }}" !important;
+    }
+    .ql-snow .ql-tooltip.ql-editing a.ql-action::after {
+      content: "{{ __('landing.Save') }}" !important;
+    }
+    .ql-snow .ql-tooltip::before {
+      content: "{{ __('landing.Visit_URL') }}:" !important;
+    }
+    .ql-snow .ql-tooltip a.ql-remove::before {
+      content: "{{ __('landing.Remove') }}" !important;
     }
     .custom-quill-editor.ql-container {
       position: relative;
