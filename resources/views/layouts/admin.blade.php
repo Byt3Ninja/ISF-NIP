@@ -86,9 +86,11 @@
     <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
     @include('partials.flatpickr-locale')
     <script>
-      if (typeof moment !== 'undefined') {
-        moment.locale('{{ app()->getLocale() }}');
-      }
+      // Do NOT set a global moment locale here. The bundled Arabic locale has a
+      // postformat() that rewrites Latin digits to Arabic-Indic ones (١٢٣), which
+      // corrupts every machine-readable format() we post to the backend (e.g. the
+      // daterangepicker MM/DD/YYYY value parsed by Carbon::createFromFormat).
+      // Views that need localized, human-facing dates call .locale(...) per moment.
     </script>
 
     <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>

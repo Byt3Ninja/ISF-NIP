@@ -24,6 +24,7 @@ use App\Messenger;
 use App\Screening;
 use App\TeamFormation;
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use App\BuilderForm;
 use App\BuilderField;
 use http\Env\Response;
@@ -336,12 +337,19 @@ class CyclesController extends Controller
 
             $dates = explode(' - ', $request->date_range);
             if( count( $dates ) < 2 ) { return redirect()->back()->with(['message2' => 'error_date_range', 'class' => 'danger']); }
-            $request->merge([
-                'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
-                'end' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
-                'fromDate' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
-                'toDate' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
 
+            try {
+                $startDate = Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'); // التاريخ الأول
+                $endDate   = Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'); // التاريخ الثاني
+            } catch (InvalidFormatException $e) {
+                return redirect()->back()->with(['message2' => 'error_date_range', 'class' => 'danger']);
+            }
+
+            $request->merge([
+                'start' => $startDate,
+                'end' => $endDate,
+                'fromDate' => $startDate,
+                'toDate' => $endDate,
             ]);
         }
 
