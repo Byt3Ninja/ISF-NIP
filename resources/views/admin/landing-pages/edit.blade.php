@@ -20,8 +20,13 @@
       z-index: 1;
     }
     .custom-quill-editor.ql-container .ql-editor {
-      height: auto !important;
-      min-height: 160px;
+      height: 300px !important;
+      overflow-y: auto;
+      /* Break long unbroken strings so they never widen the layout.
+         `anywhere` (unlike `break-word`) also shrinks the element's
+         min-content size, so the flex column can narrow back down. */
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .custom-field-group[data-field="content"],
     .custom-field-group[data-field="content_ar"] {

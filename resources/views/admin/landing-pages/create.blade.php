@@ -20,8 +20,8 @@
       z-index: 1;
     }
     .custom-quill-editor.ql-container .ql-editor {
-      height: auto !important;
-      min-height: 160px;
+      height: 300px !important;
+      overflow-y: auto;
     }
     .custom-field-group[data-field="content"],
     .custom-field-group[data-field="content_ar"] {
