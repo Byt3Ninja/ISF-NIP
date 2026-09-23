@@ -84,6 +84,16 @@
     <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
     <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+    @include('partials.flatpickr-locale')
+    {{-- Do NOT set a global moment locale here (moment.locale('ar')). The bundled
+         Arabic moment locale has a postformat() that rewrites Latin digits to
+         Arabic-Indic ones (١٢٣), which corrupts every machine-readable format()
+         we post to the backend -- e.g. the MM/DD/YYYY date_range value parsed by
+         Carbon in CyclesController::modify().
+
+         Widgets are localized individually instead, and views that need localized
+         human-facing dates call .locale(...) on the individual moment. --}}
+    @include('partials.daterangepicker-locale')
 
     <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
@@ -215,28 +225,51 @@
           forceTLS: true,
         });
 
+        // Broadcast events that legitimately drive the header notification bell.
+        // Anything else that travels over Pusher (chat messages on Echo's
+        // private-conversation.* channels, presence/connection frames, ...) must be
+        // ignored here: Pusher.log is a static on the Pusher class, so it sees every
+        // frame on every connection this page opens.
+        const NOTIFICATION_BELL_EVENTS = [
+          "ChangeStep",
+          "RequestMentorship",
+          "StartupJoining",
+          "JudgeAssigned",
+        ];
+
         Pusher.log = function (message) {
           const logMessage = message;
 
+          const start = logMessage.indexOf("[");
+          if (start === -1) {
+            return;
+          }
+
           // Extract the JSON part (after `: `)
-          const jsonPart = logMessage.substring(logMessage.indexOf("["));
+          const jsonPart = logMessage.substring(start);
 
-          // Parse it
-          const parsedLog = JSON.parse(jsonPart);
-
-          // console.log("parsedLog", parsedLog);
-
-          if (parsedLog?.length > 0 && parsedLog[0]) {
-            // console.log("parsedLog[0]", parsedLog[0]);
+          // Parse it -- most Pusher log lines are not JSON at all.
+          let parsedLog;
+          try {
+            parsedLog = JSON.parse(jsonPart);
+          } catch (e) {
+            return;
           }
 
           if (parsedLog?.length > 0 && parsedLog[1]) {
             // Access the data object
             const parsedLogData = parsedLog[1];
 
+            const eventName = parsedLogData?.event;
+            if (!NOTIFICATION_BELL_EVENTS.includes(eventName)) {
+              return;
+            }
+
             const data = parsedLogData?.data;
 
-            if (data && data.message) {
+            // Only a plain string is renderable; object payloads would print
+            // "[object Object]".
+            if (data && typeof data.message === "string" && data.message.trim() !== "") {
               // console.log("data.message", data.message);
               const notifContainer = document.querySelector(
                 ".position-relative .ti-bell"
@@ -250,8 +283,11 @@
                   ".badge-notifications"
                 );
                 if (existingBadge) {
-                  // Extract the current count
-                  count = parseInt(existingBadge.textContent, 10) + 1;
+                  // A badge hidden by "mark all as read" holds a stale count and
+                  // must not be carried forward.
+                  if (existingBadge.style.display !== "none") {
+                    count = parseInt(existingBadge.textContent, 10) + 1;
+                  }
                   existingBadge.remove(); // Remove old badge
                 }
 
@@ -263,16 +299,23 @@
 
                 let lang = document.documentElement.lang;
 
-                document.querySelector('#new-count').textContent = `${count} ${lang == 'ar' ? 'جديد' : 'New'}`;
+                const newCount = document.querySelector('#new-count');
+                if (newCount) {
+                  newCount.textContent = `${count} ${lang == 'ar' ? 'جديد' : 'New'}`;
+                }
 
-                document.querySelector('#notification-list').insertAdjacentHTML(
-                  "beforeend",
-                  `
-                  <li class="list-group item list-group-item-action dropdown-notifications-item border-bottom">
-                    <h6 class="media-heading">${data.message}</h6>
-                  </li>
-                  `
-                );
+                const notificationList = document.querySelector('#notification-list');
+                if (notificationList) {
+                  const heading = document.createElement('h6');
+                  heading.className = 'media-heading';
+                  heading.textContent = data.message;
+
+                  const item = document.createElement('li');
+                  item.className = 'list-group item list-group-item-action dropdown-notifications-item border-bottom';
+                  item.appendChild(heading);
+
+                  notificationList.appendChild(item);
+                }
               }
             }
           }
@@ -518,6 +561,21 @@
           confirmButtonText: "{{ __('admin.OK') }}",
           customClass: {
               confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+      
+      window.releaseAlert = ({icon, title, message}) => {
+        Swal.fire({
+          icon,
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+            confirmButton: 'btn btn-primary',
           },
           buttonsStyling: false,
         });

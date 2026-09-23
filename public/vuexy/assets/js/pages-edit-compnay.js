@@ -56,8 +56,8 @@ const translations = {
       invalid_url: 'Please enter a valid URL'
     },
     business_plan: {
-      file_invalid: 'Invalid file. Only PDF/DOC/DOCX up to 5MB allowed',
-      file_required: 'Business plan is required'
+      file_invalid: 'Invalid file. Only PDF, DOC, DOCX, PPT, PPTX up to 20MB allowed',
+      file_required: 'This field is required.'
     },
 
     /* Financial Tab */
@@ -116,8 +116,8 @@ const translations = {
       invalid_url: 'يرجى إدخال رابط صحيح'
     },
     business_plan: {
-      file_invalid: 'ملف غير صالح. فقط PDF أو DOC أو DOCX بحجم أقصى 5MB',
-      file_required: 'ملف خطة العمل مطلوب'
+      file_invalid: 'ملف غير صالح. يُسمح فقط بملفات PDF, DOC, DOCX, PPT, PPTX بحجم أقصى 20MB',
+      file_required: 'هذا الحقل مطلوب.'
     },
 
     /* Financial Tab */
@@ -160,7 +160,19 @@ function validateFileField(input, fieldName, lang) {
   return { valid: true };
 }
 
-function submitFormWithFetch({ form, submitBtnId, btnTextId, btnSpinnerId, successMessage }) {
+/**
+ * Clears server-rendered validation artifacts left in the DOM by a previous
+ * full-page (non-AJAX) submit, so they don't linger after a successful AJAX save.
+ */
+function clearServerValidationState(form) {
+  if (form) {
+    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    form.querySelectorAll('.invalid-feedback.d-block').forEach(el => el.remove());
+  }
+  document.querySelectorAll('#company-tab-content > .alert-danger').forEach(el => el.remove());
+}
+
+function submitFormWithFetch({ form, submitBtnId, btnTextId, btnSpinnerId, successMessage, onSuccess }) {
   const $btn = $(`#${submitBtnId}`);
   const $text = $(`#${btnTextId}`);
   const $spinner = $(`#${btnSpinnerId}`);
@@ -178,6 +190,8 @@ function submitFormWithFetch({ form, submitBtnId, btnTextId, btnSpinnerId, succe
     .then(res => res.ok ? res.json().catch(() => ({})) : Promise.reject())
     .then(() => {
       toastr.success(successMessage);
+      clearServerValidationState(form);
+      if (typeof onSuccess === 'function') onSuccess();
       // setTimeout(() => {
       //   if (!location.href.includes('myCompany')) {
       //     return;
@@ -309,7 +323,14 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
         submitBtnId: 'submit-button',
         btnTextId: 'button-text',
         btnSpinnerId: 'button-spinner',
-        successMessage: translations[lang].saveSuccess
+        successMessage: translations[lang].saveSuccess,
+        // First-time save (tabs still locked until the startup name exists):
+        // reload so the other tabs unlock without a manual refresh.
+        onSuccess: () => {
+          if (window.RELOAD_AFTER_INFO_SAVE) {
+            setTimeout(() => location.reload(), 700);
+          }
+        }
       });
     });
 
@@ -434,13 +455,19 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
         business_plan: {
           validators: {
             file: {
-              extension: 'pdf,doc,docx',
-              maxSize: 5 * 1024 * 1024,
+              extension: 'pdf,doc,docx,ppt,pptx',
+              maxSize: 20 * 1024 * 1024,
               message: translations[lang].business_plan.file_invalid
             },
             callback: {
               message: translations[lang].business_plan.file_required,
-              callback: ({ files }) => $('#business_plan_card').length || files.length > 0
+              callback: ({ element, files }) => {
+                // Not required when the company already has an attachment on file
+                // (either the dedicated card id or the download link next to the field).
+                const hasExisting = $('#business_plan_card').length ||
+                  $(element).closest('.mb-4').find('a[download]').length;
+                return Boolean(hasExisting) || files.length > 0;
+              }
             }
           }
         }
@@ -457,6 +484,9 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
         successMessage: translations[lang].saveSuccess
       });
     });
+
+    // Drop any stale server-rendered "required" error once the user picks a file
+    $('#business_plan').on('change', () => clearServerValidationState(document.getElementById('mvp-form')));
 
     /* Toggle Other Business Model */
     function syncOtherBusinessModel() {
@@ -521,19 +551,19 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
     });
 
     /* Show/Hide Average Annual Revenues */
-    function syncRevenueField() {
+    function syncRevenueField(triggerValidation) {
       const isYes = $generateRevenue.val() === 'yes';
       $('#average_annual_revenues_wrapper').toggle(isYes);
       if (!isYes) {
         $('#average_annual_revenues').val('');
         financialFV.resetField('average_annual_revenues');
-      } else {
+      } else if (triggerValidation) {
         financialFV.revalidateField('average_annual_revenues');
       }
     }
-    syncRevenueField();
+    syncRevenueField(false);
     $generateRevenue.on('change', () => {
-      syncRevenueField();
+      syncRevenueField(true);
       financialFV.revalidateField('generate_revenue');
     });
 

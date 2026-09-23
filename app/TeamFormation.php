@@ -49,6 +49,17 @@ class TeamFormation extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public static function maxAcceptedMembers($stepId)
+    {
+        $members = self::where('step_id', $stepId)->with(['teamMembers'])->get();
+        $numberOfMembers = $members->map(function ($team) {
+            $teamMembers = $team->teamMembers->where('acceptInvition', 'accepted')->values();
+            return $teamMembers->count();
+        })->max();
+
+        return $numberOfMembers;
+    }
+
     public static function teams( $cycleId )
     {
         $l = app()->getLocale();
@@ -88,8 +99,14 @@ class TeamFormation extends Model
             ->leftJoin('team_members AS tm', 'tm.team_formation_id', '=', 'tf.id')
             ->leftJoin('users AS u', 'u.id', '=', 'tm.user_id')
             ->leftJoin('companies AS c', 'tm.Company_id', '=', 'c.id')
+            // The cycle's final-evaluation step, resolved from the CYCLE rather
+            // than from `companies.step`. `companies.step` is a moving pointer to
+            // wherever the startup currently sits, so joining on it only matched
+            // during the window a startup was parked on the final step: every
+            // other team resolved a null step and was then dropped by winners(),
+            // leaving the winner-selection table empty (GV-3798 / GV-3799).
             ->leftJoin('steps AS stp', function( $join ) use ( $cycleId ) {
-                $join->on('stp.id', '=', 'c.step')
+                $join->on('stp.cycle_id', '=', 'c.cycle')
                      ->where('stp.stype', '=', StepType::FINAL_EVALUATION)
                      ->where('stp.cycle_id', '=', $cycleId);
             })
@@ -110,7 +127,10 @@ class TeamFormation extends Model
             $team->region = $t->team_region;
             $team->name = $t->team_name;
             $team->winner = $t->team_winner_status;
-            $team->img = $t->team_img_team;
+            // Team logos live outside the web root; expose the authorized route.
+            $team->img = $t->team_img_team
+                ? route('hackathon.teamLogo', basename($t->team_img_team))
+                : null;
             $team->project = new stdClass;
             $team->project->name = $t->{'team_project_name_' . $l};
             $team->project->description = $t->{'team_project_description_' . $l};
@@ -163,7 +183,12 @@ class TeamFormation extends Model
 				$evaluation->save();
 			}
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
-            $metadata = ScreeningEvaluationResults::metadata( $stepId );
+            // $allCompanies = true: metadata() otherwise scopes companies to
+            // `where('step', $stepId)`, the same moving-pointer trap fixed in
+            // teams(). Without it a startup that has already advanced past the
+            // final step loses its judges and score even though a published
+            // result exists for it.
+            $metadata = ScreeningEvaluationResults::metadata( $stepId, null, null, true );
             $judges = $metadata['judges'];
             $judges = $judges->map(function( $item ) {
                 $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
@@ -210,6 +235,21 @@ class TeamFormation extends Model
             }
             $output = $output->merge($scoped_teams);
         }
+
+        // Teams whose step never resolved (no final-evaluation step on the cycle
+        // yet, or no company linked to the leader) are still submitted projects
+        // and must appear in the winner-selection table so a rank can be assigned
+        // -- previously they were silently dropped here. They render unscored,
+        // behind the view's existing "awaiting evaluation" badge.
+        $scored_ids = $output->pluck('id')->all();
+        $unscored = $teams->whereNotIn('id', $scored_ids)->values();
+        foreach( $unscored as $team )
+        {
+            $team->score = 0;
+            $team->judges = [];
+        }
+        $output = $output->merge($unscored);
+
         $output = $output->values();
         $winnersData = $output->map(function( $team ) {
             return [

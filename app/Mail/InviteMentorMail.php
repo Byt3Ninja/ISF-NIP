@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Traits\RoutesTenantMail;
 use App\InviteMentor;
 use App\Organization;
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -29,16 +30,40 @@ class InviteMentorMail extends Mailable implements ShouldQueue
     public function build()
     {
         $orgIds = $this->invitation->organization_ids ?? [];
-        $firstOrg = !empty($orgIds) ? Organization::find($orgIds[0]) : null;
-        $orgData = $this->buildEmailOrganizationData($firstOrg);
 
-        $mail = $this->subject($this->invitation->subject)
+        // The invitation email always carries the platform's own branding
+        // (logo, name) -- never an organization's -- regardless of which
+        // organizations the invite is scoped to.
+        $orgData = $this->buildEmailOrganizationData(null);
+
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        app()->setLocale($locale);
+
+        $platformName = $orgData['org_name'] ?? config('app.name');
+
+        $defaultSubject = $locale === 'ar'
+            ? "تمت دعوتك للانضمام إلى {$platformName} كمرشد"
+            : "You're Invited to Join {$platformName} as a Mentor";
+
+        // An admin-authored subject/message is optional; when provided it
+        // replaces the platform's default template text entirely.
+        $subject = $this->invitation->subject ?: $defaultSubject;
+
+        $organizations = Organization::whereIn('id', $orgIds)->get()->map(fn($org) => ['id' => $org->id, 'name' => $org->name_en])->toArray();
+
+        $mail = $this->subject($subject)
                      ->view('emails.invite_mentor')
                      ->with(array_merge([
-                         'name'        => $this->invitation->name,
-                         'messageBody' => $this->invitation->message_content,
-                         'scope'       => $this->invitation->scope,
-                         'organizations' => Organization::whereIn('id', $orgIds)->get()->map(fn($org) => ['id' => $org->id, 'name' => $org->name_en])->toArray(),
+                         'name'          => $this->invitation->name,
+                         'messageBody'   => $this->invitation->message_content,
+                         'scope'         => $this->invitation->scope,
+                         'organizations' => $organizations,
+                         // Named distinctly from 'platformName': a global view
+                         // composer (AppServiceProvider) sets that key on every
+                         // view and would silently override this value.
+                         'invitePlatformName' => $platformName,
+                         'locale'        => $locale,
                      ], $orgData));
 
         // Attach files if exist

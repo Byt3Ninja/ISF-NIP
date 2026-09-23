@@ -72,7 +72,6 @@ Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequ
 
 
 /// Frontend routes ///
-Route::get('programs/teams/{files?}', 'HackathonController@get_team_media')->where('files', '.*');
 Route::get('lang/{locale}', 'IndexController@lang');
 Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
@@ -190,6 +189,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::patch('hackathon/rejectInvitation/{id}', 'HackathonController@rejectInvitation')->name('hackathon.rejectInvitation');
     Route::post('hackathon/getOutTeam', 'HackathonController@getOutTeam')->name('hackathon.getOutTeam');
     Route::get('hackathon/my-team', 'HackathonController@myTeam')->name('hackathon.myTeam');
+    // Team logos live OUTSIDE the web root (storage/app/public/programs/teams),
+    // so they are streamed through this action rather than served directly by
+    // the webserver. Keyed on the stored filename (no DB lookup) -- see
+    // HackathonController@teamLogo for why.
+    Route::get('hackathon/team-logo/{filename}', 'HackathonController@teamLogo')->name('hackathon.teamLogo');
     Route::post('hackathon/EditProjectIdea', 'HackathonController@EditProjectIdea')->name('hackathon.EditProjectIdea');
     Route::post('hackathon/EditTeamInfo', 'HackathonController@EditTeamInfo')->name('hackathon.EditTeamInfo');
     Route::post('hackathon/RequestJoin', 'HackathonController@RequestJoin')->name('hackathon.RequestJoinTeam');
@@ -488,7 +492,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::delete('/landing-pages/{id}/custom-sections/{sectionId}', 'LandingPagesController@destroyCustomSection')->name('landing-pages.custom-sections.destroy');
     Route::post('/landing-pages/{id}/custom-sections/upload-image', 'LandingPagesController@uploadCustomSectionImage')->name('landing-pages.custom-sections.upload-image');
 
-
+    Route::post('dashboard/landing-pages/{id}/programs/reorder', 'LandingPagesController@reorderPrograms')
+      ->name('landing-pages.programs.reorder');
+      
     //Assessment
     Route::resource('questions', 'QuestionController');
     Route::resource('weights', 'WeightController');
@@ -902,6 +908,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('programlist/create', 'ProgramController@edit')->name('programs.create');
     Route::get('programlist/edit/{id}', 'ProgramController@edit')->name('programs.edit');
     Route::get('programlist/show/{id}', 'ProgramController@show')->name('programs.view');
+    Route::get('programlist/{id}/visibility-check', 'ProgramController@checkProgramPublic')->name('programs.check_public');
     Route::get('programlist/{id}/custom-pages', 'ProgramController@customPages');
 
     Route::post('programlist/Email', 'ProgramController@SentEmail')->name('programs.send_email');

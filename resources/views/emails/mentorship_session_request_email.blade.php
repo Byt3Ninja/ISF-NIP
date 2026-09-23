@@ -19,44 +19,126 @@
                 </tr>
                 <tr>
                     <td style="padding: 40px 40px 20px 40px; text-align: {{ $alignStart }}; direction: {{ $dirAttr }};">
-                        {{--  <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">{{ __('email.mentorship_request_email.subject') }}</p>  --}}
-                        <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ trim( trim( strtolower( $party->gender ) ) == 'male' ? __('email.dear_male') : __('email.dear_female') ) . ' ' . trim($party->name) }},</h1>
+                        <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">
+                            @if($isRtl)
+                                عزيزي/عزيزتي {{ trim($party->name) }}،
+                            @else
+                                Dear {{ trim($party->name) }},
+                            @endif
+                        </h1>
 
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.mentorship_request_email.informing') }}</p>
+
+                        <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: 700; color: #111827;">{{ __('email.mentorship_request_email.request_details') }}</p>
 
                         <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F9FAFB; border-radius: 6px; border: 1px solid #E5E7EB; margin-bottom: 20px;">
                             <tr>
                                 <td style="padding: 20px; direction: {{ $dirAttr }}; text-align: {{ $alignStart }};">
+                                    @php
+                                        $isOnline = \Illuminate\Support\Str::of($sessionType ?? '')->lower()->trim()->value() === 'online';
+                                    @endphp
                                     <table width="100%" cellspacing="0" cellpadding="0" border="0">
                                         <tr>
-                                            <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.startup_name') }}:</td>
-                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $startupName }}</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.founder') }}:</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">
+                                                @if(!empty($founder))
+                                                    <a href="{{ route('clients.profile_view', $founder->id) }}" style="color: {{ $mainColor }};">{{ $founder->name }}</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
                                         </tr>
+                                        @if(!empty($startup))
+                                        <tr>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.startup_name') }}:</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">
+                                                <a href="{{ route('company.profile_view', $startup->id) }}" style="color: {{ $mainColor }};">{{ $startupName }}</a>
+                                            </td>
+                                        </tr>
+                                        @endif
                                         <tr>
                                             <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.requested_mentor') }}:</td>
                                             <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $requestedMentor }}</td>
                                         </tr>
-                                        @if( trim( $sessionNotes ) )
+                                        <tr>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.preferred_date') }}:</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $preferredDate ?: '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.preferred_time') }}:</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $preferredTime ?: '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.session_type') }}:</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $isOnline ? __('email.mentorship_request_email.session_type_online') : __('email.mentorship_request_email.session_type_in_person') }}</td>
+                                        </tr>
+                                        @if( trim( $sessionNotes ?? '' ) )
                                             <tr>
                                                 <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.session_notes') }}:</td>
                                                 <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionNotes }}</td>
                                             </tr>
                                         @endif
-                                        <tr>
-                                            <td style="padding-bottom: 0px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.preferred_date_time') }}:</td>
-                                            <td style="padding-bottom: 0px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionDateTime }}</td>
-                                        </tr>
+                                        @if($isOnline)
+                                            <tr>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentorship_request_email.meeting_link') }}:</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $meetingLink ?: '-' }}</td>
+                                            </tr>
+                                            @if(!empty($passcode))
+                                                <tr>
+                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.Passcode') }}:</td>
+                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $passcode }}</td>
+                                                </tr>
+                                            @endif
+                                        @else
+                                            <tr>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.Location') }}:</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">
+                                                    @if(!empty($locationName) && !empty($locationUrl))
+                                                        <a href="{{ $locationUrl }}" style="color: {{ $mainColor }};">{{ $locationName }}</a>
+                                                    @else
+                                                        {{ $locationName ?: '-' }}
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.address') }}:</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $address ?: '-' }}</td>
+                                            </tr>
+                                        @endif
+                                        @if(!empty($attachments))
+                                            <tr>
+                                                <td style="padding-bottom: 0px; font-size: 14px; color: #6B7280; width: 150px; vertical-align: top;">{{ __('email.Attachments') }}:</td>
+                                                <td style="padding-bottom: 0px; font-size: 14px; text-align: {{ $alignEnd }};">
+                                                    @foreach($attachments as $attachment)
+                                                        <a href="{{ $attachment['url'] }}" style="display: block; margin-bottom: 4px; color: {{ $mainColor }}; text-decoration: underline; font-weight: 600;">📎 {{ $attachment['name'] }}</a>
+                                                    @endforeach
+                                                </td>
+                                            </tr>
+                                        @endif
                                     </table>
                                 </td>
                             </tr>
                         </table>
 
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.mentorship_request_email.review_request') }}</p>
+
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{ $reviewUrl }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: {{ $mainColor }}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ __('email.cta.review_request') }}</a>
+                                </td>
+                            </tr>
+                        </table>
+
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.mentorship_request_email.ensure_parties_notified') }}</p>
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.mentorship_request_email.support_offer') }}</p>
 
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
-                            {{ __('email.regards') }}<br>
+                            @if($isRtl)
+                                مع أطيب التحيات،<br>
+                            @else
+                                {{ __('email.regards') }}<br>
+                            @endif
                             <strong>{{ __('email.team', ['platform_name' => $platformName]) }}</strong>
                         </p>
                     </td>

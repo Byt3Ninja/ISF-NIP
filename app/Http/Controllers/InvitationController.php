@@ -172,8 +172,8 @@ class InvitationController extends Controller
             'invitee_email' => 'required|email',
             'invitation_scope' => 'required',
             'organizations' => 'nullable|array',
-            'invitation_subject' => 'required',
-            'invitation_message' => 'required',
+            'invitation_subject' => 'nullable|string',
+            'invitation_message' => 'nullable|string',
             'attachments' => 'nullable',
         ]);
 
@@ -187,11 +187,24 @@ class InvitationController extends Controller
         $invitation->status = 'Sent';
         $invitation->scope = $data['invitation_scope'];
         $invitation->organization_ids = $data['organizations'] ?? [];
-        $invitation->subject = $data['invitation_subject'];
-        $invitation->message_content = trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])));
+        // Custom subject/message are optional -- when left blank, the mail
+        // falls back to the platform's default "invited as a mentor" template.
+        $invitation->subject = $data['invitation_subject'] ?: null;
+        $invitation->message_content = !empty($data['invitation_message'])
+            ? trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])))
+            : null;
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
-        dispatch(new SendInviteMentorEmail($invitation, auth()->user()->email));
+
+        // Atomically claim the "send invitation email" step so a retry/duplicate
+        // call for this same invitation can never send the email twice.
+        $claimedInviteNotify = InviteMentor::where('id', $invitation->id)
+            ->whereNull('email_sent_at')
+            ->update(['email_sent_at' => now()]);
+
+        if ($claimedInviteNotify) {
+            dispatch(new SendInviteMentorEmail($invitation, auth()->user()->email));
+        }
         if($data['invitation_scope'] == 'Organization'){
             $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
             $organizationMap = collect($allOrganizations)->keyBy('id');

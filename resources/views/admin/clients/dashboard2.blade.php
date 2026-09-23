@@ -390,7 +390,7 @@
 						<div class="card">
 							<div class="card-header border-bottom">
 								<h5 class="card-title d-flex align-items-center">
-									<i class='bx bxs-megaphone font-medium-4 mr-1'></i>{{__('dashboard.My Latest training')}} :: 
+									<i class='bx bxs-megaphone font-medium-4 mr-1'></i>{{__('dashboard.My Latest training')}}
 									<a href="/dashboard/training/my">{{__('dashboard.Show all')}}</a>
 								</h4>
 

@@ -100,4 +100,25 @@ return [
 	'validate_password_regexp' => 'يجب أن تحتوي كلمة المرور على حرف واحد ورقم واحد على الأقل',
 	'validate_job_title_string_length' => 'يجب أن يكون المسمى الوظيفي بين 2 و 100 حرف',
 	'validate_job_title_regexp' => 'يجب أن يحتوي المسمى الوظيفي على حروف ومسافات فقط',
+
+	'placeholder_first_name' => 'أدخل اسمك الأول',
+	'placeholder_last_name' => 'أدخل اسمك الأخير',
+	'placeholder_gender' => 'اختر النوع',
+	'placeholder_email' => 'أدخل بريدك الإلكتروني',
+	'placeholder_phone' => 'أدخل رقم هاتفك',
+	'placeholder_job_title' => 'أدخل المسمى الوظيفي',
+	'placeholder_bio' => 'أخبرنا عن خبراتك وكيف يمكنك مساعدة المؤسسين',
+
+	'registeringAs' => 'أنا أسجل كـ',
+	'area_of_expertise' => 'مجال الخبرة',
+	'linkedin_profile' => 'ملف لينكد إن',
+	'create_account' => 'أنشئ حسابك',
+	'sign_up_subheading' => 'سجّل للوصول إلى لوحة التحكم والمجتمع والمزيد',
+	'welcome_community' => 'مرحبًا بك في المجتمع',
+	'connect_text' => 'تواصل مع المؤسسين والموجهين ومقدمي الخدمات الذين يرسمون ملامح مستقبل العمل',
+	'sign_in_continue' => 'سجّل الدخول للمتابعة من حيث توقفت',
+	'Sign In' => 'تسجيل الدخول',
+
+	'founder_or_mentor_q' => 'هل أنت مؤسس أو موجه؟',
+	'register_as_founder_mentor' => 'سجّل كمؤسس أو موجه',
 ];

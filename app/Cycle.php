@@ -15,6 +15,8 @@ use stdClass;
 
 class Cycle extends Model
 {
+    public const TITLE_MAX_LENGTH = 50;
+
     use HasFactory, Auditable, HasFileCleanup;
     public static $module = 'Program';
     protected array $fileFields = [

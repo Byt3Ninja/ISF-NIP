@@ -158,7 +158,38 @@ class InviteToHackathon extends Notification implements ShouldQueue
 
             return (new MailMessage)
             ->subject(__('admin.Invitation_to_Join_a_Hackathon_Team'))
-            ->markdown('emails.hackathon_inviteTeam', array_merge(['data' => $this->teamLeader, 'teamName' => $this->team_q, 'teamMember' => $this->teamMember], $orgData));
+            ->markdown('emails.hackathon_inviteTeam', array_merge([
+                'data' => $this->teamLeader,
+                'teamName' => $this->team_q,
+                'teamMember' => $this->teamMember,
+                // The recipient can be an AnonymousNotifiable (email-only invite
+                // with no registered user), so these may legitimately be blank.
+                'recipientName' => $this->displayName($notifiable),
+                'recipientGender' => $notifiable->gender ?? null,
+                'leaderName' => $this->displayName($this->teamLeader),
+            ], $orgData));
+    }
+
+    /**
+     * Human-readable name for a user in the current locale, falling back to the
+     * other locale and then the email. Returns '' for an AnonymousNotifiable,
+     * which has no name columns at all.
+     */
+    private function displayName($user): string
+    {
+        if (!$user) {
+            return '';
+        }
+
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $other = $locale === 'ar' ? 'en' : 'ar';
+
+        $first = $user->{'first_name_'.$locale} ?? null;
+        $last = $user->{'last_name_'.$locale} ?? null;
+        $first = $first ?: ($user->{'first_name_'.$other} ?? null);
+        $last = $last ?: ($user->{'last_name_'.$other} ?? null);
+
+        return trim($first.' '.$last);
     }
 
     /**

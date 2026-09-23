@@ -6,6 +6,12 @@ return [
         'broadcast' => 'تمت دعوتك للانضمام إلى فريق الهاكاثون ":team".',
     ],
 
+    'hackathon_status' => [
+        'accepted' => 'قبل :member دعوتك للانضمام إلى فريق الهاكاثون ":team".',
+        'rejected' => 'رفض :member دعوتك للانضمام إلى فريق الهاكاثون ":team".',
+        'cancelled' => 'تم إلغاء الدعوة للانضمام إلى فريق الهاكاثون ":team".',
+    ],
+
     'startup_join' => [
         'whatsapp' => 'تهانينا! لقد انضممت إلى :cycle. أهلاً بك من :app.',
         'broadcast' => 'لقد انضممت إلى :cycle. أهلاً بك!',

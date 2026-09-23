@@ -129,14 +129,14 @@ class JudgerScreeningEvaluationSheet implements FromArray, WithEvents, WithStyle
                 $row[] = '';
                 $colIndex += 3;
 
-                $row[] = __('admin.total');
+                $row[] = __('admin.Sub Criteria Total');
                 $col = Coordinate::stringFromColumnIndex( $colIndex );
                 $this->mergeRanges[] = "{$col}2:{$col}3";
                 $this->totalColumnIndices[] = $colIndex;
                 $colIndex++;
             }
 
-            $row[] = __('admin.total');
+            $row[] = __('admin.Criteria Total');
             $col = Coordinate::stringFromColumnIndex( $colIndex );
             $this->mergeRanges[] = "{$col}2:{$col}3";
             $this->totalColumnIndices[] = $colIndex;

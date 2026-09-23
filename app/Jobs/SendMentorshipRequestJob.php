@@ -19,6 +19,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\MentorNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipNotification;
@@ -64,7 +65,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             // $mentor = User::find($this->mentorId);
             try {
                 // ======> notify Mentor <=================
-                $session = MentorshipRequest::with(['user', 'mentor', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
+                $session = MentorshipRequest::with(['user', 'mentor', 'admin', 'user.company', 'cycle', 'cycle.organization', 'organization'])->findOrFail($this->id);
                 $session->attachments = $session->fileurl ? [
                     [
                         'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
@@ -120,13 +121,21 @@ class SendMentorshipRequestJob implements ShouldQueue
                         ? __("messages.mentorship_session_notification_message", ['name' => $startupFullName_user, 'session_date' => $sessionDate, 'session_time' => $sessionTimeMentor], $mentorLocale)
                         : __("messages.mentorship_session_action", ['action' => __('messages.Rejected', [], $mentorLocale), 'name' => $startupFullName_user], $mentorLocale),
                 ];
-                $mentor->notify(
-                    new MentorNotifyMentorshipNotification(
-                        $mentorMessage,
-                        $session
-                    )
-                );
-                log::info('Sent New Mentorship Request notification to ' . $mentor->email);
+                // Atomically claim the "notify mentor of booked session" step so a
+                // retry of this job never double-emails the mentor.
+                $claimedMentorNotify = MentorshipRequest::where('id', $session->id)
+                    ->whereNull('mentor_notified_at')
+                    ->update(['mentor_notified_at' => now()]);
+
+                if ($claimedMentorNotify) {
+                    $mentor->notify(
+                        new MentorNotifyMentorshipNotification(
+                            $mentorMessage,
+                            $session
+                        )
+                    );
+                    log::info('Sent New Mentorship Request notification to ' . $mentor->email);
+                }
 
                 // notify the startup to the directly assigned session
                 $userMessage = [
@@ -136,13 +145,21 @@ class SendMentorshipRequestJob implements ShouldQueue
                     "/dashboard",
                     __("messages.mentorship_session_notification_message", ['name' => $mentorFullName, 'session_date' => $sessionDate, 'session_time' => $sessionTimeStartup], $startupLocale),
                 ];
-                $startup->notify(
-                    new StartupNotifyMentorshipNotification(
-                        $userMessage,
-                        $session
-                    )
-                );
-                log::info('Sent New Mentorship Request notification to ' . $startup->email);
+                // Atomically claim the "notify founder of scheduled session" step
+                // so a retry of this job never double-emails the founder.
+                $claimedFounderNotify = MentorshipRequest::where('id', $session->id)
+                    ->whereNull('founder_notified_at')
+                    ->update(['founder_notified_at' => now()]);
+
+                if ($claimedFounderNotify) {
+                    $startup->notify(
+                        new StartupNotifyMentorshipNotification(
+                            $userMessage,
+                            $session
+                        )
+                    );
+                    log::info('Sent New Mentorship Request notification to ' . $startup->email);
+                }
             } catch (\Throwable $th) {
                 Log::error('add wait Notification Error: ' . $th->getMessage());
                 throw $th;
@@ -275,7 +292,10 @@ class SendMentorshipRequestJob implements ShouldQueue
 
         if ($this->action == 'modifySession') {
             /// Notify Mentor
-            $session = MentorshipRequest::with('orgnization', 'cycle')->findOrFail($this->id);
+            $session = MentorshipRequest::with('orgnization', 'cycle', 'cycle.organization', 'user', 'user.company', 'mentor')->findOrFail($this->id);
+            // Tie the dedupe claim below to this exact update -- a later
+            // reschedule bumps updated_at again and is allowed to re-notify.
+            $mentorUpdateVersion = $session->updated_at;
             $rName = User::findOrFail($session->mentor_id);
             $rName_usr = User::findOrFail($session->user_id);
             $user = new User();
@@ -288,8 +308,8 @@ class SendMentorshipRequestJob implements ShouldQueue
             $userLocale = $rName_usr->preferredLocale();
 
             $mentorSubject = $mentorLocale === 'ar'
-                ? "جلسة إرشاد مع {$rFullName_usr}."
-                : "Mentorship Session with {$rFullName_usr}.";
+                ? "تم تحديث جلسة الإرشاد – {$rFullName_usr}"
+                : "Mentorship Session Updated – {$rFullName_usr}";
 
             $is_hackathon = $session->cycle ? (strtolower($session->cycle->type) === 'hackathon') : false;
 
@@ -310,7 +330,9 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'mentorName' => $rFullName,
                 'mentorGender' => $rName->gender ?? '',
                 'startupOwnerName' => $rFullName_usr,
+                'startupOwnerId' => $rName_usr->id,
                 'startupName' => $session->user->company->name_en ?? '',
+                'startupId' => $session->user->company->id ?? null,
                 'sessionDate' => $sessionDate,
                 'sessionTime' => $sessionTime,
                 'is_hackathon' => $is_hackathon,
@@ -318,8 +340,9 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'sessionType' => $session->session_type ?? 'Online',
                 'meetingLink' => $session->start_url ?? '',
                 'meetingPass' => $session->zoom_passcode ?? '',
-                'location' => $session->orgnization->address ?? '',
-                'mapLink' => $session->orgnization->google_map_url ?? '',
+                'location' => $session->cycle->offline_location_address ?? '',
+                'address' => $session->orgnization->address ?? '',
+                'mapLink' => $session->cycle->offline_location_map ?? $session->orgnization->google_map_url ?? '',
                 'notes' => $session->comment ?? '',
                 'attachments' => $session->fileurl ? [['url' => env('APP_URL').'/dashboard/uploads/InviteMentor/'.$session->fileurl, 'name' => basename($session->fileurl), 'path' => $session->fileurl]] : [],
                 'status' => $session->approved ?? '',
@@ -330,7 +353,18 @@ class SendMentorshipRequestJob implements ShouldQueue
             $MSGM = new MentorshipSessionMentor($mentorMessage);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                     $rName->notify($MSGM);
+                    // Claim this specific update -- a later reschedule bumps
+                    // updated_at again, so this comparison lets it notify again.
+                    $claimedMentorUpdateNotify = DB::table('mentorship_requests')->where('id', $session->id)
+                        ->where(function ($q) use ($mentorUpdateVersion) {
+                            $q->whereNull('mentor_update_notified_at')
+                              ->orWhere('mentor_update_notified_at', '!=', $mentorUpdateVersion);
+                        })
+                        ->update(['mentor_update_notified_at' => $mentorUpdateVersion]);
+
+                    if ($claimedMentorUpdateNotify) {
+                        $rName->notify($MSGM);
+                    }
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 1: ' . $th->getMessage());
@@ -375,11 +409,47 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'action' => 'modifySession',
                 'user' => 'user',
                 'lang' => $userLocale,
+                // Raw values for the founder "session updated" email, which is
+                // localized to the platform default language when it is built.
+                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
+                'startAt' => Carbon::parse($session->zoom_date)->format('Y-m-d H:i:s'),
+                'periodMinutes' => $session->period,
+                'joinUrl' => $session->join_url ?? '',
+                'passcode' => $session->zoom_passcode ?? '',
+                'offlineLocation' => $session->cycle->offline_location_address ?? '',
+                'offlineMapLink' => $session->cycle->offline_location_map
+                    ?? optional($session->cycle->organization ?? $session->orgnization)->google_map_url ?? '',
+                'offlineAddress' => optional($session->cycle->organization ?? $session->orgnization)->address ?? '',
+                'founderNotes' => $session->admin_comment ?: ($session->comment ?? ''),
+                'startupNameEn' => $session->user->company->name_en ?? '',
+                'startupNameAr' => $session->user->company->name_ar ?? '',
+                'attachmentLinks' => $session->fileurl ? [[
+                    'name' => basename($session->fileurl),
+                    'url' => app(FileManagerService::class)->getUrl($session->fileurl, 'UsersDiskInviteMentor'),
+                ]] : [],
             ];
             $MSG = new MentorshipSession($message);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    $rName_usr->notify($MSG);
+                    // Claim this specific update -- a later reschedule bumps
+                    // updated_at again, so this comparison lets it notify again.
+                    // Uses the query builder: an Eloquent update() would itself
+                    // bump updated_at and make a retry look like a new update.
+                    $claimedFounderUpdateNotify = DB::table('mentorship_requests')->where('id', $session->id)
+                        ->where(function ($q) use ($mentorUpdateVersion) {
+                            $q->whereNull('founder_update_notified_at')
+                              ->orWhere('founder_update_notified_at', '!=', $mentorUpdateVersion);
+                        })
+                        ->update(['founder_update_notified_at' => $mentorUpdateVersion]);
+
+                    if ($claimedFounderUpdateNotify) {
+                        try {
+                            $rName_usr->notify($MSG);
+                        } catch (\Throwable $th) {
+                            DB::table('mentorship_requests')->where('id', $session->id)->update(['founder_update_notified_at' => null]);
+                            throw $th;
+                        }
+                    }
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 2: ' . $th->getMessage());
@@ -463,21 +533,37 @@ class SendMentorshipRequestJob implements ShouldQueue
                     $status = strtolower( (string) $this->stat ) == 'yes' ? true : false;
                     if( $status )
                     {
-                        $startup_user->notify(
-                            new StartupNotifyMentorshipApprovalNotification(
-                                $userMessage,
-                                $session
-                            )
-                        );
+                        // Atomically claim the "notify founder of approval" step
+                        // so a retry of this job never double-emails the founder.
+                        $claimedApprovalNotify = MentorshipRequest::where('id', $session->id)
+                            ->whereNull('approval_notified_at')
+                            ->update(['approval_notified_at' => now()]);
+
+                        if ($claimedApprovalNotify) {
+                            $startup_user->notify(
+                                new StartupNotifyMentorshipApprovalNotification(
+                                    $userMessage,
+                                    $session
+                                )
+                            );
+                        }
                     }
                     else
                     {
-                        $startup_user->notify(
-                            new StartupNotifyMentorshipRejectionNotification(
-                                $userMessage,
-                                $session
-                            )
-                        );
+                        // Atomically claim the "notify founder of decline" step
+                        // so a retry of this job never double-emails the founder.
+                        $claimedRejectionNotify = MentorshipRequest::where('id', $session->id)
+                            ->whereNull('rejection_notified_at')
+                            ->update(['rejection_notified_at' => now()]);
+
+                        if ($claimedRejectionNotify) {
+                            $startup_user->notify(
+                                new StartupNotifyMentorshipRejectionNotification(
+                                    $userMessage,
+                                    $session
+                                )
+                            );
+                        }
                     }
                 } catch (\Throwable $th) {
                     Log::error('modify user Notification Error: ' . $th->getMessage());

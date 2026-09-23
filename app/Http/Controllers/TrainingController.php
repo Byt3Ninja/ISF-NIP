@@ -723,6 +723,9 @@ class TrainingController extends Controller
 				$end_time_tailing = str_contains($endTime, 'AM') || str_contains($endTime, 'PM') ? '' : ':00';
 				$end_datetime = strtotime($startDate . ' ' . $endTime . $end_time_tailing);
 			} else if ($type == 'online') {
+				if (empty($dateRange) || !str_contains($dateRange, ' - ')) {
+					return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
+				}
 				[$startDate, $endDate] = explode(' - ', $dateRange);
 				$start_datetime = strtotime($startDate);
 				$end_datetime = strtotime($endDate);
@@ -733,10 +736,19 @@ class TrainingController extends Controller
 			}
 
 			$step = $request->step_id;
+
+			// A cleared/never-selected Step or Program must fail with a clear
+			// message here -- not as a raw "step_id cannot be null" SQL error
+			// once addorcreat*Session() tries to insert the training row.
+			if (empty($step) || empty($request->cycle_id)) {
+				return back()->with(['message' => __('cycles.Step_Required'), 'class' => 'danger']);
+			}
+
 			$title = $request->title;
 			$dsc = $request->dsc;
 			$datetime = $start_datetime;
 			$original_datetime = date( 'Y-m-d h:i A', $start_datetime );
+			$original_end_datetime = date( 'Y-m-d h:i A', $end_datetime );
 			$datetimeStamp = Carbon::parse($datetime)->timestamp;
 			$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
 			$start = Carbon::parse($datetime);
@@ -758,7 +770,7 @@ class TrainingController extends Controller
 				}
 				$trainingSession = $_session['message'];
 				// ======> notify Trainer <=================
-				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $original_datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
+				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $original_datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit, $original_end_datetime, $trainingSession->start_url);
 				// ==========> End Notify <================
 				return back()->with(['message' => __('cycles.Online_Session_Added_Successfully'), 'class' => 'success']);
 			} elseif ($type == 'online') {
@@ -772,7 +784,7 @@ class TrainingController extends Controller
 				// ======> notify Trainer <=================
 				$join_url = $request->training_location ?? 'No Location';
 				$address  = $request->training_Address ?? 'No Address';
-				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $original_datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
+				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $original_datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit, $original_end_datetime);
 				// ==========> End Notify <================
 				return back()->with(['message' => __('cycles.Offline_Session_Added_Successfully'), 'class' => 'success']);
 			} else {
@@ -851,8 +863,9 @@ class TrainingController extends Controller
 							$trainingSession = $_session['message'];
 							SendTrainingNotificationJob::dispatch(
 									$step, $trainingSession->id, $title, $datetime,
-									$trainingSession->start_url, null, $type,
-									app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit
+									$trainingSession->join_url, null, $type,
+									app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit,
+									$end_datetime, $trainingSession->start_url
 							);
 							return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
 	

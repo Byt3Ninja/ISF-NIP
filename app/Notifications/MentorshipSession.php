@@ -2,7 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Organization;
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -114,6 +117,10 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
      public function toMail($notifiable)
     {
+        if (($this->data['action'] ?? '') === 'modifySession' && ($this->data['user'] ?? '') === 'user') {
+            return $this->toFounderUpdatedMail($notifiable);
+        }
+
         // $org = $notifiable->organization;
         // $smtpSettings = $org?->organizationSettings;
         
@@ -148,6 +155,76 @@ foreach ($this->data['attachments'] ?? [] as $attachment) {
 
     return $mail;
 
+    }
+
+    /**
+     * Founder "mentorship session updated" email: platform default language,
+     * organization branding, and session-type specific details.
+     */
+    protected function toFounderUpdatedMail($notifiable): MailMessage
+    {
+        $d = $this->data;
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $isRtl = $locale === 'ar';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $organization = ! empty($d['organizationId']) ? Organization::find($d['organizationId']) : null;
+        $orgData = $this->buildEmailOrganizationData($organization);
+        if ($organization && empty($organization->img_url)) {
+            $orgData['org_logo_url'] = null;
+        }
+        $orgName = $organization
+            ? (trim((string) $organization->getAttribute('name_' . $locale)) ?: $organization->getAttribute('name_en'))
+            : $platformName;
+
+        $firstName = $isRtl ? trim((string) $notifiable->first_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+        }
+
+        $startupName = $isRtl
+            ? (trim((string) ($d['startupNameAr'] ?? '')) ?: trim((string) ($d['startupNameEn'] ?? '')))
+            : trim((string) ($d['startupNameEn'] ?? ''));
+
+        $start = Carbon::parse($d['startAt']);
+        $end = $start->copy()->addMinutes((int) ($d['periodMinutes'] ?: 60));
+        $sessionTime = $start->format('h:i A') . ' – ' . $end->format('h:i A');
+        if ($isRtl) {
+            $sessionTime = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $sessionTime);
+        }
+
+        $isOnline = strtolower(trim((string) ($d['sessionType'] ?? 'online'))) !== 'offline';
+        $dash = fn ($v) => trim((string) $v) !== '' ? trim((string) $v) : '-';
+
+        $subject = $startupName !== ''
+            ? __('email.founder_session_updated_email.subject', ['startup_name' => $startupName], $locale)
+            : __('email.founder_session_updated_email.subject_plain', [], $locale);
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
+        return (new MailMessage)
+            ->subject($subject)
+            ->view('emails.mentorship_session_updated_founder', array_merge([
+                'updLocale' => $locale,
+                'updFounderName' => $firstName,
+                'updGender' => strtolower(trim((string) $notifiable->gender)),
+                'updOrgName' => $orgName,
+                'updMentorName' => $dash($d['mentorName'] ?? ''),
+                'updDate' => $dash($start->format('Y-m-d')),
+                'updTime' => $sessionTime,
+                'updDuration' => empty($d['periodMinutes']) ? '-' : __('email.founder_session_updated_email.duration_value', ['count' => $d['periodMinutes']], $locale),
+                'updIsOnline' => $isOnline,
+                'updMeetingLink' => $dash($d['joinUrl'] ?? ''),
+                'updHasMeetingLink' => trim((string) ($d['joinUrl'] ?? '')) !== '',
+                'updPasscode' => trim((string) ($d['passcode'] ?? '')),
+                'updLocation' => $dash($d['offlineLocation'] ?? ''),
+                'updMapLink' => trim((string) ($d['offlineMapLink'] ?? '')),
+                'updAddress' => $dash($d['offlineAddress'] ?? ''),
+                'updNotes' => trim((string) ($d['founderNotes'] ?? '')),
+                'updAttachments' => $d['attachmentLinks'] ?? [],
+                'updViewUrl' => route('mentorships.list_mine'),
+            ], $orgData));
     }
 
     /**

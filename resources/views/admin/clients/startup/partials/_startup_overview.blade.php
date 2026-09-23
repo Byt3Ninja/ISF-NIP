@@ -36,6 +36,14 @@
   $fundingProgress = $target > 0 ? min(100, (int) round(($raised / $target) * 100)) : 0;
   $valuation       = (float) ($co->Pre_money_Valuation ?? 0);
 
+  // Render a money value with thousands separator + currency suffix, or "N/A"
+  // when it is null / empty / non-numeric (avoids showing a bare "0 EGP").
+  $fmtMoney = function ($v) use ($currencyCode) {
+    return $v !== null && $v !== '' && is_numeric($v)
+      ? number_format((float) $v) . ' ' . $currencyCode
+      : __('admin.N/A');
+  };
+
   // --- Development Stage Mapping ---
   $stageModel  = is_numeric($co->stage ?? null) ? App\Stage::find((int) $co->stage) : null;
   $devStageName = $stageModel
@@ -63,9 +71,15 @@
   // --- Sustainability & Market Logic ---
   $sustainable_array = json_decode($co->Sustainable_development ?? '[]') ?? [];
 
-  $countryIds = is_string($co->targeted_market ?? null)
-    ? (json_decode($co->targeted_market, true) ?? [])
-    : (is_array($co->targeted_market ?? null) ? $co->targeted_market : []);
+  $countryIds = collect(
+      is_string($co->targeted_market ?? null)
+        ? (json_decode($co->targeted_market, true) ?? [])
+        : (is_array($co->targeted_market ?? null) ? $co->targeted_market : [])
+    )
+    ->filter(fn($id) => is_numeric($id))
+    ->map(fn($id) => (int) $id)
+    ->values()
+    ->all();
   $marketCount = count($countryIds);
 
   $targetedMarketNames = $marketCount > 0
@@ -203,8 +217,8 @@
   $productsDesc   = $registrationOfferingDetails['products_desc'] ?? null;
   $hasRegOffering = (bool) ($registrationOfferingDetails['has_any'] ?? false);
 
-  $generatesRevenue = (bool) ($co->generates_revenue ?? false);
-  $revenueAmount    = (float) ($co->revenue_amount ?? 0);
+  $generatesRevenue = ($co->generate_revenue ?? null) === 'yes';
+  $revenueAmount    = is_numeric($co->average_annual_revenues ?? null) ? (float) $co->average_annual_revenues : 0;
 
   // --- Locale-aware helpers ---
   $isEn          = $l === 'en';
@@ -338,7 +352,7 @@
             <i class="ti ti-currency-dollar ti-lg"></i>
           </div>
           <div>
-            <h5 class="mb-0 fw-bold">{{ number_format($raised) }} {{ $currencyCode }}</h5>
+            <h5 class="mb-0 fw-bold">{{ $fmtMoney($co->raised_fund) }}</h5>
             <small class="text-muted mb-0">{{ __('admin.raised_fund_egp') }}</small>
           </div>
         </div>
@@ -355,7 +369,7 @@
         <ul class="mb-0 list-unstyled">
           <li class="mb-3 d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.Funding_Target') }}</span>
-            <span class="small fw-bold">{{ number_format($target) }} {{ $currencyCode }}</span>
+            <span class="small fw-bold">{{ $fmtMoney($co->Funding_Target) }}</span>
           </li>
           <li class="mb-3 d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.Funding_Stage') }}</span>
@@ -363,11 +377,11 @@
           </li>
           <li class="mb-3 d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.Pre_money_Valuation') }}</span>
-            <span class="small fw-bold">{{ number_format($valuation) }} {{ $currencyCode }}</span>
+            <span class="small fw-bold">{{ $fmtMoney($co->Pre_money_Valuation) }}</span>
           </li>
           <li class="d-flex justify-content-between">
             <span class="small text-muted">{{ __('admin.average_annual_revenues') }}</span>
-            <span class="small fw-bold">{{ $average_annual_revenues ?? 'N/A' }}</span>
+            <span class="small fw-bold">{{ $fmtMoney($co->average_annual_revenues) }}</span>
           </li>
         </ul>
       </div>
@@ -379,27 +393,29 @@
     <div class="card h-100 border-0 shadow-sm">
       <div class="card-header d-flex justify-content-between align-items-center border-bottom mb-6">
         <h5 class="card-title mb-0">{{ __('startup.about_challenges') }}</h5>
-        <div class="d-flex align-items-center gap-2">
-          @if (($_user->ableTo('company.profile_view_mine', $permissions) ?? false) && !empty($company->id))
+        @if ($_user->hasAnyRole('registered'))
+          <div class="d-flex align-items-center gap-2">
+            @if (($_user->ableTo('company.profile_view_mine', $permissions) ?? false) && !empty($company->id))
+              <button
+                class="btn btn-sm btn-outline-primary"
+                onclick="localStorage.setItem('activeCompanyTab', 3); window.location.href = '/dashboard/myCompany/{{ $company->id }}'"
+              >
+                <i class="ti ti-pencil me-1"></i>
+                {{ __('admin.Edit') }}
+              </button>
+            @endif
             <button
-              class="btn btn-sm btn-outline-primary"
-              onclick="localStorage.setItem('activeCompanyTab', 3); window.location.href = '/dashboard/myCompany/{{ $company->id }}'"
+              class="btn btn-sm btn-primary"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasRight"
+              aria-controls="offcanvasRight"
             >
-              <i class="ti ti-pencil me-1"></i>
-              {{ __('admin.Edit') }}
+              <i class="ti ti-eye me-1"></i>
+              {{ __('admin.View') }}
             </button>
-          @endif
-          <button
-            class="btn btn-sm btn-primary"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasRight"
-            aria-controls="offcanvasRight"
-          >
-            <i class="ti ti-eye me-1"></i>
-            {{ __('admin.View') }}
-          </button>
-        </div>
+          </div>
+        @endif
       </div>
       <div class="card-body">
         <ul class="nav widget-nav-tabs d-flex gap-2 border-0 pb-4 nav-tabs flex-nowrap overflow-auto" role="tablist">
@@ -872,8 +888,10 @@
                   </td>
                   <td class="text-end">
                     <a
-                      @if( $field == 'financial_plan' )
+                      @if( in_array($field, ['financial_plan', 'business_plan']) )
                       href="{{ app(\App\Services\FileManagerService::class)->getUrl( $co->$field,  'pitch_deck') }}"
+                      @elseif( in_array($field, ['Commercial_Register', 'Tax_Card']) )
+                      href="{{ app(\App\Services\FileManagerService::class)->getUrl( $co->$field,  'document') }}"
                       @else
                       href="{{ $co->$field }}"
                       @endif

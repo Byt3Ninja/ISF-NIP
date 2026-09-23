@@ -187,6 +187,21 @@
                                         @endforeach
                                       </select>
                                     </div>
+                                    <div id="{{ $fieldId }}_other_wrapper" class="mt-2 d-none">
+                                      <div class="input-group">
+                                        <span class="input-group-text bg-label-primary border-end-0">
+                                          <i class="ti ti-edit"></i>
+                                        </span>
+                                        <input
+                                          type="text"
+                                          class="form-control other-field"
+                                          name="{{ $fieldName }}_other"
+                                          id="{{ $fieldId }}_other"
+                                          placeholder="{{ __('builder.Other_value') }}"
+                                          value="{{ old($fieldName . '_other') }}"
+                                        />
+                                      </div>
+                                    </div>
                                     @break
 
                                   @case('paragraph')
@@ -221,6 +236,21 @@
                                           </label>
                                         </div>
                                       @endforeach
+                                      <div id="{{ $fieldId }}_other_wrapper" class="mt-2 d-none">
+                                        <div class="input-group">
+                                          <span class="input-group-text bg-label-primary border-end-0">
+                                            <i class="ti ti-edit"></i>
+                                          </span>
+                                          <input
+                                            type="text"
+                                            class="form-control other-field"
+                                            name="{{ $fieldName }}_other"
+                                            id="{{ $fieldId }}_other"
+                                            placeholder="{{ __('builder.Other_value') }}"
+                                            value="{{ old($fieldName . '_other') }}"
+                                          />
+                                        </div>
+                                      </div>
                                     </div>
                                     @break
 
@@ -244,6 +274,21 @@
                                           </label>
                                         </div>
                                       @endforeach
+                                      <div id="{{ $fieldId }}_other_wrapper" class="mt-2 d-none">
+                                        <div class="input-group">
+                                          <span class="input-group-text bg-label-primary border-end-0">
+                                            <i class="ti ti-edit"></i>
+                                          </span>
+                                          <input
+                                            type="text"
+                                            class="form-control other-field"
+                                            name="{{ $fieldName }}_other"
+                                            id="{{ $fieldId }}_other"
+                                            placeholder="{{ __('builder.Other_value') }}"
+                                            value="{{ old($fieldName . '_other') }}"
+                                          />
+                                        </div>
+                                      </div>
                                     </div>
                                     @break
 
@@ -709,6 +754,24 @@
       }
     });
 
+    // The `callback_*` validator names used in the `fields` map above are not
+    // part of the popular bundle. FormValidation silently treats an unregistered
+    // validator name as always-valid (it short-circuits to `Valid`), so the URL,
+    // numeric, time and file rules never actually ran. Register them as aliases
+    // of the built-in `callback` validator so they execute.
+    ['callback_numeric', 'callback_time', 'callback_url', 'callback_file_type', 'callback_file_size'].forEach(function (name) {
+      fv.registerValidator(name, function () {
+        return {
+          validate: function (input) {
+            const response = typeof input.options.callback === 'function'
+              ? input.options.callback(input)
+              : true;
+            return typeof response === 'boolean' ? { valid: response } : response;
+          },
+        };
+      });
+    });
+
     fv.on('plugins.message.placed', function (e) {
       if (e.element.closest('.application-field-control')) {
         e.element.closest('.application-field-control').insertAdjacentElement('afterend', e.messageElement);
@@ -903,6 +966,49 @@
       var prev = sectionHistory[sectionHistory.length - 1];
       showSection(prev);
     }
+
+    // Toggle Other Fields helper logic
+    function toggleOtherField(input) {
+      let show = false;
+      if (input.tagName === 'SELECT' || input.type === 'select-one') {
+        show = input.value === '__OTHER__';
+      } else if (input.type === 'radio') {
+        const checked = document.querySelector(`input[name="${CSS.escape(input.name)}"]:checked`);
+        show = checked && checked.value === '__OTHER__';
+      } else if (input.type === 'checkbox') {
+        const checkboxes = document.querySelectorAll(`input[name="${CSS.escape(input.name)}"]`);
+        show = Array.from(checkboxes).some(cb => cb.checked && cb.value === '__OTHER__');
+      }
+      const card = input.closest('.application-field-control') || input.closest('.card-body');
+      const wrapper = input.type === 'select-one' || input.tagName === 'SELECT'
+        ? document.getElementById(input.id + '_other_wrapper')
+        : (card ? card.querySelector('[id$="_other_wrapper"]') : null);
+      if (wrapper) {
+        wrapper.classList.toggle('d-none', !show);
+        if (!show) {
+          const otherInput = wrapper.querySelector('.other-field');
+          if (otherInput) otherInput.value = '';
+        }
+      }
+    }
+
+    // Initialize toggleOtherField on all question-logic inputs
+    document.querySelectorAll('.question-logic').forEach(input => {
+      if (input.tagName === 'SELECT' || ['select-one', 'radio', 'checkbox'].includes(input.type)) {
+        toggleOtherField(input);
+      }
+    });
+
+    // Toggle Other field text box when options change
+    document.addEventListener('change', function (e) {
+      if (e.target.matches('.question-logic')) {
+        if (e.target.type === 'radio') {
+          document.querySelectorAll(`input[name="${CSS.escape(e.target.name)}"]`).forEach(r => toggleOtherField(r));
+        } else {
+          toggleOtherField(e.target);
+        }
+      }
+    });
  
     // Initialize: show first section
     if (sections.length > 0) {

@@ -6,6 +6,12 @@ return [
         'broadcast' => 'You have been invited to join the ":team" hackathon team.',
     ],
 
+    'hackathon_status' => [
+        'accepted' => ':member has accepted your invitation to join the ":team" hackathon team.',
+        'rejected' => ':member has declined your invitation to join the ":team" hackathon team.',
+        'cancelled' => 'The invitation to join the ":team" hackathon team has been cancelled.',
+    ],
+
     'startup_join' => [
         'whatsapp' => 'Congratulations! You have joined the :cycle. Welcome aboard from :app.',
         'broadcast' => 'You have joined the :cycle. Welcome aboard!',

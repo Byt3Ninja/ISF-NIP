@@ -22,7 +22,9 @@ use App\FinalData;
 use App\Formfield;
 use App\Messenger;
 use App\Screening;
+use App\TeamFormation;
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use App\BuilderForm;
 use App\BuilderField;
 use http\Env\Response;
@@ -335,24 +337,32 @@ class CyclesController extends Controller
 
             $dates = explode(' - ', $request->date_range);
             if( count( $dates ) < 2 ) { return redirect()->back()->with(['message2' => 'error_date_range', 'class' => 'danger']); }
-            $request->merge([
-                'start' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
-                'end' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
-                'fromDate' => Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'), // التاريخ الأول
-                'toDate' => Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'),   // التاريخ الثاني
 
+            try {
+                $startDate = Carbon::createFromFormat('m/d/Y', trim($dates[0]))->format('Y-m-d'); // التاريخ الأول
+                $endDate   = Carbon::createFromFormat('m/d/Y', trim($dates[1]))->format('Y-m-d'); // التاريخ الثاني
+            } catch (InvalidFormatException $e) {
+                return redirect()->back()->with(['message2' => 'error_date_range', 'class' => 'danger']);
+            }
+
+            $request->merge([
+                'start' => $startDate,
+                'end' => $endDate,
+                'fromDate' => $startDate,
+                'toDate' => $endDate,
             ]);
         }
 
+        $title_max_length = Cycle::TITLE_MAX_LENGTH;
         if ($type == CycleModifyAction::EDIT_CYCLE || $isEdit == true)
         {
             /// Edit Cycle (to be moved to standalone controller)
             $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => ['required', 'string', 'max:250', Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
-                'title_ar' => 'required|string|max:50',
-                'description' => 'required|string|max:100',
+                'title' => ['required', 'string', 'max:' . $title_max_length, Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
+                'title_ar' => ['required', 'string', 'max:' . $title_max_length],
+                'description' => 'required|string|max:250',
                 'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
                 // 'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
@@ -732,11 +742,28 @@ class CyclesController extends Controller
             return Response()->json('Step deleted');
         } elseif ($type == CycleModifyAction::FETCH_STEP) {
             // Modify step
-            $step = Step::where('id', $request->sid)->first()->toArray();
-
+            $step = Step::where('id', $request->sid)->first();
+            $minimumMembers = 1; // Default minimum members
+            if( !empty( $step ) )
+            {
+                if( $step->stype == StepType::TEAM_FORMATION )
+                {
+                    $minimumMembers = TeamFormation::maxAcceptedMembers($step->id);
+                    $step->minimumMembers = $minimumMembers;
+                }
+            }
+            $step = $step->toArray();
             return response()->json($step);
         } elseif ($type == CycleModifyAction::UPDATE_STEP) {
             /// deleted saved data if type changed
+            if( $request->stype == StepType::TEAM_FORMATION )
+            {
+                $numberOfMembers = TeamFormation::maxAcceptedMembers($request->sid);
+                if( $request->count_team_number < $numberOfMembers )
+                {
+                    return redirect()->back()->with(['failure' => __('cycles.TeamFormationMinMembers', ['min' => $numberOfMembers]), 'class' => 'danger']);
+                }
+            }
             if ($request->ScreeningSelect !== null && Step::where('id', $request->sid)->pluck('data')->first() != $request->ScreeningSelect) {
                 Formdata::where('step_id', $request->sid)->update(['screening' => null, 'comments' => null]);
             }
@@ -822,8 +849,8 @@ class CyclesController extends Controller
             $isAr = app()->getLocale() == 'ar';
             $request->validate([
                 'organization_id2' => 'required|exists:organizations,id',
-                'title' => 'required|string|max:250',
-                'title_ar' => 'required|string|max:50',
+                'title' => 'required|string|max:' . $title_max_length,
+                'title_ar' => 'required|string|max:' . $title_max_length,
                 'description' => 'required|string|max:100',
                 'description_ar' => 'required|string|max:250',
                 'is_public' => 'required|boolean',
@@ -1640,9 +1667,11 @@ class CyclesController extends Controller
             $rules_array[$field_name] = $hasClosureRule ? $rules : implode('|', $rules);
             $custom_messages[$field_name . '.required'] = $L['required'];
 
-            // "Other" free-text is mandatory once picked. The `values` option
-            // list is stored as a comma-joined string (see FormBuilderController),
-            // so normalize before checking for the __OTHER__ sentinel.
+            // "Other" free-text is optional by default; it's only required
+            // when the question was explicitly configured with
+            // validation.other_required (see FormBuilderController). The
+            // `values` option list is stored as a comma-joined string, so
+            // normalize before checking for the __OTHER__ sentinel.
             //
             // Detection keys off the SUBMITTED ANSWER still carrying the
             // "__OTHER__" marker — NOT the mere presence of the `{field}_other`
@@ -1663,8 +1692,11 @@ class CyclesController extends Controller
                     : $answer === '__OTHER__';
                 if ($answerHasOther) {
                     $otherKey = $field_name . '_other';
-                    $rules_array[$otherKey] = 'required|string';
-                    $custom_messages[$otherKey . '.required'] = $L['other_required'];
+                    $otherRequired = intval($field['validation']['other_required'] ?? 0) === 1;
+                    $rules_array[$otherKey] = $otherRequired ? 'required|string' : 'nullable|string';
+                    if ($otherRequired) {
+                        $custom_messages[$otherKey . '.required'] = $L['other_required'];
+                    }
                 }
             }
         }
@@ -1795,13 +1827,22 @@ class CyclesController extends Controller
             'email' => $user->email,
             'step' => $company->stepdata->title,
             'cycle' => $company->cycledata->title,
+            'cycle_id' => $company->cycledata->id,
         ];
 
         // إرسال الإشعار
         if (!in_array(env('APP_ENV', 'local'), ['local'])) {
             try {
                 broadcast(new StartupJoining($data));
-                $user->notify(new StartupJoiningNotification($data));
+                // Once per program: re-submitting steps must not re-send it.
+                if ($user->claimProgramJoinSlot((int) $company->cycledata->id)) {
+                    try {
+                        $user->notify(new StartupJoiningNotification($data));
+                    } catch (\Throwable $th) {
+                        \App\User::where('id', $user->id)->update(['program_join_notified_cycle' => null]);
+                        throw $th;
+                    }
+                }
                 log::info('Sent notification to ' . $user->email);
             } catch (\Throwable $th) {
                 throw $th;

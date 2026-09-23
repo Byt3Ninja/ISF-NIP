@@ -28,6 +28,7 @@ use App\Notifications\TemplateEmail;
 use Beta\Microsoft\Graph\Model\Team;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Services\FileManagerService;
 use App\Services\NextSessionsService;
 use App\Notifications\InviteToHackathon;
 use Illuminate\Support\Facades\Notification;
@@ -36,21 +37,76 @@ use App\Notifications\StatusHackathonInvitation;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\AuthorizesTeamAccess;
 
 class HackathonController extends Controller
 {
+    use AuthorizesTeamAccess;
 
-    public function get_team_media( $path = null )
+    /**
+     * Stream a team logo from the `programTeams` disk
+     * (storage/app/public/programs/teams -- OUTSIDE the web root).
+     *
+     * Replaces the old public `programs/teams/{files?}` route, which served the
+     * same disk with no authentication and a raw `.*` path segment. Logos are
+     * team collateral, so viewing is gated on team membership/oversight, and the
+     * filename comes from the DB rather than the URL so a caller can never
+     * address an arbitrary path.
+     */
+    /**
+     * Stream a team logo from the `programTeams` disk
+     * (storage/app/public/programs/teams -- OUTSIDE the web root).
+     *
+     * Served by filename with NO database lookup: logos render in team lists and
+     * chat, so a per-image query would add one round-trip per rendered logo for
+     * data that is deliberately not access-controlled -- a team logo is
+     * competitor-visible branding, not confidential. Access control is therefore
+     * "authenticated user" only; the security that matters for this endpoint is
+     * at UPLOAD time (FileManagerService enforces the extension/MIME blacklist
+     * and generates the filename), plus the strict filename validation below so
+     * no caller-supplied string can escape the disk root.
+     *
+     * Replaces the old UNAUTHENTICATED `programs/teams/{files?}` route, which
+     * accepted a raw `.*` path segment.
+     */
+    public function teamLogo($filename)
     {
-		try {
-			$instance = Storage::disk('programTeams');
-			if( $instance->directoryExists( $path ) ) { return response()->view('errors.404')->setStatusCode( 404 ); }
-			$file = $instance->response( $path );
-			$mimeType = $instance->mimeType($path);
-			if( $mimeType == 'image/svg' ) { $mimeType = 'image/svg+xml'; }
-			$file->headers->set('Content-Type', $mimeType);
-			return $file;
-		} catch( \Throwable $th ) { return response()->view('errors.404')->setStatusCode( 404 ); }
+        // Reject anything that is not a bare, server-generated upload name.
+        // basename() alone would still admit e.g. ".env"; this whitelist admits
+        // only the "<time>_<uniqid>.<ext>" shape FileManagerService produces.
+        if (!preg_match('/^[A-Za-z0-9._-]+\.(jpg|jpeg|png|gif|webp)$/i', $filename)
+            || str_contains($filename, '..')) {
+            abort(404);
+        }
+
+        $filename = basename($filename);
+
+        try {
+            $disk = Storage::disk('programTeams');
+
+            if (!$disk->fileExists($filename)) {
+                abort(404);
+            }
+
+            $response = $disk->response($filename);
+            $mimeType = $disk->mimeType($filename);
+            if ($mimeType === 'image/svg') {
+                $mimeType = 'image/svg+xml';
+            }
+            $response->headers->set('Content-Type', $mimeType);
+
+            // Every upload gets a fresh server-generated filename and the old
+            // file is deleted, so a given URL's bytes never change -- the name
+            // is effectively the cache key. Cache hard (and privately: these
+            // are served to authenticated users, so no shared/proxy caching).
+            $response->setMaxAge(31536000);
+            $response->setPrivate();
+            $response->headers->addCacheControlDirective('immutable');
+
+            return $response;
+        } catch (\Throwable $th) {
+            abort(404);
+        }
     }
 
     public function index(Request $request)
@@ -122,6 +178,59 @@ class HackathonController extends Controller
 
         $step = Step::where('stype', 1)->whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->get();
         $team_formation = TeamFormation::whereIn('cycle_id', $hackathons_raw->pluck('c_id'))->where('user_id', Auth::user()->id)->get();
+
+        // Pending team invitations addressed to this founder, grouped by hackathon cycle,
+        // so the card can offer Accept/Reject instead of Apply only. (GV-7377)
+        $pendingInvitations = Team_member::query()
+            ->select('team_members.*', 'tf.name as team_name', 'tf.cycle_id as cycle_id')
+            ->join('team_formations as tf', 'tf.id', '=', 'team_members.team_formation_id')
+            ->where('team_members.Email', $user->email)
+            ->where('team_members.acceptInvition', 'pending')
+            ->whereIn('tf.cycle_id', $hackathon_ids)
+            ->orderByDesc('team_members.created_at')
+            ->get()
+            ->groupBy('cycle_id');
+
+        // Hackathons this founder already joined as a member, and the ones they lead.
+        // A founder may only hold one seat per hackathon, so either state rules out
+        // Accept/Reject and instead marks the card as enrolled. (GV-7377)
+        // Keyed by cycle so an accepted member can be linked to the team they joined,
+        // which is not the same as $team_formation (the teams they lead).
+        $memberTeams = Team_member::query()
+            ->join('team_formations as tf', 'tf.id', '=', 'team_members.team_formation_id')
+            ->where('team_members.Email', $user->email)
+            ->where('team_members.acceptInvition', 'accepted')
+            ->whereIn('tf.cycle_id', $hackathon_ids)
+            ->pluck('tf.id', 'tf.cycle_id');
+
+        $memberCycles = $memberTeams->keys();
+
+        $leaderCycles = $team_formation->pluck('cycle_id');
+
+        // Everything the card needs to decide what to show, resolved here so the view
+        // stays free of query/branching logic. (GV-7377)
+        $isAdminView = $user->hasRole('admin') || $user->hasRole('organizationmanager');
+
+        $cardStates = collect($hackathon_ids)->mapWithKeys(function ($cycleId) use (
+            $pendingInvitations, $memberCycles, $memberTeams, $leaderCycles, $isAdminView
+        ) {
+            $invitations = collect($pendingInvitations[$cycleId] ?? []);
+            $isLeader = $leaderCycles->contains($cycleId);
+            $isMember = $memberCycles->contains($cycleId);
+            $isEnrolled = $isLeader || $isMember;
+
+            return [$cycleId => [
+                'invitations'      => $invitations,
+                'invitation_count' => $invitations->count(),
+                'single_invitation'=> $invitations->count() === 1 ? $invitations->first() : null,
+                'is_enrolled'      => $isEnrolled,
+                'enrolled_as'      => $isLeader ? 'leader' : ($isMember ? 'member' : null),
+                // The team they joined, for members who lead no team of their own.
+                'joined_team_id'   => $memberTeams[$cycleId] ?? null,
+                'show_invitations' => $invitations->isNotEmpty() && !$isEnrolled && !$isAdminView,
+                'show_enrolled_badge' => $isEnrolled && !$isAdminView,
+            ]];
+        });
         $hackathons = $hackathons_raw->map(function ($item, $key) use ($step, $team_formation) {
         $now = now();
         $start = \Carbon\Carbon::parse($item->c_start_date);
@@ -137,6 +246,8 @@ class HackathonController extends Controller
                 'date' => $start->format('Y-m-d') . ' - ' . $end->format('Y-m-d'),
                 'location' => $item->o_name_en ?? 'Unknown',
                 'status' => $status,
+                // Fallback placeholder colour used when the cycle has no image. (GV-7377)
+                'placeholder_color' => $status === 'Upcoming' ? '696cff' : '28c76f',
                 'description' => $item->c_description,
                 'cycle_id' => $item->c_id,
                 'cycle_end' => $end ,
@@ -150,7 +261,12 @@ class HackathonController extends Controller
             ];
          });
 
-         
+        // Fold the invitation/enrollment state into each hackathon so the card can read it
+        // straight off $hackathon, with no lookup or logic in the view. (GV-7377)
+        $hackathons = $hackathons->map(function ($item) use ($cardStates) {
+            return $item + ($cardStates[$item['id']] ?? []);
+        });
+
         $pastHackathons = $hackathons->where('status', 'Finished')
         ->sortByDesc('cycle_end')
         ->values();
@@ -167,6 +283,14 @@ class HackathonController extends Controller
     public function manage($id)
     {
         $user = Auth::user();
+
+        // The team id comes straight from the URL: without this check any
+        // authenticated founder could open (and, via the write endpoints below,
+        // edit) another team's page, and a removed member kept their old access.
+        if (!$this->canViewTeam($user, $id)) {
+            abort(404, __('admin.You are not authorized to view this team.'));
+        }
+
         $l = app()->getLocale();
                  
         $team_Formation = "SELECT 
@@ -380,10 +504,10 @@ class HackathonController extends Controller
         // ---- View-model (all logic moved out of the Blade template) ----
         $team = $team_Formation_raw->first();
 
-        $isLeader = $team_Formation_raw
-            ->where('tm_isTeamLeader', 1)
-            ->where('tm_user_id', $user->id)
-            ->isNotEmpty();
+        // Single source of truth for leader-only UI, matching the server-side
+        // guards (canManageTeam) so the page never renders a control the
+        // endpoint will reject.
+        $isLeader = $this->canManageTeam($user, $team->tf_id);
 
         $teamLeaderRow = $team_Formation_raw->firstWhere('tm_isTeamLeader', 1);
 
@@ -861,7 +985,10 @@ class HackathonController extends Controller
             $team->desc = $first->tf_description;
             $team->cycle_id = $first->tf_cycle_id;
             $team->step_id = $first->tf_step_id;
-            $team->photo = $first->tf_img_team ?? null;
+            // Logos stream from storage via the authorized route, not a public path.
+            $team->photo = $first->tf_img_team
+                ? route('hackathon.teamLogo', basename($first->tf_img_team))
+                : null;
             $team->max_members = $allSteps->where('stype', 6)->where('cycle_id', $id)->first()?->count_team_number ?? 0;
             $team->your_team = $group->where('tm_user_id', $user->id)->where('tm_isTeamLeader', 1)->where('tm_acceptInvition', 'accepted')->first()? true : false;
             $team->request_sent = $group->where('tm_user_id', $user->id)->whereIn('tm_acceptInvition', ['join'])->first()? true : false; //is_user_requested
@@ -1006,7 +1133,14 @@ class HackathonController extends Controller
             'field_ids' => implode(",", $field_map_ids)
         ];
 
-        $answers = Formfield::join('form_data', 'form_fields.id', 'form_data.field_id')->where('user_id', Auth::id())->whereIn('form_data.field_id', $field_map_ids)->orderBy('form_fields.id', 'ASC')->get();
+        // Mirrors CyclesController's answers query: scope by step so a BuilderForm
+        // shared across several steps does not leak another step's answers.
+        $answers = Formfield::rightJoin('form_data', 'form_fields.id', 'form_data.field_id')
+            ->where('user_id', Auth::id())
+            ->where('form_data.step_id', $id)
+            ->whereIn('form_data.field_id', $field_map_ids)
+            ->orderBy('form_data.id', 'ASC')
+            ->get();
         $days = request()->query('days', 14);
         $company = $user->company;
         $stepData = $company?->stepdata;
@@ -1248,9 +1382,15 @@ class HackathonController extends Controller
         $id = $step->id;
 
         $the_form = BuilderForm::findOrFail( $step->data );
-        $fields = $the_form->fields()
-            ->withPivot('options')
-            ->orderBy('builder_fields.id', 'asc')
+        // Step-scoped pivot (`form_fields`), NOT the BuilderForm template pivot
+        // (`builder_fields`). `$the_form->fields()` walks `builder_fields`, whose
+        // ids live in a different id space than `form_data.field_id` and than the
+        // list CyclesController@saveForm validates against -- so this form posted
+        // template ids (83..90) while the step's real pivot ids were 389..396 and
+        // every submission aborted with 422 "Data error" (GV-7355 follow-up).
+        $fields = $step->fields()
+            ->where('builder_forms_id', $step->data)
+            ->orderBy('form_fields.id', 'asc')
             ->get();
 
         $field_map_ids = $fields->pluck('pivot.id')->toArray();
@@ -1444,10 +1584,15 @@ class HackathonController extends Controller
         $teamformation->region = $request->Region ?? '';
 
         if ($request->hasFile('team_image')) {
-            $image = $request->file('team_image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('programs/teams/'), $imageName);
-            $teamformation->img_team = 'programs/teams/' . $imageName;
+            // Store on the `programTeams` disk (storage/, outside the web root)
+            // via FileManagerService, which enforces the extension/MIME
+            // blacklist and generates the filename server-side. The old code
+            // move()d the file into public/ using the CLIENT-supplied
+            // extension, so an uploaded .phtml landed in a web-served,
+            // executable directory.
+            $imageName = app(FileManagerService::class)
+                ->upload($request->file('team_image'), '', 'programTeams');
+            $teamformation->img_team = 'programs/teams/' . basename($imageName);
         }
 
         $teamformation->save();
@@ -1505,9 +1650,14 @@ class HackathonController extends Controller
         ]);
         $user = Auth::user();
         $team_q = TeamFormation::where('id', $request->team_formation_id)->first();
-        // if (!$team_q) {
-        //     return redirect()->back()->with('error', 'You are not authorized to edit the project idea.');
-        // }
+        if (!$team_q) {
+            return redirect()->back()->with('error', __('admin.Team_not_found.'));
+        }
+        // Leader-only: the project idea is team-owned data. Previously this
+        // endpoint trusted the posted team_formation_id outright.
+        if (!$this->canManageTeam($user, $team_q->id)) {
+            return redirect()->back()->with('error', __('admin.You are not authorized to edit the project idea.'));
+        }
         $team_q->project_name_ar = $request->Project_Name_ar;
         $team_q->project_name_en = $request->Project_Name_en;
         $team_q->project_description_ar = $request->Project_Description_ar;
@@ -1539,11 +1689,10 @@ class HackathonController extends Controller
             return response()->json(['error' => 'Team not found.'], 404);
         }
 
-        // Check if the current user is the team leader
-        $isLeader = Team_member::where('team_formation_id', $teamFormation->id)
-                               ->where('user_id', $user->id)
-                               ->where('isTeamLeader', 1)
-                               ->exists();
+        // Check if the current user is the team leader. Uses the shared helper so
+        // that acceptInvition is honoured — the previous inline query matched a
+        // leader row in ANY state, including one already removed from the team.
+        $isLeader = $this->canManageTeam($user, $teamFormation->id);
 
         if (!$isLeader) {
             return response()->json(['error' => 'You are not authorized to edit team information.'], 403);
@@ -1570,14 +1719,15 @@ class HackathonController extends Controller
                 }
             }
             
-            // Upload new image
-            $image = $request->file('team_image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            // $image->move(public_path('programs/teams/'), $imageName);
-            $path = Storage::disk('programTeams')->putFileAs('', $image, $imageName);
-            
+            // Upload new image through FileManagerService (extension/MIME
+            // blacklist + server-generated filename), same as createTeam().
+            $imageName = basename(
+                app(FileManagerService::class)
+                    ->upload($request->file('team_image'), '', 'programTeams')
+            );
+
             $teamFormation->img_team = 'programs/teams/' . $imageName;
-            $newImageUrl = '/programs/teams/' . $imageName;
+            $newImageUrl = route('hackathon.teamLogo', $imageName);
         } elseif ($request->remove_image) {
             // Remove existing image
             if ($teamFormation->img_team) {
@@ -1748,9 +1898,13 @@ class HackathonController extends Controller
     public function deleteTeamInfo(Request $request)
     {
         
-        $teamFormation = TeamFormation::where('id', $request->team_formation_id)->where('user_id', Auth::user()->id)->first();
+        $teamFormation = TeamFormation::where('id', $request->team_formation_id)->first();
         if (!$teamFormation) {
             return response()->json(['success' => false, 'message' => __("admin.Team_not_found.")]);
+        }
+        // Leader-only, and only while still on the team.
+        if (!$this->canManageTeam(Auth::user(), $teamFormation->id)) {
+            return response()->json(['success' => false, 'message' => __("admin.Team_not_found.")], 404);
         }
         $team_member = Team_member::where('team_formation_id', $teamFormation->id)->delete();
        
@@ -1765,17 +1919,16 @@ class HackathonController extends Controller
         // failed to send (they can abandon it instead of retrying).
         $teamMember = Team_member::where('id', $request->id)
             ->whereIn('acceptInvition', ['pending', 'failed'])->first();
-        if (!$teamMember) {
+        if (!$teamMember || !$this->canManageTeam($user, $teamMember->team_formation_id)) {
             return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")]);
         }
         $teamMember->acceptInvition = 'cancelled';
         $teamMember->save();
 
-        $userteam = User::where('id', $teamMember->user_id)->first();
-        $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
-
-        // Send cancel invitation email logic here
-         $user->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'cancelled'));
+        // Cancelling an invitation is a silent action: the leader performing it
+        // must not be notified about their own action. Notifying $user (which is
+        // Auth::user(), the leader) is what mailed the leader a "Status
+        // Invitation" message on every cancel (GV-7355).
 
         $team_q = TeamFormation::find($teamMember->team_formation_id);
         $occupied = $team_q ? Team_member::where('team_formation_id', $team_q->id)
@@ -1850,9 +2003,10 @@ class HackathonController extends Controller
         $user = Auth::user();
         $isExpired = Team_member::where('id', $id)
             ->where('acceptInvition', 'pending')
+            ->where('created_at', '<', now()->subHours(24))
             ->first();
-           
-            if($isExpired && $isExpired->created_at < $isExpired->created_at->subHours(24)) {
+
+            if($isExpired) {
                 $isExpired->acceptInvition = 'expired';
                 $isExpired->Name = $user->first_name . ' ' . $user->last_name;
                 $isExpired->TeamMember = 'hackathon';
@@ -1869,8 +2023,27 @@ class HackathonController extends Controller
                 return redirect()->back()->with('error', 'Invitation_not_found.');
             }
 
-            
-            
+            // A founder may hold only one seat per hackathon, whether as a team leader
+            // or as an accepted member of someone else's team. (GV-7377)
+            $cycleId = $teamMember->teamFormation?->cycle_id;
+            if ($cycleId) {
+                $leadsATeam = TeamFormation::where('cycle_id', $cycleId)
+                    ->where('user_id', $user->id)
+                    ->exists();
+
+                $alreadyJoined = Team_member::where('team_members.Email', $user->email)
+                    ->where('team_members.acceptInvition', 'accepted')
+                    ->where('team_members.id', '!=', $teamMember->id)
+                    ->whereHas('teamFormation', function ($query) use ($cycleId) {
+                        $query->where('cycle_id', $cycleId);
+                    })
+                    ->exists();
+
+                if ($leadsATeam || $alreadyJoined) {
+                    return redirect()->back()->with('error', 'Already_in_a_team_for_this_hackathon');
+                }
+            }
+
                 $teamMember->acceptInvition = 'accepted';
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
@@ -2012,29 +2185,35 @@ class HackathonController extends Controller
         if (!$teamMember) {
             return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")]);
         }
+        // Only the leader of THAT team may remove one of its members: the row id
+        // is client-supplied, so without this anyone could remove any member of
+        // any team.
+        if (!$this->canManageTeam($user, $teamMember->team_formation_id)) {
+            return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")], 404);
+        }
         $teamMember->acceptInvition = 'removed';
         $teamMember->save();
 
         $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
         $groupId = $teams->group_id_chat;
 
-        if($groupId != null){
-        
-        $conversation = Conversation::findOrFail($groupId);
+        if($groupId != null)
+        {
+            $conversation = Conversation::findOrFail($groupId);
             $user = User::findOrFail($teamMember->user_id);
-            
+
             $participant = $conversation->participants()
                 ->where('participantable_id', $user->id)
                 ->where('participantable_type', get_class($user))
                 ->first();
-                
-            if (!$participant) {
-                return response()->json([
-                    'error' => 'User is not in this conversation'
-                ], 404);
-            }
 
-            $participant->delete();
+            // GV-7375: the member has already been marked 'removed' above. Not being
+            // a group participant (group never created, or already detached) is not
+            // a failure — returning 404 here made the UI show "delete failed" and
+            // keep the row on screen even though the removal had been saved.
+            if ($participant) {
+                $participant->delete();
+            }
         }
         return response()->json(['success' => true, 'message' => __("admin.Member_removed_successfully.")]);
     }
@@ -2073,6 +2252,10 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
+            // Only that team's leader may approve a join request.
+            if (!$teamMember || !$this->canManageTeam(Auth::user(), $teamMember->team_formation_id)) {
+                return response()->json(['success' => false, 'message' => __("admin.Invitation_not_found.")], 404);
+            }
             $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
                 if($teams->group_id_chat == null){
                     $team_leader = Team_member::where('team_formation_id', $teams->id)->where('isTeamLeader', 1)->first();
@@ -2143,7 +2326,8 @@ class HackathonController extends Controller
         $teamMember = Team_member::where('id', $request->id)
             ->where('acceptInvition', 'join')
             ->first();
-            if(!$teamMember) {
+            // Only that team's leader may reject a join request.
+            if(!$teamMember || !$this->canManageTeam(Auth::user(), $teamMember->team_formation_id)) {
                 return redirect()->back()->with('error', 'Request not found.');
             }
                 $teamMember->acceptInvition = 'rejected';
@@ -2404,7 +2588,10 @@ class HackathonController extends Controller
             $team->desc = $first->tf_description;
             $team->cycle_id = $first->tf_cycle_id;
             $team->step_id = $first->tf_step_id;
-            $team->photo = $first->tf_img_team ?? null;
+            // Logos stream from storage via the authorized route, not a public path.
+            $team->photo = $first->tf_img_team
+                ? route('hackathon.teamLogo', basename($first->tf_img_team))
+                : null;
             $team->region = $first->tf_region;
             $team->winner_status = $first->tf_winner_status;
             $team->max_members = $first->tf_max_teams_members;
@@ -2631,7 +2818,10 @@ class HackathonController extends Controller
                     $team->step_state = 'none';
                     $team->company_step = null;
                 }
-                $team->photo = $leader->tf_img_team ?? null;
+                // Logos stream from storage via the authorized route, not a public path.
+                $team->photo = $leader->tf_img_team
+                    ? route('hackathon.teamLogo', basename($leader->tf_img_team))
+                    : null;
                 $team->count_members = $teamMembers->where('tm_acceptInvition', 'accepted')->count();
                 $team->created_at = $leader->tf_created_at;
                 $team->max_count_members = $step->where('stype', 6)->first()->count_team_number;

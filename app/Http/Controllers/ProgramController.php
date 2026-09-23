@@ -416,6 +416,7 @@ class ProgramController extends Controller
         $cycles = $cycles->with(['custom_pages'])->get();
         $id = request()->route('id');
         $ccycle = $cycles->where('id', $id)->first();
+        if( empty($ccycle) ) { return redirect()->route('programlist.index')->with(['message2' => 'program_not_found', 'class' => 'danger']); }
         $final_step = $ccycle->steps->where('stype', 5)->values()->last();
         $results = collect([]);
         if( !empty( $final_step ) )
@@ -537,6 +538,15 @@ class ProgramController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function checkProgramPublic(Request $request, string $id)
+    {
+        $program = Cycle::find($id);
+
+        return response()->json([
+            'is_public' => (bool) ($program && !empty($program->is_public) && !empty($program->public_slug)),
+        ]);
     }
 
     public function SentEmail(Request $request)

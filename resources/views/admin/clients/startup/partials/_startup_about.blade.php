@@ -164,7 +164,7 @@
 
           @if ($company->business_plan)
             <h6 class="text-muted text-uppercase small fw-semibold mb-2">{{ __('startup.business_plan') }}</h6>
-            <a href="{{ URL::to( $company->business_plan ) }}" target="_blank" download
+            <a href="{{ app(\App\Services\FileManagerService::class)->getUrl($company->business_plan, 'pitch_deck') }}" target="_blank" download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">
               <i class="ti ti-file text-warning"></i>
               {{ basename($company->business_plan) }}

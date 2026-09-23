@@ -110,9 +110,16 @@
               <div class="form-group mb-4">
                 <label class="form-label" for="role">{{ __('admin.Role') }}</label>
                 <select class="form-select" id="role" name="role">
-                  <option disabled value="" selected>{{ __('admin.Select_Role') }}</option>
+                  <option disabled value=""
+                    {{ request('role') !== 'mentor' ? 'selected' : '' }}>
+                    {{ __('admin.Select_Role') }}
+                  </option>
+
                   @foreach ($roles as $role)
-                    <option value="{{ $role['name'] }}">{{ __('admin.' . $role['name']) }}</option>
+                    <option value="{{ $role['name'] }}"
+                        {{ request('role') === 'mentor' && $role['name'] === 'mentor' ? 'selected' : '' }}>
+                        {{ __('admin.' . $role['name']) }}
+                    </option>
                   @endforeach
                 </select>
               </div>

@@ -134,7 +134,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                 </a>
               </div>
 
-              <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-success">
+              <div class="mb-3 px-3 py-4 bg-card rounded-2 border border-success">
                 <a href="{{ $_user->ableToAny(['organization.wizard.edit', 'organizations.edit'], $permissions) ? route('organization.wizard.edit', $cstep->cycle->organization->id) . '?step=1' : 'javascript:void(0);' }}" class="d-flex align-items-start gap-3">
                   <div class="avatar">
                     <div class="avatar-initial rounded-circle bg-label-success">
@@ -143,7 +143,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                   </div>
                   <div class="flex-grow-1">
                     <div class="text-secondary small mb-1">{{ __('admin.Organization') }}</div>
-                    <div class="text-success fw-semibold">{{ optional($cstep->cycle->organization)->name ?? '-' }}</div>
+                    <div class="text-success fw-semibold mb-1">{{ optional($cstep->cycle->organization)->name ?? '-' }}</div>
                   </div>
                 </a>
               </div>
@@ -195,7 +195,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                   <i class="ti ti-user-check me-2"></i>{{ __('cycles.Assigned Judges') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border">
+              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
                 <div id="assigned-judges" class="d-flex flex-wrap gap-2">
                   @forelse ($visibleJudgeIds as $judgeId)
                     @php $judge = $judges->find($judgeId); @endphp
@@ -203,7 +203,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                     @if ($judge)
                       <a
                         href="/dashboard/users/{{ $judge->id }}/edit"
-                        class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center"
                       >
                         <div class="avatar avatar-xs me-2">
                           @if ($judge->img_url)
@@ -226,8 +226,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 
                   @if ($hiddenJudgeIds->count() > 0)
                     <span
-                      class="badge bg-label-primary rounded-circle fw-semibold d-inline-flex align-items-center justify-content-center align-self-center p-0"
-                      style="width: 2.25rem; height: 2.25rem;"
+                      class="badge badge-center bg-label-primary p-4 rounded-circle fw-semibold d-flex justify-content-center align-items-center mt-1"
                       data-bs-toggle="tooltip"
                       data-bs-placement="top"
                       data-bs-custom-class="tooltip-wide"
@@ -245,7 +244,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                   <i class="ti ti-building-skyscraper me-2"></i>{{ __('admin.assigned_startups') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border">
+              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
                 <div id="assigned-companies" class="d-flex flex-wrap gap-2">
                   @forelse ($visibleCompanyIds as $companyId)
                     @php $company = $companiesById[$companyId] ?? null; @endphp
@@ -253,7 +252,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
                     @if ($company)
                       <a
                         href="/dashboard/companyProfile/{{ $company->id }}"
-                        class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center"
                       >
                         <div class="avatar avatar-xs me-2">
                           @if ($company->logo)

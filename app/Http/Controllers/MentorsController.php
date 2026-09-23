@@ -27,6 +27,7 @@ use App\SurveyResponses;
 use App\Surveys;
 use App\SurveyScopes;
 use App\User;
+use App\Role;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -551,6 +552,11 @@ class MentorsController extends Controller
 			'message' => $requestDateTime,
 		];
 
+		// The booking modal submits via AJAX and expects a structured JSON
+		// summary (per-slot outcomes); legacy plain-form posts still get the
+		// redirect + flash behaviour.
+		$wantsJson = $request->ajax() || $request->wantsJson();
+
 		if($user->hasAnyRole(['admin', 'organizationManager', 'subadmin']))
 		{
 			$cycle = $getStartup?->company?->cycledata;
@@ -563,14 +569,37 @@ class MentorsController extends Controller
 				foreach ($request->selected_dates as $dateItem) {
 					$rangeKey = ($dateItem['date'] ?? '') . '|' . ($dateItem['time_from'] ?? '') . '|' . ($dateItem['time_to'] ?? '');
 					if (isset($seenRanges[$rangeKey])) {
+						if ($wantsJson) {
+							return response()->json([
+								'status'    => 'error',
+								'booked'    => 0,
+								'requested' => count($request->selected_dates),
+								'failed'    => [],
+								'message'   => __('mentor.duplicate_slot_selected'),
+							], 200);
+						}
 						return back()->with(['class' => 'danger', 'msg' => 'duplicate_slot_selected']);
 					}
 					$seenRanges[$rangeKey] = true;
 				}
 
 				$errors = [];
+				$failedSlots = [];
 				$successCount = 0;
+				$requestedCount = count($request->selected_dates);
 				$bookedSessions = [];
+
+				// Record a per-slot failure once, for both the JSON summary and
+				// the legacy flash ($errors) path.
+				$recordFailure = function ($date, $timeFrom, $timeTo, $reason) use (&$errors, &$failedSlots) {
+					$errors[] = trim("$reason ($date $timeFrom-$timeTo)");
+					$failedSlots[] = [
+						'date'      => $date,
+						'time_from' => $timeFrom,
+						'time_to'   => $timeTo,
+						'reason'    => $reason,
+					];
+				};
 
 				foreach ($request->selected_dates as $index => $dateItem)
 				{
@@ -586,14 +615,14 @@ class MentorsController extends Controller
 					$mentorshipnotadded = MentorshipRequest::where('zoom_date', $datefrom)->where('mentor_id', $request->mentorid)->first();
 
 					if($mentorshipnotadded){
-						$errors[] = "Mentor already scheduled on $date from $time_from to $time_to";
+						$recordFailure($date, $time_from, $time_to, __('mentor.slot_already_requested'));
 						continue;
 					}
 					
 					$period = $request->period ?: Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
 
 					if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
-						$errors[] = __('api.max_concurrent_sessions_reached');
+						$recordFailure($date, $time_from, $time_to, __('api.max_concurrent_sessions_reached'));
 						continue;
 					}
 
@@ -618,18 +647,18 @@ class MentorsController extends Controller
 					}
 
 					if ($schedules == null) {
-						$errors[] = "Mentor not available on $date from $time_from to $time_to";
+						$recordFailure($date, $time_from, $time_to, __('mentor.mentor_not_available_in_this_time'));
 						continue;
 					}
 					if($slot_session_type == 'Offline'){
 						if($settings->allow_offline_sessions == 0){
-							$errors[] = 'Offline sessions are not allowed';
+							$recordFailure($date, $time_from, $time_to, __('mentor.offline_not_allowed'));
 							continue;
 						}
 					}
 
 						if (Carbon::parse($date . ' ' . $time_from)->isPast()) {
-							$errors[] = "Cannot schedule meeting in the past: $date $time_from";
+							$recordFailure($date, $time_from, $time_to, __('mentor.slot_in_past'));
 							continue;
 						}
 
@@ -648,7 +677,7 @@ class MentorsController extends Controller
 					$onlineMeeting = $this->meetingService->createMeeting($data);
 
 					if (!$onlineMeeting['success']) {
-						$errors[] = "Zoom meeting failed on $date";
+						$recordFailure($date, $time_from, $time_to, __('mentor.meeting_creation_failed'));
 						continue;
 					}
 
@@ -662,6 +691,7 @@ class MentorsController extends Controller
 						'user_id' => $userid,
 						'comment' => $request->notes,
 						'approved' => $approved,
+						'admin_id' => Auth::id(),
 						'start_url' => $startUrl,
 						'join_url' => $joinUrl,
 						'zoom_id' => $meetingId,
@@ -712,27 +742,56 @@ class MentorsController extends Controller
 					}
 				}
 
-				if ($successCount > 0) {
-					/* $mentor = User::find($request->mentorid);
-					$founder = User::find($request->user_id);
-					if ($mentor && $founder) {
-						$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
-					} */ 
-					return back()->with(['message' => "Request_successfully_added_Startup"]);
-				} else {
-					return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
+				/* $mentor = User::find($request->mentorid);
+				$founder = User::find($request->user_id);
+				if ($successCount > 0 && $mentor && $founder) {
+					$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
+				} */
+
+				if ($wantsJson) {
+					if ($successCount === 0) {
+						$status  = 'error';
+						$message = __('mentor.no_sessions_booked');
+					} elseif (count($failedSlots) > 0) {
+						$status  = 'partial';
+						$message = __('mentor.some_sessions_booked', [
+							'booked' => $successCount,
+							'total'  => $requestedCount,
+						]);
+					} else {
+						$status  = 'success';
+						$message = __('mentor.session_booked_successfully');
+					}
+
+					return response()->json([
+						'status'    => $status,
+						'booked'    => $successCount,
+						'requested' => $requestedCount,
+						'failed'    => $failedSlots,
+						'message'   => $message,
+					], 200);
 				}
+
+				// Legacy plain-form fallback.
+				if ($successCount > 0) {
+					return back()->with(['message' => "Request_successfully_added_Startup"]);
+				}
+				return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
 			}
 		}
 		else
 		{
 			$startupName = $user?->company?->name ?: $user->name;
 			$cycle = $user?->company?->cycledata;
-			$parties = $cycle->organization->assignedUsers;
-			$platform_admins = User::role('admin')->get()->filter(function ($admin) {
-				return $admin->hasRole('admin');
-			})->values();
-			$parties = $parties->merge($platform_admins)->unique('id');
+			// Recipients: the organization manager(s) of the organization that
+			// manages the program (cycle) the founder is currently enrolled in,
+			// the sub-admin(s) that organization is assigned to, and the
+			// platform's super admin(s). One role query covers both roles.
+			$rolesUsers = Role::_users(['organizationManager', 'admin'])->get();
+			$orgManagers = $rolesUsers->filter(fn ($u) => $u->hasRole('organizationManager') && $u->organization_id == $cycle->organization_id);
+			$superAdmins = $rolesUsers->filter(fn ($u) => $u->hasRole('admin'));
+			$subAdmins = $cycle->organization->assignedUsers;
+			$parties = $orgManagers->merge($subAdmins)->merge($superAdmins)->unique('id');
 
 			$this->meetingService = OnlineMeetingFactory::create();
 			$datefrom = $request->date . ' ' . $request->session_start_time;
@@ -848,22 +907,49 @@ class MentorsController extends Controller
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
 
-					// MentorshipSessionRequestNotification is ShouldQueue, so notify()
-					// only writes a queue row here -- the old sleep(2) between chunks
-					// throttled nothing and simply held the founder's request open for
-					// two seconds per pair of recipients. Keep the same send pacing by
-					// staggering delivery on the queue instead of blocking the response.
-					$allowedPerSecond = 2;
-					$secondsBetweenChunks = 2;
+					// Atomically claim the "notify org manager" step so a retry/duplicate
+					// call for this same request can never send the email twice.
+					$claimedNotify = MentorshipRequest::where('id', $createMentorshipRequest->id)
+						->whereNull('manager_notified_at')
+						->update(['manager_notified_at' => now()]);
 
-					foreach ($parties->chunk($allowedPerSecond) as $chunkIndex => $chunkParties) {
-						$sendAt = now()->addSeconds($chunkIndex * $secondsBetweenChunks);
+					if ($claimedNotify) {
+						$isOnlineRequest = strtolower($request->session_type ?? '') == 'online';
+						$requestAttachments = $fileName ? [[
+							'url'  => app(\App\Services\FileManagerService::class)->getUrl($fileName, 'UsersDiskInviteMentor'),
+							'name' => basename($fileName),
+						]] : [];
 
-						foreach ($chunkParties as $party) {
-							$party->notify(
-								(new MentorshipSessionRequestNotification($startupName, $requestedMentor, $dateTimePayload, $requestNotes))
-									->delay($sendAt)
-							);
+						// MentorshipSessionRequestNotification is ShouldQueue, so notify()
+						// only writes a queue row here -- the old sleep(2) between chunks
+						// throttled nothing and simply held the founder's request open for
+						// two seconds per pair of recipients. Keep the same send pacing by
+						// staggering delivery on the queue instead of blocking the response.
+						$allowedPerSecond = 2;
+						$secondsBetweenChunks = 2;
+
+						foreach ($parties->chunk($allowedPerSecond) as $chunkIndex => $chunkParties) {
+							$sendAt = now()->addSeconds($chunkIndex * $secondsBetweenChunks);
+
+							foreach ($chunkParties as $party) {
+								$party->notify(
+									(new MentorshipSessionRequestNotification(
+										$startupName,
+										$requestedMentor,
+										$dateTimePayload,
+										$requestNotes,
+										$user,
+										$user->company,
+										$request->session_type,
+										$isOnlineRequest ? $joinUrl : null,
+										$isOnlineRequest ? $passcode : null,
+										!$isOnlineRequest ? ($cycle->offline_location_address ?? optional($cycle->organization)->address) : null,
+										!$isOnlineRequest ? ($cycle->offline_location_map ?? optional($cycle->organization)->google_map_url) : null,
+										!$isOnlineRequest ? (optional($cycle->organization)->address) : null,
+										$requestAttachments
+									))->delay($sendAt)
+								);
+							}
 						}
 					}
 				}
@@ -1219,8 +1305,8 @@ class MentorsController extends Controller
 	{
 		$sessions = MentorshipRequest::with(['user', 'mentor', 'organization', 'cycle'])->where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
 		$sessions = $sessions->map(function ( $session ) {
-			$session->address = $session->cycle->offline_location_address ? $session->cycle->offline_location_address : $session->organization->address;
-			$session->google_map_url = $session->cycle->offline_location_map ? $session->cycle->offline_location_map : $session->organization->google_map_url;
+			$session->address = $session->cycle && $session->cycle->offline_location_address ? $session->cycle->offline_location_address : optional($session->organization)->address;
+			$session->google_map_url = $session->cycle && $session->cycle->offline_location_map ? $session->cycle->offline_location_map : optional($session->organization)->google_map_url;
 			$session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
 			return $session;
 		});

@@ -12,7 +12,22 @@
       font-size: 13px;
     }
     .ql-toolbar .ql-custom-button::after {
-      content: 'Button';
+      content: "{{ __('landing.Button') }}";
+    }
+    /* Quill's built-in link-tooltip actions are hardcoded in English
+       ("Edit"/"Save"/"Remove") in the vendor CSS; override them so they
+       follow the app locale. `!important` wins over the vendor rules. */
+    .ql-snow .ql-tooltip a.ql-action::after {
+      content: "{{ __('admin.Edit') }}" !important;
+    }
+    .ql-snow .ql-tooltip.ql-editing a.ql-action::after {
+      content: "{{ __('landing.Save') }}" !important;
+    }
+    .ql-snow .ql-tooltip::before {
+      content: "{{ __('landing.Visit_URL') }}:" !important;
+    }
+    .ql-snow .ql-tooltip a.ql-remove::before {
+      content: "{{ __('landing.Remove') }}" !important;
     }
     .custom-quill-editor.ql-container {
       position: relative;
@@ -20,8 +35,13 @@
       z-index: 1;
     }
     .custom-quill-editor.ql-container .ql-editor {
-      height: auto !important;
-      min-height: 160px;
+      height: 300px !important;
+      overflow-y: auto;
+      /* Break long unbroken strings so they never widen the layout.
+         `anywhere` (unlike `break-word`) also shrinks the element's
+         min-content size, so the flex column can narrow back down. */
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .custom-field-group[data-field="content"],
     .custom-field-group[data-field="content_ar"] {
@@ -65,6 +85,24 @@
     }
     .localized-file-input-name {
       min-width: 0;
+    }
+    /* Programs table — drag-to-reorder handle */
+    .program-drag-handle {
+      cursor: grab;
+      touch-action: none;
+    }
+    .program-drag-handle:active {
+      cursor: grabbing;
+    }
+    .program-drag-ghost {
+      opacity: 0.4;
+    }
+    .program-drag-chosen {
+      background-color: rgba(105, 108, 255, 0.06);
+    }
+    /* Keep the handle in step with the rest of an ended row's dimming */
+    .program-row-ended td:first-child .program-drag-handle {
+      opacity: 0.6;
     }
   </style>
 @endsection
@@ -121,6 +159,7 @@
                 target="_blank"
                 rel="noopener"
                 class="fw-medium text-primary"
+                style="overflow-wrap:break-word; word-break:break-word;"
               >{{ $currentPage->slug ? url('/lp/' . $currentPage->slug) : '' }}</a>
             </small>
           </div>
@@ -187,9 +226,33 @@
         <i class="ti ti-layout-dashboard"></i>{{ __('admin.Landing Page Sections') }}
       </h6>
     </div>
+    
+    <div style="max-width: 100%; overflow-x: auto;" class="p-4 d-md-none">
+      <ul class="nav nav-pills flex-nowrap" role="tablist">
+        @foreach ($sections as $index => $section)
+          <li class="nav-item py-1" role="presentation">
+            <button
+              type="button"
+              class="nav-link waves-effect @if($index === 0) active @endif"
+              role="tab"
+              data-bs-toggle="tab"
+              data-bs-target="#navs-{{ $section['key'] }}"
+              aria-controls="navs-{{ $section['key'] }}"
+              aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+              @if($index !== 0) tabindex="-1" @endif
+              @if(!empty($section['locked'])) disabled title="{{ __('landing.Save_General_First') }}" @endif
+            >
+              <i class="ti {{ $section['icon'] }} me-2"></i>
+              {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
+            </button>
+          </li>
+        @endforeach
+      </ul>
+    </div>
+        
     <div class="card-body p-0">
       <div class="nav-align-left">
-        <ul class="nav nav-tabs py-4" role="tablist">
+        <ul class="nav nav-tabs d-none d-md-block py-4" role="tablist">
           @foreach ($sections as $index => $section)
             <li class="nav-item py-1" role="presentation">
               <button
@@ -482,15 +545,16 @@
                           <tr
                             class="programs-list-row @if($program->is_expired) program-row-ended @endif"
                             data-program-id="{{ $program->id }}"
-                            data-search-title="{{ $program->title }} {{ $program->organization->name ?? '' }}"
+                            data-search-title="{{ $program->title }} {{ $program->title_ar }} {{ $program->organization->name ?? '' }}"
                             data-program-visibility="{{ $program->is_expired ? 'hidden' : ($program->landing_visible ? 'visible' : 'hidden') }}"
                             data-program-organization="{{ $program->organization_id }}"
                             data-program-type="{{ $program->type }}"
                           >
                             <td>
                               <div class="d-flex align-items-center gap-3">
+                                <i class="ti ti-grip-vertical program-drag-handle text-muted" title="{{ __('landing.Drag_to_reorder') }}"></i>
                                 <div class="avatar avatar-sm">
-                                  <img src="{{ $program->logo }}" alt="{{ $program->title }}" class="rounded-circle">
+                                  <img src="{{ $program->logo }}" alt="logo" class="rounded-circle border">
                                 </div>
                                 <div class="flex-grow-1" style="min-width: 0;">
                                   <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -500,7 +564,7 @@
                                       rel="noopener"
                                       class="fw-medium d-inline-flex align-items-center gap-1"
                                     >
-                                      {{ $program->title }}
+                                      {{ Str::limit($l == 'ar' ? ($program->title_ar ?: $program->title) : ($program->title ?: $program->title_ar), 50) }}
                                       <i class="ti ti-external-link text-muted"></i>
                                     </a>
                                     @if($program->is_expired)
@@ -532,21 +596,27 @@
                               </div>
                             </td>
                             <td>
-                              <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
-                                {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
-                              </span>
-                              @if(($program->steps_count ?? 0) == 0)
-                                <a href="{{ url('dashboard/programlist/show/' . $program->id) }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary">
-                                  <span
-                                    class="badge bg-label-secondary"
+                              <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge bg-label-{{ $program->type == 'Hackathon' ? 'warning' : 'info' }}">
+                                  <i class="ti ti-{{ $program->type == 'Hackathon' ? 'trophy' : 'layout-grid' }} me-1"></i>
+                                  {{ $program->type == 'Hackathon' ? __('cycles.Hackathon') : __('cycles.General_Program') }}
+                                </span>
+
+                                @if(($program->steps_count ?? 0) == 0)
+                                  <a
+                                    href="{{ url('dashboard/programlist/show/' . $program->id) }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="badge bg-label-secondary text-decoration-none"
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
                                     title="{{ __('landing.No_steps_hint') }}"
                                   >
+                                    <i class="ti ti-alert-circle me-1"></i>
                                     {{ __('landing.No_steps') }}
-                                  </span>
-                                </a>
-                              @endif
+                                  </a>
+                                @endif
+                              </div>
                             </td>
                             <td>
                               @if($program->organization)
@@ -645,50 +715,51 @@
       </div>
     </div>
   </div>
-@endsection
-
-{{-- Button-link modal for the custom section rich-text content --}}
-<div class="modal fade" id="customButtonModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          {{ __('landing.Add_Button') }}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label" for="customButtonText">
-            {{ __('landing.Button_text') }}
-          </label>
-          <input type="text" class="form-control" id="customButtonText" maxlength="50">
+  
+  {{-- Button-link modal for the custom section rich-text content --}}
+  <div class="modal fade" id="customButtonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ __('landing.Add_Button') }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="mb-3">
-          <label class="form-label" for="customButtonLink">
-            {{ __('landing.Button_link') }}
-          </label>
-          <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
-          <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label" for="customButtonText">
+              {{ __('landing.Button_text') }}
+            </label>
+            <input type="text" class="form-control" id="customButtonText" maxlength="35">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="customButtonLink">
+              {{ __('landing.Button_link') }}
+            </label>
+            <input type="text" class="form-control" id="customButtonLink" placeholder="https://">
+            <div class="text-danger small mt-1" id="customButtonLinkError" style="display:none"></div>
+          </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-          {{ __('landing.Cancel') }}
-        </button>
-        <button type="button" class="btn btn-primary" id="customButtonSave">
-          {{ __('landing.Add') }}
-        </button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+            {{ __('landing.Cancel') }}
+          </button>
+          <button type="button" class="btn btn-primary" id="customButtonSave">
+            {{ __('landing.Add') }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+@endsection
 
 @section('scripts')
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 @endsection
 
 @section('pagescripts')
@@ -726,13 +797,58 @@
       });
 
       $(document).on('change', '.localized-file-input-native', function () {
+        const $imageField = $(this).closest('.image-field');
         const $name = $(this).closest('.localized-file-input').find('.localized-file-input-name');
-        $name.text(this.files && this.files.length ? this.files[0].name : $name.data('placeholder'));
+        const files = this.files;
+
+        $name.text(files && files.length ? files[0].name : $name.data('placeholder'));
+
+        if (!$imageField.length) {
+          return;
+        }
+
+        let $preview = $imageField.children('img');
+        const originalSrc = $preview.data('original-src');
+
+        if (files && files.length) {
+          if (!$preview.length) {
+            $preview = $('<img class="rounded application-image-preview" alt="" style="width:64px;height:64px;object-fit:cover;">');
+            $imageField.prepend($preview);
+          }
+          if (originalSrc === undefined) {
+            $preview.data('original-src', $preview.attr('src') || '');
+          }
+          const previousUrl = $preview.data('object-url');
+          if (previousUrl) {
+            URL.revokeObjectURL(previousUrl);
+          }
+          const objectUrl = URL.createObjectURL(files[0]);
+          $preview
+            .data('object-url', objectUrl)
+            .attr('src', objectUrl)
+            .attr('alt', files[0].name || '');
+          return;
+        }
+
+        if (!$preview.length || originalSrc === undefined) {
+          return;
+        }
+
+        const objectUrl = $preview.data('object-url');
+        if (objectUrl) {
+          URL.revokeObjectURL(objectUrl);
+        }
+        $preview.removeData('object-url');
+        if (originalSrc) {
+          $preview.attr('src', originalSrc);
+        } else {
+          $preview.remove();
+        }
       });
 
       const urlTab = new URLSearchParams(window.location.search).get('tab');
       if (urlTab) {
-        const $targetBtn = $('button[data-bs-target="#' + urlTab + '"]');
+        const $targetBtn = $('button[data-bs-target="#' + urlTab + '"]').filter(':visible');
         if ($targetBtn.length) {
           new bootstrap.Tab($targetBtn[0]).show();
         }
@@ -770,6 +886,7 @@
       const lpUrlBase = "{{ url('/lp/') }}/";
       let lpUrlSlugChecked = false;   // current slug value verified against the backend
       let lpUrlSlugAvailable = false; // result of the last availability check
+      let lpUrlCheckErrorMessage = ''; // last error message returned by the check endpoint
       let lpUrlSavedSlug = "{{ $currentPage->slug ? $currentPage->slug : '' }}"; // slug of the currently saved configuration
       let lpUrlActive = true;         // mirrors the Active toggle
 
@@ -779,7 +896,12 @@
           .replace(/[^\w\s-]/g, '')
           .replace(/[\s_]+/g, '-')
           .replace(/-+/g, '-')
-          .replace(/^-+|-+$/g, '');
+          .replace(/^-+|-+$/g, '')
+          // Keep the generated slug within the same limit the backend
+          // enforces (see LandingPage::SLUG_MAX_LENGTH); a programmatic
+          // .val() would otherwise bypass the field's maxlength attribute.
+          .slice(0, {{ \App\LandingPage::SLUG_MAX_LENGTH }})
+          .replace(/-+$/g, '');
       };
 
       const lpUrlIsValidSlug = function (slug) {
@@ -793,11 +915,13 @@
       };
 
       const lpUrlShowFieldError = function ($input, message) {
+        if (lpUrlFv) return;
         $input.addClass('is-invalid');
         lpUrlFindFeedback($input).text(message).addClass('d-block');
       };
 
       const lpUrlClearFieldError = function ($input) {
+        if (lpUrlFv) return;
         $input.removeClass('is-invalid');
         lpUrlFindFeedback($input).text('').removeClass('d-block');
       };
@@ -824,20 +948,9 @@
         });
       };
 
-      // FormValidation wiring for the custom-URL card.
+      // FormValidation wiring for the custom-URL card. The card only has
+      // the slug input now; the Page Title lives in the General section.
       const lpUrlFvFields = {
-        lpUrlTitle: {
-          validators: {
-            notEmpty: { message: lpUrlI18n.titleRequired },
-            stringLength: { max: 100, message: lpUrlI18n.titleMax },
-          },
-        },
-        lpUrlName: {
-          validators: {
-            notEmpty: { message: lpUrlI18n.nameRequired },
-            stringLength: { max: 100, message: lpUrlI18n.nameMax },
-          },
-        },
         lpUrlSlug: {
           validators: {
             notEmpty: { message: lpUrlI18n.slugRequired },
@@ -853,8 +966,9 @@
                 if (!lpUrlSlugChecked) return { valid: true };
                 if (!lpUrlSlugAvailable) {
                   $('#lpUrlAvailabilityFeedback').text('').removeClass('text-success text-danger').hide();
+                  return { valid: false, message: lpUrlCheckErrorMessage || lpUrlI18n.taken };
                 }
-                return { valid: lpUrlSlugAvailable };
+                return { valid: true };
               },
             },
           },
@@ -892,29 +1006,41 @@
         lpUrlSlugAvailable = false;
 
         if (!slug) {
-          lpUrlSetAvailability('taken', lpUrlI18n.slugRequired);
-          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugRequired, empty: true });
+          lpUrlCheckErrorMessage = lpUrlI18n.slugRequired;
+          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage, empty: true });
           return d.promise();
         }
         if (!lpUrlIsValidSlug(slug)) {
-          lpUrlSetAvailability('taken', lpUrlI18n.slugInvalid);
-          d.resolve({ valid: false, available: false, message: lpUrlI18n.slugInvalid });
+          lpUrlCheckErrorMessage = lpUrlI18n.slugInvalid;
+          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage });
           return d.promise();
         }
 
         lpUrlSetAvailability('checking', lpUrlI18n.checking);
+        lpUrlClearFieldError($slug);
 
         lpUrlAjax("{{ route('landing-pages.url.check', $currentPage->id) }}", { slug: slug })
           .done(function (res) {
             lpUrlSlugChecked = true;
             lpUrlSlugAvailable = !!res.available;
             lpUrlSetAvailability(res.available ? 'available' : 'taken', res.message);
+            if (res.available) {
+              lpUrlClearFieldError($slug);
+            } else {
+              lpUrlCheckErrorMessage = res.message || lpUrlI18n.taken;
+              lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+            }
             d.resolve({ valid: !!res.valid, available: !!res.available, message: res.message });
           })
           .fail(function (xhr) {
-            const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
-            lpUrlSetAvailability('taken', message);
-            d.resolve({ valid: false, available: false, message: message });
+            lpUrlCheckErrorMessage = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
+            lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+            lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+            d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage });
           });
         return d.promise();
       };
@@ -945,20 +1071,18 @@
       });
 
       $('#lpUrlGenerateBtn').on('click', function () {
-        const $title = $('#lpUrlTitle');
-        if (lpUrlFv) {
-          lpUrlFv.revalidateField('lpUrlTitle');
-          if (!$title.val().trim()) return;
-        } else {
-          if (!$title.val().trim()) {
-            lpUrlShowFieldError($title, lpUrlI18n.titleRequired);
-            return;
-          }
-          lpUrlClearFieldError($title);
+        // The Page Title lives in the General section form (#general_title),
+        // not in this card — the card's own title input was removed. If
+        // General has no title yet, there's nothing to generate from, so
+        // the button is a no-op.
+        const title = ($('#general_title').val() || '').trim();
+        if (!title) {
+          return;
         }
-        $('#lpUrlSlug').val(lpUrlSlugify($title.val()));
+        $('#lpUrlSlug').val(lpUrlSlugify(title));
         lpUrlSlugChecked = false;
         lpUrlSlugAvailable = false;
+        lpUrlClearFieldError($('#lpUrlSlug'));
         lpUrlSetAvailability('', '');
         if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
       });
@@ -972,14 +1096,13 @@
       $('#lpUrlSlug').on('input', function () {
         lpUrlSlugChecked = false;
         lpUrlSlugAvailable = false;
+        lpUrlClearFieldError($(this));
         lpUrlSetAvailability('', '');
       });
 
       $('#lpUrlForm').on('submit', function (e) {
         e.preventDefault();
         const $btn = $('#lpUrlSaveBtn');
-        // const $title = $('#lpUrlTitle');
-        // const $name = $('#lpUrlName');
         const $slug = $('#lpUrlSlug');
 
         const proceedSave = function () {
@@ -997,10 +1120,11 @@
               lpUrlSlugChecked = true;
               lpUrlSlugAvailable = true;
               lpUrlRenderSavedLink();
-              releaseSuccessAlert({
+              {{--  releaseSuccessAlert({
                 title: "{{ __('admin.success') }}",
                 message: res.message || lpUrlI18n.saved,
-              });
+              });  --}}
+              toastr.success(res.message || lpUrlI18n.saved, "{{ __('admin.success') }}");
               $btn.removeClass('btn-primary').addClass('btn-success').html('<i class="ti ti-check"></i>');
               setTimeout(function () {
                 $btn.removeClass('btn-success').addClass('btn-primary').html(originalHtml);
@@ -1042,16 +1166,6 @@
             lpUrlShowFieldError($input, message);
             if (!firstError) firstError = message;
           };
-          if (!$title.val().trim()) {
-            mark($title, lpUrlI18n.titleRequired);
-          } else {
-            lpUrlClearFieldError($title);
-          }
-          if (!$name.val().trim()) {
-            mark($name, lpUrlI18n.nameRequired);
-          } else {
-            lpUrlClearFieldError($name);
-          }
           if (!slug) {
             mark($slug, lpUrlI18n.slugRequired);
           } else if (!lpUrlIsValidSlug(slug)) {
@@ -1097,6 +1211,7 @@
 
        const validationMessages = {
         pageTitle:          "{{ __('landing.validation.page_title_required') }}",
+        pageTitleMax:       "{{ __('landing.validation.page_title_max', ['max' => \App\LandingPage::TITLE_MAX_LENGTH]) }}",
         logoRequired:       "{{ __('landing.validation.logo_required') }}",
         logoUnsupported:    "{{ __('landing.validation.image_format_invalid') }}",
         logoSize:           "{{ __('landing.validation.logo_size_exceeded') }}",
@@ -1128,6 +1243,7 @@
         howStepDescription:     "{{ __('landing.validation.step_description_required') }}",
         howStepDescriptionArabic: "{{ __('landing.validation.step_description_ar_required') }}",
         customRequired:         "{{ __('landing.validation.custom_section_field_required') }}",
+        customMaxLength:        "{{ __('landing.validation.custom_section_field_max', ['max' => 225]) }}",
         customUnsupportedType:  "{{ __('landing.validation.custom_image_type_invalid') }}",
         customImageSize:        "{{ __('landing.validation.custom_image_size_exceeded') }}",
         customButtonLink:       "{{ __('landing.validation.button_link_invalid') }}",
@@ -1183,6 +1299,7 @@
           'general[title]': {
             validators: {
               notEmpty: { message: validationMessages.pageTitle },
+              stringLength: { max: {{ \App\LandingPage::TITLE_MAX_LENGTH }}, message: validationMessages.pageTitleMax },
             },
           },
           'general[logo]': buildImageField(
@@ -1402,24 +1519,24 @@
         description_ar: validationMessages.cardDescriptionArabic,
       };
       const aboutIcons = [
-        { value: 'ti-rocket', label: 'Rocket' },
-        { value: 'ti-bulb', label: 'Idea' },
-        { value: 'ti-target', label: 'Target' },
-        { value: 'ti-chart-line', label: 'Growth' },
-        { value: 'ti-users', label: 'Community' },
-        { value: 'ti-trophy', label: 'Achievement' },
-        { value: 'ti-shield', label: 'Protection' },
-        { value: 'ti-heart', label: 'Care' },
-        { value: 'ti-star', label: 'Quality' },
-        { value: 'ti-book', label: 'Education' },
-        { value: 'ti-code', label: 'Code' },
-        { value: 'ti-cpu', label: 'Technology' },
-        { value: 'ti-world', label: 'Global' },
-        { value: 'ti-flag', label: 'Goal' },
-        { value: 'ti-crown', label: 'Leadership' },
-        { value: 'ti-gift', label: 'Reward' },
-        { value: 'ti-briefcase', label: 'Career' },
-        { value: 'ti-cloud', label: 'Cloud' },
+        { value: 'ti-rocket', label: "{{ __('landing.icons.rocket') }}" },
+        { value: 'ti-bulb', label: "{{ __('landing.icons.bulb') }}" },
+        { value: 'ti-target', label: "{{ __('landing.icons.target') }}" },
+        { value: 'ti-chart-line', label: "{{ __('landing.icons.chart_line') }}" },
+        { value: 'ti-users', label: "{{ __('landing.icons.users') }}" },
+        { value: 'ti-trophy', label: "{{ __('landing.icons.trophy') }}" },
+        { value: 'ti-shield', label: "{{ __('landing.icons.shield') }}" },
+        { value: 'ti-heart', label: "{{ __('landing.icons.heart') }}" },
+        { value: 'ti-star', label: "{{ __('landing.icons.star') }}" },
+        { value: 'ti-book', label: "{{ __('landing.icons.book') }}" },
+        { value: 'ti-code', label: "{{ __('landing.icons.code') }}" },
+        { value: 'ti-cpu', label: "{{ __('landing.icons.cpu') }}" },
+        { value: 'ti-world', label: "{{ __('landing.icons.world') }}" },
+        { value: 'ti-flag', label: "{{ __('landing.icons.flag') }}" },
+        { value: 'ti-crown', label: "{{ __('landing.icons.crown') }}" },
+        { value: 'ti-gift', label: "{{ __('landing.icons.gift') }}" },
+        { value: 'ti-briefcase', label: "{{ __('landing.icons.briefcase') }}" },
+        { value: 'ti-cloud', label: "{{ __('landing.icons.cloud') }}" },
       ];
       let aboutCardCounter = 0;
 
@@ -1460,19 +1577,19 @@
                 </div>
                 <div class="col-md-8">
                   <label class="form-label">${"{{ __('landing.Title') }}"}</label>
-                  <input type="text" name="about[cards][${id}][title]" maxlength="100" class="form-control" data-card-field>
+                  <input type="text" name="about[cards][${id}][title]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
-                  <input type="text" name="about[cards][${id}][title_ar]" maxlength="100" class="form-control" data-card-field>
+                  <input type="text" name="about[cards][${id}][title_ar]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-card-field>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Description') }}"}</label>
-                  <textarea name="about[cards][${id}][description]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
+                  <textarea name="about[cards][${id}][description]" maxlength="{{ App\LandingPage::STEPS_DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-card-field></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Description_ar') }}"}</label>
-                  <textarea name="about[cards][${id}][description_ar]" maxlength="500" rows="4" class="form-control" data-card-field></textarea>
+                  <textarea name="about[cards][${id}][description_ar]" maxlength="{{ App\LandingPage::STEPS_DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-card-field></textarea>
                 </div>
               </div>
             </div>
@@ -1534,13 +1651,23 @@
           updateAboutCardButtons();
         });
 
-      // About main fields are only mandatory while the section is enabled.
-      $('#about_is_enabled').on('change', function () {
-        const fv = sectionValidations.about;
+      // For the section enable switches: main fields are only mandatory
+      // while the section is enabled. The state is applied both on toggle
+      // and on initial load, so saving a disabled section never surfaces
+      // required-field messages for its (empty) main fields.
+      const sectionRequiredFields = {
+        about:    ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
+        how:      ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
+        programs: ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
+      };
+
+      const setSectionRequiredState = function (sectionKey) {
+        const fv = sectionValidations[sectionKey];
         if (!fv) return;
-        const enabled = this.checked;
-        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
-          const fieldName = 'about[' + name + ']';
+        const $switch = $('#' + sectionKey + '_is_enabled');
+        const enabled = $switch.is(':checked');
+        (sectionRequiredFields[sectionKey] || []).forEach(function (name) {
+          const fieldName = sectionKey + '[' + name + ']';
           if (enabled) {
             fv.enableValidator(fieldName, 'notEmpty');
           } else {
@@ -1548,7 +1675,12 @@
           }
           fv.revalidateField(fieldName);
         });
-      });
+      };
+
+      $('#about_is_enabled').on('change', function () { setSectionRequiredState('about'); });
+      $('#how_is_enabled').on('change', function () { setSectionRequiredState('how'); });
+      $('#programs_is_enabled').on('change', function () { setSectionRequiredState('programs'); });
+      ['about', 'how', 'programs'].forEach(setSectionRequiredState);
 
       // ─────────────────────────────────────────────────────────────
       // How It Works section — process steps repeater (max 3 steps)
@@ -1605,19 +1737,19 @@
                 </div>
                 <div class="col-md-8">
                   <label class="form-label">${"{{ __('landing.Step_Title') }}"}</label>
-                  <input type="text" name="how[steps][${id}][title]" maxlength="100" class="form-control" data-step-field>
+                  <input type="text" name="how[steps][${id}][title]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Step_Title_ar') }}"}</label>
-                  <input type="text" name="how[steps][${id}][title_ar]" maxlength="100" class="form-control" data-step-field>
+                  <input type="text" name="how[steps][${id}][title_ar]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-step-field>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Step_Description') }}"}</label>
-                  <textarea name="how[steps][${id}][description]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
+                  <textarea name="how[steps][${id}][description]" maxlength="{{ App\LandingPage::STEPS_DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-step-field></textarea>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Step_Description_ar') }}"}</label>
-                  <textarea name="how[steps][${id}][description_ar]" maxlength="300" rows="4" class="form-control" data-step-field></textarea>
+                  <textarea name="how[steps][${id}][description_ar]" maxlength="{{ App\LandingPage::STEPS_DESCRIPTION_MAX_LENGTH }}" rows="4" class="form-control" data-step-field></textarea>
                 </div>
               </div>
             </div>
@@ -1678,38 +1810,6 @@
           $step.remove();
           updateHowStepButtons();
         });
-
-      // How It Works main fields are only mandatory while the section is enabled.
-      $('#how_is_enabled').on('change', function () {
-        const fv = sectionValidations.how;
-        if (!fv) return;
-        const enabled = this.checked;
-        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
-          const fieldName = 'how[' + name + ']';
-          if (enabled) {
-            fv.enableValidator(fieldName, 'notEmpty');
-          } else {
-            fv.disableValidator(fieldName, 'notEmpty');
-          }
-          fv.revalidateField(fieldName);
-        });
-      });
-
-      // Programs main fields are only mandatory while the section is enabled.
-      $('#programs_is_enabled').on('change', function () {
-        const fv = sectionValidations.programs;
-        if (!fv) return;
-        const enabled = this.checked;
-        ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'].forEach(function (name) {
-          const fieldName = 'programs[' + name + ']';
-          if (enabled) {
-            fv.enableValidator(fieldName, 'notEmpty');
-          } else {
-            fv.disableValidator(fieldName, 'notEmpty');
-          }
-          fv.revalidateField(fieldName);
-        });
-      });
 
       // ─────────────────────────────────────────────────────────────
       // Programs selection list — client-side search + filters +
@@ -1802,7 +1902,40 @@
       // Visible/Hidden filter (read live above) stays accurate without a
       // page reload.
       $('#programsListBody').on('change', '.program-visibility-switch', function () {
-        if (programsFilters.visibility !== 'all') renderProgramsPagination();
+        const $switch = $(this);
+        const $row = $switch.closest('.programs-list-row');
+        const programId = $row.data('program-id');
+
+        if (!$switch.is(':checked')) {
+          if (programsFilters.visibility !== 'all') renderProgramsPagination();
+          return;
+        }
+
+        // Ask the server for the program's CURRENT availability state, so a
+        // program fixed in another tab doesn't keep triggering the warning
+        // from stale row data.
+        const visibilityCheckUrl = "{{ url('dashboard/programlist') }}/" + programId + '/visibility-check';
+        $.getJSON(visibilityCheckUrl, function (data) {
+          if (data.is_public) {
+            if (programsFilters.visibility !== 'all') renderProgramsPagination();
+            return;
+          }
+
+          if (!$switch.is(':checked')) return; // user changed their mind while checking
+
+          $switch.prop('checked', false);
+          const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '#program-settings-visibility';
+          releaseWarningAlert({
+            title: "{{ __('admin.Warning') }}",
+            message: "{{ __('landing.Program_not_public_hint') }}",
+            confirmText: "{{ __('landing.Go_to_program_visibility') }}",
+            cancelText: "{{ __('landing.Cancel') }}",
+            confirmColor: 'primary',
+            onConfirm: function () {
+              window.open(programSettingsUrl, '_blank');
+            },
+          });
+        });
       });
 
       $('#programsPaginationList').on('click', '.page-link', function (e) {
@@ -1830,12 +1963,74 @@
       renderProgramsPagination();
 
       // ─────────────────────────────────────────────────────────────
+      // Programs selection list — drag-to-reorder (AJAX, client-side)
+      // Sortable moves the actual <tr> nodes; on drop we read the new
+      // DOM order straight off the row `data-program-id` attributes and
+      // fire it to the backend immediately, independent of the section's
+      // own Save button. Only rows visible on the current page/filter
+      // are valid drop targets, so this reorders within what's on screen.
+      // ─────────────────────────────────────────────────────────────
+      const programsReorderUrl = "{{ route('landing-pages.programs.reorder', $currentPage->id) }}";
+      let programsReorderInFlight = null;
+
+      const programsReorderErrorText = isArabic
+        ? 'تعذر حفظ الترتيب الجديد. يرجى المحاولة مرة أخرى.'
+        : 'Could not save the new order. Please try again.';
+
+      const sendProgramsReorder = function () {
+        const order = $('#programsListBody .programs-list-row').map(function () {
+          return $(this).attr('data-program-id');
+        }).get();
+
+        // Cancel any reorder request already in flight so a rapid second
+        // drag doesn't race an earlier one and overwrite it with a stale order.
+        if (programsReorderInFlight && programsReorderInFlight.abort) {
+          programsReorderInFlight.abort();
+        }
+
+        programsReorderInFlight = $.ajax({
+          url: programsReorderUrl,
+          method: 'POST',
+          data: {
+            _token: "{{ csrf_token() }}",
+            order: order,
+          },
+          dataType: 'json',
+        })
+          .fail(function (xhr) {
+            if (xhr.statusText === 'abort') return;
+            const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || programsReorderErrorText;
+            releaseFailureAlert({
+              title: "{{ __('admin.Error') }}",
+              message: message,
+            });
+          })
+          .always(function () {
+            programsReorderInFlight = null;
+          });
+      };
+
+      if (typeof Sortable !== 'undefined') {
+        Sortable.create(document.getElementById('programsListBody'), {
+          handle: '.program-drag-handle',
+          animation: 150,
+          ghostClass: 'program-drag-ghost',
+          chosenClass: 'program-drag-chosen',
+          onEnd: function (evt) {
+            if (evt.oldIndex === evt.newIndex) return;
+            sendProgramsReorder();
+          },
+        });
+      }
+
+      // ─────────────────────────────────────────────────────────────
       // Custom sections — block repeater with rich-text (Quill) editors
       // A block can stay fully empty; once any required field of a
       // block is filled, every required field becomes mandatory.
       // ─────────────────────────────────────────────────────────────
       const customQuills = new Map();
       const customRequiredFields = ['title', 'title_tag', 'content', 'title_ar', 'title_tag_ar', 'content_ar'];
+      const customFieldMaxLengths = { title: 225, title_ar: 225, title_tag: 225, title_tag_ar: 225 };
       const customMaxSections = 5;
       let customSectionCounter = 0;
 
@@ -1860,22 +2055,26 @@
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title">
                   <label class="form-label">${"{{ __('landing.Title') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_ar">
                   <label class="form-label">${"{{ __('landing.Title_ar') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_ar]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag">
                   <label class="form-label">${"{{ __('landing.Title_tag') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_tag]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="title_tag_ar">
                   <label class="form-label">${"{{ __('landing.Title_tag_ar') }}"}</label>
-                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="255" class="form-control custom-section-input" data-custom-field>
+                  <input type="text" name="custom_sections[${id}][title_tag_ar]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control custom-section-input" data-custom-field>
+                  <div class="form-text">${"{{ __('landing.Max') }}"} {{ App\LandingPage::TITLE_MAX_LENGTH }} ${"{{ __('landing.characters') }}"}</div>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="content">
@@ -1892,11 +2091,11 @@
                 </div>
                 {{-- <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Button_text') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
-                  <input type="text" name="custom_sections[${id}][button_text]" maxlength="255" class="form-control">
+                  <input type="text" name="custom_sections[${id}][button_text]" maxlength="35" class="form-control">
                 </div>
                 <div class="col-md-6 custom-field-group" data-field="button_link">
                   <label class="form-label">${"{{ __('landing.Button_link') }}"} <span class="text-muted">(${"{{ __('landing.Optional') }}"})</span></label>
-                  <input type="url" name="custom_sections[${id}][button_link]" maxlength="500" class="form-control" placeholder="https://" data-custom-field>
+                  <input type="url" name="custom_sections[${id}][button_link]" maxlength="250" class="form-control" placeholder="https://" data-custom-field>
                   <div class="custom-error-msg text-danger small mt-1" style="display:none"></div>
                 </div> --}}
               </div>
@@ -1948,9 +2147,23 @@
 
         let valid = true;
         customRequiredFields.forEach(function (field) {
-          const filled = customFieldValue($card, field) !== '';
-          setCustomFieldError($card.find('.custom-field-group[data-field="' + field + '"]'), filled ? '' : validationMessages.customRequired);
-          if (!filled) valid = false;
+          const $group = $card.find('.custom-field-group[data-field="' + field + '"]');
+          const value = customFieldValue($card, field);
+          const max = customFieldMaxLengths[field];
+
+          if (value === '') {
+            setCustomFieldError($group, validationMessages.customRequired);
+            valid = false;
+            return;
+          }
+
+          if (max && value.length > max) {
+            setCustomFieldError($group, validationMessages.customMaxLength);
+            valid = false;
+            return;
+          }
+
+          setCustomFieldError($group, '');
         });
         return valid;
       };
@@ -1975,6 +2188,34 @@
       const updateCustomSectionLabels = function () {
         $('#customSectionsContainer .custom-section-card').each(function (i) {
           $(this).find('.custom-section-label').text((isArabic ? 'القسم المخصص ' : 'Custom Section ') + (i + 1));
+        });
+      };
+
+      const quillTooltipMap = {
+        '.ql-bold':          "{{ __('landing.quill_bold') }}",
+        '.ql-italic':        "{{ __('landing.quill_italic') }}",
+        '.ql-underline':     "{{ __('landing.quill_underline') }}",
+        '.ql-ordered':       "{{ __('landing.quill_ordered_list') }}",
+        '.ql-bullet':        "{{ __('landing.quill_bullet_list') }}",
+        '.ql-link':          "{{ __('landing.quill_insert_link') }}",
+        '.ql-image':         "{{ __('landing.quill_insert_image') }}",
+        '.ql-clean':         "{{ __('landing.quill_clear_formatting') }}",
+        '.ql-custom-button': "{{ __('landing.quill_insert_button') }}",
+      };
+
+      const applyQuillTooltips = function (quill) {
+        if (!quill || !quill.container) return;
+        const toolbar = quill.container.previousElementSibling;
+        if (!toolbar) return;
+        Object.entries(quillTooltipMap).forEach(function ([selector, label]) {
+          const btn = toolbar.querySelector(selector);
+          if (!btn || btn.hasAttribute('title')) return;
+          btn.setAttribute('data-bs-toggle', 'tooltip');
+          btn.setAttribute('data-bs-placement', 'top');
+          btn.setAttribute('title', label);
+          if (typeof bootstrap !== 'undefined') {
+            bootstrap.Tooltip.getOrCreateInstance(btn);
+          }
         });
       };
 
@@ -2010,6 +2251,7 @@
           });
 
           customQuills.set(el, quill);
+          applyQuillTooltips(quill);
 
           const $group = $(el).closest('.custom-field-group');
           const $input = $group.find('.custom-hidden-content');
@@ -2075,6 +2317,30 @@
         }
       };
 
+      const markCustomButtonAnchors = function (quill, html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        const matched = tmp.querySelectorAll('a[href]');
+        const anchors = quill.root.querySelectorAll('a[href]');
+        for (let m = 0; m < matched.length; m++) {
+          const src = matched[m];
+          if (!/(?:^|\s)btn(?:\s|$)/.test(src.getAttribute('class') || '')) continue;
+          const href = src.getAttribute('href');
+          const text = src.textContent.trim();
+          let target = null;
+          for (let i = 0; i < anchors.length; i++) {
+            if (anchors[i].getAttribute('href') === href && anchors[i].textContent.trim() === text) {
+              target = anchors[i];
+            }
+          }
+          if (target) {
+            target.setAttribute('class', 'btn btn-primary');
+            target.setAttribute('target', '_blank');
+            target.setAttribute('rel', 'noopener noreferrer');
+          }
+        }
+      };
+
       let activeButtonQuill = null;
 
       const openCustomButtonModal = function (quill) {
@@ -2105,6 +2371,7 @@
           const index = range ? range.index : activeButtonQuill.getLength();
           const html = '<a class="btn btn-primary" href="' + escapeCustomAttr(link) + '" target="_blank" rel="noopener">' + escapeCustomHtml(text || link) + '</a>&nbsp;';
           activeButtonQuill.clipboard.dangerouslyPasteHTML(index, html, 'user');
+          markCustomButtonAnchors(activeButtonQuill, html);
           activeButtonQuill.setSelection(index + 1);
         }
         const modalEl = document.getElementById('customButtonModal');
@@ -2145,17 +2412,20 @@
             updateCustomSectionLabels();
           };
 
-          // Unsaved card: nothing on the server to delete, drop it silently.
-          if ($card.attr('data-persisted') !== 'true') {
-            removeCard();
-            return;
-          }
+          const flashDeleted = function (message) {
+            releaseSuccessAlert({
+              title: "{{ __('admin.success') }}",
+              message: message || "{{ __('landing.success.custom_deleted') }}",
+            });
+          };
 
           const dbId = $card.find('.custom-section-db-id').val();
 
           const deleteFromServer = function () {
+            // Unsaved card: nothing on the server to delete, drop it locally.
             if (!dbId) {
               removeCard();
+              flashDeleted();
               return;
             }
             $btn.prop('disabled', true);
@@ -2165,11 +2435,9 @@
               data: { _token: "{{ csrf_token() }}", _method: 'DELETE' },
             })
               .done(function (res) {
+                $btn.prop('disabled', false);
                 removeCard();
-                releaseSuccessAlert({
-                  title: "{{ __('admin.success') }}",
-                  message: (res && res.message) ? res.message : "{{ __('landing.success.custom_deleted') }}",
-                });
+                flashDeleted(res && res.message);
               })
               .fail(function (xhr) {
                 $btn.prop('disabled', false);
@@ -2221,7 +2489,6 @@
       customSections.forEach(function (section) {
         const id = addCustomSection();
         const $card = $('#customSectionsContainer .custom-section-card[data-section-id="' + id + '"]');
-        $card.attr('data-persisted', 'true');
         $card.find('[name="custom_sections[' + id + '][id]"]').val(section.id || '');
         $card.find('[name="custom_sections[' + id + '][visibility]"]').prop('checked', !!section.visibility);
         $card.find('[name="custom_sections[' + id + '][title]"]').val(section.title || '');
@@ -2236,6 +2503,7 @@
           const html = i === 0 ? (section.content || '') : (section.content_ar || '');
           if (html) {
             quill.clipboard.dangerouslyPasteHTML(0, html, 'user');
+            markCustomButtonAnchors(quill, html);
           }
         });
       });
@@ -2374,6 +2642,17 @@
           if (!validateCustomSections()) return;
           submitViaAjax();
           return;
+        }
+
+        // Sections with an Enable switch are not required to have content
+        // while disabled: submit straight away so no required-field
+        // messages surface for their empty main fields.
+        if (sectionRequiredFields[sectionKey]) {
+          const $sectionSwitch = $('#' + sectionKey + '_is_enabled');
+          if ($sectionSwitch.length && !$sectionSwitch.is(':checked')) {
+            submitViaAjax();
+            return;
+          }
         }
 
         // Block the save until client-side validation passes.

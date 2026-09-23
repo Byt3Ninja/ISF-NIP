@@ -241,6 +241,14 @@ class ChatController extends Controller
                         'error' => 'You are not a participant in this conversation'
                     ], 403);
                 }
+
+                // GV-7375: block sending into a DM whose peer left / was removed.
+                $conversation->load('participants');
+                if (!$this->conversationIsAllowed($conversation, $this->currentUserTeamContext()['teammateIds'])) {
+                    return response()->json([
+                        'error' => 'You can only chat with your team members'
+                    ], 403);
+                }
             } elseif ($request->user_id) {
                 // Create or get conversation with the specified user
                 $createConversationRequest = new Request(['user_id' => $request->user_id]);
@@ -269,16 +277,11 @@ class ChatController extends Controller
             // Load the message with sender information
             $message->load('sendable');
 
-            // Broadcast the message synchronously so real-time works without a queue worker.
-            // App\Events\MessageCreated is ShouldBroadcastNow (fires immediately to Pusher)
-            // on PrivateChannel('conversation.'.$id) with the full message payload.
-            try {
-                broadcast(new \App\Events\MessageCreated($message));
-                Log::info('MessageCreated broadcast (sync) for message: ' . $message->id);
-            } catch (\Exception $e) {
-                // Never fail the send if broadcasting fails.
-                Log::error('Failed to broadcast message: ' . $e->getMessage());
-            }
+            // NOTE: do NOT broadcast MessageCreated here. WireChatMessageObserver
+            // already fires it on the model's "created" event (registered in
+            // AppServiceProvider), which covers every creation path. Dispatching
+            // again here delivered each message to Pusher twice, which is what
+            // made the header notification counter jump by 2 (GV-7355).
 
             return response()->json([
                 'message' => $message,
@@ -487,6 +490,45 @@ class ChatController extends Controller
     }
 
     /**
+     * GV-7375: a private DM is only valid while BOTH users are still accepted
+     * members of a shared team. When a leader removes a member, the DM row and
+     * its participants survive (getOutTeam only detaches the group conversation),
+     * so without this gate the removed member's chat keeps showing in the list
+     * and stays readable/writable.
+     *
+     * Returns true when the conversation is still allowed for the current user:
+     *  - group conversations: allowed (participant-ship is maintained on removal)
+     *  - private conversations: allowed only if every other participant is a
+     *    current accepted teammate.
+     */
+    private function conversationIsAllowed(Conversation $conversation, \Illuminate\Support\Collection $teammateIds): bool
+    {
+        // NOTE: WireChat casts `type` to the ConversationType enum, so compare on
+        // the backing value rather than the raw attribute.
+        $type = $conversation->type instanceof \Namu\WireChat\Enums\ConversationType
+            ? $conversation->type->value
+            : (string) $conversation->type;
+
+        if ($type !== \Namu\WireChat\Enums\ConversationType::PRIVATE->value) {
+            return true;
+        }
+
+        $currentUserId = auth()->id();
+
+        $peerIds = $conversation->participants
+            ->where('participantable_type', 'App\User')
+            ->pluck('participantable_id')
+            ->reject(fn ($id) => (int) $id === (int) $currentUserId)
+            ->values();
+
+        if ($peerIds->isEmpty()) {
+            return false;
+        }
+
+        return $peerIds->every(fn ($id) => $teammateIds->contains((int) $id));
+    }
+
+    /**
      * Get-or-create one WireChat group conversation per team the current user
      * belongs to that has >= 2 accepted members. Persists the conversation id on
      * team_formations.group_id_chat. Ensures all accepted teammates are participants.
@@ -587,7 +629,11 @@ class ChatController extends Controller
             }
 
             // Transient team identity for the response (not persisted on the conversation).
-            $conversation->team_img       = $team->img_team;
+            // Team logos live outside the web root; expose the authorized route
+            // rather than the raw storage path.
+            $conversation->team_img       = $team->img_team
+                ? route('hackathon.teamLogo', basename($team->img_team))
+                : null;
             $conversation->team_name      = $team->name;
             $conversation->team_member_ids = $memberIds->values()->all();
             $conversation->team_leader_id = $leaderIdByTeam->get($team->id);
@@ -714,7 +760,7 @@ class ChatController extends Controller
                 return [
                     'id'                 => $conversation->id,
                     'name'               => $conversation->team_name ?: $conversation->name,
-                    'avatar_url'         => $teamImg ? '/' . ltrim($teamImg, '/') : null,
+                    'avatar_url'         => $teamImg ?: null,
                     'initials'           => $this->initialsFor($conversation->team_name ?: $conversation->name),
                     'participants'       => $participants,
                     'participants_count' => $participants->count(),
@@ -754,6 +800,13 @@ class ChatController extends Controller
             })->with(['participants.participantable', 'messages' => function($query) {
                 $query->latest()->limit(1);
             }])->get();
+
+            // GV-7375: drop DMs whose peer is no longer an accepted teammate, so a
+            // removed member's conversation disappears from the list immediately.
+            $teammateIds = $this->currentUserTeamContext()['teammateIds'];
+            $conversations = $conversations
+                ->filter(fn ($conversation) => $this->conversationIsAllowed($conversation, $teammateIds))
+                ->values();
 
             $conversations->each(function ($conversation) use ($user) {
                 // Preserve the eager-loaded last message (limit(1)) for the sidebar preview,
@@ -822,6 +875,17 @@ class ChatController extends Controller
             if (!$isParticipant) {
                 return response()->json([
                     'error' => 'You are not a participant in this conversation',
+                    'messages' => []
+                ], 403);
+            }
+
+            // GV-7375: participant-ship alone is not enough — a DM with a removed
+            // teammate must not be re-openable (the client restores the last
+            // conversation id from localStorage).
+            $conversation->load('participants');
+            if (!$this->conversationIsAllowed($conversation, $this->currentUserTeamContext()['teammateIds'])) {
+                return response()->json([
+                    'error' => 'You can only chat with your team members',
                     'messages' => []
                 ], 403);
             }

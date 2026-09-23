@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
 use App\Services\ServiceRequestStatusLogger;
 
@@ -482,17 +483,18 @@ class ServiceProviderDashboardController extends Controller
      */
     private function sendActionNotification(ServicesRequests $serviceRequest, string $actionLabel): void
     {
-        if (in_array(env('APP_ENV', 'local'), ['local'])) {
-            return;
-        }
-
         try {
             $founder  = $serviceRequest->user;
+            if (!$founder) {
+                return;
+            }
             $service  = $serviceRequest->service;
             $provider = $service->provider;
 
-            $founderLang  = $founder->language ?? 'en';
-            $founderName  = trim($founder->first_name_en . ' ' . $founder->last_name_en);
+            $founderLang  = method_exists($founder, 'preferredLocale') ? $founder->preferredLocale() : ($founder->language ?? 'en');
+            $firstName    = $founder->{"first_name_{$founderLang}"} ?? $founder->first_name_en;
+            $lastName     = $founder->{"last_name_{$founderLang}"} ?? $founder->last_name_en;
+            $founderName  = trim($firstName . ' ' . $lastName);
             $serviceName  = $founderLang === 'ar' ? ($service->name_ar ?: $service->name_en) : $service->name_en;
             $providerName = $provider->company_name ?? '';
 
@@ -529,12 +531,16 @@ class ServiceProviderDashboardController extends Controller
                 $body,
                 '/dashboard/requests/mine',
                 $inApp,
-            ]);
+            ], $founderLang);
             $notification->ActionText = __('admin.service_request_view_details', [], $founderLang);
 
             $founder->notify($notification);
         } catch (\Throwable $th) {
-            // Silently fail - matches existing pattern
+            Log::error('Failed to send service request action notification', [
+                'error'      => $th->getMessage(),
+                'request_id' => $serviceRequest->id,
+                'action'     => $actionLabel,
+            ]);
         }
     }
 

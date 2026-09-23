@@ -20,8 +20,6 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
-<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
-<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
 @stop
 @section('content')
 @if (!$_user->first_name_ar)
@@ -599,7 +597,11 @@
 										@endif
 									</div>
 								</div>
-								@if( !is_null( $myFinal ) && $myFinal->join_url )
+								{{-- GV-9620: the guard used to also require $myFinal->join_url, so a
+									 meeting whose link failed to generate hid the WHOLE table and the
+									 founder was told the session would "start soon". The row now renders
+									 without a link and the Actions cell says the link is unavailable. --}}
+								@if( !is_null( $myFinal ) && count( $myFinal ) )
 								<div class="card-datatable table-responsive">
 									<table class="table mb-0 sessonsTable">
 										<thead class="table-light">
@@ -612,53 +614,75 @@
 											</tr>
 										</thead>
 										<tbody>
+											{{-- GV-9620: one row per final panel. A startup can sit in several. --}}
+											@foreach( $myFinal as $final )
 											<tr>
 												<td>
 													<div class="d-flex align-items-center">
-														<a class="media-left" href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
-															<img src="{{ $myFinal->company->user->image_url }}" alt="avatar"
+														<a class="media-left" href="/dashboard/users/{{ $final->company->user->id }}/edit">
+															<img src="{{ $final->company->user->image_url }}" alt="avatar"
 																class="rounded-circle me-3" height="40" width="40">
 														</a>
-														<a href="/dashboard/users/{{ $myFinal->company->user->id }}/edit">
+														<a href="/dashboard/users/{{ $final->company->user->id }}/edit">
 															<div class="media-body">
-																<h6 class="media-heading mb-0 text-nowrap">{{ $myFinal->company->user->name }}</h6>
-																<span class="font-small-2 text-nowrap">{{ $myFinal->company->user->title }}</span>
+																<h6 class="media-heading mb-0 text-nowrap">{{ $final->company->user->name }}</h6>
+																<span class="font-small-2 text-nowrap">{{ $final->company->user->title }}</span>
 															</div>
 														</a>
 													</div>
 												</td>
 												<td>
 													{{-- GV-8357: all of the panel's judges in one cell, capped with a +N overflow --}}
-													@include('includes.partials.judges-cell', ['judges' => $myFinal->judges])
+													@include('includes.partials.judges-cell', ['judges' => $final->judges])
 												</td>
-												{{-- GV-3321: per-startup slot derived from the panel interval --}}
+												@php
+													// GV-8363: compare in the viewer's own timezone. Slots are stored as
+													// bare wall-clock times, so comparing them against the raw server
+													// clock opened/closed the window at the wrong moment for anyone whose
+													// profile timezone differed from the server's.
+													// GV-7381: session_start/session_end are resolved in the controller so
+													// the schedule, the Completed flag and the Join window all agree --
+													// previously the end time was derived from the floored `duration`.
+													$startTime = $final->session_start;
+													$endTime = $final->session_end;
+													// Join Now + passcode unlock 10 minutes before the slot starts
+													// and stay available until an hour after it ends.
+													$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
+												@endphp
+												{{-- GV-3321: per-startup slot derived from the panel interval.
+													 GV-7381: both branches render d-m-Y + a formatted time. The fallback
+													 used to echo the raw `datetime` column (Y-m-d H:i:s), so an unscheduled
+													 row read "2026-09-23 22:00:00" next to a scheduled row's "23-09-2026". --}}
 												<td>
-													@if( !empty( $myFinal->meeting_time ) )
-														{{ $myFinal->meeting_date }} <br>
-														<small class="text-muted">{{ $myFinal->meeting_time }}</small>
+													@if( !empty( $final->meeting_time ) )
+														{{ $final->meeting_date }} <br>
+														<small class="text-muted">{{ $final->meeting_time }}</small>
+													@elseif( !is_null( $startTime ) )
+														{{ $startTime->format('d-m-Y') }} <br>
+														<small class="text-muted">
+															{{ $startTime->format('h:i A') }}@if( !is_null( $endTime ) ) - {{ $endTime->format('h:i A') }}@endif
+														</small>
 													@else
-														{{ $myFinal->datetime }} <br>({{ $myFinal->duration }}M)
+														-
 													@endif
 												</td>
-												<td> {{ $myFinal->datetime < now() ? __('Yes') : __('No') }} </td>
+												{{-- GV-7381: a session is Completed once its end time passes, read in the
+													 viewer's timezone. This used to compare the raw `datetime` (the session
+													 START, and NULL for unscheduled rows -- where `null < now()` is true in
+													 PHP, so every such row reported "Yes"). --}}
+												<td> {{ \App\Services\MeetingWindowService::hasEnded( $endTime, $_user ) ? __('Yes') : __('No') }} </td>
 												<td>
-													@php
-														// GV-8363: compare in the viewer's own timezone. Slots are stored as
-														// bare wall-clock times, so comparing them against the raw server
-														// clock opened/closed the window at the wrong moment for anyone whose
-														// profile timezone differed from the server's.
-														$startTime = $myFinal->meeting_start ?? \Carbon\Carbon::parse($myFinal->datetime);
-														$endTime = $myFinal->meeting_end
-															?? \Carbon\Carbon::parse($myFinal->datetime)->addMinutes($myFinal->duration);
-														// Join Now + passcode unlock 10 minutes before the slot starts
-														// and stay available until an hour after it ends.
-														$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
-													@endphp
-													@if( $canJoin )
-														<a href="{{ $myFinal->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
-														@if( !empty( $myFinal->passcode ) )
+													{{-- GV-9620: the meeting row is shown even when the online-meeting
+														 link failed to generate (ScreeningController catches and logs the
+														 failure, leaving join_url null). Join is disabled rather than the
+														 whole table being hidden. --}}
+													@if( empty( $final->join_url ) )
+														<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
+													@elseif( $canJoin )
+														<a href="{{ $final->join_url }}" target="_blank">({{__('dashboard.Join now')}})</a>
+														@if( !empty( $final->passcode ) )
 															<button title="{{ __('dashboard.Passcode') }}" type="button"
-																data-passcode="{{ $myFinal->passcode }}"
+																data-passcode="{{ $final->passcode }}"
 																class="btn btn-label-warning btn-sm show-passcode rounded ms-1">
 																<i class="ti ti-key"></i>
 															</button>
@@ -670,6 +694,7 @@
 													@endif
 												</td>
 											</tr>
+											@endforeach
 										</tbody>
 									</table>
 								</div>
@@ -803,7 +828,7 @@
 								<div class="card-header border-bottom">
 									<div class="d-flex align-items-center">
 										<h5 style="text-transform: capitalize">
-											{{ __('dashboard.My Latest training') }} ::
+											{{ __('dashboard.My Latest training') }}
 										</h5>
 										<a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
 									</div>
@@ -1947,7 +1972,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 						<div class="hxi-medallion" aria-hidden="true">
 							<span class="hxi-initial">{{ $hxiTeamInitial }}</span>
 							@if($join->tf_img_team)
-								<img src="{{ asset($join->tf_img_team) }}" alt=""
+								<img src="{{ route('hackathon.teamLogo', basename($join->tf_img_team)) }}" alt=""
 									onerror="this.onerror=null;this.src='/icons/team-default.svg';this.closest('.hxi-medallion').classList.add('hxi-medallion--fallback');">
 							@endif
 						</div>
@@ -2074,7 +2099,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
-<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
 @stop
 @section('pagescripts')
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
@@ -2259,16 +2283,16 @@ document.addEventListener('DOMContentLoaded', function() {
 	<script>
 		// Initialize DataTable with pagination configuration
 		$(document).on('click', '.show-passcode', function(e) {
-		e.preventDefault();
-		let passcode = $(this).data('passcode');
-		alertify.defaults.transition = 'zoom';
-		alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-		alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-		alertify.defaults.theme.input = 'form-control';
-
-		alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+      e.preventDefault();
+      let passcode = $(this).data('passcode');
+      releaseAlert({
+        icon: 'info',
+        title: '{{ __('dashboard.meeting_passcode') }}',
+        message: `{!! __('dashboard.passcode_is', ['code' => '<strong>${passcode}</strong>']) !!}`,
+      });
 		});
-
+    
+		// Initialize DataTable with pagination configuration
 		$(document).ready(function() {
 			$("#ratingsTable").DataTable({
 				"pageLength": 5,

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -102,14 +103,45 @@ class NewTrainingNotification extends Notification implements ShouldQueue
     {
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
 
+        // Branded with the organization running the training (its cycle's
+        // organization), not the recipient's own organization relation.
+        $trainingOrg = $this->data['organization'] ?? $org;
+        $orgData = $this->buildEmailOrganizationData($trainingOrg);
+
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+        }
+
+        $type = strtolower(trim((string) ($this->data['type'] ?? '')));
+        $isOnline = in_array($type, ['online', 'sessions'], true);
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
         return (new MailMessage)
-            ->subject(__('admin.new_training_message'))
-            ->markdown('emails.new_training', array_merge(['data' => $this->data], $orgData));
+            ->subject(__('email.new_training_email.subject', [], $locale))
+            ->view('emails.new_training', array_merge([
+                'trainingLocale' => $locale,
+                'trainingRecipientName' => $firstName,
+                'trainingOrgName' => $orgName,
+                'trainingTitle' => $this->data['title'] ?? '',
+                'trainingDate' => $this->data['date'] ?? '',
+                'trainingStartTime' => $this->data['start_time'] ?? '',
+                'trainingEndTime' => $this->data['end_time'] ?? '',
+                'trainingIsOnline' => $isOnline,
+                'trainingLink' => $this->data['join_url'] ?? '',
+                'trainingMapLink' => $this->data['join_url'] ?? '',
+                'trainingAddress' => $this->data['Address'] ?? '',
+            ], $orgData));
     }
 
     /**

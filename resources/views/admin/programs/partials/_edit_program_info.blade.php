@@ -55,6 +55,7 @@
         placeholder="{{ __('cycles.Cycle title') }}"
         oninput="this.value = this.value.trimStart()" 
         value="{{ isset($ccycle) ? $ccycle->title : '' }}"
+        maxlength="{{ \App\Cycle::TITLE_MAX_LENGTH }}"
       />
       <div class="invalid-feedback"></div>
     </div>
@@ -74,7 +75,7 @@
         placeholder="{{ $l == 'en' ? 'Program Title in Arabic' : 'عنوان البرنامج باللغة العربية' }}"
         oninput="this.value = this.value.trimStart()" 
         value="{{ isset($ccycle) ? $ccycle->title_ar : '' }}"
-        maxlength="50"
+        maxlength="{{ \App\Cycle::TITLE_MAX_LENGTH }}"
       />
       <div class="invalid-feedback"></div>
     </div>
@@ -326,9 +327,9 @@ $(document).ready(function() {
       title.addClass('is-invalid');
       title.next('.invalid-feedback').text('{{ $l == "en" ? "Title must be at least 3 characters" : "العنوان يجب أن يكون 3 أحرف على الأقل" }}');
       isValid = false;
-    } else if (title.val().length > 100) {
+    } else if (title.val().length > {{ \App\Cycle::TITLE_MAX_LENGTH }} ) {
       title.addClass('is-invalid');
-      title.next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 100 characters" : "العنوان لا يمكن أن يتجاوز 100 حرف" }}');
+      title.next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed ' . \App\Cycle::TITLE_MAX_LENGTH . ' characters" : "العنوان لا يمكن أن يتجاوز ' . \App\Cycle::TITLE_MAX_LENGTH . ' حرف" }}');
       isValid = false;
     }
 
@@ -338,9 +339,9 @@ $(document).ready(function() {
       title_ar.addClass('is-invalid');
       title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Program Title in Arabic is required." : "عنوان البرنامج باللغة العربية مطلوب." }}');
       isValid = false;
-    } else if (title_ar.val().length > 50) {
+    } else if (title_ar.val().length > {{ \App\Cycle::TITLE_MAX_LENGTH }} ) {
       title_ar.addClass('is-invalid');
-      title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed 50 characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز 50 حرف." }}');
+      title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed ' . \App\Cycle::TITLE_MAX_LENGTH . ' characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز ' . \App\Cycle::TITLE_MAX_LENGTH . ' حرف." }}');
       isValid = false;
     }
 
@@ -451,9 +452,9 @@ $(document).ready(function() {
     if (value.length > 0 && value.length < 3) {
       $(this).addClass('is-invalid');
       $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Title must be at least 3 characters" : "العنوان يجب أن يكون 3 أحرف على الأقل" }}');
-    } else if (value.length > 100) {
+    } else if (value.length > 50) {
       $(this).addClass('is-invalid');
-      $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 100 characters" : "العنوان لا يمكن أن يتجاوز 100 حرف" }}');
+      $(this).next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 50 characters" : "العنوان لا يمكن أن يتجاوز 50 حرف" }}');
     } else {
       $(this).next('.invalid-feedback').text('');
     }

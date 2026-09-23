@@ -5,34 +5,18 @@ namespace Tests\Unit\Notifications;
 use Tests\TestCase;
 use App\User;
 use App\Notifications\MentorshipSessionFounderNotification;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Notification;
 
 class MentorshipSessionFounderNotificationTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public function createApplication()
-    {
-        $app = parent::createApplication();
-
-        $app['config']->set('database.default', 'sqlite');
-        $app['config']->set('database.connections.sqlite', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-        ]);
-
-        return $app;
-    }
+    use DatabaseTransactions;
 
     /** @test */
     public function it_sends_english_email_when_founder_preferred_language_is_english()
     {
-        $founder = User::factory()->create([
-            'language' => 'en',
-            'email' => 'founder@example.com',
-        ]);
+        $founder = new User();
+        $founder->language = 'en';
 
         $sessionData = [
             'mentor_name' => 'John Doe',
@@ -62,10 +46,8 @@ class MentorshipSessionFounderNotificationTest extends TestCase
     /** @test */
     public function it_sends_arabic_email_when_founder_preferred_language_is_arabic()
     {
-        $founder = User::factory()->create([
-            'language' => 'ar',
-            'email' => 'founder@example.com',
-        ]);
+        $founder = new User();
+        $founder->language = 'ar';
 
         $sessionData = [
             'mentor_name' => 'John Doe',
@@ -96,10 +78,8 @@ class MentorshipSessionFounderNotificationTest extends TestCase
     /** @test */
     public function it_renders_offline_details_when_session_type_is_offline()
     {
-        $founder = User::factory()->create([
-            'language' => 'en',
-            'email' => 'founder@example.com',
-        ]);
+        $founder = new User();
+        $founder->language = 'en';
 
         $sessionData = [
             'mentor_name' => 'John Doe',

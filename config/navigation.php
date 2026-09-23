@@ -246,9 +246,11 @@ return function () {
       ];
       $menu['dashboard']['children'][] = ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true];
     }
-    if (app()->environment(['local', 'dev', 'test']))
+    if (app()->environment(['local', 'dev', 'test', 'beta']))
     {
-      $menu['admin']['children'][] = ['title' => 'custom_landing_pages', 'route' => 'landing-pages.index', 'menuOnly' => true];
+      $children = $menu['admin']['children'];
+      $customLandingPage = ['title' => 'custom_landing_pages', 'route' => 'landing-pages.index', 'menuOnly' => true];
+      $menu['admin']['children'] = array_merge(array_slice($children, 0, 1), [$customLandingPage], array_slice($children, 1));
     }
     if(auth()->check() && auth()->user()->hasRole('Admin')) {
       $menu['admin']['children'][] = ['title' => 'general', 'route' => 'settings.system_general_view' , 'menuOnly' => false];

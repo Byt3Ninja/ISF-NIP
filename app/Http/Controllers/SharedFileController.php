@@ -36,22 +36,28 @@ class SharedFileController extends Controller
         // Validation
         try {
             $request->validate([
-                'file'        => 'required|file|mimes:pptx,zip,docx,pdf|max:10240',
+                'file'        => 'required|file|mimes:ppt,pptx,rar,zip,doc,docx,pdf|max:10240',
                 'description' => 'nullable|string'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'status' => 'error',
+                'message' => __('validation.mimes'),
                 'errors' => $e->errors(),
             ], 422);
         }
 
-        // Ensure user belongs to a team
-        $team_member = DB::select("SELECT id, team_formation_id FROM team_members WHERE user_id = ?", [$user->id]);
+        // Ensure user belongs to a team — and is still ON it. Without the
+        // acceptInvition filter a removed member kept uploading into their old
+        // team, attributed to the stale membership row.
+        $team_member = DB::select(
+            "SELECT id, team_formation_id FROM team_members WHERE user_id = ? AND acceptInvition = 'accepted'",
+            [$user->id]
+        );
         if (empty($team_member)) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'No team found for user'
+                'message' => __('cycles.no_team_for_user'),
             ], 400);
         }
 
@@ -77,7 +83,7 @@ class SharedFileController extends Controller
         // Success Response
         return response()->json([
             'status'        => 'success',
-            'message'       => 'File uploaded successfully',
+            'message'       => __('cycles.file_upload_success'),
             'id'            => $sharedFile->id,
             'file'          => $sharedFile->file,
             'original_name' => $sharedFile->original_name,
@@ -141,10 +147,13 @@ class SharedFileController extends Controller
             return false;
         }
 
-        // Team member of this team formation.
+        // Team member of this team formation. Must still be ON the team:
+        // acceptInvition filters out removed / rejected / cancelled / pending
+        // rows, which previously kept granting access after a member was removed.
         $isMember = DB::table('team_members')
             ->where('team_formation_id', $teamFormationId)
             ->where('user_id', $user->id)
+            ->where('acceptInvition', 'accepted')
             ->exists();
         if ($isMember) {
             return true;
@@ -232,13 +241,13 @@ class SharedFileController extends Controller
 
             $file = SharedFile::find($id);
         if (!$file) {
-            return response()->json(['status' => 'error', 'message' => 'File not found'], 404);
+            return response()->json(['status' => 'error', 'message' => __('cycles.file_not_found')], 404);
         }
 
         // Authorization: only the file's uploader, the team leader, or an admin may delete.
         // Mirrors the delete button's visibility rule in manage-team.blade.php.
         if (!$this->canDeleteFile(auth()->user(), $file)) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+            return response()->json(['status' => 'error', 'message' => __('cycles.file_delete_unauthorized')], 403);
         }
 
         // Delete the physical file from the private disk
@@ -248,7 +257,7 @@ class SharedFileController extends Controller
 
         $file->delete();
 
-        return response()->json(['status' => 'success', 'message' => 'File deleted successfully']);
+        return response()->json(['status' => 'success', 'message' => __('cycles.file_delete_success')]);
 
     }
 }

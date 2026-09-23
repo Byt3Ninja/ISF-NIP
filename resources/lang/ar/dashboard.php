@@ -139,6 +139,7 @@ return [
   	'Your training sessions ready, click links to join upcoming sessions' => 'الجلسة التدريبية متاحة الآن، إضغط على الرابط للإنضمام للجلسة',
   	'Your traditional training' => 'لديك تدريب تقليدي',
   	'Join now' => 'إنضم الآن',
+  	'Meeting link unavailable' => 'رابط الاجتماع غير متاح',
     'Rate' => 'قيم',
     'service' => 'خدمة',
     'Did you get this service?' => 'هل تم تلقي هذه الخدمة؟',
@@ -255,5 +256,8 @@ return [
     'sp_requests' => 'الطلبات',
     'sp_top_share' => 'أعلى مشاركة',
     'sp_total' => 'إجمالي',
-    'sp_completion_rate' => 'معدل الإنجاز'
+    'sp_completion_rate' => 'معدل الإنجاز',
+
+  'meeting_passcode' => 'رمز مرور الاجتماع',
+  'passcode_is' => 'رمز المرور لهذا الاجتماع هو: ":code"',
 ];

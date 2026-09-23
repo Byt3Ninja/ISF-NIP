@@ -861,4 +861,6 @@ return [
 	'criteria_not_configured_title' => 'Bewertungskriterien nicht konfiguriert',
 	'criteria_not_configured_message' => 'Die Bewertungskriterien für diesen Screening-Schritt wurden noch nicht konfiguriert. Die Bewertung kann erst durchgeführt werden, wenn die Kriterien verfügbar sind.',
 
+	'You are not authorized to view this team.' => 'Sie sind nicht berechtigt, dieses Team anzuzeigen.',
+	'You are not authorized to edit the project idea.' => 'Sie sind nicht berechtigt, die Projektidee zu bearbeiten.',
 ];

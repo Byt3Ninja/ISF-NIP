@@ -237,6 +237,10 @@ $tabs = [
             title.addClass('is-invalid');
             title.next('.invalid-feedback').text('{{ $l == "en" ? "Title must be at least 3 characters" : "العنوان يجب أن يكون 3 أحرف على الأقل" }}');
             isValid = false;
+          } else if (title.val().length > {{ \App\Cycle::TITLE_MAX_LENGTH }} ) {
+            title.addClass('is-invalid');
+            title.next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 50 characters" : "العنوان لا يمكن أن يتجاوز 50 حرف" }}');
+            isValid = false;
           }
 
           // Validate title_ar
@@ -245,7 +249,7 @@ $tabs = [
             title_ar.addClass('is-invalid');
             title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Program Title in Arabic is required." : "عنوان البرنامج باللغة العربية مطلوب." }}');
             isValid = false;
-          } else if (title_ar.val().length > 50) {
+          } else if (title_ar.val().length > {{ \App\Cycle::TITLE_MAX_LENGTH }} ) {
             title_ar.addClass('is-invalid');
             title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed 50 characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز 50 حرف." }}');
             isValid = false;

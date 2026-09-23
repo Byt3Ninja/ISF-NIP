@@ -320,12 +320,8 @@
       return `
         <div class="col-12">
           <div class="text-center py-5 my-4 border rounded-3 border-dashed bg-light-subtle empty-state">
-            <div class="avatar avatar-lg bg-card mx-auto mb-4">
-              <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-                <i class="ti ti-search text-dark"></i>
-              </div>
-            </div>
-            <h5 class="mb-2 fw-semibold">${t.noResults(escapeHtml(term))}</h5>
+            <i class="ti ti-search text-secondary" style="font-size: 3.5rem; line-height: 1;"></i>
+            <h5 class="mb-2 fw-semibold mt-4">${t.noResults(escapeHtml(term))}</h5>
             <p class="text-secondary mb-4">${t.noResultsDesc}</p>
             <button type="button" class="btn btn-outline-secondary btn-sm" 
                     onclick="TeamInfo.renderList('${type}')">
@@ -357,12 +353,8 @@
     return `
       <div class="col-12">
         <div class="text-center py-5 my-4 border rounded-3 border-dashed bg-light-subtle empty-state">
-          <div class="avatar avatar-lg bg-card mx-auto mb-4">
-            <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-              <i class="ti ${icons[type]} text-dark"></i>
-            </div>
-          </div>
-          <h5 class="mb-2 fw-semibold">${titles[type]}</h5>
+          <i class="ti ${icons[type]} text-secondary" style="font-size: 5rem; line-height: 1;"></i>
+          <h5 class="mb-2 fw-semibold mt-4">${titles[type]}</h5>
           <p class="text-secondary mb-4">
             ${
               type === "founder"

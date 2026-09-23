@@ -25,6 +25,14 @@
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.rejection.informing') }}</p>
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.rejection.suggestion') }}</p>
 
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{ $submitNewRequestUrl }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: {{ $mainColor }}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ __('email.cta.submit_new_request') }}</a>
+                                </td>
+                            </tr>
+                        </table>
+
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
                             {{ __('email.regards') }}<br>
                             <strong>{{ __('email.team', ['platform_name' => $platformName]) }}</strong>

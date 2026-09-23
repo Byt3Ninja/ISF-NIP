@@ -8,6 +8,18 @@ use Illuminate\Support\Str;
 
 class LandingPage extends Model
 {
+    /**
+     * Maximum length of a landing page title and of the slug derived from
+     * it. The slug's DB column and the "Custom URL" validation both cap at
+     * 100, so the title must not be allowed to exceed the same limit or it
+     * would produce an unsaveable slug.
+     */
+    public const TITLE_MAX_LENGTH = 50;
+    public const SLUG_MAX_LENGTH = 100;
+    public const DESCRIPTION_MAX_LENGTH = 500;
+    public const PROGRAM_DESCRIPTION_MAX_LENGTH = 100;
+    public const STEPS_DESCRIPTION_MAX_LENGTH = 300;
+
     protected $fillable = [
         'created_by',
         'title',
@@ -57,6 +69,7 @@ class LandingPage extends Model
         'programs_title_tag_ar',
         'programs_description',
         'programs_description_ar',
+        'programs_order',
     ];
 
     protected $casts = [
@@ -66,6 +79,7 @@ class LandingPage extends Model
         'how_is_enabled' => 'boolean',
         'how_steps' => 'array',
         'programs_is_enabled' => 'boolean',
+        'programs_order' => 'array',
     ];
 
     public function createdBy()
@@ -139,14 +153,23 @@ class LandingPage extends Model
      */
     public static function generateSlug($title, $excludeId = null)
     {
-        $slug = Str::slug($title);
-        $originalSlug = $slug;
+        // Cap the base slug so that even with the "-<counter>" uniqueness
+        // suffix appended below the final slug never exceeds the column /
+        // validation limit (see self::SLUG_MAX_LENGTH).
+        $base = Str::limit(Str::slug($title), self::SLUG_MAX_LENGTH - 6, '');
+        $base = trim($base, '-');
+
+        if ($base === '') {
+            $base = 'landing-page';
+        }
+
+        $slug = $base;
         $counter = 1;
 
         while (static::where('slug', $slug)
             ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
             ->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $base . '-' . $counter;
             $counter++;
         }
 

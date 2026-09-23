@@ -14,6 +14,7 @@ use App\Jobs\ExportScreeneData;
 use App\Jobs\SendChangeCycleNotificationJob;
 use App\Notifications\ChangeCycle;
 use App\Notifications\JudgeAssignedToScreeningNotification;
+use App\Notifications\StartupMeetingTimeChangedNotification;
 use App\Notifications\TemplateEmail;
 use App\Screening;
 use App\ScreeningEvaluation;
@@ -24,6 +25,7 @@ use App\ScreeningEvaluationResults;
 use App\Factories\OnlineMeetingFactory;
 use App\Services\JudgeScheduleConflictService;
 use App\Services\PanelWindowService;
+use App\Services\ScreeningSlotService;
 use App\Services\WhatsAppService;
 use App\Step;
 use App\User;
@@ -37,6 +39,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
 
@@ -656,6 +659,58 @@ class ScreeningController extends Controller
 		$panels = $request->panels ?? [];
 		$step = Step::with('cycle.organization')->find($stepId);
 
+		// Past-schedule gate (GV-9618).
+		//
+		// `minDate: 'today'` on the date picker was the only guard, and it was
+		// cosmetic: client-side, and blind to the START TIME, which sat in a
+		// separate picker with no floor. Today at 13:00 therefore saved happily at
+		// 14:38. This is the authoritative check — the browser guards are an
+		// affordance, this is the rule.
+		//
+		// Two carve-outs keep ordinary editing working:
+		//
+		// 1. History panels are skipped. Their meetings have already happened and
+		//    their values are restored from the database above, not typed — so
+		//    they are past BY DEFINITION and would block every save on a step with
+		//    a finished panel.
+		//
+		// 2. A live panel is checked only when its date or start time CHANGED
+		//    against what is stored. An admin editing a past panel's roster or
+		//    meeting link must not be blocked by a time they never touched; only
+		//    an attempt to SCHEDULE something in the past is rejected.
+		foreach ($panels as $index => $panel) {
+			if (isset($panel['history_panel'])) {
+				continue;
+			}
+
+			$window = PanelWindowService::fromInput($panel);
+			if (!$window || !PanelWindowService::startsInPast($window, auth()->user())) {
+				continue;
+			}
+
+			// Unchanged against the stored row → the admin is editing something
+			// else on an already-past panel. Let it through.
+			$saved = Screening::where('step_id', $stepId)->where('panel', $index + 1)->first();
+			if ($saved) {
+				$savedDate = $saved->session_date instanceof \DateTimeInterface
+					? $saved->session_date->format('Y-m-d')
+					: $saved->session_date;
+				$savedStart = $saved->start_time ? substr($saved->start_time, 0, 5) : null;
+
+				$sameDate  = (string) $savedDate === (string) ($panel['session_date'] ?? '');
+				$sameStart = (string) $savedStart === substr((string) ($panel['start_time'] ?? ''), 0, 5);
+
+				if ($sameDate && $sameStart) {
+					continue;
+				}
+			}
+
+			return response()->json([
+				'success' => false,
+				'message' => __('admin.session_datetime_in_past', ['panel' => $index + 1]),
+			], 422);
+		}
+
 		// Judge double-booking gate (GV-8300). A judge cannot sit on two panels
 		// whose windows overlap, within this submission or against panels already
 		// saved on other screening/final steps of the same cycle.
@@ -738,6 +793,14 @@ class ScreeningController extends Controller
 			->map(fn ($row) => ((int) $row->panel) . ':' . ((int) $row->user_id))
 			->unique();
 
+		// Snapshot every scheduled startup's meeting slot BEFORE the rebuild, for
+		// the same reason as $judgesBefore: the delete below is a hard delete, so
+		// a line later there is nothing left to diff against (GV-8892 / GV-8893).
+		//
+		// Taken after the conflict gate has passed, so a save that comes back
+		// asking for confirmation notifies nobody.
+		$slotsBefore = $this->snapshotCompanySlots($stepId);
+
 		// Clear existing screenings for this step
 		Screening::where('step_id', $stepId)->delete();
 
@@ -808,7 +871,12 @@ class ScreeningController extends Controller
 					if (!empty($endTime)) {
 						$start = \Carbon\Carbon::parse($startDateTime);
 						$end = \Carbon\Carbon::parse($panel['session_date'] . ' ' . $endTime);
-						$duration = max($start->diffInMinutes($end), 30);
+						// GV-7381: store the window the admin actually entered. This
+						// used to floor the value at 30, so a 22:00-22:15 session was
+						// booked with Zoom -- and shown to the founder -- as 30 minutes.
+						// Sub-30 windows are routine (5/10/20-minute intervals are in
+						// active use), so the floor only ever corrupted the duration.
+						$duration = max($start->diffInMinutes($end), 1);
 					}
 
 					$meetingService = OnlineMeetingFactory::create();
@@ -867,7 +935,7 @@ class ScreeningController extends Controller
 					$companyDuration = $duration;
 
 					if ($interval !== null && !empty($panel['session_date']) && !empty($panel['start_time'])) {
-						$slot = \App\Services\ScreeningSlotService::slotFor(
+						$slot = ScreeningSlotService::slotFor(
 							$panel['session_date'],
 							$panel['start_time'],
 							$interval,
@@ -909,6 +977,7 @@ class ScreeningController extends Controller
 		}
 
 		$this->notifyNewlyAssignedJudges($stepId, $panels, $judgesBefore);
+		$this->notifyAffectedStartups($stepId, $panels, $slotsBefore);
 
 		return response()->json([
 			'success' => true,
@@ -982,6 +1051,295 @@ class ScreeningController extends Controller
 					'judge_id' => $judge->id,
 					'step_id'  => $stepId,
 					'error'    => $th->getMessage(),
+				]);
+			}
+		}
+	}
+
+	/**
+	 * Snapshot the scheduled meeting slot of every startup on a step.
+	 *
+	 * Keyed "companyId:panel" => ['company' => int, 'start' => 'Y-m-d H:i'|null,
+	 * 'panel' => int]. A company sitting in several panels holds ONE ENTRY PER
+	 * PANEL, because each panel is a separate meeting with its own time.
+	 *
+	 * Collapsing a company to a single (earliest) slot silently hid every change
+	 * to its other panels (GV-8892 follow-up): editing panel 2's interval, date
+	 * or roster left the company's earliest slot — on panel 3 — untouched, so the
+	 * diff saw no change and nobody was emailed.
+	 *
+	 * `screenings` holds one row PER JUDGE PER PANEL, so the rows are collapsed
+	 * to one entry per panel first — otherwise a panel with three judges would
+	 * compute every one of its companies' slots three times.
+	 *
+	 * @return array<string, array{company: int, start: ?string, panel: int}>
+	 */
+	private function snapshotCompanySlots(int $stepId): array
+	{
+		$slots = [];
+
+		$panelRows = Screening::where('step_id', $stepId)->get()->unique('panel');
+
+		foreach ($panelRows as $row) {
+			$companyIds = is_array($row->users) ? $row->users : (json_decode((string) $row->users, true) ?: []);
+
+			foreach (array_values($companyIds) as $position => $companyId) {
+				$companyId = (int) $companyId;
+
+				if (!$companyId) {
+					continue;
+				}
+
+				$slot = ScreeningSlotService::slotFor(
+					$row->session_date instanceof \DateTimeInterface
+						? $row->session_date->format('Y-m-d')
+						: $row->session_date,
+					$row->start_time,
+					isset($row->interval) ? (int) $row->interval : null,
+					$position,
+					$row->end_time
+				);
+
+				$start = !empty($slot['start']) ? $slot['start']->format('Y-m-d H:i') : null;
+
+				// One entry per (company, panel): each panel is its own meeting, so
+				// a company in several panels must be diffed panel by panel.
+				$panelNumber = (int) $row->panel;
+
+				$slots[$companyId . ':' . $panelNumber] = [
+					'company' => $companyId,
+					'start'   => $start,
+					'panel'   => $panelNumber,
+				];
+			}
+		}
+
+		return $slots;
+	}
+
+	/**
+	 * Which startups and which panel numbers the "Notify now" switch covers.
+	 *
+	 * Returns [companyId => true, [panelNumber, ...]]. The company map gates
+	 * startups still on a panel; the panel-number list gates startups REMOVED
+	 * from one, which by definition no longer appear in any panel's list.
+	 *
+	 * Panel numbers are 1-based here, matching how the Screening rows and
+	 * $stepList are numbered from this same $panels array.
+	 *
+	 * @return array{0: array<int, true>, 1: array<int, int>}
+	 */
+	private function notifyingPanelScope(array $panels): array
+	{
+		$companies = [];
+		$panelNumbers = [];
+
+		foreach ($panels as $index => $panel) {
+			// A finished meeting must not re-notify. Blade hides the switch on a
+			// history panel, but the payload is not a boundary — re-check here.
+			if (isset($panel['history_panel'])) {
+				continue;
+			}
+
+			if (!filter_var($panel['notify'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+				continue;
+			}
+
+			$panelNumbers[] = $index + 1;
+
+			foreach ((array) ($panel['companies'] ?? []) as $companyId) {
+				$companyId = (int) $companyId;
+
+				if ($companyId) {
+					$companies[$companyId] = true;
+				}
+			}
+		}
+
+		return [$companies, $panelNumbers];
+	}
+
+	/**
+	 * Email startups whose scheduled meeting time actually moved (GV-8892 /
+	 * GV-8893), and those whose meeting was cancelled by removing them from a
+	 * scheduled panel.
+	 *
+	 * Runs for both initial screening (stype 2) and final screening (stype 5) —
+	 * both save through addJudgingPanels(), and every role that can assign hits
+	 * the same endpoint, so one call site covers all of them.
+	 *
+	 * Only genuine changes notify. A startup whose slot is unmoved gets nothing,
+	 * which is what "the affected startup" means: with interval scheduling,
+	 * adding, removing or REORDERING startups reflows the positions after the
+	 * edit, so the set of affected startups is far wider than the ones the admin
+	 * actually touched — and narrower than the whole panel.
+	 *
+	 * Gated on the panel's "Notify now" switch, exactly like the judge emails:
+	 * the switch's own hint promises to email "the judges and startups in this
+	 * panel", and saving must never contact anyone unless asked. An admin
+	 * reordering startups with the switch off is making a quiet correction, and
+	 * the confirmation dialog is suppressed to match.
+	 *
+	 * @param  array<string, array{company: int, start: ?string, panel: int}>  $slotsBefore
+	 */
+	private function notifyAffectedStartups(int $stepId, array $panels, array $slotsBefore): void
+	{
+		[$notifiableCompanies, $notifyingPanelNumbers] = $this->notifyingPanelScope($panels);
+
+		if (empty($notifiableCompanies) && empty($notifyingPanelNumbers)) {
+			return;
+		}
+
+		$slotsAfter = $this->snapshotCompanySlots($stepId);
+
+		$scheduled = [];
+		$rescheduled = [];
+		$cancelled = [];
+
+		// Compared per (company, panel): a company in several panels holds one
+		// meeting per panel, and a change to any of them must reach it.
+		foreach ($slotsAfter as $key => $after) {
+			$companyId = $after['company'];
+			$before = $slotsBefore[$key] ?? null;
+
+			// Newly scheduled, or moved to a different time. A company that had no
+			// slot before and still has none is not a change.
+			if ($after['start'] === null) {
+				continue;
+			}
+
+			// Only startups sitting on a panel whose switch is on.
+			if (!isset($notifiableCompanies[$companyId])) {
+				continue;
+			}
+
+			// The panel this slot belongs to must itself be notifying, otherwise a
+			// quiet edit to panel 2 would ride out on panel 3's switch.
+			if (!in_array($after['panel'], $notifyingPanelNumbers, true)) {
+				continue;
+			}
+
+			if ($before !== null && $before['start'] === $after['start']) {
+				continue;
+			}
+
+			// "Rescheduled" is only true of a meeting the startup ALREADY had at a
+			// different time. Two cases are a first booking, not a move:
+			//
+			//  - the startup had no meeting on this step at all;
+			//  - it holds this slot on a panel it was not on before. A panel is
+			//    ONE meeting, so a second panel is an ADDITIONAL meeting (another
+			//    round) and any earlier one stays exactly where it was. Calling
+			//    that a reschedule reads as the first meeting having moved, and
+			//    the founder stops attending it.
+			//
+			// Only a slot on a panel the startup was already sitting on is a
+			// genuine move: that panel's times reflowed underneath it.
+			$bucket = ($before === null) ? 'scheduled' : 'rescheduled';
+
+			// Earliest changed slot wins when several of a company's panels moved,
+			// so it receives one mail naming its next meeting.
+			if ($bucket === 'scheduled') {
+				if (!isset($scheduled[$companyId]) || $after['start'] < $scheduled[$companyId]) {
+					$scheduled[$companyId] = $after['start'];
+				}
+			} elseif (!isset($rescheduled[$companyId]) || $after['start'] < $rescheduled[$companyId]) {
+				$rescheduled[$companyId] = $after['start'];
+			}
+		}
+
+		// Removal is decided by MEMBERSHIP, never by the slot: positionOf()
+		// returns 0 for a company it cannot find, so a removed startup and one
+		// moved into the first slot produce identical slot data. Only the
+		// company's absence from the rebuilt step distinguishes them.
+		foreach ($slotsBefore as $key => $before) {
+			$companyId = $before['company'];
+
+			if ($before['start'] === null) {
+				continue;
+			}
+
+			if (array_key_exists($key, $slotsAfter)) {
+				continue;
+			}
+
+			// A removed startup is on no panel any more, so it cannot be looked
+			// up in $notifiableCompanies. Gate it on the panel it was removed
+			// FROM instead — that panel's switch is the consent that covers it.
+			if (!in_array((int) $before['panel'], $notifyingPanelNumbers, true)) {
+				continue;
+			}
+
+			// Losing THIS panel's meeting is a cancellation even when the company
+			// still sits on another panel: the two are separate meetings, and the
+			// one in hand is genuinely gone.
+			//
+			// A reschedule already queued for this company wins, though: the same
+			// save moved another of its meetings, and one mail naming the new time
+			// says more than a bare cancellation.
+			if (isset($rescheduled[$companyId]) || isset($scheduled[$companyId])) {
+				continue;
+			}
+
+			$cancelled[$companyId] = $before['start'];
+		}
+
+		// A move reported for the same company wins over a first booking: one mail
+		// per save, naming the change to the meeting it already knew about.
+		$scheduled = array_diff_key($scheduled, $rescheduled);
+
+		if (empty($scheduled) && empty($rescheduled) && empty($cancelled)) {
+			return;
+		}
+
+		$this->sendStartupMeetingNotifications($stepId, $scheduled, 'scheduled');
+		$this->sendStartupMeetingNotifications($stepId, $rescheduled, 'rescheduled');
+		$this->sendStartupMeetingNotifications($stepId, $cancelled, 'cancelled');
+	}
+
+	/**
+	 * Deliver one batch of startup meeting notifications.
+	 *
+	 * The notifiable is the company OWNER — a Company is not itself notifiable.
+	 * Ownership lives on `users.company_id` (there is no `companies.user_id`),
+	 * so the owners are resolved from the users side in a single query.
+	 *
+	 * @param  array<int, string>  $companies  company id => slot start
+	 * @param  string  $variant  'scheduled', 'rescheduled' or 'cancelled'
+	 */
+	private function sendStartupMeetingNotifications(int $stepId, array $companies, string $variant): void
+	{
+		if (empty($companies)) {
+			return;
+		}
+
+		$owners = User::whereIn('company_id', array_keys($companies))
+			->get()
+			->keyBy('company_id');
+
+		foreach ($companies as $companyId => $slotStart) {
+			$owner = $owners->get($companyId);
+
+			if (!$owner) {
+				continue;
+			}
+
+			try {
+				$owner->notify(new StartupMeetingTimeChangedNotification(
+					$stepId,
+					(int) $companyId,
+					$slotStart,
+					$variant
+				));
+			} catch (\Throwable $th) {
+				// A mail failure must never fail the save: the schedule is already
+				// persisted, and throwing here would report an error for work that
+				// succeeded.
+				Log::error('Failed to notify startup of screening meeting change', [
+					'company_id' => $companyId,
+					'step_id'    => $stepId,
+					'variant'    => $variant,
+					'error'      => $th->getMessage(),
 				]);
 			}
 		}
@@ -1633,7 +1991,7 @@ class ScreeningController extends Controller
 		{
 			$cName = isset($criterion['name']) ? trim((string) $criterion['name']) : '';
 			$cLabel = $cName !== ''
-				? __('cycles.evaluation_named_criterion', ['name' => $cName])
+				? __('cycles.evaluation_named_criterion', ['name' => Str::limit($cName, 40)])
 				: __('cycles.evaluation_named_criterion_position', ['position' => $i + 1]);
 			$cWeightPresent = isset($criterion['weight']) && $criterion['weight'] !== '' && $criterion['weight'] !== null;
 
@@ -1641,9 +1999,9 @@ class ScreeningController extends Controller
 			{
 				if( $requireComplete ) { return __('cycles.evaluation_criterion_name_required_named', ['criterion' => $cLabel]); }
 			}
-			elseif( mb_strlen($cName) > 255 )
+			elseif( mb_strlen($cName) > ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH )
 			{
-				return __('cycles.evaluation_criterion_name_too_long_named', ['criterion' => $cLabel]);
+				return __('cycles.evaluation_criterion_name_too_long_named', ['criterion' => $cLabel, 'max' => ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]);
 			}
 			if( !$cWeightPresent )
 			{
@@ -1664,7 +2022,7 @@ class ScreeningController extends Controller
 			{
 				$sName = isset($sub['name']) ? trim((string) $sub['name']) : '';
 				$sLabel = $sName !== ''
-					? __('cycles.evaluation_named_subcriterion', ['name' => $sName])
+					? __('cycles.evaluation_named_subcriterion', ['name' => Str::limit($sName, 40)])
 					: __('cycles.evaluation_named_subcriterion_position', ['position' => $j + 1]);
 				$sWeightPresent = isset($sub['weight']) && $sub['weight'] !== '' && $sub['weight'] !== null;
 
@@ -1672,9 +2030,9 @@ class ScreeningController extends Controller
 				{
 					if( $requireComplete ) { return __('cycles.evaluation_subcriterion_name_required_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]); }
 				}
-				elseif( mb_strlen($sName) > 255 )
+				elseif( mb_strlen($sName) > ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH )
 				{
-					return __('cycles.evaluation_subcriterion_name_too_long_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel]);
+					return __('cycles.evaluation_subcriterion_name_too_long_named', ['subcriterion' => $sLabel, 'criterion' => $cLabel, 'max' => ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]);
 				}
 				if( !$sWeightPresent )
 				{

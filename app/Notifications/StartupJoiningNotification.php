@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Cycle;
+use App\Settings;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
@@ -100,15 +102,50 @@ class StartupJoiningNotification extends Notification implements ShouldQueue
     {
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
         $this->configureSmtp($smtpSettings);
+
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        // Branded with the organization that runs the program; the platform
+        // when the program has none.
+        $cycle = ! empty($this->data['cycle_id']) ? Cycle::with('organization')->find($this->data['cycle_id']) : null;
+        $programOrg = $cycle?->organization;
+        $orgData = $this->buildEmailOrganizationData($programOrg);
+        if ($programOrg && empty($programOrg->img_url)) {
+            $orgData['org_logo_url'] = null;
+        }
+
+        $programName = $locale === 'ar'
+            ? (trim((string) $cycle?->title_ar) ?: ($cycle?->title ?? ($this->data['cycle'] ?? '')))
+            : ($cycle?->title ?? ($this->data['cycle'] ?? ''));
+        $orgName = $programOrg
+            ? (trim((string) $programOrg->getAttribute('name_' . $locale)) ?: $programOrg->getAttribute('name_en'))
+            : $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+        }
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
         return (new MailMessage)
             ->from(config('mail.from.address'), config('mail.from.name'))
-            ->subject(__('admin.Startup_Joined_New_Program_subject'))
-            ->markdown('emails.startup_join', array_merge(['data' => $this->data], $orgData));
+            ->subject(__('email.startup_join_program_email.subject', ['program_name' => $programName], $locale))
+            ->view('emails.startup_join', array_merge([
+                'joinLocale' => $locale,
+                'joinProgramName' => $programName,
+                'joinPlatformName' => $platformName,
+                'joinOrgName' => $orgName,
+                'joinFounderName' => $firstName,
+                'joinGender' => strtolower(trim((string) $notifiable->gender)),
+                'joinDashboardUrl' => url('/dashboard'),
+            ], $orgData));
     }
 
     /**

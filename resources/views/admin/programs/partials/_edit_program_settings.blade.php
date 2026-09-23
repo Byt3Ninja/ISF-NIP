@@ -126,7 +126,7 @@
   <hr class="my-6" />
 
   <!-- Program Visibility -->
-  <h5>{{ __('cycles.Program Visibility') }}</h5>
+  <h5 id="program-settings-visibility">{{ __('cycles.Program Visibility') }}</h5>
   <div class="col-12">
     <div class="form-group mb-4">
       <label class="form-label fs-6 fw-semibold" for="is_public">{{ __('cycles.visibility') }}: </label>

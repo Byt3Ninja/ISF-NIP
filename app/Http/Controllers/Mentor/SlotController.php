@@ -176,29 +176,11 @@ class SlotController extends Controller
 										   ->where('tto', '>', date('H:i:s'));
 									  });
 								});
-						})
-						// اخفاء سلوتات الـ Period المحجوزة (approved أو pending)
-						->where(function ($outer) {
-							$outer->whereNull('date') // Weekly slots: ترجع دايماً
-								->orWhere(function ($periodQuery) {
-									$periodQuery->whereNotNull('date')
-										->whereNotExists(function ($sub) {
-											$sub->select(\DB::raw(1))
-												->from('mentorship_requests')
-												->where(function ($q) {
-													$q->where('approved', 'Yes')
-														->orWhereNull('approved');
-												})
-												->whereRaw('mentorship_requests.mentor_id = schedules.user_id')
-												->whereRaw('mentorship_requests.zoom_date >= CURDATE()')
-												->whereRaw("
-													DATE(mentorship_requests.zoom_date) = schedules.date
-													AND TIME(mentorship_requests.zoom_date)
-														BETWEEN schedules.tfrom AND schedules.tto
-												");
-										});
-								});
 						});
+						// Booked Period slots are intentionally NOT filtered out here: they are
+						// returned and rendered as locked/disabled on the frontend via
+						// blocked_intervals (see mentor bookings block below), so a manager sees
+						// why a slot is unavailable instead of it silently vanishing.
 
 		// Active-only filter
 		if ($request->has('active_only') && $request->active_only == 'true') {

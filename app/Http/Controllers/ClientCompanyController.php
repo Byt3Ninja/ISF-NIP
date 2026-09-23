@@ -901,6 +901,15 @@ class ClientCompanyController extends Controller
                     }
                 }
 
+                // Fresh registered users get a blank company auto-created above; make sure
+                // $company_instance and $id are set so every tab below (industry/sectors,
+                // employees, milestones, financials, ...) renders against that company
+                // instead of falling back to empty data.
+                $company_instance = $client?->company;
+                if ($company_instance) {
+                    $id = $company_instance->id;
+                }
+
                 $countries = Country::all();
                 $states = State::all();
                 $Setting = Settings::where('id', 1)->first();
@@ -1336,7 +1345,28 @@ class ClientCompanyController extends Controller
                 $result = new Company();
                 $msgtype = 'AddComp';
             }
-    
+
+            // Every tab except Startup Info is locked until the startup itself
+            // exists. editOrCreate() auto-creates a blank company row so the tab
+            // partials have something to render against, which means $result can
+            // be a stub with no name -- saving another tab onto it would attach
+            // data to a startup the founder has not created yet (GV-9668).
+            if ($data['CompanyN'] != CompanyFormStep::BasicInfo->value
+                && trim((string) $result->name_en) === '') {
+                // The classification tab posts over AJAX and treats any 2xx as a
+                // success, so a redirect here would surface a false "saved" toast.
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('admin.please_complete_startup_info'),
+                    ], 422);
+                }
+
+                return redirect()
+                    ->route('company.profile_view_mine')
+                    ->with(['msg' => 'please_complete_startup_info', 'class' => 'danger']);
+            }
+
             if ($data['CompanyN'] == CompanyFormStep::BasicInfo->value) {
 
                 $l = $request->input('locale', app()->getLocale());
@@ -1783,14 +1813,20 @@ class ClientCompanyController extends Controller
                 $result->about_challenges = $data['about_challenges'];
             }
             if ($data['CompanyN'] == CompanyFormStep::BusinessModel->value) {
+                // Business plan attachment is mandatory only when the company has none on file yet;
+                // once uploaded it can be kept without re-uploading on every save.
+                $businessPlanRules = ['file', 'mimes:pdf,doc,docx,ppt,pptx', 'max:20480']; // max limit to be defined later from admin panel settings
+                $businessPlanRules[] = empty($company?->business_plan) ? 'required' : 'nullable';
+
                 $request->validate([
                     'business_model' => 'required',
                     'business_model_description' => 'required|string|max:255',
-                    'business_plan' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx|max:20480', // max limit to be defined later from admin panel settings
+                    'business_plan' => $businessPlanRules,
                     'mvp_prototype_link' => 'nullable|url|max:500',
                 ], [
                     'business_model.required' => __('admin.business_model is required'),
                     'business_model_description.required' => __('admin.business_model_description is required'),
+                    'business_plan.required' => __('admin.this_field_is_required'),
                     'mvp_prototype_link.url' => __('startup.mvp_prototype_link_invalid_url'),
                     'mvp_prototype_link.max' => __('startup.mvp_prototype_link_invalid_url'),
                 ]);
@@ -2451,7 +2487,7 @@ class ClientCompanyController extends Controller
                     ]);
                 }
 
-                return redirect()->route('company.profile_view_mine', ['id' => $redirectId])->with(['msg' => __('startup_info_updated'), 'class' => 'success']);
+                return redirect()->route('company.profile_view_mine', ['id' => $redirectId])->with(['msg' => 'startup_info_updated', 'class' => 'success']);
             } else {
                 if ($data['CompanyN'] == CompanyFormStep::Classification->value && $request->ajax()) {
                     return response()->json([

@@ -84,10 +84,15 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         {
             if( !in_array(env('APP_ENV', 'local'), ['local']) )
             {
-                try {
-                    $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
-                } catch (\Throwable $th) {
-                    // throw $th;
+                // Swallow double-submits so one action never sends two verification emails.
+                $lockKey = 'verify-email-notify:' . $this->getKey();
+                if (\Illuminate\Support\Facades\Cache::add($lockKey, true, 10)) {
+                    try {
+                        $this->notify(new Notifications\VerifyEmailQueued($this->first_name_en.' ' .$this->last_name_en));
+                    } catch (\Throwable $th) {
+                        \Illuminate\Support\Facades\Cache::forget($lockKey);
+                        // throw $th;
+                    }
                 }
             }
             else
@@ -119,6 +124,33 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         'magic_login_sent_at' => 'datetime',
         'must_change_password' => 'boolean',
     ];
+
+    /**
+     * Atomically claim a one-time "email sent" marker column (e.g.
+     * `mentor_welcome_sent_at`). Returns true only for the single caller that
+     * flips it from NULL, so a retried flow never double-emails the user.
+     */
+    public function claimEmailSlot(string $column): bool
+    {
+        return static::where('id', $this->id)
+            ->whereNull($column)
+            ->update([$column => now()]) > 0;
+    }
+
+    /**
+     * Claim the "joined a program" email for a cycle. True only for the first
+     * caller per cycle, so re-submitting steps of the same program never
+     * re-sends it while joining a different program still does.
+     */
+    public function claimProgramJoinSlot(int $cycleId): bool
+    {
+        return static::where('id', $this->id)
+            ->where(function ($q) use ($cycleId) {
+                $q->whereNull('program_join_notified_cycle')
+                  ->orWhere('program_join_notified_cycle', '!=', $cycleId);
+            })
+            ->update(['program_join_notified_cycle' => $cycleId]) > 0;
+    }
 
     /**
      * Generate a fresh single-use magic-login nonce, mark this user as needing
@@ -396,6 +428,13 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     public function hasRole( $name ) 
     {
         if( env('PERMISSION_BYPASS', false) === true ) { return true; }
+        $name = trim( strtolower($name) );
+        $roles = $this->roles->pluck('default_for')->toArray();
+        $roles = array_map(function($n){ return trim( strtolower($n) ); }, $roles);
+        return in_array($name, $roles);
+    }
+    public function hasActualRole( $name ) 
+    {
         $name = trim( strtolower($name) );
         $roles = $this->roles->pluck('default_for')->toArray();
         $roles = array_map(function($n){ return trim( strtolower($n) ); }, $roles);

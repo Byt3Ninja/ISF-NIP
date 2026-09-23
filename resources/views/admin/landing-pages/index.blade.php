@@ -3,6 +3,17 @@
 @section('title', __('admin.Custom Landing Pages'))
 @section('subTitle', __('admin.Custom Landing Pages'))
 
+@section('style')
+  <style>
+  .line-clamp-5 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+  }
+  </style>
+@endsection
+
 @section('content')
   {{-- Header --}}
   <div class="card mb-6">
@@ -48,14 +59,14 @@
       </form>
     </div>
   </div>
-  
+
   {{-- Cards --}}
   <div class="row g-4">
     @if ($pages->isEmpty())
       <div class="col-12">
         <div class="card">
           <div class="card-body text-center">
-            <img src="/icons/not-found.svg" width="250" height="250" alt="No Result">
+            <img src="/icons/empty-state.svg" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
             <h4 class="mb-2">
               {{ __('landing.No_LandingPages') }}
             </h4>
@@ -86,7 +97,7 @@
                       <img
                         src="{{ $page->logo_url }}"
                         alt="logo"
-                        class="rounded object-fit-contain"
+                        class="rounded object-fit-cover w-px-50 h-px-50 flex-shrink-0"
                       />
                     @else
                       <div class="avatar-initial rounded">
@@ -96,8 +107,10 @@
                   </div>
                 <div>
 
-                  <h5 class="card-title mb-1">
-                    {{ $page->title }}
+                  <h5 class="card-title mb-1 line-clamp-1">
+                    <a href="{{ route('landing-pages.edit', $page->id) }}" class="text-dark">
+                      {{ Str::limit($page->title, 35) }}
+                    </a>
                   </h5>
 
                   <div class="badge rounded-pill bg-label-{{ $page->status ? 'info' : 'danger' }} mb-3 pb-1">
@@ -109,28 +122,29 @@
 
               </div>
 
-              <p class="card-text text-secondary">
+              <p class="card-text text-secondary line-clamp-5">
                 {{ ($l == 'ar' ? $page->description_ar : $page->description) ?: (__('landing.No_Description') . '...') }}
               </p>
 
-              <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
-                <div class="avatar">
-                  <div class="avatar-initial rounded-circle overflow-hidden">
-                    @if($page->createdBy && $page->createdBy->img_url)
-                      <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
-                    @else
-                      <i class="ti ti-user text-dark"></i>
-                    @endif
+              @if ($_user->hasAnyRole('admin'))
+                <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
+                  <div class="avatar">
+                    <div class="avatar-initial rounded-circle overflow-hidden">
+                      @if($page->createdBy && $page->createdBy->img_url)
+                        <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
+                      @else
+                        <i class="ti ti-user text-dark"></i>
+                      @endif
+                    </div>
                   </div>
-                </div>
-                <span class="text-body">{{ __('admin.created_by') }}</span>
-                <span
-                  class="fw-semibold text-dark"
-                >
-                  {{ $page->createdBy->name ?? '' }}
-                </span>
-              </a>
-
+                  <span class="text-body">{{ __('admin.created_by') }}</span>
+                  <span
+                    class="fw-semibold text-dark"
+                  >
+                    {{ $page->createdBy->name ?? '' }}
+                  </span>
+                </a>
+              @endif
             </div>
 
             <div class="card-footer bg-card border-top pt-6 d-flex justify-content-between align-items-center">

@@ -1,21 +1,24 @@
-<!DOCTYPE html>
-<html lang="{{ $l }}" dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
-  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-theme="theme-default"
-  data-assets-path="/vuexy/assets/" data-template="vertical-menu-template" data-style="light">
+<!doctype html>
+
+<html lang="{{ $l }}" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  class="light-style layout-wide customizer-hide" data-theme="theme-default"
+  data-assets-path="/vuexy/assets/" data-template="vertical-menu-template" data-style="light"
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-  <meta name="description" content="VI Login">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+  <meta name="description" content="Sign in to your account">
   <meta name="author" content="info@growthlabs.app">
-  <title>{{ __('Login Page') }} - {{ App\Settings::findorfail(1)->first('title')->title }} - v1</title>
+  <title>
+    {{ $l == 'en' ? 'Sign In' : 'تسجيل الدخول'}}
+  </title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
 
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
@@ -24,30 +27,41 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/fontawesome.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/tabler-icons.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/flag-icons.css" />
-  <!-- End Icons -->
 
   <!-- Core CSS -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
 
-  <!-- Form Validation CSS -->
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/node-waves/node-waves.css" />
+
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
+  <!-- Vendor -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 
   <!-- Page CSS -->
+  <!-- Page -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
 
   <style>
-    #switcher-container {
-      position: absolute;
-      top: 1rem;
-      width: 100px;
+    .authentication-wrapper.authentication-cover .authentication-inner {
+      display: flex;
+      align-items: stretch;
     }
-    
-    @media screen and (min-width: 768px) {
-      #switcher-container {
-        width: 120px;
-      }
+
+    .authentication-wrapper.authentication-cover .authentication-inner .auth-cover-bg {
+      height: 100vh;
+      min-height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    /* Prevent the form column from stretching wider than its grid share */
+    .authentication-wrapper.authentication-cover .authentication-inner > .d-flex {
+      min-width: 0;
     }
   </style>
 
@@ -61,11 +75,8 @@
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="/vuexy/assets/js/config.js"></script>
 </head>
-<!-- END: Head-->
-<!-- BEGIN: Body-->
 
 <body>
-  <!-- Content -->
   @php
     $setting = App\Settings::first();
     $logo = $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png');
@@ -75,213 +86,266 @@
       ? 'الرجاء تسجيل الدخول إلى حسابك وابدأ المغامرة'
       : 'Please sign-in to your account and start the adventure';
   @endphp
+  <!-- Content -->
 
-  <!-- Toggle theme and language -->
-  <nav 
-    class="container-xxl navbar navbar-expand-xl align-items-center"
-    style="right: 1rem;"
-    id="switcher-container"
-  >
-    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-      <ul class="navbar-nav flex-row align-items-center ms-auto">
-        <!-- Language -->
-        <li class="nav-item dropdown-language dropdown" style="position: relative;">
-          <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
-            href="javascript:void(0);" data-bs-toggle="dropdown">
-            <i class="ti ti-language rounded-circle ti-md"></i>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end" 
-            style="position: absolute; left: -8rem; top: 2rem;"
-          >
-            <li class="dropdown dropdown-language nav-item">
-              @if ($l == 'ar')
-                <a class="dropdown-item" href="/lang/en">
-                  <i class="flag-icon flag-icon-us"></i>
-                  <span class="selected-language">English</span>
-                </a>
-              @else
-                <a class="dropdown-item" href="/lang/ar">
-                  <i class="flag-icon flag-icon-sa"></i>
-                  <span class="selected-language">عربي</span>
-                </a>
-              @endif
-            </li>
-          </ul>
-        </li>
-        <!--/ Language -->
+  <div class="authentication-wrapper authentication-cover">
+    <!-- Language & Style Switchers -->
+    <div class="d-flex align-items-center gap-2 position-fixed top-0 end-0 p-4 p-sm-6" style="z-index: 1200">
+      <!-- Language -->
+      <div class="dropdown-language dropdown">
+        <a class="btn btn-primary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
+          data-bs-toggle="dropdown">
+          <i class="ti ti-language ti-md text-white"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          @if ($l == 'ar')
+            <a class="dropdown-item" href="/lang/en">
+              <i class="flag-icon flag-icon-us"></i>
+              <span class="selected-language">English</span>
+            </a>
+          @else
+            <a class="dropdown-item" href="/lang/ar">
+              <i class="flag-icon flag-icon-sa"></i>
+              <span class="selected-language">عربي</span>
+            </a>
+          @endif
+        </ul>
+      </div>
+      <!--/ Language -->
 
-        <!-- Style Switcher -->
-        <li class="nav-item dropdown-style-switcher dropdown" style="position: relative;">
-          <a class="nav-link btn-icon rounded-pill dropdown-toggle hide-arrow"
-            href="javascript:void(0);" data-bs-toggle="dropdown">
-            <i class="ti ti-md"></i>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end dropdown-styles" 
-            style="position: absolute; left: -8rem; width: 150px;"
-          >
-            <li>
-              <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
-                <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
-                <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
-                <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-        <!-- / Style Switcher-->
-      </ul>
+      <!-- Style Switcher -->
+      <div class="dropdown-style-switcher dropdown">
+        <a class="btn btn-primary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
+          data-bs-toggle="dropdown">
+          <i class="ti ti-md text-white"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+              <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+              <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+              <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <!--/ Style Switcher -->
     </div>
-  </nav>
-  <!-- Toggle theme and language -->  
-  <div class="container-xxl">
-    <div class="authentication-wrapper authentication-basic container-p-y">
-      <div class="authentication-inner py-md-6 mt-10 mt-md-0">
-        <!-- Login -->
-        <div class="card">
-          <div class="px-4 px-md-4 py-6">
+    <!--/ Language & Style Switchers -->
+
+    <!-- Logo -->
+    <a href="/dashboard" class="app-brand auth-cover-brand">
+      <img src="{{$logo}}" alt="logo" width="32">
+      <span class="app-brand-text demo text-white fw-bold">Growthlabs</span>
+    </a>
+    <!-- /Logo -->
+
+    <div class="authentication-inner row m-0">
+      <!-- /Right Text -->
+      <div class="d-none d-lg-flex col-lg-7 p-0">
+        <div class="auth-cover-bg d-flex justify-content-center align-items-center text-center p-6" style="
+              background-image:
+                radial-gradient(
+                  circle at 12% 12%,
+                  rgba(255, 255, 255, 0.18) 0%,
+                  rgba(255, 255, 255, 0.05) 32%,
+                  rgba(255, 255, 255, 0) 56%
+                ),
+                radial-gradient(circle at 90% 88%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 45%),
+                linear-gradient(155deg, #6d5df8 0%, #7367f0 42%, #a08eff 100%);
+            ">
+          <div class="w-px-440">
             <!-- Logo -->
-            <div class="app-brand justify-content-center mb-4">
-              <a href="/dashboard" class="app-brand-link">
-                <img src="{{ $logo }}" alt="avatar"  width="150" class="rounded">
-              </a>
-            </div>
-            <!-- /Logo -->
-            <h4 
-              class="mb-2 text-center lh-base text-capitalize"
-              style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-            >
-              {!! str_replace('Platform', 'Platform <br/>', $formHeading) !!}
-            </h4>
-            <p class="mb-6 text-center">{{ $formSubHeading }}</p>
-
-            <!-- Auth Errors -->
-            <div>
-              @if (session('error'))
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="alert alert-danger">
-                      <ul>
-                        <li>{{ session('error') }} </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              @endif
-
-              @if (session('Reset'))
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="alert alert-success">
-                      <ul>
-                        <li>{{ session('Reset') }} </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              @endif
-    
-              @if ($errors->has('social'))
-                <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                  {{ __('You already have an account, Login with your email, or reset your account') }}!!
-                </div>
-              @elseif ($errors->has('email'))
-                <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                  {{ $l == 'ar' ? 'بيانات الاعتماد هذه غير متطابقة مع البيانات المسجلة لدينا.' : 'These credentials do not match our records.' }}
-                </div>
-              @elseif ($errors->has('password'))
-                <div class="text-danger mb-6 bg-label-danger p-3 rounded">
-                  {{ $errors->first('password') }}
-                </div>
-              @endif
-            </div>
-
-            <form id="formAuthentication" class="mb-4 px-md-10" method="POST" action="{{ route('login') }}">
-              @csrf
-              <div class="mb-6">
-                <label for="email" class="form-label fs-6 fw-semibold">{{ __('auth.E-Mail') }}</label>
-                <input value="{{ old('email') }}" name="email" type="email" class="form-control" id="email"
-                  placeholder="{{ __('auth.E-Mail') }}" required autocomplete="off" />
-              </div>
-              <div class="mb-6 form-password-toggle">
-                <label class="form-label fs-6 fw-semibold" for="password">{{ __('auth.Password') }}</label>
-                <div class="input-group input-group-merge shadow-none">
-                  <input 
-                    type="password" 
-                    id="password" 
-                    class="form-control" 
-                    placeholder="{{ __('auth.Password') }}"
-                    name="password" 
-                    required 
-                    aria-describedby="password" 
-                    autocomplete="current-password" 
-                  />
-                  <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
-                </div>
-              </div>
-              <div class="my-4">
-                <div class="d-flex justify-content-between">
-                  <div class="form-check mb-0 ms-2">
-                    <input class="form-check-input" type="checkbox" id="remember-me"
-                      {{ old('remember') ? 'checked' : '' }} name="remember" />
-                    <label class="form-check-label" for="remember-me">{{ __('auth.stay_logged') }}</label>
-                  </div>
-                  <a href="{{ route('password.request') }}">
-                    <p class="mb-0">{{ __('Forgot Password?') }}</p>
-                  </a>
-                </div>
-              </div>
-              <div class="mb-4">
-                <button id="login-submit-btn" class="btn btn-primary d-grid w-100" type="submit">{{ __('auth.Login') }}</button>
-              </div>
-            </form>
-
-            <p class="text-center">
-              <span>
-                {{ __('auth.New on our platform') }}
+            <a href="/dashboard" class="app-brand d-inline-flex justify-content-center mb-8 text-decoration-none">
+              <span class="app-brand-logo demo">
+                <img src="{{$logo}}" alt="logo" width="32">
               </span>
-              <a href="{{ route('register') }}">
-                <span>{{ __('auth.Create_new_account') }}</span>
-              </a>
+              <span class="app-brand-text demo text-white fw-bold">Growthlabs</span>
+            </a>
+            <!-- /Logo -->
+
+            <h3 class="text-white fw-bold mb-2">{{ $l == 'ar' ? 'مرحبًا بعودتك' : 'Welcome back' }}</h3>
+            <p class="text-white opacity-75 fw-medium mb-8">
+              {{ $l == 'ar' ? 'سجّل الدخول للوصول إلى لوحة التحكم والمجتمع والمزيد' : 'Sign in to access your dashboard, community and more.' }}
             </p>
-            @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') ||(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
-            <div class="divider my-6 mx-auto" style="width: 80%;">
-              <div class="divider-text">{{ __('auth.or') }}</div>
+
+            <!-- Sign up -->
+            <div class="bg-white rounded-3 p-6 text-center shadow-none">
+              <p class="fw-medium text-heading mb-1">{{ __('auth.New on our platform') }}</p>
+              <p class="text-muted small mb-6">{{ __('auth.connect_text') }}</p>
+              <a href="{{ route('register') }}" class="btn btn-primary d-grid w-100">{{ __('auth.create_account') }}</a>
             </div>
-            @endif
-            @php $data = request('data') ?? '2521'; @endphp
-            <div class="d-flex justify-content-center">
-              @if(isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled')
-              <a href="{{ route('integrations.auth_linkedin_login', $data) }}" class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
-                <i class="fa-brands fa-linkedin-in text-white"></i> 
-              </a>
-              @endif
-             @if(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled')
-              <a href="{{ url('/auth/redirect/google') }}" class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
-                <img src="/icons/google-icon.svg" alt="google" width="20" height="20">
-              </a>
-            @endif
-            </div>
+            <!-- /Sign up -->
           </div>
         </div>
       </div>
+      <!-- / Right Text -->
+
+      <!-- /Login -->
+      <div class="d-flex col-12 col-lg-5 align-items-center authentication-bg p-sm-12 p-6">
+        <div class="w-px-460 mx-auto mt-12 pt-5">
+          <h4 class="mb-1">{{ $formHeading }}</h4>
+          <p class="mb-6">{{ $formSubHeading }}</p>
+
+          <!-- Auth Errors -->
+          <div>
+            @if (session('error'))
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="alert alert-danger">
+                    <ul>
+                      <li>{{ session('error') }} </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            @endif
+
+            @if (session('Reset'))
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="alert alert-success">
+                    <ul>
+                      <li>{{ session('Reset') }} </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            @endif
+
+            @if ($errors->has('social'))
+              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                {{ __('You already have an account, Login with your email, or reset your account') }}!!
+              </div>
+            @elseif ($errors->has('email'))
+              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                {{ $l == 'ar' ? 'بيانات الاعتماد هذه غير متطابقة مع البيانات المسجلة لدينا.' : 'These credentials do not match our records.' }}
+              </div>
+            @elseif ($errors->has('password'))
+              <div class="text-danger mb-6 bg-label-danger p-3 rounded">
+                {{ $errors->first('password') }}
+              </div>
+            @endif
+          </div>
+
+          <form id="formAuthentication" class="mb-6" method="POST" action="{{ route('login') }}">
+            @csrf
+
+            <!-- Email -->
+            <div class="mb-6">
+              <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
+              <div class="input-group input-group-merge">
+                <span class="input-group-text"><i class="ti ti-mail"></i></span>
+                <input type="email" class="form-control" id="email" name="email"
+                  value="{{ old('email') }}" placeholder="{{ __('auth.E-Mail') }}" autocomplete="off" required />
+              </div>
+              @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+
+            <!-- Password -->
+            <div class="mb-6 form-password-toggle">
+              <label class="form-label" for="password">{{ __('auth.Password') }}</label>
+              <div class="input-group input-group-merge">
+                <input type="password" id="password" class="form-control" name="password"
+                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                  aria-describedby="password" autocomplete="current-password" required />
+                <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              </div>
+              @error('password')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+
+            <!-- Remember & Forgot -->
+            <div class="my-8">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="form-check mb-0">
+                  <input class="form-check-input" type="checkbox" id="remember-me"
+                    {{ old('remember') ? 'checked' : '' }} name="remember" />
+                  <label class="form-check-label" for="remember-me">{{ __('auth.stay_logged') }}</label>
+                </div>
+                <a href="{{ route('password.request') }}">
+                  <p class="mb-0 fs-6">{{ __('Forgot Password?') }}</p>
+                </a>
+              </div>
+            </div>
+
+            <button id="login-submit-btn" type="submit" class="btn btn-primary btn-lg d-grid w-100">
+              {{ __('auth.Sign In') }}
+            </button>
+          </form>
+
+          <p class="text-center">
+            <span>
+              {{ __('auth.New on our platform') }}
+            </span>
+            <a href="{{ route('register') }}">
+              <span>{{ __('auth.Create_new_account') }}</span>
+            </a>
+          </p>
+
+          @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') || (isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
+            <div class="divider my-6">
+              <div class="divider-text">{{ __('auth.or') }}</div>
+            </div>
+          @endif
+
+          @php $data = request('data') ?? '2521'; @endphp
+          @if ((isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled') || (isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled'))
+            <div class="d-flex justify-content-center">
+              @if(isset($setting) && ($setting->LINKEDIN_LOGIN ?? 'disabled') === 'enabled')
+                <a href="{{ route('integrations.auth_linkedin_login', $data) }}"
+                  class="btn btn-sm btn-icon rounded-circle btn-text-facebook me-3 shadow-sm" style="background-color: #0077b5;">
+                  <i class="fa-brands fa-linkedin-in text-white"></i>
+                </a>
+              @endif
+
+              @if(isset($setting) && ($setting->GOOGLE_LOGIN ?? 'disabled') === 'enabled')
+                <a href="{{ url('/auth/redirect/google') }}"
+                  class="btn btn-sm bg-white border btn-icon rounded-circle btn-text-google-plus shadow-sm">
+                  <img src="/icons/google-icon.svg" alt="google" width="20" height="20">
+                </a>
+              @endif
+            </div>
+          @endif
+        </div>
+      </div>
+      <!-- /Login -->
     </div>
   </div>
 
+  <!-- / Content -->
+
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+
   <script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="/vuexy/assets/vendor/libs/popper/popper.js"></script>
   <script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
+  <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
+  <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
+  <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+  <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
+  <script src="/vuexy/assets/vendor/js/menu.js"></script>
+
+  <!-- endbuild -->
 
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
 
@@ -377,6 +441,13 @@
             submitButton: new FormValidation.plugins.SubmitButton(),
             defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
             autoFocus: new FormValidation.plugins.AutoFocus()
+          },
+           init: instance => {
+            instance.on('plugins.message.placed', function (e) {
+              if (e.element.parentElement.classList.contains('input-group')) {
+                e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+              }
+            });
           }
         });
 

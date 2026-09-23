@@ -207,6 +207,7 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  @include('partials.flatpickr-locale')
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 
   <!-- Page JS -->

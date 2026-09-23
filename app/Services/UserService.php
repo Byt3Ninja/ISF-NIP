@@ -124,9 +124,25 @@ class UserService
 				Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
 				Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
 
-				if($user->hasRole('Judger')) { $user->notify(new WelcomeJudgerNotification($user)); }
-				elseif($user->hasRole('mentor')) { $user->notify(new WelcomeMentorNotification($user, $data['password'])); }
-				else { $user->notify(new WelcomeUserNotification($user, $data['password'])); }
+				$isJudge = $user->hasRole('Judger')
+					|| $user->hasRole('judge')
+					|| in_array(strtolower($data['role'] ?? ''), ['judger', 'judge']);
+
+				if($isJudge) {
+					if ($user->claimEmailSlot('judge_welcome_sent_at')) {
+						$user->notify(new WelcomeJudgerNotification($user));
+					}
+				}
+				elseif($user->hasRole('mentor') || strtolower($data['role'] ?? '') === 'mentor') {
+					if ($user->claimEmailSlot('mentor_welcome_sent_at')) {
+						$user->notify(new WelcomeMentorNotification($user, $data['password']));
+					}
+				}
+				else {
+					if ($user->claimEmailSlot('user_welcome_sent_at')) {
+						$user->notify(new WelcomeUserNotification($user, $data['password']));
+					}
+				}
 			}
 			return $result;
 		} catch (\Throwable $e) {

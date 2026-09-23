@@ -872,7 +872,7 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       if (list) {
         list.innerHTML =
           '<li class="text-center p-4"><small class="text-muted">' +
-          (window.CHAT_I18N ? window.CHAT_I18N.teamChatWaiting : '') +
+          escapeHtml(window.CHAT_I18N?.teamChatWaiting || '') +
           '</small></li>';
       }
       const header = document.querySelector('.chat-history-header .chat-contact-info h6');
@@ -1119,6 +1119,12 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
       const messagesContainer = document.getElementById('chat-messages');
       
       if (!messages || messages.length === 0) {
+        // A leader-only team has no one to chat with yet, so the generic
+        // "no messages" copy is wrong here — show the waiting notice instead.
+        if (!window.CHAT_HAS_TEAMMATES) {
+          showTeamWaitingEmptyState();
+          return;
+        }
         messagesContainer.innerHTML = `
           <li class="text-center p-4">
             <small class="text-muted">${escapeHtml(window.CHAT_I18N?.noMessagesInConversation || 'No messages in this conversation yet')}</small>
@@ -2189,8 +2195,18 @@ Hey there, we’re just writing to let you know that you’ve been subscribed to
         // Auto-open last conversation and rejoin channel after refresh
         const lastConvIdStr = localStorage.getItem(LS_KEYS.lastConversationId);
         const lastConvId = lastConvIdStr ? parseInt(lastConvIdStr) : null;
-        if (lastConvId) {
-          loadConversation(lastConvId);
+        if (lastConvId && window.CHAT_HAS_TEAMMATES) {
+          // GV-7375: the stored id may point at a DM with a member who has since
+          // been removed from the team. Only restore it if the server still lists
+          // it (or it is one of my team groups); otherwise forget it.
+          const stillListed =
+            (conversations || []).some(c => c.id === lastConvId) ||
+            (groups || []).some(g => g.id === lastConvId);
+          if (stillListed) {
+            loadConversation(lastConvId);
+          } else {
+            try { localStorage.removeItem(LS_KEYS.lastConversationId); } catch (e) {}
+          }
         }
       } catch (error) {
         console.error('Failed to initialize chat system:', error);

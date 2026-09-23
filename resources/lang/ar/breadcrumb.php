@@ -172,4 +172,11 @@ return [
     'profile_view_user' => 'عرض الملف الشخصي',
     'view_profile' => 'عرض الملف الشخصي',
     'profile_service_provider' => 'ملف مقدم الخدمة',
+
+    // Landing Pages
+    'custom_landing_pages' => 'الصفحات الرئيسية العامة',
+    'public_landing-page' => 'الصفحات الرئيسية العامة',
+
+    // Programs
+    'view_program' => 'عرض البرنامج',
 ];

@@ -7,6 +7,10 @@
   .companies-picker-popover .popover-body {
     padding: 0;
   }
+  
+  .swal2-container {
+    z-index: 9999 !important;
+  }
 
   /* The picker trigger is a <button>, so Bootstrap's .is-invalid (which only
      styles form controls) leaves it unmarked. Border it explicitly so the
@@ -287,7 +291,13 @@
                     <button type="button"
                       class="btn btn-outline-primary d-flex align-items-center justify-content-between w-100 companies-picker-trigger"
                       data-panel-index="{{ $index }}" data-off-step='{{ json_encode($panelOffStepIds->values()->all()) }}'
-                      data-selected='{{ json_encode($panelSelectedIds) }}'>
+                      data-selected='{{ json_encode($panelSelectedIds) }}'
+                      {{-- The startup list as SAVED, in submission order (off-step hidden
+                           inputs render first, then the picker's selections). Compared
+                           against the live inputs on submit to detect an add, a removal
+                           or a REORDER, any of which reflows interval slots
+                           (GV-8892 / GV-8893). --}}
+                      data-companies-baseline='{{ json_encode($panelOffStepIds->values()->concat($panelSelectedIds)->all()) }}'>
                       <span class="companies-summary text-truncate me-2">{{ __('admin.select_startups') }}</span>
                       <i class="ti ti-chevron-down"></i>
                     </button>
@@ -304,14 +314,18 @@
 
                 <hr class="my-4">
 
-                <!-- Session -->
+                @php
+                  $sessionEnabled = !empty($panel['session']) && ($panel['session']['checked'] ?? false) == true;
+                @endphp
+
                 <div class="form-check form-switch mb-3">
-                  <input class="form-check-input session-toggle" type="checkbox" id="session-toggle-{{ $index + 1 }}" {{ (!empty($panel['session']) && $panel['session']['checked'] == true) ? 'checked' : '' }}>
+                  <input class="form-check-input session-toggle" type="checkbox" id="session-toggle-{{ $index + 1 }}"
+                    {{ $sessionEnabled ? 'checked' : '' }}>
                   <label class="form-check-label fw-semibold">{{ __('admin.screening.schedule_session') }}</label>
                 </div>
 
                 <div class="session-inputs border rounded p-4"
-                  style="display: {{ !empty($panel['session']) ? 'block' : 'none' }}">
+                  style="display: {{ $sessionEnabled ? 'block' : 'none' }}">
 
                   <label class="switch switch-square mb-3">
                     <input type="checkbox" class="switch-input interval-toggle" id="interval-toggle-{{ $index + 1 }}" {{ !empty($panel['session']['interval_checked']) ? 'checked' : '' }}>
@@ -625,10 +639,10 @@
       };
 
       const buildCompaniesPopoverHtml = ($trig) => {
-        const rangeValues = $trig.data('range-values') || {};
-        const hasRange = rangeValues.from != null || rangeValues.to != null;
+        const hasSelection = ($trig.data('selected') || new Set()).size > 0;
         const total = allCompanies.length;
         const search = String($trig.data('search') || '');
+        const rangeValues = $trig.data('range-values') || {};
         return `
         <div class="companies-popover" data-panel-index="${$trig.data('panel-index')}">
           <div class="p-3 border-bottom">
@@ -640,7 +654,7 @@
           <div class="auto-range p-3 border-bottom bg-card ${$trig.attr('data-readonly') === '1' ? 'd-none' : ''}">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <span class="fw-semibold small text-uppercase">${rangeLabels.title}</span>
-              <a href="javascript:void(0);" class="clear-range small fw-medium ${hasRange ? '' : 'd-none'}">${rangeLabels.clear}</a>
+              <a href="javascript:void(0);" class="clear-range small fw-medium ${hasSelection ? '' : 'd-none'}">${rangeLabels.clear}</a>
             </div>
             <div class="d-flex align-items-end flex-wrap gap-2">
               <div class="flex-grow-1" style="min-width: 70px;">
@@ -719,8 +733,7 @@
         const $pop = $(`.companies-popover[data-panel-index="${panelIndex}"]`);
         if (!$pop.length) return;
         $pop.find('.companies-list').html(buildCompaniesRows($trig));
-        const rangeValues = $trig.data('range-values') || {};
-        $pop.find('.clear-range').toggleClass('d-none', rangeValues.from == null && rangeValues.to == null);
+        $pop.find('.clear-range').toggleClass('d-none', ($trig.data('selected') || new Set()).size === 0);
       };
 
       // Select All acts on what the user can currently SEE. With a search active
@@ -791,6 +804,18 @@
       // shown) rather than private instance internals, so this reliably finds only
       // popovers that are actually open right now.
       $(document).on('click.companiesPickerOutside', (e) => {
+        // A Swal dialog (duplicate-assignment confirm, range confirm) renders in its
+        // own container appended to <body>, outside both the trigger and the popover's
+        // tip element. Without this guard, clicking Confirm/Cancel registers as an
+        // "outside" click and closes the popover out from under the dialog.
+        if ($(e.target).closest('.swal2-container').length) return;
+
+        // "Select all" / "Deselect all" sits next to the label, above the picker
+        // button — outside the trigger and outside the popover's tip element, same
+        // as the Swal buttons above. Without this guard, clicking it closes the
+        // popover before toggleAllCompanies() finishes updating it.
+        if ($(e.target).closest('.select-all-toggle').length) return;
+
         $('.companies-picker-trigger').each(function () {
           const tipId = this.getAttribute('aria-describedby');
           if (!tipId) return; // this trigger's popover isn't open
@@ -801,9 +826,76 @@
           if (instance) instance.hide();
         });
       });
-
+      
       // True for controls inside a finished (History) panel.
       const inHistoryPanel = (el) => $(el).closest('.accordion-item').attr('data-history') === '1';
+
+      // ---- GV-9618: past-date/time guards -------------------------------
+      //
+      // The date picker's `minDate: 'today'` was the only past guard, and it is
+      // cosmetic: the START TIME picker is separate and had no floor, so today
+      // at 13:00 saved happily at 14:38. These helpers add the missing half on
+      // the client; ScreeningController enforces the same rule on the server.
+
+      // Local "now" as {date: 'Y-m-d', minutes: since-midnight}. Built from the
+      // browser clock deliberately — the fields are wall-clock values the admin
+      // reads off the same clock, matching how MeetingWindowService treats slot
+      // times. The server re-checks anyway, so a skewed client cannot let a past
+      // session through.
+      const clockNow = () => {
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return {
+          date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+          minutes: d.getHours() * 60 + d.getMinutes()
+        };
+      };
+
+      // A start time is in the past only when the session is dated TODAY. A
+      // future date makes any time legal, and a past date is already rejected by
+      // the date picker and the server rule.
+      const startTimeIsPast = (dateVal, timeVal) => {
+        const now = clockNow();
+        if (!dateVal || !timeVal || dateVal !== now.date) return false;
+        const minutes = parseTime(timeVal);
+        return minutes !== null && minutes < now.minutes;
+      };
+
+      // True when the admin actually edited this panel's date or start time.
+      //
+      // This is the regression guard. A saved session whose meeting has already
+      // happened is still editable — the admin may be fixing its roster or
+      // toggling notify — and blocking that save on a past time the admin never
+      // touched would break ordinary edits. So the past check only fires on a
+      // value that CHANGED.
+      //
+      // Reuses the baseline trick panelChangeKind() documents: the `value`
+      // ATTRIBUTE keeps what blade rendered while .val() reads what the admin
+      // now has, and flatpickr writes only the property, so the two stay
+      // independent.
+      const startChanged = ($p) => ['session_date', 'start_time'].some((name) => {
+        const $input = $p.find(`[name*="[${name}]"]`).first();
+        if (!$input.length) return false;
+        return ($input.attr('value') || '').trim() !== ($input.val() || '').trim();
+      });
+
+      // Constrain the start picker to the remainder of the day when the panel is
+      // dated today, and lift the constraint otherwise. Purely an affordance —
+      // it makes the past unpickable rather than merely rejected.
+      const applyStartTimeFloor = ($panel) => {
+        if ($panel.attr('data-history') === '1') return;
+
+        const dateVal = ($panel.find('input[name*="[session_date]"]').val() || '').trim();
+        const startEl = $panel.find('input[name*="[start_time]"]').get(0);
+        if (!startEl || !startEl._flatpickr) return;
+
+        const now = clockNow();
+        // `set` on a live instance, not a re-init: re-initializing would drop the
+        // instance the date picker's onChange reaches for and reset the field.
+        startEl._flatpickr.set('minTime', dateVal === now.date
+          ? `${String(Math.floor(now.minutes / 60)).padStart(2, '0')}:${String(now.minutes % 60).padStart(2, '0')}`
+          : null);
+      };
 
       const initPlugins = (el) => {
         // flatpickr is NOT attached to history panels. `minDate: 'today'` rejects
@@ -812,9 +904,19 @@
         // stored value is correct; the picker was corrupting the display. A
         // read-only panel needs no picker anyway.
         $(el).find('.session-date').filter((_, d) => !inHistoryPanel(d))
-          .flatpickr({ dateFormat: 'Y-m-d', minDate: 'today' });
+          .flatpickr({
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            // GV-9618: `minDate` stops a past DATE, but the start time is a
+            // separate picker that knows nothing about it. Moving the date on or
+            // off today changes whether a past time is legal, so the start
+            // picker's floor is recomputed on every date change.
+            onChange: (dates, dateStr, fp) => applyStartTimeFloor($(fp.input).closest('.accordion-item'))
+          });
         $(el).find('.session-time').filter((_, d) => !inHistoryPanel(d))
           .flatpickr({ enableTime: true, noCalendar: true, dateFormat: 'H:i' });
+        // Seed the floor for panels rendered with a date already in them.
+        $(el).find('.accordion-item').each((_, item) => applyStartTimeFloor($(item)));
         $(el).find('.select2').each(function () {
           initSelect2($(this));
           // Select2 renders its own widget, which ignores an ancestor
@@ -906,39 +1008,90 @@
         $select.val(curr.length === allOpts.length ? null : allOpts).trigger('change');
       });
 
+      // Duplicate-selection confirms are debounced per panel: checking several
+      // duplicate startups within a short window queues ONE Swal for all of them
+      // instead of interrupting after every checkbox, so multi-selecting doesn't
+      // mean clicking through a dialog per startup.
+      const pendingDuplicateConfirms = {}; // panelIndex -> { ids: Set<string>, timer }
+
+      const flushDuplicateConfirm = async (panelIndex) => {
+        const pending = pendingDuplicateConfirms[panelIndex];
+        if (!pending) return;
+        delete pendingDuplicateConfirms[panelIndex];
+
+        const $trig = getCompaniesTrigger(panelIndex);
+        if (!$trig.length) return;
+        const selected = $trig.data('selected') || new Set();
+
+        // Only ids still checked when the timer fires need confirming — one may
+        // have been unchecked again inside the window.
+        const ids = [...pending.ids].filter(id => selected.has(id));
+        if (!ids.length) return;
+
+        const names = ids
+          .map(id => companiesMap[id] ? companyDisplayName(companiesMap[id]) : id)
+          .map(n => `<li class="text-start">${esc(n)}</li>`)
+          .join('');
+
+        const { isConfirmed } = await Swal.fire({
+          icon: 'warning',
+          html: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
+          showCancelButton: true,
+          confirmButtonText: '{{ __("admin.Confirm") }}',
+          cancelButtonText: '{{ __("admin.Cancel") }}',
+          customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
+          buttonsStyling: false
+        });
+
+        if (!isConfirmed) {
+          ids.forEach(id => selected.delete(id));
+          $trig.data('selected', selected);
+          syncCompaniesState($trig);
+          refreshCompaniesPopover($trig);
+        }
+      };
+
       // Companies popover: keep selection state in sync when a checkbox is toggled.
-      // If the startup is already assigned to another panel, ask for confirmation
-      // before allowing the duplicate assignment.
-      $(document).on('change', '.company-check', async function () {
+      // Duplicate assignments (already sitting in another panel) are confirmed via
+      // flushDuplicateConfirm() on a 3s debounce rather than inline here, so the
+      // admin can check several before the warning appears.
+      $(document).on('change', '.company-check', function () {
         const panelIndex = $(this).closest('.companies-popover').data('panel-index');
         const $trig = getCompaniesTrigger(panelIndex);
         if (!$trig.length) return;
         // A history panel's picker is view-only; never mutate its selection.
         if ($trig.attr('data-readonly') === '1') return;
         const selected = $trig.data('selected') || new Set();
+        const id = this.value;
 
         if (this.checked) {
-          if (isSelectedInOtherPanel(panelIndex, this.value)) {
-            const { isConfirmed } = await Swal.fire({
-              icon: 'warning',
-              text: '{{ __("admin.company_assigned_other_panel") }}',
-              showCancelButton: true,
-              confirmButtonText: '{{ __("admin.Confirm") }}',
-              cancelButtonText: '{{ __("admin.Cancel") }}',
-              customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-              buttonsStyling: false
-            });
-            if (!isConfirmed) {
-              this.checked = false;
-              return;
+          // Add right away so the checkbox, summary, and count reflect the click
+          // immediately; duplicates are only ever confirmed AFTER selection, on the
+          // debounce, never blocked before it.
+          selected.add(id);
+          $trig.data('selected', selected);
+          syncCompaniesState($trig);
+
+          if (isSelectedInOtherPanel(panelIndex, id)) {
+            let pending = pendingDuplicateConfirms[panelIndex];
+            if (!pending) {
+              pending = { ids: new Set(), timer: null };
+              pendingDuplicateConfirms[panelIndex] = pending;
             }
+            pending.ids.add(id);
+            clearTimeout(pending.timer);
+            pending.timer = setTimeout(() => flushDuplicateConfirm(panelIndex), 1500);
           }
-          selected.add(this.value);
         } else {
-          selected.delete(this.value);
+          selected.delete(id);
+          $trig.data('selected', selected);
+          syncCompaniesState($trig);
+          // No longer selected, so it no longer needs confirming — drop it from
+          // any pending batch so an unchecked startup can't still show up in the
+          // dialog a moment later.
+          const pending = pendingDuplicateConfirms[panelIndex];
+          if (pending) pending.ids.delete(id);
         }
-        $trig.data('selected', selected);
-        syncCompaniesState($trig);
       });
 
       // Auto Select Range: numbers only, reject anything else while typing.
@@ -1018,12 +1171,14 @@
         const $pop = $(this).closest('.companies-popover');
         const $trig = getCompaniesTrigger($pop.data('panel-index'));
         if (!$trig.length) return;
-        // Clearing the range only forgets the From/To values; it deliberately
-        // leaves the selection alone, so a user who applied a range and then
-        // hand-adjusted a few startups does not lose that work.
+        // Clearing the range now resets the whole picker: the From/To values AND the
+        // companies selection they produced. A trailing hand-adjustment after Apply
+        // is no longer preserved — Clear is a full reset of this control, not just
+        // a way to re-open the range fields.
         $trig.removeData('range-filter').removeData('range-values');
+        $trig.data('selected', new Set());
+        syncCompaniesState($trig);
         refreshCompaniesPopover($trig);
-        $(this).addClass('d-none');
         $pop.find('.range-from, .range-to').val('');
         $pop.find('.range-error').text('').addClass('d-none');
         $pop.find('.range-from, .range-to').removeClass('is-invalid');
@@ -1141,6 +1296,15 @@
         $clone.find('.meeting-link-input, .meeting-password-input').val('');
         $clone.find('.copy-meeting-link, .copy-meeting-password').hide();
 
+        // The resets above clear the VALUE PROPERTY, but a clone also inherits
+        // the source panel's `value` ATTRIBUTES — which panelChangeKind() reads
+        // as "what the server rendered". Left in place, a new panel would carry
+        // the copied panel's date/time/interval as its baseline and compare
+        // against values it never had. A new panel has no saved state, so its
+        // baselines are cleared to match (GV-8892 / GV-8893).
+        $clone.find('.session-date, .session-time, .interval-duration').attr('value', '');
+        $clone.find('.companies-picker-trigger').attr('data-companies-baseline', '[]');
+
         if (!$clone.find('.remove-panel').length) {
           $clone.find('.accordion-header').append('<button type="button" class="btn btn-icon btn-sm btn-outline-danger ms-2 me-4 remove-panel"><i class="ti ti-trash"></i></button>');
         }
@@ -1227,7 +1391,10 @@
         $(this).closest('.accordion-body').find('.error-interval').text('');
       });
 
-      $(document).on('submit', '#judging-panels-form', function (e) {
+      // async: the startup-assignment confirmation below awaits the admin's answer
+      // before the panels are posted (GV-8892 / GV-8893). e.preventDefault() runs
+      // synchronously at the top, so the native submit is still cancelled.
+      $(document).on('submit', '#judging-panels-form', async function (e) {
         e.preventDefault();
         let valid = true;
 
@@ -1297,6 +1464,13 @@
               $start.addClass('is-invalid');
               $p.find('.error-start_time').text('{{ __('admin.select_start_time_first') }}');
               valid = false;
+            } else if (startChanged($p) && startTimeIsPast($p.find('input[name*="[session_date]"]').val().trim(), startVal)) {
+              // GV-9618. Gated on startChanged() so re-saving a panel whose
+              // meeting already happened (roster edit, notify toggle) is not
+              // blocked by a time the admin never touched.
+              $start.addClass('is-invalid');
+              $p.find('.error-start_time').text('{{ __('admin.start_time_in_past') }}');
+              valid = false;
             }
 
             if (intervalVal === '' || !/^\d+$/.test(intervalVal) || parseInt(intervalVal, 10) <= 0) {
@@ -1310,6 +1484,12 @@
             if (!startVal) {
               $start.addClass('is-invalid');
               $p.find('.error-start_time').text('{{ __('admin.start_time_required') }}');
+              valid = false;
+            } else if (startChanged($p) && startTimeIsPast($p.find('input[name*="[session_date]"]').val().trim(), startVal)) {
+              // GV-9618. The ticket reproduced this with the interval ON, but a
+              // panel-wide window has exactly the same gap.
+              $start.addClass('is-invalid');
+              $p.find('.error-start_time').text('{{ __('admin.start_time_in_past') }}');
               valid = false;
             }
             if (!endVal) {
@@ -1333,8 +1513,147 @@
           return;
         }
 
-        submitPanels($(this).attr('action'), new FormData(this));
+        const action = $(this).attr('action');
+        const formData = new FormData(this);
+
+        // GV-8892 / GV-8893: warn before a save that moves meeting times.
+        //
+        // Only interval panels are gated. With the interval off every startup in
+        // a panel shares one panel-wide window, so nothing here moves a time and
+        // the warning would be untrue. With it on, each slot is derived from the
+        // startup's POSITION and the panel's date/start/interval, so editing any
+        // of them shifts real meetings.
+        //
+        // Purely client-side, unlike the judge-conflict round-trip below: the
+        // browser already rendered the saved values, so it can see the change
+        // without asking the server.
+        //
+        // A roster change wins over a schedule change when both are present: its
+        // wording is the more specific of the two.
+        const changeKinds = $('.accordion-item').toArray()
+          .map(el => panelChangeKind($(el)))
+          .filter(Boolean);
+
+        const changeKind = changeKinds.includes('startup_assignment')
+          ? 'startup_assignment'
+          : (changeKinds[0] || null);
+
+        if (changeKind) {
+          const copy = {
+            startup_assignment: {
+              title: '{{ __("admin.screening.startup_assignment_change_title") }}',
+              body: '{{ __("admin.screening.startup_assignment_change_body") }}'
+            },
+            schedule: {
+              title: '{{ __("admin.screening.schedule_change_title") }}',
+              body: '{{ __("admin.screening.schedule_change_body") }}'
+            }
+          }[changeKind];
+
+          const { isConfirmed } = await Swal.fire({
+            icon: 'warning',
+            title: copy.title,
+            text: copy.body,
+            showCancelButton: true,
+            confirmButtonText: '{{ __("admin.Confirm") }}',
+            cancelButtonText: '{{ __("admin.Cancel") }}',
+            customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
+            buttonsStyling: false
+          });
+
+          // Cancel leaves the form exactly as the admin left it, so the panel can
+          // be corrected before retrying.
+          if (!isConfirmed) return;
+        }
+
+        submitPanels(action, formData);
       });
+
+      // Which kind of change a panel carries, or null when nothing that moves a
+      // meeting time was touched.
+      //
+      // Three inputs drive ScreeningSlotService — the session date, the start
+      // time and the interval — plus the startup list, whose ORDER decides each
+      // slot's position. Any of them reflows the schedule, so all four are
+      // compared against the values the server rendered.
+      //
+      // end_time is deliberately NOT compared: with the interval on it is
+      // derived by computeEndTime() from the start time and interval, so it
+      // would only restate a change already detected here.
+      //
+      // The baseline for the schedule fields is the `value` ATTRIBUTE, which
+      // keeps what blade rendered, while .val() reads what the admin now has.
+      // flatpickr writes the property, never the attribute, so the two stay
+      // independent. The startup list needs an explicit baseline attribute
+      // instead, because its inputs are rebuilt from a Set on every change.
+      const panelChangeKind = ($p) => {
+        // A history panel's inputs are disabled and its stored values are
+        // restored server-side, so it cannot have changed.
+        if ($p.attr('data-history') === '1') return null;
+
+        // An unscheduled panel has no meeting times to move.
+        if (!$p.find('.session-toggle').is(':checked')) return null;
+
+        // The dialog promises "affected startups will be notified", and with
+        // "Notify now" off the server deliberately emails nobody. Warning about
+        // a notification that will not be sent would be a false promise, so a
+        // quiet edit stays quiet — matching the backend gate in
+        // notifyAffectedStartups().
+        if (!$p.find('.notify-toggle').is(':checked')) return null;
+
+        // Per-startup slots only exist in interval mode. Without it every
+        // startup shares the panel window, so a roster edit moves nobody.
+        if (!$p.find('.interval-toggle').is(':checked')) return null;
+
+        // Roster first: it is the case the ticket names, and its wording is the
+        // more specific of the two.
+        if (companiesChanged($p)) return 'startup_assignment';
+
+        const scheduleFields = ['session_date', 'start_time', 'interval'];
+        const scheduleMoved = scheduleFields.some((name) => {
+          const $input = $p.find(`[name*="[${name}]"]`).first();
+          if (!$input.length) return false;
+
+          const rendered = ($input.attr('value') || '').trim();
+          const now = ($input.val() || '').trim();
+
+          return rendered !== now;
+        });
+
+        return scheduleMoved ? 'schedule' : null;
+      };
+
+      // True when a panel's startup list differs from the one that was rendered
+      // — in membership OR in order.
+      //
+      // Order matters as much as membership: ScreeningSlotService derives slot N
+      // from start + (N * interval), so dragging startup 3 above startup 1
+      // changes both of their times while the set stays identical.
+      const companiesChanged = ($p) => {
+        const $trig = $p.find('.companies-picker-trigger');
+        if (!$trig.length) return false;
+
+        // parseIdList yields STRINGS, so both sides are normalised to numbers
+        // before comparing — otherwise 3 !== '3' would report a change on every
+        // save and the dialog would fire even when nothing moved.
+        const toIds = (values) => values
+          .map(v => parseInt(v, 10))
+          .filter(id => !isNaN(id));
+
+        const baseline = toIds(parseIdList($trig.attr('data-companies-baseline')));
+
+        // Read the inputs that will actually be posted, so this compares exactly
+        // what the server will store — including submission order.
+        const current = toIds(
+          $p.find('input[type="hidden"][name*="[companies][]"]')
+            .toArray()
+            .map(input => input.value)
+        );
+
+        if (baseline.length !== current.length) return true;
+
+        return baseline.some((id, i) => id !== current[i]);
+      };
 
       // Posts the panels, handling the judge-conflict round-trip.
       //
@@ -1442,7 +1761,7 @@
 
       const renderOverflowBadge = (hiddenNames, count) => {
         const tooltip = hiddenNames.join('\n');
-        return `<span class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-wide" title="${tooltip}">+${count}</span>`;
+        return `<span class="badge badge-center bg-label-primary p-4 rounded-circle fw-semibold d-flex justify-content-center align-items-center mt-1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-wide" title="${tooltip}">+${count}</span>`;
       };
 
       const updateStepAssignees = (newAssignees) => {

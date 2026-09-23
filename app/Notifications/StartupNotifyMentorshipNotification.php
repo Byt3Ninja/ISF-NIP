@@ -13,7 +13,6 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
-use App\Services\FileManagerService;
 use Throwable;
 
 class StartupNotifyMentorshipNotification extends Notification implements ShouldQueue
@@ -134,36 +133,29 @@ class StartupNotifyMentorshipNotification extends Notification implements Should
             $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
         }
         $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
-        $location = $sessionType == 'offline' ? ($cycle->offline_location_address ?: optional($cycle->organization)->address ?: '-') : '-';
-        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: '-') : '-';
-        $attachments = $mentorship_session->attachments;
-        if( empty( $attachments ) )
-        {
-            $attachments = $mentorship_session->fileurl ? [
-                [
-                    'url' => app(FileManagerService::class)->getUrl($mentorship_session->fileurl, 'UsersDiskInviteMentor'),
-                    'name' => basename($mentorship_session->fileurl),
-                    'path' => $mentorship_session->fileurl
-                ]
-            ] : [];
-        }
+        $locationName = $sessionType == 'offline' ? ($cycle->offline_location_address ?: null) : null;
+        $address = $sessionType == 'offline' ? (optional($cycle->organization)->address ?: null) : null;
 
         $mentorName = $mentorship_session?->mentor?->name ?? '';
+        $adminName = $mentorship_session?->admin?->name ?? '';
+        $signOffName = $orgData['org_name'] ?? $platformName;
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
             ->subject( __('email.startup_mentorship_session_notify_email.subject') )
             ->view('emails.mentorship_notify_startup_email', array_merge([
                 'party'             => $notifiable,
                 'mentorName'        => $mentorName,
+                'adminName'         => $adminName,
                 'sessionType'       => $sessionType,
                 'sessionDate'       => $sessionDate,
                 'sessionTime'       => $sessionTime,
                 'sessionLink'       => $mentorship_session?->join_url ?? '',
-                'platformName'      => $platformName,
-                'location'          => $location,
-                'mapLink'           => $mapLink,
-                'attachments'       => $attachments,
-                'sessionNotes'      => $mentorship_session?->comment ?? '-',
+                'passcode'          => $mentorship_session?->zoom_passcode ?? '',
+                'platformName'      => $signOffName,
+                'locationName'      => $locationName,
+                'address'           => $address,
+                'viewSessionUrl'    => route('mentorships.list_mine'),
             ], $orgData));
     }
 

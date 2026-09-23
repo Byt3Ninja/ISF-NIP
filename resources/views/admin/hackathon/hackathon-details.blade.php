@@ -13,7 +13,7 @@
   // ====================================
   
   $user = Auth::user();
-  $isAdmin = $user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('organizationmanager');
+  $isAdmin = $user->hasRole('admin') || $user->hasRole('subadmin') || $user->hasRole('organizationmanager');
   
   // Determine if hackathon is finished and has results to display
   $isFinishedHackathon = isset($currentHackathon['status']) && 

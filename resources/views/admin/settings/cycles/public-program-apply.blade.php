@@ -514,6 +514,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 	<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 	<script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 	<script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+	@include('partials.flatpickr-locale')
 	<script src="https://cdn.jsdelivr.net/npm/bs-stepper/dist/js/bs-stepper.min.js"></script>
 	<script src="/vuexy/assets/js/forms-selects.js"></script>
 

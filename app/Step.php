@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * 3. Mentorship
  * 4. Training
  * 5. Final Screening
+ * 6. Team Formation
 */
 
 class Step extends Model

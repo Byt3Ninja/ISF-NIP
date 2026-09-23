@@ -49,11 +49,7 @@
                                 <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">{{ __('email.Mentorship_Update', [], 'ar') }}</p>
                                 @if(($data['user'] ?? 'user') == 'mentor')
                                 <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">
-                                    @if(strtolower($data['mentorGender'] ?? '') == 'female')
-                                        {{ __('email.dear_female', [], 'ar') }} {{ $data['mentorName'] ?? '' }}،
-                                    @else
-                                        {{ __('email.dear_male', [], 'ar') }} {{ $data['mentorName'] ?? '' }}،
-                                    @endif
+                                    عزيزي/عزيزتي {{ $data['mentorName'] ?? '' }}،
                                 </h1>
                                 @else
                                 <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">
@@ -63,7 +59,7 @@
                                 
                                 <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.5; color: #374151;">
                                     @if(($data['user'] ?? 'user') == 'mentor')
-                                        {{ __('email.mentorship_session_action_notify.mentor_message', ['startup_owner' => $data['startupOwnerName'] ?? '', 'status' => $text_ar], 'ar') }}
+                                        تم تحديث تفاصيل جلسة الإرشاد القادمة مع {{ $data['startupOwnerName'] ?? '' }}.
                                     @else
                                         @if($isApproved)
                                             @if(($data['action'] ?? '') == 'modifySession')
@@ -77,6 +73,9 @@
                                     @endif
                                 </p>
 
+                                @if(($data['user'] ?? 'user') == 'mentor')
+                                    <p style="margin: 0 0 10px 0; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">تفاصيل الجلسة المحدثة</p>
+                                @endif
                                 <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F9FAFB; border-radius: 6px; border: 1px solid #E5E7EB; direction: rtl;">
                                     <tr>
                                         <td style="padding: 20px;">
@@ -84,25 +83,41 @@
                                                 @if(($data['user'] ?? 'user') == 'mentor')
                                                     <tr>
                                                         <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; text-align: right;">{{ __('email.founder_name', [], 'ar') }}:</td>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $data['startupOwnerName'] ?? '' }}.</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">
+                                                            @if(!empty($data['startupOwnerId']))
+                                                                <a href="{{ route('clients.profile_view', $data['startupOwnerId']) }}" style="color: #4F46E5;">{{ $data['startupOwnerName'] ?? '' }}</a>
+                                                            @else
+                                                                {{ $data['startupOwnerName'] ?? '-' }}
+                                                            @endif
+                                                        </td>
                                                     </tr>
-                                                    @if(empty($data['is_hackathon']) || !$data['is_hackathon'])
+                                                    @if(!empty($data['startupName']))
                                                         <tr>
                                                             <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; text-align: right;">{{ __('email.startup_name', [], 'ar') }}:</td>
-                                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $data['startupName'] ?? '' }}.</td>
+                                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">
+                                                                @if(!empty($data['startupId']))
+                                                                    <a href="{{ route('company.profile_view', $data['startupId']) }}" style="color: #4F46E5;">{{ $data['startupName'] }}</a>
+                                                                @else
+                                                                    {{ $data['startupName'] }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @endif
                                                     <tr>
                                                         <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; text-align: right;">التاريخ:</td>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $data['sessionDate'] ?? '' }}.</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $data['sessionDate'] ?? '-' }}</td>
                                                     </tr>
                                                     <tr>
                                                         <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; text-align: right;">الوقت:</td>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $data['sessionTime'] ?? '' }}.</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $data['sessionTime'] ?? '-' }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; text-align: right;">{{ __('email.Duration', [], 'ar') }}:</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $data['duration'] ?? '-' }}</td>
                                                     </tr>
                                                     <tr>
                                                         <td style="padding-bottom: 0px; font-size: 14px; color: #6B7280; text-align: right;">{{ __('email.Type', [], 'ar') }}:</td>
-                                                        <td style="padding-bottom: 0px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ ($data['sessionType'] ?? '') === 'Online' ? 'أونلاين' : 'أوفلاين' }}</td>
+                                                        <td style="padding-bottom: 0px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ strtolower($data['sessionType'] ?? '') === 'online' ? 'عن بُعد' : 'حضورية' }}</td>
                                                     </tr>
                                                 @else
                                                     <tr>
@@ -128,28 +143,31 @@
                                 </table>
 
                                  {{-- Action Button / Location --}}
-                                @if($isApproved)
                                 <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 25px;">
-                                    @if(($data['sessionType'] ?? '') == 'Online')
+                                    @if(strtolower($data['sessionType'] ?? '') == 'online')
                                         <tr>
                                             <td align="center">
                                                 <a href="{{ $data['meetingLink'] ?? '' }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: {{ $mainColor }}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{__('email.Join_Meeting', [], 'ar')}}</a>
-                                                <p style="margin-top: 10px; font-size: 12px; color: #6B7280; text-align: center;">{{ __('email.Passcode', [], 'ar') }}: <strong>{{ $data['meetingPass'] ?? '' }}</strong></p>
+                                                @if(!empty($data['meetingPass']))
+                                                    <p style="margin-top: 10px; font-size: 12px; color: #6B7280; text-align: center;">{{ __('email.Passcode', [], 'ar') }}: <strong>{{ $data['meetingPass'] }}</strong></p>
+                                                @endif
                                             </td>
                                         </tr>
                                     @else
                                         <tr>
                                             <td style="background-color: #eff6ff; padding: 15px; border-radius: 6px; color: #1e40af; border: 1px solid #dbeafe; text-align: right;">
-                                                <strong>📍 {{ __('email.Location', [], 'ar') }}:</strong> {{ $data['location'] ?? '' }}
-                                                @if(!empty($data['mapLink']))
-                                                    <br><br>
-                                                    <a href="{{ $data['mapLink'] }}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #3b82f6; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">{{ __('email.open_maps', [], 'ar') }}</a>
+                                                <strong>📍 {{ __('email.Location', [], 'ar') }}:</strong>
+                                                @if(!empty($data['location']) && !empty($data['mapLink']))
+                                                    <a href="{{ $data['mapLink'] }}" style="color: #1e40af;">{{ $data['location'] }}</a>
+                                                @else
+                                                    {{ $data['location'] ?? '-' }}
                                                 @endif
+                                                <br>
+                                                <strong>{{ __('email.address', [], 'ar') }}:</strong> {{ $data['address'] ?? '-' }}
                                             </td>
                                         </tr>
                                     @endif
                                 </table>
-                                @endif
 
                                 {{-- Notes & Attachments --}}
                                 @if(!empty($data['notes']))
@@ -172,9 +190,14 @@
                                     <p style="margin: 20px 0 0 0; font-size: 15px; color: #374151;">{{ __('email.action_session_details', [], 'ar') }}</p>
                                 @endif
 
+                                @if(($data['user'] ?? 'user') == 'mentor')
+                                    <p style="margin: 20px 0 0 0; font-size: 15px; color: #374151;">يرجى مراجعة تفاصيل الجلسة المحدثة والتأكد من توافرك في الموعد المحدد.</p>
+                                    <p style="margin: 10px 0 0 0; font-size: 15px; color: #374151;">إذا كانت لديك أي استفسارات أو كنت بحاجة إلى مساعدة إضافية، يرجى التواصل معنا.</p>
+                                @endif
+
                                 <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
                                     {{ __('email.Best_regards', [], 'ar') }}،<br>
-                                    <strong>{{ env('APP_NAME') }}</strong>
+                                    <strong>{{ $data['orgName'] ?? env('APP_NAME') }}</strong>
                                 </p>
                             </td>
                         </tr>
@@ -193,30 +216,25 @@
                                 <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">{{ __('email.Mentorship_Update') }}</p>
                                 @if(($data['user'] ?? 'user') == 'mentor')
                                 <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">
-                                    {{ __('email.Dear') }} {{ $data['mentorName'] ?? '' }},
+                                    Dear {{ $data['mentorName'] ?? '' }},
                                 </h1>
                                 @else
                                 <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">
                                     {{ __('email.Dear') }} {{ $data['startupOwnerName'] ?? '' }},
                                 </h1>
                                 @endif
-                                
+
                                 <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.5; color: #374151;">
                                     @if(($data['user'] ?? 'user') == 'mentor')
-                                        @if($isApproved)
-                                            @if(($data['action'] ?? '') == 'modifySession')
-                                                {{ __('email.mentorship_session_action_notify.user_rescheduled', ['mentor' => $data['startupOwnerName'] ?? '']) }}
-                                            @else
-                                                You have a new session(s) with {{ $data['startupOwnerName'] ?? '' }}.
-                                            @endif
-                                        @else
-                                            {{ __('email.mentorship_session_action_notify.user_declined', ['mentor' => $data['startupOwnerName'] ?? '']) }}
-                                        @endif
+                                        The details of your upcoming mentorship session with {{ $data['startupOwnerName'] ?? '' }} have been updated.
                                     @else
                                         A new mentorship session has been <strong style="color: {{ $statusColor }};">{{ $text_en }}</strong>.
                                     @endif
                                 </p>
 
+                                @if(($data['user'] ?? 'user') == 'mentor')
+                                    <p style="margin: 0 0 10px 0; font-size: 14px; color: #111827; font-weight: 600;">Updated Session Details</p>
+                                @endif
                                 {{-- Details Box --}}
                                 <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F9FAFB; border-radius: 6px; border: 1px solid #E5E7EB;">
                                     <tr>
@@ -225,25 +243,41 @@
                                                 @if(($data['user'] ?? 'user') == 'mentor')
                                                     <tr>
                                                         <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">{{ __('email.founder_name') }}:</td>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['startupOwnerName'] ?? '' }}.</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">
+                                                            @if(!empty($data['startupOwnerId']))
+                                                                <a href="{{ route('clients.profile_view', $data['startupOwnerId']) }}" style="color: {{ $mainColor }};">{{ $data['startupOwnerName'] ?? '' }}</a>
+                                                            @else
+                                                                {{ $data['startupOwnerName'] ?? '-' }}
+                                                            @endif
+                                                        </td>
                                                     </tr>
-                                                    @if(empty($data['is_hackathon']) || !$data['is_hackathon'])
+                                                    @if(!empty($data['startupName']))
                                                         <tr>
                                                             <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">{{ __('email.startup_name') }}:</td>
-                                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['startupName'] ?? '' }}.</td>
+                                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">
+                                                                @if(!empty($data['startupId']))
+                                                                    <a href="{{ route('company.profile_view', $data['startupId']) }}" style="color: {{ $mainColor }};">{{ $data['startupName'] }}</a>
+                                                                @else
+                                                                    {{ $data['startupName'] }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @endif
                                                     <tr>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">Date(s):</td>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['sessionDate'] ?? '' }}.</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">Date:</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['sessionDate'] ?? '-' }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">Time(s):</td>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['sessionTime'] ?? '' }}.</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">Time:</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['sessionTime'] ?? '-' }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">{{ __('email.Duration') }}:</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['duration'] ?? '-' }}</td>
                                                     </tr>
                                                     <tr>
                                                         <td style="padding-bottom: 0px; font-size: 14px; color: #6B7280;">{{ __('email.Type') }}:</td>
-                                                        <td style="padding-bottom: 0px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $data['sessionType'] ?? '' }}</td>
+                                                        <td style="padding-bottom: 0px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ strtolower($data['sessionType'] ?? '') === 'online' ? 'Online' : 'In Person' }}</td>
                                                     </tr>
                                                 @else
                                                     <tr>
@@ -269,28 +303,31 @@
                                 </table>
 
                                  {{-- Action Button / Location --}}
-                                @if($isApproved)
                                 <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 25px;">
-                                    @if(($data['sessionType'] ?? '') == 'Online')
+                                    @if(strtolower($data['sessionType'] ?? '') == 'online')
                                         <tr>
                                             <td align="center">
                                                 <a href="{{ $data['meetingLink'] ?? '' }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: {{ $mainColor }}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{__('email.Join_Meeting')}}</a>
-                                                <p style="margin-top: 10px; font-size: 12px; color: #6B7280;">{{ __('email.Passcode') }}: <strong>{{ $data['meetingPass'] ?? '' }}</strong></p>
+                                                @if(!empty($data['meetingPass']))
+                                                    <p style="margin-top: 10px; font-size: 12px; color: #6B7280;">{{ __('email.Passcode') }}: <strong>{{ $data['meetingPass'] }}</strong></p>
+                                                @endif
                                             </td>
                                         </tr>
                                     @else
                                         <tr>
                                             <td style="background-color: #eff6ff; padding: 15px; border-radius: 6px; color: #1e40af; border: 1px solid #dbeafe;">
-                                                <strong>📍 {{ __('email.Location') }}:</strong> {{ $data['location'] ?? '' }}
-                                                @if(!empty($data['mapLink']))
-                                                    <br><br>
-                                                    <a href="{{ $data['mapLink'] }}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #3b82f6; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">{{ __('email.open_maps') }}</a>
+                                                <strong>📍 {{ __('email.Location') }}:</strong>
+                                                @if(!empty($data['location']) && !empty($data['mapLink']))
+                                                    <a href="{{ $data['mapLink'] }}" style="color: #1e40af;">{{ $data['location'] }}</a>
+                                                @else
+                                                    {{ $data['location'] ?? '-' }}
                                                 @endif
+                                                <br>
+                                                <strong>{{ __('email.address') }}:</strong> {{ $data['address'] ?? '-' }}
                                             </td>
                                         </tr>
                                     @endif
                                 </table>
-                                @endif
 
                                 {{-- Notes & Attachments --}}
                                 @if(!empty($data['notes']))
@@ -310,10 +347,15 @@
                                         @endif
                                     </div>
                                 @endif
-                                
+
+                                @if(($data['user'] ?? 'user') == 'mentor')
+                                    <p style="margin: 20px 0 0 0; font-size: 15px; color: #374151;">Please review the updated session details and make sure you are available at the scheduled time.</p>
+                                    <p style="margin: 10px 0 0 0; font-size: 15px; color: #374151;">If you have any questions or need additional assistance, please feel free to reach out.</p>
+                                @endif
+
                                 <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
                                     {{ __('email.Best_regards') }},<br>
-                                    <strong>{{ env('APP_NAME') }}</strong>
+                                    <strong>{{ $data['orgName'] ?? env('APP_NAME') }}</strong>
                                 </p>
                             </td>
                         </tr>

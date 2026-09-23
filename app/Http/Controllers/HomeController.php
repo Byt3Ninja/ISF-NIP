@@ -1378,25 +1378,55 @@ class HomeController extends Controller
                     )
                 WHERE
                     fs.company_id = ?
-                AND fs.step_id = ?
-                LIMIT 1";
-            $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]))->first();
-            if (!empty($myFinal)) {
+                AND fs.step_id = ?";
+            // GV-9620: a startup can sit in more than one final panel, so this
+            // returns every one of its rows for the step. It used to end in
+            // `LIMIT 1` and collapse to ->first(), which silently hid all but
+            // one meeting.
+            $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]));
+            $myFinal = $myFinal->map(function ($final) use ($company, $l) {
                 // GV-3321: this startup's own slot within the final panel.
                 $finalSlot = \App\Services\ScreeningSlotService::slotFor(
-                    $myFinal->panel_session_date ?? null,
-                    $myFinal->panel_start_time ?? null,
-                    isset($myFinal->panel_interval) ? (int) $myFinal->panel_interval : null,
-                    \App\Services\ScreeningSlotService::positionOf($myFinal->panel_users ?? [], $company->id),
-                    $myFinal->panel_end_time ?? null
+                    $final->panel_session_date ?? null,
+                    $final->panel_start_time ?? null,
+                    isset($final->panel_interval) ? (int) $final->panel_interval : null,
+                    \App\Services\ScreeningSlotService::positionOf($final->panel_users ?? [], $company->id),
+                    $final->panel_end_time ?? null
                 );
-                $myFinal->meeting_start = $finalSlot['start'];
-                $myFinal->meeting_end = $finalSlot['end'];
-                $myFinal->meeting_date = $finalSlot['start'] ? $finalSlot['start']->format('d-m-Y') : null;
-                $myFinal->meeting_time = \App\Services\ScreeningSlotService::formatRange($finalSlot);
-                $myFinal->passcode = $myFinal->zoom_passcode ?? null;
+                $final->meeting_start = $finalSlot['start'];
+                $final->meeting_end = $finalSlot['end'];
+                $final->meeting_date = $finalSlot['start'] ? $finalSlot['start']->format('d-m-Y') : null;
+                $final->meeting_time = \App\Services\ScreeningSlotService::formatRange($finalSlot);
+                $final->passcode = $final->zoom_passcode ?? null;
 
-                $judges = json_decode($myFinal->judges, true) ?? [];
+                // GV-7381: when the panel carries no schedule the row falls back to
+                // finalscreenings.datetime/duration -- but `duration` is floored to
+                // 30 on write (ScreeningController), so a 22:00-22:15 session was
+                // shown as "(30M)" and stayed joinable until 22:30. Prefer the
+                // panel's real end_time, and only fall back to the stored duration
+                // when there is genuinely nothing better to use.
+                $final->session_start = $finalSlot['start']
+                    ?: (!empty($final->datetime) ? \Carbon\Carbon::parse($final->datetime) : null);
+
+                $final->session_end = $finalSlot['end'];
+                if (is_null($final->session_end) && !empty($final->datetime)) {
+                    if (!empty($final->panel_session_date) && !empty($final->panel_end_time)) {
+                        try {
+                            $final->session_end = \Carbon\Carbon::parse(
+                                $final->panel_session_date . ' ' . $final->panel_end_time
+                            );
+                        } catch (\Exception $e) {
+                            $final->session_end = null;
+                        }
+                    }
+
+                    if (is_null($final->session_end) && !empty($final->duration)) {
+                        $final->session_end = \Carbon\Carbon::parse($final->datetime)
+                            ->addMinutes((int) $final->duration);
+                    }
+                }
+
+                $judges = json_decode($final->judges, true) ?? [];
                 if (!is_array($judges)) {
                     $judges = [];
                 }
@@ -1428,32 +1458,38 @@ class HomeController extends Controller
                         return $judger;
                     });
 
-                    $myFinal->judges = $judgers;
-                    $myFinal->company = new stdClass;
-                    $myFinal->company->id = $company->id;
-                    $myFinal->company->user = new stdClass;
-                    $myFinal->company->user->id = $myFinal->user_id;
-                    $myFinal->company->user->image_url = User::image_handler($myFinal->user_image_url);
-                    $myFinal->company->user->first_name = $myFinal->{'user_first_name_' . $l};
-                    $myFinal->company->user->last_name = $myFinal->{'user_last_name_' . $l};
-                    $myFinal->company->user->name = trim($myFinal->company->user->first_name . ' ' . $myFinal->company->user->last_name);
-                    $myFinal->company->user->title = $myFinal->{'user_title_' . $l};
-
-                    unset($myFinal->user_id);
-                    unset($myFinal->user_image_url);
-                    unset($myFinal->user_first_name_en);
-                    unset($myFinal->user_first_name_ar);
-                    unset($myFinal->user_last_name_en);
-                    unset($myFinal->user_last_name_ar);
-                    unset($myFinal->user_title_en);
-                    unset($myFinal->user_title_ar);
+                    $final->judges = $judgers;
                 } else {
                     // GV-8357: leaving the raw JSON string here made the blade
                     // @foreach fatal on judge-less final screenings.
                     $judgers = collect();
-                    $myFinal->judges = $judgers;
+                    $final->judges = $judgers;
                 }
-            }
+
+                // GV-9620: the founder/company cell is built for every row. It
+                // used to sit inside the `count($judges) > 0` branch, so a
+                // judge-less panel reached the blade with no ->company at all.
+                $final->company = new stdClass;
+                $final->company->id = $company->id;
+                $final->company->user = new stdClass;
+                $final->company->user->id = $final->user_id;
+                $final->company->user->image_url = User::image_handler($final->user_image_url);
+                $final->company->user->first_name = $final->{'user_first_name_' . $l};
+                $final->company->user->last_name = $final->{'user_last_name_' . $l};
+                $final->company->user->name = trim($final->company->user->first_name . ' ' . $final->company->user->last_name);
+                $final->company->user->title = $final->{'user_title_' . $l};
+
+                unset($final->user_id);
+                unset($final->user_image_url);
+                unset($final->user_first_name_en);
+                unset($final->user_first_name_ar);
+                unset($final->user_last_name_en);
+                unset($final->user_last_name_ar);
+                unset($final->user_title_en);
+                unset($final->user_title_ar);
+
+                return $final;
+            });
 
             $stepData = $company->stepdata;
             if (!empty($stepData)) {

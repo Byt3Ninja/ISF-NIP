@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -37,12 +38,23 @@ class ForgotPasswordController extends Controller
     {
         $this->validate($request, ['email' => 'required|email']);
 
+        // Swallow double-submits (double click / repeated request) so one
+        // submission never produces two emails.
+        $lockKey = 'password-reset-request:' . sha1(strtolower(trim($request->email)));
+        if (! Cache::add($lockKey, true, 10)) {
+            return $this->sendResetLinkResponse($request, Password::RESET_LINK_SENT);
+        }
+
         DB::table('password_resets')->where('email', $request->email)->delete();
 
         // Send the new reset link
         $response = Password::sendResetLink(
             $request->only('email')
         );
+
+        if ($response != Password::RESET_LINK_SENT) {
+            Cache::forget($lockKey);
+        }
 
         return $response == Password::RESET_LINK_SENT
             ? $this->sendResetLinkResponse($request, $response)

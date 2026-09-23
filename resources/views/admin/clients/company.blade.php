@@ -68,6 +68,9 @@
           'label'  => $tab[2]
       ];
   })->toArray();
+
+  // Lock every tab except "Startup Info" until the startup name has been saved.
+  $lockTabs = ! ($client && $client->company && trim((string) $client->company->name_en) !== '');
 @endphp
 
 @section('content')
@@ -80,11 +83,12 @@
         <ul class="nav nav-pills flex-nowrap" role="tablist">
           @foreach ($tabs as $key => $tab)
             <li class="nav-item d-flex justify-content-center align-items-center">
-              <a 
+              <a
                 id="mobile-company-tab"
                 href="#navs-left-{{ $tab['target'] }}"
-                class="nav-link {{ $key == 0 ? 'active' : '' }}"
-                data-bs-toggle="tab" 
+                class="nav-link {{ $key == 0 ? 'active' : '' }} {{ $lockTabs && $key != 0 ? 'disabled' : '' }}"
+                @if ($lockTabs && $key != 0) aria-disabled="true" tabindex="-1" title="{{ __('admin.tabs_locked_until_startup_saved') }}" @endif
+                data-bs-toggle="tab"
                 role="tab"
               >
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
@@ -103,10 +107,11 @@
             <ul class="nav nav-align-left nav-pills flex-column">
               @foreach ($tabs as $key => $tab)
               <li class="nav-item bg-label-light {{ $key == count($tabs) - 1 ? '' : 'mb-2' }} rounded overflow-x-hidden d-flex align-items-center">
-                <a 
+                <a
                     id="company-tab"
                     href="#navs-left-{{ $tab['target'] }}"
-                    class="nav-link py-3 {{ $key == 0 ? 'active' : '' }}"
+                    class="nav-link py-3 {{ $key == 0 ? 'active' : '' }} {{ $lockTabs && $key != 0 ? 'disabled' : '' }}"
+                    @if ($lockTabs && $key != 0) aria-disabled="true" tabindex="-1" title="{{ __('admin.tabs_locked_until_startup_saved') }}" @endif
                     data-bs-toggle="tab"
                     role="tab"
                   >
@@ -149,7 +154,16 @@
               @endforeach
             @endif
             <!-- / Alert -->
-  
+
+            {{-- Say why the other tabs are greyed out, rather than leaving the
+                 founder to guess why they cannot be clicked (GV-9668). --}}
+            @if ($lockTabs)
+              <div class="alert alert-info d-flex align-items-start gap-2 mb-6" role="alert">
+                <i class="ti ti-lock ti-18px flex-shrink-0 mt-1"></i>
+                <span>{{ __('admin.tabs_locked_until_startup_saved') }}</span>
+              </div>
+            @endif
+
             @foreach ($tabs as $index => $tab)
               <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" id="navs-left-{{ $tab['target'] }}">
                 @switch($tab['target'])
@@ -164,9 +178,6 @@
                   @break
                   @case('company-desc')
                     @include('partials.forms.company.company-desc', ['heading' => $tab['label']])
-                  @break
-                  @case('company-financial-info')
-                    @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
                   @break
                   @case('company-financial-info')
                     @include('partials.forms.company.company-financial', ['heading' => $tab['label']])
@@ -230,7 +241,7 @@
   </script>
   <script src="/app-assets/js/1.js"></script>
   
-  <script src="/vuexy/assets/js/pages-edit-compnay.js"></script>
+  <script src="/vuexy/assets/js/pages-edit-compnay.js?v={{ @filemtime(public_path('vuexy/assets/js/pages-edit-compnay.js')) ?: 1 }}"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -244,14 +255,33 @@
       
       const urlParams = new URLSearchParams(window.location.search);
       const hasCompleteProfile = urlParams.get('action') === 'complete-profile';
-      const activeIndex = hasCompleteProfile || !activeCompanyTab ? 0 : JSON.parse(activeCompanyTab);
-      const activePitchIndex = hasCompleteProfile || !activePitchTab ? 0 : JSON.parse(activePitchTab);
 
-      // Clear localStorage if complete-profile action
-      if (hasCompleteProfile) {
+      // Every tab but Startup Info is locked until the startup name is saved.
+      // A remembered tab from an earlier visit must not reopen a locked pane,
+      // otherwise the founder lands on e.g. Financial Info and fills in a form
+      // that cannot be saved (GV-9668).
+      const tabsLocked = @json($lockTabs);
+
+      // Clear the remembered tab on complete-profile, and while locked, so a
+      // stale index cannot survive into the next visit.
+      if (hasCompleteProfile || tabsLocked) {
         localStorage.removeItem('activeCompanyTab');
         localStorage.removeItem('activePitchTab');
       }
+
+      // ?tab=<target> deep-links to one section, so a prompt elsewhere in the
+      // app can send the founder to the exact field it is asking them to fill
+      // (e.g. the assessment's "set your development stage" hint). Ignored when
+      // the tabs are locked, and when the slug is unknown.
+      const tabTargets = @json(array_column($tabs, 'target'));
+      const requestedTab = urlParams.get('tab');
+      const requestedIndex = tabsLocked ? -1 : tabTargets.indexOf(requestedTab);
+
+      const restoreDisabled = hasCompleteProfile || tabsLocked;
+      const activeIndex = requestedIndex > -1
+        ? requestedIndex
+        : (restoreDisabled || !activeCompanyTab ? 0 : JSON.parse(activeCompanyTab));
+      const activePitchIndex = restoreDisabled || !activePitchTab ? 0 : JSON.parse(activePitchTab);
 
       // Initialize pitch tabs (internal tabs within pitch deck)
       pitchTabs.forEach((tab, index) => {
@@ -278,6 +308,7 @@
       // Initialize desktop tabs
       tabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
+          if (tabsLocked) return;
           localStorage.setItem('activeCompanyTab', JSON.stringify(index));
         });
         
@@ -291,6 +322,7 @@
       // Initialize mobile tabs
       mobileTabs.forEach((tab, index) => {
         tab.addEventListener('click', function() {
+          if (tabsLocked) return;
           localStorage.setItem('activeCompanyTab', JSON.stringify(index));
         });
         
@@ -312,6 +344,12 @@
     });
   </script>
   
+  <script>
+    // While the tabs are locked (startup name not saved yet), pages-edit-compnay.js
+    // reloads the page after a successful save so the tabs unlock without a manual refresh.
+    window.RELOAD_AFTER_INFO_SAVE = @json($lockTabs);
+  </script>
+
   <script>
     $(document).ready(function() {
       $('.roundBtn').click(function() {

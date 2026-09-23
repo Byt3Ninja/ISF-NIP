@@ -201,7 +201,7 @@
                       {{ $l == 'en' ? $member->tm_name : $member->tm_name }}
                     </h6>
                     <small class="text-muted">
-                      {{ $l == 'en' ? 'Team Member ' . $T : 'عضو الفريق ' . $T }}
+                      {{ $member->u_email }}
                     </small>
                   </div>
                 </div>
@@ -403,12 +403,12 @@
                 <div class="mb-3">
                   <div class="avatar avatar-xl mx-auto mb-3 position-relative">
                     @php
-                    $imageSrc = ($team && $team->tf_img_team) ? '/' . $team->tf_img_team . '?t=' . time() : '/icons/team-default.svg';
+                    $imageSrc = ($team && $team->tf_img_team) ? route('hackathon.teamLogo', basename($team->tf_img_team)) : '/icons/team-default.svg';
                     @endphp
                     <img
                       src="{{ $imageSrc }}"
                       alt="{{ $team->tf_name }}"
-                      class="rounded-circle w-100 h-100 border-3 border-light shadow-sm"
+                      class="rounded-circle w-100 h-100 object-fit-contain bg-light border-3 border-light shadow-sm"
                       onerror="this.onerror=null;this.src='/icons/team-default.svg';"
                       id="team-image-display"
                     >
@@ -499,11 +499,13 @@
                       <p class="small mb-0" id="team-project-idea">{{ $team->tf_projectDescription_en }}</p>
                     </div>
 
+                    @if($isLeader)
                     <button class="btn btn-outline-info btn-sm w-100 mb-3" data-bs-toggle="modal"
                       data-bs-target="#editProjectIdeaModal">
                       <i class="ti ti-edit me-1"></i>
                       {{ $l == 'en' ? 'Edit Project Details' : 'تعديل تفاصيل المشروع' }}
                     </button>
+                    @endif
 
                     <!-- Project Progress -->
                     <div class="mb-3">
@@ -643,6 +645,7 @@
 </div>
 
 <!-- Edit Team Info Modal -->
+@if($isLeader)
 <div class="modal fade" id="editTeamInfoModal" tabindex="-1" aria-labelledby="editTeamInfoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -665,12 +668,12 @@
               <div class="text-center mb-4">
                 <div class="avatar avatar-xl mx-auto mb-3 position-relative">
                   @php
-                  $imageSrcModal = ($team && $team->tf_img_team) ? '/' . $team->tf_img_team . '?t=' . time() : '/icons/team-default.svg';
+                  $imageSrcModal = ($team && $team->tf_img_team) ? route('hackathon.teamLogo', basename($team->tf_img_team)) : '/icons/team-default.svg';
                   @endphp
                   <img
                     src="{{ $imageSrcModal }}"
                     alt="{{ $team->tf_name }}"
-                    class="rounded-circle w-100 h-100 border-3 border-light shadow"
+                    class="rounded-circle w-100 h-100 object-fit-contain bg-light border-3 border-light shadow"
                     onerror="this.onerror=null;this.src='/icons/team-default.svg';"
                     id="team-image-preview"
                   >
@@ -771,8 +774,10 @@
     </div>
   </div>
 </div>
+@endif
 
 <!-- Edit Project Idea Modal -->
+@if($isLeader)
 <div class="modal fade" id="editProjectIdeaModal" tabindex="-1" aria-labelledby="editProjectIdeaModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -872,6 +877,7 @@
     </div>
   </div>
 </div>
+@endif
 
 <!-- View All Members Modal -->
 <div class="modal fade" id="viewAllMembersModal" tabindex="-1" aria-labelledby="viewAllMembersModalLabel" aria-hidden="true">
@@ -995,7 +1001,7 @@
             <input class="form-control" name="file" type="file" id="fileInput" required>
             <div class="invalid-feedback file-err" style="display: none;">{{ $l == 'en' ? 'Please select a file to upload.' : 'يرجى اختيار ملف للرفع.' }}</div>
             <div class="invalid-feedback file-size-err" style="display: none;">{{ $l == 'en' ? 'Maximum file size: 10MB' : 'أقصى حجم للملف: 10 ميجابايت' }}</div>
-            <div class="invalid-feedback file-type-err" style="display: none;">{{ $l == 'en' ? 'Allowed: PDF, DOCX, PPTX, ZIP' : 'المسموح: PDF, DOCX, PPTX, ZIP' }}</div>
+            <div class="invalid-feedback file-type-err" style="display: none;">{{ $l == 'en' ? 'Allowed: PDF, DOC, DOCX, PPT, PPTX, ZIP, RAR' : 'المسموح: PDF, DOC, DOCX, PPT, PPTX, ZIP, RAR' }}</div>
           </div>
           <div class="mb-3">
             <label for="fileDescription" class="form-label">
@@ -1011,12 +1017,12 @@
           <i class="ti ti-x me-1"></i>
           {{ $l == 'en' ? 'Cancel' : 'إلغاء' }}
         </button>
-        <button type="button" class="btn btn-primary" onclick="uploadFile()">
-          <span class="btn-text">
+        <button type="button" class="btn btn-primary" id="uploadFileBtn" onclick="uploadFile()">
+          <span class="btn-text" id="uploadFileBtnText">
             <i class="ti ti-cloud-upload me-1"></i>
             {{ $l == 'en' ? 'Upload' : 'رفع' }}
           </span>
-          <span class="btn-spinner d-none">
+          <span class="btn-spinner d-none" id="uploadFileBtnSpinner">
             <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             {{ $l == 'en' ? 'Uploading...' : 'جاري الرفع...' }}
           </span>
@@ -1202,6 +1208,7 @@
 
 @section('pagescripts')
 <script>
+  var is_upload_in_progress = false;
   const HACKATHON_ID_TEAM_PAGE = new URLSearchParams(window.location.search).get('hackathonId') || '1';
   const HACKATHON_NAME = "{{ $l == 'en' ? 'Future of AI Hackathon' : 'هاكثون مستقبل الذكاء الاصطناعي' }}";
   const IS_TEAM_LEADER = true;
@@ -2040,9 +2047,12 @@
   }
 
   function uploadFile() {
+    if( is_upload_in_progress == true ) { return; }
     const fileInput = document.getElementById('fileInput');
     const fileDescription = document.getElementById('fileDescription') ? document.getElementById('fileDescription').value : '';
     const l = '{{ $l }}'; // "en" or "ar"
+    const uploadFileBtnText = document.getElementById('uploadFileBtnText');
+    const uploadFileBtnSpinner = document.getElementById('uploadFileBtnSpinner');
 
     if (!fileInput || fileInput.files.length === 0) {
       fileInput.classList.add('is-invalid');
@@ -2058,6 +2068,12 @@
     const allowedTypes = [
       'application/pdf', 
       'application/zip',
+      'application/x-zip-compressed',
+      'application/vnd.rar',
+      'application/x-rar-compressed',
+      'application/x-compressed',
+      'application/vnd.ms-powerpoint',
+      'application/msword',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   // docx
     ];
@@ -2138,6 +2154,9 @@
       if (placeholder) placeholder.style.display = 'none';
     };
 
+    uploadFileBtnText.classList.add('d-none');
+    uploadFileBtnSpinner.classList.remove('d-none');
+    is_upload_in_progress = true;
     // Send request to the route
     fetch('/dashboard/hackathon/addSharedFile', {
       method: 'POST',
@@ -2149,6 +2168,9 @@
     })
     .then(res => res.json())
     .then(data => {
+      uploadFileBtnText.classList.remove('d-none');
+      uploadFileBtnSpinner.classList.add('d-none');
+      is_upload_in_progress = false;
       if (data.status === 'success') {
         releaseSuccessAlert({
           title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
@@ -2163,12 +2185,18 @@
       }
     })
     .catch(error => {
+      uploadFileBtnText.classList.remove('d-none');
+      uploadFileBtnSpinner.classList.add('d-none');
+      is_upload_in_progress = false;
       releaseFailureAlert({
         title: l === 'en' ? "Error" : "خطأ",
         message: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
       });
     })
     .finally(() => {
+      is_upload_in_progress = false;
+      uploadFileBtnText.classList.remove('d-none');
+      uploadFileBtnSpinner.classList.add('d-none');
       const uploadModalEl = document.getElementById('uploadFileModal');
       const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
       if (uploadModal) uploadModal.hide();
@@ -2179,6 +2207,16 @@
  
    
   }
+
+  const uploadModal = document.getElementById('uploadFileModal');
+  // Fires IMMEDIATELY when the modal starts opening / rendering
+  uploadModal.addEventListener('show.bs.modal', function (event) {
+    $('.file-err').hide();
+    $('.file-type-err').hide();
+    $('.file-size-err').hide();
+    const fileInput = document.getElementById('fileInput');
+    fileInput.classList.remove('is-invalid');
+  });
 
   function deleteFile(buttonElement, fileId) {
     console.log('deleteFile called with:', buttonElement, fileId);

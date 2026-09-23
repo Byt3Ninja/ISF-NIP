@@ -134,8 +134,9 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
             $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
         }
         $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
-        $location = $sessionType == 'offline' ? ($cycle->offline_location_address ?: optional($cycle->organization)->address ?: '-') : '-';
-        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: '-') : '-';
+        $locationName = $sessionType == 'offline' ? ($cycle->offline_location_address ?: null) : null;
+        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: null) : null;
+        $address = $sessionType == 'offline' ? (optional($cycle->organization)->address ?: null) : null;
         $attachments = $mentorship_session->attachments;
         if( empty( $attachments ) )
         {
@@ -148,28 +149,33 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
             ] : [];
         }
 
-        $founderName = $mentorship_session?->user?->name ?? '';
-        $startupName = $founderName;
+        $founder = $mentorship_session?->user;
+        $startup = $founder?->company;
+        $founderName = $founder?->name ?? '';
         $subject = app()->getLocale() === 'ar'
             ? "جلسة إرشاد مع {$founderName}."
-            : "Mentorship Session with {$founderName}.";
+            : "Upcoming Mentorship Session with {$founderName}";
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])
             ->subject($subject)
             ->view('emails.mentorship_notify_mentor_email', array_merge([
                 'party'             => $notifiable,
-                'other_party'       => $mentorship_session?->user,
-                'startupName'       => $startupName,
+                'founder'           => $founder,
+                'startup'           => $startup,
+                'startupName'       => $startup?->name_en ?? $startup?->name_ar ?? '',
                 'sessionType'       => $sessionType,
-                'sessionNotes'      => $mentorship_session?->comment ?? '-',
+                'sessionNotes'      => $mentorship_session?->comment ?? '',
                 'sessionDate'       => $sessionDate,
                 'sessionTime'       => $sessionTime,
                 'sessionLink'       => $mentorship_session?->join_url ?? '',
+                'passcode'          => $mentorship_session?->zoom_passcode ?? '',
                 'platformName'      => $platformName,
-                'location'          => $location,
+                'locationName'      => $locationName,
                 'mapLink'           => $mapLink,
+                'address'           => $address,
                 'attachments'       => $attachments,
+                'viewSessionUrl'    => route('mentorships.sessions_list_detailed'),
             ], $orgData));
 
     }

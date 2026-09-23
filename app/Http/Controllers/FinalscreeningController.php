@@ -13,6 +13,7 @@ use App\Notifications\WelcomeJudgerNotification;
 use App\Screening;
 use App\ScreeningEvaluation;
 use App\ScreeningEvaluationResults;
+use App\Services\PanelWindowService;
 use App\Step;
 use App\User;
 use Carbon\Carbon;
@@ -332,15 +333,37 @@ class FinalscreeningController extends Controller
 		}
 		$companies = [];
 		$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
-		if( $cstep ) { $companies = Company::whereIn('step', [$form?->id ?? 0, $cstep?->id ?? 0])->get(); } else { $cstep = []; }
+		// Only startups that have actually progressed to THIS step belong here.
+		// Including the form id in the step filter compared a builder_forms id
+		// against companies.step (a steps FK), so startups sitting at an
+		// unrelated step were listed as selectable AND — failing the
+		// current-step test below — rendered a second time as "moved (no longer
+		// at this step)" (GV-9556). Same rule the initial screening already
+		// applies (GV-3237).
+		if( $cstep ) { $companies = Company::where('step', $cstep->id)->get(); } else { $cstep = []; }
 
 		/** Prepare Judging Panels for View (Clean Code) */
 		$judgingPanels = [];
 		if ($cstep && isset($judgers_list) && count($judgers_list) > 0) {
 			foreach ($judgers_list as $panelId => $panelData) {
+				// Same History rule as the initial screening (GV-8300): once a
+				// panel's meeting has ended it is read-only. The flag was only
+				// ever computed on the initial-screening path, so a finished
+				// FINAL panel stayed editable and never showed the badge — the
+				// "status change is delayed" in GV-9568. Derived from the saved
+				// row, not request input, so it cannot be spoofed.
+				$screening = Screening::where('step_id', $cstep->id)->where('panel', $panelId)->first();
 				$panelEntry = [
 					'judges' => (array) ($panelData['judgers'] ?? []),
 					'companies' => (array) ($panelData['companies'] ?? []),
+					'is_history' => PanelWindowService::isPast(
+						PanelWindowService::fromScreening($screening),
+						auth()->user()
+					),
+					// The panel number this record is STORED under. Deleting an
+					// earlier panel renumbers the accordion, so the loop index is
+					// not identity — carry the real number through.
+					'panel_number' => (int) $panelId,
 					'session' => [
 						'checked' => $panelData['session']['checked'] ?? false,
 						'date' => $panelData['session']['date'] ?? null,
@@ -373,7 +396,9 @@ class FinalscreeningController extends Controller
 		// another step is dropped here (its evaluation still shows on the results
 		// page). Keep it as the cstep's current companies intersected with the
 		// panel assignments.
-		$currentStepCompanyIds = Company::where('step', $cstep->id)->pluck('id')->map(fn ($i) => (int) $i)->all();
+		// Derived from $companies itself so the selectable list and the off-step
+		// list can never disagree about the same startup (GV-9556).
+		$currentStepCompanyIds = collect($companies)->pluck('id')->map(fn ($i) => (int) $i)->all();
 		$allPanelCompanyIds = collect($judgingPanels)->pluck('companies')->flatten()->map(fn ($i) => (int) $i)->filter()->unique()->values();
 		$assignedCompanyIds = $allPanelCompanyIds->intersect($currentStepCompanyIds)->values();
 
@@ -424,11 +449,13 @@ class FinalscreeningController extends Controller
 				// إرسال الإشعار
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
-					try {
-						$result->notify(new WelcomeJudgerNotification($data));
-					} catch (\Throwable $th) {
-						//throw $th;
-					}
+					// Disabled for now: this is not an account-creation event. A
+					// separate "assigned to screening" email will replace it.
+					// try {
+					// 	$result->notify(new WelcomeJudgerNotification($data));
+					// } catch (\Throwable $th) {
+					// 	//throw $th;
+					// }
 				}
 			}
 			
@@ -582,11 +609,13 @@ class FinalscreeningController extends Controller
 				// إرسال الإشعار
 				if( !in_array(env('APP_ENV', 'local'), ['local']) )
 				{
-					try {
-						$result->notify(new WelcomeJudgerNotification($data));
-					} catch (\Throwable $th) {
-						// throw $th;
-					}
+					// Disabled for now: this is not an account-creation event. A
+					// separate "assigned to screening" email will replace it.
+					// try {
+					// 	$result->notify(new WelcomeJudgerNotification($data));
+					// } catch (\Throwable $th) {
+					// 	// throw $th;
+					// }
 				}
 			}
 			

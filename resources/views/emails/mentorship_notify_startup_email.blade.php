@@ -19,10 +19,9 @@
                 </tr>
                 <tr>
                     <td style="padding: 40px 40px 20px 40px; text-align: {{ $alignStart }}; direction: {{ $dirAttr }};">
-                        {{--  <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">{{ __('email.startup_mentorship_session_notify_email.subject') }}</p>  --}}
                         <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ __('email.hello') . ' ' . trim($party->name) }},</h1>
 
-                        <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.informing') }}</p>
+                        <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.informing', ['admin_name' => $adminName ?: '-']) }}</p>
 
                         <p style="margin: 0 0 10px 0; font-size: 14px; color: #111827; font-weight: 600;">{{ __('email.startup_mentorship_session_notify_email.session_details') }}</p>
 
@@ -32,50 +31,39 @@
                                     <table width="100%" cellspacing="0" cellpadding="0" border="0">
                                         <tr>
                                             <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.mentor') }}:</td>
-                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $mentorName }}</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $mentorName ?: '-' }}</td>
                                         </tr>
                                         <tr>
                                             <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.date') }}:</td>
-                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionDate }}</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionDate ?: '-' }}</td>
                                         </tr>
                                         <tr>
                                             <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.time') }}:</td>
-                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionTime }}</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionTime ?: '-' }}</td>
                                         </tr>
                                         <tr>
                                             <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.session_type') }}:</td>
-                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionType == 'online' ? __('email.online') : __('email.offline') }}</td>
+                                            <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionType == 'online' ? __('email.startup_mentorship_session_notify_email.session_type_online') : __('email.startup_mentorship_session_notify_email.session_type_in_person') }}</td>
                                         </tr>
                                         @if( $sessionType == 'online' || $sessionType == 'both' )
                                             <tr>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.session_link') }}:</td>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: {{ $mainColor }}; font-weight: 600; text-align: {{ $alignEnd }};"><a href="{{ $sessionLink }}" style="color: {{ $mainColor }};">{{ __('email.Join_Meeting') }}</a></td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.meeting_link') }}:</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: {{ $mainColor }}; font-weight: 600; text-align: {{ $alignEnd }};"><a href="{{ $sessionLink }}" style="color: {{ $mainColor }};">{{ $sessionLink }}</a></td>
                                             </tr>
-                                        @endif
-                                        @if( $sessionType == 'offline' || $sessionType == 'both' )
+                                            @if(!empty($passcode))
+                                                <tr>
+                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.Passcode') }}:</td>
+                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $passcode }}</td>
+                                                </tr>
+                                            @endif
+                                        @else
                                             <tr>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.session_address') }}:</td>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $location }}</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.Location') }}:</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $locationName ?: '-' }}</td>
                                             </tr>
                                             <tr>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.startup_mentorship_session_notify_email.map_location_link') }}:</td>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: {{ $mainColor }}; font-weight: 600; text-align: {{ $alignEnd }};"><a href="{{ $mapLink }}" style="color: {{ $mainColor }};">{{ __('email.open_maps') }}</a></td>
-                                            </tr>
-                                        @endif
-                                        @if( !empty( $attachments ) )
-                                            <tr>
-                                                <td style="padding-bottom: 0px; font-size: 14px; color: #6B7280; width: 150px; vertical-align: top;">{{ __('email.Attachments') }}:</td>
-                                                <td style="padding-bottom: 0px; font-size: 14px; text-align: {{ $alignEnd }};">
-                                                    @foreach( $attachments as $attachment )
-                                                        <a href="{{ $attachment['url'] }}" style="display: block; margin-bottom: 4px; color: {{ $mainColor }}; text-decoration: underline; font-weight: 600;">📎 {{ $attachment['name'] }}</a>
-                                                    @endforeach
-                                                </td>
-                                            </tr>
-                                        @endif
-                                        @if( $sessionNotes != '-' )
-                                            <tr>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px; vertical-align: top !important;">{{ __('email.mentor_notify_email.session_notes') }}:</td>
-                                                <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $sessionNotes }}</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.address') }}:</td>
+                                                <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $address ?: '-' }}</td>
                                             </tr>
                                         @endif
                                     </table>
@@ -84,11 +72,14 @@
                         </table>
 
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.ensure_on_time') }}</p>
-                        <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.startup_mentorship_session_notify_email.wishes') }}</p>
 
-                        @if($isRtl)
-                            <p style="margin: 20px 0 0 0; font-size: 15px; color: #374151;">{{ __('email.action_session_details') }}</p>
-                        @endif
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{ $viewSessionUrl }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: {{ $mainColor }}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ __('email.cta.view_session') }}</a>
+                                </td>
+                            </tr>
+                        </table>
 
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
                             {{ __('email.regards') }}<br>

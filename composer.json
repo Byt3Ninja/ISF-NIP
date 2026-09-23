@@ -19,6 +19,7 @@
         "guzzlehttp/guzzle": "^7.4",
         "intervention/image": "^2.5",
         "jenssegers/agent": "^2.6",
+        "khaled.alshamaa/ar-php": "^7.0",
         "laravel/framework": "^10.10",
         "laravel/reverb": "^1.5",
         "laravel/sanctum": "^3.3",

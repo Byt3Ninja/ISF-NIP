@@ -1044,6 +1044,22 @@
             currentTabIndex = 0;
             $('#current_tab_id').val(1);
             initStepTypeHelpText();
+
+            // Deep link from the landing page "Program not public" warning:
+            // open the Program Settings tab and scroll to the Program
+            // Visibility section.
+            if (window.location.hash === '#program-settings-visibility') {
+                const settingsTabIndex = tabIds.indexOf('program_settings');
+                if (settingsTabIndex > -1) {
+                    navigateToTab(settingsTabIndex, false);
+                    setTimeout(function () {
+                        const $section = $('#program-settings-visibility');
+                        if ($section.length) {
+                            $('html, body').animate({ scrollTop: $section.offset().top - 120 }, 500);
+                        }
+                    }, 350);
+                }
+            }
         });
     </script>
 @stop

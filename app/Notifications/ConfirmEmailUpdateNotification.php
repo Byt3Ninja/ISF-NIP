@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -60,15 +61,32 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
     {
         $org = $this->user?->organization;
         $smtpSettings = $org?->organizationSettings;
-        
-        // Get from address and name
+
+        // Platform-branded email (platform logo/name); the org only routes SMTP.
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->buildEmailOrganizationData(null);
+
+        // Follow the platform's default language (General Settings).
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $firstName = $locale === 'ar' ? trim((string) $this->user?->first_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $this->user?->first_name_en);
+        }
 
         return (new MailMessage)
-            ->subject(__('notifications.confirm_email_update.subject'))
+            ->subject(__('email.email_change_confirm_email.subject', [], $locale))
             ->view('admin.emails.updateEmail', array_merge([
                 'url' => $this->url,
+                'locale' => $locale,
+                // Named distinctly from 'platformName': a global view composer
+                // (AppServiceProvider) sets that key on every view and would
+                // silently override it.
+                'emailChangePlatformName' => $platformName,
+                'emailChangeFirstName' => $firstName,
+                'emailChangeGender' => strtolower(trim((string) $this->user?->gender)),
             ], $orgData));
     }
 
