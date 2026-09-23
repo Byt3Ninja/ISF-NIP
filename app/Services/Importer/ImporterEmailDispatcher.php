@@ -48,8 +48,9 @@ class ImporterEmailDispatcher
                 'locale'         => $locale,
                 // A brand-new founder has never seen their (randomly
                 // generated) password, so they get a one-time sign-in link
-                // instead of the credentials themselves.
-                'login_url'      => $wasCreated ? $user->generateMagicLoginUrl() : null,
+                // instead of the credentials themselves. An existing founder
+                // already has a password, so they get the normal login page.
+                'login_url'      => $wasCreated ? $user->generateMagicLoginUrl() : route('login'),
             ], $orgData);
 
             $mailable = $wasCreated
