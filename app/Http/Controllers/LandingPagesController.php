@@ -51,7 +51,9 @@ class LandingPagesController extends Controller
 
 		$pages = $pagesQuery->paginate(9)->withQueryString();
 
-		return view('admin.landing-pages.index', compact('pages'));
+		$titleMaxLength = LandingPage::TITLE_MAX_LENGTH;
+
+		return view('admin.landing-pages.index', compact('pages', 'titleMaxLength'));
 	}
 
 	/**

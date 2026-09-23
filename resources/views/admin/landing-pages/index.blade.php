@@ -108,8 +108,8 @@
                 <div>
 
                   <h5 class="card-title mb-1 line-clamp-1">
-                    <a href="{{ route('landing-pages.edit', $page->id) }}" class="text-dark">
-                      {{ Str::limit($page->title, 35) }}
+                    <a href="{{ route('landing-pages.edit', $page->id) }}" class="text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $page->title }}">
+                      {{ Str::limit($page->title, 50) }}
                     </a>
                   </h5>
 
