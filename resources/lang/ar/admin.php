@@ -2947,6 +2947,8 @@ return [
 	'start_time_required' => 'يرجى إدخال وقت البدء',
 	'end_time_required' => 'يرجى إدخال وقت النهاية',
 	'end_time_must_be_after_start_time' => 'يجب أن يكون الوقت النهاية بعد الوقت البدء',
+	'start_time_in_past' => 'يجب أن يكون وقت البدء بعد الوقت الحالي.',
+	'session_datetime_in_past' => 'لا يمكن جدولة اللجنة رقم :panel في الماضي. يرجى اختيار تاريخ ووقت في المستقبل.',
 	'meeting_link_required' => 'يرجى إدخال رابط الاجتماع',
 	'meeting_link_url_required' => 'يرجى إدخال رابط اجتماع صحيح',
 	'interval' => 'الفاصل الزمني',

@@ -156,4 +156,30 @@ class PanelWindowService
 
         return $end !== null && MeetingWindowService::now($user)->greaterThan($end);
     }
+
+    /**
+     * Is this panel scheduled to START in the past? (GV-9618)
+     *
+     * The counterpart to isPast(), and deliberately measured on the START rather
+     * than the end: this answers "may this session be scheduled at all", where a
+     * window whose first slot has already begun is invalid no matter how far its
+     * end still runs. isPast() answers the different question of whether a
+     * meeting has FINISHED (and so may no longer be edited), which is why the two
+     * cannot share a comparison.
+     *
+     * Same wall-clock reading as isPast(): slot times carry no stored offset, so
+     * both sides are compared in the viewer's timezone.
+     *
+     * An unscheduled panel books no time and is never in the past.
+     */
+    public static function startsInPast(?array $window, $user = null): bool
+    {
+        if (empty($window['start'])) {
+            return false;
+        }
+
+        $start = MeetingWindowService::inUserZone($window['start'], $user);
+
+        return $start !== null && MeetingWindowService::now($user)->greaterThan($start);
+    }
 }

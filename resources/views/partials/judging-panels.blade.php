@@ -830,6 +830,73 @@
       // True for controls inside a finished (History) panel.
       const inHistoryPanel = (el) => $(el).closest('.accordion-item').attr('data-history') === '1';
 
+      // ---- GV-9618: past-date/time guards -------------------------------
+      //
+      // The date picker's `minDate: 'today'` was the only past guard, and it is
+      // cosmetic: the START TIME picker is separate and had no floor, so today
+      // at 13:00 saved happily at 14:38. These helpers add the missing half on
+      // the client; ScreeningController enforces the same rule on the server.
+
+      // Local "now" as {date: 'Y-m-d', minutes: since-midnight}. Built from the
+      // browser clock deliberately — the fields are wall-clock values the admin
+      // reads off the same clock, matching how MeetingWindowService treats slot
+      // times. The server re-checks anyway, so a skewed client cannot let a past
+      // session through.
+      const clockNow = () => {
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return {
+          date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+          minutes: d.getHours() * 60 + d.getMinutes()
+        };
+      };
+
+      // A start time is in the past only when the session is dated TODAY. A
+      // future date makes any time legal, and a past date is already rejected by
+      // the date picker and the server rule.
+      const startTimeIsPast = (dateVal, timeVal) => {
+        const now = clockNow();
+        if (!dateVal || !timeVal || dateVal !== now.date) return false;
+        const minutes = parseTime(timeVal);
+        return minutes !== null && minutes < now.minutes;
+      };
+
+      // True when the admin actually edited this panel's date or start time.
+      //
+      // This is the regression guard. A saved session whose meeting has already
+      // happened is still editable — the admin may be fixing its roster or
+      // toggling notify — and blocking that save on a past time the admin never
+      // touched would break ordinary edits. So the past check only fires on a
+      // value that CHANGED.
+      //
+      // Reuses the baseline trick panelChangeKind() documents: the `value`
+      // ATTRIBUTE keeps what blade rendered while .val() reads what the admin
+      // now has, and flatpickr writes only the property, so the two stay
+      // independent.
+      const startChanged = ($p) => ['session_date', 'start_time'].some((name) => {
+        const $input = $p.find(`[name*="[${name}]"]`).first();
+        if (!$input.length) return false;
+        return ($input.attr('value') || '').trim() !== ($input.val() || '').trim();
+      });
+
+      // Constrain the start picker to the remainder of the day when the panel is
+      // dated today, and lift the constraint otherwise. Purely an affordance —
+      // it makes the past unpickable rather than merely rejected.
+      const applyStartTimeFloor = ($panel) => {
+        if ($panel.attr('data-history') === '1') return;
+
+        const dateVal = ($panel.find('input[name*="[session_date]"]').val() || '').trim();
+        const startEl = $panel.find('input[name*="[start_time]"]').get(0);
+        if (!startEl || !startEl._flatpickr) return;
+
+        const now = clockNow();
+        // `set` on a live instance, not a re-init: re-initializing would drop the
+        // instance the date picker's onChange reaches for and reset the field.
+        startEl._flatpickr.set('minTime', dateVal === now.date
+          ? `${String(Math.floor(now.minutes / 60)).padStart(2, '0')}:${String(now.minutes % 60).padStart(2, '0')}`
+          : null);
+      };
+
       const initPlugins = (el) => {
         // flatpickr is NOT attached to history panels. `minDate: 'today'` rejects
         // a past date, and the picker then rewrites the field — which is why a
@@ -837,9 +904,19 @@
         // stored value is correct; the picker was corrupting the display. A
         // read-only panel needs no picker anyway.
         $(el).find('.session-date').filter((_, d) => !inHistoryPanel(d))
-          .flatpickr({ dateFormat: 'Y-m-d', minDate: 'today' });
+          .flatpickr({
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            // GV-9618: `minDate` stops a past DATE, but the start time is a
+            // separate picker that knows nothing about it. Moving the date on or
+            // off today changes whether a past time is legal, so the start
+            // picker's floor is recomputed on every date change.
+            onChange: (dates, dateStr, fp) => applyStartTimeFloor($(fp.input).closest('.accordion-item'))
+          });
         $(el).find('.session-time').filter((_, d) => !inHistoryPanel(d))
           .flatpickr({ enableTime: true, noCalendar: true, dateFormat: 'H:i' });
+        // Seed the floor for panels rendered with a date already in them.
+        $(el).find('.accordion-item').each((_, item) => applyStartTimeFloor($(item)));
         $(el).find('.select2').each(function () {
           initSelect2($(this));
           // Select2 renders its own widget, which ignores an ancestor
@@ -1387,6 +1464,13 @@
               $start.addClass('is-invalid');
               $p.find('.error-start_time').text('{{ __('admin.select_start_time_first') }}');
               valid = false;
+            } else if (startChanged($p) && startTimeIsPast($p.find('input[name*="[session_date]"]').val().trim(), startVal)) {
+              // GV-9618. Gated on startChanged() so re-saving a panel whose
+              // meeting already happened (roster edit, notify toggle) is not
+              // blocked by a time the admin never touched.
+              $start.addClass('is-invalid');
+              $p.find('.error-start_time').text('{{ __('admin.start_time_in_past') }}');
+              valid = false;
             }
 
             if (intervalVal === '' || !/^\d+$/.test(intervalVal) || parseInt(intervalVal, 10) <= 0) {
@@ -1400,6 +1484,12 @@
             if (!startVal) {
               $start.addClass('is-invalid');
               $p.find('.error-start_time').text('{{ __('admin.start_time_required') }}');
+              valid = false;
+            } else if (startChanged($p) && startTimeIsPast($p.find('input[name*="[session_date]"]').val().trim(), startVal)) {
+              // GV-9618. The ticket reproduced this with the interval ON, but a
+              // panel-wide window has exactly the same gap.
+              $start.addClass('is-invalid');
+              $p.find('.error-start_time').text('{{ __('admin.start_time_in_past') }}');
               valid = false;
             }
             if (!endVal) {

@@ -659,6 +659,58 @@ class ScreeningController extends Controller
 		$panels = $request->panels ?? [];
 		$step = Step::with('cycle.organization')->find($stepId);
 
+		// Past-schedule gate (GV-9618).
+		//
+		// `minDate: 'today'` on the date picker was the only guard, and it was
+		// cosmetic: client-side, and blind to the START TIME, which sat in a
+		// separate picker with no floor. Today at 13:00 therefore saved happily at
+		// 14:38. This is the authoritative check — the browser guards are an
+		// affordance, this is the rule.
+		//
+		// Two carve-outs keep ordinary editing working:
+		//
+		// 1. History panels are skipped. Their meetings have already happened and
+		//    their values are restored from the database above, not typed — so
+		//    they are past BY DEFINITION and would block every save on a step with
+		//    a finished panel.
+		//
+		// 2. A live panel is checked only when its date or start time CHANGED
+		//    against what is stored. An admin editing a past panel's roster or
+		//    meeting link must not be blocked by a time they never touched; only
+		//    an attempt to SCHEDULE something in the past is rejected.
+		foreach ($panels as $index => $panel) {
+			if (isset($panel['history_panel'])) {
+				continue;
+			}
+
+			$window = PanelWindowService::fromInput($panel);
+			if (!$window || !PanelWindowService::startsInPast($window, auth()->user())) {
+				continue;
+			}
+
+			// Unchanged against the stored row → the admin is editing something
+			// else on an already-past panel. Let it through.
+			$saved = Screening::where('step_id', $stepId)->where('panel', $index + 1)->first();
+			if ($saved) {
+				$savedDate = $saved->session_date instanceof \DateTimeInterface
+					? $saved->session_date->format('Y-m-d')
+					: $saved->session_date;
+				$savedStart = $saved->start_time ? substr($saved->start_time, 0, 5) : null;
+
+				$sameDate  = (string) $savedDate === (string) ($panel['session_date'] ?? '');
+				$sameStart = (string) $savedStart === substr((string) ($panel['start_time'] ?? ''), 0, 5);
+
+				if ($sameDate && $sameStart) {
+					continue;
+				}
+			}
+
+			return response()->json([
+				'success' => false,
+				'message' => __('admin.session_datetime_in_past', ['panel' => $index + 1]),
+			], 422);
+		}
+
 		// Judge double-booking gate (GV-8300). A judge cannot sit on two panels
 		// whose windows overlap, within this submission or against panels already
 		// saved on other screening/final steps of the same cycle.

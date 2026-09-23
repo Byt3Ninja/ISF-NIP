@@ -2903,6 +2903,8 @@ return [
 	'start_time_required' => 'Please enter the start time.',
 	'end_time_required' => 'Please enter the end time.',
 	'end_time_must_be_after_start_time' => 'The end time must be after the start time.',
+	'start_time_in_past' => 'The start time must be later than the current time.',
+	'session_datetime_in_past' => 'Panel #:panel cannot be scheduled in the past. Please choose a future date and time.',
 	'meeting_link_required' => 'Please enter the meeting link.',
 	'meeting_link_url_required' => 'Please enter a valid meeting link',
 	'interval' => 'Interval',
