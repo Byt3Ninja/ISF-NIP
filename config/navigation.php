@@ -245,9 +245,6 @@ return function () {
         'menuOnly' => true,
       ];
       $menu['dashboard']['children'][] = ['title' => 'reports', 'route' => 'reports.list', 'menuOnly' => true];
-    }
-    if (app()->environment(['local', 'dev', 'test', 'beta']))
-    {
       $children = $menu['admin']['children'];
       $customLandingPage = ['title' => 'custom_landing_pages', 'route' => 'landing-pages.index', 'menuOnly' => true];
       $menu['admin']['children'] = array_merge(array_slice($children, 0, 1), [$customLandingPage], array_slice($children, 1));
