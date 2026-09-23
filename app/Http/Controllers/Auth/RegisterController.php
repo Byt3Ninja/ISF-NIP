@@ -100,14 +100,6 @@ class RegisterController extends Controller
         if( $data['role'] == 'Founder' ) { $data['role'] = 'registered'; }
         if( $data['role'] == 'Mentor' ) { $data['role'] = 'mentor'; }
 
-        $hasMentorPayload = !empty($data['title_en'])
-            || !empty($data['bio_en'])
-            || !empty($data['Linkedin'])
-            || !empty($data['expertise']);
-        if ($data['role'] === 'registered' && $hasMentorPayload) {
-            $data['role'] = 'mentor';
-        }
-
         $data['must_change_password'] = false;
         $user= $this->userService->store($data);
     
