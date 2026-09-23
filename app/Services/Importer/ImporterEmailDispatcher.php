@@ -38,7 +38,7 @@ class ImporterEmailDispatcher
                 'founder_name'   => trim(($user->first_name_en ?? '') . ' ' . ($user->last_name_en ?? '')),
                 'founder_gender' => strtolower(trim((string) $user->gender)),
                 'program_name'   => $cycle->title,
-                'program_type'   => $cycle->type,
+                'program_type'   => __('cycles.' . $cycle->type, [], $locale),
                 'start_date'     => $cycle->start ? Carbon::parse($cycle->start)->format('Y-m-d') : null,
                 'end_date'       => $cycle->end ? Carbon::parse($cycle->end)->format('Y-m-d') : null,
                 'organization'   => $locale === 'ar'
