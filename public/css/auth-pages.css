@@ -1,0 +1,421 @@
+/*
+ * Auth pages — login, founder/mentor register, service-provider register.
+ * GV-8956 / GV-8957 / GV-8958
+ *
+ * Shared by all three views so the brand lockup, the cover panel and the form
+ * rhythm cannot drift apart. Everything here is expressed in Vuexy's own custom
+ * properties (--bs-primary-rgb, --bs-body-bg, ...) so the pages follow whichever
+ * theme and light/dark style the customizer has applied, instead of pinning a
+ * single hardcoded purple.
+ */
+
+/* ---------------------------------------------------------------- layout -- */
+
+.authentication-wrapper.authentication-cover .authentication-inner {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+
+/* Both columns must be allowed to shrink, or a wide child (Select2, intl-tel-input)
+   pushes the grid past the viewport and creates a horizontal scrollbar. */
+.authentication-wrapper.authentication-cover .authentication-inner > * {
+  min-width: 0;
+}
+
+/* The form column scrolls on its own; the cover panel stays put beside it. */
+/*
+ * The form column centres its content while it fits, then falls back to normal
+ * top-aligned flow once the form is taller than the viewport — so a long form
+ * scrolls from its first field instead of being centred with its head cut off.
+ */
+.auth-form-col {
+  min-height: 100vh;
+}
+
+/* p-sm-12 is a fixed 3rem top/bottom; on short viewports that is pure overflow. */
+@media (min-height: 0px) and (max-height: 900px) {
+  .auth-form-col.p-sm-12 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .auth-brand {
+    margin-bottom: 1.125rem;
+  }
+
+  .auth-brand img {
+    height: 44px;
+  }
+
+  .auth-form-heading {
+    margin-bottom: 1rem;
+  }
+
+  .auth-form-col .form-group-tight {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.auth-form-col .auth-form-inner {
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------------- cover panel -- */
+
+/*
+ * Tenant-derived gradient: built from --bs-primary-rgb, so a tenant on the
+ * raspberry/bordered theme gets their own hue rather than Vuexy's default purple.
+ */
+/* Specificity here deliberately matches page-auth.css's own 3-class selector for
+   .auth-cover-bg; a single-class rule would silently lose to it. */
+.authentication-wrapper.authentication-cover .authentication-inner .auth-cover-bg {
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.375rem 3.5rem;
+  background-color: rgb(var(--bs-primary-rgb));
+  background-image:
+    radial-gradient(circle at 14% 14%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 88% 86%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 48%),
+    linear-gradient(155deg,
+      rgba(var(--bs-primary-rgb), 0.92) 0%,
+      rgb(var(--bs-primary-rgb)) 45%,
+      rgba(var(--bs-primary-rgb), 0.78) 100%);
+}
+
+/* Slightly calmer panel in dark mode: full-strength primary glares against a dark UI. */
+[data-style='dark'] .authentication-cover .authentication-inner .auth-cover-bg,
+html.dark-style .authentication-cover .authentication-inner .auth-cover-bg {
+  background-image:
+    radial-gradient(circle at 14% 14%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(155deg,
+      rgba(var(--bs-primary-rgb), 0.80) 0%,
+      rgba(var(--bs-primary-rgb), 0.92) 48%,
+      rgba(var(--bs-primary-rgb), 0.66) 100%);
+}
+
+/*
+ * Welcome lockup, per the GV-8956 wireframe:
+ *
+ *   Heading
+ *   ——            <- 34x3 rule
+ *   Body copy
+ *   ( CREATE ACCOUNT )   <- transparent outline pill
+ *
+ * Left-aligned, not centred: the short rule only reads as a rule when it is
+ * anchored to a consistent edge. Centred, it floats and looks like a divider.
+ * The wireframe's own greys (#343640 / Montserrat) are deliberately NOT adopted —
+ * the brand gradient and Cairo stay, per the PM's note that identity is unchanged.
+ */
+.auth-cover-content {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: start;
+  gap: 1rem;
+}
+
+.auth-cover-title {
+  margin: 0;
+  color: #fff;
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* The tiny rule: a fixed 34x3 bar, never a full-width divider. */
+.auth-cover-rule {
+  display: block;
+  width: 34px;
+  height: 3px;
+  border-radius: 2px;
+  background: #fff;
+  flex: none;
+}
+
+.auth-cover-text {
+  margin: 0;
+  max-width: 280px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+/*
+ * Outline pill. Transparent over the gradient so the panel reads as one surface;
+ * inverting to solid white on hover is the whole interaction. On that white fill
+ * the label takes the BRAND colour, not the wireframe's neutral grey, so the
+ * inversion still reads as this platform's identity.
+ */
+.auth-cover-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.625rem;
+  min-height: 46px;
+  max-width: 100%;
+  padding: 0.75rem 2.5rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.auth-cover-btn:hover,
+.auth-cover-btn:focus-visible {
+  background: #fff;
+  border-color: #fff;
+  color: rgb(var(--bs-primary-rgb));
+}
+
+/* Arabic is not an uppercase script, and .14em tracking breaks its joins. */
+[dir='rtl'] .auth-cover-btn {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* Secondary route on the service-provider panel. */
+.auth-cover-alt {
+  margin: 0.5rem 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.auth-cover-alt a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------ brand mark -- */
+
+/*
+ * Height-constrained, never width-constrained. Tenant logos are not a
+ * predictable shape: Zain's is a tall stacked wordmark, others ship a square
+ * glyph. Fixing the WIDTH (the old width="32") squashes the former to an
+ * unreadable sliver; fixing the height lets both sit correctly on the same slot.
+ */
+/*
+ * The logo sits above the form heading, forming one centred lockup:
+ *   mark -> heading -> subheading -> fields.
+ *
+ * It lives in the FORM column, not on the cover panel, because the form column is
+ * the only one that survives every breakpoint (the panel is d-none below lg). The
+ * brand therefore stays on screen at every size, and is never printed twice.
+ */
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+/*
+ * Height-constrained, never width-constrained. Tenant logos are not a predictable
+ * shape: some ship a tall stacked wordmark, others a square glyph. Fixing the WIDTH
+ * squashes the former to an unreadable sliver; fixing the height lets both sit
+ * correctly in the same slot.
+ */
+.auth-brand img {
+  height: 52px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+}
+
+/* ------------------------------------------------------------------ form -- */
+
+.auth-form-heading {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.auth-form-heading h4 {
+  margin-bottom: 0.375rem;
+  font-weight: 600;
+}
+
+.auth-form-heading p {
+  margin-bottom: 0;
+  color: var(--bs-secondary-color);
+}
+
+/*
+ * Vertical rhythm.
+ *
+ * The register form stacks ~9 rows; at the old 1.25rem gap the column measured
+ * ~1006px and so scrolled on any viewport shorter than ~1030px. The gap is the
+ * dominant term (9 x 20px = 180px), so it is tightened here and the label/control
+ * padding below, rather than shrinking type, which would cost legibility.
+ */
+.auth-form-col .form-group-tight {
+  margin-bottom: 0.875rem;
+}
+
+/* Labels sit closer to their control; the pair still reads as one unit. */
+.auth-form-col .form-label {
+  margin-bottom: 0.1875rem;
+  font-size: 0.8125rem;
+}
+
+.auth-form-col .form-control,
+.auth-form-col .form-select {
+  padding-block: 0.375rem;
+}
+
+/*
+ * Service-provider banner: a secondary route out of this form, not a field, so it
+ * carries less vertical weight than the inputs it sits between.
+ */
+.auth-form-col .sp-banner .card-body {
+  padding: 0.625rem 0.875rem;
+}
+
+.auth-form-col .sp-banner .avatar-md {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.auth-form-col .sp-banner h6 {
+  margin-bottom: 0.0625rem;
+  font-size: 0.875rem;
+}
+
+.auth-form-col .sp-banner small {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Bootstrap's .row gutter compounds with the group gap on paired fields. */
+.auth-form-col .row.gy-3 {
+  --bs-gutter-y: 0.75rem;
+}
+
+.auth-form-col .row.g-3 {
+  --bs-gutter-y: 0.75rem;
+}
+
+/* Keyboard focus must stay visible on top of the gradient. */
+.auth-cover-content a:focus-visible,
+.auth-brand:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.auth-cover-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* --------------------------------------------------------------- vendors -- */
+
+/* intl-tel-input: fill the column and keep the country list inside the viewport. */
+.iti {
+  display: block;
+  width: 100%;
+}
+
+.iti__country-list {
+  direction: ltr !important;
+  text-align: left !important;
+  max-width: min(350px, calc(100vw - 3rem));
+  box-sizing: border-box;
+}
+
+/* Select2 writes inline widths; force it back inside the column. */
+.auth-form-col .select2,
+.auth-form-col .select2-container,
+.auth-form-col .select2-selection {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.auth-form-col .select2-selection__rendered {
+  white-space: normal !important;
+  word-break: break-word;
+}
+
+/* ---------------------------------------------------------- responsive --- */
+
+/*
+ * Below lg the cover panel is hidden (Bootstrap d-none d-lg-flex), so the form
+ * column owns the screen and must not keep desktop's 100vh centring, which
+ * strands a tall register form against the top of the page.
+ */
+/* Between lg and the wireframe's 800px stack point the panel is narrow, so the
+   lockup steps down rather than overflowing its column. */
+@media (max-width: 1199.98px) {
+  .auth-cover-title {
+    font-size: 1.625rem;
+  }
+
+  .authentication-wrapper.authentication-cover .authentication-inner .auth-cover-bg {
+    padding: 2rem 2.25rem;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .authentication-wrapper.authentication-cover .authentication-inner {
+    height: auto;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  .auth-form-col {
+    min-height: auto;
+  }
+
+  .auth-form-col {
+    padding-top: 4.5rem !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .auth-form-col .auth-form-inner {
+    max-width: 100%;
+  }
+
+  .auth-brand img {
+    height: 44px;
+  }
+}
+
+/* Respect a reduced-motion preference for anything the pages animate. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-cover-bg,
+  .auth-brand img,
+  .auth-cover-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}
