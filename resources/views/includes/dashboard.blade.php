@@ -1398,8 +1398,11 @@
 																	</a>
 																@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
 																	<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+																@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																	{{-- GV-9564: inside the join window but no link was generated --}}
+																	<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
 																@else
-																	-
+																	<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
 																@endif
 															</td>
 														</tr>
@@ -1548,8 +1551,11 @@
 																				@endif  --}}
 																			@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
 																				<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+																			@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																				{{-- GV-9565: inside the join window but no link was generated --}}
+																				<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
 																			@else
-																				{{ __('dashboard.Not started') }}
+																				<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
 																			@endif
 																		</td>
 																	</tr>
