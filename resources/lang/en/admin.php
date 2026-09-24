@@ -2794,12 +2794,12 @@ return [
 		// or reordered on an interval panel, because each startup's slot is
 		// derived from its position and therefore shifts.
 		'startup_assignment_change_title' => 'Confirm startup assignment change',
-		'startup_assignment_change_body' => 'Changing the startup assignment may update scheduled meeting times. Affected startups will be notified of their new meeting time. Do you want to continue?',
+		'startup_assignment_change_body' => 'Changing the startup assignment may update scheduled meeting times. Affected judges and startups will be notified of the new meeting times. Do you want to continue?',
 		// Same warning for a change to the interval, start time or session date:
 		// those reflow every startup's slot exactly like a reorder does, but the
 		// wording above ("startup assignment") would not describe what changed.
 		'schedule_change_title' => 'Confirm schedule change',
-		'schedule_change_body' => 'Changing the schedule will update scheduled meeting times. Affected startups will be notified of their new meeting time. Do you want to continue?',
+		'schedule_change_body' => 'Changing the schedule will update scheduled meeting times. Affected judges and startups will be notified of the new meeting times. Do you want to continue?',
 		// History panels (past meetings) — read-only records.
 		'panel_history' => 'History',
 		'panel_history_notice' => 'This panel\'s scheduled screening time has passed. It is kept as a read-only record and can no longer be edited.',

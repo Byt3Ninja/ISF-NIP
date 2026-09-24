@@ -83,7 +83,11 @@ trait ConfiguresSmtp
 
         return [
             'org_name'      => $organization?->name ?? $defaultName,
-            'org_logo_url'  => $organization?->image_url ?? null,
+            // image_url falls back to a RELATIVE placeholder path when the
+            // organization has no logo, which renders as a broken image in a
+            // mail client. Only a real logo is passed, so the layout falls back
+            // to the platform logo instead (GV-8625).
+            'org_logo_url'  => filled($organization?->img_url) ? $organization->image_url : null,
             'org_address'   => $organization?->address ?? null,
             'org_website'   => $organization?->website_url ?? null,
             'org_linkedin'  => $organization?->linkedin_company_url ?? null,

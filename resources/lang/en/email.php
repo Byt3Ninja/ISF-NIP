@@ -426,34 +426,75 @@ return [
         'database' => 'You have been invited to judge an evaluation.',
         'whatsapp' => 'Hello :name, you have been invited to judge the :program_name evaluation process, running from :start_date to :end_date. Check your account for more details.',
     ],
-    'startup_meeting_changed_email' => [
+    // Screening / Final Screening meeting emails and in-platform notifications
+    // (GV-3295 reschedule & cancellation: GV-8486..GV-8759). Wording is taken
+    // from the tickets; :stage is the stage name so one set of keys serves both
+    // initial screening (stype 2) and final screening (stype 5).
+    'screening_meeting_email' => [
+        'stage' => [
+            'screening' => 'Screening',
+            'final' => 'Final Screening',
+        ],
         'greeting' => 'Hello :name,',
-        'new_meeting_time' => 'Your New Meeting Time:',
-        'meeting_time' => 'Your Meeting Time:',
-        'date' => 'Date',
-        'time' => 'Time',
-        'open_dashboard' => 'Open Dashboard',
-        'inquiry_suggest' => 'If you have any questions or need assistance, please feel free to contact us.',
-        'scheduled' => [
-            'subject' => 'Your Screening Meeting Has Been Scheduled',
-            'intro' => 'A screening meeting for :startup_name has been scheduled as part of the :program_name screening.',
-            'please_check' => 'Please make a note of your meeting time. You can review the full details, including the meeting link, from your dashboard.',
-            'database' => 'Your screening meeting has been scheduled for :date at :time.',
-            'whatsapp' => 'Hello :name, your screening meeting for :program_name has been scheduled for :date at :time. Check your account for more details.',
+        'thanks' => 'Thank you,',
+        'details' => 'Meeting Details:',
+        'updated_details' => 'Updated Meeting Details:',
+        'label' => [
+            'step' => ':stage Step',
+            'founders' => 'Founder (s)',
+            'startups' => 'Startup (s)',
+            'founder' => 'Founder',
+            'startup' => 'Startup',
+            'date' => 'Date',
+            'time' => 'Time',
+            'meeting_link' => 'Meeting Link',
+            'passcode' => 'Passcode',
         ],
-        'rescheduled' => [
-            'subject' => 'Your Screening Meeting Time Has Changed',
-            'intro' => 'The schedule for the :program_name screening has been updated, and the meeting time for :startup_name has changed.',
-            'please_check' => 'Please make a note of your new meeting time. You can review the full details, including the meeting link, from your dashboard.',
-            'database' => 'Your screening meeting has been rescheduled to :date at :time.',
-            'whatsapp' => 'Hello :name, your screening meeting for :program_name has been rescheduled to :date at :time. Check your account for more details.',
+        'judge' => [
+            'rescheduled' => [
+                'subject' => 'Your :stage Meeting Has Been Rescheduled',
+                'intro' => 'Your :stage meeting for :program has been rescheduled.',
+                'outro' => [
+                    'Please use the meeting link above or refer to your Judge Dashboard for the latest meeting details.',
+                    'This updated schedule replaces the previously scheduled meeting time.',
+                ],
+                'database' => 'Your :stage meeting for :program has been rescheduled to :date, :start – :end.',
+            ],
+            'cancelled' => [
+                'subject' => ':stage Meeting Cancelled – :founder | :program',
+                'intro' => 'Your :stage meeting with :founder for :program has been cancelled.',
+                'outro' => [
+                    'No action is required from you for this meeting.',
+                ],
+                'database' => 'Your :stage meeting with :founder for :program on :date, :start – :end has been cancelled.',
+            ],
         ],
-        'cancelled' => [
-            'subject' => 'Your Screening Meeting Has Been Cancelled',
-            'intro' => 'The schedule for the :program_name screening has been updated, and the meeting previously arranged for :startup_name is no longer scheduled.',
-            'please_check' => 'No action is needed from you right now. If a new meeting is arranged, you will be notified with the new time.',
-            'database' => 'Your screening meeting scheduled for :date at :time has been cancelled.',
-            'whatsapp' => 'Hello :name, your screening meeting for :program_name, scheduled for :date at :time, has been cancelled. Check your account for more details.',
+        'founder' => [
+            'scheduled' => [
+                'subject' => 'Your :stage Meeting Has Been Scheduled',
+                'intro' => 'Your :stage meeting for :program has been scheduled.',
+                'outro' => [
+                    'Please use the meeting link above or refer to your dashboard for the meeting details.',
+                ],
+                'database' => 'Your :stage meeting for :program has been scheduled for :date, :start – :end.',
+            ],
+            'rescheduled' => [
+                'subject' => 'Your :stage Meeting Has Been Rescheduled',
+                'intro' => 'Your :stage meeting for :program has been rescheduled.',
+                'outro' => [
+                    'Please use the meeting link above or refer to your dashboard for the latest meeting details.',
+                    'This updated meeting time replaces your previously scheduled time.',
+                ],
+                'database' => 'Your :stage meeting for :program has been rescheduled to :date, :start – :end.',
+            ],
+            'cancelled' => [
+                'subject' => ':stage Meeting Cancelled – :program',
+                'intro' => 'Your :stage meeting for :program has been cancelled.',
+                'outro' => [
+                    'No action is required from you for this meeting.',
+                ],
+                'database' => 'Your :stage meeting for :program on :date, :start – :end has been cancelled.',
+            ],
         ],
     ],
 

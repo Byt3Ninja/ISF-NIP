@@ -1351,7 +1351,13 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
               },
-              body: JSON.stringify({ step: '{{ $cstep->id }}', panel: panelIdx })
+              // Deleting a panel cancels its meetings (GV-3295). The panel's own
+              // "Notify now" switch decides whether that is emailed too.
+              body: JSON.stringify({
+                step: '{{ $cstep->id }}',
+                panel: panelIdx,
+                notify: $panel.find('.notify-toggle').is(':checked')
+              })
             });
             const data = await response.json();
             if (data.success) {
