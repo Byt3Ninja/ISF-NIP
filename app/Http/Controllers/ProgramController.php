@@ -614,7 +614,7 @@ class ProgramController extends Controller
     }
 
     /**
-     * Wizard steps 2-5 (Schedule / Mentorship / Location / Publish — one route each, see routes).
+     * Wizard steps 2-5 (Schedule / Mentorship / Landing / Publish — one route each, see routes).
      * Requires an existing program; never creates one.
      */
     public function update(Request $request, string $id)
@@ -630,7 +630,7 @@ class ProgramController extends Controller
         $handlers = [
             'programs.schedule' => 'updateProgramSchedule',
             'programs.mentorship' => 'updateProgramMentorship',
-            'programs.location' => 'updateProgramLocation',
+            'programs.landing' => 'updateProgramLanding',
             'programs.publish' => 'updateProgramPublish',
         ];
         $routeName = $request->route()->getName();
@@ -854,7 +854,7 @@ class ProgramController extends Controller
     // Step 4: Landing & Branding (visibility + branding colors)
     // ------------------------------------------------------------------
 
-    protected function updateProgramLocation(Request $request, Cycle $cycle): array
+    protected function updateProgramLanding(Request $request, Cycle $cycle): array
     {
         $isPublic = $request->input('programVisibility') === 'public';
 

@@ -203,22 +203,35 @@
   const syncPageStatusLabels = () => {
     $pageList.find(".page-status").each(function () {
       const $label = $(this).closest(".form-check").find(".page-status-label");
-      $label.text($(this).is(":checked") ? T("Active", "Active") : T("Inactive", "Inactive"));
+      $label.text(
+        $(this).is(":checked")
+          ? T("Active", "Active")
+          : T("Inactive", "Inactive"),
+      );
     });
   };
 
   // Renumber page rows after a drag so the posted names match the visual order
   const reindexPages = () => {
     $pageList.find("[data-repeater-item]").each(function (index) {
-      $(this).find("[name]").each(function () {
-        const $input = $(this);
-        const matches = ($input.attr("name") || "").match(/\[[^\]]+\]/g);
-        const base = matches ? matches[matches.length - 1].replace(/\[|\]/g, "") : $input.attr("name");
-        $input.attr(
-          "name",
-          "programPages[" + index + "][" + base + "]" + ($input.is(":checkbox") ? "[]" : ""),
-        );
-      });
+      $(this)
+        .find("[name]")
+        .each(function () {
+          const $input = $(this);
+          const matches = ($input.attr("name") || "").match(/\[[^\]]+\]/g);
+          const base = matches
+            ? matches[matches.length - 1].replace(/\[|\]/g, "")
+            : $input.attr("name");
+          $input.attr(
+            "name",
+            "programPages[" +
+              index +
+              "][" +
+              base +
+              "]" +
+              ($input.is(":checkbox") ? "[]" : ""),
+          );
+        });
     });
   };
 
@@ -260,7 +273,11 @@
     // Status switch label + drag & drop reordering (SortableJS handles the handle-only drag)
     $pageList.on("change", ".page-status", function () {
       const $label = $(this).closest(".form-check").find(".page-status-label");
-      $label.text($(this).is(":checked") ? T("Active", "Active") : T("Inactive", "Inactive"));
+      $label.text(
+        $(this).is(":checked")
+          ? T("Active", "Active")
+          : T("Inactive", "Inactive"),
+      );
     });
     syncPageStatusLabels();
 
@@ -281,7 +298,7 @@
     { key: "general", selector: "#step-general", path: "general" },
     { key: "schedule", selector: "#step-schedule", path: "schedule" },
     { key: "mentorship", selector: "#step-mentorship", path: "mentorship" },
-    { key: "location", selector: "#step-location", path: "location" },
+    { key: "landing", selector: "#step-landing", path: "landing" },
     { key: "pages", selector: "#step-pages", path: "publish" },
   ];
 
@@ -330,6 +347,32 @@
     true,
   );
   setAllStepsLocked(!isEditMode);
+
+  // ---- URL tab param (?tab=<slug>) -------------------------------------------
+  const TAB_PARAM = "tab";
+  const stepSlugs = stepHeaders.map((el) => el?.dataset.url || "");
+
+  const setUrlTab = (slug) => {
+    if (!slug) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get(TAB_PARAM) === slug) return;
+    url.searchParams.set(TAB_PARAM, slug);
+    window.history.replaceState(window.history.state, "", url);
+  };
+
+  // Jump to the step named in the URL on load (only if it's unlocked)
+  const initialTab = new URLSearchParams(window.location.search).get(TAB_PARAM);
+  const initialIndex = initialTab ? stepSlugs.indexOf(initialTab) : -1;
+  if (initialIndex > 0 && !lockedSteps.has(stepHeaders[initialIndex])) {
+    goToStep(initialIndex);
+  } else {
+    setUrlTab(stepSlugs[activeIndex()]);
+  }
+
+  // Keep the URL in sync whenever the active step changes (tab click, Next/Prev, goToStep)
+  wizardEl.addEventListener("shown.bs-stepper", () =>
+    setUrlTab(stepSlugs[activeIndex()]),
+  );
 
   // ------------------------------------------------------------
   // Requests
@@ -874,7 +917,7 @@
       await postStep(stepUrl("general"), [step1, step2]);
     }
     await postStep(stepUrl("mentorship"), step3);
-    await postStep(stepUrl("location"), step4);
+    await postStep(stepUrl("landing"), step4);
     await postStep(stepUrl("pages"), step5);
 
     await Swal.fire({

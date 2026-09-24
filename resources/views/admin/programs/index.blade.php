@@ -162,6 +162,14 @@
                             <i class="ti ti-pencil me-1"></i> {{ __('cycles.Edit_Program') }}
                           </a>
                         </li>
+                        <li>
+                          <a 
+                            class="dropdown-item" 
+                            href="/dashboard/programlist/edit/{{ $cycle->id }}?tab=landing"
+                          >
+                            <i class="ti ti-eye-check me-1"></i> {{ __('cycles.Landing Page Visibility') }}
+                          </a>
+                        </li>
                       @endif
                       @if ($_user->ableToAny(['programs.create', 'programs.edit'], $permissions))
                         <li>

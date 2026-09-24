@@ -1924,7 +1924,7 @@
           if (!$switch.is(':checked')) return; // user changed their mind while checking
 
           $switch.prop('checked', false);
-          const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '#program-settings-visibility';
+          const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '?tab=landing';
           releaseWarningAlert({
             title: "{{ __('admin.Warning') }}",
             message: "{{ __('landing.Program_not_public_hint') }}",

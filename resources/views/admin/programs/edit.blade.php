@@ -34,7 +34,7 @@
 ['step-general', 'ti-building',  'General Info',            'Organization & basics'],
     ['step-schedule', 'ti-calendar', 'Schedule & Media',        'Duration, logo & run type'],
     ['step-mentorship', 'ti-users',  'Mentorship & Visibility', 'Approve, reminders & access'],
-    ['step-location',   'ti-palette',   'Location & Branding',     'Offline session & colors'],
+    ['step-landing',    'ti-palette',   'Landing & Branding',     'Offline session & colors'],
     ['step-pages',      'ti-files',     'Custom Pages',            'Pages, visibility & review'],
   ];
 
@@ -90,7 +90,7 @@ HTML;
   <div class="bs-stepper-header border-end">
     @foreach ($wizardSteps as [$sid, $icon, $title, $subtitle])
       @if (!$loop->first)<div class="line"></div>@endif
-      <div class="step" data-target="#{{ $sid }}">
+      <div class="step" data-target="#{{ $sid }}" data-url="{{ Str::after($sid, 'step-') }}">
         <button type="button" class="step-trigger">
           <span class="bs-stepper-circle"><i class="ti {{ $icon }} ti-sm"></i></span>
           <span class="bs-stepper-label">
@@ -256,9 +256,9 @@ HTML;
       </div>
 
       <!-- Landing & Branding -->
-      <div id="step-location" class="content">
+      <div id="step-landing" class="content">
         <div class="content-header mb-4">
-          <h6 class="mb-0">{{ __('cycles.Location & Branding') }}</h6>
+          <h6 class="mb-0">{{ __('cycles.Landing & Branding') }}</h6>
           <small>{{ __('cycles.Add the offline session location and customize the program branding colors.') }}</small>
         </div>
         <div class="row g-6">
@@ -269,6 +269,10 @@ HTML;
               <option value="public" {{ $ccycle->is_public ? 'selected' : '' }}>{{ __('cycles.Public') }}</option>
               <option value="private" {{ !$ccycle->is_public ? 'selected' : '' }}>{{ __('cycles.Private') }}</option>
             </select>
+            <small class="text-body d-block mt-1">
+              <strong>{{ __('cycles.Public') }}</strong> — {{ __('cycles.Program_Visibility_Public_Helper') }}<br>
+              <strong>{{ __('cycles.Private') }}</strong> — {{ __('cycles.Program_Visibility_Private_Helper') }}
+            </small>
           </div>
           <div class="col-sm-6 program-public-url-wrap">
             <label class="form-label" for="programPublicUrl">{{ __('cycles.Public URL') }}<span class="text-danger">*</span></label>

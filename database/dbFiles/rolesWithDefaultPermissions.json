@@ -4203,8 +4203,8 @@
                 ]
             },
             {
-                "name": "programs.location",
-                "description": "Allow user to edit program location settings",
+                "name": "programs.landing",
+                "description": "Allow user to edit program landing settings",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

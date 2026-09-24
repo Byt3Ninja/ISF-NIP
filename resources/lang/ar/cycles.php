@@ -713,7 +713,8 @@ return [
     'Descriptions & participation' => 'الأوصاف والمشاركة',
     'Mentorship & Visibility' => 'إعدادات الإرشاد',
     'Approve, reminders & access' => 'الموافقة والتذكيرات والموقع',
-    'Location & Branding' => 'صفحة الهبوط والعلامة التجارية',
+    'Landing & Branding' => 'صفحة الهبوط والعلامة التجارية',
+    'Landing Page Visibility' => 'رؤية صفحة الهبوط',
     'Offline session & colors' => 'العلامة التجارية والألوان',
     'Configure mentoring workflows and decide how the program is accessed.' => 'قم بتكوين سير عمل الإرشاد وأضف موقع الجلسة الحضورية.',
     'Custom Pages' => 'الصفحات المخصصة',
@@ -808,4 +809,6 @@ return [
     'Value' => 'القيمة',
     'legal_policy' => 'السياسة القانونية',
     'weight_must_be_number' => 'يجب أن يكون الوزن رقمًا',
+    'Program_Visibility_Public_Helper' => 'أنشئ صفحة هبوط عامة للبرنامج واعرضها.',
+    'Program_Visibility_Private_Helper' => 'لن يتم إنشاء صفحة هبوط عامة للبرنامج.',
 ];

@@ -719,7 +719,8 @@ return [
     'Descriptions & participation' => 'Descriptions & participation',
     'Mentorship & Visibility' => 'Mentorship Settings',
     'Approve, reminders & access' => 'Approve, reminders & location',
-    'Location & Branding' => 'Landing & Branding',
+    'Landing & Branding' => 'Landing & Branding',
+    'Landing Page Visibility' => 'Landing Page Visibility',
     'Offline session & colors' => 'Branding & colors',
     'Configure mentoring workflows and decide how the program is accessed.' => 'Configure mentoring workflows and add the offline session location.',
     'Custom Pages' => 'Custom Pages',
@@ -813,4 +814,6 @@ return [
     'Value' => 'Value',
     'legal_policy' => 'Legal policy',
     'weight_must_be_number' => 'Weight must be a number',
+    'Program_Visibility_Public_Helper' => 'Create and display a public landing page for the program.',
+    'Program_Visibility_Private_Helper' => 'No public landing page will be created for the program.',
 ];
