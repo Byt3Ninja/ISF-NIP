@@ -209,9 +209,15 @@
             // what took place. Collapsed by default so live panels stay in view.
             $isHistory = !empty($panel['is_history']);
             $expanded = $index === 0 && !$isHistory;
+            // GV-9671. Whether this panel was SAVED with a scheduled session, i.e.
+            // whether real meetings exist that a save could move. The first panel
+            // of a step (and any never-scheduled one) has none, so the "meeting
+            // times may change" warning must not fire for it.
+            $hasSavedSession = !empty($panel['session']) && ($panel['session']['checked'] ?? false) == true;
           @endphp
           <div class="accordion-item border {{ $isHistory ? 'panel-history' : '' }}" data-index="{{ $index }}"
-            @if($isHistory) data-history="1" @endif>
+            @if($isHistory) data-history="1" @endif
+            @if($hasSavedSession) data-saved-session="1" @endif>
             @if($isHistory)
               {{-- The panel number this history record is stored under. Deleting an
                    earlier panel renumbers the accordion, so position alone cannot
@@ -1214,6 +1220,8 @@
         // read-only DIRECTLY on those elements, so clearing the fieldset alone
         // leaves both controls dead in the new panel.
         $clone.removeAttr('data-history').removeClass('panel-history');
+        // A new panel has no saved meetings, whatever its source had (GV-9671).
+        $clone.removeAttr('data-saved-session');
         $clone.find('fieldset').prop('disabled', false).removeAttr('disabled');
         $clone.find('select').prop('disabled', false).removeAttr('disabled');
         $clone.find('input, textarea, button').prop('disabled', false);
@@ -1594,6 +1602,12 @@
         // An unscheduled panel has no meeting times to move.
         if (!$p.find('.session-toggle').is(':checked')) return null;
 
+        // Nor does one that was never saved with a schedule: a brand-new panel
+        // (the first on a step, or one just added) or a panel being scheduled for
+        // the first time. Its empty baseline would otherwise make every startup
+        // it is given read as an "assignment change" (GV-9671).
+        if ($p.attr('data-saved-session') !== '1') return null;
+
         // The dialog promises "affected startups will be notified", and with
         // "Notify now" off the server deliberately emails nobody. Warning about
         // a notification that will not be sent would be a false promise, so a
@@ -1653,6 +1667,33 @@
         if (baseline.length !== current.length) return true;
 
         return baseline.some((id, i) => id !== current[i]);
+      };
+
+      // After a successful save, make what was just submitted the new "saved"
+      // state — exactly what a reload would render. The save is AJAX, so without
+      // this every baseline panelChangeKind() and startChanged() read stays at
+      // page-load values: a first-created panel kept looking never-scheduled and
+      // later edits skipped the warning until the page was refreshed (GV-9671).
+      const rebaselinePanels = () => {
+        $('.accordion-item').not('[data-history="1"]').each((_, el) => {
+          const $p = $(el);
+
+          if ($p.find('.session-toggle').is(':checked')) {
+            $p.attr('data-saved-session', '1');
+          } else {
+            $p.removeAttr('data-saved-session');
+          }
+
+          $p.find('.session-date, .session-time, .interval-duration').each((_, input) => {
+            $(input).attr('value', $(input).val() || '');
+          });
+
+          const companies = $p.find('input[type="hidden"][name*="[companies][]"]')
+            .toArray()
+            .map(input => parseInt(input.value, 10))
+            .filter(id => !isNaN(id));
+          $p.find('.companies-picker-trigger').attr('data-companies-baseline', JSON.stringify(companies));
+        });
       };
 
       // Posts the panels, handling the judge-conflict round-trip.
@@ -1717,6 +1758,7 @@
             }
 
             setSubmitBusy(false);
+            rebaselinePanels();
 
             releaseSuccessAlert({
               title: '{{ __('admin.success') }}',
