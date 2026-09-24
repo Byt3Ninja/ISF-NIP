@@ -214,12 +214,16 @@ class serviceProviderController extends Controller
 	public function registration()
 	{
 		$setting = Settings::first();
-		$logo = setting('Logo', 'images/background/logo.png');
+		// setting('Logo') returns a BARE FILE NAME with no images/logo/ prefix and no
+		// asset() wrapping, so it never resolved to a usable URL. brandLogo() builds
+		// the real URL and falls back when the configured file is missing from disk.
+		$logo = brandLogo();
+		$platformName = brandName();
 		$termsUrl = setting('terms_url', '#') ;
 		$privacyUrl = setting('privacy_url', '#');
 		// if( trim( $termsUrl ) == '#' ) { $termsUrl = null; }
 		// if( trim( $privacyUrl ) == '#' ) { $privacyUrl = null; }
-		return view('auth.provider_register', compact('setting', 'logo', 'termsUrl', 'privacyUrl'));
+		return view('auth.provider_register', compact('setting', 'logo', 'platformName', 'termsUrl', 'privacyUrl'));
 	}
 
 	public function registration_request(Request $request)

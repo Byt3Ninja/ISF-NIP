@@ -543,3 +543,50 @@ if (!function_exists('form_field_options')) {
             ->all();
     }
 }
+
+if (! function_exists('brandLogo')) {
+    /**
+     * Resolve the platform logo URL for the auth pages (GV-8956/8957/8958).
+     *
+     * `Settings.Logo` holds only a FILE NAME, and nothing guarantees that file still
+     * exists on disk: a tenant can be seeded with a logo that was never uploaded, or
+     * the record can outlive a storage wipe. The old ternary
+     *
+     *     $setting ? asset('images/logo/' . $setting->Logo) : asset(... fallback ...)
+     *
+     * only fell back when the whole settings ROW was missing, never when the FILE was,
+     * so a stale row emitted a dead URL and the browser painted the <img> alt text
+     * ("avatar", "logo") where the brand should be. Checking the file itself is what
+     * actually protects the page, so every caller goes through here.
+     */
+    function brandLogo(): string
+    {
+        $fallback = asset('images/background/logo.png');
+        $name = optional(Settings::first())->Logo;
+
+        if (blank($name)) {
+            return $fallback;
+        }
+
+        // basename() keeps a crafted "../" value from escaping the logo directory.
+        $path = public_path('images/logo/' . basename($name));
+
+        return is_file($path) ? asset('images/logo/' . basename($name)) : $fallback;
+    }
+}
+
+if (! function_exists('brandName')) {
+    /**
+     * The platform's display name, used for the logo's alt text on the auth pages.
+     *
+     * Falls back to the app name so the alt text is never empty: a screen reader
+     * announcing "avatar" tells nobody which platform they are signing in to.
+     */
+    function brandName(): string
+    {
+        $setting = Settings::first();
+
+        return optional($setting)->Platform_Name
+            ?: (optional($setting)->title ?: config('app.name'));
+    }
+}
