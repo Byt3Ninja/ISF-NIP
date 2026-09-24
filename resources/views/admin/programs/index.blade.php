@@ -281,7 +281,7 @@
                 </div>
 
                 {{-- Progress --}}
-                <div class="d-flex flex-column mb-2">
+                {{-- <div class="d-flex flex-column mb-2">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <span>{{ __('admin.Progress') }}</span>
                     <strong>{{ number_format($presSteps, 0) }}%</strong>
@@ -294,7 +294,7 @@
                       aria-valuemin="0" aria-valuemax="100">
                     </div>
                   </div>
-                </div>
+                </div> --}}
 
                   {{-- Date --}}
                 <p class="text-muted mb-6 d-flex align-items-center gap-2">
