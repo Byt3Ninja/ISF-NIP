@@ -370,10 +370,10 @@
           <label for="alumniStatusFilter" class="form-label">{{ __('admin.status') ?? 'Status' }}</label>
           <select name="status" id="alumniStatusFilter" class="form-select select2">
             <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>
-              {{ __('admin.applied_all') ?? 'Applied (All) Startups' }}
+              {{ __('admin.All') ?? 'All Startups' }}
             </option>
             <option value="incubated" {{ request('status') == 'incubated' ? 'selected' : '' }}>
-              {{ __('admin.incubated') ?? 'Incubated Startups' }}
+              {{ __('admin.Active') ?? 'Active Startups' }}
             </option>
             <option value="alumni" {{ request('status') == 'alumni' ? 'selected' : '' }}>
               {{ __('startup.alumni') ?? 'Alumni Startups' }}
