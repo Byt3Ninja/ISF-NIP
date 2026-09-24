@@ -2365,7 +2365,7 @@ class HomeController extends Controller
                 'color' => 'primary',
                 'href' => '/dashboard/requests/mine',
                 'icon' => 'ti ti-speakerphone',
-                'text' => 'My Requests',
+                'text' => 'Service Requests',
                 'permissions' => ['service_requests.list_mine', 'dashboard.widgets_cards_my_requests_view'],
                 'count' => $my_requests->count(),
                 'isRating' => false,

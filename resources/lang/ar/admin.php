@@ -4045,4 +4045,5 @@ return [
   'ContinueAssessment' => 'متابعة التقييم',
   'tabs_locked_until_startup_saved' => 'احفظ معلومات الشركة أولاً. يتم فتح باقي الأقسام بعد إنشاء شركتك الناشئة.',
   'AssessmentCreateFailed' => 'تعذر إنشاء التقييم. حاول مرة أخرى.',
+  'Service Requests' => 'طلبات الخدمات',
 ];

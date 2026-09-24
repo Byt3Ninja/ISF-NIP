@@ -4001,4 +4001,5 @@ return [
   'ContinueAssessment' => 'Continue assessment',
   'tabs_locked_until_startup_saved' => 'Save your Startup Info first. The remaining sections unlock once your startup has been created.',
   'AssessmentCreateFailed' => 'Could not create the assessment. Try again.',
+  'Service Requests' => 'Service Requests',
 ];
