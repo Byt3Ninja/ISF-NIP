@@ -1319,13 +1319,21 @@ class HomeController extends Controller
                 return $session;
             });
 
+            // GV-9567: the Final Session table lists EVERY panel the startup sits
+            // in. `screenings` is the source of truth -- it holds one row per judge
+            // per panel, each carrying that panel's own meeting link, passcode and
+            // window. `finalscreenings` collapses to ONE row per company (the write
+            // in ScreeningController unions judges and overwrites the meeting), so
+            // reading the meeting from there could only ever surface the last panel
+            // saved, with a NULL passcode -- and its `judges` column is the UNION
+            // of every panel's judges, so it cannot say who judged which panel.
+            // It is no longer consulted here at all.
             $myFinal_q = "SELECT
-                    fs.id,
-                    fs.judges,
-                    fs.join_url,
-                    fs.datetime,
-                    fs.duration,
-                    fs.zoom_passcode,
+                    sc.id,
+                    sc.panel,
+                    sc.user_id AS `judge_id`,
+                    sc.meeting_link AS `join_url`,
+                    sc.meeting_password AS `zoom_passcode`,
                     sc.session_date AS `panel_session_date`,
                     sc.start_time AS `panel_start_time`,
                     sc.end_time AS `panel_end_time`,
@@ -1340,50 +1348,25 @@ class HomeController extends Controller
                     u.title_en AS `user_title_en`,
                     u.title_ar AS `user_title_ar`
                 FROM
-                    finalscreenings fs
+                    screenings sc
                 LEFT JOIN
-                    companies c ON c.id = fs.company_id
-                LEFT JOIN
-                    users u ON u.company_id = c.id AND u.id = ?
-                LEFT JOIN
-                    screenings sc ON sc.id = (
-                        -- One panel per company, chosen deterministically.
-                        --
-                        -- `screenings` holds ONE ROW PER JUDGE PER PANEL, and a
-                        -- company may sit in several panels of the same step, so
-                        -- joining on (step_id, JSON_CONTAINS(users)) alone matched
-                        -- many rows carrying DIFFERENT meeting windows. Which one
-                        -- won was down to arbitrary row order, so a judge could be
-                        -- shown another panel window -- or an unscheduled panel
-                        -- empty one, which never expires and leaves the row stuck
-                        -- reading as not started.
-                        --
-                        -- Prefer a panel that is actually scheduled; among those,
-                        -- the NEXT ONE that has not finished yet, falling back to
-                        -- the most recent past panel when every panel is over.
-                        -- Picking the earliest outright would surface a finished
-                        -- 09:00 session and hide a live 19:50 one.
-                        SELECT sc2.id
-                        FROM screenings sc2
-                        WHERE sc2.step_id = fs.step_id
-                            AND sc2.deleted_at IS NULL
-                            AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
-                        ORDER BY
-                            (sc2.session_date IS NULL) ASC,
-                            (TIMESTAMP(sc2.session_date, COALESCE(sc2.end_time, '23:59:59')) < NOW()) ASC,
-                            TIMESTAMP(sc2.session_date, COALESCE(sc2.start_time, '00:00:00')) ASC,
-                            sc2.panel ASC,
-                            sc2.id ASC
-                        LIMIT 1
-                    )
+                    users u ON u.id = ?
                 WHERE
-                    fs.company_id = ?
-                AND fs.step_id = ?";
-            // GV-9620: a startup can sit in more than one final panel, so this
-            // returns every one of its rows for the step. It used to end in
-            // `LIMIT 1` and collapse to ->first(), which silently hid all but
-            // one meeting.
-            $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]));
+                    sc.step_id = ?
+                AND sc.deleted_at IS NULL
+                AND JSON_CONTAINS(sc.users, CAST(? AS CHAR))
+                ORDER BY
+                    sc.panel ASC, sc.id ASC";
+            $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->step, $company->id]));
+
+            // One row per judge per panel -> one row per PANEL, carrying every
+            // judge on it. Mirrors the initial-screening path, which already
+            // groups by step_id-panel for exactly this reason (GV-8357).
+            $myFinal = $myFinal->groupBy('panel')->map(function ($panelRows) {
+                $row = $panelRows->first();
+                $row->judge_ids = $panelRows->pluck('judge_id')->filter()->unique()->values()->all();
+                return $row;
+            })->values();
             $myFinal = $myFinal->map(function ($final) use ($company, $l) {
                 // GV-3321: this startup's own slot within the final panel.
                 $finalSlot = \App\Services\ScreeningSlotService::slotFor(
@@ -1399,37 +1382,32 @@ class HomeController extends Controller
                 $final->meeting_time = \App\Services\ScreeningSlotService::formatRange($finalSlot);
                 $final->passcode = $final->zoom_passcode ?? null;
 
-                // GV-7381: when the panel carries no schedule the row falls back to
-                // finalscreenings.datetime/duration -- but `duration` is floored to
-                // 30 on write (ScreeningController), so a 22:00-22:15 session was
-                // shown as "(30M)" and stayed joinable until 22:30. Prefer the
-                // panel's real end_time, and only fall back to the stored duration
-                // when there is genuinely nothing better to use.
-                $final->session_start = $finalSlot['start']
-                    ?: (!empty($final->datetime) ? \Carbon\Carbon::parse($final->datetime) : null);
-
+                // GV-9567: the schedule now comes wholly from the panel, so the
+                // old fallback to finalscreenings.datetime/duration is gone --
+                // that `duration` was floored to 30 on write (ScreeningController),
+                // which is what made a 22:00-22:15 session read as "(30M)" and stay
+                // joinable until 22:30 (GV-7381). `interval` off simply means the
+                // startup shares the panel's own start_time..end_time window.
+                $final->session_start = $finalSlot['start'];
                 $final->session_end = $finalSlot['end'];
-                if (is_null($final->session_end) && !empty($final->datetime)) {
-                    if (!empty($final->panel_session_date) && !empty($final->panel_end_time)) {
-                        try {
-                            $final->session_end = \Carbon\Carbon::parse(
-                                $final->panel_session_date . ' ' . $final->panel_end_time
-                            );
-                        } catch (\Exception $e) {
-                            $final->session_end = null;
-                        }
-                    }
 
-                    if (is_null($final->session_end) && !empty($final->duration)) {
-                        $final->session_end = \Carbon\Carbon::parse($final->datetime)
-                            ->addMinutes((int) $final->duration);
+                if (is_null($final->session_end)
+                    && !empty($final->panel_session_date)
+                    && !empty($final->panel_end_time)) {
+                    try {
+                        $final->session_end = \Carbon\Carbon::parse(
+                            $final->panel_session_date . ' ' . $final->panel_end_time
+                        );
+                    } catch (\Exception $e) {
+                        $final->session_end = null;
                     }
                 }
 
-                $judges = json_decode($final->judges, true) ?? [];
-                if (!is_array($judges)) {
-                    $judges = [];
-                }
+                // GV-9567: the panel's OWN judges, collected from its screenings
+                // rows above. Reading finalscreenings.judges here showed the union
+                // of every panel's judges on every row, so each panel appeared to
+                // be judged by all of them.
+                $judges = $final->judge_ids ?? [];
 
                 if (count($judges) > 0)
                 {
@@ -1487,6 +1465,7 @@ class HomeController extends Controller
                 unset($final->user_last_name_ar);
                 unset($final->user_title_en);
                 unset($final->user_title_ar);
+                unset($final->judge_ids);
 
                 return $final;
             });
