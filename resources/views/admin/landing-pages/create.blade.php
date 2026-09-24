@@ -1106,14 +1106,14 @@
                 </button>
               </div>
               <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-12">
                   <label class="form-label">${"{{ __('landing.Icon') }}"}</label>
                   <select name="about[cards][${id}][icon]" class="form-select" data-card-field>
                     <option value="">${"{{ __('landing.Select_an_icon') }}"}</option>
                     ${iconOptions}
                   </select>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Title') }}"}</label>
                   <input type="text" name="about[cards][${id}][title]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-card-field>
                 </div>
