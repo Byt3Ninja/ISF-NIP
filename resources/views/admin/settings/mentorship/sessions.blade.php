@@ -188,8 +188,9 @@
                           </span>
                         </td>
                         <td class="text-nowrap" style="min-width: 150px;">
-                          <small>{{ $session->zoom_date ? $session->zoom_date->format('d-m-Y') : '' }}</small>
-                          <small class="d-block">{{ $session->zoom_date ? $session->zoom_date->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
+                          @php $shownAt = \App\Services\TimezoneService::forViewer($session->zoom_date, $_user); @endphp
+                          <small>{{ $shownAt ? $shownAt->format('d-m-Y') : '' }}</small>
+                          <small class="d-block">{{ $shownAt ? $shownAt->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
                         </td>
                         <td class="text-nowrap" style="min-width: 150px;">
                           @if($session->comment)

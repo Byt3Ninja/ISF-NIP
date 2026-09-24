@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Services\TimezoneService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BookServiceRequest extends FormRequest
@@ -15,7 +17,13 @@ class BookServiceRequest extends FormRequest
     {
         return [
             'id'       => 'required|exists:services,id',
-            'datetime' => 'required|date|after:now',
+            // GV-9566: the picker posts platform wall-clock; `after:now` would read it in the storage zone.
+            'datetime' => ['bail', 'required', 'date', function ($attribute, $value, $fail) {
+                $at = TimezoneService::wallClock($value);
+                if (!$at || $at->lte(Carbon::now())) {
+                    $fail($this->messages()['datetime.after']);
+                }
+            }],
             'comment'  => 'nullable|string|max:1000',
         ];
     }

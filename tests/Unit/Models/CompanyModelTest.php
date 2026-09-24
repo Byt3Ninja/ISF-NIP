@@ -12,11 +12,9 @@ use App\Stage;
 use App\Sector;
 use App\Milestone;
 use App\Team_member;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CompanyModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_fillable_attributes()

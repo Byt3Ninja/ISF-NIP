@@ -128,6 +128,8 @@
       userId: null,
       staleCheckTimer: null,
       reloadOnClose: false,
+      // GV-9566: slot times are wall-clock in this zone (sent by the slots endpoint).
+      timezone: @json(\App\Services\TimezoneService::platform()),
     };
 
     const SESSION_TYPES = {
@@ -323,18 +325,37 @@
       });
     };
 
+    // GV-9566: "YYYY-MM-DD" + "HH:mm" read as wall-clock in state.timezone -> unix seconds.
+    // Uses the zone's offset ON THAT DATE (DST-safe), the same instant the server builds
+    // for blocked_intervals, whatever the browser's own timezone is.
+    const zoneParts = (ms, tz) => {
+      const p = {};
+      new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).formatToParts(new Date(ms)).forEach(x => { p[x.type] = x.value; });
+      return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+    };
+    const slotInstant = (dateStr, time) => {
+      const [y, mo, d] = dateStr.split('-').map(Number);
+      const [h, mi]    = time.split(':').map(Number);
+      const asUtc = Date.UTC(y, mo - 1, d, h, mi);
+      let ms = asUtc;
+      try {
+        ms = asUtc - (zoneParts(asUtc, state.timezone) - asUtc);
+        ms = asUtc - (zoneParts(ms, state.timezone) - ms);
+      } catch (e) { /* unknown zone: fall back to reading it as UTC */ }
+      return Math.floor(ms / 1000);
+    };
+
     const isSlotBlocked = (slot, dateStr) => {
       if (!state.blocked_intervals?.length) return false;
-      const offset = '{{ \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('P') }}';
-      const start = moment(`${dateStr} ${slot.start_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').unix();
-      const end   = moment(`${dateStr} ${slot.end_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').unix();
+      const start = slotInstant(dateStr, slot.start_time);
+      const end   = slotInstant(dateStr, slot.end_time);
       return state.blocked_intervals.some(i => start < i.end && end > i.start);
     };
 
-    const isSlotPast = (slot, dateStr) => {
-      const offset = '{{ \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('P') }}';
-      return moment(`${dateStr} ${slot.start_time} ${offset}`, 'YYYY-MM-DD HH:mm Z').isSameOrBefore(moment());
-    };
+    const isSlotPast = (slot, dateStr) => slotInstant(dateStr, slot.start_time) <= moment().unix();
 
     const filterSlots = (slots, filterType) => {
       // Past slots are dropped; already-booked slots are kept but tagged so the
@@ -725,6 +746,7 @@
       .done(result => {
         state.slots             = result?.data              || [];
         state.blocked_intervals = result?.blocked_intervals || [];
+        if (result?.timezone) state.timezone = result.timezone;
         state.offlineDisabled   = !result?.offline_allowed;
 
         if (result?.user) $('#mentorName').text(result.user.name || 'Mentor Name');

@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -74,23 +75,23 @@ class ProgramResource extends JsonResource
 
      protected function getStatus(): string
     {
-        $now = Carbon::now();
-        $start = $this->start ? Carbon::parse($this->start) : null;
-        $end = $this->end ? Carbon::parse($this->end) : null;
+        // GV-9566: start/end are inclusive days in the program's platform zone;
+        // comparing now() with their midnights completed it on its last morning.
+        $today = TimezoneService::platformToday(TimezoneService::platform($this->organization_id));
+        $start = $this->start ? Carbon::parse($this->start)->format('Y-m-d') : null;
+        $end = $this->end ? Carbon::parse($this->end)->format('Y-m-d') : null;
 
         if (!$start || !$end) {
             return 'Unknown';
         }
 
-        if ($now->lt($start)) {
+        if ($today < $start) {
             return 'Upcoming';
-        } elseif ($now->between($start, $end)) {
+        } elseif ($today <= $end) {
             return 'In Progress';
-        } elseif ($now->gt($end)) {
-            return 'Completed';
         }
 
-        return 'Unknown';
+        return 'Completed';
     }
 
 }

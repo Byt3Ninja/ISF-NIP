@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\TimezoneService;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 
@@ -9,15 +10,9 @@ class SetUserTimezone
 {
     public function handle($request, Closure $next)
     {
-        $defaultTimezone = 'Africa/Cairo';
-
-        $userTimezone = $defaultTimezone;
-        if (Auth::check()) {
-            $tz = Auth::user()->timezone;
-            if (in_array($tz, timezone_identifiers_list(), true)) {
-                $userTimezone = $tz;
-            }
-        }
+        // The user's own zone, else the platform zone admins configured
+        // (GV-9566) -- it used to fall back to a hard-coded 'Africa/Cairo'.
+        $userTimezone = TimezoneService::viewer(Auth::user()) ?? TimezoneService::platform();
 
         // Display-only: expose the user's timezone for views/formatters.
         // IMPORTANT: do NOT call date_default_timezone_set() here — mutating

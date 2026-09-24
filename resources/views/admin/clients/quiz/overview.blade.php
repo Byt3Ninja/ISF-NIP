@@ -76,13 +76,13 @@
 								<div class="p-2">
 									<i class="ti text-primary ti-calendar me-1"></i>
 									<span class="text-dark fw-semibold">
-										{{ __('admin.Start at') }}: {{ $quiz->start->format('jS M. Y h:i A') }}
+										{{ __('admin.Start at') }}: {{ \App\Services\TimezoneService::forViewer( $quiz->start, $_user )->format('jS M. Y h:i A') }}
 									</span>
 								</div>
 								<div class="p-2">
 									<i class="ti text-primary ti-calendar-event me-1"></i>
 									<span class="text-dark fw-semibold">
-										{{ __('admin.End at') }}: {{ $quiz->end->format('jS M. Y h:i A') }}
+										{{ __('admin.End at') }}: {{ \App\Services\TimezoneService::forViewer( $quiz->end, $_user )->format('jS M. Y h:i A') }}
 									</span>
 								</div>
 							</div>

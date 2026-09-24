@@ -7,6 +7,7 @@ use App\Step;
 use Carbon\Carbon;
 use App\Traits\Auditable;
 use App\Traits\HasFileCleanup;
+use App\Services\TimezoneService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
@@ -50,9 +51,12 @@ class Cycle extends Model
     {
         return date('Y-m-d',strtotime($this->attributes['end']));
     }
+    // GV-9566: `end` is an inclusive DATE in the program's platform zone;
+    // isPast() on its midnight expired the program on the morning of its last day.
     public function getIsExpiredAttribute()
     {
-        return $this->end && $this->end->isPast();
+        return $this->end
+            && $this->end->format('Y-m-d') < TimezoneService::platformToday(TimezoneService::platform($this->organization_id));
     }
 
     public function getLogoAttribute()
@@ -163,7 +167,9 @@ class Cycle extends Model
     {
         $totalSteps = Step::where('cycle_id', $this->id)->count();
 
-        $totalStepsFinish = \App\Step::where('to', '>', Carbon::now())->where('cycle_id', $this->id)->count();
+        // GV-9566: a step is still running through its `to` day in the platform zone.
+        $today = TimezoneService::platformToday(TimezoneService::platform($this->organization_id));
+        $totalStepsFinish = \App\Step::where('to', '>=', $today)->where('cycle_id', $this->id)->count();
 
         return $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
     }

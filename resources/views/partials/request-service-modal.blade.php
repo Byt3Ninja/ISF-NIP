@@ -119,8 +119,8 @@ $(function () {
   const fp = $dateInput.flatpickr({
     enableTime: true,
     dateFormat: "Y-m-d H:i",
-    minDate: "{{ date('Y-m-d H:i', strtotime('+1 hour')) }}",
-    maxDate: "{{ date('Y-m-d H:i', strtotime('+1 year')) }}",
+    minDate: "{{ \App\Services\TimezoneService::platformNow()->addHour()->format('Y-m-d H:i') }}",
+    maxDate: "{{ \App\Services\TimezoneService::platformNow()->addYear()->format('Y-m-d H:i') }}",
   });
 
   // Toggle button state and validation on change

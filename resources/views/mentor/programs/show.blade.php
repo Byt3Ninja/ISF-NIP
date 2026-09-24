@@ -46,7 +46,7 @@
                   <div class="d-flex align-items-center gap-1">
                     <i class="ti ti-picture-in-picture-top text-primary"></i>
                     <span>{{ __('admin.Upcoming Sessions') }}</span>
-                    <span class="fw-bold ms-1">{{ $cycle->mentorshipRequests()->where('zoom_date', '>', now())->count() }}</span>
+                    <span class="fw-bold ms-1">{{ $cycle->mentorshipRequests()->where('zoom_date', '>', \App\Services\TimezoneService::platformNow()->format('Y-m-d H:i:s'))->count() }}</span>
                   </div>
                   <div class="d-flex align-items-center gap-1">
                     <i class="ti ti-archive text-primary"></i>
@@ -123,7 +123,7 @@
                       <td>
                         <div class="d-flex align-items-center gap-2">
                           <i class="ti ti-calendar-event text-primary"></i>
-                          <span>{{ $session->zoom_date }}</span>
+                          <span>{{ optional(\App\Services\TimezoneService::forViewer($session->zoom_date, $_user))->format('Y-m-d H:i:s') }}</span>
                           <small class="text-muted">
                             @php
                               $period = $session->period;

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\MentorshipRequest;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
+use App\Services\TimezoneService;
 use App\Services\WhatsAppService;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendMentorshipRequestJob;
@@ -121,7 +122,11 @@ class MentorshipSessionController extends Controller
 
         $mentorId = $request->mentor_id;
         $userId = $startup->id;
-        $date = Carbon::parse($request->preferred_date_time);
+        // GV-9566: read in the organization's platform zone (an explicit client offset
+        // wins) and kept there, so format('H:i:s') below compares with the mentor's
+        // platform wall-clock schedules and the zoom_date binding is platform wall-clock.
+        $zone = TimezoneService::platform($request->organization_id ? (int) $request->organization_id : null);
+        $date = Carbon::parse($request->preferred_date_time, $zone)->setTimezone($zone);
         $duration = $request->duration_minutes;
 
         $conflict = MentorshipRequest::where('user_id', $userId)
@@ -133,7 +138,7 @@ class MentorshipSessionController extends Controller
              return $this->conflict(__('api.session_already_exists'));
         }
 
-        if (\App\Settings::hasReachedMaxConcurrentSessions($date->timestamp, $duration)) {
+        if (\App\Settings::hasReachedMaxConcurrentSessions($date, $duration)) {
              return $this->validationError(__('api.max_concurrent_sessions_reached'));
         }
 
@@ -166,7 +171,7 @@ class MentorshipSessionController extends Controller
             'participant_video' => 1
         ];
 
-        $onlineMeeting = $this->meetingService->createMeeting($data);
+        $onlineMeeting = $this->meetingService->createMeeting($data + ['timezone' => $zone]);
         $meetingId = $onlineMeeting['data']['id'] ?? null;
         $startUrl = $onlineMeeting['data']['start_url'] ?? null;
         $joinUrl = $onlineMeeting['data']['join_url'] ?? null;
@@ -176,10 +181,11 @@ class MentorshipSessionController extends Controller
         $mentorship = new MentorshipRequest();
         $mentorship->mentor_id = $mentorId;
         $mentorship->user_id = $userId;
+        // organization_id first: the zoom_date cast resolves the zone from it.
+        $mentorship->organization_id = $request->organization_id;
         $mentorship->zoom_date = $date;
         $mentorship->period = $duration;
         $mentorship->comment = $request->notes;
-        $mentorship->organization_id = $request->organization_id;
         $mentorship->cycle_id = $request->cycle_id;
         $mentorship->override_reason = $request->override_reason ? $request->override_reason : null;
         $mentorship->start_url = $startUrl;
@@ -336,7 +342,8 @@ class MentorshipSessionController extends Controller
     ->where('user_id', $user->id)
     ->where('approved', 'Yes')
     ->whereNull('rating')
-    ->where('zoom_date', '<', now())
+    // GV-9566: zoom_date is platform wall-clock, so compare with the platform clock.
+    ->where('zoom_date', '<', TimezoneService::platformNow()->format('Y-m-d H:i:s'))
     ->orderByDesc('zoom_date')
     ->paginate(10);
 

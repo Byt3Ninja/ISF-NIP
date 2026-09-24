@@ -6,11 +6,9 @@ use Tests\TestCase;
 use App\Repositories\FormRepository;
 use App\BuilderForm;
 use App\Step;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class FormRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected FormRepository $formRepository;
 

@@ -74,10 +74,11 @@ class MentorshipAvailabilityService
             return false;
         }
 
-        $now = Carbon::now();
+        // GV-9566: inclusive days in the organization's platform zone, not the server's.
+        $today = TimezoneService::platformToday(TimezoneService::forStep($mentorshipStep->id));
 
-        return $now->gte(Carbon::parse($mentorshipStep->from)->startOfDay())
-            && $now->lte(Carbon::parse($mentorshipStep->to)->endOfDay());
+        return Carbon::parse($mentorshipStep->from)->toDateString() <= $today
+            && $today <= Carbon::parse($mentorshipStep->to)->toDateString();
     }
 
     /**

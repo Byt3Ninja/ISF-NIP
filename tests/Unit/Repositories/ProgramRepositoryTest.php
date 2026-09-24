@@ -5,11 +5,9 @@ namespace Tests\Unit\Repositories;
 use Tests\TestCase;
 use App\Repositories\ProgramRepository;
 use App\Cycle;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ProgramRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected ProgramRepository $programRepository;
 

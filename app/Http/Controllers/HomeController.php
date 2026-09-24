@@ -35,6 +35,8 @@ use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
 use App\Services\MeetingWindowService;
+use App\Services\ScreeningSlotService;
+use App\Services\TimezoneService;
 use App\Services\MentorshipAvailabilityService;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
@@ -657,7 +659,8 @@ class HomeController extends Controller
             $filtration = collect([]);
         }
 
-        $filtration = $filtration->groupBy('id')->map(function ($groupedSteps) use ($l) {
+        $viewer = $user;
+        $filtration = $filtration->groupBy('id')->map(function ($groupedSteps) use ($l, $viewer) {
             $s = $groupedSteps->first();
             $step = new stdClass;
             $step->id = $s->id;
@@ -694,7 +697,7 @@ class HomeController extends Controller
                 // and how `screenings` actually stores the data.
                 ->groupBy(function ($row) {
                     return $row->company_id . ':' . $row->screening_panel;
-                })->map(function ($oneStep) use ($l) {
+                })->map(function ($oneStep) use ($l, $viewer) {
                 $c = $oneStep->first();
                 $company = new stdClass;
                 $company->id = $c->company_id;
@@ -717,15 +720,18 @@ class HomeController extends Controller
                 // start time, the admin's interval and this startup's position
                 // within the panel, so each startup sees its own window rather
                 // than the panel-wide one.
-                $slot = \App\Services\ScreeningSlotService::slotFor(
+                $slot = ScreeningSlotService::slotFor(
                     $c->screening_session_date ?? null,
                     $c->screening_start_time ?? null,
                     isset($c->screening_interval) ? (int) $c->screening_interval : null,
-                    \App\Services\ScreeningSlotService::positionOf($c->screening_users ?? [], $c->company_id),
-                    $c->screening_end_time ?? null
+                    ScreeningSlotService::positionOf($c->screening_users ?? [], $c->company_id),
+                    $c->screening_end_time ?? null,
+                    TimezoneService::forStep($c->id)
                 );
-                $company->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
-                $company->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+                // GV-9566: shown in the judge's own timezone; the gate uses the instants.
+                $shown = ScreeningSlotService::forViewer($slot, $viewer);
+                $company->meeting_date = $shown['start'] ? $shown['start']->format('d-m-Y') : null;
+                $company->meeting_time = ScreeningSlotService::formatRange($shown);
                 $company->meeting_start = $slot['start'];
                 $company->meeting_end = $slot['end'];
                 $company->join_url = $c->screening_meeting_link ?? null;
@@ -808,6 +814,10 @@ class HomeController extends Controller
                         -- the most recent past panel when every panel is over.
                         -- Picking the earliest outright would surface a finished
                         -- 09:00 session and hide a live 19:50 one.
+                        --
+                        -- GV-9566: the current time is bound as platform wall-clock.
+                        -- MySQL NOW() runs on the SYSTEM zone of the DB host, which
+                        -- is unrelated to the zone the panel times were typed in.
                         SELECT sc2.id
                         FROM screenings sc2
                         WHERE sc2.step_id = fs.step_id
@@ -815,7 +825,7 @@ class HomeController extends Controller
                             AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
                         ORDER BY
                             (sc2.session_date IS NULL) ASC,
-                            (TIMESTAMP(sc2.session_date, COALESCE(sc2.end_time, '23:59:59')) < NOW()) ASC,
+                            (TIMESTAMP(sc2.session_date, COALESCE(sc2.end_time, '23:59:59')) < ?) ASC,
                             TIMESTAMP(sc2.session_date, COALESCE(sc2.start_time, '00:00:00')) ASC,
                             sc2.panel ASC,
                             sc2.id ASC
@@ -844,7 +854,8 @@ class HomeController extends Controller
             if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                 $evaluation_q .= " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
-            $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
+            $platformNow = Carbon::now(TimezoneService::platform())->format('Y-m-d H:i:s');
+            $evaluation = collect(DB::select($evaluation_q, [$platformNow]))->map(function ($e) {
                 $judges = json_decode($e->judges, true);
                 // Handle double-encoded values like "\"[1,2]\"" by decoding once more.
                 if (is_string($judges)) { $judges = json_decode($judges, true); }
@@ -852,7 +863,7 @@ class HomeController extends Controller
                 $e->judges = array_map('intval', $judges);
                 return $e;
             });
-            $evaluation = $evaluation->groupBy('step_id')->map(function( $groupedEvaluation ) use ( $l ) {
+            $evaluation = $evaluation->groupBy('step_id')->map(function( $groupedEvaluation ) use ( $l, $viewer ) {
                 $_step = $groupedEvaluation->first();
                 $step = new stdClass;
                 $step->id = $_step->step_id;
@@ -865,7 +876,7 @@ class HomeController extends Controller
                 $step->cycle->title = $_step->cycle_title;
                 $step->cycle->start = $_step->cycle_start;
                 $step->cycle->end = $_step->cycle_end;
-                $step->companies = $groupedEvaluation->groupBy('company_id')->map(function ( $groupedCompanies ) use ( $l ) {
+                $step->companies = $groupedEvaluation->groupBy('company_id')->map(function ( $groupedCompanies ) use ( $l, $viewer ) {
                     $_company = $groupedCompanies->first();
                     $company = new stdClass;
                     $company->id = $_company->company_id;
@@ -891,17 +902,20 @@ class HomeController extends Controller
                     // the panel with an interval, each startup gets its own window
                     // derived from the panel start time and its position in the
                     // panel; otherwise fall back to the stored panel datetime.
-                    $slot = \App\Services\ScreeningSlotService::slotFor(
+                    $slot = ScreeningSlotService::slotFor(
                         $_company->panel_session_date ?? null,
                         $_company->panel_start_time ?? null,
                         isset($_company->panel_interval) ? (int) $_company->panel_interval : null,
-                        \App\Services\ScreeningSlotService::positionOf($_company->panel_users ?? [], $_company->company_id),
-                        $_company->panel_end_time ?? null
+                        ScreeningSlotService::positionOf($_company->panel_users ?? [], $_company->company_id),
+                        $_company->panel_end_time ?? null,
+                        TimezoneService::forStep($_company->step_id)
                     );
                     $company->meeting_start = $slot['start'];
                     $company->meeting_end = $slot['end'];
-                    $company->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
-                    $company->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+                    // GV-9566: shown in the judge's own timezone; the gate uses the instants.
+                    $shown = ScreeningSlotService::forViewer($slot, $viewer);
+                    $company->meeting_date = $shown['start'] ? $shown['start']->format('d-m-Y') : null;
+                    $company->meeting_time = ScreeningSlotService::formatRange($shown);
 
                     return $company;
                 })->values();
@@ -967,7 +981,8 @@ class HomeController extends Controller
                 $upcoming_sessions_q .= " AND mr.mentor_id = " . $user->id;
             }
             $params = [];
-            $params[] = date("Y-m-d H:i:s");
+            // GV-9566: zoom_date is platform wall-clock, so bind the platform clock.
+            $params[] = TimezoneService::platformNow()->format('Y-m-d H:i:s');
             $l = app()->getLocale();
             $upcoming_sessions = collect(DB::select($upcoming_sessions_q, $params))->map(function ($session) use ($l) {
                 $output = new stdClass;
@@ -1003,7 +1018,7 @@ class HomeController extends Controller
                 $organization->name = $session->{"organization_name_{$l}"};
                 $output->organization = $organization;
 
-                $output->meeting_status = mentorshipMeetingStatus($output->zoom_date, $output->period);
+                $output->meeting_status = mentorshipMeetingStatus($output->zoom_date, $output->period, TimezoneService::platform($output->organization_id ? (int) $output->organization_id : null));
 
                 return $output;
             });
@@ -1043,7 +1058,8 @@ class HomeController extends Controller
 
             $params = [];
             $params[] = $user->id;
-            $params[] = now()->format('Y-m-d');
+            // GV-9566: zoom_date is platform wall-clock, so bind the platform date.
+            $params[] = TimezoneService::platformToday();
             $completed_sessions = collect(DB::select($completed_sessions_q, $params));
             $count = $completed_sessions->count();
             $attends_rate = $count > 0 ? (($completed_sessions->sum('done') / $count) * 100 . '%') : '0%';
@@ -1139,7 +1155,7 @@ class HomeController extends Controller
             LIMIT
                 5
         ";
-        $latest_events = collect(DB::select($latest_events_q, [now()->format('Y-m-d')]));
+        $latest_events = collect(DB::select($latest_events_q, [TimezoneService::platformToday()]));
 
         $conditions = '';
         if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
@@ -1193,7 +1209,7 @@ class HomeController extends Controller
                 c.private IS null AND c.type = 'General_Program'
                 AND ? BETWEEN c.start AND c.end
         ";
-        $workingCycles = collect(DB::select($working_cycles_q, [now()->format('Y-m-d')]))->map(function ($item) use ($l) {
+        $workingCycles = collect(DB::select($working_cycles_q, [TimezoneService::platformToday()]))->map(function ($item) use ($l) {
             $cycle = new stdClass;
             $cycle->id = $item->id;
             $cycle->title = $item->title;
@@ -1308,11 +1324,10 @@ class HomeController extends Controller
             $sessions = collect(DB::select($sessions_q, [$company->step]));
 
             // GV-8301: the widget's join icon must close once the session has ended.
-            $sessions = $sessions->map(function ($session) use ($user) {
+            $sessions = $sessions->map(function ($session) {
                 $session->can_join = MeetingWindowService::isOpen(
-                    TrainingSession::wallClock($session->datetime),
-                    TrainingSession::wallClock($session->end_datetime),
-                    $user,
+                    $session->datetime,
+                    $session->end_datetime,
                     'founder'
                 );
 
@@ -1367,19 +1382,23 @@ class HomeController extends Controller
                 $row->judge_ids = $panelRows->pluck('judge_id')->filter()->unique()->values()->all();
                 return $row;
             })->values();
-            $myFinal = $myFinal->map(function ($final) use ($company, $l) {
+            $stepTimezone = TimezoneService::forStep($company->step);
+            $myFinal = $myFinal->map(function ($final) use ($company, $l, $user, $stepTimezone) {
                 // GV-3321: this startup's own slot within the final panel.
-                $finalSlot = \App\Services\ScreeningSlotService::slotFor(
+                $finalSlot = ScreeningSlotService::slotFor(
                     $final->panel_session_date ?? null,
                     $final->panel_start_time ?? null,
                     isset($final->panel_interval) ? (int) $final->panel_interval : null,
-                    \App\Services\ScreeningSlotService::positionOf($final->panel_users ?? [], $company->id),
-                    $final->panel_end_time ?? null
+                    ScreeningSlotService::positionOf($final->panel_users ?? [], $company->id),
+                    $final->panel_end_time ?? null,
+                    $stepTimezone
                 );
                 $final->meeting_start = $finalSlot['start'];
                 $final->meeting_end = $finalSlot['end'];
-                $final->meeting_date = $finalSlot['start'] ? $finalSlot['start']->format('d-m-Y') : null;
-                $final->meeting_time = \App\Services\ScreeningSlotService::formatRange($finalSlot);
+                // GV-9566: shown in the founder's own timezone; the gate uses the instants.
+                $shownSlot = ScreeningSlotService::forViewer($finalSlot, $user);
+                $final->meeting_date = $shownSlot['start'] ? $shownSlot['start']->format('d-m-Y') : null;
+                $final->meeting_time = ScreeningSlotService::formatRange($shownSlot);
                 $final->passcode = $final->zoom_passcode ?? null;
 
                 // GV-9567: the schedule now comes wholly from the panel, so the
@@ -1394,13 +1413,10 @@ class HomeController extends Controller
                 if (is_null($final->session_end)
                     && !empty($final->panel_session_date)
                     && !empty($final->panel_end_time)) {
-                    try {
-                        $final->session_end = \Carbon\Carbon::parse(
-                            $final->panel_session_date . ' ' . $final->panel_end_time
-                        );
-                    } catch (\Exception $e) {
-                        $final->session_end = null;
-                    }
+                    $final->session_end = TimezoneService::wallClock(
+                        $final->panel_session_date . ' ' . $final->panel_end_time,
+                        $stepTimezone
+                    );
                 }
 
                 // GV-9567: the panel's OWN judges, collected from its screenings
@@ -1498,7 +1514,7 @@ class HomeController extends Controller
                 return in_array($companyId, $item->users);
             })->values();
 
-            $myInitial = $myInitial->map(function ($item) use ($companyId) {
+            $myInitial = $myInitial->map(function ($item) use ($companyId, $user) {
                 $item->judge = $item->user;
                 if( !is_null( $item->session_date ) )
                 {
@@ -1515,11 +1531,13 @@ class HomeController extends Controller
 
                 // GV-3320: this startup's own slot within the panel, derived from
                 // the admin's interval and the startup's position in the panel.
-                $slot = \App\Services\ScreeningSlotService::slotForCompany($item, $companyId);
+                $slot = ScreeningSlotService::slotForCompany($item, $companyId);
                 $item->meeting_start = $slot['start'];
                 $item->meeting_end = $slot['end'];
-                $item->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
-                $item->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+                // GV-9566: shown in the founder's own timezone; the gate uses the instants.
+                $shownSlot = ScreeningSlotService::forViewer($slot, $user);
+                $item->meeting_date = $shownSlot['start'] ? $shownSlot['start']->format('d-m-Y') : null;
+                $item->meeting_time = ScreeningSlotService::formatRange($shownSlot);
 
                 return $item;
             });
@@ -1550,8 +1568,9 @@ class HomeController extends Controller
             })->values();
         }
 
-        $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
-        $end = Carbon::now()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
+        // GV-9566: bounds for the zoom_date (platform wall-clock) window below.
+        $start = TimezoneService::platformNow()->startOfDay()->format('Y-m-d H:i:s');
+        $end = TimezoneService::platformNow()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
 
         $steps_q = "SELECT
                 s.id,
@@ -1575,15 +1594,16 @@ class HomeController extends Controller
             ORDER BY
                 s.arr asc
         ";
-        $now = time();
+        // GV-9566: steps.from/to are DATEs in the cycle's platform zone, inclusive.
+        $today = TimezoneService::platformToday(TimezoneService::platform($company?->cycledata?->organization_id));
         $stepType = $company?->cycledata?->step_type;
         $steps = collect(DB::select($steps_q));
         $cycleSteps = $steps->pluck('id')->toArray();
 
         // array_search($company->step, $cycleSteps)
-        $steps = $steps->map(function ($step) use ($l, $company, $stepData, $stepType, $cycle_id, $now) {
-            $starting = Carbon::parse($step->from)->format('Y-m-d 00:00:00');
-            $ending = Carbon::parse($step->to)->format('Y-m-d 23:59:59');
+        $steps = $steps->map(function ($step) use ($l, $company, $stepData, $stepType, $cycle_id, $today) {
+            $starting = Carbon::parse($step->from)->format('Y-m-d');
+            $ending = Carbon::parse($step->to)->format('Y-m-d');
 
             $step->from = Carbon::parse($step->from)->format('d-m-Y');
             $step->to = Carbon::parse($step->to)->format('d-m-Y');
@@ -1596,7 +1616,7 @@ class HomeController extends Controller
             {
                 if( $stepType == 'time' )
                 {
-                    if( $now > Carbon::parse($ending)->timestamp )
+                    if( $today > $ending )
                     {
                         $status_flag = 'completed';
                         $status_flag_tile = $l == 'ar' ? 'انتهت' : 'Completed';
@@ -1604,7 +1624,7 @@ class HomeController extends Controller
                         $color = 'label-success';
                         $textColor = 'success';
                     }
-                    if( $now <= Carbon::parse($ending)->timestamp && $now >= Carbon::parse($starting)->timestamp )
+                    if( $today <= $ending && $today >= $starting )
                     {
                         $status_flag = 'ongoing';
                         $status_flag_tile = $l == 'ar' ? 'جاري' : 'Ongoing';
@@ -1772,7 +1792,7 @@ class HomeController extends Controller
             $org->google_map_url = $_session->offline_location_map ? $_session->offline_location_map : $_session->org_google_map_url;
             $org->address = $_session->offline_location_address ? $_session->offline_location_address : $_session->org_address;
             $session->organization = $org;
-            $session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
+            $session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period, TimezoneService::platform($_session->organization_id ? (int) $_session->organization_id : null));
             return $session;
         })->values();
 
@@ -1828,8 +1848,9 @@ class HomeController extends Controller
             if( $schedule['weekly'] == true ) { return true; }
             else
             {
-                $end_at = Carbon::parse( $schedule['date'] . $schedule['end_time'] . ':00' );
-                return $currentTime->lte( $end_at );
+                // GV-9566: schedule date/time are platform wall-clock.
+                $end_at = TimezoneService::wallClock( $schedule['date'] . ' ' . $schedule['end_time'] . ':00' );
+                return $end_at && $currentTime->lte( $end_at );
             }
         })->values();
 
@@ -3024,7 +3045,7 @@ class HomeController extends Controller
             // ],
         ];
 
-        $dateRate = date("Y-m-d 23:59:59");
+        $dateRate = TimezoneService::platformToday() . ' 23:59:59';
         $notRated_men = "SELECT
                 *, 
                 CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS MentorName_en,
@@ -3159,10 +3180,12 @@ class HomeController extends Controller
                                 $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
                             $newhackathon = DB::select($newhackathon_q, $params);
                             }else{
-                                $newhackathon_q .= "AND `start` < now() ";
-                                $newhackathon_q .= "AND `end` > now() ";
+                                // GV-9566: DATE columns in the platform zone, not MySQL NOW(); inclusive days.
+                                $newhackathon_q .= "AND `start` <= ? ";
+                                $newhackathon_q .= "AND `end` >= ? ";
                                 $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
-                                $newhackathon = DB::select($newhackathon_q);
+                                $platformToday = TimezoneService::platformToday();
+                                $newhackathon = DB::select($newhackathon_q, [$platformToday, $platformToday]);
                                 
                             }
         $newhackathon = collect($newhackathon)->first();
@@ -3905,13 +3928,13 @@ class HomeController extends Controller
 
         // ======> tables <=====
         $data['services_latest'] = Service::orderBy('created_at', 'DESC')->take(5)->get();
-        $data['events_latest'] = Calendar::where('start', '>=', now()->format('Y-m-d'))->where(function ($q) {
+        $data['events_latest'] = Calendar::where('start', '>=', TimezoneService::platformToday())->where(function ($q) {
             $q->orWhere('user_id', Auth::id())
                 ->orWhereNull('isPrivate');
         })->orderBy('start')->take(5)->get();
         // ======> process <=========
         $data['mysteps'] = auth()->user()->screeningRequests()->get();
-        $today = date("Y-m-d");
+        $today = TimezoneService::platformToday();
         $data['csteps'] = Step::whereRaw('"' . $today . '" BETWEEN `from` AND `to`')->whereIn('id', $data['mysteps']->pluck('step_id'))->get();
         $data['fcompanies'] = Finalscreening::where('judges', 'like', "%\"{$myid}\"%")->get();
         return view('admin.clients.judge', $data);
@@ -3919,23 +3942,24 @@ class HomeController extends Controller
     protected function mentorDashboard()
     {
         $data['services_latest'] = Service::orderBy('created_at', 'DESC')->take(5)->get();
-        $data['event_latest'] = Calendar::where('start', '>=', now()->format('Y-m-d'))->where(function ($q) {
+        $data['event_latest'] = Calendar::where('start', '>=', TimezoneService::platformToday())->where(function ($q) {
             $q->orWhere('user_id', Auth::id())
                 ->orWhereNull('isPrivate');
         })->orderBy('start')->take(5)->get();
         $data['services_count'] = Service::count();
         $data['service_requests_count'] = ServicesRequests::where('user_id', Auth::id())->count();
         $data['nm_count'] = Messenger::where('receiver', Auth::id())->whereNull('read')->count();
-        $data['mysessions'] = auth()->user()->mentorSessions()->where('zoom_date', '>=', date("Y-m-d 00:00:00"))->where('approved', 'Yes')->get()
-            ->each(function ($session) {
-                // zoom_date is stored as local wall-clock time (see book-session-modal.blade.php), not UTC (app.timezone)
-                $today = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d');
-                $session->is_today = $today == date('Y-m-d', strtotime($session->zoom_date));
+        // GV-9566: zoom_date is platform wall-clock (PlatformDateTime cast); "today" on the card is the viewer's day.
+        $viewer = auth()->user();
+        $data['mysessions'] = $viewer->mentorSessions()->where('zoom_date', '>=', TimezoneService::platformNow()->startOfDay()->format('Y-m-d H:i:s'))->where('approved', 'Yes')->get()
+            ->each(function ($session) use ($viewer) {
+                $shown = TimezoneService::forViewer($session->zoom_date, $viewer);
+                $session->is_today = $shown && $shown->isSameDay(Carbon::now($shown->getTimezone()));
             });
         $data['mycycles'] = auth()->user()->mentorCycles;
         $data['myschedules'] = Schedule::where('user_id', Auth::id())->get();
-        if (auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', now()->format('Y-m-d'))->count()) {
-            $data['attends_rate'] = (int)(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', now()->format('Y-m-d'))->sum('done') / auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', now()->format('Y-m-d'))->count() * 100) . '%';
+        if (auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', TimezoneService::platformToday())->count()) {
+            $data['attends_rate'] = (int)(auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', TimezoneService::platformToday())->sum('done') / auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', TimezoneService::platformToday())->count() * 100) . '%';
         } else {
             $data['attends_rate'] = '0%';
         }

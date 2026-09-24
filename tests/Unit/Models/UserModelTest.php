@@ -7,12 +7,10 @@ use App\User;
 use App\Company;
 use App\Role;
 use App\Organization;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 class UserModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_fillable_attributes()

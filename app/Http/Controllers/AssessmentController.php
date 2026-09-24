@@ -11,6 +11,7 @@ use App\UserScore;
 use App\Assessment;
 use App\SubCategory;
 use App\QuestionsBank;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -89,7 +90,8 @@ class AssessmentController extends Controller
             'start_date' => 'required|date', // تاريخ صالح وأقل أو يساوي end_date
         ]);
 
-        if( \Carbon\Carbon::parse($request->start_date)->startOfDay()->lt(now()->startOfDay()) )
+        // GV-9566: "today" is the platform zone's date, not the server's.
+        if( \Carbon\Carbon::parse($request->start_date)->format('Y-m-d') < TimezoneService::platformToday() )
         {
             return redirect()->back()->with(['class'=>'danger', 'message'=>__('admin.StartDateCannotBeInPast'), 'message_resolved' => true]);
         }

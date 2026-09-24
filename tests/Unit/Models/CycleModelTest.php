@@ -10,13 +10,11 @@ use App\User;
 use App\Step;
 use App\MentorshipRequest;
 use App\Project;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class CycleModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_name_attribute_accessor()

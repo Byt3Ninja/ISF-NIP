@@ -20,6 +20,7 @@ use App\MentorshipRequest;
 use App\SessionReport;
 use App\ScreeningEvaluation;
 use App\Enums\CycleModifyAction;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use App\Jobs\ExportCycleData;
 use Illuminate\Support\Facades\DB;
@@ -215,8 +216,9 @@ class ProgramController extends Controller
 
         // --- Step aggregates ---
         $totalSteps       = Step::where('cycle_id', $cycle->id)->count();
+        // GV-9566: a step runs through its `to` day in the program's platform zone.
         $totalStepsFinish = Step::where('cycle_id', $cycle->id)
-                                ->where('to', '>', now())->count();
+                                ->where('to', '>=', TimezoneService::platformToday(TimezoneService::platform($cycle->organization_id)))->count();
         $presSteps        = $totalSteps > 0
                                 ? round(($totalStepsFinish / $totalSteps) * 100, 2)
                                 : 0;

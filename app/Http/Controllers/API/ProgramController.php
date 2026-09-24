@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\User;
 use App\Messenger;
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use App\ScreeningEvaluation;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
@@ -441,7 +442,8 @@ public function index(Request $request)
        }
 
         if ($request->filled('status')) {
-         $now = Carbon::now();
+         // GV-9566: DATE columns vs the platform zone's today, not the server's.
+         $now = TimezoneService::platformToday();
          $status = $request->status;
 
         $query->where(function ($q) use ($status, $now) {
@@ -659,12 +661,13 @@ public function summary(string $programId)
             'description' => $cycle->description,
             'currentStage' => $currentStep->id
         ],
-        'programStages' => $cycle->steps->map(function ($step) use ($currentStep) {
-         $now = Carbon::now();
+        'programStages' => $cycle->steps->map(function ($step) use ($currentStep, $cycle) {
+         // GV-9566: step dates are inclusive days in the program's platform zone.
+         $today = TimezoneService::platformToday(TimezoneService::platform($cycle->organization_id));
          if ($step->from && $step->to) {
-         if ($now->lt($step->from)) {
+         if ($today < $step->from?->format('Y-m-d')) {
             $status = 'pending';
-          } elseif ($now->between($step->from, $step->to)) {
+          } elseif ($today <= $step->to?->format('Y-m-d')) {
             $status = 'in Progress';
           } else {
             $status = 'Completed';

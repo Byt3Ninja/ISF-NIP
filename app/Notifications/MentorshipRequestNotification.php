@@ -12,6 +12,8 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
 use Throwable;
+use App\Services\TimezoneService;
+use Carbon\Carbon;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
@@ -114,9 +116,13 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
         $from = $this->getFromAddress($smtpSettings);
         $orgData = $this->buildEmailOrganizationData($org);
 
-        $sessionTimestamp = strtotime($this->data['date'] ?? 'now');
-        $sessionDate = date('Y-m-d', $sessionTimestamp);
-        $sessionTime = date('h:i A', $sessionTimestamp);
+        // GV-9566: the session's platform wall-clock, shown in the recipient's own timezone.
+        $session = TimezoneService::forViewer(
+            TimezoneService::wallClock($this->data['date'] ?? null) ?? Carbon::now(),
+            $notifiable
+        );
+        $sessionDate = $session->format('Y-m-d');
+        $sessionTime = $session->format('h:i A');
         if (app()->getLocale() == 'ar') {
             $sessionTime = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $sessionTime);
         }

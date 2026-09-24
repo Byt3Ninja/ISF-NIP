@@ -58,7 +58,7 @@
                                   </div>
                                 </a>
                               </td>
-                              <td>{{ $session->zoom_date }} ({{ $session->period }}M)</td>
+                              <td>{{ optional( \App\Services\TimezoneService::forViewer( \App\Services\TimezoneService::wallClock( $session->zoom_date, \App\Services\TimezoneService::platform( $session->organization_id ?? null ) ), $_user ) )->format('Y-m-d H:i') }} ({{ $session->period }}M)</td>
                               <td>
                                 @php
                                   $comment = $session->admin_comment ?? $session->comment;

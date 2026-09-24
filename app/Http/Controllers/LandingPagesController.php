@@ -6,6 +6,7 @@ use App\Cycle;
 use App\LandingPage;
 use App\Services\FileManagerService;
 use App\Services\LandingPageCustomSectionService;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -31,7 +32,8 @@ class LandingPagesController extends Controller
 		// filters $page->cycles the same way via reject->is_expired).
 		$pagesQuery = $this->scopedLandingPagesQuery()->with('createdBy')->withCount(['cycles' => function ($query) {
 			$query->where(function ($query) {
-				$query->whereNull('end')->orWhere('end', '>=', now());
+				// GV-9566: `end` is an inclusive DATE in the platform zone.
+				$query->whereNull('end')->orWhere('end', '>=', TimezoneService::platformToday());
 			});
 		}]);
 
@@ -82,7 +84,6 @@ class LandingPagesController extends Controller
 
 		$colors = ['primary', 'success', 'info', 'warning', 'danger', 'secondary', 'dark'];
 		$l = app()->getLocale();
-		$now = now();
 
 		// Only keep programs whose organization is still within the page
 		// creator's organization access. The landing_page_cycles pivot is
@@ -90,7 +91,7 @@ class LandingPagesController extends Controller
 		// re-saved (see updatePrograms()), so without this an Organization
 		// removed from a Sub Admin would keep showing its programs here —
 		// and accepting applications — until that manual save.
-		$visiblePrograms = $this->accessibleCycles($page)->reject->is_expired->values()->map(function ($program) use ($now, $l) {
+		$visiblePrograms = $this->accessibleCycles($page)->reject->is_expired->values()->map(function ($program) use ($l) {
 			// Keep the application status identical to the Organization's public
 			// Program page (PublicLandingController): it is driven solely by the
 			// first form step (stype = 1). When no form step is configured the
@@ -101,9 +102,12 @@ class LandingPagesController extends Controller
 				$stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
 				$stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
 
-				$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
-				$isUpcoming = $stepStart !== null && $now->lt($stepStart);
-				$isClosed = $stepEnd !== null && $now->gt($stepEnd);
+				// GV-9566: step dates are inclusive days in the program's platform zone
+				// (comparing now() with the `to` midnight closed it on its last morning).
+				$today = TimezoneService::platformToday(TimezoneService::platform($program->organization_id));
+				$isOpen = ($stepStart === null || $today >= $stepStart->format('Y-m-d')) && ($stepEnd === null || $today <= $stepEnd->format('Y-m-d'));
+				$isUpcoming = $stepStart !== null && $today < $stepStart->format('Y-m-d');
+				$isClosed = $stepEnd !== null && $today > $stepEnd->format('Y-m-d');
 			} else {
 				$isOpen = false;
 				$isUpcoming = false;

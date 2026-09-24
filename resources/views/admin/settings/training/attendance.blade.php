@@ -58,9 +58,10 @@
                               <td>{{ $key + 1 }}</td>
                               <td>{{ $attendance->trainingSession->title  ?? 'غير متوفر' }}
                                 <br>
-                                {{ __('admin.Start') }}:( {{ $attendance->trainingSession->datetime ?? 'غير متوفر' }} ) 
+                                {{-- GV-9566: timestamps shown in the viewer's own timezone --}}
+                                {{ __('admin.Start') }}:( {{ optional($attendance->trainingSession?->startsAt($_user))->format('Y-m-d h:i A') ?? 'غير متوفر' }} ) 
                                 <br>
-                                {{ __('admin.End') }}:( {{ $attendance->trainingSession->enddatetime ?? 'غير متوفر' }} )
+                                {{ __('admin.End') }}:( {{ optional($attendance->trainingSession?->endsAt($_user))->format('Y-m-d h:i A') ?? 'غير متوفر' }} )
                               </td>
                               <td>{{ $attendance->trainingSession->trainer_name ?? 'غير متوفر' }}</td>
                               <td>{{ $attendance->cycle->title ?? 'غير متوفر' }}</td>
@@ -68,7 +69,8 @@
                               @if ($attendance->attendance == 1)
                               <td class="text-center text-success">{{ $attendance->created_at ?? 'غير متوفر' }}</td>
                               @else
-                              @if ($attendance->trainingSession->enddatetime < now())
+                              {{-- GV-9566: compare the instant; the raw timestamp string vs now() always read as past --}}
+                              @if (optional($attendance->trainingSession?->endsAt())->isPast())
                               <td class="text-center text-danger">{{ __('admin.Absent') }}</td>
                               @else
                               <td class="text-center text-warning">{{ __('admin.Pending') }}</td>

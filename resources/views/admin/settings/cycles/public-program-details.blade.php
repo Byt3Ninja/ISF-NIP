@@ -171,8 +171,10 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 	$month = $monthMatch[0] ?? '';
 	$endDateForCountdown = trim($month . ' ' . $endDatePart);
 }
-$endDateForCountdown = $program->registration_end;
-$startDateForCountdown = $program->registration_start;
+// GV-9566: ISO-8601 instants with offset, so the browser does not read the
+// window in its own zone.
+$endDateForCountdown = $program->registration_ends_at?->toIso8601String();
+$startDateForCountdown = $program->registration_starts_at?->toIso8601String();
 @endphp
 
 <body>
@@ -310,7 +312,7 @@ $startDateForCountdown = $program->registration_start;
 						</div>
 					</div>
 
-					@if( now()->gt( $program->registration_start ) && now()->lt( $program->registration_end ) )
+					@if( $program->registration_starts_at && $program->registration_ends_at && now()->gt( $program->registration_starts_at ) && now()->lt( $program->registration_ends_at ) )
 					<div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
 						<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" class="btn btn-primary-custom px-5 py-3 fs-5">
 							<i class="ti ti-send me-2"></i>{{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}

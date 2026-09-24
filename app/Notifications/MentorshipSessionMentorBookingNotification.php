@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Services\TimezoneService;
 
 class MentorshipSessionMentorBookingNotification extends Notification implements ShouldQueue
 {
@@ -72,7 +73,8 @@ class MentorshipSessionMentorBookingNotification extends Notification implements
             $founderName = $this->founder->name;
         }
 
-        $mappedSessions = array_map(function($session) use ($locale, $founderName) {
+        $mappedSessions = array_map(function($session) use ($locale, $founderName, $notifiable) {
+            $session = $this->forRecipient($session, $notifiable);
             $session['founder_name'] = $founderName;
 
             if ($this->founder->company) {
@@ -99,5 +101,25 @@ class MentorshipSessionMentorBookingNotification extends Notification implements
                 'sessions' => $mappedSessions,
                 'locale' => $locale,
             ]);
+    }
+
+    /**
+     * A booked session's platform wall-clock date/start/end, shown in the
+     * recipient's own timezone (GV-9566).
+     */
+    protected function forRecipient(array $session, $notifiable): array
+    {
+        if (empty($session['date'])) {
+            return $session;
+        }
+
+        $start = TimezoneService::wallClockForViewer($session['date'], $session['start_time'] ?? '', $notifiable);
+        $end = TimezoneService::wallClockForViewer($session['date'], $session['end_time'] ?? '', $notifiable);
+
+        $session['date'] = $start['date'];
+        $session['start_time'] = $start['time'];
+        $session['end_time'] = $end['time'];
+
+        return $session;
     }
 }

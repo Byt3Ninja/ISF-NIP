@@ -70,15 +70,17 @@
                   <td>{{ $_cycle->start_format ?? '' }}</td>
                   <td>{{ $_cycle->end_format ?? '' }}</td>
                   <td>
-                    @if( $_cycle->start <= now() && now() <= $_cycle->end )
+                    {{-- GV-9566: start/end are inclusive days in the program's platform zone --}}
+                    @php($cycleToday = \App\Services\TimezoneService::platformToday(\App\Services\TimezoneService::platform($_cycle->organization_id)))
+                    @if( $_cycle->start?->format('Y-m-d') <= $cycleToday && $cycleToday <= $_cycle->end?->format('Y-m-d') )
                       <span class="badge bg-label-primary w-100  ms-2">
                         {{ __('admin.On going') }}
                       </span>
-                    @elseif( $_cycle->start > now() )
+                    @elseif( $_cycle->start?->format('Y-m-d') > $cycleToday )
                       <span class="badge bg-label-warning w-100  ms-2">
                         {{ __('admin.Not started') }}
                       </span>
-                    @elseif( $_cycle->end < now() )
+                    @elseif( $_cycle->end?->format('Y-m-d') < $cycleToday )
                       <span class="badge bg-label-success w-100  ms-2">
                         {{ __('admin.completed') }}
                       </span>

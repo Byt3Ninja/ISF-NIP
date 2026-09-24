@@ -96,7 +96,7 @@ if ($user->hasRole('Admin')) {
 										else
 										{
 											if( $failed->count() >= $quiz->attempts ) { return false; }
-											if( now()->format('Y-m-d H:i:s') >= \Carbon\Carbon::parse($quiz->end)->format('Y-m-d H:i:s') ) { return false; }
+											if( $quiz->end_at && now()->gte($quiz->end_at) ) { return false; }
 											return true;
 										}
 									});

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use App\Services\WhatsAppService;
+use App\Services\TimezoneService;
 use App\Services\FormSectionStructurer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -109,9 +110,11 @@ class ExternalCyclesController extends Controller
 		if ($firstFormStep) {
 			$stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
 			$stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
-			$now = now();
+			// GV-9566: step dates are inclusive days in the program's platform zone
+			// (comparing now() with the `to` midnight closed it on its last morning).
+			$today = TimezoneService::platformToday(TimezoneService::forStep($firstFormStep->id));
 
-			$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+			$isOpen = ($stepStart === null || $today >= $stepStart->format('Y-m-d')) && ($stepEnd === null || $today <= $stepEnd->format('Y-m-d'));
 			if (!$isOpen) {
 				return redirect()->to("/o/" . ($program->org_slug ?? $org_slug))->with('error', app()->getLocale() == 'ar' ? 'التقديم مغلق حالياً.' : 'Applications are currently closed.');
 			}
@@ -502,6 +505,7 @@ class ExternalCyclesController extends Controller
 		$program = DB::table('cycles AS p')
 			->select([
 				'p.id AS id',
+				'p.organization_id',
 				'p.title',
 				'p.description',
 				'p.start',
@@ -544,6 +548,11 @@ class ExternalCyclesController extends Controller
 			}
 			$program->registration_start = $start . ' 00:00:00';
 			$program->registration_end = $end . ' 23:59:59';
+			// GV-9566: the window as real instants in the program's platform zone,
+			// for the page's Apply gate and its JS countdown.
+			$zone = TimezoneService::platform($program->organization_id ? (int) $program->organization_id : null);
+			$program->registration_starts_at = TimezoneService::wallClock($program->registration_start, $zone);
+			$program->registration_ends_at = TimezoneService::wallClock($program->registration_end, $zone);
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
 			$program->ranges = date_ranges( $start, $end );
 

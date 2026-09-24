@@ -636,10 +636,9 @@
 													@include('includes.partials.judges-cell', ['judges' => $final->judges])
 												</td>
 												@php
-													// GV-8363: compare in the viewer's own timezone. Slots are stored as
-													// bare wall-clock times, so comparing them against the raw server
-													// clock opened/closed the window at the wrong moment for anyone whose
-													// profile timezone differed from the server's.
+													// GV-9566: slots are real instants in the panel's platform zone, so the
+													// window opens at the same moment for everyone, whatever their profile
+													// timezone or the server's.
 													// GV-7381: session_start/session_end are resolved in the controller so
 													// the schedule, the Completed flag and the Join window all agree --
 													// previously the end time was derived from the floored `duration`.
@@ -647,7 +646,7 @@
 													$endTime = $final->session_end;
 													// Join Now + passcode unlock 10 minutes before the slot starts
 													// and stay available until an hour after it ends.
-													$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
+													$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, 'founder' );
 												@endphp
 												{{-- GV-3321: per-startup slot derived from the panel interval.
 													 GV-7381: both branches render d-m-Y + a formatted time. The fallback
@@ -666,11 +665,10 @@
 														-
 													@endif
 												</td>
-												{{-- GV-7381: a session is Completed once its end time passes, read in the
-													 viewer's timezone. This used to compare the raw `datetime` (the session
+												{{-- GV-7381: a session is Completed once its end time passes. This used to compare the raw `datetime` (the session
 													 START, and NULL for unscheduled rows -- where `null < now()` is true in
 													 PHP, so every such row reported "Yes"). --}}
-												<td> {{ \App\Services\MeetingWindowService::hasEnded( $endTime, $_user ) ? __('Yes') : __('No') }} </td>
+												<td> {{ \App\Services\MeetingWindowService::hasEnded( $endTime ) ? __('Yes') : __('No') }} </td>
 												<td>
 													{{-- GV-9620: the meeting row is shown even when the online-meeting
 														 link failed to generate (ScreeningController catches and logs the
@@ -687,7 +685,7 @@
 																<i class="ti ti-key"></i>
 															</button>
 														@endif
-													@elseif( \App\Services\MeetingWindowService::hasExpired( $endTime, $_user ) )
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $endTime ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -773,19 +771,23 @@
 														-
 													@endif
 												</td>
-												<td> {{ !is_null( $screening->dateTime ) && $screening->dateTime < now() ? __('Yes') : __('No') }} </td>
+												@php
+													// GV-9566: slots are real instants in the panel's platform zone.
+													// Rows without a derived slot fall back to the raw panel times, read
+													// in that same zone -- never against the server clock.
+													$slotZone = \App\Services\TimezoneService::forStep( $screening->step_id );
+													$slotStart = $screening->meeting_start
+														?? \App\Services\TimezoneService::wallClock( $screening->dateTime, $slotZone );
+													$slotEnd = $screening->meeting_end
+														?? \App\Services\TimezoneService::wallClock( $screening->endTime, $slotZone );
+													// GV-8363: Join Now + passcode unlock 10 minutes before the slot
+													// starts and stay available until an hour after it ends.
+													$canJoin = !is_null( $screening->meeting_link )
+														&& \App\Services\MeetingWindowService::isOpen( $slotStart, $slotEnd, 'founder' );
+												@endphp
+												{{-- GV-9566: Done once the session ends, the same rule as the Final Session table (GV-7381) --}}
+												<td> {{ \App\Services\MeetingWindowService::hasEnded( $slotEnd ) ? __('Yes') : __('No') }} </td>
 												<td>
-													@php
-														$slotStart = $screening->meeting_start
-															?? ( !is_null( $screening->dateTime ) ? \Carbon\Carbon::parse( $screening->dateTime ) : null );
-														$slotEnd = $screening->meeting_end
-															?? ( !is_null( $screening->endTime ) ? \Carbon\Carbon::parse( $screening->endTime ) : null );
-														// GV-8363: Join Now + passcode unlock 10 minutes before the slot
-														// starts and stay available until an hour after it ends, compared
-														// in the viewer's own timezone rather than the server clock.
-														$canJoin = !is_null( $screening->meeting_link )
-															&& \App\Services\MeetingWindowService::isOpen( $slotStart, $slotEnd, $_user, 'founder' );
-													@endphp
 													@if( $canJoin )
 														<a href="{{ $screening->meeting_link }}" target="_blank">({{__('dashboard.Join now')}})</a>
 														@if( !empty( $screening->meeting_password ) )
@@ -795,7 +797,7 @@
 																<i class="ti ti-key"></i>
 															</button>
 														@endif
-													@elseif( \App\Services\MeetingWindowService::hasExpired( $slotEnd, $_user ) )
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $slotEnd ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -1388,17 +1390,17 @@
 															</td>
 															<td>
 																{{-- GV-8361/8364: Join Now opens 24h before the judge's slot and
-																	 closes an hour after it ends, compared in the viewer's own
-																	 timezone. The old gate used an unbounded subDay() on the
+																	 closes an hour after it ends -- the same real moment for every
+																	 viewer (GV-9566). The old gate used an unbounded subDay() on the
 																	 server clock, so it stayed visible past the end time. --}}
 																@if( !empty( $company->join_url )
-																	&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																	&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
 																	<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																		<i class="ti ti-video"></i> {{ __('dashboard.Join') }}
 																	</a>
-																@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end ) )
 																	<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
-																@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
 																	{{-- GV-9564: inside the join window but no link was generated --}}
 																	<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
 																@else
@@ -1531,11 +1533,11 @@
 																		</td>
 																		<td>
 																			{{-- GV-8364: Join Now opens 24h before the judge's slot and closes
-																				 an hour after it ends, in the viewer's own timezone. The old gate
+																				 an hour after it ends, the same real moment for every viewer (GV-9566). The old gate
 																				 fell open whenever meeting_start was missing and used an
 																				 unbounded subDay() on the server clock. --}}
 																			@if( $company->join_url
-																				&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																				&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
 																				<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																					<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
 																				</a>
@@ -1549,9 +1551,9 @@
 																					<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
 																				</a>
 																				@endif  --}}
-																			@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																			@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end ) )
 																				<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
-																			@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																			@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
 																				{{-- GV-9565: inside the join window but no link was generated --}}
 																				<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
 																			@else

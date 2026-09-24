@@ -7,12 +7,10 @@ use App\Repositories\UserRepository;
 use App\User;
 use App\Role;
 use App\Company;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 class UserRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected UserRepository $userRepository;
 

@@ -9,11 +9,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class FileManagerServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected FileManagerService $fileManager;
 

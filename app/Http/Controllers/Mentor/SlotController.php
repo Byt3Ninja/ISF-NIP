@@ -8,6 +8,7 @@ use App\Schedule;
 use App\Settings;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Services\TimezoneService;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -77,6 +78,10 @@ class SlotController extends Controller
 
 		$events = [];
 		$now = now();
+		// GV-9566: finalscreenings.datetime / mentorship_requests.zoom_date are platform
+		// wall-clock. The SQL pre-filter uses a day of slack so no organization's zone
+		// is cut off (a past interval is harmless); each row becomes a real instant below.
+		$since = TimezoneService::platformNow()->subDay()->toDateTimeString();
 
 		// 1. Training Sessions
 		$sessions = \DB::table('training_sessions')
@@ -92,11 +97,12 @@ class SlotController extends Controller
 		// 2. Final Screenings
 		$screenings = \DB::table('finalscreenings')
 			->whereNotNull('zoom_id')
-			->whereRaw('DATE_ADD(datetime, INTERVAL duration MINUTE) > ?', [$now->toDateTimeString()])
-			->get(['datetime', 'duration']);
+			->whereRaw('DATE_ADD(datetime, INTERVAL duration MINUTE) > ?', [$since])
+			->get(['datetime', 'duration', 'step_id']);
 
 		foreach ($screenings as $s) {
-			$start = Carbon::parse($s->datetime);
+			$start = TimezoneService::wallClock($s->datetime, TimezoneService::forStep($s->step_id));
+			if (!$start) continue;
 			$end = (clone $start)->addMinutes($s->duration);
 			$events[] = ['time' => $start->timestamp, 'type' => 1];
 			$events[] = ['time' => $end->timestamp, 'type' => -1];
@@ -105,11 +111,12 @@ class SlotController extends Controller
 		// 3. Mentorship Requests
 		$mentorships = \DB::table('mentorship_requests')
 			->whereNotNull('zoom_id')
-			->whereRaw('DATE_ADD(zoom_date, INTERVAL period MINUTE) > ?', [$now->toDateTimeString()])
-			->get(['zoom_date', 'period']);
+			->whereRaw('DATE_ADD(zoom_date, INTERVAL period MINUTE) > ?', [$since])
+			->get(['zoom_date', 'period', 'organization_id']);
 
 		foreach ($mentorships as $m) {
-			$start = Carbon::parse($m->zoom_date);
+			$start = TimezoneService::wallClock($m->zoom_date, TimezoneService::platform($m->organization_id ? (int) $m->organization_id : null));
+			if (!$start) continue;
 			$end = (clone $start)->addMinutes($m->period);
 			$events[] = ['time' => $start->timestamp, 'type' => 1];
 			$events[] = ['time' => $end->timestamp, 'type' => -1];
@@ -156,24 +163,46 @@ class SlotController extends Controller
 
 		$isOwner = $mentorId == auth()->id();
 
+		// Resolve the program (cycle) / organization the slots are booked for
+		$cycleId = $request->input('cycle_id');
+		$organizationId = $request->input('organization_id');
+
+		$cycle = null;
+		if ($cycleId) {
+			$cycle = \App\Cycle::with('organization')->find($cycleId);
+		}
+		if (!$cycle) {
+			$user = auth()->user();
+			if ($user && $user->company) {
+				$cycle = $user->company->cycledata;
+			}
+		}
+
+		// GV-9566: slot dates/times are wall-clock in the platform zone of the organization
+		// they are booked for. The modal reads them in the same zone (returned as `timezone`).
+		$slotZone = TimezoneService::platform(($cycle->organization_id ?? null) ? (int) $cycle->organization_id : ($organizationId ? (int) $organizationId : null));
+		$platformNow = TimezoneService::platformNow($slotZone);
+		$today = $platformNow->toDateString();
+		$clock = $platformNow->format('H:i:s');
+
 		$query = Schedule::where('user_id', $mentorId)
-						->where(function ($query) use ($isOwner) {$query
-								->where(function ($weekly) use ($isOwner) {
+						->where(function ($query) use ($isOwner, $today, $clock) {$query
+								->where(function ($weekly) use ($isOwner, $today) {
 									$weekly->whereNull('date');
 									// dfrom filter: only hide not-yet-active Weekly slots for non-owners (booking view)
 									if (!$isOwner) {
-										$weekly->where(function ($q) {
+										$weekly->where(function ($q) use ($today) {
 											$q->whereNull('dfrom')
-											  ->orWhere('dfrom', '<=', date('Y-m-d'));
+											  ->orWhere('dfrom', '<=', $today);
 										});
 									}
 								})
 								//->orWhere('date', '>=', date('Y-m-d'))
-								->orWhere(function ($q) {
-									$q->where('date', '>', date('Y-m-d'))
-									  ->orWhere(function ($q2) {
-										$q2->where('date', date('Y-m-d'))
-										   ->where('tto', '>', date('H:i:s'));
+								->orWhere(function ($q) use ($today, $clock) {
+									$q->where('date', '>', $today)
+									  ->orWhere(function ($q2) use ($today, $clock) {
+										$q2->where('date', $today)
+										   ->where('tto', '>', $clock);
 									  });
 								});
 						});
@@ -194,20 +223,6 @@ class SlotController extends Controller
 		}
 
 		// Resolve location and address based on cycle/program or organization
-		$cycleId = $request->input('cycle_id');
-		$organizationId = $request->input('organization_id');
-		
-		$cycle = null;
-		if ($cycleId) {
-			$cycle = \App\Cycle::with('organization')->find($cycleId);
-		}
-		if (!$cycle) {
-			$user = auth()->user();
-			if ($user && $user->company) {
-				$cycle = $user->company->cycledata;
-			}
-		}
-
 		$location = null;
 		$address = null;
 		if ($cycle) {
@@ -279,11 +294,13 @@ class SlotController extends Controller
 			->where(function ($q) {
 				$q->where('approved', 'Yes')->orWhereNull('approved');
 			})
-			->where('zoom_date', '>=', now()->toDateString())
-			->get(['zoom_date', 'period']);
+			->where('zoom_date', '>=', $platformNow->copy()->subDay()->toDateString())
+			->get(['zoom_date', 'period', 'organization_id']);
 
 		foreach ($mentorBookings as $booking) {
-			$start = Carbon::parse($booking->zoom_date);
+			// GV-9566: a real instant, matching the modal's reading of the slot times.
+			$start = TimezoneService::wallClock($booking->zoom_date, TimezoneService::platform($booking->organization_id ? (int) $booking->organization_id : null));
+			if (!$start) continue;
 			$end = (clone $start)->addMinutes($booking->period ?: 60);
 			$blockedIntervals[] = [
 				'start' => $start->timestamp,
@@ -320,10 +337,11 @@ class SlotController extends Controller
 				'blocked_intervals' => $blockedIntervals,
 				'offline_allowed' => $offline_allowed,
 				'startups' => $startups,
+				'timezone' => $slotZone,
 			], 200);
 		}
 
-		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed, 'startups' => $startups], 200);
+		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed, 'startups' => $startups, 'timezone' => $slotZone], 200);
 	}
 
 
@@ -357,7 +375,8 @@ class SlotController extends Controller
 					}
 				}
 				
-				if($validated['type'] == 'Period' && $validated['date'].' '.$validated['tfrom'] <= date('Y-m-d H:i')){
+				// GV-9566: a mentor's slot is platform wall-clock (no organization: global zone).
+				if($validated['type'] == 'Period' && $validated['date'].' '.$validated['tfrom'] <= TimezoneService::platformNow()->format('Y-m-d H:i')){
 					return response()->json([
 							'success' => false,
 							'message' => __('mentor.this_time_before_now'),

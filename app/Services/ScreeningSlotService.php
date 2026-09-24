@@ -23,6 +23,10 @@ use Carbon\Carbon;
  *
  * Nothing here is persisted: only `screenings.interval` is stored, so editing
  * the panel's start time reflows every slot automatically.
+ *
+ * Slots are real instants in the platform zone of the panel's organization
+ * (GV-9566), so formatting one still prints the wall-clock the admin typed, and
+ * comparing one with the clock is correct whatever the server's zone.
  */
 class ScreeningSlotService
 {
@@ -34,10 +38,13 @@ class ScreeningSlotService
      * @param  int|null     $interval     minutes; null/0 => interval mode off
      * @param  int          $position     zero-based index of the startup in the panel
      * @param  string|null  $endTime      manually entered end time, used when interval is off
+     * @param  string|null  $timezone     platform zone of the panel; default TimezoneService::platform()
      * @return array{start: ?Carbon, end: ?Carbon, has_slot: bool}
      */
-    public static function slotFor(?string $sessionDate, ?string $startTime, ?int $interval, int $position = 0, ?string $endTime = null): array
+    public static function slotFor(?string $sessionDate, ?string $startTime, ?int $interval, int $position = 0, ?string $endTime = null, ?string $timezone = null): array
     {
+        $timezone = $timezone ?? TimezoneService::platform();
+
         $empty = ['start' => null, 'end' => null, 'has_slot' => false];
 
         if (empty($sessionDate) || empty($startTime)) {
@@ -45,7 +52,7 @@ class ScreeningSlotService
         }
 
         try {
-            $start = Carbon::parse($sessionDate . ' ' . $startTime);
+            $start = Carbon::parse($sessionDate . ' ' . $startTime, $timezone);
         } catch (\Exception $e) {
             return $empty;
         }
@@ -55,7 +62,7 @@ class ScreeningSlotService
             $end = null;
             if (!empty($endTime)) {
                 try {
-                    $end = Carbon::parse($sessionDate . ' ' . $endTime);
+                    $end = Carbon::parse($sessionDate . ' ' . $endTime, $timezone);
                 } catch (\Exception $e) {
                     $end = null;
                 }
@@ -105,8 +112,25 @@ class ScreeningSlotService
             $screening->start_time ?? null,
             isset($screening->interval) ? (int) $screening->interval : null,
             self::positionOf($screening->users ?? [], $companyId),
-            $screening->end_time ?? null
+            $screening->end_time ?? null,
+            TimezoneService::forStep($screening->step_id ?? null)
         );
+    }
+
+    /**
+     * The same slot as a viewer should see it, in their own timezone (GV-9566).
+     *
+     * Display only: the instants are unchanged, so a join window computed from
+     * either copy is identical.
+     *
+     * @return array{start: ?Carbon, end: ?Carbon, has_slot: bool}
+     */
+    public static function forViewer(array $slot, $user = null): array
+    {
+        $slot['start'] = TimezoneService::forViewer($slot['start'] ?? null, $user);
+        $slot['end'] = TimezoneService::forViewer($slot['end'] ?? null, $user);
+
+        return $slot;
     }
 
     /**

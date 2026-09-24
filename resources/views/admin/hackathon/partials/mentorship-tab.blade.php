@@ -161,7 +161,11 @@
                             :
                             $session->comment !!} </small> </td>
                         @endif
-                        <td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
+                        @php
+                          // GV-9566: zoom_date is platform wall-clock of the session's organization.
+                          $startAt = \App\Services\TimezoneService::wallClock($session->zoom_date, \App\Services\TimezoneService::platform($session->organization_id ?? null));
+                        @endphp
+                        <td> {{ optional(\App\Services\TimezoneService::forViewer($startAt, $_user))->format('Y-m-d H:i:s') }} <br> ({{ $session->period }}M) </td>
                         <td>
                           <div class="d-flex align-items-center gap-1"> {!! __( $session->approved ) ??'<span
                               class="warning">'.__('Waiting').'</span>' !!} </div>
@@ -169,9 +173,9 @@
                         <td> {{ $session->done ?__('Yes') : __('No') }} </td>
                         <td>
                           @php
-                            $endTime = \Carbon\Carbon::parse($session->zoom_date)->addMinutes($session->period);
+                            $endTime = $startAt ? $startAt->copy()->addMinutes((int) $session->period) : null;
                           @endphp
-                          @if(now() > $endTime)
+                          @if($endTime && now()->gt($endTime))
                             <span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
                           @else
                           <a class="btn btn-sm btn-label-primary" href="{{ route('mentorship.join', $session->id) }}" target="_blank">

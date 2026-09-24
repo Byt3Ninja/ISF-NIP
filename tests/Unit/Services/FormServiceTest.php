@@ -7,12 +7,10 @@ use App\Services\FormService;
 use App\Repositories\FormRepository;
 use App\BuilderForm;
 use App\Step;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 
 class FormServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected FormService $formService;
     protected $formRepoMock;

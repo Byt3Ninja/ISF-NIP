@@ -131,7 +131,8 @@
                       // Status from the step's date window vs today. Guard null
                       // dates (treat a missing window as active, not "completed",
                       // which a null < today comparison would wrongly produce).
-                      $today = date('Y-m-d');
+                      // GV-9566: "today" in the step's platform zone, not the server's.
+                      $today = \App\Services\TimezoneService::platformToday(\App\Services\TimezoneService::forStep($step->id));
                       $status = (!empty($step->end_date) && $step->end_date < $today)
                         ? 'completed'
                         : ((!empty($step->start_date) && $step->start_date > $today) ? 'upcoming' : 'in_progress');

@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Services\TimezoneService;
 
 class MentorshipSessionResource extends JsonResource
 {
@@ -36,7 +37,8 @@ class MentorshipSessionResource extends JsonResource
             'rating' => round($avgRating, 1),
             'notes' => $this->comment,
          ],
-            'sessionDateTime' => optional($this->zoom_date)->toDateTimeString(),
+            // GV-9566: the session instant in the requesting user's own timezone.
+            'sessionDateTime' => optional(TimezoneService::forViewer($this->zoom_date, $request->user()))->toDateTimeString(),
         ];
     }
 }

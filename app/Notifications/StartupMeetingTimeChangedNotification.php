@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
 use Throwable;
+use App\Services\TimezoneService;
 
 /**
  * Tells a startup that its screening meeting was newly scheduled, that its time
@@ -204,8 +205,8 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
                 'recipient'     => $notifiable,
                 'startupName'   => $this->startupName(),
                 'programName'   => $this->programName($step, $platformName),
-                'meetingDate'   => $this->formatDate(),
-                'meetingTime'   => $this->formatTime(),
+                'meetingDate'   => $this->formatDate($notifiable),
+                'meetingTime'   => $this->formatTime($notifiable),
                 'cancelled'     => $this->cancelled,
                 'variant'       => $this->variant,
                 'dashboardUrl'  => url('/dashboard'),
@@ -224,8 +225,8 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
 
         return [
             'message' => __('email.startup_meeting_changed_email.' . $key . '.database', [
-                'date' => $this->formatDate(),
-                'time' => $this->formatTime(),
+                'date' => $this->formatDate($notifiable),
+                'time' => $this->formatTime($notifiable),
             ]),
         ];
     }
@@ -241,8 +242,8 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
         return __('email.startup_meeting_changed_email.' . $key . '.whatsapp', [
             'name'         => trim($notifiable->name ?? ''),
             'program_name' => $this->programName($step, config('app.name')),
-            'date'         => $this->formatDate(),
-            'time'         => $this->formatTime(),
+            'date'         => $this->formatDate($notifiable),
+            'time'         => $this->formatTime($notifiable),
         ]);
     }
 
@@ -256,8 +257,8 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
         return new BroadcastMessage([
             'subject' => __('email.startup_meeting_changed_email.' . $key . '.subject'),
             'message' => __('email.startup_meeting_changed_email.' . $key . '.database', [
-                'date' => $this->formatDate(),
-                'time' => $this->formatTime(),
+                'date' => $this->formatDate($notifiable),
+                'time' => $this->formatTime($notifiable),
             ]),
             'url'     => '/dashboard',
             'time'    => now()->toDateTimeString(),
@@ -316,34 +317,36 @@ class StartupMeetingTimeChangedNotification extends Notification implements Shou
     /**
      * The meeting date, or an em dash when the slot is unknown.
      */
-    protected function formatDate(): string
+    protected function formatDate($notifiable = null): string
     {
-        return $this->slot()?->format('d-m-Y') ?? '—';
+        return $this->slot($notifiable)?->format('d-m-Y') ?? '—';
     }
 
     /**
      * The meeting start time, or an em dash when the slot is unknown.
      */
-    protected function formatTime(): string
+    protected function formatTime($notifiable = null): string
     {
-        return $this->slot()?->format('h:i A') ?? '—';
+        return $this->slot($notifiable)?->format('h:i A') ?? '—';
     }
 
     /**
      * Parse the stored slot string, tolerating a malformed value rather than
      * failing the whole notification over a display field.
+     *
+     * GV-9566: the slot is platform wall-clock of the step's organization; it is
+     * shown in the recipient's own timezone.
      */
-    protected function slot(): ?Carbon
+    protected function slot($notifiable = null): ?Carbon
     {
         if (empty($this->slotStart)) {
             return null;
         }
 
-        try {
-            return Carbon::parse($this->slotStart);
-        } catch (\Exception $e) {
-            return null;
-        }
+        return TimezoneService::forViewer(
+            TimezoneService::wallClock($this->slotStart, TimezoneService::forStep($this->stepId)),
+            $notifiable
+        );
     }
 
     /**

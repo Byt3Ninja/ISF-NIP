@@ -9,12 +9,10 @@ use App\BuilderForm;
 use App\Company;
 use App\Screening;
 use App\Formdata;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Carbon\Carbon;
 
 class StepModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_casts_dates()

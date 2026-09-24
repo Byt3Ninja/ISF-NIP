@@ -15,6 +15,7 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
 use Throwable;
+use App\Services\TimezoneService;
 
 class MentorshipSession extends Notification implements ShouldQueue
 {
@@ -187,7 +188,11 @@ foreach ($this->data['attachments'] ?? [] as $attachment) {
             ? (trim((string) ($d['startupNameAr'] ?? '')) ?: trim((string) ($d['startupNameEn'] ?? '')))
             : trim((string) ($d['startupNameEn'] ?? ''));
 
-        $start = Carbon::parse($d['startAt']);
+        // GV-9566: startAt is platform wall-clock; show it in the founder's own timezone.
+        $start = TimezoneService::forViewer(
+            TimezoneService::wallClock($d['startAt'], TimezoneService::platform(! empty($d['organizationId']) ? (int) $d['organizationId'] : null)),
+            $notifiable
+        ) ?? Carbon::now();
         $end = $start->copy()->addMinutes((int) ($d['periodMinutes'] ?: 60));
         $sessionTime = $start->format('h:i A') . ' – ' . $end->format('h:i A');
         if ($isRtl) {

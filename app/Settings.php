@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Auditable;
+use App\Services\TimezoneService;
 use Carbon\Carbon;
 
 class Settings extends Model
@@ -20,6 +21,12 @@ class Settings extends Model
         'enable_whatsapp' => 'boolean',
         'enable_pusher' => 'boolean',
     ];
+
+    protected static function booted()
+    {
+        // TimezoneService caches the platform zone (GV-9566).
+        static::saved(fn () => TimezoneService::forgetPlatform());
+    }
 
     public static function hasReachedMaxConcurrentSessions($startTime = null, $duration = null, $organization_id = null)
     {
@@ -39,19 +46,25 @@ class Settings extends Model
             $maxLimit = (int) $settings->max_concurrent_sessions;
         }
 
+        // GV-9566: work on real instants. A plain string is wall-clock typed in the
+        // platform zone (not the server's); training sessions store unix timestamps,
+        // final screenings and mentorship sessions store platform wall-clock, so each
+        // source is compared in its own terms. Rows are read in the organization's
+        // zone when one is given, else the global platform zone.
+        $zone = TimezoneService::platform($organization_id ? (int) $organization_id : null);
+
         // If no time is provided, check the current time
         if ($startTime) {
-            if (is_numeric($startTime)) {
-                $checkTime = Carbon::createFromTimestamp($startTime);
-            } else {
-                $checkTime = Carbon::parse($startTime);
-            }
-        } else {
-            $checkTime = now();
+            $checkTime = $startTime instanceof \DateTimeInterface
+                ? Carbon::instance($startTime)
+                : TimezoneService::wallClock($startTime, $zone);
         }
+        $checkTime = $checkTime ?? now();
         
         $duration = $duration ?? 0;
         $endTime = (clone $checkTime)->addMinutes($duration);
+        $checkClock = $checkTime->copy()->setTimezone($zone)->toDateTimeString();
+        $endClock = $endTime->copy()->setTimezone($zone)->toDateTimeString();
 
         $count = 0;
 
@@ -75,9 +88,9 @@ class Settings extends Model
         $screeningQuery = \DB::table('finalscreenings')
             ->whereNull('finalscreenings.deleted_at')
             ->whereNotNull('finalscreenings.zoom_id')
-            ->where(function($query) use ($checkTime, $endTime) {
-                $query->where('finalscreenings.datetime', '<', $endTime->toDateTimeString())
-                      ->whereRaw('DATE_ADD(finalscreenings.datetime, INTERVAL finalscreenings.duration MINUTE) > ?', [$checkTime->toDateTimeString()]);
+            ->where(function($query) use ($checkClock, $endClock) {
+                $query->where('finalscreenings.datetime', '<', $endClock)
+                      ->whereRaw('DATE_ADD(finalscreenings.datetime, INTERVAL finalscreenings.duration MINUTE) > ?', [$checkClock]);
             });
 
         if ($organization_id) {
@@ -91,9 +104,9 @@ class Settings extends Model
         $mentorshipQuery = \DB::table('mentorship_requests')
             ->whereNull('mentorship_requests.deleted_at')
             ->whereNotNull('mentorship_requests.zoom_id')
-            ->where(function($query) use ($checkTime, $endTime) {
-                $query->where('mentorship_requests.zoom_date', '<', $endTime->toDateTimeString())
-                      ->whereRaw('DATE_ADD(mentorship_requests.zoom_date, INTERVAL mentorship_requests.period MINUTE) > ?', [$checkTime->toDateTimeString()]);
+            ->where(function($query) use ($checkClock, $endClock) {
+                $query->where('mentorship_requests.zoom_date', '<', $endClock)
+                      ->whereRaw('DATE_ADD(mentorship_requests.zoom_date, INTERVAL mentorship_requests.period MINUTE) > ?', [$checkClock]);
             });
 
         if ($organization_id) {

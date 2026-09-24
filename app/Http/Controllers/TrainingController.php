@@ -49,6 +49,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
 use App\TrainingDuration;
 use App\Services\MeetingWindowService;
+use App\Services\TimezoneService;
 use Intervention\Image\ImageManagerStatic as Image;
 
 class TrainingController extends Controller
@@ -663,9 +664,12 @@ class TrainingController extends Controller
 				$steps = $company?->cycledata?->steps;
 				if( !empty( $steps ) )
 				{
-					$now = time();
-					$steps_ids = $steps->filter(function ($step) use ($now) {
-						return $step->from->timestamp <= $now && $step->to->timestamp >= $now;
+					// GV-9566: step dates are inclusive days in the program's platform zone
+					// (this used to drop the step on its own last day).
+					$today = TimezoneService::platformToday(TimezoneService::platform($company->cycledata->organization_id));
+					$steps_ids = $steps->filter(function ($step) use ($today) {
+						return $step->from && $step->to
+							&& $step->from->format('Y-m-d') <= $today && $step->to->format('Y-m-d') >= $today;
 					})->values()->pluck('id')->toArray();
 					$sessions = TrainingSession::where('id', '>', 0);
 					// where('step_id', Auth::user()->company->step)
@@ -674,25 +678,21 @@ class TrainingController extends Controller
 				}
 				
 			}
-			$user = Auth::user();
-			$sessions = $sessions->map(function ($session) use ($user) {
+			$viewer = Auth::user();
+			$sessions = $sessions->map(function ($session) use ($viewer) {
 				// GV-8301: decide joinability from the raw stored values, before
 				// the display formatting below overwrites `enddatetime` (and
 				// truncates it to Y-m-d for `online` courses).
 				$session->can_join = MeetingWindowService::isOpen(
-					TrainingSession::wallClock($session->getRawOriginal('datetime')),
-					TrainingSession::wallClock($session->getRawOriginal('enddatetime')),
-					$user,
+					$session->getRawOriginal('datetime'),
+					$session->getRawOriginal('enddatetime'),
 					'founder'
 				);
 
-				if ($session->type == "online") {
-					$session->datetime1 = FormatDate($session->datetime, 'Y-m-d');
-					$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d');
-				} else {
-					$session->datetime1 = FormatDate($session->datetime, 'Y-m-d h:i A');
-					$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d h:i A');
-				}
+				// GV-9566: shown in the founder's own timezone.
+				$format = $session->type == "online" ? 'Y-m-d' : 'Y-m-d h:i A';
+				$session->datetime1 = FormatDate($session->startsAt($viewer), $format);
+				$session->enddatetime = FormatDate($session->endsAt($viewer), $format);
 
 				return $session;
 			});
@@ -713,22 +713,25 @@ class TrainingController extends Controller
 			$dateRange = $request->date_range;
 			$type = $request->type;
 			$l = app()->getLocale();
+			// GV-9566: the admin types wall-clock in the step's platform zone; strtotime()
+			// read it in the server zone, shifting every session by the difference.
+			$zone = TimezoneService::forStep($request->step_id);
 			if ($type == 'sessions' || $type == 'offline') {
 				$startDate = $request->datetime;
 				$startTime = $request->starttime;   // وقت البداية
 				$endTime = $request->endtime;   // وقت النهاية
 				$start_time_tailing = str_contains($startTime, 'AM') || str_contains($startTime, 'PM') ? '' : ':00';
-				$start_datetime = strtotime($startDate . ' ' . $startTime . $start_time_tailing);
+				$start_datetime = self::toTimestamp($startDate . ' ' . $startTime . $start_time_tailing, $zone);
 				
 				$end_time_tailing = str_contains($endTime, 'AM') || str_contains($endTime, 'PM') ? '' : ':00';
-				$end_datetime = strtotime($startDate . ' ' . $endTime . $end_time_tailing);
+				$end_datetime = self::toTimestamp($startDate . ' ' . $endTime . $end_time_tailing, $zone);
 			} else if ($type == 'online') {
 				if (empty($dateRange) || !str_contains($dateRange, ' - ')) {
 					return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
 				}
 				[$startDate, $endDate] = explode(' - ', $dateRange);
-				$start_datetime = strtotime($startDate);
-				$end_datetime = strtotime($endDate);
+				$start_datetime = self::toTimestamp($startDate, $zone);
+				$end_datetime = self::toTimestamp($endDate, $zone);
 			}
 
 			if ($start_datetime == null || $end_datetime == null) {
@@ -747,8 +750,8 @@ class TrainingController extends Controller
 			$title = $request->title;
 			$dsc = $request->dsc;
 			$datetime = $start_datetime;
-			$original_datetime = date( 'Y-m-d h:i A', $start_datetime );
-			$original_end_datetime = date( 'Y-m-d h:i A', $end_datetime );
+			$original_datetime = TrainingSession::at( $start_datetime, $zone )->format( 'Y-m-d h:i A' );
+			$original_end_datetime = TrainingSession::at( $end_datetime, $zone )->format( 'Y-m-d h:i A' );
 			$datetimeStamp = Carbon::parse($datetime)->timestamp;
 			$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
 			$start = Carbon::parse($datetime);
@@ -843,10 +846,12 @@ class TrainingController extends Controller
 					$dsc      = $request->dsc;
 					$datetime = $start_datetime;
 	
-					$datetimeStamp     = Carbon::parse($datetime)->timestamp;
-					$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
-					$start             = Carbon::parse($datetime);
-					$end               = Carbon::parse($end_datetime);
+					// GV-9566: the form posts platform wall-clock (see session()).
+					$zone              = TimezoneService::forStep($step);
+					$start             = Carbon::parse($datetime, $zone);
+					$end               = Carbon::parse($end_datetime, $zone);
+					$datetimeStamp     = $start->timestamp;
+					$end_datetimeStamp = $end->timestamp;
 					$duration          = $start->diffInMinutes($end);
 	
 					if ($type == 'sessions') {
@@ -909,13 +914,28 @@ class TrainingController extends Controller
 			}
 	}
 
+	/** Admin-typed wall-clock in $zone as a unix timestamp; null when unparsable (was strtotime() === false). */
+	private static function toTimestamp($value, string $zone): ?int
+	{
+		if (empty($value)) {
+			return null;
+		}
+
+		try {
+			return Carbon::parse($value, $zone)->timestamp;
+		} catch (\Exception $e) {
+			return null;
+		}
+	}
+
 	private function addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $trainer_name, $trainer_email, $sid = null)
 	{
 		$this->meetingService =  OnlineMeetingFactory::create();
 		if ($type == 'sessions') {
 			// Add Zoom
 			$topic = "Training (" . $title . ')';
-			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1];
+			// GV-9566: the meeting is booked in the step's platform zone.
+			$data = ['topic' => $topic, "start_time" => $datetime, 'duration' => $duration, 'host_video' => 1, 'participant_video' => 1, 'timezone' => TimezoneService::forStep($step)];
 			$onlineMeeting = $this->meetingService->createMeeting($data);
 			if (!$onlineMeeting['success']) {
 				return [
@@ -1039,12 +1059,16 @@ class TrainingController extends Controller
 			$session['title'] = $sessionData->title;
 			$session['dsc'] = $sessionData->dsc;
 			$session['type'] = $sessionData->type;
+			// GV-9566: feeds the admin edit form, so platform wall-clock (never the
+			// viewer's zone): an unchanged edit must post back the same instant.
+			$startsAt = $sessionData->startsAt();
+			$endsAt = $sessionData->endsAt();
 			if ($sessionData->type == 'online') {
-				$session['daterange'] = FormatDate($sessionData->datetime, 'Y-m-d') . ' - ' . FormatDate($sessionData->enddatetime, 'Y-m-d');
+				$session['daterange'] = FormatDate($startsAt, 'Y-m-d') . ' - ' . FormatDate($endsAt, 'Y-m-d');
 			} else {
-				$session['daterange'] = FormatDate($sessionData->datetime, 'Y-m-d');
-				$session['fromtime'] = FormatDate($sessionData->datetime, 'h:i A');
-				$session['endtime'] = FormatDate($sessionData->enddatetime, 'h:i A');
+				$session['daterange'] = FormatDate($startsAt, 'Y-m-d');
+				$session['fromtime'] = FormatDate($startsAt, 'h:i A');
+				$session['endtime'] = FormatDate($endsAt, 'h:i A');
 			}
 			if ($sessionData->type == 'sessions') {
 				$session['training_Address'] = $sessionData->training_Address;
@@ -1062,9 +1086,8 @@ class TrainingController extends Controller
 			$session['join_url'] = $sessionData->join_url;
 			// GV-8301: the details modal hides its Join button once the window closes.
 			$session['can_join'] = MeetingWindowService::isOpen(
-				TrainingSession::wallClock($sessionData->getRawOriginal('datetime')),
-				TrainingSession::wallClock($sessionData->getRawOriginal('enddatetime')),
-				Auth::user(),
+				$sessionData->getRawOriginal('datetime'),
+				$sessionData->getRawOriginal('enddatetime'),
 				'founder'
 			);
 			$session['created_at'] = $sessionData->created_at;
@@ -1367,18 +1390,22 @@ class TrainingController extends Controller
 			$result = DB::select($session, [$id]);
 			$session = collect($result)->first();
 
+			// GV-9566: shown in the viewer's own timezone.
+			$zone = TimezoneService::forStep($session->step_id);
+			$startsAt = TrainingSession::at($session->datetime, $zone, Auth::user());
+			$endsAt = TrainingSession::at($session->enddatetime, $zone, Auth::user());
 
 			if (strtolower(trim($session->type)) == "online") {
-				$session->datetime1 = FormatDate($session->datetime, 'Y-m-d');
-				$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d');
+				$session->datetime1 = FormatDate($startsAt, 'Y-m-d');
+				$session->enddatetime = FormatDate($endsAt, 'Y-m-d');
 				$session->Course_id = $session->training_Address;
 				$session->course_Name = $session->title;
 			} else {
-				$session->datetime1 = FormatDate($session->datetime, 'Y-m-d h:i A');
-				$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d h:i A');
-				$session->starttime = FormatDate($session->datetime, 'h:i A');
-				$session->endtime = FormatDate($session->enddatetime, 'h:i A');
-				$session->date = FormatDate($session->datetime, 'Y-m-d');
+				$session->datetime1 = FormatDate($startsAt, 'Y-m-d h:i A');
+				$session->enddatetime = FormatDate($endsAt, 'Y-m-d h:i A');
+				$session->starttime = FormatDate($startsAt, 'h:i A');
+				$session->endtime = FormatDate($endsAt, 'h:i A');
+				$session->date = FormatDate($startsAt, 'Y-m-d');
 			}
 
 
@@ -1484,11 +1511,15 @@ class TrainingController extends Controller
 			$step_user = $user->company->step;
 
 			if ($step_user == $step_Traning) {
-				if ($session->datetime > now()) {
-					return response()->json(['message' => 'WaitForStartAttendece', 'Start' => $session->datetime]);
+				// GV-9566: compare instants. `enddatetime` is an uncast timestamp string,
+				// which PHP compared as text with now(), so every session read as ended.
+				$startsAt = $session->startsAt($user);
+				$endsAt = $session->endsAt($user);
+				if ($startsAt && $startsAt->isFuture()) {
+					return response()->json(['message' => 'WaitForStartAttendece', 'Start' => $startsAt->format('Y-m-d h:i A')]);
 				}
-				if ($session->enddatetime < now()) {
-					return response()->json(['message' => 'SessionEnded', 'Ended' => $session->enddatetime]);
+				if ($endsAt && $endsAt->isPast()) {
+					return response()->json(['message' => 'SessionEnded', 'Ended' => $endsAt->format('Y-m-d h:i A')]);
 				}
 				$insert = DB::table('attendance_training_offline')
 					->where('training_session_id', $session->id)
@@ -1556,12 +1587,15 @@ class TrainingController extends Controller
 			}
 			
 			
-			if ($request->dateFrom != 0) {
-				$sessions = $sessions->where('datetime', '>=', $request->dateFrom);
+			// GV-9566: `datetime` is a unix timestamp; compare with the platform-zone
+			// day boundaries (a Y-m-d string never matched a digit string).
+			$reportZone = TimezoneService::platform();
+			if ($request->dateFrom != 0 && ($from = self::toTimestamp($request->dateFrom, $reportZone))) {
+				$sessions = $sessions->where('datetime', '>=', Carbon::createFromTimestamp($from)->setTimezone($reportZone)->startOfDay()->timestamp);
 			}
 
-			if ($request->dateTo != 0) {
-				$sessions = $sessions->where('datetime', '<=', $request->dateTo);
+			if ($request->dateTo != 0 && ($to = self::toTimestamp($request->dateTo, $reportZone))) {
+				$sessions = $sessions->where('datetime', '<=', Carbon::createFromTimestamp($to)->setTimezone($reportZone)->endOfDay()->timestamp);
 			}
 
 			$sessions = $sessions->get();
@@ -1871,9 +1905,8 @@ class TrainingController extends Controller
 		// enforced here too and not only by hiding the button in the view.
 		// Attendance must not be recorded for a session that can no longer be joined.
 		$joinOpen = MeetingWindowService::isOpen(
-			TrainingSession::wallClock($session->getRawOriginal('datetime')),
-			TrainingSession::wallClock($session->getRawOriginal('enddatetime')),
-			$user,
+			$session->getRawOriginal('datetime'),
+			$session->getRawOriginal('enddatetime'),
 			'founder'
 		);
 

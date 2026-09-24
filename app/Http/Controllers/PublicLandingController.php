@@ -6,6 +6,7 @@ use App\Organization;
 use App\OrganizationLandingPage;
 use App\Services\OrganizationCustomSectionService;
 use App\Services\ProgramLandingService;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -144,19 +145,21 @@ class PublicLandingController extends Controller
 
         $colors = ['warning', 'success', 'danger', 'info', 'primary', 'secondary', 'dark', 'success', 'primary', 'danger', 'info', 'warning', 'secondary'];
 
-        $now = now();
         $l = app()->getLocale();
         // Application status + CTA
-        $landingPrograms = $landingPrograms->map(function ($program) use ($now, $l) {
+        $landingPrograms = $landingPrograms->map(function ($program) use ($l) {
             $firstFormStep = $program->steps()->where('stype', 1)->orderBy('arr', 'asc')->first();
             if ($firstFormStep)
             {
                 $stepStart = $firstFormStep->from ? Carbon::parse($firstFormStep->from) : null;
                 $stepEnd = $firstFormStep->to ? Carbon::parse($firstFormStep->to) : null;
 
-                $isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
-                $isUpcoming = $stepStart !== null && $now->lt($stepStart);
-                $isClosed = $stepEnd !== null && $now->gt($stepEnd);
+                // GV-9566: step dates are inclusive days in the program's platform zone
+                // (comparing now() with the `to` midnight closed it on its last morning).
+                $today = TimezoneService::platformToday(TimezoneService::platform($program->organization_id));
+                $isOpen = ($stepStart === null || $today >= $stepStart->format('Y-m-d')) && ($stepEnd === null || $today <= $stepEnd->format('Y-m-d'));
+                $isUpcoming = $stepStart !== null && $today < $stepStart->format('Y-m-d');
+                $isClosed = $stepEnd !== null && $today > $stepEnd->format('Y-m-d');
             }
             else
             {

@@ -8,12 +8,10 @@ use App\User;
 use App\Cycle;
 use App\Organization;
 use App\MentorshipTask;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Carbon\Carbon;
 
 class MentorshipRequestModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_casts_zoom_date_to_datetime()

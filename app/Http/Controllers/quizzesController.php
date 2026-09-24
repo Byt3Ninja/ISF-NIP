@@ -13,6 +13,7 @@ use App\QuestionsBank;
 use App\QuizQuestions;
 use App\QuizResponses;
 use App\TrainingSession;
+use App\Services\TimezoneService;
 use App\QuestionCategories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -97,6 +98,8 @@ class quizzesController extends Controller
 			$quiz_obj->description = $quiz->quiz_description;
 			$quiz_obj->start = $quiz->quiz_start;
 			$quiz_obj->end = $quiz->quiz_end;
+			// GV-9566: raw row, so read the wall-clock end in the organization's platform zone.
+			$quiz_obj->end_at = TimezoneService::wallClock($quiz->quiz_end, TimezoneService::platform($quiz->quiz_organization_id ? (int) $quiz->quiz_organization_id : null));
 			$quiz_obj->time_limit = $quiz->quiz_time_limit;
 			$quiz_obj->attempts = $quiz->quiz_attempts;
 			$quiz_obj->retry_after = $quiz->quiz_retry_after;
@@ -649,15 +652,16 @@ class quizzesController extends Controller
 					$time_remaining = sprintf('%02d:%02d:%02d', $diff->h, $diff->i, $diff->s);
 				}
 				$quiz_status = null;
-				$time_now = now()->format('Y-m-d H:i:s');
+				// GV-9566: start/end are real instants (PlatformDateTime cast); compare them as
+				// instants -- formatted strings mixed the server zone with the platform zone.
 				$quiz->in_progress = $attempts->where('status', false)->first() ? true : false;
 				if( $attempts->where('score', '>=', $quiz->passing_criteria)->count() >= 1 ) { $quiz_status = 'passed'; }
-				elseif( $time_now > $quiz->end->format('Y-m-d H:i:s') && $attempts->count() == 0 ) { $quiz_status = 'notTaken'; }
+				elseif( now()->gt($quiz->end) && $attempts->count() == 0 ) { $quiz_status = 'notTaken'; }
 				elseif(
 					$attempts->where('score', '<', $quiz->passing_criteria)->where('status', true)->count() >= $quiz->attempts
-					|| $time_now > $quiz->end->format('Y-m-d H:i:s')
+					|| now()->gt($quiz->end)
 				) { $quiz_status = 'failed'; }
-				elseif( $time_now < $quiz->start->format('Y-m-d H:i:s') ) { $quiz_status = 'notStartedYet'; }
+				elseif( now()->lt($quiz->start) ) { $quiz_status = 'notStartedYet'; }
 				elseif( $quiz->in_progress == true ) { $quiz_status = 'inProgress'; }
 				else { $quiz_status = 'available'; }
 

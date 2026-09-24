@@ -24,6 +24,7 @@ use App\Messenger;
 use App\Screening;
 use App\TeamFormation;
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use Carbon\Exceptions\InvalidFormatException;
 use App\BuilderForm;
 use App\BuilderField;
@@ -1157,7 +1158,8 @@ class CyclesController extends Controller
             if( $step?->stype != 1 ) {
                 return redirect()->route('core.dashboard_view')->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
             }
-            if( $step->to < now()->format('Y-m-d') ) {
+            // GV-9566: `to` is an inclusive day in the program's platform zone.
+            if( $step->to?->format('Y-m-d') < TimezoneService::platformToday(TimezoneService::platform($private->organization_id)) ) {
                 return redirect()->route('core.dashboard_view')->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);
             }
 

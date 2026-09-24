@@ -4,12 +4,10 @@ namespace Tests\Feature\Web;
 
 use Tests\TestCase;
 use App\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 class AuthenticationTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function user_can_view_login_page()

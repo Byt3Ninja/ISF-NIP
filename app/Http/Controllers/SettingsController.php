@@ -15,6 +15,8 @@ use App\Currency;
 use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
+use DateTimeZone;
+use Illuminate\Validation\Rule;
 use App\Invitation;
 use App\Technology;
 use App\ReminderLog;
@@ -370,6 +372,8 @@ class SettingsController extends Controller
 		$request->validate([
 			'terms_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
     		'privacy_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
+			// GV-9566: this is the platform zone every meeting and deadline is read in.
+			'timezone' => ['nullable', Rule::in(DateTimeZone::listIdentifiers(DateTimeZone::ALL_WITH_BC))],
 		]);
 
 		$id = $request->input('id');
@@ -887,7 +891,7 @@ class SettingsController extends Controller
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
-            'time_zone' => 'nullable|string|max:100',
+            'time_zone' => ['nullable', Rule::in(DateTimeZone::listIdentifiers(DateTimeZone::ALL_WITH_BC))],
             'currency_id' => 'nullable|exists:currencies,id',
         ]);
 

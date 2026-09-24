@@ -120,24 +120,23 @@ class MicrosoftCalenderService
             return response()->json(['error' => 'Failed to create event: ' . $e->getMessage()], 400);
         }
     }
+    /**
+     * The event's platform wall-clock as a UTC instant (GV-9566). This used to
+     * read it as Asia/Riyadh and subtract a fixed 3 hours.
+     */
     public function toZoomTimeFormat(string $dateTime, $duration = null)
     {
-        try {
-            if (is_null($duration)) {
-                $date = new \DateTime($dateTime, new \DateTimeZone('Asia/Riyadh'));
-                $interval = new \DateInterval('PT3H');
-                $date->sub($interval);
-                return $date->format('Y-m-d\TH:i:s.u\Z');
-            } else {
-                $date = new \DateTime($dateTime, new \DateTimeZone('Asia/Riyadh'));
-                $interval = new \DateInterval('PT' . $duration . 'M');
-                $date->add($interval);
+        $moment = TimezoneService::wallClock($dateTime);
 
-                return $date->format('Y-m-d\TH:i:s.u\Z');
-            }
-        } catch (\Exception $e) {
-            Log::error('Teams->TimeFormat : ' . $e->getMessage());
+        if (is_null($moment)) {
+            Log::error('Teams->TimeFormat : unparseable date ' . $dateTime);
             return '';
         }
+
+        if (!is_null($duration)) {
+            $moment = $moment->copy()->addMinutes((int) $duration);
+        }
+
+        return $moment->copy()->utc()->format('Y-m-d\TH:i:s.u\Z');
     }
 }

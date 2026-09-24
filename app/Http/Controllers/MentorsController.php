@@ -20,6 +20,7 @@ use App\Notifications\MentorshipSession;
 use App\Notifications\MentorshipSessionFounderBookingNotification;
 use App\Notifications\TemplateEmail;
 use App\Schedule;
+use App\Services\TimezoneService;
 use App\Services\WhatsAppService;
 use App\Settings;
 use App\SurveyQuestions;
@@ -621,7 +622,10 @@ class MentorsController extends Controller
 					
 					$period = $request->period ?: Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
 
-					if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
+					// GV-9566: the slot is platform wall-clock; pass the instant (in that zone)
+					// so both the timestamp and the wall-clock comparisons in the check agree.
+					$slotZone = TimezoneService::platform($request->organization_id ? (int) $request->organization_id : null);
+					if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom, $slotZone), $period)) {
 						$recordFailure($date, $time_from, $time_to, __('api.max_concurrent_sessions_reached'));
 						continue;
 					}
@@ -657,7 +661,7 @@ class MentorsController extends Controller
 						}
 					}
 
-						if (Carbon::parse($date . ' ' . $time_from)->isPast()) {
+						if (Carbon::parse($date . ' ' . $time_from, $slotZone)->isPast()) {
 							$recordFailure($date, $time_from, $time_to, __('mentor.slot_in_past'));
 							continue;
 						}
@@ -673,8 +677,9 @@ class MentorsController extends Controller
 
 					$userid = $request->user_id;
 					$topic = "Online mentorship meeting (M{$request->mentorid}-U{$userid})";
-					$data = ['topic' => $topic, "start_time" => $date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
-					$onlineMeeting = $this->meetingService->createMeeting($data);
+					// GV-9566: the slot's date AND time -- the date alone booked Zoom at midnight.
+					$data = ['topic' => $topic, "start_time" => $date . ' ' . $time_from, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
+					$onlineMeeting = $this->meetingService->createMeeting($data + ['timezone' => $slotZone ?? null]);
 
 					if (!$onlineMeeting['success']) {
 						$recordFailure($date, $time_from, $time_to, __('mentor.meeting_creation_failed'));
@@ -787,7 +792,9 @@ class MentorsController extends Controller
 			// manages the program (cycle) the founder is currently enrolled in,
 			// the sub-admin(s) that organization is assigned to, and the
 			// platform's super admin(s). One role query covers both roles.
-			$rolesUsers = Role::_users(['organizationManager', 'admin'])->get();
+			// Role::_users() already returns a Collection; the trailing ->get() threw an
+			// ArgumentCountError on every founder self-booking (since GV-7173).
+			$rolesUsers = Role::_users(['organizationManager', 'admin']);
 			$orgManagers = $rolesUsers->filter(fn ($u) => $u->hasRole('organizationManager') && $u->organization_id == $cycle->organization_id);
 			$superAdmins = $rolesUsers->filter(fn ($u) => $u->hasRole('admin'));
 			$subAdmins = $cycle->organization->assignedUsers;
@@ -847,13 +854,15 @@ class MentorsController extends Controller
 				}
 			}
 				
-			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
+			// GV-9566: the slot is wall-clock in the program organization's platform zone.
+			$slotZone = TimezoneService::platform($cycle->organization_id ? (int) $cycle->organization_id : null);
+			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom, $slotZone), $period)) {
 				return back()->with(['class' => 'danger', 'msg' => __('api.max_concurrent_sessions_reached')]);
 			}
 
 			if ($request->mentorid) {
 				
-				if (Carbon::parse($request->date . ' ' . $request->session_start_time)->isPast()) {
+				if (Carbon::parse($request->date . ' ' . $request->session_start_time, $slotZone)->isPast()) {
 					return back()->with(['msg' => 'cannot_schedule_past_meeting']);
 				}
 				$fileName = '';
@@ -871,8 +880,9 @@ class MentorsController extends Controller
 				$approved = null;
 				$userid = Auth::id();
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $userid . ')';
-				$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
-				$onlineMeeting = $this->meetingService->createMeeting($data);
+				// GV-9566: the slot's date AND time -- the date alone booked Zoom at midnight.
+				$data = ['topic' => $topic, "start_time" => $request->date . ' ' . $request->session_start_time, 'duration' => $period, 'host_video' => 1, 'participant_video' => 1];
+				$onlineMeeting = $this->meetingService->createMeeting($data + ['timezone' => $slotZone ?? null]);
 				if (!$onlineMeeting['success']) {
 					return back()->with(['msg' => "meeting_error", 'class' => 'danger']);
 				}
@@ -980,14 +990,16 @@ class MentorsController extends Controller
 			foreach ($dates as $key) {
 				$date = ltrim($key);
 				
-				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($date)->timestamp, $request->period)) {
+				// GV-9566: typed slot is platform wall-clock.
+				$slotZone = TimezoneService::platform($request->organization_id ? (int) $request->organization_id : null);
+				if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($date, $slotZone), $request->period)) {
 					return back()->with(['message2' => __('api.max_concurrent_sessions_reached'), 'notAdd' => 2]);
 				}
 
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
 
-				$onlineMeeting = $this->meetingService->createMeeting($data);
+				$onlineMeeting = $this->meetingService->createMeeting($data + ['timezone' => $slotZone ?? null]);
 
 				if (!$onlineMeeting['success']) {
 					return back()->with(['message2' => "meeting_error"]);
@@ -1169,7 +1181,9 @@ class MentorsController extends Controller
 		
 		if ($request) {
 			
-			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($request->date)->timestamp, $request->period)) {
+			// GV-9566: the edited time is platform wall-clock of the session's organization.
+			$slotZone = TimezoneService::platform(MentorshipRequest::whereKey($request->id)->value('organization_id'));
+			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($request->date, $slotZone), $request->period)) {
 				return back()->with(['message2' => __('api.max_concurrent_sessions_reached')]);
 			}
 
@@ -1179,7 +1193,7 @@ class MentorsController extends Controller
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
 				
-				$onlineMeeting = $this->meetingService->createMeeting($data);
+				$onlineMeeting = $this->meetingService->createMeeting($data + ['timezone' => $slotZone ?? null]);
 				
 				if (!$onlineMeeting['success']) {
 					return back()->with(['message2' => "Error, can't create Online meeting"]);
@@ -1234,7 +1248,7 @@ class MentorsController extends Controller
 				// 	->get(['zoom_date as dfrom', 'period AS tfrom', DB::raw("(id + 1000000) AS id, 'Session' AS type, 'Mentorship session' AS notes")]);
 
                     $sessions = MentorshipRequest::where('mentor_id', $request->id)
-						->where('zoom_date', '>=', date("Y-m-d 00:00:00"))
+						->where('zoom_date', '>=', TimezoneService::platformToday() . ' 00:00:00')
 						->where('approved', 'Yes')
 						->get([
 							DB::raw("DATE(zoom_date) AS date"),
@@ -1633,18 +1647,22 @@ class MentorsController extends Controller
 		})->with(['mentor', 'user', 'user.company', 'cycle', 'orgnization'])->orderBy('created_at', 'DESC')->get();
 		$surveys = SurveyResponses::where('user_id', $user->id)->where('triggered_on', 'mentorship')->get();
 			
-		$now = date('Y-m-d H:i');
-		$mentorship_sessions = $mentorshipRequests->map(function ($session) use ( $surveys ) {
+		// GV-9566: the view compares $now with start_time/end_time as strings, so all
+		// three are read in ONE zone (global platform); zoom_date is the cast instant.
+		$platformZone = TimezoneService::platform();
+		$now = TimezoneService::platformNow($platformZone)->format('Y-m-d H:i');
+		$mentorship_sessions = $mentorshipRequests->map(function ($session) use ( $surveys, $platformZone, $user ) {
 			$survey = $surveys->get($session->id);
 			$_sesssion = new stdClass;
 			$_sesssion->id = $session->id;
-			$_sesssion->zoom_date = $session->zoom_date;
+			// Display only: shown in the mentor's own timezone.
+			$_sesssion->zoom_date = TimezoneService::forViewer($session->zoom_date, $user);
 			$_sesssion->period = $session->period;
 			if ($session->zoom_date) {
 				$meetingStatus = mentorshipMeetingStatus($session->zoom_date, $session->period);
 				$_sesssion->status = $meetingStatus === 'before' ? 'Upcoming' : ($meetingStatus === 'expired' ? 'Completed' : 'In-progress');
-				$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' -30 minutes'));
-				$_sesssion->end_time   = date('Y-m-d H:i', strtotime($session->zoom_date . ' +' . $session->period . ' minutes'));
+				$_sesssion->start_time = $session->zoom_date->copy()->subMinutes(30)->setTimezone($platformZone)->format('Y-m-d H:i');
+				$_sesssion->end_time   = $session->zoom_date->copy()->addMinutes((int) $session->period)->setTimezone($platformZone)->format('Y-m-d H:i');
 			} else {
 				$_sesssion->status     = 'Upcoming';
 				$_sesssion->start_time = null;
@@ -1727,7 +1745,8 @@ class MentorsController extends Controller
 				//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
 			$surveys = $availableSurveys->map(function ($survey) use (
 			$mentorshipRequests,
-			$surveyQuestionsCount
+			$surveyQuestionsCount,
+			$user
 		) {
 			$responses = json_decode($survey->responses, true) ?? [];
 			$totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
@@ -1771,7 +1790,7 @@ class MentorsController extends Controller
 				'session' => $mentorship
 					? (object)[
 						'id' => $mentorship->id,
-						'zoom_date' => $mentorship->zoom_date->format('Y-m-d H:i'),
+						'zoom_date' => TimezoneService::forViewer($mentorship->zoom_date, $user)->format('Y-m-d H:i'),
 					]
 					: null,
 			];
@@ -1842,7 +1861,8 @@ class MentorsController extends Controller
 			if ($startupUser && $startupUser->company) {
 				$founder = $startupUser->company->resolveUser();
 				if ($founder && $founder->id !== Auth::id()) {
-					$zoomDate = Carbon::parse($mentorshipRequest->zoom_date);
+					// GV-9566: shown in the founder's own timezone.
+					$zoomDate = TimezoneService::forViewer($mentorshipRequest->zoom_date, $founder);
 					$duration = $mentorshipRequest->period ?? 60;
 					$endDate = $zoomDate->copy()->addMinutes($duration);
 

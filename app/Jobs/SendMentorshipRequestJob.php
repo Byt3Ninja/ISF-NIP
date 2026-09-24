@@ -25,6 +25,7 @@ use App\Notifications\MentorNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipApprovalNotification;
 use App\Notifications\StartupNotifyMentorshipRejectionNotification;
+use App\Services\TimezoneService;
 
 class SendMentorshipRequestJob implements ShouldQueue
 {
@@ -90,24 +91,8 @@ class SendMentorshipRequestJob implements ShouldQueue
                 // $mentor->notify(new MentorshipRequestNotification($data));
                 $startupFullName_user = $startup->name;
 
-                $session_date = strtotime($session->zoom_date);
-                $start = Carbon::parse($session->zoom_date);
-                $end = $start->copy()->addMinutes($session->period);
-                $sessionDate = date('Y-m-d', $session_date);
-
-                $sessionTimeMentor = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp);
-                if( $mentorLocale == 'ar' )
-                {
-                    $sessionTimeMentor = str_replace('AM', 'صباحاً', $sessionTimeMentor);
-                    $sessionTimeMentor = str_replace('PM', 'مساءاً', $sessionTimeMentor);
-                }
-
-                $sessionTimeStartup = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp);
-                if( $startupLocale == 'ar' )
-                {
-                    $sessionTimeStartup = str_replace('AM', 'صباحاً', $sessionTimeStartup);
-                    $sessionTimeStartup = str_replace('PM', 'مساءاً', $sessionTimeStartup);
-                }
+                [$sessionDateMentor, $sessionTimeMentor] = $this->sessionWindowFor($session->zoom_date, $session->period, $session->organization_id, $mentor, $mentorLocale);
+                [$sessionDateStartup, $sessionTimeStartup] = $this->sessionWindowFor($session->zoom_date, $session->period, $session->organization_id, $startup, $startupLocale);
 
                 // ======> notify Mentor <=================
                 $mentorMessage = [
@@ -118,7 +103,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                         : __("messages.denied_message", ['other_party' => $startupFullName_user], $mentorLocale),
                     "/dashboard",
                     $this->stat == 'Yes'
-                        ? __("messages.mentorship_session_notification_message", ['name' => $startupFullName_user, 'session_date' => $sessionDate, 'session_time' => $sessionTimeMentor], $mentorLocale)
+                        ? __("messages.mentorship_session_notification_message", ['name' => $startupFullName_user, 'session_date' => $sessionDateMentor, 'session_time' => $sessionTimeMentor], $mentorLocale)
                         : __("messages.mentorship_session_action", ['action' => __('messages.Rejected', [], $mentorLocale), 'name' => $startupFullName_user], $mentorLocale),
                 ];
                 // Atomically claim the "notify mentor of booked session" step so a
@@ -143,7 +128,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                     __("messages.dear", ['name' => $startupFullName_user], $startupLocale),
                     __("messages.approved_message", ['other_party' => $mentorFullName], $startupLocale),
                     "/dashboard",
-                    __("messages.mentorship_session_notification_message", ['name' => $mentorFullName, 'session_date' => $sessionDate, 'session_time' => $sessionTimeStartup], $startupLocale),
+                    __("messages.mentorship_session_notification_message", ['name' => $mentorFullName, 'session_date' => $sessionDateStartup, 'session_time' => $sessionTimeStartup], $startupLocale),
                 ];
                 // Atomically claim the "notify founder of scheduled session" step
                 // so a retry of this job never double-emails the founder.
@@ -186,16 +171,8 @@ class SendMentorshipRequestJob implements ShouldQueue
             $session = MentorshipRequest::with('cycle', 'orgnization')->find($this->id);
             $is_hackathon = $session && $session->cycle ? (strtolower($session->cycle->type) === 'hackathon') : false;
 
-            $session_date = strtotime($this->date);
-            $start = Carbon::parse($this->date);
-            $end = $start->copy()->addMinutes($this->period ?? 60);
-            $sessionDate = date('Y-m-d', $session_date);
-            
-            $sessionTime = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp) . ' (AM/PM)';
-            if ($mentorLocale == 'ar') {
-                $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
-                $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
-            }
+            $sessionOrganizationId = $session->organization_id ?? null;
+            [$sessionDate, $sessionTime] = $this->sessionWindowFor($this->date, $this->period ?? 60, $sessionOrganizationId, $mentor, $mentorLocale, ' (AM/PM)');
 
             $user = new User();
             $user->email = $mentor->email;
@@ -237,7 +214,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
                 $Massage = "Dear " . $mentor_name . ", 
                 This Is notification new mentorship session with '" . $startup_owner_name . "',
-                Session will start:" . $this->date . ",
+                Session will start:" . $this->sessionStartFor($this->date, $sessionOrganizationId, $startup_owner) . ",
                 Check your account to join the session ";
                 $whatsAppService = app()->make(\App\Services\WhatsAppService::class);
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -256,7 +233,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'mentorName' => $mentor_name,
                 'startupOwnerName' => $startup_owner_name,
                 'startupName' => $startup_owner->company->name_en ?? '',
-                'sessionDate' => $this->date,
+                'sessionDate' => $this->sessionStartFor($this->date, $sessionOrganizationId, $startup_owner),
                 'duration' => $this->period ?? '60 min',
                 'sessionType' => $this->onlineMeeting ? 'Online' : 'Offline',
                 'meetingLink' => $this->onlineMeeting['data']['join_url'] ?? '',
@@ -282,7 +259,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
                 $Massage = "Dear " . $startup_owner->name . ",
                 This Is notification new mentorship session with '" . $startup_owner_name . "',
-                Session will start: " . $this->date . ",
+                Session will start: " . $this->sessionStartFor($this->date, $sessionOrganizationId, $startup_owner) . ",
                 Session Link: " . ($this->onlineMeeting['data']['join_url'] ?? '') . ",
                 Thanks from " . env('APP_NAME');
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -313,16 +290,7 @@ class SendMentorshipRequestJob implements ShouldQueue
 
             $is_hackathon = $session->cycle ? (strtolower($session->cycle->type) === 'hackathon') : false;
 
-            $session_date = strtotime($session->zoom_date);
-            $start = Carbon::parse($session->zoom_date);
-            $end = $start->copy()->addMinutes($session->period ?? 60);
-            $sessionDate = date('Y-m-d', $session_date);
-            
-            $sessionTime = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp) . ' (AM/PM)';
-            if ($mentorLocale == 'ar') {
-                $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
-                $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
-            }
+            [$sessionDate, $sessionTime] = $this->sessionWindowFor($session->zoom_date, $session->period ?? 60, $session->organization_id, $rName, $mentorLocale, ' (AM/PM)');
 
             $mentorMessage =[
                 'subject' => $mentorSubject,
@@ -372,7 +340,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
                 $Massage = "Dear " . $rName->name . ",
 				you have a new mentorship session with '" . $rFullName . "',
-				Session will start:" . $this->date . ",
+				Session will start:" . $this->sessionStartFor($this->date, $session->organization_id, $rName) . ",
 				Check your account to join the session,
 				Thanks from " . env('APP_NAME');
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -383,11 +351,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             $user->email = $rName_usr->email;
             $user->id = $rName_usr->id;
             $userSubject = $userLocale === 'ar' ? "جلسة إرشاد مع {$rFullName}." : "Mentorship Session with {$rFullName}.";
-            $userSessionTime = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp) . ' (AM/PM)';
-            if ($userLocale == 'ar') {
-                $userSessionTime = str_replace('AM', 'صباحاً', $userSessionTime);
-                $userSessionTime = str_replace('PM', 'مساءاً', $userSessionTime);
-            }
+            [$userSessionDate, $userSessionTime] = $this->sessionWindowFor($session->zoom_date, $session->period ?? 60, $session->organization_id, $rName_usr, $userLocale, ' (AM/PM)');
 
             $message = [
                 'subject' => $userSubject,
@@ -395,7 +359,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'mentorName' => $rFullName,
                 'startupOwnerName' => $rFullName_usr,
                 'startupName' => $session->user->company->name_en ?? '',
-                'sessionDate' => $sessionDate,
+                'sessionDate' => $userSessionDate,
                 'sessionTime' => $userSessionTime,
                 'duration' => $session->period ?? '60 min',
                 'sessionType' => $session->session_type ?? 'Online',
@@ -457,7 +421,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
                 $Massage = "Dear " . $rName_usr->name . ",
 				you have a new mentorship session with '" . $rFullName . "',
-				Session will start:" . $this->date . ",
+				Session will start:" . $this->sessionStartFor($this->date, $session->organization_id, $rName_usr) . ",
 				Check your account to join the session,
 				Thanks from " . env('APP_NAME');
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -582,5 +546,44 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $this->stat
             ));
         }
+    }
+
+    /**
+     * The session's date and "h:i A – h:i A" window as $recipient should read it:
+     * the platform wall-clock converted to their own timezone (GV-9566).
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function sessionWindowFor($startsAt, $period, $organizationId, $recipient, string $locale, string $suffix = ''): array
+    {
+        $start = $this->sessionStartInstant($startsAt, $organizationId, $recipient);
+
+        if (is_null($start)) {
+            return ['', ''];
+        }
+
+        $time = $start->format('h:i A') . ' – ' . $start->copy()->addMinutes((int) $period)->format('h:i A') . $suffix;
+
+        if ($locale == 'ar') {
+            $time = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $time);
+        }
+
+        return [$start->format('Y-m-d'), $time];
+    }
+
+    /** "Y-m-d H:i" of the session start in $recipient's own timezone (GV-9566). */
+    private function sessionStartFor($startsAt, $organizationId, $recipient): string
+    {
+        $start = $this->sessionStartInstant($startsAt, $organizationId, $recipient);
+
+        return $start ? $start->format('Y-m-d H:i') : (string) $startsAt;
+    }
+
+    private function sessionStartInstant($startsAt, $organizationId, $recipient): ?Carbon
+    {
+        return TimezoneService::forViewer(
+            TimezoneService::wallClock($startsAt, TimezoneService::platform($organizationId ? (int) $organizationId : null)),
+            $recipient
+        );
     }
 }

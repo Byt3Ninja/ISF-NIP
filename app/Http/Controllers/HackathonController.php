@@ -13,6 +13,7 @@ use App\Company;
 use App\Formfield;
 use App\Messenger;
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use App\Team_member;
 use App\Conversation;
 use App\ProjectLikes;
@@ -232,12 +233,9 @@ class HackathonController extends Controller
             ]];
         });
         $hackathons = $hackathons_raw->map(function ($item, $key) use ($step, $team_formation) {
-        $now = now();
         $start = \Carbon\Carbon::parse($item->c_start_date);
         $end = \Carbon\Carbon::parse($item->c_end_date);
-        $status = $now->lt($start)
-            ? 'Upcoming'
-            : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
+        $status = self::dateWindowStatus($start, $end, $item->o_id);
 
             return [
                 'id' => $item->c_id,
@@ -803,13 +801,10 @@ class HackathonController extends Controller
         if( $hackathons_raw->isNotEmpty() )
         {
             $item = $hackathons_raw->first();
-            $now = now();
             $start = Carbon::parse($item->c_start_date);
             $end = Carbon::parse($item->c_end_date);
 
-            $status = $now->lt($start)
-                ? 'Upcoming'
-                : ($now->between($start, $end) ? 'Ongoing' : 'Finished');
+            $status = self::dateWindowStatus($start, $end, $item->o_id);
 
             $status_ar = match($status) {
                 'Upcoming' => 'قادم',
@@ -1152,9 +1147,11 @@ class HackathonController extends Controller
             $steps = $company?->cycledata?->steps;
             if( !empty( $steps ) )
             {
-                $now = time();
-                $steps_ids = $steps->filter(function ($step) use ($now) {
-					return $step->from->timestamp <= $now && $step->to->timestamp >= $now;
+                // GV-9566: step dates are inclusive days in the program's platform zone.
+                $today = TimezoneService::platformToday(TimezoneService::platform($company->cycledata->organization_id));
+                $steps_ids = $steps->filter(function ($step) use ($today) {
+					return $step->from && $step->to
+						&& $step->from->format('Y-m-d') <= $today && $step->to->format('Y-m-d') >= $today;
 				})->values()->pluck('id')->toArray();
             }
             $sessions = DB::table('training_sessions AS ts')
@@ -1296,7 +1293,8 @@ class HackathonController extends Controller
         $finishedHackathon = [];
         $hackathonCycle = Cycle::find($id);
 
-        if($hackathonCycle && $hackathonCycle->end && $hackathonCycle->end < now()){
+        // GV-9566: finished once its last day has passed in the platform zone.
+        if($hackathonCycle && $hackathonCycle->is_expired){
             $finishedHackathon['id'] = $hackathonCycle->id;
             $finishedHackathon['title'] = $hackathonCycle->title;
             $finishedHackathon['description'] = $hackathonCycle->description;
@@ -1323,8 +1321,9 @@ class HackathonController extends Controller
                 : \Carbon\Carbon::parse($data_evi['end']);
         }
         
-        $now = \Carbon\Carbon::now();
-        $isOpen = $start && $end && $now->between($start, $end);
+        // GV-9566: step dates are inclusive days in the program's platform zone.
+        $isOpen = $start && $end
+            && self::dateWindowStatus($start, $end, $hackathonCycle?->organization_id) === 'Ongoing';
 
         return view('admin.hackathon.hackathon-details', compact(
             'pages',
@@ -3110,6 +3109,19 @@ class HackathonController extends Controller
         return view('admin.hackathon.admin.dashboard_admin', compact('teams', 'step', 'data', 'nextSessions', 'cType'));
     }
 
+    /**
+     * GV-9566: status of a window whose start/end are inclusive DATE days in the
+     * platform zone. Comparing now() with their midnights ended it on its last morning.
+     */
+    private static function dateWindowStatus($start, $end, $organizationId = null): string
+    {
+        $today = TimezoneService::platformToday(TimezoneService::platform($organizationId ? (int) $organizationId : null));
+        $start = Carbon::parse($start)->format('Y-m-d');
+        $end = Carbon::parse($end)->format('Y-m-d');
+
+        return $today < $start ? 'Upcoming' : ($today <= $end ? 'Ongoing' : 'Finished');
+    }
+
     public function viewHackathonWinners( $id )
     {
         $l = app()->getLocale();
@@ -3119,10 +3131,9 @@ class HackathonController extends Controller
         $teams = TeamFormation::teams( $id );
         $winnersData = TeamFormation::winners( $teams );
 
-        $now = now();
         $start = Carbon::parse($cycle->start);
         $end = Carbon::parse($cycle->end);
-        $status = $now->lt($start) ? 'Upcoming' : ( $now->between($start, $end) ? 'Ongoing' : 'Finished' );
+        $status = self::dateWindowStatus($start, $end, $cycle->organization_id);
         $status_ar = match($status) {
             'Upcoming' => 'قادم',
             'Ongoing' => 'قائم',

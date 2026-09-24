@@ -137,11 +137,14 @@
 					</div>
 					<div class="card-body">
 						<div class="step-timeline">
+							@php
+								// GV-9566: steps.from/to are inclusive DATEs in the organization's platform zone.
+								$platformToday = \App\Services\TimezoneService::platformToday(\App\Services\TimezoneService::platform($cycle->organization_id ?? null));
+							@endphp
 							@foreach($cycle->steps as $index => $step)
 								@php
-									$now = now();
-									$isActive = $step->from && $step->to && $now->between($step->from, $step->to);
-									$isPast = $step->to && $now->gt($step->to);
+									$isActive = $step->from && $step->to && $step->from->toDateString() <= $platformToday && $platformToday <= $step->to->toDateString();
+									$isPast = $step->to && $step->to->toDateString() < $platformToday;
 								@endphp
 									<div class="step-item {{ $isActive ? 'active' : ($isPast ? 'completed' : '') }}">
 										<div class="d-flex justify-content-between align-items-start">

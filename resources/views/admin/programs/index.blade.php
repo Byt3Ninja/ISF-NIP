@@ -90,9 +90,12 @@
           @php
             $totalSteps = $cycle->steps->count();
 
+            // GV-9566: a step is finished once its last (inclusive) day has passed
+            // in the program's platform zone.
+            $cycleToday = \App\Services\TimezoneService::platformToday(\App\Services\TimezoneService::platform($cycle->organization_id));
             $totalStepsFinish = $cycle->steps
-              ->where('from', '<=', Carbon\Carbon::now())
-              ->where('to', '<=', Carbon\Carbon::now())
+              ->filter(fn ($s) => $s->from && $s->to
+                && $s->from->format('Y-m-d') <= $cycleToday && $s->to->format('Y-m-d') < $cycleToday)
               ->count();
             $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
           @endphp

@@ -6,7 +6,6 @@ use Tests\TestCase;
 use App\User;
 use App\Company;
 use App\StartupCustomerGrowth;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class StartupCustomerGrowthTest extends TestCase
 {

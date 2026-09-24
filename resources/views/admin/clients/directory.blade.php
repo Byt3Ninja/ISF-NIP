@@ -209,8 +209,8 @@
     $('#date').flatpickr({
       enableTime: true,
       dateFormat: "Y-m-d H:i",
-      minDate: "{{ date('Y-m-d H:i', strtotime('+1 hour')) }}", // Minimum date is 1 hour from now
-      maxDate: "{{ date('Y-m-d H:i', strtotime('+1 year')) }}", // Maximum date is 1 year from now
+      minDate: "{{ \App\Services\TimezoneService::platformNow()->addHour()->format('Y-m-d H:i') }}", // Minimum date is 1 hour from now
+      maxDate: "{{ \App\Services\TimezoneService::platformNow()->addYear()->format('Y-m-d H:i') }}", // Maximum date is 1 year from now
       // time_24hr: true,
     });
 

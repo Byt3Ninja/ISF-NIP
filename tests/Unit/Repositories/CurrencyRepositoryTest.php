@@ -5,11 +5,9 @@ namespace Tests\Unit\Repositories;
 use Tests\TestCase;
 use App\Repositories\CurrencyRepository;
 use App\Currency;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CurrencyRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected CurrencyRepository $currencyRepository;
 

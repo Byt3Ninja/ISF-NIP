@@ -9,12 +9,10 @@ use App\Step;
 use App\SessionAttendance;
 use App\SessionRecording;
 use App\SessionReport;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Carbon\Carbon;
 
 class TrainingSessionModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_can_belong_to_training()

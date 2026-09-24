@@ -26,6 +26,7 @@ use App\Factories\OnlineMeetingFactory;
 use App\Services\JudgeScheduleConflictService;
 use App\Services\PanelWindowService;
 use App\Services\ScreeningSlotService;
+use App\Services\TimezoneService;
 use App\Services\WhatsAppService;
 use App\Step;
 use App\User;
@@ -87,7 +88,8 @@ class ScreeningController extends Controller
 
 		if( $request->filled('status') && $request->input('status', 'all') != 'all')
 		{
-			$today = now()->toDateString();
+			// GV-9566: step DATE columns vs the platform zone's today, not the server's.
+			$today = TimezoneService::platformToday();
 			switch ($request->status)
 			{
 				case 'upcoming':
@@ -336,8 +338,7 @@ class ScreeningController extends Controller
 					// preserved as a record of what actually took place. Derived from
 					// the saved row (not request input), so it cannot be spoofed.
 					'is_history' => PanelWindowService::isPast(
-						PanelWindowService::fromScreening($screening),
-						auth()->user()
+						PanelWindowService::fromScreening($screening)
 					),
 					// The panel number this record is STORED under. The view's loop
 					// index is not the same thing once panels have been deleted, so
@@ -584,7 +585,7 @@ class ScreeningController extends Controller
 				continue;
 			}
 
-			if (!PanelWindowService::isPast(PanelWindowService::fromScreening($saved), auth()->user())) {
+			if (!PanelWindowService::isPast(PanelWindowService::fromScreening($saved))) {
 				continue;
 			}
 
@@ -683,8 +684,8 @@ class ScreeningController extends Controller
 				continue;
 			}
 
-			$window = PanelWindowService::fromInput($panel);
-			if (!$window || !PanelWindowService::startsInPast($window, auth()->user())) {
+			$window = PanelWindowService::fromInput($panel, TimezoneService::forStep($stepId));
+			if (!$window || !PanelWindowService::startsInPast($window)) {
 				continue;
 			}
 
@@ -886,6 +887,8 @@ class ScreeningController extends Controller
 						'duration' => $duration,
 						'host_video' => 1,
 						'participant_video' => 1,
+						// GV-9566: booked in the step's platform zone, the zone the panel was typed in.
+						'timezone' => TimezoneService::forStep($stepId),
 					]);
 
 					if (!empty($meetingResult['success']) && !empty($meetingResult['data'])) {
@@ -1360,7 +1363,7 @@ class ScreeningController extends Controller
         // — this endpoint takes a panel number straight from the request, so the
         // rule has to be enforced here too.
         $existing = Screening::where('step_id', $stepId)->where('panel', $panelIdx)->first();
-        if ($existing && PanelWindowService::isPast(PanelWindowService::fromScreening($existing), auth()->user())) {
+        if ($existing && PanelWindowService::isPast(PanelWindowService::fromScreening($existing))) {
             return response()->json([
                 'success' => false,
                 'message' => __('admin.screening.panel_history_cannot_delete'),

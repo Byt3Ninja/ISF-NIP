@@ -47,6 +47,7 @@ use Illuminate\Http\Request;
 use App\StartupCustomerGrowth;
 use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
+use App\Services\TimezoneService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -286,7 +287,8 @@ class ClientCompanyController extends Controller
             // The company is still assigned to this cycle (hasn't moved to Almuni yet),
             // so it can only be 'upcoming' or 'ongoing' here — never 'completed'.
             // A cycle's calendar end date passing doesn't mean this company finished it.
-            $cycleStatus = ($startDate && Carbon::now()->lessThan($startDate)) ? 'upcoming' : 'ongoing';
+            // GV-9566: `start` is a day in the program's platform zone.
+            $cycleStatus = ($startDate && TimezoneService::platformToday(TimezoneService::platform($cycle->organization_id)) < $startDate->format('Y-m-d')) ? 'upcoming' : 'ongoing';
 
             $custom_form = $cycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
             $submissions = Formdata::where('company_id', $company?->id)->where('step_id', $custom_form?->id)->orderBy('created_at', 'asc')->first();

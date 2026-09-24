@@ -5,6 +5,7 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Services\TimezoneService;
 
 class MentorshipSessionFounderBookingNotification extends Notification implements ShouldQueue
 {
@@ -50,11 +51,15 @@ class MentorshipSessionFounderBookingNotification extends Notification implement
         $locale = $notifiable->language ?: 'en';
         app()->setLocale($locale);
 
+        // GV-9566: platform wall-clock, shown in the founder's own timezone.
+        $start = TimezoneService::wallClockForViewer($this->sessionDate, $this->startTime, $notifiable);
+        $end = TimezoneService::wallClockForViewer($this->sessionDate, $this->endTime, $notifiable);
+
         $message = __('notifications.mentorship_session.founder_booking', [
             'mentor_name' => $this->mentorName,
-            'session_date' => $this->sessionDate,
-            'start_time' => $this->startTime,
-            'end_time' => $this->endTime,
+            'session_date' => $start['date'],
+            'start_time' => $start['time'],
+            'end_time' => $end['time'],
         ]);
 
         app()->setLocale($oldLocale);
