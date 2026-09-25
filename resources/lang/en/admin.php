@@ -1709,6 +1709,7 @@ return [
 	'Good Performance' => 'Good Performance',
 	'Needs Improvement' => 'Needs Improvement',
 	'Not Evaluated' => 'Not Evaluated',
+	'Not scored' => 'Not scored',
 	'awaiting_evaluation' => 'Awaiting evaluation',
 	'Min Rating' => 'Min Rating',
 	'Min Progress' => 'Min Progress',

@@ -355,13 +355,24 @@
               <div class="row mb-6">
                 @foreach( $evaluationForm->categories as $key => $criteria )
                 <div class="col-6 col-md-3 pb-3">
+                  @php
+                    $subCriteriaCount = $criteria->subCriteria->count();
+                    $scoredCount = $criteria->subCriteria->filter(function ($subCriteria) {
+                      return $subCriteria?->result?->score !== null && $subCriteria?->result?->score !== '';
+                    })->count();
+                    // An unscored (or empty) category has no meaningful percentage,
+                    // so it's shown as "not scored" instead of NaN / a division by zero.
+                    $categoryPercentage = ($subCriteriaCount > 0 && $scoredCount === $subCriteriaCount)
+                      ? number_format(($criteria->subCriteria->sum(function ($subCriteria) { return (float) $subCriteria?->result?->score; }) / ($subCriteriaCount * 10)) * 100, 2)
+                      : null;
+                  @endphp
                   <div id="category-{{ $criteria->id }}" class="d-flex flex-column h-100 border border-dark rounded px-3 py-2">
                     <h6 class="mb-1 text-secondary fw-semibold">{{ $criteria->name }}</h6>
                     <div class="d-flex justify-content-between align-items-center mt-auto">
                       <span class="fs-5 fw-bold mb-0 text-dark percentage">
-                        {{ number_format( ($criteria->subCriteria->sum(function($subCriteria) { return $subCriteria->result->score; }) / ($criteria->subCriteria->count() * 10)) * 100, 2) }}
+                        {{ $categoryPercentage ?? __('admin.Not scored') }}
                       </span>
-                      <span class="fs-5 fw-bold text-primary mb-0">%</span>
+                      <span class="fs-5 fw-bold text-primary mb-0 percentage-suffix" @if (is_null($categoryPercentage)) style="display: none;" @endif>%</span>
                     </div>
                   </div>
                 </div>
@@ -418,14 +429,26 @@
     });
 
     $(document).on('click', '#pills-view-evaluation-tab', function() {
+      var notScoredLabel = '{{ __('admin.Not scored') }}';
       $.each(categories, function(index, category) {
         var totalScore = 0;
+        var hasUnscoredCriteria = false;
         $.each(category.subCriteria, function(index, subCriteria) {
-          totalScore += parseInt( $("#score_" + subCriteria.id).val() );
+          // An unselected score is an empty string, which parseInt() turns into
+          // NaN and would poison the category total, so it is tracked instead.
+          var score = parseInt( $("#score_" + subCriteria.id).val(), 10);
+          if (isNaN(score)) {
+            hasUnscoredCriteria = true;
+          } else {
+            totalScore += score;
+          }
           $("#comment_summary_" + category.id + "_" + subCriteria.id).html( $("#comment_" + subCriteria.id).val() );
         });
-        var percentage = (totalScore / (category.subCriteria.length * 10)) * 100;
-        $("#category-" + category.id ).find('.percentage').html( percentage.toFixed(2) );
+        var maxScore = (category.subCriteria || []).length * 10;
+        var $category = $("#category-" + category.id);
+        var isScored = !hasUnscoredCriteria && maxScore > 0;
+        $category.find('.percentage').text( isScored ? ((totalScore / maxScore) * 100).toFixed(2) : notScoredLabel );
+        $category.find('.percentage-suffix').toggle( isScored );
       });
       $("#final_comments_summary").html( $("#final_comments").val() );
     });

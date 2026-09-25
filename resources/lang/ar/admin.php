@@ -1717,6 +1717,7 @@ return [
 	'Good Performance' => 'أداء جيد',
 	'Needs Improvement' => 'يحتاج إلى تحسين',
 	'Not Evaluated' => 'لم يتم التقييم',
+	'Not scored' => 'لم يتم التقييم',
 	'awaiting_evaluation' => 'في انتظار التقييم',
 	'Min Rating' => 'أقل تقييم',
 	'Min Progress' => 'أقل تقدم',
