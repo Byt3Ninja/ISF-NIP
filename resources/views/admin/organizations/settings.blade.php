@@ -136,7 +136,11 @@
                         @include('partials.forms.whatsapp-settings-form')
                         @break
                       @case('smtp')
-                        @include('admin.organizations.partials.smtp')
+                        @if ($emailConfig)
+                          @include('partials.forms.email-configuration')
+                        @else
+                          <div class="alert alert-warning mb-0">{{ __('settings.no_organization_linked') }}</div>
+                        @endif
                         @break
                       @case('notifications')
                         @include('admin.organizations.partials.notifications')

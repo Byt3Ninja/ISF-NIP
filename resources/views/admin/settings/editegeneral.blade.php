@@ -122,7 +122,7 @@ $tabs = collect([
               @include('partials.forms.analysis-settings-form')
               @break
               @case('SMTP')
-              @include('partials.forms.SMTP-configuration-form')
+              @include('partials.forms.email-configuration')
               @break
               @case('app-identity')
               @include('partials.forms.app-identity-form')

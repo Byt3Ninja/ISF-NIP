@@ -68,6 +68,42 @@
                 ]
             },
             {
+                "name": "settings.system_mail_test",
+                "description": "Send Test Email With Mail Settings",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_mail_resend_connect",
+                "description": "Connect Resend API Key",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_mail_resend_domain",
+                "description": "Add Resend Domain",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_mail_resend_test",
+                "description": "Send Resend Test Email To Connect",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "settings.system_push_notifications_update",
                 "description": "Update Push Notification Settings",
                 "guard_name": "web",
@@ -8687,6 +8723,46 @@
             {
                 "name": "settings.organization.smtp_update",
                 "description": "Update Email Configuration",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "settings.organization.smtp_test",
+                "description": "Send Test Email With Email Configuration",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "settings.organization.resend_connect",
+                "description": "Connect Resend API Key",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "settings.organization.resend_domain",
+                "description": "Add Resend Domain",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "settings.organization.resend_test",
+                "description": "Send Resend Test Email To Connect",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

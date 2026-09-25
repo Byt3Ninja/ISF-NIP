@@ -26,8 +26,8 @@ return [
                 ],
             ],
         ],
-        'gmail' => [
-            'transport' => 'gmail',
+        'resend' => [
+            'transport' => 'resend',
         ],
 
         'ses' => [
