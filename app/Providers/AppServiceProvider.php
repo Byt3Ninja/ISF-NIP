@@ -16,7 +16,9 @@ use App\Observers\WireChatMessageObserver;
 use Namu\WireChat\Models\Message;
 use App\Services\BreadcrumbService;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\GmailTransport;
+use App\Services\TenantMailer;
+use Resend;
+use Resend\Laravel\Transport\ResendTransportFactory;
 use App\Repositories\SettingRepository;
 use App\AttendanceTrainingOffline;
 use App\ServicesRequests;
@@ -47,16 +49,16 @@ class AppServiceProvider extends ServiceProvider
                 $settings = Settings::find(1);
 
                 if ($settings) {
-                    if ($settings->email_provider === 'resend' && $settings->resend_api_key) {
+                    if (TenantMailer::resendConnected($settings)) {
                         $data = [
                             'transport' => 'resend',
                             'api_key' => $settings->resend_api_key,
-                            'from_address' => $settings->Mail ?? config('mail.from.address'),
-                            'from_name' => $settings->title ?? config('mail.from.name', 'Your App Name'),
+                            'from_address' => $settings->resend_from_address,
+                            'from_name' => $settings->resend_from_name ?: ($settings->title ?? config('mail.from.name')),
                         ];
                         MailConfig::set($data);
                     } else {
-                        Config::set('mail.default', $settings?->email_provider ?? 'smtp');
+                        Config::set('mail.default', 'smtp');
                         Config::set('mail.mailers.smtp.host', $settings->host ?? env('MAIL_HOST'));
                         Config::set('mail.mailers.smtp.port', $settings->Port ?? env('MAIL_PORT'));
                         Config::set('mail.mailers.smtp.username', $settings->Mail ?? env('MAIL_USERNAME'));
@@ -83,10 +85,13 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        Mail::extend('gmail', function () {
-            return new GmailTransport(
-                config('mail.mailers.smtp.username') ?? env('MAIL_USERNAME'),
-                config('mail.mailers.smtp.password') ?? env('MAIL_PASSWORD')
+        // resend-laravel builds its transport from a container singleton, so a
+        // key changed at runtime (MailConfig::set) would never be picked up.
+        // Build the client from the current config for every fresh mailer.
+        Mail::extend('resend', function (array $config = []) {
+            return new ResendTransportFactory(
+                Resend::client((string) config('resend.api_key')),
+                $config['options'] ?? []
             );
         });
         view()->composer('*', function ($view) use (&$settings) {
