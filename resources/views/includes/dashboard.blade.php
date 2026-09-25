@@ -20,6 +20,12 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+<style>
+	/* GV-9570: Responsive's child-row list is inline-block, so it shrank to its
+	   content and its dividers stopped short of the card on phones. */
+	table.dataTable > tbody > tr.child ul.dtr-details { display: block; width: 100%; }
+	table.dataTable > tbody > tr.child ul.dtr-details > li.dtr-hide-title > .dtr-title { display: none; }
+</style>
 @stop
 @section('content')
 @if (!$_user->first_name_ar)
@@ -619,9 +625,10 @@
 											<tr>
 												<td>
 													<div class="d-flex align-items-center">
-														<a class="media-left" href="/dashboard/users/{{ $final->company->user->id }}/edit">
-															<img src="{{ $final->company->user->image_url }}" alt="avatar"
-																class="rounded-circle me-3" height="40" width="40">
+														<a class="media-left flex-shrink-0" href="/dashboard/users/{{ $final->company->user->id }}/edit">
+															<img src="{{ $final->company->user->image_url }}" alt=""
+																onerror="this.onerror=null;this.src='/images/user-placeholder.jpeg'"
+																class="rounded-circle object-fit-cover me-3" height="40" width="40">
 														</a>
 														<a href="/dashboard/users/{{ $final->company->user->id }}/edit">
 															<div class="media-body">
@@ -744,9 +751,10 @@
 											<tr>
 												<td>
 													<div class="d-flex align-items-center">
-														<a class="media-left" href="/dashboard/users/{{ $_user->id }}/edit">
-															<img src="{{ $_user->image_url }}" alt="avatar"
-																class="rounded-circle me-3" height="40" width="40">
+														<a class="media-left flex-shrink-0" href="/dashboard/users/{{ $_user->id }}/edit">
+															<img src="{{ $_user->image_url }}" alt=""
+																onerror="this.onerror=null;this.src='/images/user-placeholder.jpeg'"
+																class="rounded-circle object-fit-cover me-3" height="40" width="40">
 														</a>
 														<a href="/dashboard/users/{{ $_user->id }}/edit">
 															<div class="media-body">
@@ -895,9 +903,9 @@
 						<div class="col-md-12">
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<div class="d-flex justify-content-between align-items-center">
+									<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 										<h5 class="card-title mb-0">{{ __("dashboard.UpcomingMentorsSession") }} <small class="text-muted"> ( {{ __('dashboard.next_two_weeks') }} ) </small> </h5>
-										<a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
+										<a class="btn btn-sm btn-primary text-nowrap" href="/dashboard/mentorship/mine">
 											<i class="ti ti-eye me-2 ti-16px"></i>
 											{{__('cycles.showAll')}}
 										</a>
@@ -1585,15 +1593,15 @@
 		</div>
 		
 		<div class="row">
-			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions) && $notrated_mens)
+			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions) && $notrated_mens->isNotEmpty() )
 			<div class="col-12">
 				<div class="card mb-6">
 					<div class="card-header border-bottom d-flex justify-content-between align-items-center">
 						<h5 class="card-title mb-0">
-							{{__('dashboard.Rate mentorship session with')}}
-							<span class="fw-bold">
-								{{$notrated_men->{'first_name_'.$l} ?? '' }} {{$notrated_men->{'last_name_'.$l} ?? ''}}
-							</span>
+							{{-- GV-9570: the header used to append $notrated_men's name, but that is only
+								 defined inside the row loop below, so the title always ended in a dangling
+								 "with". Each row already names its mentor. --}}
+							{{ __('dashboard.Rate your mentorship sessions') }}
 						</h5>
 					</div>
 					<div class="card-datatable table-responsive">
@@ -1611,56 +1619,63 @@
 							<tbody>
 								@foreach ($notrated_mens as $notrated_men)
 								<tr class="border-bottom">
-									<form method="post" action="/dashboard/mentorship/rate" enctype="multipart/form-data" autocomplete="off"
-										class="row g-3">
-										@csrf
-										<input type="hidden" name="id" value="{{$notrated_men->mr_id}}">
-										<input type="hidden" name="rate" value="0" id="rate">
-										<td class="align-middle">
-											<div class="d-flex align-items-center">
-												<div
-													class="avatar avatar-sm me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center">
-													<span class="text-white fw-bold">{{substr($notrated_men->{'MentorName_'.$l}, 0, 1)}}</span>
-												</div>
-												<div>
-													<p class="mb-0 fw-semibold">{{$notrated_men->{'MentorName_'.$l} }}</p>
-													<small class="text-muted">ID: {{ $notrated_men->mr_id }}</small>
-												</div>
+									{{-- GV-9570: a <form> can't sit directly in a <tr> -- the parser empties it
+										 and its fields only attach by accident, so once Responsive moves them
+										 into the mobile child row, Submit posts nothing. The form now lives in
+										 the first cell and every field joins it through form="". --}}
+									<td class="align-middle">
+										<form id="rateForm-{{ $notrated_men->mr_id }}" method="post" action="/dashboard/mentorship/rate"
+											enctype="multipart/form-data" autocomplete="off">
+											@csrf
+											<input type="hidden" name="id" value="{{$notrated_men->mr_id}}">
+											<input type="hidden" name="rate" value="0" id="rate-{{ $notrated_men->mr_id }}">
+										</form>
+										<div class="d-flex align-items-center">
+											<div
+												class="avatar avatar-sm me-2 flex-shrink-0 bg-primary rounded-circle d-flex align-items-center justify-content-center">
+												<span class="text-white fw-bold">{{ mb_substr($notrated_men->{'MentorName_'.$l}, 0, 1) }}</span>
 											</div>
-										</td>
-										<td class="align-middle">
-											<div class="d-flex align-items-center">
-												<i class="bx bx-time-five me-2 text-muted"></i>
-												<span>{{$notrated_men->zoom_date}}</span>
+											<div>
+												<p class="mb-0 fw-semibold">{{$notrated_men->{'MentorName_'.$l} }}</p>
+												<small class="text-muted">ID: {{ $notrated_men->mr_id }}</small>
 											</div>
-										</td>
-										<td class="align-middle">
-											<div class="form-check form-check-inline">
-												<input class="form-check-input" type="radio" name="done" id="doneyes-{{$notrated_men->mr_id}}"
-													checked="">
-												<label class="form-check-label" for="doneyes-{{$notrated_men->mr_id}}">{{__('Yes')}}</label>
-											</div>
-											<div class="form-check form-check-inline">
-												<input class="form-check-input" type="radio" name="done" id="doneno-{{$notrated_men->mr_id}}">
-												<label class="form-check-label" for="doneno-{{$notrated_men->mr_id}}">{{__('No')}}</label>
-											</div>
-										</td>
-										<td class="align-middle">
-											<div class="full-star-ratings" data-rateyo-full-star="true" data-rateyo-rating="0"
-												data-rateyo-num-stars="5" data-rateyo-star-width="24px"></div>
-										</td>
-										<td class="align-middle">
-											<textarea class="form-control form-control-sm border-1" id="comment-{{$notrated_men->mr_id}}"
-												name="comment" rows="3" required
-												placeholder="{{ __('dashboard.Write your notes here') }}..."></textarea>
-										</td>
-										<td class="align-middle text-center">
-											<button type="submit" class="btn btn-primary btn-sm px-3">
-												<i class="bx bx-check me-1"></i>
-												<span>{{__('dashboard.Submit')}}</span>
-											</button>
-										</td>
-									</form>
+										</div>
+									</td>
+									<td class="align-middle">
+										<div class="d-flex align-items-center">
+											<i class="bx bx-time-five me-2 text-muted"></i>
+											<span class="text-nowrap">{{$notrated_men->zoom_date}}</span>
+										</div>
+									</td>
+									<td class="align-middle">
+										{{-- GV-9570: without values both radios posted "on", so "No" was saved as done --}}
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="done" value="1" form="rateForm-{{ $notrated_men->mr_id }}"
+												id="doneyes-{{$notrated_men->mr_id}}" checked="">
+											<label class="form-check-label" for="doneyes-{{$notrated_men->mr_id}}">{{__('Yes')}}</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="done" value="0" form="rateForm-{{ $notrated_men->mr_id }}"
+												id="doneno-{{$notrated_men->mr_id}}">
+											<label class="form-check-label" for="doneno-{{$notrated_men->mr_id}}">{{__('No')}}</label>
+										</div>
+									</td>
+									<td class="align-middle">
+										<div class="full-star-ratings" data-rate-input="#rate-{{ $notrated_men->mr_id }}"
+											data-rateyo-full-star="true" data-rateyo-rating="0"
+											data-rateyo-num-stars="5" data-rateyo-star-width="24px"></div>
+									</td>
+									<td class="align-middle">
+										<textarea class="form-control form-control-sm border-1" id="comment-{{$notrated_men->mr_id}}"
+											name="comment" rows="3" required form="rateForm-{{ $notrated_men->mr_id }}"
+											placeholder="{{ __('dashboard.Write your notes here') }}..."></textarea>
+									</td>
+									<td class="align-middle text-center">
+										<button type="submit" class="btn btn-primary btn-sm px-3" form="rateForm-{{ $notrated_men->mr_id }}">
+											<i class="bx bx-check me-1"></i>
+											<span>{{__('dashboard.Submit')}}</span>
+										</button>
+									</td>
 								</tr>
 								@endforeach
 							</tbody>
@@ -1829,6 +1844,9 @@
 	</div>
 </div>
 <!-- / Content Wrapper -->
+
+{{-- GV-9570: the full judges list behind the Screening / Final Session avatar stacks --}}
+@include('includes.partials.judges-panel')
 
 @if( $_user->ableTo('mentors.settings_modify', $permissions) &&
 array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null( $cycle_id ) )
@@ -2308,7 +2326,15 @@ document.addEventListener('DOMContentLoaded', function() {
 				"searching": true,
 				"ordering": true,
 				"info": true,
-				"responsive": true,
+				// GV-9570: the default renderer copies the cells' startup HTML into the
+				// mobile child row -- no rateYo stars and form-less inputs. Move the
+				// live nodes instead so the stars and the form fields keep working.
+				"responsive": {
+					"details": { "renderer": $.fn.dataTable.Responsive.renderer.listHiddenNodes() }
+				},
+				// GV-9570: the Submit column's heading repeats the button's own label
+				// ("Submit  [Submit]") once it collapses into the child row.
+				"columnDefs": [ { "targets": -1, "className": "dtr-hide-title" } ],
 				@if( $l == 'ar' )
 				"language": {
 					"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
@@ -2423,10 +2449,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		$(function () {
 			var isRtl = $('html').attr('data-textdirection') === 'rtl';
-			var fullStar = $('.full-star-ratings');
-			var instance = fullStar.rateYo({rtl: isRtl});
-			// Rating onSet Event
-			if( instance.length ) { instance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $('#rate').val(data.rating); }); }
+			// GV-9570: each row writes to its own hidden input -- a shared #rate sent
+			// every rating to the first row's form.
+			$('.full-star-ratings').each(function () {
+				var $stars = $(this);
+				$stars.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $($stars.data('rate-input')).val(data.rating); });
+			});
 
 			var fullServiceStar = $('.full-services-star-ratings');
 			fullServiceStar.each(function (index, oneInstance) {
