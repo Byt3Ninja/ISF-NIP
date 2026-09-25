@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Requests\UpdateSocialLoginRequest;
 use App\Notifications\UserInvitationNotification;
+use App\Services\EmailSettingsStore;
 
 class SettingsController extends Controller
 {
@@ -97,7 +98,8 @@ class SettingsController extends Controller
 				->with('Title',$Title)->with('Icons',$Icons)->with('Img1',$Img1)
 				->with('Img2',$Img2)->with('Img3',$Img3)->with('Counters',$Counters)
 				->with('countries', $countries)->with('states', $states)->with('currencies',$currencies)
-				->with('settings', $settings);
+				->with('settings', $settings)
+				->with('emailConfig', EmailSettingsStore::platform()->viewData());
 	}
 
 	public function update_settings(Request $request)
@@ -452,50 +454,6 @@ class SettingsController extends Controller
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
 
-	public function update_settingsmail(Request $request)
-	{
-		$id = $request->input('id');
-		$emailProvider = $request->input('email_provider', 'smtp');
-		$updateSetting = Settings::where('id', $id)->first();
-
-		if ($emailProvider === 'resend') {
-			$request->validate([
-				'resend_api_key' => ['required', 'string', 'max:64'],
-			], [
-				'resend_api_key.required' => __('settings.api_key_required'),
-			]);
-
-			if (!\App\Services\ResendApiKeyValidator::validate($request->input('resend_api_key'))) {
-				if ($request->expectsJson()) {
-					return response()->json(['message' => __('settings.invalid_api_key')], 422);
-				}
-				return redirect()->back()->with('message2', __('settings.invalid_api_key'));
-			}
-
-			$updateSetting->email_provider = 'resend';
-			$updateSetting->resend_api_key = $request->input('resend_api_key');
-			$updateSetting->save();
-
-			if ($request->expectsJson()) {
-				return response()->json(['message' => __('settings.email_config_saved')]);
-			}
-			return redirect()->back()->with('message', 'StoredSuccessfully');
-		}
-
-		// SMTP provider (existing logic)
-		$updateSetting->email_provider = $request->input('email_provider', 'smtp');
-		$updateSetting->host = $request->input('host');
-		$updateSetting->Mail = $request->input('Mail');
-		$updateSetting->Mailpassword = $request->input('Mailpassword');
-		$updateSetting->Port = $request->input('Port');
-		$updateSetting->encryption = $request->input('Encryption');
-		$updateSetting->mail_from_name = $request->input('mail_from_name');
-		$updateSetting->mail_from_address = $request->input('mail_from_address');
-		$updateSetting->save();
-
-		return redirect()->back()->with('message', 'StoredSuccessfully');
-	}
-
 	public function update_settingspush(Request $request)
 	{
 		$id = $request->input('id');
@@ -823,10 +781,9 @@ class SettingsController extends Controller
 			$invitations = collect([]);
 		}
 		$role = Role::where('name', 'organizationManager')->first();
+		$emailConfig = $organization ? EmailSettingsStore::forOrganization($organization)->viewData() : null;
 
-		
-		
-        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','role','invitations'));
+        return view('admin.organizations.settings', compact('organization', 'currencies', 'timezones','role','invitations','emailConfig'));
     }
 
 	public function ReminderLogs(Request $request) {

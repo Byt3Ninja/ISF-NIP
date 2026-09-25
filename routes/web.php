@@ -306,7 +306,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('settings/Updateone', 'SettingsController@update_settingsone')->name('settings.system_section_one_update');
     Route::put('settings/Updatelogo', 'SettingsController@update_settinglogo')->name('settings.system_logo_update');
     Route::put('settings/Updatetwo', 'SettingsController@update_settingstwo')->name('settings.system_section_two_update');
-    Route::put('settings/UpdateMail', 'SettingsController@update_settingsmail')->name('settings.system_mail_update');
+    Route::put('settings/UpdateMail', 'EmailConfigurationController@saveSmtp')->defaults('scope', 'platform')->name('settings.system_mail_update');
+    Route::post('settings/mail/test', 'EmailConfigurationController@testSmtp')->defaults('scope', 'platform')->name('settings.system_mail_test');
+    Route::post('settings/mail/resend/connect', 'EmailConfigurationController@resendConnect')->defaults('scope', 'platform')->name('settings.system_mail_resend_connect');
+    Route::post('settings/mail/resend/domains', 'EmailConfigurationController@resendAddDomain')->defaults('scope', 'platform')->name('settings.system_mail_resend_domain');
+    Route::post('settings/mail/resend/test', 'EmailConfigurationController@resendTest')->defaults('scope', 'platform')->name('settings.system_mail_resend_test');
     Route::put('settings/UpdatePush', 'SettingsController@update_settingspush')->name('settings.system_push_notifications_update');
     Route::put('settings/UpdateMeeting', 'SettingsController@update_settingsMeeting')->name('settings.system_meeting_integration_update');
     Route::put('settings/UpdateLogin', 'SettingsController@update_settingsLogin')->name('settings.system_social_login_update');
@@ -326,7 +330,11 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('organizations/settings/updateMeeting', 'SettingsController@meetingSetting')->name('settings.organization_meeting_manage');
     Route::put('organizations/settings/socialLogin', 'SettingsController@socialSetting')->name('settings.organization_social_manage');
     Route::put('organizations/settings/general', 'SettingsController@generalSetting')->name('settings.organization.general.manage');
-    Route::put('organizations/settings/smtp', 'OrganizationSettingsController@updateSmtp')->name('settings.organization.smtp_update');
+    Route::put('organizations/settings/smtp', 'EmailConfigurationController@saveSmtp')->defaults('scope', 'organization')->name('settings.organization.smtp_update');
+    Route::post('organizations/settings/smtp/test', 'EmailConfigurationController@testSmtp')->defaults('scope', 'organization')->name('settings.organization.smtp_test');
+    Route::post('organizations/settings/resend/connect', 'EmailConfigurationController@resendConnect')->defaults('scope', 'organization')->name('settings.organization.resend_connect');
+    Route::post('organizations/settings/resend/domains', 'EmailConfigurationController@resendAddDomain')->defaults('scope', 'organization')->name('settings.organization.resend_domain');
+    Route::post('organizations/settings/resend/test', 'EmailConfigurationController@resendTest')->defaults('scope', 'organization')->name('settings.organization.resend_test');
     Route::put('organizations/settings/notifications', 'OrganizationSettingsController@updateNotifications')->name('settings.organization.notifications_update');
     Route::post('organizations/settings/invite', 'SettingsController@inviteUser')->name('organization.users_invite');
     Route::post('organizations/settings/resend-invitation/{invitationId}', 'SettingsController@resendInvitation')->name('organization.users_invitations_resend');

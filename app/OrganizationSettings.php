@@ -14,7 +14,12 @@ class OrganizationSettings extends Model
     protected $fillable = [
         'organization_id',
         'email_provider',
+        'smtp_preset',
         'resend_api_key',
+        'resend_domain',
+        'resend_from_address',
+        'resend_from_name',
+        'resend_connected_at',
         'smtp_host',
         'smtp_port',
         'smtp_encryption',
@@ -34,6 +39,7 @@ class OrganizationSettings extends Model
         'accept_whatsapp' => 'boolean',
         'accept_pusher' => 'boolean',
         'smtp_failed_at' => 'datetime',
+        'resend_connected_at' => 'datetime',
     ];
 
     /**

@@ -117,18 +117,19 @@ class TenantMailer
             return null;
         }
 
-        if ($settings->email_provider === 'resend' && !empty($settings->resend_api_key)) {
+        if (static::resendConnected($settings)) {
             return [
                 'transport'    => 'resend',
                 'api_key'      => $settings->resend_api_key,
-                'from_address' => $settings->smtp_from_address ?: config('mail.from.address'),
-                'from_name'    => $settings->smtp_from_name ?: ($organization->name ?? config('mail.from.name')),
+                'from_address' => $settings->resend_from_address,
+                'from_name'    => $settings->resend_from_name ?: ($organization->name ?? config('mail.from.name')),
                 'source'       => 'organization',
                 'organization_id' => $organization->id,
             ];
         }
 
-        // An SMTP config is only usable with a host to connect to.
+        // An SMTP config is only usable with a host to connect to. Also the
+        // fallback for a Resend setup that never passed its test email.
         if (empty($settings->smtp_host)) {
             return null;
         }
@@ -164,12 +165,12 @@ class TenantMailer
             return null;
         }
 
-        if ($setting->email_provider === 'resend' && !empty($setting->resend_api_key)) {
+        if (static::resendConnected($setting)) {
             return [
                 'transport'    => 'resend',
                 'api_key'      => $setting->resend_api_key,
-                'from_address' => $setting->mail_from_address ?: $setting->Mail,
-                'from_name'    => $setting->mail_from_name ?: ($setting->Platform_Name ?? config('app.name')),
+                'from_address' => $setting->resend_from_address,
+                'from_name'    => $setting->resend_from_name ?: ($setting->Platform_Name ?? config('app.name')),
                 'source'       => 'global',
             ];
         }
@@ -191,6 +192,18 @@ class TenantMailer
             'from_name'    => $setting->mail_from_name ?: ($setting->Platform_Name ?? config('app.name')),
             'source'       => 'global',
         ];
+    }
+
+    /**
+     * A Resend (API) setup only goes live once its test email went through
+     * (GV-1513 / GV-1514); until then the SMTP settings or the platform apply.
+     */
+    public static function resendConnected(Settings|OrganizationSettings $settings): bool
+    {
+        return $settings->email_provider === 'resend'
+            && !empty($settings->resend_api_key)
+            && !empty($settings->resend_from_address)
+            && !empty($settings->resend_connected_at);
     }
 
     /**
