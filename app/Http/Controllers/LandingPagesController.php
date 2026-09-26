@@ -165,7 +165,11 @@ class LandingPagesController extends Controller
 			->filter(fn ($section) => !empty($section->content) || !empty($section->content_ar))
 			->values();
 
-		return view('admin.landing-pages.show', compact('page', 'colors', 'visiblePrograms', 'customSections'));
+		// An enabled but empty How It Works section must not render (nor its
+		// nav / CTA / footer links and hero stat).
+		$showHow = $page->isHowRenderable($l == 'ar');
+
+		return view('admin.landing-pages.show', compact('page', 'colors', 'visiblePrograms', 'customSections', 'showHow'));
 	}
 
   public function create(Request $request)

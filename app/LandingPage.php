@@ -145,6 +145,33 @@ class LandingPage extends Model
     }
 
     /**
+     * Whether the How It Works section should render on the public landing
+     * page for the given language. It must be enabled and have all mandatory
+     * fields (title, title tag, description) filled for that language.
+     *
+     * @param bool $isAr Render language is Arabic
+     * @return bool
+     */
+    public function isHowRenderable($isAr = false)
+    {
+        if (!$this->how_is_enabled) {
+            return false;
+        }
+
+        $mandatory = $isAr
+            ? [$this->how_title_ar, $this->how_title_tag_ar, $this->how_description_ar]
+            : [$this->how_title, $this->how_title_tag, $this->how_description];
+
+        foreach ($mandatory as $value) {
+            if (trim((string) $value) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Generate a unique slug from a landing page title.
      *
      * @param string $title

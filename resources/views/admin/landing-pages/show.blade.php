@@ -37,7 +37,7 @@
     // Stats belong to a section only while that section is enabled: a disabled
     // Programs / How It Works section must not leak its numbers into the hero.
     $lpShowProgramStats = $page->programs_is_enabled && $lpProgramsCount > 0;
-    $lpShowStepStat = $page->how_is_enabled && $lpStepCount > 0;
+    $lpShowStepStat = $showHow && $lpStepCount > 0;
   @endphp
 
   <!-- ===== Hero ===== -->
@@ -70,7 +70,7 @@
             @if($page->programs_is_enabled)
               <li class="nav-item"><a class="nav-link" href="#programs">{{ __('landing.programs') }}</a></li>
             @endif
-            @if($page->how_is_enabled)
+            @if($showHow)
               <li class="nav-item"><a class="nav-link"
                   href="#how-it-works">{{ __('landing.how_it_works') }}</a></li>
             @endif
@@ -124,7 +124,7 @@
               <a href="#programs" class="btn hero-primary-cta btn-lg">{{ __('landing.browse_open_programs') }} <i
                   class="ti ti-arrow-up-right ms-1"></i></a>
             @endif
-            {{-- @if($page->how_is_enabled)
+            {{-- @if($showHow)
               <a href="#how-it-works"
                 class="btn btn-outline-light rounded-pill btn-lg">{{ __('landing.see_how_it_works') }}</a>
             @endif --}}
@@ -422,7 +422,7 @@
   @endif
 
   <!-- ===== How it works ===== -->
-  @if($page->how_is_enabled)
+  @if($showHow)
     <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="how-it-works">
       @php $landingBg = !$landingBg; @endphp
       <div class="container py-4">
@@ -503,7 +503,7 @@
             <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ __('landing.find_my_program') }} <i
                 class="ti ti-arrow-up-right ms-1"></i></a>
           @endif
-          @if($page->how_is_enabled)
+          @if($showHow)
             <a href="#how-it-works"
               class="btn btn-outline-light rounded-pill btn-lg">{{ __('landing.see_how_it_works') }}</a>
           @endif
@@ -578,7 +578,7 @@
               if ($page->programs_is_enabled) {
                 $footerQuickLinks->push(['label' => __('landing.programs'), 'url' => '#programs']);
               }
-              if ($page->how_is_enabled) {
+              if ($showHow) {
                 $footerQuickLinks->push(['label' => __('landing.how_it_works'), 'url' => '#how-it-works']);
               }
               foreach ($customSections as $footerSection) {
