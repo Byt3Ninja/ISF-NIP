@@ -283,6 +283,11 @@
                   'items' => $pastPrograms,
               ],
           ];
+
+          // A single group is the whole section, so its heading is redundant noise.
+          $showProgramGroupTitles = collect($programGroups)
+            ->filter(fn ($group) => $group['items']->count() > 0)
+            ->count() > 1;
         @endphp
 
         @if($lpProgramsCount === 0)
@@ -294,11 +299,13 @@
         @foreach($programGroups as $programGroup)
           @if($programGroup['items']->count() > 0)
             <div class="programs-group">
-              <h3 class="programs-group-title">
-                <span class="programs-group-ic"><i class="ti {{ $programGroup['icon'] }}" aria-hidden="true"></i></span>
-                <span>{{ $programGroup['label'] }}</span>
-                <span class="programs-group-count">{{ $programGroup['items']->count() }}</span>
-              </h3>
+              @if($showProgramGroupTitles)
+                <h3 class="programs-group-title">
+                  <span class="programs-group-ic"><i class="ti {{ $programGroup['icon'] }}" aria-hidden="true"></i></span>
+                  <span>{{ $programGroup['label'] }}</span>
+                  <span class="programs-group-count">{{ $programGroup['items']->count() }}</span>
+                </h3>
+              @endif
 
               <div class="row g-4">
                 @foreach($programGroup['items'] as $program)
