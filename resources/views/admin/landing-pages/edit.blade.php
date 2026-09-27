@@ -687,7 +687,8 @@
 
                 @if($section['key'] === 'custom')
                   <hr class="my-4">
-                  <div class="d-flex align-items-center justify-content-end mb-3">
+                  <div class="d-flex align-items-center justify-content-end mb-3 gap-2">
+                    <span id="customSectionCount" class="badge bg-label-primary rounded-pill" style="display:none">0 / 5</span>
                     <button
                       type="button"
                       class="btn btn-primary btn-sm d-flex align-items-center gap-1"
@@ -698,6 +699,9 @@
                     </button>
                   </div>
                   <div id="customSectionsContainer"></div>
+                  <div id="customSectionMaxHint" class="alert alert-warning py-2 small d-none" role="alert">
+                    {{ __('landing.Custom_Sections_Max_Hint') }}
+                  </div>
                   <div id="customSectionsEmpty" class="text-center py-5 border border-dashed rounded">
                     <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
                     <h5 class="text-muted mb-1">
@@ -2193,8 +2197,13 @@
         const count = $('#customSectionsContainer .custom-section-card').length;
         $('#customSectionsEmpty').toggle(count === 0);
         $('#customSectionCount').text(count + ' / ' + customMaxSections).toggle(count > 0);
-        $('#customAddSection').prop('disabled', count >= customMaxSections);
+        // The button stays enabled at the cap so clicking it can explain the
+        // limit (see the click handler) instead of silently doing nothing.
         $('#customSectionMaxHint').toggleClass('d-none', count < customMaxSections);
+      };
+
+      const customSectionsAtMax = function () {
+        return $('#customSectionsContainer .custom-section-card').length >= customMaxSections;
       };
 
       const updateCustomSectionLabels = function () {
@@ -2404,7 +2413,16 @@
         return id;
       };
 
-      $('#customAddSection').on('click', addCustomSection);
+      // The cap is enforced here rather than inside addCustomSection, because
+      // the same builder renders the already-saved sections on page load —
+      // refusing to build those would drop real data.
+      $('#customAddSection').on('click', function () {
+        if (customSectionsAtMax()) {
+          toastr.warning("{{ __('landing.Custom_Sections_Max_Hint') }}");
+          return;
+        }
+        addCustomSection();
+      });
 
       $('#customSectionsContainer')
         .on('input change', '[data-custom-field]', function () {

@@ -1724,8 +1724,13 @@
         const count = $('#customSectionsContainer .custom-section-card').length;
         $('#customSectionsEmpty').toggle(count === 0);
         $('#customSectionCount').text(count + ' / ' + customMaxSections).toggle(count > 0);
-        $('#customAddSection').prop('disabled', count >= customMaxSections);
+        // The button stays enabled at the cap so clicking it can explain the
+        // limit (see the click handler) instead of silently doing nothing.
         $('#customSectionMaxHint').toggleClass('d-none', count < customMaxSections);
+      };
+
+      const customSectionsAtMax = function () {
+        return $('#customSectionsContainer .custom-section-card').length >= customMaxSections;
       };
 
       const updateCustomSectionLabels = function () {
@@ -1924,9 +1929,6 @@
       });
 
       const addCustomSection = function () {
-        if ($('#customSectionsContainer .custom-section-card').length >= customMaxSections) {
-          return;
-        }
         const id = ++customSectionCounter;
         $('#customSectionsContainer').append(customSectionHtml(id));
         initCustomQuill($('#customSectionsContainer'));
@@ -1937,7 +1939,13 @@
         }, 100);
       };
 
-      $('#customAddSection').on('click', addCustomSection);
+      $('#customAddSection').on('click', function () {
+        if (customSectionsAtMax()) {
+          toastr.warning("{{ __('landing.Custom_Sections_Max_Hint') }}");
+          return;
+        }
+        addCustomSection();
+      });
 
       $('#customSectionsContainer')
         .on('input change', '[data-custom-field]', function () {
