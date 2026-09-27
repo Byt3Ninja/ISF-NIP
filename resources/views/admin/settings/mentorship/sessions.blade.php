@@ -1,10 +1,5 @@
 @extends('layouts.admin')
 
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
-  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
-@stop
-
 @section('content')
   <!-- BEGIN: Content-->
   <div class="">
@@ -600,22 +595,17 @@
   </div>
 @stop
 
-@section('scripts')
-  <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
-@stop
-
 @section('pagescripts')
   <script>
     var is_submitting = false;
     $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
-      alertify.defaults.transition = 'zoom';
-      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-      alertify.defaults.theme.input = 'form-control';
-
-      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+      releaseAlert({
+        icon: 'info',
+        title: '{{ __('dashboard.meeting_passcode') }}',
+        message: `{!! __('dashboard.passcode_is', ['code' => '<strong>${passcode}</strong>']) !!}`,
+      });
     });
 
     $(document).on('click', '#submitModifyRequest', function(e) {
@@ -1204,30 +1194,42 @@
     }
 
     function approve(id, stat) {
-      if(stat == 'Yes'){
-      alert('{{ __('admin.Accepting_request') }}')
-      }else{
-        alert('{{ __('admin.Rejecting_request') }}')
-      }
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-      });
-      $.ajax({
-        type: "POST",
-        url: "/dashboard/mentors/modify",
-        data: {
-          "id": id,
-          "stat": stat,
-          'rtype': 6,
-        },
-        success: function(response) {
-          location.reload();
-        },
-        error: function(error) {
-          console.log(error);
-          alert("Error Occurred, Try again!");
+      const isApproving = stat === 'Yes';
+      const successMessage = isApproving
+        ? "{{ __('admin.mentorship_session_approved_successfully') }}"
+        : "{{ __('admin.mentorship_session_rejected_successfully') }}";
+      const failureMessage = isApproving
+        ? "{{ __('admin.mentorship_session_approve_failed') }}"
+        : "{{ __('admin.mentorship_session_reject_failed') }}";
+
+      releaseWarningAlert({
+        title: isApproving ? "{{ __('admin.Approve') }}" : "{{ __('admin.Disapprove') }}",
+        message: (isApproving ? "{{ __('admin.Accepting_request') }}" : "{{ __('admin.Rejecting_request') }}").trim(),
+        confirmText: "{{ __('admin.Confirm') }}",
+        cancelText: "{{ __('admin.Cancel') }}",
+        confirmColor: isApproving ? 'success' : 'danger',
+        onConfirm: function () {
+          $.ajaxSetup({
+            headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+          });
+          $.ajax({
+            type: "POST",
+            url: "/dashboard/mentors/modify",
+            data: {
+              "id": id,
+              "stat": stat,
+              'rtype': 6,
+            },
+            success: function (response) {
+              toastr.success(successMessage);
+              setTimeout(function () { location.reload(); }, 1500);
+            },
+            error: function (xhr) {
+              toastr.error(xhr.responseJSON?.message || failureMessage);
+            }
+          });
         }
       });
     }
