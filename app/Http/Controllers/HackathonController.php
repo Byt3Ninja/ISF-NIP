@@ -408,9 +408,9 @@ class HackathonController extends Controller
                 'name'      => $member->user_name_en,
                 'email'     => $member->u_email,
                 'image'     => $user->u_image ?? '/vuexy/assets/img/avatars/default.png',
-                'country'   => $user->{'co_country_'. $l} ?? 'N/A',
-                'city'      => $user->{'ci_city_'. $l} ?? 'N/A',
-                'state'     => $user->{'s_state_'. $l} ?? 'N/A',
+                'country'   => $user->{'co_country_'. $l},
+                'city'      => $user->{'ci_city_'. $l},
+                'state'     => $user->{'s_state_'. $l},
                 'title'     => $user->{'u_title_'. $l} ?? '',
                 'isInvited' => $pendingInvites
                     ->where('team_formation_id', $id)

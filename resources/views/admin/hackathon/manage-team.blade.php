@@ -933,16 +933,16 @@
                       </p>
                     @endif
                     
-                    @if($member['city'] || $member['state'] || $member['country'])
-                      <p class="text-muted small mb-3">
-                        <i class="ti ti-map-pin me-1"></i>
-                        {{ $member['city'] ?? '' }}
-                        @if($member['city'] && ($member['state'] || $member['country'])), @endif
-                        {{ $member['state'] ?? '' }}
-                        @if($member['state'] && $member['country']), @endif
-                        {{ $member['country'] ?? '' }}
-                      </p>
-                    @endif
+                    @php
+                      $locationParts = collect([$member['city'] ?? null, $member['state'] ?? null, $member['country'] ?? null])
+                        ->map(fn ($part) => is_string($part) ? trim($part) : $part)
+                        ->reject(fn ($part) => $part === null || $part === '' || mb_strtolower((string) $part) === 'n/a')
+                        ->values();
+                    @endphp
+                    <p class="text-muted small mb-3">
+                      <i class="ti ti-map-pin me-1"></i>
+                      {{ $locationParts->isEmpty() ? ($l == 'ar' ? 'غير متاح' : 'Not available') : $locationParts->implode(', ') }}
+                    </p>
                     
                     <button 
                       type="button" 
