@@ -2714,7 +2714,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 @if( $_user->ableTo('slots.index', $permissions) )
-@if ( isset($$my_schedules) && count( $$my_schedules ) > 0 )
+@if ( isset($my_schedules) && count( $my_schedules ) > 0 )
 	<script>
 		$(document).ready(function () {
 			// Initialize slots DataTable
