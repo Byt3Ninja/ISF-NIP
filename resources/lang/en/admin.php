@@ -3285,6 +3285,7 @@ return [
 	'login_or_register' => 'Login / Register',
 	'quick_links' => 'Quick Links',
 	'read_more' => 'Read More',
+	'read_less' => 'Read Less',
 	'get_in_touch' => 'Get In Touch',
 	'org_landing_contact_description' => 'Any question or remark? just write us a message',
 	'send_a_message' => 'Send a Message',

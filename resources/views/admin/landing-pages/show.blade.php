@@ -488,8 +488,15 @@
         @if($sectionTitle)
           <h2>{{ $sectionTitle }}</h2>
         @endif
-        <div class="mt-3 lp-rich" style="white-space:pre-wrap;">
-          {!! ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content !!}</div>
+        @php $customSectionContent = ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content; @endphp
+        <div class="mt-3 lp-rich lp-rich-clamp" data-lp-clamp style="white-space:pre-wrap;">
+          {!! $customSectionContent !!}
+        </div>
+        <button type="button" class="btn btn-link lp-read-more d-none mt-2 px-0" data-lp-clamp-toggle
+          data-more-label="{{ __('admin.read_more') }}" data-less-label="{{ __('admin.read_less') }}">
+          <span data-lp-clamp-label>{{ __('admin.read_more') }}</span>
+          <i class="ti ti-chevron-down ms-1"></i>
+        </button>
       </div>
     </section>
   @endforeach
@@ -671,6 +678,80 @@
         }, { rootMargin: '-45% 0px -50% 0px' });
         spyTargets.forEach(function (t) { spy.observe(t); });
       }
+    })();
+
+    /* Long custom-section copy is clamped to a readable height; the toggle is
+       only surfaced when the copy actually overflows, so short sections never
+       grow a pointless button. Re-measured on resize since the clamp is in
+       viewport units. */
+    (function () {
+      var CLAMPED_CLASS = 'is-clamped';
+      var EXPANDED_CLASS = 'is-expanded';
+
+      function pairs() {
+        return Array.prototype.map.call(
+          document.querySelectorAll('[data-lp-clamp]'),
+          function (body) {
+            return { body: body, button: body.parentElement.querySelector('[data-lp-clamp-toggle]') };
+          }
+        );
+      }
+
+      function isOverflowing(body) {
+        // +4px absorbs sub-pixel rounding so a section that fits by a hair
+        // does not get a Read More button that reveals nothing.
+        return body.scrollHeight - body.clientHeight > 4;
+      }
+
+      function apply(pair) {
+        if (!pair.button) return;
+        // Measure with the clamp already on. An unclamped box always reports
+        // scrollHeight === clientHeight, so measuring first would report every
+        // section as fitting and the button would never appear.
+        pair.body.classList.add(CLAMPED_CLASS);
+        if (isOverflowing(pair.body)) {
+          pair.button.classList.remove('d-none');
+        } else {
+          pair.body.classList.remove(CLAMPED_CLASS);
+          pair.button.classList.add('d-none');
+        }
+      }
+
+      function sync(pair) {
+        var label = pair.button.querySelector('[data-lp-clamp-label]');
+        if (!label) return;
+        var expanded = !pair.body.classList.contains(CLAMPED_CLASS);
+        label.textContent = expanded
+          ? pair.button.dataset.lessLabel
+          : pair.button.dataset.moreLabel;
+        pair.button.classList.toggle(EXPANDED_CLASS, expanded);
+        pair.button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        pairs().forEach(function (pair) {
+          if (!pair.button) return;
+          apply(pair);
+          if (!pair.button.classList.contains('d-none')) sync(pair);
+          pair.button.addEventListener('click', function () {
+            pair.body.classList.toggle(CLAMPED_CLASS);
+            sync(pair);
+          });
+        });
+      });
+
+      var resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          pairs().forEach(function (pair) {
+            // Leave sections the reader deliberately expanded alone.
+            if (!pair.button || pair.button.classList.contains(EXPANDED_CLASS)) return;
+            apply(pair);
+            if (!pair.button.classList.contains('d-none')) sync(pair);
+          });
+        }, 200);
+      });
     })();
 
   </script>

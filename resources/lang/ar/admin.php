@@ -3333,6 +3333,7 @@ return [
 	'login_or_register' => 'تسجيل الدخول',
 	'quick_links' => 'روابط سريعة',
 	'read_more' => 'قراءة المزيد',
+	'read_less' => 'عرض أقل',
 	'get_in_touch' => 'كن على تواصل',
 	'org_landing_contact_description' => 'أي سؤال أو تعليق؟ فقط اكتب لنا رسالة',
 	'send_a_message' => 'أرسل رسالة',

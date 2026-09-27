@@ -913,6 +913,26 @@ header[id] {
   padding: 0.6rem 0.85rem;
 }
 
+/* Clamp long custom-section copy; the Read More button drops .is-clamped. */
+.lp-rich-clamp.is-clamped {
+  max-height: 16rem;
+  overflow: hidden;
+}
+
+.lp-read-more {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lp-read-more .ti-chevron-down,
+.lp-read-more .ti-chevron-up {
+  transition: transform 0.2s ease;
+}
+
+.lp-read-more.is-expanded .ti-chevron-down {
+  transform: rotate(180deg);
+}
+
 /* ----- CTA ----- */
 .gl-cta {
   --lp-cta-bg-start: #05030f;
