@@ -1456,6 +1456,14 @@ class LandingPagesController extends Controller
 			$requiredFields = ['title', 'title_ar', 'title_tag', 'title_tag_ar', 'content', 'content_ar'];
 
 			foreach ($sections as $index => $section) {
+				// A section with its visibility switch off is never rendered, so
+				// its fields are legitimately left incomplete; requiring them
+				// would block saving a section nobody can see. The length and
+				// URL rules above still apply, since the values are stored either way.
+				if (empty($section['visibility'])) {
+					continue;
+				}
+
 				$values = [];
 				foreach ($requiredFields as $field) {
 					$values[$field] = trim((string) ($section[$field] ?? ''));

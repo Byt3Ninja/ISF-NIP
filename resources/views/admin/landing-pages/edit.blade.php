@@ -2133,17 +2133,18 @@
         });
       };
 
+      const isCustomSectionVisible = function ($card) {
+        return $card.find('.custom-visibility-switch').is(':checked');
+      };
+
       const validateCustomSection = function ($card) {
-        const used = customRequiredFields.some(function (field) {
+        // A section with its visibility switch off is never published, so its
+        // fields are left incomplete on purpose and must not be demanded. The
+        // length caps still apply, because the value is persisted either way
+        // and the server enforces them regardless of visibility.
+        const used = isCustomSectionVisible($card) && customRequiredFields.some(function (field) {
           return customFieldValue($card, field) !== '';
         });
-
-        if (!used) {
-          customRequiredFields.forEach(function (field) {
-            setCustomFieldError($card.find('.custom-field-group[data-field="' + field + '"]'), '');
-          });
-          return true;
-        }
 
         let valid = true;
         customRequiredFields.forEach(function (field) {
@@ -2151,7 +2152,7 @@
           const value = customFieldValue($card, field);
           const max = customFieldMaxLengths[field];
 
-          if (value === '') {
+          if (used && value === '') {
             setCustomFieldError($group, validationMessages.customRequired);
             valid = false;
             return;
@@ -2398,6 +2399,11 @@
         .on('input change', '[data-custom-field]', function () {
           const $group = $(this).closest('.custom-field-group');
           if ($(this).val().trim()) setCustomFieldError($group, '');
+        })
+        .on('change', '.custom-visibility-switch', function () {
+          // Drop the "required" complaints the moment the section is hidden,
+          // so turning the switch off visibly clears them.
+          validateCustomSection($(this).closest('.custom-section-card'));
         })
         .on('click', '.remove-custom-section', function () {
           const $card = $(this).closest('.custom-section-card');
