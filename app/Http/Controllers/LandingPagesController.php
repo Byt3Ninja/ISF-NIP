@@ -1564,7 +1564,10 @@ class LandingPagesController extends Controller
 		// the slug is just checked for global uniqueness.
 		$page = $id ? $this->scopedLandingPagesQuery()->findOrFail($id) : null;
 
-		$slug = strtolower(trim((string) $request->input('slug')));
+		// Validate the slug exactly as it was typed. Lowercasing it first would
+		// make "MyPage" pass the pattern check and be stored as "mypage",
+		// silently accepting input the field's own format rule rejects.
+		$slug = trim((string) $request->input('slug'));
 
 		if (mb_strlen($slug) > LandingPage::SLUG_MAX_LENGTH) {
 			return response()->json([
@@ -1609,7 +1612,9 @@ class LandingPagesController extends Controller
 		}
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 
-		$slug = strtolower(trim((string) $request->input('slug')));
+		// Kept raw (no strtolower) so the regex below sees the real input and
+		// rejects uppercase instead of quietly normalising it.
+		$slug = trim((string) $request->input('slug'));
 
 		$validator = Validator::make(['title' => $request->input('title'), 'slug' => $slug], [
 			// 'title' => 'required|string|max:100',

@@ -961,7 +961,9 @@
             callback: {
               message: lpUrlI18n.taken,
               callback: function (input) {
-                const slug = (input.value || '').trim().toLowerCase();
+                // Raw value, not lowercased: an invalid format is the regexp
+                // validator's job to report, so just skip the lookup.
+                const slug = (input.value || '').trim();
                 if (!lpUrlIsValidSlug(slug)) return { valid: true };
                 if (!lpUrlSlugChecked) return { valid: true };
                 if (!lpUrlSlugAvailable) {
@@ -1000,22 +1002,31 @@
       // Always resolves with { valid, available, message }.
       const lpUrlCheckAvailability = function () {
         const $slug = $('#lpUrlSlug');
-        const slug = ($slug.val() || '').trim().toLowerCase();
+        // Raw value, not lowercased: lowercasing here would let "MyPage"
+        // pass as "mypage" and report it available, contradicting the
+        // format rule (and the server, which now validates the raw slug).
+        const slug = ($slug.val() || '').trim();
         const d = $.Deferred();
         lpUrlSlugChecked = false;
         lpUrlSlugAvailable = false;
 
+        // Empty / malformed values are field-level problems, and FormValidation
+        // already renders those messages in the field's .invalid-feedback. Keep
+        // them out of the availability line, otherwise the exact same string is
+        // printed twice. That line is reserved for availability status only.
         if (!slug) {
           lpUrlCheckErrorMessage = lpUrlI18n.slugRequired;
-          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlSetAvailability('', '');
           lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
           d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage, empty: true });
           return d.promise();
         }
         if (!lpUrlIsValidSlug(slug)) {
           lpUrlCheckErrorMessage = lpUrlI18n.slugInvalid;
-          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlSetAvailability('', '');
           lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
           d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage });
           return d.promise();
         }
@@ -1112,7 +1123,7 @@
           lpUrlAjax("{{ route('landing-pages.url.save', $currentPage->id) }}", {
             // title: $title.val().trim(),
             // name: $name.val().trim(),
-            slug: ($slug.val() || '').trim().toLowerCase(),
+            slug: ($slug.val() || '').trim(),
             active: lpUrlActive ? 1 : 0,
           })
             .done(function (res) {
@@ -1160,7 +1171,7 @@
           }
 
           // Fallback when the FormValidation plugin is unavailable.
-          const slug = ($slug.val() || '').trim().toLowerCase();
+          const slug = ($slug.val() || '').trim();
           let firstError = null;
           const mark = function ($input, message) {
             lpUrlShowFieldError($input, message);
