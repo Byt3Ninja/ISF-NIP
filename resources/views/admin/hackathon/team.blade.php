@@ -130,16 +130,6 @@
                 <i class="ti ti-bulb me-2"></i>{{ $l == 'ar' ? 'المشروع' : 'Project' }}
               </button>
             </li>
-            @if(count($team->shared_files) > 0)
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="files-tab" data-bs-toggle="pill" 
-                      data-bs-target="#files" type="button" role="tab" 
-                      aria-controls="files" aria-selected="false">
-                <i class="ti ti-paperclip me-2"></i>{{ $l == 'ar' ? 'الملفات' : 'Files' }} ({{ count($team->shared_files) }})
-              </button>
-            </li>
-            @endif
-            
             @if(isset($team->todo_lists[0]) && $team->todo_lists[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
             @if(count($team->todo_lists) > 0)
             <li class="nav-item" role="presentation">
@@ -440,77 +430,81 @@
             <p class="text-muted">{{ $l == 'ar' ? 'لم يتم إضافة معلومات المشروع بعد' : 'Project information has not been added yet' }}</p>
           </div>
           @endif
-        </div>
 
-        {{-- Files Tab --}}
-        {{-- @if(isset($team->shared_files[0]) && $team->shared_files[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id) --}}
-        @if(count($team->shared_files) > 0)
-        <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
-          <div class="row">
-            @foreach($team->shared_files as $file)
-            <div class="col-lg-4 col-md-6 mb-4">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-start">
-                    <div class="flex-shrink-0 me-3">
-                      @php
-                        $extension = pathinfo($file->file, PATHINFO_EXTENSION);
-                        $iconClass = 'ti ti-file';
-                        $colorClass = 'text-secondary';
-                        if(in_array($extension, ['pdf'])) { 
-                          $iconClass = 'ti ti-file-type-pdf'; 
-                          $colorClass = 'text-danger';
-                        }
-                        elseif(in_array($extension, ['doc', 'docx'])) { 
-                          $iconClass = 'ti ti-file-type-doc'; 
-                          $colorClass = 'text-primary';
-                        }
-                        elseif(in_array($extension, ['ppt', 'pptx'])) { 
-                          $iconClass = 'ti ti-presentation'; 
-                          $colorClass = 'text-warning';
-                        }
-                        elseif(in_array($extension, ['zip', 'rar'])) { 
-                          $iconClass = 'ti ti-file-zip'; 
-                          $colorClass = 'text-info';
-                        }
-                        elseif(in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) { 
-                          $iconClass = 'ti ti-photo'; 
-                          $colorClass = 'text-success';
-                        }
-                      @endphp
-                      <div class="avatar">
-                        <span class="avatar-initial rounded {{ $colorClass }}">
-                          <i class="{{ $iconClass }} ti-lg"></i>
-                        </span>
-                      </div>
-                    </div>
-                    <div class="flex-grow-1">
-                      <h6 class="mb-1">{{ basename($file->file) }}</h6>
-                      @if($file->description)
-                        <p class="text-muted small mb-2">{{ $file->description }}</p>
-                      @endif
-                      <div class="text-muted small mb-3">
-                        <div class="mb-1">
-                          <i class="ti ti-user me-1"></i>{{ $file->uploader->name }}
+          {{-- Shared Files --}}
+          @if(count($team->shared_files) > 0)
+          <div class="card mt-4">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="ti ti-paperclip me-2"></i>{{ $l == 'ar' ? 'الملفات المشتركة' : 'Shared Files' }} ({{ count($team->shared_files) }})
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                @foreach($team->shared_files as $file)
+                <div class="col-lg-4 col-md-6 mb-4">
+                  <div class="card h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-start">
+                        <div class="flex-shrink-0 me-3">
+                          @php
+                            $extension = pathinfo($file->file, PATHINFO_EXTENSION);
+                            $iconClass = 'ti ti-file';
+                            $colorClass = 'text-secondary';
+                            if(in_array($extension, ['pdf'])) {
+                              $iconClass = 'ti ti-file-type-pdf';
+                              $colorClass = 'text-danger';
+                            }
+                            elseif(in_array($extension, ['doc', 'docx'])) {
+                              $iconClass = 'ti ti-file-type-doc';
+                              $colorClass = 'text-primary';
+                            }
+                            elseif(in_array($extension, ['ppt', 'pptx'])) {
+                              $iconClass = 'ti ti-presentation';
+                              $colorClass = 'text-warning';
+                            }
+                            elseif(in_array($extension, ['zip', 'rar'])) {
+                              $iconClass = 'ti ti-file-zip';
+                              $colorClass = 'text-info';
+                            }
+                            elseif(in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                              $iconClass = 'ti ti-photo';
+                              $colorClass = 'text-success';
+                            }
+                          @endphp
+                          <div class="avatar">
+                            <span class="avatar-initial rounded {{ $colorClass }}">
+                              <i class="{{ $iconClass }} ti-lg"></i>
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <i class="ti ti-calendar me-1"></i>{{ \Carbon\Carbon::parse($file->created_at)->format('M d, Y') }}
+                        <div class="flex-grow-1">
+                          <h6 class="mb-1">{{ basename($file->file) }}</h6>
+                          @if($file->description)
+                            <p class="text-muted small mb-2">{{ $file->description }}</p>
+                          @endif
+                          <div class="text-muted small mb-3">
+                            <div class="mb-1">
+                              <i class="ti ti-user me-1"></i>{{ $file->uploader->name }}
+                            </div>
+                            <div>
+                              <i class="ti ti-calendar me-1"></i>{{ \Carbon\Carbon::parse($file->created_at)->format('M d, Y') }}
+                            </div>
+                          </div>
+                          <a href="{{ asset($file->file) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="ti ti-download me-1"></i>{{ $l == 'ar' ? 'تحميل' : 'Download' }}
+                          </a>
                         </div>
                       </div>
-                      <a href="{{ asset($file->file) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                        <i class="ti ti-download me-1"></i>{{ $l == 'ar' ? 'تحميل' : 'Download' }}
-                      </a>
                     </div>
                   </div>
                 </div>
+                @endforeach
               </div>
             </div>
-            @endforeach
           </div>
+          @endif
         </div>
-        @endif
-        
-        {{-- @endif --}}
 
         {{-- Tasks Tab --}}
         @if(isset($team->todo_lists[0]) && $team->todo_lists[0]?->team_formation_id == auth()->user()->team_member?->team_formation_id)
