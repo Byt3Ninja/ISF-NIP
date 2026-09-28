@@ -2273,7 +2273,7 @@ class HomeController extends Controller
             [
                 'color' => 'success',
                 'href' => '/dashboard/users?r=organizationmanager',
-                'icon' => 'ti ti-user-share',
+                'icon' => 'ti ti-users',
                 'text' => 'Managers',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_managers_view'],
                 'count' => $managers->count(),
