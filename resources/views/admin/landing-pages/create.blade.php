@@ -196,16 +196,9 @@
                   </div>
                 @endif
 
-                {{-- Save button, top-right of each section --}}
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                  <h5 class="mb-0">
-                    {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
-                  </h5>
-                  <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
-                    <i class="ti ti-device-floppy"></i>
-                    {{ __('landing.Save') }}
-                  </button>
-                </div>
+                <h5 class="mb-4">
+                  {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
+                </h5>
 
                 <div class="row g-4">
                   @foreach ($section['fields'] as $field)
@@ -609,6 +602,15 @@
                     </p>
                   </div>
                 @endif
+
+                {{-- Save button, bottom of each section. Stays inside the
+                     fieldset so the locked-section state still disables it. --}}
+                <div class="d-flex justify-content-end mt-4 pt-4 border-top">
+                  <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                    <i class="ti ti-device-floppy"></i>
+                    {{ __('landing.Save') }}
+                  </button>
+                </div>
 
                 </fieldset>
               </form>
