@@ -226,7 +226,7 @@
                         <h5 class="mb-2">{{ $cardTitle }}</h5>
                       @endif
                       @if($cardDesc)
-                        <p class="text-secondary small mb-0">{{ $cardDesc }}</p>
+                        <p class="text-secondary mb-0">{{ $cardDesc }}</p>
                       @endif
                     </div>
                   </div>
