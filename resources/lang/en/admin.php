@@ -2628,7 +2628,7 @@ return [
 	'Expertise_Settings' => 'Expertise Settings',
 	'Expertises_Name' => 'Expertise Name',
 	'Register_Disabled' => 'Registration Disabled',
-	'Expertises' => 'Expertises',
+	'Expertises' => 'Area of Expertise',
 	'all_Expertises' => 'All Expertises',
 	'Expertises_Created' => 'Expertises Created',
 	'No final comments provided' => 'No final comments provided',
