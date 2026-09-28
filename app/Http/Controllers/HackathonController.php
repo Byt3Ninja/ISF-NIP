@@ -893,7 +893,10 @@ class HackathonController extends Controller
             $params = [$id];
 
             // خطوة آمنة لـ step_id
-            if ($request->step_id !== null) {
+            // 'all' is the "All Steps" sentinel; '' or a missing key also mean no filter.
+            // Neither 'all' nor '' may reach intval(), since intval('all') === 0
+            // and 0 is the Disapprove step.
+            if ($request->step_id !== null && $request->step_id !== '' && $request->step_id !== 'all') {
                 $forms .= " AND C.step = ? ";
                 $params[] = intval($request->step_id);
             }
