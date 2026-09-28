@@ -126,7 +126,7 @@ return [
 	'ZOOM_CLIENT_SECRET'=>'ZOOM CLIENT SECRET',
 	'ZOOM_ACCOUNT_ID'=>'ZOOM ACCOUNT ID',
 	'Choose'=>'Choose',
-	'SocialMediaLogin'=>'Social Media Login',
+	'SocialMediaLogin'=>'Social Login & Verification.',
 	'MentorList'=>'Mentor List',
 	'Assessment'=>'Assessment',
 	'whatsApp_URL_callback' => 'WhatsApp URL Callback',
