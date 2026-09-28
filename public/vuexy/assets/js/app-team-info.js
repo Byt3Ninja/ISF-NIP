@@ -93,7 +93,7 @@
   const TRANSLATIONS = {
     en: {
       noResults: (term) => `No results for "${term}"`,
-      noFounders: "No founders added yet",
+      noFounders: "No Cofounders added yet",
       foundersEmptyDesc:
         "Add your founding team to showcase the people behind your startup.",
       noInvestors: "No Investors Listed",
@@ -135,7 +135,7 @@
     },
     ar: {
       noResults: (term) => `لا توجد نتائج لـ "${term}"`,
-      noFounders: "لم تتم إضافة مؤسسين بعد",
+      noFounders: "لم تتم إضافة شركاء مؤسسين بعد",
       foundersEmptyDesc:
         "أضف فريق المؤسسين لعرض الأشخاص الذين يقفون خلف شركتك الناشئة.",
       noInvestors: "لم يتم إضافة مستثمرين",
