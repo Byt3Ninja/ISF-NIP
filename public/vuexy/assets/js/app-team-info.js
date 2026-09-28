@@ -345,7 +345,7 @@
     };
 
     const icons = {
-      founder: "ti-users",
+      founder: "ti-user-plus",
       investor: "ti-building-bank",
       shareholder: "ti-users-group",
     };
@@ -353,7 +353,7 @@
     return `
       <div class="col-12">
         <div class="text-center py-5 my-4 border rounded-3 border-dashed bg-light-subtle empty-state">
-          <i class="ti ${icons[type]} text-secondary" style="font-size: 5rem; line-height: 1;"></i>
+          <i class="ti ${icons[type]} text-secondary" style="font-size: 3.5rem; line-height: 1;"></i>
           <h5 class="mb-2 fw-semibold mt-4">${titles[type]}</h5>
           <p class="text-secondary mb-4">
             ${
