@@ -110,7 +110,7 @@ return [
     'here' => 'هنا',
     'My next mentorship sessions' => 'الاجتماع القادم',
     'No sessions added yet' => 'لا توجد مواعيد حالياً',
-    'User' => 'المستخدم',
+    'User' => 'المؤسس',
     'Date' => 'التاريخ',
     'Admin Notes' => 'ملاحظات الإدارة',
     'Meeting Link' => 'رابط الإجتماع',
