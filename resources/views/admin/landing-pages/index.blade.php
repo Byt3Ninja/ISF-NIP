@@ -139,7 +139,7 @@
 
               @if ($_user->hasAnyRole('admin'))
                 <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
-                  <div class="avatar avatar-sm">
+                  <div class="avatar avatar-xs">
                     <div class="avatar-initial rounded-circle overflow-hidden">
                       @if($page->createdBy && $page->createdBy->img_url)
                         <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
