@@ -502,7 +502,7 @@
   @endforeach
 
   <!-- ===== CTA ===== -->
-  <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}">
+  {{-- <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}">
     @php $landingBg = !$landingBg; @endphp
     <div class="container">
       <div class="gl-cta text-center">
@@ -524,7 +524,7 @@
         </div>
       </div>
     </div>
-  </section>
+  </section> --}}
 
   <!-- ===== Footer ===== -->
   <footer class="gl-footer py-5">
