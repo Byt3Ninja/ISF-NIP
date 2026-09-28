@@ -816,4 +816,5 @@ return [
     'weight_must_be_number' => 'Weight must be a number',
     'Program_Visibility_Public_Helper' => 'Create and display a public landing page for the program.',
     'Program_Visibility_Private_Helper' => 'No public landing page will be created for the program.',
+    'no_mentors_assigned' => 'No mentors assigned',
 ];

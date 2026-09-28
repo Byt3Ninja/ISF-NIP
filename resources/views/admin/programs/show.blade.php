@@ -142,7 +142,7 @@
                                     {{ $mentor->name }}
                                 </a>
                             @empty
-                                <span class="text-muted small">{{ __('cycles.NA') }}</span>
+                                <span class="text-muted small">{{ __('cycles.no_mentors_assigned') }}</span>
                             @endforelse
                         </div>
                     </div>

@@ -811,4 +811,5 @@ return [
     'weight_must_be_number' => 'يجب أن يكون الوزن رقمًا',
     'Program_Visibility_Public_Helper' => 'أنشئ صفحة هبوط عامة للبرنامج واعرضها.',
     'Program_Visibility_Private_Helper' => 'لن يتم إنشاء صفحة هبوط عامة للبرنامج.',
+    'no_mentors_assigned' => 'لم يتم تعيين مرشدين',
 ];
