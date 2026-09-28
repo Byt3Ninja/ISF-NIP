@@ -55,6 +55,19 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
 
   <style>
+    :root {
+      --page-gutter: clamp(1rem, 5vw, 5rem);
+    }
+
+    /* Navbar, hero, all sections, footer */
+    body .container {
+      padding-inline: var(--page-gutter);
+    }
+
+    /* Navigation pills wrapper (uses px-6 instead of .container) */
+    .landing-pills-wrap {
+      padding-inline: var(--page-gutter);
+      }
     html {
       direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};
     }
@@ -116,7 +129,6 @@
     /* Swiper adds -lock when every slide fits: hide pagination on a single page. */
     .partners-carousel .swiper-pagination.swiper-pagination-lock {
       display: none;
-    }
     }
   </style>
 
@@ -281,9 +293,9 @@
 
     <!-- ============ HERO (FLEX-FILL) ============ -->
     <div class="flex-fill d-flex section-py landing-hero position-relative">
-      <div class="container" style="{{$isRtl ? 'padding: 0 9rem;' : '' }}">
-        <div class="row px-4 px-lg-0">
-          <div class="col-lg-8 offset-lg-1">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8">
 
             <!-- Logo + Location -->
             <div class="d-flex align-items-center mb-4">
@@ -340,7 +352,7 @@
                   {{ __('admin.explore_programs') }}
                 </a>
               @endif
-              @if( count($socialLinks) > 0 )
+              @if(count($socialLinks) > 0)
                 <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
                   <span class="text-dark me-2 d-block">{{ __('admin.follow_us') }}</span>
                   <div class="d-flex align-items-center gap-2">
@@ -362,7 +374,7 @@
   </section>
 
   <!-- Navigation Pills -->
-  <div class="px-6">
+  <div class="landing-pills-wrap">
     <div class="card shadow-none border-0 my-8 rounded-pill">
       <div class="card-body">
         <div class="nav-align-top">
