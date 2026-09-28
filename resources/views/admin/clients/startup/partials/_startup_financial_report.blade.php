@@ -71,16 +71,19 @@
       <div class="card border-0 shadow-sm text-center py-5">
         <div class="card-body py-5">
           <div class="mb-4">
-            <i class="ti ti-database-x text-warning" style="font-size: 5rem !important;"></i>
+            <img src="/icons/empty-state.svg" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
           </div>
           <h4 class="card-title text-dark fw-bold mb-2">{{ __('startup.financial.no_financial_data_title') }}</h4>
           <p class="text-muted mx-auto mb-4" style="max-width: 500px;">
             {{ __('startup.financial.no_financial_data_desc') }}
           </p>
-          @if( $_user->hasAnyRole('Admin') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
-            <a href="/dashboard/myCompany/{{ $company->id }}#company-financial-projection" class="btn btn-primary">
-              {{ __('startup.financial.enter_financial_data') }} <i class="ti ti-arrow-right ms-2"></i>
-            </a>
+          @if($_user->hasAnyRole('Admin') || ($_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id))
+            <button 
+              onclick="localStorage.setItem('activeCompanyTab', 5); window.location.href = '/dashboard/myCompany/{{ $company->id }}'"
+              class="btn btn-primary"
+            >
+              {{ __('startup.financial.enter_financial_data') }} <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ms-2"></i>
+            </button>
           @endif
         </div>
       </div>
@@ -96,9 +99,12 @@
             {{ __('startup.financial.missing_required_fields_desc') }}
           </p>
           @if( $_user->hasAnyRole('Admin') || ( $_user->ableTo('company.profile_view_mine', $permissions) && $_user->hasRole('registered') && $_user->company_id == $company->id ) )
-            <a href="/dashboard/myCompany/{{ $company->id }}#company-financial-projection" class="btn btn-primary">
-              {{ __('startup.financial.complete_financial_data') }} <i class="ti ti-arrow-right ms-2"></i>
-            </a>
+            <button
+              onclick="localStorage.setItem('activeCompanyTab', 5); window.location.href = '/dashboard/myCompany/{{ $company->id }}'" 
+              class="btn btn-primary"
+            >
+              {{ __('startup.financial.complete_financial_data') }} <i class="ti ti-arrow-{{ $l == 'en' ? 'right' : 'left' }} ms-2"></i>
+            </button>
           @endif
         </div>
       </div>
