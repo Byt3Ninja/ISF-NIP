@@ -12,15 +12,35 @@
     -webkit-box-orient: vertical;
   }
 
-  /* Status accent bar along the card's top edge. The colors mirror the
-     .bg-label-primary / .bg-label-warning badges in theme-default.css so the
-     bar and the badge stay in sync. */
+  /* Status accent bar along the card's top edge, plus a matching hover tint.
+     --status-color is declared once per status and reused by the bar, the hover
+     shadow, and the hover border, so the three can never drift apart.
+     Colors mirror .bg-label-primary / .bg-label-warning in theme-default.css. */
+  .landing-card {
+    --status-color: transparent;
+    --status-shadow: rgba(0, 0, 0, .12);
+    transition: transform .25s ease-in-out, box-shadow .25s ease-in-out, border-color .25s ease-in-out;
+  }
+
   .landing-card.status-active {
-    border-top: 3px solid #7367f0;
+    --status-color: #7367f0;
+    --status-shadow: rgba(115, 103, 240, .22);
   }
 
   .landing-card.status-inactive {
-    border-top: 3px solid #ff9f43;
+    --status-color: #ff9f43;
+    --status-shadow: rgba(255, 159, 67, .22);
+  }
+
+  .landing-card.status-active,
+  .landing-card.status-inactive {
+    border-top: 3px solid var(--status-color);
+  }
+
+  .landing-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--status-color);
+    box-shadow: 0 .75rem 1.5rem var(--status-shadow) !important;
   }
   </style>
 @endsection
