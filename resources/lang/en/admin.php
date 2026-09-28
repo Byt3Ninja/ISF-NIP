@@ -818,7 +818,7 @@ return [
 	'timesheetNotFound' => 'Time Sheet Not Found',
 	'CountTotalHours' => '  Count Total Hours ',
 	'TotalAmount' => '  Total Amount',
-	'HouresRate' => '  Houres Rate',
+	'HouresRate' => '  Hours Rate',
 	'Number' => ' Number  ',
 	'Condition' => ' Condition  ',
 	'Equal' => ' Equal  ',
