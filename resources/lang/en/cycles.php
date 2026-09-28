@@ -18,7 +18,7 @@ return [
     'Screening' => 'Screening',
     'Mentorship' => 'Mentorship',
     'Training' => 'Training',
-    'Final evaluation' => 'Final evaluation',
+    'Final evaluation' => 'Final Screening',
     'Add New step' => 'Add New step',
     'Cycle steps' => 'Program steps',
     'Drag arrange' => 'Drag & drop to arrange steps/ add new item from menu/ click remove icon to remove',

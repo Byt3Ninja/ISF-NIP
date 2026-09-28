@@ -1751,7 +1751,7 @@ return [
 	'Startup Performance' => 'Startup Performance',
 	'Mentorship & Advisory' => 'Mentorship & Advisory',
 	'Workshops' => 'Workshops',
-	'Final Evaluation' => 'Final Evaluation',
+	'Final Evaluation' => 'Final Screening',
 	'Startup Program Dashboard' => 'Startup Program Dashboard',
 	'average_rating' => 'Average Rating',
 	'company_counts' => 'Company Counts',
