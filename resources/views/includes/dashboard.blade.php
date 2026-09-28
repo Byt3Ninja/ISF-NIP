@@ -1212,27 +1212,65 @@
 								<tr>
 									<td> {{ $loop->iteration }} </td>
 									<td>
-										@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark"
-											href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
-											<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
-												height="40" width="40">
-											<span class="fw-medium"> {{ $session->user->company->name }}</span>
-											@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
-									</td>
+                    @if ($_user->ableTo('company.profile_view', $permissions))
+                      <a
+                        href="/dashboard/companyProfile/{{ $session->user->company->id }}"
+                        class="d-flex align-items-center gap-2 text-dark"
+                      >
+                    @else
+                      <div class="d-flex align-items-center gap-2">
+                    @endif
+
+                      <img
+                        src="{{ $session->user->company->logo_url }}"
+                        alt="{{ $session->user->company->name }}"
+                        class="rounded-circle flex-shrink-0 border w-px-40 h-px-40"
+                      >
+
+                      <span class="fw-medium text-truncate">
+                        {{ $session->user->company->name }}
+                      </span>
+
+                    @if ($_user->ableTo('company.profile_view', $permissions))
+                      </a>
+                    @else
+                      </div>
+                    @endif
+                  </td>
 									<td>
-										@if( $_user->ableTo('users.edit', $permissions) )<a
-											class="text-dark d-flex align-items-center gap-2"
-											href="/dashboard/users/{{ $session->user->id }}/edit">@endif
-											<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
-												height="35" width="35" style="border: 2px solid #ddd;">
-											<div class="media-body">
-												<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}
-												</h6>
-												<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
-											</div>
-											@if( $_user->ableTo('users.edit', $permissions) )
-										</a>@endif
-									</td>
+                    @if ($_user->ableTo('users.edit', $permissions))
+                      <a
+                        href="/dashboard/users/{{ $session->user->id }}/edit"
+                        class="d-flex align-items-center gap-2 text-body"
+                      >
+                    @else
+                      <div class="d-flex align-items-center gap-2">
+                    @endif
+
+                      <img
+                        src="{{ $session->user->image_url }}"
+                        alt="{{ $session->user->name }}"
+                        class="rounded-circle flex-shrink-0 border w-px-40 h-px-40"
+                      >
+
+                      <div class="min-w-0">
+                        <h6 class="mb-0 text-truncate">
+                          {{ $session->user->name }}
+                        </h6>
+
+                        @if (!empty($session->user->title))
+                          <span class="text-muted text-truncate d-block">
+                            {{ $session->user->title }}
+                          </span>
+                        @endif
+                      </div>
+
+                    @if ($_user->ableTo('users.edit', $permissions))
+                      </a>
+                    @else
+                      </div>
+                    @endif
+                  </td>
 									<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
 									<td>
 										{{ $session->session_type ?? '' }}
@@ -1260,12 +1298,12 @@
 											@else
 											
 												<span class="warning">
-													<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
+													<a class="btn btn-sm btn-label-primary" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
 														<i class="ti ti-map me-2"></i>
-														{{ __('admin.Location') }}
+														{{ __('cycles.View_Location') }}
 													</a>
 													<div class="mt-3">
-														<small> <i class="fas fa-map-marker-alt"></i> {{ $session->organization->address }} </small>
+														<small> <i class="ti ti-map-pin me-1"></i> {{ $session->organization->address }} </small>
 													</div>
 												</span>
 											@endif
