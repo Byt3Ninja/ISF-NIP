@@ -102,17 +102,18 @@
           <div class="col-md-4">
             <div class="card h-100 shadow-sm">
               <div class="card-header d-flex align-items-center justify-content-between pb-3">
-                <div class="w-px-52 h-px-52 bg-white rounded overflow-hidden me-2 border shadow-xs d-flex justify-content-center align-items-center">
-                  @if ($cycle->logo)
-                    <img 
-                      src="{{ $cycle->logo }}"
-                      alt="{{ __('admin.Logo') }}"
-                      onerror="this.src = '/images/logo-placeholder.png';"
-                      class="img-fluid w-100 h-100 object-cover"
-                    />
-                  @else
-                    <i class="ti ti-components text-primary ti-lg"></i>
-                  @endif
+                <div class="w-px-52 h-px-52 flex-shrink-0 position-relative bg-white rounded overflow-hidden me-2 shadow-xs d-flex justify-content-center align-items-center">
+                  <img 
+                    src="{{ $cycle->logo }}"
+                    alt="{{ __('admin.Logo') }}"
+                    onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
+                    class="w-100 h-100 object-fit-contain {{ $cycle->logo ? '' : 'd-none' }}"
+                  />
+                  <span class="avatar {{ $cycle->logo ? 'd-none' : '' }}">
+                    <div class="avatar-initial avatar-initial bg-label-primary rounded">
+                      <i class="ti ti-rocket ti-lg"></i>
+                    </div>
+                  </span>
                 </div>
 
                 <div class="d-flex align-items-center">
