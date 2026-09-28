@@ -11,6 +11,17 @@
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
   }
+
+  /* Status accent bar along the card's top edge. The colors mirror the
+     .bg-label-primary / .bg-label-warning badges in theme-default.css so the
+     bar and the badge stay in sync. */
+  .landing-card.status-active {
+    border-top: 3px solid #7367f0;
+  }
+
+  .landing-card.status-inactive {
+    border-top: 3px solid #ff9f43;
+  }
   </style>
 @endsection
 
@@ -87,7 +98,7 @@
 
         <div class="col-xl-4 col-md-6" data-id="{{ $page->id }}">
 
-          <div class="card landing-card h-100 shadow-sm" data-url="{{ $page->public_url }}">
+          <div class="card landing-card h-100 shadow-sm status-{{ $page->status ? 'active' : 'inactive' }}" data-url="{{ $page->public_url }}">
 
             <div class="card-body d-flex flex-column">
 
@@ -113,7 +124,7 @@
                     </a>
                   </h5>
 
-                  <div class="badge rounded-pill bg-label-{{ $page->status ? 'info' : 'danger' }} mb-3 pb-1">
+                  <div class="badge rounded-pill bg-label-{{ $page->status ? 'primary' : 'warning' }} mb-3 pb-1">
                     <i class="ti ti-point-filled ti-xs"></i>
                     {{ $page->status ? __('admin.Active') : __('admin.Inactive') }}
                   </div>
@@ -128,7 +139,7 @@
 
               @if ($_user->hasAnyRole('admin'))
                 <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
-                  <div class="avatar">
+                  <div class="avatar avatar-sm">
                     <div class="avatar-initial rounded-circle overflow-hidden">
                       @if($page->createdBy && $page->createdBy->img_url)
                         <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
@@ -137,17 +148,17 @@
                       @endif
                     </div>
                   </div>
-                  <span class="text-body">{{ __('admin.created_by') }}</span>
-                  <span
-                    class="fw-semibold text-dark"
+                  <small class="text-body">{{ __('admin.created_by') }}</small>
+                  <small
+                    class="fw-semibold text-dark fs-xs"
                   >
                     {{ $page->createdBy->name ?? '' }}
-                  </span>
+                  </small>
                 </a>
               @endif
             </div>
 
-            <div class="card-footer bg-card border-top pt-6 d-flex justify-content-between align-items-center">
+            <div class="card-footer bg-card border-top py-2 d-flex justify-content-between align-items-center">
 
               <div class="text-secondary small">
                 <i class="ti ti-rocket me-1"></i>
