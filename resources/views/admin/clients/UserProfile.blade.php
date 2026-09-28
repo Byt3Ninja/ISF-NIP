@@ -223,7 +223,7 @@ if ($canRequestMentorship) {
                       <div class="d-flex justify-content-center align-items-center mb-2">
                         <div class="avatar me-4">
                           <span class="avatar-initial rounded bg-label-primary">
-                            <i class="ti-brand-my-oppo text-primary ti-28px"></i>
+                            <i class="ti ti-brand-my-oppo text-primary ti-28px"></i>
                           </span>
                         </div>
                         <p class="mb-0 text-center h4">{{ $mentrequests_count }}</p>
@@ -239,7 +239,7 @@ if ($canRequestMentorship) {
                       <div class="d-flex justify-content-center align-items-center mb-2">
                         <div class="avatar me-4">
                           <span class="avatar-initial rounded bg-label-primary">
-                            <i class="ti-calendar-event text-primary ti-28px"></i>
+                            <i class="ti ti-calendar-event text-primary ti-28px"></i>
                           </span>
                         </div>
                         <p class="mb-0 text-center h4">{{ $mentrequests_period }}</p>
@@ -255,7 +255,7 @@ if ($canRequestMentorship) {
                       <div class="d-flex justify-content-center align-items-center mb-2">
                         <div class="avatar me-4">
                           <span class="avatar-initial rounded bg-label-primary">
-                            <i class="ti-calendar-event text-primary ti-28px"></i>
+                            <i class="ti ti-star text-primary ti-28px"></i>
                           </span>
                         </div>
                         <p class="mb-0 text-center h4">{{ number_format($average_rating ?? 0, 1) }}</p>
