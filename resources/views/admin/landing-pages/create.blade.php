@@ -209,10 +209,14 @@
                       $colWidth   = $field['col'] ?? 12;
                     @endphp
                     <div class="col-md-{{ $colWidth }}">
-                      <label for="{{ $fieldId }}" class="form-label">
-                        {{ $fieldLabel }}
-                        @if(!empty($field['required'])) <span class="text-danger">*</span> @endif
-                      </label>
+                      {{-- Checkbox labels sit after the switch, so the block-level
+                           label above is suppressed for them. --}}
+                      @if($field['type'] !== 'checkbox')
+                        <label for="{{ $fieldId }}" class="form-label">
+                          {{ $fieldLabel }}
+                          @if(!empty($field['required'])) <span class="text-danger">*</span> @endif
+                        </label>
+                      @endif
 
                       @switch($field['type'])
                         @case('textarea')
@@ -264,7 +268,7 @@
                           @break
 
                         @case('checkbox')
-                          <div class="form-check form-switch">
+                          <div class="form-check form-switch d-flex align-items-center gap-2 mb-0">
                             <input
                               type="hidden"
                               name="{{ $fieldName }}"
@@ -278,6 +282,9 @@
                               class="form-check-input"
                               @checked(old($fieldName, $field['value']))
                             >
+                            <label class="form-check-label mb-0" for="{{ $fieldId }}">
+                              {{ $fieldLabel }}
+                            </label>
                           </div>
                           @break
 
@@ -360,6 +367,11 @@
                     </button>
                   </div>
                   <div class="row g-4" id="aboutCardsContainer"></div>
+                  <div id="aboutCardsEmpty" class="text-center py-5 border border-dashed rounded">
+                    <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="text-muted mb-1">{{ __('landing.No_about_cards_yet') }}</h5>
+                    <p class="text-muted small mb-0">{{ __('landing.Add_about_cards_hint') }}</p>
+                  </div>
                 @endif
 
                 @if($section['key'] === 'programs')
@@ -573,6 +585,11 @@
                     </button>
                   </div>
                   <div class="row g-4" id="howStepsContainer"></div>
+                  <div id="howStepsEmpty" class="text-center py-5 border border-dashed rounded">
+                    <i class="ti ti-sitemap text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="text-muted mb-1">{{ __('landing.No_how_steps_yet') }}</h5>
+                    <p class="text-muted small mb-0">{{ __('landing.Add_how_steps_hint') }}</p>
+                  </div>
                 @endif
 
                 @if($section['key'] === 'custom')
@@ -1140,6 +1157,8 @@
       const updateAboutCardButtons = function () {
         const count = $('#aboutCardsContainer .about-card').length;
         $('#aboutAddCard').prop('disabled', count >= aboutMaxCards);
+        $('#aboutCardsEmpty').toggleClass('d-none', count > 0);
+        $('#aboutCardsContainer').toggleClass('d-none', count === 0);
         $('#aboutCardsContainer .about-card').each(function (i) {
           $(this).find('.about-card-label').text(("{{ __('landing.Card') }}") + (i + 1));
         });
@@ -1189,6 +1208,9 @@
           $card.remove();
           updateAboutCardButtons();
         });
+
+      // New pages start with no cards, so reconcile the empty state once here.
+      updateAboutCardButtons();
 
       // For the section enable switches: main fields are only mandatory
       // while the section is enabled. The state is applied both on toggle
@@ -1299,6 +1321,8 @@
       const updateHowStepButtons = function () {
         const count = $('#howStepsContainer .how-step').length;
         $('#howAddStep').prop('disabled', count >= howMaxSteps);
+        $('#howStepsEmpty').toggleClass('d-none', count > 0);
+        $('#howStepsContainer').toggleClass('d-none', count === 0);
         $('#howStepsContainer .how-step').each(function (i) {
           $(this).find('.how-step-label').text(("{{ __('landing.Step') }}") + (i + 1));
         });
@@ -1348,6 +1372,8 @@
           $step.remove();
           updateHowStepButtons();
         });
+
+      updateHowStepButtons();
 
       // ─────────────────────────────────────────────────────────────
       // Programs selection list — client-side search + filters +
