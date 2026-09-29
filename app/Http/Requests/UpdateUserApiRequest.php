@@ -41,7 +41,6 @@ class UpdateUserApiRequest extends FormRequest
         ],
         'gender' => ['nullable', 'string', 'in:Male,Female'],
         'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-        'role' => ['nullable', 'exists:roles,id'],
         'status' => ['nullable', 'string'],
         'HaveCompany'=> ['nullable', 'bool'],
         'country_id'=> ['nullable','exists:countries,id'],

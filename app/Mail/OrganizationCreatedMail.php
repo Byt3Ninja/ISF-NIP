@@ -2,8 +2,10 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use App\User;
 use App\Organization;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 
 class OrganizationCreatedMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
     public $organization;
     public $user;
@@ -31,9 +33,11 @@ class OrganizationCreatedMail extends Mailable implements ShouldQueue
 
      public function build()
     {
+        $orgData = $this->buildEmailOrganizationData($this->organization);
+
         return $this->subject('New Organization Created')
                     ->view('emails.organization_created')
-                    ->with(['organization' => $this->organization, 'user' => $this->user, 'password' => $this->password]);
+                    ->with(array_merge(['organization' => $this->organization, 'user' => $this->user, 'password' => $this->password], $orgData));
     // Log::info('Organization created email sent successfully', ['organization' => $this->organization, 'user' => $this->user, 'password' => $this->password]);
     }
 

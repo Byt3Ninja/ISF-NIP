@@ -48,6 +48,7 @@ use App\Jobs\SendTrainingNotificationJob;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Notifications\NewTrainingNotification;
 use App\TrainingDuration;
+use App\Services\MeetingWindowService;
 use Intervention\Image\ImageManagerStatic as Image;
 
 class TrainingController extends Controller
@@ -219,21 +220,17 @@ class TrainingController extends Controller
 	public function all(Request $request, $id = 0)
 	{
 		try {
-			$courses = Training::orderBy('created_at', 'DESC');
-			if ($request->catTr_id) {
+			$courses = Training::visibleToUser()->with('organization')->orderBy('created_at', 'DESC');
+			if( $request->catTr_id )
+			{
 				$courses = $courses->whereHas('categories', function ($query) use ($request) {
 					$query->whereIn('categories_id', (array) $request->catTr_id);
 				})
-					->where('status', 1)
-					->orderBy('created_at', 'DESC');
+				->where('status', 1)
+				->orderBy('created_at', 'DESC');
 			}
-			if ($request->status) {
-				if ($request->status == "draft") {
-					$courses = $courses->where('Status', 0);
-				} else {
-					$courses = $courses->where('Status', 1);
-				}
-			}
+			if( $request->status ) { $courses = $courses->where('Status', $request->status == "draft" ? 0 : 1); }
+
 			$courses = $courses->get();
 			if ($id == 0 && count($courses)) {
 				$id = $courses->pluck('id')[0];
@@ -248,117 +245,105 @@ class TrainingController extends Controller
 
 	public function edit($id)
 	{
-		$courses = Training::findOrFail($id);
+		$courses = Training::visibleToUser()->findOrFail($id);
 		return response()->json($courses);
 	}
 
 	public function store(Request $request)
 	{
 		try {
-			if ($request->hasFile('image')) {
+			$user = auth()->user();
+
+			// Determine organization_id
+			$organizationId = null;
+			if ($user->ableTo('trainings.set_public')) {
+				$organizationId = $request->organization_id ?: null;
+			} elseif ($user->organization_id) {
+				$organizationId = $user->organization_id;
+			} elseif (!empty($user->organizations_ids)) {
+				$organizationId = $user->organizations_ids[0];
+			}
+
+			// Determine is_public (only users with permission can set it)
+			$isPublic = false;
+			if ($user->ableTo('trainings.set_public')) {
+				$isPublic = $request->has('is_public') ? true : false;
+			}
+
+			// On update: non-privileged users cannot change organization_id
+			if ($request->id) {
+				$existing = Training::find($request->id);
+				if ($existing && !$user->ableTo('trainings.set_public')) {
+					$organizationId = $existing->organization_id;
+					$isPublic = $existing->is_public;
+				}
+			}
+
+			$img_url = null;
+			if ($request->hasFile('image'))
+			{
 				$img_url = $request->file('image');
 				$img_url = $img_url->store('training', ['disk' => 'public_uploads']);
 				Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 350, function ($con) {
 					$con->aspectRatio();
 				})->save();
+			}
 
-				$training = Training::updateOrCreate(
-					['id' => $request->id],
-					[
-						'title' => $request->title,
-						'dsc' => $request->dsc,
-						'code' => $request->code,
-						'CoursLevel' => $request->CoursLevel,
-						'Quizs' => $request->Quizs,
-						'Instractor' => $request->Instractor,
-						'start_date' => $request->start_date,
-						'end_date' => $request->end_date,
-						'Status' => $request->Status,
-						'user_id' => Auth::id(),
-						'image' => $img_url
-					]
-				);
+			$training = Training::updateOrCreate(
+				['id' => $request->id],
+				[
+					'title' => $request->title,
+					'dsc' => $request->dsc,
+					'code' => $request->code,
+					'CoursLevel' => $request->CoursLevel,
+					'Quizs' => $request->Quizs,
+					'Instractor' => $request->Instractor,
+					'start_date' => $request->start_date,
+					'end_date' => $request->end_date,
+					'Status' => $request->Status,
+					'user_id' => $user->id,
+					'image' => $img_url,
+					'organization_id' => $organizationId,
+					'is_public' => $isPublic,
+				]
+			);
 
-				$expertises = [];
-				foreach ($request->CoursCategories as $expertiseId) {
+			$expertises = [];
+			if( !empty($request->CoursCategories) )
+			{
+				foreach( $request->CoursCategories as $expertiseId )
+				{
 					$expertises[] = [
 						'categories_id' => $expertiseId,
 						'training_id' => $training->id
 					];
 				}
+			}
 
-				DB::table('categories_training')->where('training_id', $training->id)->delete();
-				// إدراج الخبرات دفعة واحدة
-				DB::table('categories_training')->insert($expertises);
+			DB::table('categories_training')->where('training_id', $training->id)->delete();
+			// إدراج الخبرات دفعة واحدة
+			DB::table('categories_training')->insert($expertises);
 
-				if (!empty(array_filter($request->Tags))) {
-					$tags = [];
-					foreach ($request->Tags as $tagName) {
-						// تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
-						$tag = Tags::where('name', $tagName)->first();
-						// إذا لم يكن موجودًا، قم بإنشائه
-						if (!$tag) {
-							$tag = Tags::create(['name' => $tagName]);
-						}
-						// قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
-						$tags[] = [
-							'tag_id' => $tag->id,
-							'training_id' => $training->id
-						];
+			if( !empty( array_filter( $request->Tags ) ) )
+			{
+				$tags = [];
+				foreach( $request->Tags as $tagName )
+				{
+					// تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
+					$tag = Tags::where('name', $tagName)->first();
+					// إذا لم يكن موجودًا، قم بإنشائه
+					if (!$tag) {
+						$tag = Tags::create(['name' => $tagName]);
 					}
-					DB::table('tag_training')->where('training_id', $training->id)->delete();
-					// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
-					DB::table('tag_training')->insert($tags);
-				}
-			} else {
-				$training = Training::updateOrCreate(
-					['id' => $request->id],
-					[
-						'title' => $request->title,
-						'dsc' => $request->dsc,
-						'code' => $request->code,
-						'CoursLevel' => $request->CoursLevel,
-						'Quizs' => $request->Quizs,
-						'Status' => $request->Status,
-						'user_id' => Auth::id()
-
-					]
-				);
-				$expertises = [];
-				foreach ($request->CoursCategories as $expertiseId) {
-					$expertises[] = [
-						'categories_id' => $expertiseId,
+					// قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
+					$tags[] = [
+						'tag_id' => $tag->id,
 						'training_id' => $training->id
 					];
 				}
-
-				DB::table('categories_training')->where('training_id', $training->id)->delete();
-
-				// إدراج الخبرات دفعة واحدة
-				DB::table('categories_training')->insert($expertises);
-
-				if (!empty(array_filter($request->Tags))) {
-					$tags = [];
-					foreach ($request->Tags as $tagName) {
-						// تحقق مما إذا كان الـ tag موجود بالفعل في الجدول
-						$tag = Tags::where('name', $tagName)->first();
-						// إذا لم يكن موجودًا، قم بإنشائه
-						if (!$tag) {
-							$tag = Tags::create(['name' => $tagName]);
-						}
-						// قم بإضافة الـ tag_id و training_id إلى القائمة لإدراجها في الجدول الوسيط
-						$tags[] = [
-							'tag_id' => $tag->id,
-							'training_id' => $training->id
-						];
-					}
-
-					DB::table('tag_training')
-						->where('training_id', $training->id)
-						->delete();
-					// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
-					DB::table('tag_training')->insert($tags);
-				}
+				DB::table('tag_training')->where('training_id', $training->id)->delete();
+				// إدراج الـ tags المرتبطة بالتدريب دفعة واحدة في الجدول الوسيط
+				DB::table('tag_training')->insert($tags);
 			}
 
 			return redirect('/dashboard/training/all/')->with(['class' => 'success', 'message' => 'Saved']);
@@ -371,7 +356,11 @@ class TrainingController extends Controller
 	{
 		try {
 			if ($request) {
-				Training::where('id', $id)->delete();
+				$training = Training::visibleToUser()->where('id', $id)->first();
+				if (!$training) {
+					return response()->json(['state' => 'forbidden'], 403);
+				}
+				$training->delete();
 				TrainingContent::where('training_id', $id)->delete();
 				DB::table('tag_training')->where('training_id', $id)->delete();
 				DB::table('categories_training')->where('training_id', $id)->delete();
@@ -536,7 +525,7 @@ class TrainingController extends Controller
 		$user= Auth::user();
 		if($user->hasRole('Registered')){
 			
-		 	$request->validate([
+			$request->validate([
 				'duration_minutes' => 'required|integer|min:1',
 				'trainingId' => 'required|integer',
 			]);
@@ -576,25 +565,24 @@ class TrainingController extends Controller
 					});
 				});
 			})->where('type', 'online')->orderBy('datetime')->get();
-			if ($id == 0) {
-				$id = $sessions->pluck('id')->first();
-				$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
-			} else {
-				$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
-			}
+			if ($id == 0) { $id = $sessions->pluck('id')->first(); }
+			$csession = TrainingSession::where('type', 'online')->where('id', $id)->first();
 			$contents = 0;
 
 			if ($csession) {
 				$contents = TrainingContent::where('training_id', $csession->training_Address)->count();
 			}
-			$steps11 = Step::where('id', $csession?->step_id)->orderBy('arr')->get();
+
+			$get_online_session = Step::where('id', $csession?->step_id)->orderBy('arr')->get();
 			$companies = collect([]);
-			foreach ($steps11 as $steps1) {
-				$companies = Company::where('cycle', $steps1->cycle_id)->get();
+			$companies_cycle_ids = $get_online_session->pluck('cycle_id')->toArray();
+			if( count( $companies_cycle_ids ) > 0 )
+			{
+				$companies = Company::whereIn('cycle', $companies_cycle_ids)->get();
 			}
+			
 			$uniqueCycleIds = $companies->pluck('cycle')->unique();
 			$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
-
 
 			return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));
 		} catch (\Throwable $e) {
@@ -606,32 +594,44 @@ class TrainingController extends Controller
 		try {
 			$user = auth()->user();
 			$orgIds = $user->organizations_ids;
+			$original_step_id = $id;
 
 			$steps = Step::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 				return $q->whereHas('cycle', function ($query) use ($orgIds) {
 					$query->whereIn('organization_id', $orgIds);
 				});
-			})->where('stype', 4)->get();
+			})->where('stype', 4)->with(['cycle', 'cycle.organization'])->get();
+			$cycles = $steps->pluck('cycle')->unique('id')->values();
 
 			if ($id == 0) {
 				$id = $steps->pluck('id')->first();
 			}
+			$steps_ids = $steps->pluck('id')->toArray();
 			if($request->company_id != 0) { 
 				$company = Company::find($request->company_id);
 				$id = $company->step;
-			 }
+			}
 			
 			// $sessions = TrainingSession::where('step_id', $id)->with('reports')->orderBy('datetime', 'ASC');
+			$current_step = $steps->where('id', $id)->first();
+			if( !$current_step ) { return abort(404); }
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
-			if($request->company_id != 0) { 
+			if( $request->company_id != 0 )
+			{ 
 				$company = Company::find($request->company_id);
 				$sessions = $sessions->where('step_id', $company->step);
-			 }
-			 $sessions = $sessions->get();
+			}
+			else
+			{
+				$sessions = $sessions->whereIn('step_id', $steps_ids);
+			}
+			if( $original_step_id != 0 )
+			{
+				$sessions = $sessions->where('step_id', $original_step_id);
+			}
+			$sessions = $sessions->get();
 
-			$cycles = TrainingSession::with('step.cycle')->get()->pluck('step.cycle')->unique('id');
-			
-			$online = Training::get();
+			$online = Training::visibleToUser()->get();
 			// if ($request->type != 0) {
 			// 	$sessions = $sessions->where('type', $request->type);
 			// }
@@ -644,8 +644,11 @@ class TrainingController extends Controller
 			// }
 
 			// dd($sessions->toArray());
-			return view('admin/settings/training/sessions', compact('steps', 'id', 'sessions', 'cycles', 'online'));
+			
+			$program_steps = $steps->where('cycle_id', $current_step->cycle->id)->values();
+			return view('admin/settings/training/sessions', compact('steps', 'program_steps', 'id', 'sessions', 'cycles', 'online', 'current_step'));
 		} catch (\Throwable $e) {
+			if( $e->getStatusCode() == 404 ) { return abort(404); }
 			Log::error('Error in TrainingController@sessions: ' . $e->getMessage());
 		}
 	}
@@ -671,7 +674,18 @@ class TrainingController extends Controller
 				}
 				
 			}
-			$sessions = $sessions->map(function ($session) {
+			$user = Auth::user();
+			$sessions = $sessions->map(function ($session) use ($user) {
+				// GV-8301: decide joinability from the raw stored values, before
+				// the display formatting below overwrites `enddatetime` (and
+				// truncates it to Y-m-d for `online` courses).
+				$session->can_join = MeetingWindowService::isOpen(
+					TrainingSession::wallClock($session->getRawOriginal('datetime')),
+					TrainingSession::wallClock($session->getRawOriginal('enddatetime')),
+					$user,
+					'founder'
+				);
+
 				if ($session->type == "online") {
 					$session->datetime1 = FormatDate($session->datetime, 'Y-m-d');
 					$session->enddatetime = FormatDate($session->enddatetime, 'Y-m-d');
@@ -703,9 +717,15 @@ class TrainingController extends Controller
 				$startDate = $request->datetime;
 				$startTime = $request->starttime;   // وقت البداية
 				$endTime = $request->endtime;   // وقت النهاية
-				$start_datetime = strtotime($startDate . ' ' . $startTime . ':00');
-				$end_datetime = strtotime($startDate . ' ' . $endTime . ':00');
+				$start_time_tailing = str_contains($startTime, 'AM') || str_contains($startTime, 'PM') ? '' : ':00';
+				$start_datetime = strtotime($startDate . ' ' . $startTime . $start_time_tailing);
+				
+				$end_time_tailing = str_contains($endTime, 'AM') || str_contains($endTime, 'PM') ? '' : ':00';
+				$end_datetime = strtotime($startDate . ' ' . $endTime . $end_time_tailing);
 			} else if ($type == 'online') {
+				if (empty($dateRange) || !str_contains($dateRange, ' - ')) {
+					return back()->with(['message' => 'Please fill all fields', 'class' => 'danger']);
+				}
 				[$startDate, $endDate] = explode(' - ', $dateRange);
 				$start_datetime = strtotime($startDate);
 				$end_datetime = strtotime($endDate);
@@ -716,10 +736,19 @@ class TrainingController extends Controller
 			}
 
 			$step = $request->step_id;
+
+			// A cleared/never-selected Step or Program must fail with a clear
+			// message here -- not as a raw "step_id cannot be null" SQL error
+			// once addorcreat*Session() tries to insert the training row.
+			if (empty($step) || empty($request->cycle_id)) {
+				return back()->with(['message' => __('cycles.Step_Required'), 'class' => 'danger']);
+			}
+
 			$title = $request->title;
 			$dsc = $request->dsc;
 			$datetime = $start_datetime;
 			$original_datetime = date( 'Y-m-d h:i A', $start_datetime );
+			$original_end_datetime = date( 'Y-m-d h:i A', $end_datetime );
 			$datetimeStamp = Carbon::parse($datetime)->timestamp;
 			$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
 			$start = Carbon::parse($datetime);
@@ -741,7 +770,7 @@ class TrainingController extends Controller
 				}
 				$trainingSession = $_session['message'];
 				// ======> notify Trainer <=================
-				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $original_datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
+				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $original_datetime, $trainingSession->join_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit, $original_end_datetime, $trainingSession->start_url);
 				// ==========> End Notify <================
 				return back()->with(['message' => __('cycles.Online_Session_Added_Successfully'), 'class' => 'success']);
 			} elseif ($type == 'online') {
@@ -755,7 +784,7 @@ class TrainingController extends Controller
 				// ======> notify Trainer <=================
 				$join_url = $request->training_location ?? 'No Location';
 				$address  = $request->training_Address ?? 'No Address';
-				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $original_datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
+				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $original_datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit, $original_end_datetime);
 				// ==========> End Notify <================
 				return back()->with(['message' => __('cycles.Offline_Session_Added_Successfully'), 'class' => 'success']);
 			} else {
@@ -776,87 +805,108 @@ class TrainingController extends Controller
 	}
 	public function editsession(Request $request, $id)
 	{
-		try {
-			// dd($request->all());
-			$this->meetingService =  OnlineMeetingFactory::create();
-			$addOrEdit = 'edit';
-			$type = $request->type;
-			$start_datetime = null;
-			$end_datetime = null;
-			$l = app()->getLocale();
-
-			if ($type == 'sessions' || $type == 'offline') {
-				$startDate = $request->datetime;
-				$startTime = date('H:i', strtotime($request->starttime));
-				$endTime = date('H:i', strtotime($request->endtime));
-				$start_datetime = $startDate . ' ' . $startTime;
-				$end_datetime = $startDate . ' ' . $endTime;
-			} elseif ($type == 'online') {
-				if (empty($request->date_range)) {
-					return back()->with(['message' => 'Date range is required for online sessions', 'class' => 'danger']);
-				}
-				[$startDate, $endDate] = explode(' - ', $request->date_range);
-				try {
-					$start_datetime = Carbon::createFromFormat('m/d/Y', trim($startDate))->format('Y-m-d');
-					$end_datetime = Carbon::createFromFormat('m/d/Y', trim($endDate))->format('Y-m-d');
-				} catch (\Exception $e) {
-					return back()->with(['message' => 'Invalid date format in date range', 'class' => 'danger']);
-				}
+			try {
+					$this->meetingService = OnlineMeetingFactory::create();
+					$addOrEdit = 'edit';
+					$type = $request->type;
+					$start_datetime = null;
+					$end_datetime = null;
+					$l = app()->getLocale();
+	
+					if ($type == 'sessions' || $type == 'offline') {
+							$startDate = $request->datetime;
+							$startTime = date('H:i', strtotime($request->starttime));
+							$endTime   = date('H:i', strtotime($request->endtime));
+							$start_datetime = $startDate . ' ' . $startTime;
+							$end_datetime   = $startDate . ' ' . $endTime;
+					} elseif ($type == 'online') {
+							if (empty($request->date_range)) {
+									return back()->with(['message' => 'Date range is required for online sessions', 'class' => 'danger']);
+							}
+							[$startDate, $endDate] = explode(' - ', $request->date_range);
+							try {
+									$start_datetime = Carbon::createFromFormat('m/d/Y', trim($startDate))->format('Y-m-d');
+									$end_datetime   = Carbon::createFromFormat('m/d/Y', trim($endDate))->format('Y-m-d');
+							} catch (\Exception $e) {
+									return back()->with(['message' => 'Invalid date format in date range', 'class' => 'danger']);
+							}
+					} else {
+							return back()->with(['message' => "Can't edit session — unknown type", 'class' => 'danger']);
+					}
+	
+					if (is_null($start_datetime) || is_null($end_datetime)) {
+							return back()->with(['message' => 'Please fill all required date and time fields', 'class' => 'danger']);
+					}
+	
+					$step     = $request->step_id;
+					$title    = $request->title;
+					$dsc      = $request->dsc;
+					$datetime = $start_datetime;
+	
+					$datetimeStamp     = Carbon::parse($datetime)->timestamp;
+					$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
+					$start             = Carbon::parse($datetime);
+					$end               = Carbon::parse($end_datetime);
+					$duration          = $start->diffInMinutes($end);
+	
+					if ($type == 'sessions') {
+							$_session = $this->addorcreatSession(
+									$type, $datetime, $duration, $title, $dsc,
+									$datetimeStamp, $end_datetimeStamp, $step, $addOrEdit,
+									$request->trainer_name, $request->trainer_email, $request->sid
+							);
+	
+							if ($_session['success'] == false) {
+									return back()->with(['message' => $_session['message'], 'class' => 'danger']);
+							}
+	
+							$trainingSession = $_session['message'];
+							SendTrainingNotificationJob::dispatch(
+									$step, $trainingSession->id, $title, $datetime,
+									$trainingSession->join_url, null, $type,
+									app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit,
+									$end_datetime, $trainingSession->start_url
+							);
+							return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
+	
+					} elseif ($type == 'online') {
+							$addorcreatOnlineSession = $this->addorcreatOnlineSession(
+									$type, $datetime, $title, $dsc,
+									$datetimeStamp, $end_datetimeStamp, $step, $addOrEdit,
+									$request->online, $request->sid
+							);
+							SendTrainingNotificationJob::dispatch(
+									$step, $addorcreatOnlineSession, $title, $datetime,
+									null, null, $type, app()->getLocale(), null, null, $addOrEdit
+							);
+							return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
+	
+					} elseif ($type == 'offline') {
+							$trainingSession = $this->addorcreatOfflineSession(
+									$type, $datetime, $duration, $title, $dsc,
+									$datetimeStamp, $end_datetimeStamp, $step, $addOrEdit,
+									$request->training_Address, $request->training_location,
+									$request->trainer_name, $request->trainer_email, $request->sid
+							);
+	
+							if (!$trainingSession) {
+									return back()->with(['message' => 'Failed to update session. Please try again.', 'class' => 'danger']);
+							}
+	
+							$join_url = $request->training_location ?? 'No Location';
+							$address  = $request->training_Address  ?? 'No Address';
+							SendTrainingNotificationJob::dispatch(
+									$step, $trainingSession, $title, $datetime,
+									$join_url, $address, $type,
+									app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit
+							);
+							return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
+					}
+	
+			} catch (\Throwable $e) {
+					Log::error('Error in TrainingController@editsession: ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+					return back()->with(['message' => 'An error occurred: ' . $e->getMessage(), 'class' => 'danger']);
 			}
-
-			if (is_null($start_datetime) || is_null($end_datetime)) {
-				return back()->with(['message' => 'Please fill all required date and time fields', 'class' => 'danger']);
-			}
-
-			$step = $request->step_id;
-			$title = $request->title;
-			$dsc = $request->dsc;
-			$datetime = $start_datetime;
-			$datetimeStamp = Carbon::parse($datetime)->timestamp;
-			$end_datetimeStamp = Carbon::parse($end_datetime)->timestamp;
-			$start = Carbon::parse($datetime);
-			$end = Carbon::parse($end_datetime);
-			$duration = $start->diffInMinutes($end);
-			// $step = $request->step_id;
-			$title = $request->title;
-			$dsc = $request->dsc;
-			// $id = $request->sid;
-
-			if ($type == 'sessions') {
-				// Add Zoom
-				$_session = $this->addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->trainer_name, $request->trainer_email, $request->sid);
-				
-				if( $_session['success'] == false )
-				{
-					return back()->with([
-						'message' => $_session['message'],
-						'class' => 'danger'
-					]);
-				}
-				$trainingSession = $_session['message'];
-				// $session = TrainingSession::find($trainingSession->sid);
-				// ======> notify Trainer <=================
-				SendTrainingNotificationJob::dispatch($step, $trainingSession->id, $title, $datetime, $trainingSession->start_url, null, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
-				// ==========> End Notify <================
-				return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
-			} elseif ($type == 'online') {
-				$addorcreatOnlineSession = $this->addorcreatOnlineSession($type, $datetime, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->online, $request->sid);
-				SendTrainingNotificationJob::dispatch($step, $addorcreatOnlineSession, $title, $datetime, null, null, $type, app()->getLocale(), null, null, $addOrEdit);
-				return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
-			} elseif ($type == 'offline') {
-				$trainingSession = $this->addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $request->training_Address, $request->training_location, $request->trainer_name, $request->trainer_email, $request->sid);
-				// ======> notify Trainer <=================
-				$join_url = $request->training_location ?? 'No Location';
-				$address = $request->training_Address ?? 'No Address';
-				SendTrainingNotificationJob::dispatch($step, $trainingSession, $title, $datetime, $join_url, $address, $type, app()->getLocale(), $request->trainer_name, $request->trainer_email, $addOrEdit);
-				// ==========> End Notify <================
-				return back()->with(['message' => __('admin.sessionUpdated'), 'class' => 'success']);
-			} else {
-				return back()->with(['message' => 'Can\'t edit session', 'class' => 'danger']);
-			}
-		} catch (\Throwable $e) {
-			Log::error('Error in TrainingController@editsession: ' . $e->getMessage());
-		}
 	}
 
 	private function addorcreatSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $trainer_name, $trainer_email, $sid = null)
@@ -933,42 +983,51 @@ class TrainingController extends Controller
 		return $trainingOnlineSession;
 	}
 
-	private function addorcreatOfflineSession($type, $datetime, $duration, $title, $dsc, $datetimeStamp, $end_datetimeStamp, $step, $addOrEdit, $training_Address, $training_location, $trainer_name, $trainer_email, $sid = null)
-	{
-		$data = [
-			'type' => $type,
-			'step_id' => $step,
-			'title' => $title,
-			'dsc' => $dsc,
-			'datetime' => $datetimeStamp,
-			'user_id' => Auth::id(),
-			'training_Address' => $training_Address,
-			'training_location' => $training_location,
-			'enddatetime' => $end_datetimeStamp,
-			'trainer_name' => $trainer_name,
-			'trainer_email' => $trainer_email
-		];
-		if ($addOrEdit == 'add') {
-			$trainingSession = TrainingSession::create($data);
-		} else {
-			$trainingSession_update = TrainingSession::where('id', $sid)->update($data);
-			$trainingSession = TrainingSession::find($sid);
-		}
-		// رابط المسح الضوئي للحضور
-		$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$trainingSession->id}");
-		// اسم ملف QR Code
-		$qrFileName = 'training_' . $trainingSession->id . '.png';
-		// توليد QR Code كـ string
-		$qrCode = QrCode::format('png')->size(300)->generate($attendanceUrl);
-		// المسار الكامل داخل `public/`
-		$qrFilePath = '/qrcodes/' . $qrFileName;
-		// حفظ QR Code في `public/qrcodes/`
-		$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
-
-		// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
-		$trainingSession->update(['QrCode' => $qrFilePath]);
-
-		return $trainingSession;
+	private function addorcreatOfflineSession(
+			$type, $datetime, $duration, $title, $dsc,
+			$datetimeStamp, $end_datetimeStamp, $step, $addOrEdit,
+			$training_Address, $training_location, $trainer_name, $trainer_email, $sid = null
+	) {
+			$data = [
+					'type'              => $type,
+					'step_id'           => $step,
+					'title'             => $title,
+					'dsc'               => $dsc,
+					'datetime'          => $datetimeStamp,
+					'user_id'           => Auth::id(),
+					'training_Address'  => $training_Address,
+					'training_location' => $training_location,
+					'enddatetime'       => $end_datetimeStamp,
+					'trainer_name'      => $trainer_name,
+					'trainer_email'     => $trainer_email,
+			];
+	
+			if ($addOrEdit == 'add') {
+					$trainingSession = TrainingSession::create($data);
+			} else {
+					TrainingSession::where('id', $sid)->update($data);
+					$trainingSession = TrainingSession::find($sid);
+			}
+	
+			if (!$trainingSession) {
+					throw new \RuntimeException("TrainingSession not found for sid={$sid}");
+			}
+	
+			// Generate QR code only on create, or regenerate if explicitly needed
+			try {
+					$attendanceUrl = url("/dashboard/training/session-attendance-offline/{$trainingSession->id}");
+					$qrFileName    = 'training_' . $trainingSession->id . '.png';
+					$qrFilePath    = '/qrcodes/' . $qrFileName;
+					$qrCode        = QrCode::format('png')->size(300)->generate($attendanceUrl);
+	
+					Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
+					$trainingSession->update(['QrCode' => $qrFilePath]);
+			} catch (\Throwable $e) {
+					Log::error('QR Code generation failed for session ' . $trainingSession->id . ': ' . $e->getMessage());
+					// QR failure is non-fatal — session was already saved successfully
+			}
+	
+			return $trainingSession;
 	}
 
 	public function session(Request $request)
@@ -1001,8 +1060,16 @@ class TrainingController extends Controller
 			$session['duration'] = $sessionData->duration;
 			$session['start_url'] = $sessionData->start_url;
 			$session['join_url'] = $sessionData->join_url;
+			// GV-8301: the details modal hides its Join button once the window closes.
+			$session['can_join'] = MeetingWindowService::isOpen(
+				TrainingSession::wallClock($sessionData->getRawOriginal('datetime')),
+				TrainingSession::wallClock($sessionData->getRawOriginal('enddatetime')),
+				Auth::user(),
+				'founder'
+			);
 			$session['created_at'] = $sessionData->created_at;
 			$session['step_id'] = $sessionData->step_id;
+			$session['cycle_id'] = $sessionData->step?->cycle_id;
 
 			return response()->json($session);
 		} else {
@@ -1041,6 +1108,9 @@ class TrainingController extends Controller
 				$qrFilePath = '/qrcodes/' . $qrFileName;
 
 				// حفظ QR Code في `public/qrcodes/`
+				if (!file_exists(public_path('qrcodes'))) {
+					mkdir(public_path('qrcodes'), 0775, true);
+				}
 				$add = Storage::disk('QrCodePublic')->put($qrFileName, $qrCode);
 
 				// تحديث الحقل `QrCode` في الجلسة التدريبية (يجب حفظ اسم الملف فقط)
@@ -1054,6 +1124,7 @@ class TrainingController extends Controller
 			}
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@QrCodeTraining: ' . $e->getMessage());
+			return response()->json(['state' => 'failed', 'message' => $e->getMessage()], 500);
 		}
 	}
 
@@ -1133,7 +1204,7 @@ class TrainingController extends Controller
                 return redirect()->back()->with(['message2' => 'session report is not available yet']);
             }
         } elseif ($isTeams) {
-			 $participants = $response['participants'] ?? [];
+			$participants = $response['participants'] ?? [];
 
             if (empty($participants)) {
                 Log::warning('Teams sessionReport: participants empty', ['response' => $response]);
@@ -1320,7 +1391,7 @@ class TrainingController extends Controller
 	public function create($id = 0)
 	{
 		try {
-			$courses = Training::orderBy('created_at', 'DESC')->get();
+			$courses = Training::visibleToUser()->orderBy('created_at', 'DESC')->get();
 			if ($id == 0 && count($courses)) {
 				$id = $courses->pluck('id')[0];
 			}
@@ -1338,7 +1409,10 @@ class TrainingController extends Controller
 			// 	$query->where('name', 'Mentor');
 			// })->get();
 
-			return view('admin/settings/training/newCours', compact('randomNumber', 'Tags', 'expertises', 'client', 'Quizzes'));
+			$user = Auth::user();
+			$organizations = $user->ableTo('trainings.set_public') ? \App\Organization::all() : collect();
+
+			return view('admin/settings/training/newCours', compact('randomNumber', 'Tags', 'expertises', 'client', 'Quizzes', 'organizations'));
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@create: ' . $e->getMessage());
 		}
@@ -1347,9 +1421,9 @@ class TrainingController extends Controller
 	public function editTR($id)
 	{
 		try {
-			$course = Training::where('id', $id)->orderBy('created_at', 'DESC')->first();
-			if ($id == 0 && count($course)) {
-				$id = $course->pluck('id')[0];
+			$course = Training::visibleToUser()->where('id', $id)->orderBy('created_at', 'DESC')->first();
+			if (!$course) {
+				abort(403);
 			}
 			$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 
@@ -1362,7 +1436,11 @@ class TrainingController extends Controller
 			$training = Training::find($id);
 
 			$tags = $training->tags;
-			return view('admin/settings/training/editCours', compact('course', 'id', 'contents', 'expertises', 'Quizzes', 'instructors', 'tags'));
+
+			$user = auth()->user();
+			$organizations = $user->ableTo('trainings.set_public') ? \App\Organization::all() : collect();
+
+			return view('admin/settings/training/editCours', compact('course', 'id', 'contents', 'expertises', 'Quizzes', 'instructors', 'tags', 'organizations'));
 		} catch (\Throwable $e) {
 			Log::error('Error in TrainingController@editTR: ' . $e->getMessage());
 		}
@@ -1371,9 +1449,9 @@ class TrainingController extends Controller
 	public function showCourse($id)
 	{
 		try {
-			$course = Training::where('id', $id)->orderBy('created_at', 'DESC')->first();
-			if ($id == 0 && count($course)) {
-				$id = $course->pluck('id')[0];
+			$course = Training::visibleToUser()->where('id', $id)->orderBy('created_at', 'DESC')->first();
+			if (!$course) {
+				abort(403);
 			}
 			$contents = TrainingContent::where('training_id', $id)->orderBy('arr', 'ASC')->get();
 
@@ -1463,7 +1541,7 @@ class TrainingController extends Controller
 				});
 			})->where('stype', 4)->get();
 			$sessions = TrainingSession::with('reports')->orderBy('datetime', 'ASC');
-			$online = Training::get();
+			$online = Training::visibleToUser()->get();
 			if ($request->type != 0) {
 				$sessions = $sessions->where('type', $request->type);
 			}
@@ -1788,6 +1866,22 @@ class TrainingController extends Controller
 		$session = TrainingSession::findOrFail($id);
 		
 		$user = Auth::user();
+
+		// GV-8301: the join route is directly reachable, so the window is
+		// enforced here too and not only by hiding the button in the view.
+		// Attendance must not be recorded for a session that can no longer be joined.
+		$joinOpen = MeetingWindowService::isOpen(
+			TrainingSession::wallClock($session->getRawOriginal('datetime')),
+			TrainingSession::wallClock($session->getRawOriginal('enddatetime')),
+			$user,
+			'founder'
+		);
+
+		if (!$joinOpen) {
+			return redirect()
+				->route('trainings.my_sessions_mine')
+				->with('error', __('admin.Finished'));
+		}
 		
 		AttendanceTrainingOffline::updateOrCreate(
 			[

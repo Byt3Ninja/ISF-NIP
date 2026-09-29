@@ -12,6 +12,7 @@ class SharedFile extends Model
         'team_formation_id',
         'team_member_id',
         'file',
+        'original_name',
         'description',
         'user_id',
     ];

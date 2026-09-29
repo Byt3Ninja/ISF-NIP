@@ -15,29 +15,17 @@
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 
-		<!-- Navigation Tabs -->
-		<nav class="nav-align-top mb-6">
-			@php
-				$tabs = [
-					['title' => __('admin.surveys'), 'url' => 'dashboard/surveys', 'icon' => 'device-imac-search'],
-					['title' => __('admin.surveys_results'), 'url' => 'dashboard/Totalsurveys', 'icon' => 'report-search'],
-				]
-			@endphp
-			<ul class="nav nav-pills">
-				@foreach($tabs as $tab)
-					<li class="nav-item">
-						<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-							<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-							{{ $tab['title'] }}
-						</a>
-					</li>
-				@endforeach
-			</ul>
-		</nav>
-		<!--/ Navigation Tabs -->
+		@php
+      $tabs = [
+        ['title' => __('admin.surveys'), 'route' => 'surveys.index', 'icon' => 'device-imac-search'],
+        ['title' => __('admin.surveys_results'), 'route' => 'surveys.dashboard_count_view', 'icon' => 'report-search'],
+      ]
+    @endphp
+    
+    <x-navigation-pills :tabs="$tabs" />
 
 		<div class="row">
 			@if( session()->has('success') )
@@ -165,14 +153,14 @@
 @stop
 
 @section('scripts')
-<script type="text/javascript">
+	<script type="text/javascript">
 		$(document).ready(function() {
 			$('[data-toggle="tooltip"]').tooltip()
 
 			var table = $('.table').DataTable({
 				responsive: true,
-        pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
+				pageLength: 10,
+				lengthMenu: [10, 25, 50, 100],
 				dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
 				'buttons': [
 					{
@@ -215,7 +203,7 @@
 						'sSortAscending': ": تفعيل لترتيب العمود تصاعدياً",
 						'sSortDescending': ": تفعيل ترتيب العمود تنازلياً"
 					}
-				}
+				},
 				@endif
 				initComplete: function() {
 					var table = this.api();
@@ -376,5 +364,5 @@
 				}
 			})
 		});
-</script>
+	</script>
 @stop

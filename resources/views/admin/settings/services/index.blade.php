@@ -5,208 +5,330 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
+    @php
+      $tabs = [
+        ['title' => __('admin.All Services'), 'route' => 'services.index', 'icon' => 'arrows-move'],
+        ['title' => __('admin.Services Requests'), 'route' => 'service_requests.list_all', 'icon' => 'ti ti-briefcase'],
+        // ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'],
+      ];
+      if( $_user->ableTo('serviceCategories.index', $permissions) )
+      {
+        $tabs[] = ['title' => __('admin.Services Categories'), 'route' => 'serviceCategories.index', 'icon' => 'layout-grid'];
+      }
+    @endphp
+    @if( !$_user->hasRole('registered') && !$_user->hasRole('serviceProvider') )
+      <x-navigation-pills :tabs="$tabs" />
+    @endif
     
     @if (session()->has('msg'))
-    <div class="row mb-6">
-      <div class="col-md-12">
-        <div class="alert alert-success alert-dismissible mb-2" role="alert">
-          {{ __('admin.' . session()->get('msg')) }}
-          {{ Session::forget('msg') }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <div class="row mb-6">
+        <div class="col-md-12">
+          <div class="alert alert-success alert-dismissible mb-2" role="alert">
+            {{ __('admin.' . session()->get('msg')) }}
+            {{ Session::forget('msg') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
         </div>
       </div>
-    </div>
     @endif
 
-    <!-- Navigation Tabs -->
-    <nav class="nav-align-top mb-6">
-      @php
-        $tabs = [
-          ['title' => __('admin.All Services'), 'url' => 'dashboard/services', 'icon' => 'arrows-move'],
-          ['title' => __('admin.Services Requests'), 'url' => 'dashboard/requests/all', 'icon' => 'ti ti-briefcase'],
-          ['title' => __('admin.Services Categories'), 'url' => 'dashboard/serviceCategories', 'icon' => 'layout-grid'],
-        ]
-      @endphp
-      <ul class="nav nav-pills">
-        @foreach($tabs as $tab)
-          <li class="nav-item">
-            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-              <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-              {{ $tab['title'] }}
+    <!-- Services List -->
+    <div class="card mb-6">
+      <div class="card-header d-flex flex-wrap justify-content-between gap-4 border-bottom">
+        <div class="card-title mb-0 me-1">
+          <h5 class="mb-0">{{ __('admin.Services') }}</h5>
+          @if ($_user->ableToAny(['services.create', 'services.store', 'services.edit', 'services.update'], $permissions))
+            <p class="mb-0">{{ __('admin.services_subtitle') }}</p>
+          @endif
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          @if ($_user->ableToAny(['services.export_excel', 'services.export_csv'], $permissions))
+            <div class="dropdown">
+              <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                <li><a class="dropdown-item" href="{{ route('services.export_excel', request()->query()) }}" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
+                <li><a class="dropdown-item" href="{{ route('services.export_csv', request()->query()) }}" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
+              </ul>
+            </div>
+          @endif
+          @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
+            <a href="{{ route('services.create') }}" class="btn btn-primary text-nowrap">
+              <i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
             </a>
-          </li>
-        @endforeach
-      </ul>
-    </nav>
-    <!--/ Navigation Tabs -->
-  
-    <div class="content-body">
-      <section id="basic-datatable">
-        <?php $index = 1; ?>
-        
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
-                <h5 class="card-title mb-3 mb-md-0">{{ __('cycles.Services') }}</h5>
-                <div class="d-flex align-items-center gap-3">
-                  <div class="dropdown">
-                    <button class="btn btn-label-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="ti ti-file-export me-2"></i>{{ __('admin.Export') }}
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="exportDropdown">
-                      <li><a class="dropdown-item" href="javascript:void(0)" id="exportExcel"><i class="ti ti-file-spreadsheet me-2"></i>Excel</a></li>
-                      <li><a class="dropdown-item" href="javascript:void(0)" id="exportCsv"><i class="ti ti-file-text me-2"></i>CSV</a></li>
-                    </ul>
-                  </div>
-                  @if( $_user->ableToAny(['services.create', 'services.store'], $permissions) )
-                  <div class="invoice-create-btn">
-                    <a href="{{ route('services.create') }}" class="btn btn-primary glow">
-                      <i class="ti ti-plus me-2"></i> {{ __('cycles.Add New') }}
-                    </a>
-                  </div>
-                  @endif
+          @endif
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card shadow-none rounded-0 border-bottom">
+        <div class="card-body py-4">
+          <form method="GET" action="{{ route('services.index') }}" id="filter-form" data-ignore-dirty>
+            <div class="row g-3 align-items-end">
+              <div class="col-md-6 col-lg-3">
+                <div class="input-group input-group-merge">
+                  <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+                  <input
+                    type="search"
+                    id="debounced-search"
+                    class="form-control"
+                    placeholder="{{ __('admin.Search') }}..."
+                    name="search"
+                    aria-label="Search services"
+                    aria-describedby="search-services"
+                    value="{{ request('search') ? request('search') : '' }}"
+                  />
                 </div>
               </div>
-              <div class="card-content">
-                <div class="card-datatable table-responsive">
-                  <table class="table zero-configuration" id="services-table" style="font-size: 0.92rem;">
-                    <thead class="table-light">
-                      <tr>
-                        <th>#</th>
-                        <th class="text-center">{{__('admin.Organization')}}</th>
-                        <th class="text-center">{{ __('admin.Service_Name') }}</th>
-                        <th class="text-center">{{ __('cycles.Price') }}</th>
-                        <th class="text-center">{{ __('admin.Vendor Info') }}</th>
-                        <th class="text-center">{{ __('admin.Image') }}</th>
-                        <th class="text-center">{{ __('cycles.Created At') }}</th>
-                        @if( $_user->ableToAny(['services.show', 'services.edit', 'services.update',
-                        'services.destroy'], $permissions) )<th class="text-center">{{ __('admin.Actions') }}</th>
-                        @endif
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach ($services as $service)
-                      <tr>
-                        <td>{{ $index++ }}</td>
-                        <td class="text-center" style="min-width: 200px; max-width: 300px; font-size: 0.92rem;">
-                          @if($service->organizations && $service->organizations->count())
-                          <div class="d-flex flex-wrap justify-content-center gap-1 w-100">
-                            @php $orgs = $service->organizations; $orgCount = $orgs->count(); @endphp
-                            @foreach($orgs->take(3) as $organization)
-                            <span class="badge bg-label-primary rounded-pill"
-                              title="{{ $organization->{'name_'.$l} }}">
-                              <a href="{{ URL::to('dashboard/organizations/' . $organization->id . '/edit') }}"
-                                class="text-decoration-none">
-                                {{ Str::limit($organization->{'name_'.$l}, 15) }}
-                              </a>
-                            </span>
-                            @endforeach
-                            @if($orgCount > 3)
-                            <span class="badge bg-label-secondary rounded-pill orgs-modal-trigger"
-                              data-orgs='@json($orgs->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'
-                              style="cursor:pointer;">
-                              +{{ $orgCount - 3 }}
-                            </span>
-                            @endif
-                          </div>
-                          @else
-                          <span class="text-muted">{{ __('admin.No Organizations') }}</span>
-                          @endif
-                        </td>
-                        <td class="text-center" style="font-size: 0.92rem;">{{ $service->name_en }}</td>
-                        <td class="text-center" style="font-size: 0.92rem;">{{ $service->price > 0 ? $service->price . $Setting->Currency : 'Free' }}</td>
-                        <td class="text-center" style="font-size: 0.92rem;">
-                          @if($service->vendor_name || $service->vendor_email || $service->vendor_phone)
-                          <div class="vendor-info d-flex flex-column align-items-start">
-                            @if($service->vendor_name)
-                            <div class="d-flex align-items-center mb-1 vendor-name">
-                              <i class="ti ti-user me-1"></i>
-                              <span class="fw-medium text-xs">{{ $service->vendor_name }}</span>
-                            </div>
-                            @endif
-                            @if($service->vendor_email)
-                            <div class="vendor-email d-flex align-items-center mb-1">
-                              <i class="ti ti-mail me-1"></i>
-                              <a href="mailto:{{ $service->vendor_email }}" class="text-decoration-none text-xs">
-                                {{ $service->vendor_email }}
-                              </a>
-                            </div>
-                            @endif
-                            @if($service->vendor_phone)
-                            <div class="vendor-phone d-flex align-items-center">
-                              <i class="ti ti-phone me-1"></i>
-                              <a href="tel:{{ $service->vendor_phone }}" class="text-decoration-none text-xs">
-                                {{ $service->vendor_phone }}
-                              </a>
-                            </div>
-                            @endif
-                          </div>
-                          @else
-                          <span class="text-muted">-</span>
-                          @endif
-                        </td>
-                        <td class="text-center">
-                          @if ($service->img_url)
-                          <img class="rounded" src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" alt="img"
-                            style="width: 50px; height: 50px;">
-                          @else
-                          -
-                          @endif
-                        </td>
-                        <td class="text-center" style="font-size: 0.92rem;">{{ $service->created_at }}</td>
-                        @if($_user->ableToAny(['services.show', 'services.edit', 'services.update',
-                        'services.destroy'], $permissions))
-                        <td class="text-center" style="font-size: 0.92rem;">
-                          <div class="dropdown">
-                            <button class="btn btn-label-secondary p-1 px-2" type="button"
-                              id="actionsDropdown{{ $service->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                              <i class="ti ti-dots-vertical"></i>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="actionsDropdown{{ $service->id }}">
-                              @if($_user->ableToAny(['services.show', 'services.edit', 'services.update'], $permissions))
-                              <li>
-                                <a class="dropdown-item d-flex align-items-center" href="{{ route('services.edit', ['service' => $service->id]) }}">
-                                  <i class="ti ti-pencil me-1"></i> {{ __('admin.Edit') }}
-                                </a>
-                              </li>
-                              @endif
-                              @if($_user->ableTo('services.destroy', $permissions))
-                              <li>
-                                <button
-                                  class="dropdown-item text-danger d-flex align-items-center delete-service-action"
-                                  data-id="{{ $service->id }}"
-                                  data-url="{{ route('services.destroy', ['service' => $service->id]) }}">
-                                  <i class="ti ti-trash me-1"></i> {{ __('Delete') }}
-                                </button>
-                              </li>
-                              @endif
-                            </ul>
-                          </div>
-                        </td>
-                        @endif
-                      </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
+
+              @if (!$_user->hasRole('registered'))
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select select2" name="org-id" id="organization-filter" data-placeholder="{{ __('admin.All_Organizations') }}">
+                  <option value="all">{{ __('admin.All_Organizations') }}</option>
+                  @foreach($organizations as $org)
+                    <option value="{{ $org->id }}" {{ request('org-id') == $org->id ? 'selected' : '' }}>{{ $org->{'name_' . $l} }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select select2" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
+                  <option value="all">{{ __('admin.All_statuses') }}</option>
+                  <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>{{ __('admin.Active') }}</option>
+                  <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>{{ __('admin.Inactive') }}</option>
+                </select>
+              </div>
+              @endif
+
+              @if ($_user->hasRole('registered'))
+                <div class="col-md-6 col-lg-3">
+                  <select class="form-select select2" name="rating" data-placeholder="{{ __('admin.all_ratings') }}">
+                    <option value="all">{{ __('admin.all_ratings') }}</option>
+                    <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>★★★★★ (5 {{ __('admin.stars') }})</option>
+                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>★★★★☆ (4 {{ __('admin.stars') }})</option>
+                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>★★★☆☆ (3 {{ __('admin.stars') }})</option>
+                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>★★☆☆☆ (2 {{ __('admin.stars') }})</option>
+                    <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>★☆☆☆☆ (1 {{ __('admin.star') }})</option>
+                  </select>
+                </div>
+              @endif
+
+              <div class="col-md-6 col-lg-2">
+                <div class="d-flex justify-content-lg-end gap-2">
+                  @if(request('search') || request('rating') || request('status') || request('org-id'))
+                    <a href="{{ route('services.index') }}" class="btn bg-card border btn-icon">
+                      <i class="ti ti-refresh"></i>
+                    </a>
+                  @endif
+                  <button type="submit" class="btn btn-primary btn-icon" disabled>
+                    <i class="ti ti-filter"></i>
+                  </button>
                 </div>
               </div>
             </div>
+          </form>
+        </div>
+      </div>
+
+      @if (!empty($services) && $services->count() > 0)
+      <div class="card-body">
+        <div class="row gy-6" id="services-container">
+          @foreach ($services as $service)
+            <div class="col-sm-6 col-lg-4 service-card" data-service-id="{{ $service->id }}" data-orgs="{{ $service->organizations ? $service->organizations->pluck('id')->join(',') : '' }}">
+              <div class="card h-100 border overflow-hidden">
+                <div class="bg-light text-center position-relative w-100 h-px-200 flex-shrink-0">
+                  @if (isset($service->img_url))
+                    <img 
+                      src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" 
+                      alt="{{ $service->name_en }}" 
+                      class="w-100 h-100"
+                      onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none')"
+                    />
+                  @endif
+
+                  <!-- Placeholder -->
+                  <div class="d-flex align-items-center justify-content-center h-100 w-100 {{ isset($service->img_url) ? 'd-none' : '' }}">
+                    <i class="ti ti-photo-off text-muted" style="font-size: 3rem;"></i>
+                  </div>
+             
+                  <div class="d-flex align-items-center gap-2 position-absolute top-0 end-0 p-4">
+                    @if ($_user->ableToAny(['services.edit', 'services.update'], $permissions))
+                      <a
+                        href="{{ route('services.edit', ['service' => $service->id]) }}"
+                        class="btn btn-sm btn-icon btn-label-secondary rounded-pill border shadow-xs"
+                        title="{{ __('admin.Edit') }}"
+                      >
+                        <i class="ti ti-edit text-dark"></i>
+                      </a>
+                    @endif
+  
+                    @if($_user->ableTo('services.destroy', $permissions))
+                      <button
+                        class="btn btn-sm btn-icon btn-label-secondary rounded-pill border shadow-xs delete-service-action"
+                        title="{{ __('admin.Delete') }}"
+                        data-id="{{ $service->id }}"
+                        data-url="{{ route('services.destroy', ['service' => $service->id]) }}"
+                      >
+                        <i class="ti ti-trash text-dark"></i>
+                      </button>
+                    @endif
+                  </div>
+                </div>
+
+
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                    <h5 class="card-title mb-0">{{ $service->name }}</h5>
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                      @if( !( $service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']) ) )
+                      <a
+                        href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile?tab=reviews&service_id=' . $service->id : 'javascript:void(0)' }}"
+                        target="_blank"
+                      >
+                      @endif
+                      <div class="badge bg-light-subtle text-dark py-1 px-2">
+                        <span class="text-warning">
+                          <i class="ti ti-star-filled ti-16px me-1"></i>
+                        </span>
+                        {{ number_format($service->rating ?? 0.0, 1) }}
+                      </div>
+                      <span class="fw-normal">({{ $service->review_count ?? '0' }})</span>
+                      @if( !( $service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']) ) )
+                      </a>
+                      @endif
+                    </div>
+                  </div>
+                  @if ($service->vendor_name)
+                    @if( ( $service->hide_vendor_info == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin']) ) || $service->service_provider_id == $_user->service_provider?->id)
+                      <div></div>
+                    @else
+                      <a
+                        href="{{ isset($service->service_provider_id) ? '/dashboard/service-provider/' . $service->provider->id . '/profile' : 'javascript:void(0)' }}"
+                        class="d-flex align-items-center gap-1 mb-4 text-dark"
+                      >
+                        <i class="ti ti-building"></i>
+                        {{ $service->vendor_name }}
+                        {{-- <div>{{ __('admin.provided_by') }}:</div> --}}
+                      </a>
+                    @endif
+                  @else
+                    <div></div>
+                  @endif
+
+                  <p class="mt-1">{!! Str::limit($service->description ?? 'No description available', 100) !!}</p>
+                  @if($_user->hasAnyRole(['admin', 'serviceProvider', 'organizationManager', 'subadmin']))
+                  @php
+                    $visibleOrgs = $_user->hasAnyRole(['admin', 'serviceProvider'])
+                      ? $service->organizations
+                      : $service->organizations->whereIn('id', $_user->organizations_ids);
+                  @endphp
+                  <div class="d-flex align-items-center gap-2 mb-4">
+                    <!-- Organizations Badges -->
+                    @if($visibleOrgs->count())
+                      @foreach($visibleOrgs->take(2) as $organization)
+                        <div class="badge bg-label-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $organization->{'name_' . $l } }}">
+                          {{ Str::limit($organization->{'name_' . $l}, 25) }}
+                        </div>
+                      @endforeach
+                      @if($visibleOrgs->count() > 2)
+                        <div class="badge bg-label-secondary orgs-modal-trigger" style="cursor:pointer;" data-orgs='@json($visibleOrgs->map(function($o) use($l) { return ["id"=>$o->id, "name"=>$o->{"name_".$l}]; }))'>+{{ $visibleOrgs->count() - 2 }}</div>
+                      @endif
+                    @else
+                      <div class="badge bg-label-secondary">{{ __('admin.No Organizations') }}</div>
+                    @endif
+                  </div>
+                  @endif
+
+                  <div class="d-flex flex-column flex-grow-1">
+                    <!-- Service Price -->
+                    @if($service->price && $service->hide_price == 1 && !$_user->hasAnyRole(['admin', 'organizationManager', 'subadmin', 'serviceProvider']))
+                      {{-- Price hidden from non-management roles --}}
+                    @else
+                      <div class="d-flex align-items-center gap-2 mb-4">
+                        <div>{{ __('admin.Price') }}:</div>
+                        @if($service->price)
+                          <span class="fw-medium">{{ $service->price }} {{ $service->currency }}</span>
+                        @else
+                          <span class="fw-medium text-muted">{{ __('admin.free') }}</span>
+                        @endif
+                      </div>
+                    @endif
+
+                    <!-- Service Category & Status -->
+                    {{--  @if (!$_user->hasRole('registered'))  --}}
+                      <div class="d-flex justify-content-between align-items-center mt-auto {{ $_user->hasRole('registered') ? 'mb-4' : '' }}">
+                        <div 
+                          class="badge bg-label-secondary text-dark me-2" 
+                          data-bs-toggle="tooltip"  
+                          data-bs-placement="top"
+                          title="{{ __('admin.service_category') }}"
+                        >
+                          <i class="ti ti-briefcase ti-md me-2"></i>
+                          {{ $service->serviceCategory?->name ?? '' }}
+                        </div>
+  
+                        @if (!$_user->hasRole('registered'))
+                        <div 
+                          class="badge bg-label-{{ $service->status == 1 ? 'success' : 'danger' }}"
+                          data-bs-toggle="tooltip"  
+                          data-bs-placement="top"
+                          title="{{ __('admin.status') }}"
+                        >
+                          <i class="ti ti-point-filled text-{{ $service->status == 1 ? 'success' : 'danger' }}"></i>
+                          {{ $service->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                        </div>
+                        @endif
+                      </div>
+                    {{--  @endif  --}}
+                  </div>
+
+                  <!-- Request Service Button -->
+                  @if ($_user->hasRole('registered'))
+                    <button 
+                      class="btn btn-primary w-100 mt-auto"
+                      data-service-id="{{ $service->id }}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#requestServiceModal"
+                    >
+                      <i class="ti ti-affiliate me-2"></i>
+                      {{ __('admin.request_service') }}
+                    </button>
+                  @endif
+
+                </div>
+              </div>
+            </div>
+          @endforeach
+
+          <div class="col-12 mt-12">
+            {{ $services->links('pagination::bootstrap-5') }}
           </div>
         </div>
-      </section>
+      </div>
+      @else
+        @include(
+          'includes.no-result',
+          ['message' => request('search') || request('rating') || request('status') || request('org-id') ? __('admin.noResultsMatch') :__('admin.No_Data_Found')]
+        )
+      @endif
     </div>
   </div>
 </div>
 
+<!-- Request Service Modal -->
+@if ($_user->hasRole('registered'))
+  @include('partials.request-service-modal')
+@endif
+
 <!-- Modal for all organizations -->
 <div class="modal fade" id="orgsModal" tabindex="-1" aria-labelledby="orgsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="orgsModalLabel">{{ __('admin.Organization') }}</h5>
+        <h5 class="modal-title" id="orgsModalLabel">{{ __('admin.Organizations') }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="orgsModalBody">
@@ -217,95 +339,72 @@
 </div>
 @stop
 
-@section('scripts')
-<script type="text/javascript">
-  $(document).ready(function() {
-      const isArabic = "{{ $l }}" === 'ar';
-      // Initialize DataTable
-      const table = $('#services-table').DataTable({
-        responsive: true,
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-        language: isArabic ? { url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/ar.json' } : {},
-        dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-        displayLength: 10,
-        lengthMenu: [10, 25, 50, 75, 100],
-        order: [[6, 'desc']],
-        columnDefs: [{ orderable: false, targets: [0, 7] }],
-        buttons: [
-          {
-            extend: 'excel',
-            title: isArabic ? 'الخدمات' : 'Services',
-            exportOptions: { columns: [0, 1, 2, 3, 4, 6] }
-          },
-          {
-            extend: 'csv',
-            title: isArabic ? 'الخدمات' : 'Services',
-            exportOptions: { columns: [0, 1, 2, 3, 4, 6] }
-          },
-        ],
-      });
-
-      // Export button handlers
-      $('#exportExcel').on('click', () => table.button('.buttons-excel').trigger());
-      $('#exportCsv').on('click', () => table.button('.buttons-csv').trigger());
-
-      // Handle delete action
-      $(document).on("click", ".delete-service-action", function (e) {
-        e.preventDefault();
-        var url = $(this).data('url');
-        var id = $(this).data('id');
-        var token = '{{ csrf_token() }}';
-        
-        Swal.fire({
-          title: "{{__('admin.SureDelete')}}",
-          text: "{{__('admin.Recover')}}",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}",
-          reverseButtons: true,
-          customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-          },
-          buttonsStyling: false,
-        })
-        .then((result) => {
-          if (result.value) {
-            $.post(url, {'_method': 'DELETE' , '_token': token},
-              function(response) {
-                releaseSuccessAlert({
-                  title: "{{ __('admin.Deleted') }}!",
-                  message: "{{ __('admin.DeletedSuccessfully') }}.",
-                });
-                // Remove the row from DataTable if still on same page
-                $('#services-table').DataTable().row($(e.target).closest('tr')).remove().draw();
-              }
-            ).fail(function(error) { 
-              releaseFailureAlert({
-                title: "{{ __('admin.Error') }}!",
-								message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
-              });
-            });
-          }
-        });
-      });
-    });
-</script>
+@section('pagescripts')
 <script>
-  $(document).on('click', '.orgs-modal-trigger', function() {
-    var orgs = $(this).data('orgs');
-    var html = '<ul class="list-group">';
-    orgs.forEach(function(org) {
-      html += '<li class="list-group-item">'
-        + '<a href="/dashboard/organizations/' + org.id + '/edit" target="_blank">' + org.name + '</a>'
-        + '</li>';
+  $(function() {
+    // Toggle submit button disable state on form change
+    $('#filter-form select, #filter-form input').on('change input', function () {
+      $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
     });
-    html += '</ul>';
-    $('#orgsModalBody').html(html);
-    var modal = new bootstrap.Modal(document.getElementById('orgsModal'));
-    modal.show();
+
+    // Handle delete action
+    $(document).on("click", ".delete-service-action", function (e) {
+      e.preventDefault();
+      var url = $(this).data('url');
+      var id = $(this).data('id');
+      var token = '{{ csrf_token() }}';
+
+      Swal.fire({
+        title: "{{__('admin.SureDelete')}}",
+        text: "{{__('admin.Recover')}}",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "{{ __('admin.DYes') }}",
+        cancelButtonText: "{{ __('admin.No') }}",
+        reverseButtons: true,
+        customClass: {
+          confirmButton: 'btn btn-danger me-2',
+          cancelButton: 'btn btn-label-secondary',
+        },
+        buttonsStyling: false,
+      })
+      .then((result) => {
+        if (result.value) {
+          $.post(url, {'_method': 'DELETE' , '_token': token},
+            function(response) {
+              releaseSuccessAlert({
+                title: "{{ __('admin.Deleted') }}!",
+                message: "{{ __('admin.DeletedSuccessfully') }}.",
+              });
+              // Remove the organization card from DOM
+              $('div[data-service-id="' + id + '"]').fadeOut(300, function() {
+                $(this).remove();
+              });
+            }
+          ).fail(function(error) {
+            releaseFailureAlert({
+              title: "{{ __('admin.Error') }}!",
+              message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
+            });
+          });
+        }
+      });
+    });
+
+    // Handle organization modal trigger
+    $(document).on('click', '.orgs-modal-trigger', function() {
+      var orgs = $(this).data('orgs');
+      var html = '<div class="d-flex flex-wrap gap-2">';
+      orgs.forEach(function(org) {
+        html += '<div class="badge bg-label-primary p-2">'
+          + '<a href="/dashboard/organizations/' + org.id + '/edit" target="_blank" class="text-decoration-none text-primary">' + org.name + '</a>'
+          + '</div>';
+      });
+      html += '</div>';
+      $('#orgsModalBody').html(html);
+      var modal = new bootstrap.Modal(document.getElementById('orgsModal'));
+      modal.show();
+    });
   });
 </script>
 @stop

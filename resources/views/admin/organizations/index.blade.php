@@ -3,17 +3,13 @@
 @section('title', __('admin.Organizations'))
 @section('subTitle', __('admin.Organizations`s List'))
 
-@section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
-@stop
-
 @php
 $colors = ['primary', 'info', 'danger', 'warning'];
 @endphp
 
 @section('content')
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       @if (session()->has('msg'))
         <x-alert 
           type="success" 
@@ -57,12 +53,12 @@ $colors = ['primary', 'info', 'danger', 'warning'];
               </div>
             </div>
             <div class="col-lg-9">
-              <form class="row gy-4 gx-3 justify-content-end align-items-center" id="status-form" method="GET" action="{{ route('organizations.index') }}">
+              <form class="row gy-4 gx-3 justify-content-end align-items-center" id="status-form" method="GET" action="{{ route('organizations.index') }}" data-ignore-dirty>
                 <div class="col-12 col-lg-4">
                   <!-- Search Input -->
                   <div class="input-group input-group-merge">
-                    <span class="input-group-text" id="searchInput"><i class="ti ti-search text-muted"></i></span>
-                    <input type="text" id="search-input" class="form-control h-px-40" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}..." aria-label="Search" aria-describedby="basic-addon-search31">
+                    <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+                    <input type="search" id="debounced-search" class="form-control h-px-40" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.Search') }}..." aria-label="Search" aria-describedby="basic-addon-search31">
                   </div>
                 </div>
                 <div class="col-6 col-lg-2">
@@ -87,9 +83,19 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                     </option>
                   </select>
                 </div>
-                <div class="col-lg-2 d-flex justify-content-end">
-                  @if ($_user->ableToAny(['organization.wizard.create', 'organization.wizard.store'], $permissions))
-                    <a href="{{ route('organization.wizard.create') }}" class="btn btn-primary text-nowrap">
+                <div class="col-6 col-lg-2">
+                  <select class="form-select" id="sort-select" name="sort">
+                    <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>
+                      {{ __('admin.Newest First') }}
+                    </option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>
+                      {{ __('admin.Oldest First') }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-lg-auto d-flex justify-content-end">
+                  @if ($_user->ableTo('organization.wizard.create', $permissions))
+                    <a href="{{ route('organization.wizard.create') }}?step=1" class="btn btn-primary text-nowrap">
                       <i class="ti ti-plus me-2"></i> {{ __('admin.Add_New') }}
                     </a>
                   @endif
@@ -108,20 +114,20 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                 <div class="card-body flex-fill d-flex flex-column">
                   <!-- Header -->
                   <div class="d-flex justify-content-between align-items-start mb-4">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="avatar avatar-md me-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="avatar avatar-md me-2 d-flex flex-shrink-0">
                         @if ($org->img_url)
-                          <img src="{{ $org->imageUrl }}" alt="logo" class="rounded object-fit-cover" width="50" height="50" />
+                          <img src="{{ route('organizations.logo', $org->img_url ?? '') }}" alt="logo" class="rounded object-fit-contain" />
                         @else
                           <span class="avatar-initial rounded bg-label-secondary">
                             {{ substr($org->name, 0, 2) }}
                           </span>
                         @endif
                       </div>
-                      <h5 class="card-title mb-0">{{ $org->{'name_' . $l} }}</h5>
+                      <h5 class="card-title line-clamp-2 mb-0 w-px-{{ $org->is_draft ? '150' : '200' }}">{{ $org->{'name_' . $l} }}</h5>
                     </div>
 
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center ms-2">
                       <!-- Status Badge -->
                       @if($org->is_draft)
                         <span class="badge bg-label-warning rounded-pill">
@@ -137,15 +143,15 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                         <ul class="dropdown-menu dropdown-menu-end">
                           @if ($_user->ableTo('organization.wizard.edit', $permissions))
                             <li>
-                              <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}">
+                              <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}?step=1">
                                 <i class="ti ti-edit me-2"></i> {{ __('admin.Edit') }}
                               </a>
                             </li>
                           @endif
                           @if ($_user->ableTo('organization.wizard.edit', $permissions))
                           <li>
-                            <a class="dropdown-item" href="{{ route('organization.wizard.edit', $org->id) }}?step=4">
-                              <i class="ti ti-layout me-2"></i> {{ __('admin.Edit') }} {{ __('admin.Landing Page') }}
+                            <a class="dropdown-item" href="{{ route('organization.wizard.landing', $org->id) }}">
+                              <i class="ti ti-layout me-2"></i> {{ __('admin.Manage') }} {{ __('admin.Landing Page') }}
                             </a>
                           </li>
                           @endif
@@ -171,8 +177,14 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                   </div>
 
                   <div class="flex-grow-1">
+                    <!-- Status Badge -->
+                    <div class="badge bg-label-{{ $org->status == 1 ? 'info' : 'danger' }} mb-3">
+                      {{ $org->status == 1 ? __('admin.Active') : __('admin.Inactive') }}
+                    </div>
+
                     <!-- Description -->
                     <p class="mb-4 line-clamp-3">{{ $org->bio }}</p>
+
     
                     <!-- Managers -->
                     <div class="mb-4">
@@ -180,17 +192,17 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                       <div class="d-flex align-items-center avatar-group my-4">
                         @if($org->assignedUsers->isNotEmpty())
                           @foreach($org->assignedUsers->take(3) as $manager)
-                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $manager->name }}">
-                              <img src="{{ $manager->img_url }}" alt="Avatar" class="rounded-circle pull-up">
+                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $manager->name }}">
+                              <img src="{{ $manager->image_url }}" alt="Avatar" class="rounded-circle pull-up">
                             </div>
                           @endforeach
                           @if($org->assignedUsers->count() > 3)
-                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $org->assignedUsers->count() - 3 }} more">
-                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="{{ $org->assignedUsers->count() - 3 }} more">+{{ $org->assignedUsers->count() - 3 }}</span>
+                            <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $org->assignedUsers->count() - 3 }} more">
+                              <span class="avatar-initial rounded-circle pull-up text-heading" data-bs-toggle="tooltip" data-bs-placement="bottom" title="{{ $org->assignedUsers->count() - 3 }} more">+{{ $org->assignedUsers->count() - 3 }}</span>
                             </div>
                           @endif
                         @else
-                          <div class="avatar">
+                          <div class="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $org->user->name ?? 'N' }}">
                             <span class="avatar-initial rounded-circle pull-up text-heading">{{ substr($org->user->name ?? 'N', 0, 2) }}</span>
                           </div>
                         @endif
@@ -232,7 +244,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
           @endforeach
 
           <div class="col-12 mt-12">
-             {{ $organizations->links('pagination::bootstrap-5') }}
+            {{ $organizations->links('pagination::bootstrap-5') }}
           </div>
         </div>
       @else
@@ -243,8 +255,6 @@ $colors = ['primary', 'info', 'danger', 'warning'];
 @stop
 
 @section('scripts')
-  <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-
   <script>
     // Filter Organizations
     $(document).on("change", "#status-select", function(e) {
@@ -253,44 +263,10 @@ $colors = ['primary', 'info', 'danger', 'warning'];
     $(document).on("change", "#visibility-select", function(e) {
       $("#status-form").submit();
     });
-
-    // Debounce helper
-    const debounce = (fn, delay = 1000) => {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn(...args), delay);
-      };
-    };
-
-    // Create debounced search handler
-    const handleSearch = debounce((value) => {
-      // Show loading spinner
-      $('#searchInput i').removeClass('ti-search').addClass('ti-loader-2 ti-spin');
-
-      const url = new URL(window.location);
-      if (value.trim()) {
-        url.searchParams.set('search', value.trim());
-      } else {
-        url.searchParams.delete('search');
-      }
-      // Preserve other query parameters
-      const currentParams = new URLSearchParams(window.location.search);
-      ['status', 'visibility', 'page'].forEach(param => {
-        if (currentParams.has(param)) {
-          url.searchParams.set(param, currentParams.get(param));
-        }
-      });
-
-      window.location.href = url.href;
-    }, 800);
-
-    // Bind debounced search event to input
-    $('#search-input').on('input', function() {
-      handleSearch($(this).val());
+    $(document).on("change", "#sort-select", function(e) {
+      $("#status-form").submit();
     });
   </script>
-
   
   @if ($_user->ableTo('organizations.destroy', $permissions))
     <script>
@@ -329,6 +305,10 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                     $('div[data-org-id="' + $(this).data('id') + '"]').fadeOut(300, function() {
                       $(this).remove();
                     });
+                    
+                    // Reload the page
+                    location.reload();
+
                   } else {
                     releaseFailureAlert({
                       title: "{{ __('admin.Error') }}",

@@ -95,12 +95,14 @@ class ProgramCreatedNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject(__('notifications.program_created.subject'))
-            ->view('emails.program-created', [
+            ->view('emails.program-created', array_merge([
                 'cycle' => $this->cycle,
                 'admin' => $this->admin,
-            ]);
+            ], $orgData));
     }
 
     public function toDatabase(object $notifiable): array

@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Notifications\OrganizationAssignedNotification;
+use App\Notifications\OrganizationManagerWelcomeNotification;
 use App\Organization;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class OrganizationManagerService
 {
@@ -47,6 +50,7 @@ class OrganizationManagerService
             });
         }
 
+        $query = $query->orderBy('created_at', 'desc');
         // Get assigned manager IDs for this organization
         $assignedManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
 
@@ -131,16 +135,21 @@ class OrganizationManagerService
         DB::beginTransaction();
 
         try {
-            $this->syncManagersToOrganization($organization, $managerIds);
+            $newlyAssignedIds = $this->syncManagersToOrganization($organization, $managerIds);
 
-            // Update wizard step if moving forward
-            if ($organization->wizard_step < 4) {
-                $organization->wizard_step = 4;
+            // Update wizard step if moving forward (max 3 steps in wizard)
+            if ($organization->wizard_step < 3) {
+                $organization->wizard_step = 3;
             }
 
             $organization->save();
 
             DB::commit();
+
+            // Sent after commit so queued jobs never race uncommitted pivot rows.
+            // Only newly attached managers are notified — re-saving this step must
+            // not re-notify managers who were already assigned.
+            $this->notifyNewlyAssignedManagers($organization, $newlyAssignedIds);
 
             return [
                 'success' => true,
@@ -203,6 +212,10 @@ class OrganizationManagerService
             $organization->assignedUsers()->attach($user->id);
 
             DB::commit();
+
+            // Sent after commit so the queued job never races an uncommitted user,
+            // and so a rolled-back creation cannot trigger a welcome email.
+            $this->notifyManagerOfWelcome($user, $organization);
 
             $name = $locale === 'ar'
                 ? (($user->first_name_ar ?? $user->first_name_en) . ' ' . ($user->last_name_ar ?? $user->last_name_en))
@@ -294,12 +307,16 @@ class OrganizationManagerService
      *
      * @param Organization $organization
      * @param array $managerIds
-     * @return void
+     * @return array IDs of managers newly attached by this sync (already-assigned
+     *               managers are excluded so re-saving the step does not re-notify).
      */
-    protected function syncManagersToOrganization(Organization $organization, array $managerIds): void
+    protected function syncManagersToOrganization(Organization $organization, array $managerIds): array
     {
         // Get current assignments
         $currentManagerIds = $organization->assignedUsers()->pluck('users.id')->toArray();
+
+        // Managers being added for the first time by this sync
+        $newlyAssignedIds = array_values(array_diff($managerIds, $currentManagerIds));
 
         // Sync the pivot table
         $organization->assignedUsers()->sync($managerIds);
@@ -328,6 +345,63 @@ class OrganizationManagerService
             // If user now has only 1 org and has Sub-Admin role, switch back to organizationmanager
             if ($orgCount == 1 && $user->hasRole('subadmin')) {
                 $this->switchToOrgManager($user);
+            }
+        }
+
+        return $newlyAssignedIds;
+    }
+
+    /**
+     * Send the welcome email to a manager whose account was just created.
+     *
+     * Delivery failures are logged and swallowed: the manager has already been
+     * created and committed at this point, so a mail/queue error must not surface
+     * as a failed request (the caller would retry and hit the email unique rule).
+     *
+     * @param User $user
+     * @param Organization $organization
+     * @return void
+     */
+    protected function notifyManagerOfWelcome(User $user, Organization $organization): void
+    {
+        try {
+            $user->notify(new OrganizationManagerWelcomeNotification($organization, auth()->user()));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send organization manager welcome notification', [
+                'user_id' => $user->id,
+                'organization_id' => $organization->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Notify existing users that they have been assigned to an organization.
+     *
+     * Failures are logged per-user so one bad recipient cannot stop the rest,
+     * and never surface as a failed request — the assignment itself is committed.
+     *
+     * @param Organization $organization
+     * @param array $userIds
+     * @return void
+     */
+    protected function notifyNewlyAssignedManagers(Organization $organization, array $userIds): void
+    {
+        if (empty($userIds)) {
+            return;
+        }
+
+        $admin = auth()->user();
+
+        foreach (User::whereIn('id', $userIds)->get() as $user) {
+            try {
+                $user->notify(new OrganizationAssignedNotification($organization, $admin));
+            } catch (\Throwable $e) {
+                Log::error('Failed to send organization assignment notification', [
+                    'user_id' => $user->id,
+                    'organization_id' => $organization->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
     }

@@ -22,7 +22,7 @@
     ['SocialMediaLinks', 'ti-share', __('settings.SocialMediaLinks')],
     ['teamMembers', 'ti-users', __('settings.teamMembers')],
     ['WhatsApp', 'ti-brand-whatsapp', __('admin.WhatsApp')],
-    ['smtp', 'ti-mail', 'SMTP'],
+    ['smtp', 'ti-mail', __('settings.Email Configuration')],
     ['notifications', 'ti-bell', __('admin.notifications')],
     // ['Schedule', 'ti-calendar-bolt', __('admin.Schedule')],
   ])->map(function ($tab) {
@@ -32,9 +32,9 @@
 
 @section('content')
   <!-- Content wrapper -->
-  <div class="content-wrapper">
+  <div class="">
     <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       <!-- Alert -->
       @if (session()->has('message'))
         <div class="alert alert-success alert-dismissible" role="alert">
@@ -46,6 +46,27 @@
         <div class="alert alert-danger alert-dismissible" role="alert">
           {{  session()->get('message2') }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      @endif
+      @if (session()->has('error'))
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          {{ session()->get('error') }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      @endif
+      @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      @endif
+      @if (!$organization)
+        <div class="alert alert-warning" role="alert">
+          {{ __('settings.no_organization_linked') }}
         </div>
       @endif
       <!-- / Alert -->

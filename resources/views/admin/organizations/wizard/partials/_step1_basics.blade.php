@@ -10,7 +10,7 @@
         id="upload-org-logo-preview"
         class="d-block w-px-100 h-px-100 rounded border shadow-sm"
         alt="logo"
-        src="{{ $org && $org->img_url ? $org->imageUrl : '/images/logo-placeholder.png' }}"
+        src="{{ $org && $org->img_url ? route('organizations.logo', $org->img_url ?? '') : '/images/logo-placeholder.png' }}"
         onerror="this.onerror=null;this.src='/images/logo-placeholder.png'"
       />
       <div class="button-wrapper">
@@ -160,7 +160,7 @@
           value="{{ $industry->id }}"
           {{ in_array($industry->id, $selectedIndustries) ? 'selected' : '' }}
         >
-          {{ app()->getLocale() == 'ar' ? $industry->name_ar : $industry->name_en }}
+          {{ app()->getLocale() == 'ar' ? ($industry->name_ar ?? $industry->name_en ) : $industry->name_en }}
         </option>
       @endforeach
     </select>

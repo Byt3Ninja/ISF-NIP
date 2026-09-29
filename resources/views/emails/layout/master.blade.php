@@ -31,7 +31,7 @@
                                                         <div align="center" class="alignment">
                                                             <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                                                                 <tr>
-                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;"><span> </span></td>
+                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;"><span> </span></td>
                                                                 </tr>
                                                             </table>
                                                         </div>
@@ -58,18 +58,22 @@
                                                 <tr>
                                                     <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                         <div align="center" class="alignment" style="line-height:10px">
-                                                            {{-- <div style="max-width: 560px;"><img alt="GrowthLab" height="auto" src="{{ $setting->header ? asset('images/logo/' . $setting->header) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="560"/></div> --}}
+                                                            @if(!empty($setting->Logo))
+                                                                <div style="max-width: 280px; padding: 20px 0;">
+                                                                    <img alt="{{ $setting->Logo }}" height="auto" src="{{ asset('/images/logo/' . $setting->Logo) }}" style="display: block; height: auto; border: 0; max-height: 80px; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                     </td>
                                                 </tr>
                                             </table>
                                             <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                                                 <tr>
-                                                    <td class="pad" style="padding-top:50px;">
+                                                    <td class="pad" style="padding-top:30px;">
                                                         <div align="center" class="alignment">
                                                             <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                                                                 <tr>
-                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;"><span> </span></td>
+                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;"><span> </span></td>
                                                                 </tr>
                                                             </table>
                                                         </div>
@@ -99,7 +103,7 @@
                                                         <div align="center" class="alignment">
                                                             <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                                                                 <tr>
-                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;"><span> </span></td>
+                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;"><span> </span></td>
                                                                 </tr>
                                                             </table>
                                                         </div>
@@ -128,18 +132,9 @@
                                                         <div align="center" class="alignment">
                                                             <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                                                                 <tr>
-                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;"><span> </span></td>
+                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;"><span> </span></td>
                                                                 </tr>
                                                             </table>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            <table border="0" cellpadding="0" cellspacing="0" class="image_block block-2" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                                                <tr>
-                                                    <td class="pad" style="width:100%;">
-                                                        <div align="center" class="alignment" style="line-height:10px">
-                                                            {{-- <div style="max-width: 640px;"><img alt="I'm an image" height="auto" src="{{ $setting->footer ? asset('images/logo/' . $setting->footer) : asset('images/logo/logo.jpeg') }}" style="display: block; height: auto; border: 0; width: 100%;" title="GrowthLab" width="640"/></div> --}}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -150,7 +145,7 @@
                                                         <div align="center" class="alignment">
                                                             <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                                                                 <tr>
-                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 1px solid #555961;"><span> </span></td>
+                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 1px solid #555961;"><span> </span></td>
                                                                 </tr>
                                                             </table>
                                                         </div>

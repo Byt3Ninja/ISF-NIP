@@ -19,7 +19,7 @@ class OrganizationFactory extends Factory
             'phone' => $this->faker->phoneNumber,
             'bio' => $this->faker->paragraph,
             'status' => $this->faker->randomElement([0, 1]),
-            'img_url' => null,
+            'img_url' => 'default.png',
             'user_id' => User::factory(),
         ];
     }

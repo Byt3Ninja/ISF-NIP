@@ -1,0 +1,16 @@
+Program Name,Program Type,Program Start Date,Program End Date,Founder First Name,Founder Last Name,Founder Email,Founder Gender,Founder Phone,Country Code,Co-Founder Name,Co-Founder Email,Co-Founder Phone Number,Co-Founder Working Commitment,Co-Founder Educational Status,Startup Name,Country
+Hackathon Spring,Hackathon,6/1/2026,6/15/2026,Alex,Morgan,hack.alex@example.com,Male,1030001001,20,,,,,,Acme Robotics,Egypt
+Hackathon Spring,Hackathon,6/1/2026,6/15/2026,Sara,Hassan,hack.sara@example.com,Female,1030001002,20,Cofound A,hack.coa@example.com,9990002002,Part-time,Student,BlueWave Labs,Egypt
+Hackathon Summer,Hackathon,7/1/2026,7/14/2026,Omar,Khaled,hack.omar@example.com,Male,1030001003,20,Cofound B,hack.cob@example.com,9990002003,Full-time,Graduate,Pyramid Cloud,Egypt
+Hackathon Summer,Hackathon,7/1/2026,7/14/2026,Mona,Adel,hack.mona@example.com,Female,1030001004,20,,,,,,Nile Energy,Egypt
+Hackathon Autumn,Hackathon,9/1/2026,9/15/2026,Karim,Nabil,hack.karim@example.com,Male,1030001005,20,Cofound C,hack.coc@example.com,9990002005,Full-time,Graduate,Desert Foods,Egypt
+Hackathon Autumn,Hackathon,9/1/2026,9/15/2026,Hana,Reda,hack.hana@example.com,Female,1030001006,20,,,,,,Oasis Mobility,Egypt
+Hackathon Autumn,Hackathon,9/1/2026,9/15/2026,Yusuf,Tarek,hack.yusuf@example.com,Male,1030001007,20,Cofound D,hack.cod@example.com,9990002007,Part-time,Student,Cairo Analytics,Egypt
+Hackathon Winter,Hackathon,12/1/2026,12/15/2026,Tamer,Fouad,hack.tamer@example.com,Male,1030001008,20,,,,,,Phoenix Drinks,Egypt
+Hackathon Winter,Hackathon,12/1/2026,12/15/2026,Salma,Magdy,hack.salma@example.com,Female,1030001009,20,Cofound E,hack.coe@example.com,9990002009,Full-time,Graduate,Verdant Farms,Egypt
+Hackathon Winter,Hackathon,12/1/2026,12/15/2026,Nour,Saad,hack.nour@example.com,Female,1030001010,20,,,,,,Sphinx Studio,Egypt
+Accelerator North,General_Program,4/1/2026,7/31/2026,Layla,Samir,hack.layla@example.com,Female,1030001011,20,,,,,,Sahara Foods,Egypt
+Accelerator North,General_Program,4/1/2026,7/31/2026,Selim,Awad,hack.selim@example.com,Male,1030001012,20,,,,,,Atlas Robotics,Egypt
+Accelerator South,General_Program,5/1/2026,8/31/2026,Dina,Wahba,hack.dina@example.com,Female,1030001013,20,,,,,,Helios Tech,Egypt
+Accelerator South,General_Program,5/1/2026,8/31/2026,Maya,Hany,hack.maya@example.com,Female,1030001014,20,Cofound F,hack.cof@example.com,9990002014,Part-time,Student,Sigma Trade,Egypt
+Hackathon Spring,Hackathon,6/1/2026,6/15/2026,Rana,Fares,hack.rana@example.com,Female,1030001015,20,Cofound G,hack.cog@example.com,9990002015,Full-time,Graduate,Delta Print,Egypt

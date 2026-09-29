@@ -42,11 +42,14 @@ class CompanyExportController extends Controller
         }
 
         // Prepare rows
-        $rows = collect($companies)->map(function($c){
-            $program = optional($c->cycleRelation);
-            $org = optional($program->organization);
-            $sector = optional($c->sectoR)->{'name_' . app()->getLocale()} ?? '';
-            $stage = optional($c->stagE)->{'name_' . app()->getLocale()} ?? '';
+        $rows = collect( collect( $companies )['data'] )->map(function($c){
+            $company = (object) $c;
+            return $company;
+        })->map(function($c){
+            $program = optional( (object) $c->cycle_relation );
+            $org = optional( (object) $program->organization );
+            $sector = optional( (object) $c->secto_r)?->{'name_' . app()->getLocale()} ?? '';
+            $stage = optional( (object)  $c->stag_e)?->{'name_' . app()->getLocale()} ?? '';
             $programs = $program ? ($program->{'title'} ?? ($program->{'title_ar'} ?? '')) : '';
             return [
                 'Company Name' => $c->{'name_' . app()->getLocale()} ?? $c->name_en ?? '',

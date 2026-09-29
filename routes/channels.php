@@ -18,7 +18,7 @@ Broadcast::channel('App.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('Web-Message', function ($user) {
-    return true;
+    return $user !== null;
 });
 
 // Chat conversation channels

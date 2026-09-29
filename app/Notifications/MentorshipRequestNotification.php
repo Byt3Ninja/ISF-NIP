@@ -10,11 +10,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Services\GlobalNotificationSettingsService;
+use App\Traits\ConfiguresSmtp;
 use Throwable;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ConfiguresSmtp;
 
     /**
      * The number of times the job may be attempted.
@@ -111,16 +112,30 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        if($this->reminder == 'Reminder'){
-            return (new MailMessage)
-            ->subject( __('emails.mentorship_request_reminder.subject', ['startup' => $this->data['company_name']]))
-            ->markdown('emails.mentorship_request_reminder', ['data' => $this->data]);
-           Log::info('Mail data:', ['company_name' => $this->data['company_name']]);
-        }else{
-            return (new MailMessage)
-            ->subject(__('admin.mentorship_request_subject', ['startup' => $this->data['company_name']]))
-            ->markdown('emails.mentorship_request', ['data' => $this->data]);
+        $orgData = $this->buildEmailOrganizationData($org);
+
+        $sessionTimestamp = strtotime($this->data['date'] ?? 'now');
+        $sessionDate = date('Y-m-d', $sessionTimestamp);
+        $sessionTime = date('h:i A', $sessionTimestamp);
+        if (app()->getLocale() == 'ar') {
+            $sessionTime = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $sessionTime);
         }
+
+        return (new MailMessage)
+        ->subject(__('admin.mentorship_request_subject', ['startup' => $this->data['company_name']]))
+        ->view('emails.mentorship_notify_startup_approval_email', array_merge([
+            'party'        => $notifiable,
+            'mentorName'   => $this->data['Mentorname'] ?? '',
+            'sessionType'  => 'online',
+            'sessionDate'  => $sessionDate,
+            'sessionTime'  => $sessionTime,
+            'sessionLink'  => $this->data['join_url'] ?? '',
+            'platformName' => $orgData['org_name'] ?? config('app.name'),
+            'location'     => '-',
+            'mapLink'      => '-',
+            'attachments'  => [],
+            'sessionNotes' => '-',
+        ], $orgData));
     }
 
     /**
@@ -138,10 +153,21 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
 
      public function toDatabase(object $notifiable): array
     {
+       $isMentor = method_exists($notifiable, 'hasActualRole') 
+           ? ($notifiable->hasActualRole('Mentor') || $notifiable->hasActualRole('mentor'))
+           : (method_exists($notifiable, 'hasRole') && ($notifiable->hasRole('Mentor') || $notifiable->hasRole('mentor')));
+
+       if ($isMentor) {
+           $message = ($this->data['company_name'] ?? 'N/A') . 
+                      ' has sent you a mentorship request. They are eager to learn from your expertise and guidance.';
+       } else {
+           $mentorName = $this->data['Mentorname'] ?? __('messages.Mentors');
+           $locale = method_exists($notifiable, 'preferredLocale') ? $notifiable->preferredLocale() : 'en';
+           $message = __("messages.mentorship_session_action", ['action' => __('messages.Approved', [], $locale), 'name' => $mentorName], $locale);
+       }
        return [
-        'message' => ($this->data['company_name'] ?? 'N/A') . 
-                     ' has sent you a mentorship request. They are eager to learn from your expertise and guidance.',
-         ]; 
+        'message' => $message,
+       ]; 
     }
 
     /**

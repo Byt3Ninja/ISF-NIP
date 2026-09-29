@@ -12,7 +12,7 @@
           enctype="multipart/form-data">
     @endif
     {!! csrf_field() !!}
-    <input name="CompanyN" type="hidden" value="2">
+    <input name="CompanyN" type="hidden" value="{{ \App\Enums\CompanyFormStep::ContactInfo->value }}">
     <div class="row">
       <div class="border-bottom mb-4">
         <h5 class="card-title">{{ __('admin.Logo_Social') }} </h5>
@@ -87,7 +87,7 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">{{ __('admin.Twitter') }}</label>
+                <label class="fs-6 form-label fw-semibold mb-1" for="twitter">X</label>
                 <div class="input-group input-group-merge">
                   <input 
                     type="url" 
@@ -336,7 +336,7 @@
       const country = countryData.find(country => `+${country.dialCode}` === dialCode);
 
       if (country) {
-        console.log("Country Code Found: " + country.iso2);
+        // console.log("Country Code Found: " + country.iso2);
         return country.iso2;
       }
       return "eg";

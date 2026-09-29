@@ -236,7 +236,7 @@
             },
             {
                 "name": "settings.create_technologies",
-                "description": " Create Technologies",
+                "description": "Create Technologies",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -245,7 +245,7 @@
             },
             {
                 "name": "settings.update_technologies",
-                "description": " Update Technologies",
+                "description": "Update Technologies",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -254,7 +254,7 @@
             },
             {
                 "name": "settings.delete_technologies",
-                "description": " Delete Technologies",
+                "description": "Delete Technologies",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -263,7 +263,7 @@
             },
             {
                 "name": "settings.create_industries",
-                "description": " Create Industries",
+                "description": "Create Industries",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -272,7 +272,7 @@
             },
             {
                 "name": "settings.update_industries",
-                "description": " Update Industries",
+                "description": "Update Industries",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -281,7 +281,7 @@
             },
             {
                 "name": "settings.delete_industries",
-                "description": " Delete Industries ",
+                "description": "Delete Industries ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -290,7 +290,7 @@
             },
             {
                 "name": "settings.create_sectors",
-                "description": " Create Sectors",
+                "description": "Create Sectors",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -299,7 +299,7 @@
             },
             {
                 "name": "settings.update_sectors",
-                "description": " Update Sectors ",
+                "description": "Update Sectors ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -308,7 +308,7 @@
             },
             {
                 "name": "settings.delete_sectors",
-                "description": " Delete Sectors",
+                "description": "Delete Sectors",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -339,7 +339,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -373,7 +372,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -964,6 +962,50 @@
                 ]
             },
             {
+                "name": "services_providers.step1.store",
+                "description": "Save New Service Provider Step 1",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services_providers.step2.store",
+                "description": "Save New Service Provider Step 2",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services_providers.step3.store",
+                "description": "Save New Service Provider Step 3",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services_providers.step4.store",
+                "description": "Save New Service Provider Step 4",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "services_providers.show",
                 "description": "Show Service Provider Details",
                 "guard_name": "web",
@@ -1017,6 +1059,58 @@
                 "is_core": 0,
                 "default_for": [
                     "admin"
+                ]
+            },
+            {
+                "name": "services.export_excel",
+                "description": "Export Services to Excel File",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "services.export_csv",
+                "description": "Export Services to CSV File ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "service_provider.profile",
+                "description": "View Service Provider Profile",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider",
+                    "registered",
+                    "mentor",
+                    "judger"
+                ]
+            },
+            {
+                "name": "service_provider.reviews",
+                "description": "View Service Provider Reviews",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider",
+                    "registered",
+                    "mentor",
+                    "judger"
                 ]
             }
         ]
@@ -1107,7 +1201,18 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_review.submit",
+                "description": "Submit Service Review (Startups)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered"
                 ]
             },
             {
@@ -1566,7 +1671,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1575,7 +1682,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1584,7 +1693,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1593,7 +1704,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1602,7 +1715,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1611,7 +1726,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1620,7 +1737,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1629,7 +1748,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1638,7 +1759,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1647,7 +1770,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -1656,7 +1781,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -2331,7 +2458,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]
@@ -2355,7 +2484,9 @@
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
-                    "admin"
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -2435,7 +2566,7 @@
             },
             {
                 "name": "users.judger",
-                "description": " List All Judger ",
+                "description": "List All Judger ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3165,7 +3296,7 @@
             },
             {
                 "name": "hackathon.apply",
-                "description": " Apply for Hackathon",
+                "description": "Apply for Hackathon",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3212,7 +3343,7 @@
             },
             {
                 "name": "hackathon.invitation",
-                "description": " Invite Hackathon Participants",
+                "description": "Invite Hackathon Participants",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3224,7 +3355,7 @@
             },
             {
                 "name": "hackathon.acceptInvitation",
-                "description": " Accept Hackathon Invitation ",
+                "description": "Accept Hackathon Invitation ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3236,7 +3367,7 @@
             },
             {
                 "name": "hackathon.rejectInvitation",
-                "description": " Reject Hackathon Invitation ",
+                "description": "Reject Hackathon Invitation ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3248,7 +3379,7 @@
             },
             {
                 "name": "hackathon.Cancelinvitation",
-                "description": " Cancel Hackathon Invitation ",
+                "description": "Cancel Hackathon Invitation ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3260,7 +3391,7 @@
             },
             {
                 "name": "hackathon.manageTeam",
-                "description": " Manage Hackathon Team Members ",
+                "description": "Manage Hackathon Team Members ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3272,7 +3403,7 @@
             },
             {
                 "name": "hackathon.getOutTeam",
-                "description": " Remove Member from Hackathon Team ",
+                "description": "Remove Member from Hackathon Team ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3284,7 +3415,7 @@
             },
             {
                 "name": "hackathon.myTeam",
-                "description": " View My Hackathon Team Work Spice ",
+                "description": "View My Hackathon Team Work Spice ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3296,7 +3427,7 @@
             },
             {
                 "name": "hackathon.EditProjectIdea",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3308,7 +3439,7 @@
             },
             {
                 "name": "hackathon.RequestJoinTeam",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3320,7 +3451,7 @@
             },
             {
                 "name": "hackathon.ApprovedRequestJoinTeam",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3332,7 +3463,7 @@
             },
             {
                 "name": "hackathon.RejectedRequestJoin",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3344,7 +3475,7 @@
             },
             {
                 "name": "hackathon.ViewSubmission",
-                "description": " Edit Hackathon Project Idea ",
+                "description": "Edit Hackathon Project Idea ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3355,7 +3486,7 @@
             },
             {
                 "name": "hackathon.viewAdminHackaton",
-                "description": " View Admin Dashboard Hackathon ",
+                "description": "View Admin Dashboard Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3366,7 +3497,19 @@
             },
             {
                 "name": "hackathon.addSharedFile",
-                "description": " Add Shared File Hackathon ",
+                "description": "Add Shared File Hackathon ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered"
+                ]
+            },
+            {
+                "name": "hackathon.downloadSharedFile",
+                "description": "Download Shared File Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3378,7 +3521,7 @@
             },
             {
                 "name": "hackathon.deleteSharedFile",
-                "description": " Delete Shared File Hackathon ",
+                "description": "Delete Shared File Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3390,7 +3533,7 @@
             },
             {
                 "name": "hackathon.AddtodoList",
-                "description": " Add Todo List in Hackathon ",
+                "description": "Add Todo List in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3402,7 +3545,7 @@
             },
             {
                 "name": "hackathon.EdittodoList",
-                "description": " Edit Todo List in Hackathon ",
+                "description": "Edit Todo List in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3414,7 +3557,7 @@
             },
             {
                 "name": "hackathon.deleteTodoList",
-                "description": " Delete Todo in Hackathon ",
+                "description": "Delete Todo in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3426,7 +3569,7 @@
             },
             {
                 "name": "hackathon.EditTeamInfo",
-                "description": " Edit Team Info in Hackathon ",
+                "description": "Edit Team Info in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3438,7 +3581,7 @@
             },
             {
                 "name": "hackathon.EdittodoListStatus",
-                "description": " Edit Todo List Status in Hackathon ",
+                "description": "Edit Todo List Status in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3450,7 +3593,7 @@
             },
             {
                 "name": "hackathon.deleteTeamInfo",
-                "description": " Delete Team Info in Hackathon ",
+                "description": "Delete Team Info in Hackathon ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3462,7 +3605,7 @@
             },
             {
                 "name": "hackathon.hackathon_Summary",
-                "description": " View Finish Hackathon Summary ",
+                "description": "View Finish Hackathon Summary ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -3487,7 +3630,9 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "registered",
+                    "mentor"
                 ]
             },
             {
@@ -3976,7 +4121,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "mentor"
                 ]
             },
             {
@@ -4126,6 +4272,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "subadmin",
+                    "organizationmanager",
+                    "registered",
                     "mentor"
                 ]
             },
@@ -4196,7 +4345,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "mentor"
+                    "mentor",
+                    "registered"
                 ]
             },
             {
@@ -4291,7 +4441,8 @@
                     "mentor",
                     "registered",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "serviceProvider"
                 ]
             },
             {
@@ -4301,7 +4452,6 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "registered",
                     "organizationmanager",
                     "subadmin",
                     "serviceProvider"
@@ -4340,6 +4490,70 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_requests.timeline",
+                "description": "View Service Request Timeline",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_requests.mark_complete",
+                "description": "Mark a Service Request as Completed",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_requests.send_message",
+                "description": "Send a Message in a Service Request Thread",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_requests.messages",
+                "description": "View Messages in a Service Request Thread",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_requests.download_attachment",
+                "description": "Download an Attachment in a Service Request Thread",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
                     "organizationmanager",
                     "subadmin",
                     "serviceProvider"
@@ -4645,6 +4859,7 @@
                     "mentor",
                     "judger",
                     "registered",
+                    "serviceProvider",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -4789,7 +5004,7 @@
             },
             {
                 "name": "company.getEmployees",
-                "description": " Get Company Employees",
+                "description": "Get Company Employees",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -4801,7 +5016,18 @@
             },
             {
                 "name": "company.addCompanyAlumni",
-                "description": " Add Alumni to Company",
+                "description": "Add Alumni to Company",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.addCompanyAlumniBulk",
+                "description": "Add Bulk Alumni to Company",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -4812,7 +5038,7 @@
             },
             {
                 "name": "company.alumni_view",
-                "description": " View company program details (alumni)",
+                "description": "View company program details (alumni)",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -4820,6 +5046,48 @@
                     "organizationmanager",
                     "subadmin",
                     "registered"
+                ]
+            },
+            {
+                "name": "company.perks_view",
+                "description": "View company perks and discounts",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
+                ]
+            },
+            {
+                "name": "company.financial_projection.realtime",
+                "description": "View company financial projections",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered",
+                    "admin",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.financial_projection.save",
+                "description": "Save company financial projections",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered",
+                    "admin",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.employees_statistics",
+                "description": "Save company employees statistics",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered",
+                    "admin",
+                    "subadmin"
                 ]
             }
         ]
@@ -4831,6 +5099,174 @@
             {
                 "name": "utils.locations_list_states_by_country",
                 "description": "Get States by Country",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Countries, States and Cities Management",
+        "description": null,
+        "permissions": [
+            {
+                "name": "country-management.index",
+                "description": "List Countries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "country-management.create",
+                "description": "Create Country Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "country-management.store",
+                "description": "Save New Country",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "country-management.edit",
+                "description": "Edit Country Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "country-management.update",
+                "description": "Save Country Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "country-management.destroy",
+                "description": "Delete Country",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "state-management.index",
+                "description": "List States",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "state-management.create",
+                "description": "Create State Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "state-management.store",
+                "description": "Save New State",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "state-management.edit",
+                "description": "Edit State Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "state-management.update",
+                "description": "Update State",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "state-management.destroy",
+                "description": "Delete State",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "city-management.index",
+                "description": "List Cities",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "city-management.create",
+                "description": "Create City Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "city-management.store",
+                "description": "Save New City",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "city-management.edit",
+                "description": "Edit City Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "city-management.update",
+                "description": "Update City",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "city-management.destroy",
+                "description": "Delete City",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5042,7 +5478,7 @@
             },
             {
                 "name": "messages.send_team_message",
-                "description": " Send Team Message",
+                "description": "Send Team Message",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5084,6 +5520,52 @@
                 "is_core": 0,
                 "default_for": [
                     "admin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Landing Pages Management",
+        "description": null,
+        "permissions": [
+            {
+                "name": "landing-pages.index",
+                "description": "List Custom Landing Pages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "landing-pages.create",
+                "description": "Create Custom Landing Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "landing-pages.edit",
+                "description": "Edit Custom Landing Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "landing-pages.destroy",
+                "description": "Delete Custom Landing Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin"
                 ]
             }
         ]
@@ -5234,6 +5716,28 @@
                     "organizationmanager",
                     "subadmin"
                 ]
+            },
+            {
+                "name": "forms.reorder_sections",
+                "description": "Reorder Form Sections",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "reorder_questions",
+                "description": "Reorder Form Questions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
             }
         ]
     },
@@ -5329,6 +5833,28 @@
                 ]
             },
             {
+                "name": "screening.final",
+                "description": "List Final Screening Sessions\/Entries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.manage_final",
+                "description": "manage Final Screening Sessions\/Entries",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "screening.index",
                 "description": "List Screening Sessions\/Entries",
                 "guard_name": "web",
@@ -5347,6 +5873,17 @@
                 "default_for": [
                     "admin",
                     "judger",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.manage",
+                "description": "manage Specific Screening Session\/Entry",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
                     "organizationmanager",
                     "subadmin"
                 ]
@@ -5388,6 +5925,17 @@
             },
             {
                 "name": "screening.results_view",
+                "description": "View Screening Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.results",
                 "description": "View Screening Results",
                 "guard_name": "web",
                 "is_core": 0,
@@ -5593,6 +6141,15 @@
                 ]
             },
             {
+                "name": "screening.judger_export",
+                "description": "Export My Screening Evaluations (Judger)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "judger"
+                ]
+            },
+            {
                 "name": "screening.get",
                 "description": "Get Judger Users",
                 "guard_name": "web",
@@ -5600,8 +6157,30 @@
                 "default_for": []
             },
             {
+                "name": "screening.export_results",
+                "description": "Export Screening Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.export_company_results",
+                "description": "Export One Company Screening Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "screening.results_report",
-                "description": " All Screening Results Report",
+                "description": "All Screening Results Report",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5825,6 +6404,18 @@
                 ]
             },
             {
+                "name": "mentorships.sessions",
+                "description": "Mentorship Sessions",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
+                ]
+            },
+            {
                 "name": "mentorships.requests_list",
                 "description": "List Mentorship Requests\/Assignments",
                 "guard_name": "web",
@@ -5868,6 +6459,19 @@
                     "mentor",
                     "organizationmanager",
                     "subadmin"
+                ]
+            },
+            {
+                "name": "mentorship.join",
+                "description": "Join Mentorship",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "mentor",
+                    "organizationmanager",
+                    "subadmin",
+                    "registered"
                 ]
             }
         ]
@@ -6134,6 +6738,15 @@
                 ]
             },
             {
+                "name": "trainings.set_public",
+                "description": "Set Training Course as Public",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "trainings.surveys_list",
                 "description": "List Training Surveys",
                 "guard_name": "web",
@@ -6281,7 +6894,7 @@
             },
             {
                 "name": "trainings.sessions_report",
-                "description": " View Trainings Sessions Report",
+                "description": "View Trainings Sessions Report",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7423,7 +8036,7 @@
             },
             {
                 "name": "mentorship.schedule_store",
-                "description": " Add Mentorship Schedule",
+                "description": "Add Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7434,7 +8047,7 @@
             },
             {
                 "name": "mentorship.schedule_update",
-                "description": " Update Mentorship Schedule",
+                "description": "Update Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7445,7 +8058,7 @@
             },
             {
                 "name": "mentorship.schedule_destroy",
-                "description": " Delete Mentorship Schedule",
+                "description": "Delete Mentorship Schedule",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7456,7 +8069,7 @@
             },
             {
                 "name": "organization.ReminderLogs",
-                "description": " Show Reminders Logs",
+                "description": "Show Reminders Logs",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7467,7 +8080,7 @@
             },
             {
                 "name": "organization.destroyReminderLogs",
-                "description": " Delete Reminders Logs",
+                "description": "Delete Reminders Logs",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7827,51 +8440,137 @@
         ]
     },
     {
-        "name": "Importer Tool",
-        "description": null,
+        "name": "Dashboard (Service Provider)",
+        "description": "Dashboard (Service Provider)",
         "permissions": [
             {
-                "name": "importer.index",
-                "description": "View Importer Page",
+                "name": "dashboard.widgets_cards_service_provider_total_services_view",
+                "description": "Show Total Services Card (Service Provider)",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager",
-                    "subadmin"
+                    "serviceProvider"
                 ]
             },
             {
-                "name": "importer.upload",
-                "description": "Upload Importer File",
+                "name": "dashboard.widgets_cards_service_provider_active_services_view",
+                "description": "Show Active Services Card (Service Provider)",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager",
-                    "subadmin"
+                    "serviceProvider"
                 ]
             },
             {
-                "name": "importer.import",
-                "description": "Importer Parsing",
+                "name": "dashboard.widgets_cards_service_provider_completion_rate_view",
+                "description": "Show Completion Rate Card (Service Provider)",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager",
-                    "subadmin"
+                    "serviceProvider"
                 ]
             },
             {
-                "name": "importer.organizations",
-                "description": "Fetch Organizations",
+                "name": "dashboard.widgets_cards_service_provider_requests_30_days_view",
+                "description": "Show Requests (30 Days) Card (Service Provider)",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager",
-                    "subadmin"
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_service_provider_pending_requests_view",
+                "description": "Show Pending Requests Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_cards_service_provider_median_response_time_view",
+                "description": "Show Median Response Time Card (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_service_provider_requests_inbox_view",
+                "description": "Show Requests Inbox Table (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "dashboard.widgets_tables_service_provider_recent_activity_view",
+                "description": "Show Recent Activity Timeline (Service Provider)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_request.quick_action",
+                "description": "Accept or Reject Request from Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_request.bulk_action",
+                "description": "Bulk Accept or Reject Requests from Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_dashboard.refresh",
+                "description": "Refresh Service Provider Dashboard Data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_dashboard.requests_inbox",
+                "description": "Access Requests Inbox API on Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
+                ]
+            },
+            {
+                "name": "service_provider_dashboard.activity",
+                "description": "Access Recent Activity API on Service Provider Dashboard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "serviceProvider"
                 ]
             }
         ]
@@ -7987,7 +8686,7 @@
             },
             {
                 "name": "settings.organization.smtp_update",
-                "description": "List Notification Templates",
+                "description": "Update Email Configuration",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -8682,7 +9381,7 @@
             },
             {
                 "name": "trainings.sessions_join",
-                "description": " Attendance to Training Session",
+                "description": "Attendance to Training Session",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -8715,7 +9414,10 @@
                 "is_core": 0,
                 "default_for": [
                     "mentor",
-                    "registered"
+                    "registered",
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -8759,7 +9461,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "mentor"
                 ]
             },
             {
@@ -8769,7 +9472,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
                 ]
             },
             {
@@ -8779,7 +9484,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
                 ]
             },
             {
@@ -8789,7 +9496,93 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "subadmin",
                     "organizationmanager"
+                ]
+            },
+            {
+                "name": "tasks.show",
+                "description": "show task details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "subadmin",
+                    "organizationmanager",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "tasks.move",
+                "description": "Move task (udpate its status)",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "tasks.download_attachment",
+                "description": "Download task attachment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager"
+                ]
+            },
+            {
+                "name": "tasks.delete_attachment",
+                "description": "Delete task attachment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
+                ]
+            },
+            {
+                "name": "tasks.upload_attachment",
+                "description": "Upload task attachment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "tasks.add_comment",
+                "description": "Add Task comment",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "registered"
+                ]
+            },
+            {
+                "name": "tasks.add_feedback",
+                "description": "Add Task feedback",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor"
                 ]
             }
         ]
@@ -8805,7 +9598,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -8815,7 +9609,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -8825,7 +9620,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
@@ -8835,28 +9631,201 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
             },
             {
                 "name": "invitations.upload",
-                "description": " Upload invitation file ",
+                "description": "Upload invitation file ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
                 ]
-            }
-            ,
+            },
             {
                 "name": "invitations.DeleteAttachment",
-                "description": " Delete invitation attachment ",
+                "description": "Delete invitation attachment ",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
                     "admin",
-                    "organizationmanager"
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "invite_mentor.attachment",
+                "description": "Show attachment for invitation ",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Importer",
+        "description": "Bulk data importer (v2)",
+        "permissions": [
+            {
+                "name": "importer.index",
+                "description": "Open importer wizard",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.template",
+                "description": "Download importer template",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.schema",
+                "description": "Fetch importer schema",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.organizations",
+                "description": "List organizations available to importer",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.create",
+                "description": "Create importer session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.show",
+                "description": "View importer session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.discard",
+                "description": "Discard importer session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.file.delete",
+                "description": "Delete importer session file",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.file.upload",
+                "description": "Upload importer session file",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.automap",
+                "description": "Auto-map importer columns",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.validate",
+                "description": "Validate importer session data",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.conflicts",
+                "description": "Review importer session conflicts",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.preview",
+                "description": "Preview importer session results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "importer.sessions.execute",
+                "description": "Execute importer session",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
                 ]
             }
         ]

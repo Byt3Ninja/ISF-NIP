@@ -52,11 +52,34 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public $teamMember;
 
+    /**
+     * Team member row id (for marking the invite failed on worker failure).
+     *
+     * @var int|null
+     */
+    public $teamMemberId;
+
     public function __construct($teamLeader, $team_q, $teamMember)
     {
         $this->teamLeader = $teamLeader;
         $this->team_q = $team_q;
         $this->teamMember = $teamMember;
+        $this->teamMemberId = $teamMember->id ?? null;
+    }
+
+    /**
+     * Resolve the organization for SMTP/branding without depending on
+     * user-only properties. Preserves prior behavior for real users
+     * (their own organization) and falls back to the team leader / cycle
+     * for AnonymousNotifiable email recipients.
+     */
+    private function resolveOrganization(object $notifiable)
+    {
+        if ($notifiable instanceof \App\User) {
+            return $notifiable->organization;
+        }
+        return $this->teamLeader->organization
+            ?? optional($this->team_q->cycle)->organization;
     }
 
  /**
@@ -66,42 +89,47 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $isUser = $notifiable instanceof \App\User;
+
+        $org = $this->resolveOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Configure SMTP if settings exist
         $this->configureSmtp($smtpSettings);
-        
+
         // Organization channel toggles (default to true when not configured)
         $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
         $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
         $orgAcceptPusher = $smtpSettings?->accept_pusher ?? true;
 
+        // User-level prefs only apply to real users; an email-only recipient
+        // (AnonymousNotifiable) can receive mail only.
+        $userAcceptWhatsapp = $isUser ? ($notifiable->accept_whatsapp ?? true) : false;
+        $userAcceptPusher   = $isUser ? ($notifiable->accept_pusher ?? true) : false;
+        $userAcceptEmail    = $isUser ? ($notifiable->accept_email ?? true) : true;
+
         $channels = [];
 
-        // WhatsApp if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isWhatsAppEnabled() 
-            && $orgAcceptWhatsapp 
-            && $notifiable->accept_whatsapp) {
+        if (GlobalNotificationSettingsService::isWhatsAppEnabled()
+            && $orgAcceptWhatsapp
+            && $userAcceptWhatsapp) {
             $channels[] = WhatsAppChannel::class;
         }
 
-        // Pusher (broadcast) if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isPusherEnabled() 
-            && $orgAcceptPusher 
-            && $notifiable->accept_pusher) {
+        if (GlobalNotificationSettingsService::isPusherEnabled()
+            && $orgAcceptPusher
+            && $userAcceptPusher) {
             $channels[] = 'broadcast';
         }
 
-        // Email if enabled globally AND organization/user accepts it
-        if (GlobalNotificationSettingsService::isEmailEnabled() 
-            && $orgAcceptEmail 
-            && $notifiable->accept_email) {
+        if (GlobalNotificationSettingsService::isEmailEnabled()
+            && $orgAcceptEmail
+            && $userAcceptEmail) {
             $channels[] = 'mail';
         }
 
-        // Always store in database for audit/history if any channels are active
-        if (!empty($channels)) {
+        // Store in database only for real users (AnonymousNotifiable cannot).
+        if (!empty($channels) && $isUser) {
             $channels[] = 'database';
         }
 
@@ -113,9 +141,9 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
+        $org = $this->resolveOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
         // return (new MailMessage)
@@ -126,9 +154,42 @@ class InviteToHackathon extends Notification implements ShouldQueue
         //     ->action('Accept Invitation', url('/invitations/accept')) // عدّل الرابط حسب مشروعك
         //     ->line('Thank you for using our platform!');
 
+        $orgData = $this->buildEmailOrganizationData($org);
+
             return (new MailMessage)
             ->subject(__('admin.Invitation_to_Join_a_Hackathon_Team'))
-            ->markdown('emails.hackathon_inviteTeam', ['data' => $this->teamLeader, 'teamName' => $this->team_q, 'teamMember' => $this->teamMember]);
+            ->markdown('emails.hackathon_inviteTeam', array_merge([
+                'data' => $this->teamLeader,
+                'teamName' => $this->team_q,
+                'teamMember' => $this->teamMember,
+                // The recipient can be an AnonymousNotifiable (email-only invite
+                // with no registered user), so these may legitimately be blank.
+                'recipientName' => $this->displayName($notifiable),
+                'recipientGender' => $notifiable->gender ?? null,
+                'leaderName' => $this->displayName($this->teamLeader),
+            ], $orgData));
+    }
+
+    /**
+     * Human-readable name for a user in the current locale, falling back to the
+     * other locale and then the email. Returns '' for an AnonymousNotifiable,
+     * which has no name columns at all.
+     */
+    private function displayName($user): string
+    {
+        if (!$user) {
+            return '';
+        }
+
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $other = $locale === 'ar' ? 'en' : 'ar';
+
+        $first = $user->{'first_name_'.$locale} ?? null;
+        $last = $user->{'last_name_'.$locale} ?? null;
+        $first = $first ?: ($user->{'first_name_'.$other} ?? null);
+        $last = $last ?: ($user->{'last_name_'.$other} ?? null);
+
+        return trim($first.' '.$last);
     }
 
     /**
@@ -138,7 +199,7 @@ class InviteToHackathon extends Notification implements ShouldQueue
     {
         return __('notifications.hackathon_invite.whatsapp', [
             'leader' => ($this->teamLeader->first_name_en ?? '').' '.($this->teamLeader->last_name_en ?? ''),
-            'team' => $this->team_q,
+            'team' => $this->team_q->name ?? '',
         ]);
     }
 
@@ -149,9 +210,27 @@ class InviteToHackathon extends Notification implements ShouldQueue
     {
         return new BroadcastMessage([
             'subject' => __('admin.Invitation_to_Join_a_Hackathon_Team'),
-            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q]),
+            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q->name ?? '']),
             'time' => now()->toDateTimeString(),
         ]);
+    }
+
+    /**
+     * Database (stored) representation. Required because via() adds the
+     * 'database' channel for registered users; without this the queue job
+     * throws "Notification is missing toDatabase / toArray method".
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'subject' => __('admin.Invitation_to_Join_a_Hackathon_Team'),
+            'message' => __('notifications.hackathon_invite.broadcast', ['team' => $this->team_q->name ?? '']),
+            'team'    => $this->team_q->id ?? null,
+            'leader'  => $this->teamLeader->id ?? null,
+            'member'  => $this->teamMember->id ?? null,
+        ];
     }
 
     /**
@@ -162,6 +241,12 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
+        if ($this->teamMemberId) {
+            \App\Team_member::where('id', $this->teamMemberId)
+                ->where('acceptInvition', 'pending')
+                ->update(['acceptInvition' => 'failed']);
+        }
+
         Log::error('InviteToHackathon notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

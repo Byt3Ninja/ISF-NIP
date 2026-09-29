@@ -29,6 +29,7 @@ class UpdateCurrencyRequest extends FormRequest
                 Rule::unique('currencies')->ignore($this->currency)
             ],
             'currency_name' => 'required|string|max:100',
+            'currency_name_ar' => 'nullable|sometimes|string|max:100',
             'currency_symbol' => 'nullable|string|max:10',
             'exchange_rate_to_usd' => 'nullable|numeric|min:0|regex:/^\d+(\.\d{1,6})?$/',
             'enabled' => 'nullable|boolean',

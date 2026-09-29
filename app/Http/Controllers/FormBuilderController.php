@@ -11,6 +11,7 @@ use App\Field;
 
 class FormBuilderController extends Controller
 {
+    use \App\Traits\ValidatesUrlDomains;
 
     /**
      * show the builder
@@ -131,7 +132,7 @@ class FormBuilderController extends Controller
 
         $fields = Field::all()->mapWithKeys(fn($field) => [$field->field_type => $field->id]);
 
-        $builder_fields = BuilderField::where('builder_form_id', $id)->orderBy('id', 'asc');
+        $builder_fields = BuilderField::where('builder_form_id', $id)->orderBy('sort_order', 'asc');
 
         if ($builder_fields->exists()) {
             $field_data = $builder_fields->get()->map(function ($field) use ($fields) {
@@ -142,15 +143,15 @@ class FormBuilderController extends Controller
 
                 switch ($fields->search($field->field_id)) {
                     case 'select':
-                        $type = 'dropdown';
+                        $type = $options->type ?? 'dropdown';
                         $listOptions = $options->values ?? [];
                         break;
                     case 'textarea':
-                        $type = 'paragraph';
+                        $type = $options->type ?? 'paragraph';
                         $listOptions = [];
                         break;
                     case 'file':
-                        $type = 'file';
+                        $type = $options->type ?? 'file';
                         $listOptions = [];
                         break;
                     default:
@@ -167,6 +168,31 @@ class FormBuilderController extends Controller
                     'type' => $type,
                     'options' => is_array($listOptions) ? $listOptions : explode(',', $listOptions),
                     'logic' => $logic,
+                    // Re-hydrate the URL "allowed domains" config so the builder
+                    // repopulates it on edit (the JS reads url_config.allowed_domains).
+                    'url_config' => $type === 'url'
+                        ? ['allowed_domains' => $options->allowed_domains ?? '']
+                        : null,
+                    // Re-hydrate the number min/max/step config so the builder
+                    // repopulates it on edit (the JS reads number_config.min/max/step).
+                    'number_config' => $type === 'number'
+                        ? [
+                            'min'  => $options->min  ?? '',
+                            'max'  => $options->max  ?? '',
+                            'step' => $options->step ?? '',
+                        ]
+                        : null,
+                    // Re-hydrate the linear scale endpoints/labels so the
+                    // builder repopulates them on edit (the JS reads
+                    // scale.from/to/label_low/label_high).
+                    'scale' => $type === 'linear_scale'
+                        ? [
+                            'from'       => $options->min ?? 1,
+                            'to'         => $options->max ?? 5,
+                            'label_low'  => $options->label_low  ?? '',
+                            'label_high' => $options->label_high ?? '',
+                        ]
+                        : null,
                 ];
             });
 
@@ -189,6 +215,9 @@ class FormBuilderController extends Controller
                                 'type' => $f['type'],
                                 'options' => $f['options'],
                                 'logic' => $f['logic'],
+                                'url_config' => $f['url_config'] ?? null,
+                                'number_config' => $f['number_config'] ?? null,
+                                'scale' => $f['scale'] ?? null,
                             ];
                         })->values()->toArray(),
                     ];
@@ -234,7 +263,7 @@ class FormBuilderController extends Controller
 
         $fields = $the_form->fields()
             ->withPivot('options')
-            ->orderBy('builder_fields.id', 'asc')
+            ->orderBy('builder_fields.sort_order', 'asc')
             ->get();
 
         $structured = $fields->map(function ($field) {
@@ -247,10 +276,13 @@ class FormBuilderController extends Controller
                 'section'       => $options['section'] ?? 'بدون قسم',
                 'type'          => $options['type'] ?? null,
                 'is_required'   => (bool)($options['validation']['required'] ?? 0),
-                'options'       => isset($options['values'])
-                    ? (is_array($options['values']) ? $options['values'] : explode(',', $options['values']))
-                    : [],
+                'options'       => form_field_options($options['values'] ?? null),
                 'logic'         => $options['logic'] ?? [],
+                'allowed_domains' => $options['allowed_domains'] ?? '',
+                'min'           => $options['min'] ?? null,
+                'max'           => $options['max'] ?? null,
+                'label_low'     => $options['label_low'] ?? '',
+                'label_high'    => $options['label_high'] ?? '',
             ];
         })
         ->groupBy('section')
@@ -270,6 +302,11 @@ class FormBuilderController extends Controller
                         'type'        => $q['type'],
                         'options'     => $q['options'],
                         'logic'       => $q['logic'],
+                        'allowed_domains' => $q['allowed_domains'] ?? '',
+                        'min'         => $q['min'] ?? null,
+                        'max'         => $q['max'] ?? null,
+                        'label_low'   => $q['label_low'] ?? '',
+                        'label_high'  => $q['label_high'] ?? '',
                     ];
                 })->toArray(),
             ];
@@ -310,27 +347,98 @@ class FormBuilderController extends Controller
         abort_if($validator->fails(), 422, "Data error");
 
         // generating validation rules based on dynamic field config data
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        $messages_map = [
+            'en' => [
+                'required'        => 'This field is required.',
+                'email'           => 'Please enter a valid email address.',
+                'url'             => 'Please enter a valid URL starting with http:// or https://.',
+                'allowed_domains' => 'The URL must belong to one of these domains: :domains.',
+                'numeric'   => 'Please enter numbers only.',
+                'time'      => 'Please enter a valid time.',
+                'file_size' => 'File size must not exceed 10 MB.',
+                'file_type' => 'Supported file types are Word, Excel, PowerPoint, PDF, JPG, JPEG, PNG, and WEBP.',
+            ],
+            'ar' => [
+                'required'        => 'هذا الحقل مطلوب.',
+                'email'           => 'يرجى إدخال بريد إلكتروني صحيح.',
+                'url'             => 'يرجى إدخال رابط صالح يبدأ بـ http:// أو https://.',
+                'allowed_domains' => 'يجب أن ينتمي الرابط إلى أحد هذه النطاقات: :domains.',
+                'numeric'   => 'يرجى إدخال أرقام فقط.',
+                'time'      => 'يرجى إدخال وقت صحيح.',
+                'file_size' => 'يجب ألا يتجاوز حجم الملف 10 ميجابايت.',
+                'file_type' => 'أنواع الملفات المدعومة هي Word وExcel وPowerPoint وPDF وJPG وJPEG وPNG وWEBP.',
+            ],
+        ];
+        $L = $messages_map[$locale];
+
+        // File upload policy (shared with client-side in form.blade.php).
+        $allowed_file_extensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf', 'jpg', 'jpeg', 'png', 'webp'];
+        $max_file_size_kb = 10 * 1024; // 10 MB
+
         $field_map_ids = explode(",", $request->input('field_ids'));
-        $field_required_rules = collect($field_map_ids)->mapWithKeys(function($id){
-        $field_options = BuilderField::findOrFail($id)->options;
-            if($field_options->validation->required == 1) {
-                $rules = ['required'];
-                if(isset($field_options->type) && $field_options->type == "email") $rules[] = 'email';
+        $rules_array = [];
+        $custom_messages = [];
 
-                return [
-                    'field_'. $id => implode("|", $rules)
-                ];
-            }
-            else {
-                return ['field_'. $id => 'nullable'];
-            }
-        });
+        foreach ($field_map_ids as $id) {
+            $field_options = BuilderField::findOrFail($id)->options;
+            $field_name = 'field_' . $id;
+            $type = $field_options->type ?? 'text';
+            $required = intval($field_options->validation->required ?? 0) === 1;
 
-        // validation based on dynamic data
-        $dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
-            'required' => "field can't be left blank",
-            'email' => 'field must be a valid email address'
-        ]);
+            $rules = [];
+            $rules[] = $required ? 'required' : 'nullable';
+
+            switch ($type) {
+                case 'email':
+                    $rules[] = 'email';
+                    $custom_messages[$field_name . '.email'] = $L['email'];
+                    break;
+                case 'url':
+                    $rules[] = 'url';
+                    $custom_messages[$field_name . '.url'] = $L['url'];
+                    $allowedDomains = $this->parseAllowedDomains($field_options->allowed_domains ?? '');
+                    if (!empty($allowedDomains)) {
+                        $domainsLabel = implode(', ', $allowedDomains);
+                        $rules[] = function ($attribute, $value, $fail) use ($allowedDomains, $domainsLabel, $L) {
+                            if ($value !== null && $value !== '' && !$this->urlHostAllowed($value, $allowedDomains)) {
+                                $fail(str_replace(':domains', $domainsLabel, $L['allowed_domains']));
+                            }
+                        };
+                    }
+                    break;
+                case 'number':
+                case 'linear_scale':
+                    $rules[] = 'numeric';
+                    $custom_messages[$field_name . '.numeric'] = $L['numeric'];
+                    break;
+                case 'time':
+                    $rules[] = 'date_format:H:i';
+                    $custom_messages[$field_name . '.date_format'] = $L['time'];
+                    break;
+                case 'date':
+                    $rules[] = 'date';
+                    $custom_messages[$field_name . '.date'] = $L['time'];
+                    break;
+                case 'file':
+                    $rules[] = 'file';
+                    $rules[] = 'max:' . $max_file_size_kb;
+                    $rules[] = 'mimes:' . implode(',', $allowed_file_extensions);
+                    $custom_messages[$field_name . '.file']  = $L['file_type'];
+                    $custom_messages[$field_name . '.max']   = $L['file_size'];
+                    $custom_messages[$field_name . '.mimes'] = $L['file_type'];
+                    break;
+            }
+
+            // Closure rules (e.g. the allowed-domains check) can't be joined into
+            // the pipe-delimited string, so pass the array form when any rule is
+            // not a plain string; otherwise keep the original string format.
+            $hasClosureRule = collect($rules)->contains(fn ($r) => !is_string($r));
+            $rules_array[$field_name] = $hasClosureRule ? $rules : implode('|', $rules);
+            $custom_messages[$field_name . '.required'] = $L['required'];
+        }
+
+        $dynamic_validator = Validator::make($request->all(), $rules_array, $custom_messages);
 
         if ($dynamic_validator->fails()) {
             return redirect()->back()
@@ -357,42 +465,95 @@ class FormBuilderController extends Controller
      */
     public function saveForm($id, Request $request)
     {
-        //  dd($request->all());
-
         $request->validate([
             'form_fields_data' => 'required|array',
             'form_fields_data.items' => 'required|array',
+            'form_fields_data.title' => 'required|string',
+            'form_fields_data.organization_id' => 'required|integer|exists:organizations,id',
         ]);
 
         $form_data = $request->form_fields_data;
 
-        
-        $form = BuilderForm::where('form_name', $form_data['title'])->where('organization_id', $form_data['organization_id'])->first();
-       
-        if ($form) {
-            $id = $form->id;
-        }else{
-        $form = new BuilderForm;
+        // Backend validation: Do not allow saving empty sections
+        if (isset($form_data['items']) && is_array($form_data['items'])) {
+            foreach ($form_data['items'] as $item) {
+                if (($item['type'] ?? null) === 'section') {
+                    if (empty($item['questions']) || !is_array($item['questions'])) {
+                        $message = app()->getLocale() === 'ar' 
+                            ? 'لا يمكن حفظ قسم فارغ. يرجى إضافة أسئلة للقسم أو حذفه.' 
+                            : 'An empty section cannot be saved. Please add questions to the section or delete it.';
+                        return response()->json([
+                            'success' => false,
+                            'message' => $message,
+                        ], 422);
+                    }
+                }
+            }
+        }
+
+        // Route parameter `{id}` is the authoritative form identifier.
+        // "0" / missing means "create new"; any other value means "update that
+        // specific form" (including renaming it). The old implementation
+        // looked the form up by (form_name, organization_id) which broke
+        // renames — a rename created a new form and orphaned the original,
+        // and a name collision silently rewrote the wrong form.
+        $is_edit = false;
+        $form = null;
+
+        if ($id && (int) $id > 0) {
+            $form = BuilderForm::find($id);
+            if ($form) {
+                $is_edit = true;
+                $form->form_name = $form_data['title'];
+                $form->organization_id = $form_data['organization_id'];
+                $form->save();
+            }
+        }
+
+        if (!$is_edit) {
+            $form = new BuilderForm;
             $form->form_name = $form_data['title'];
             $form->organization_id = $form_data['organization_id'];
             $form->save();
-            $id = $form->id;
         }
+
+        $id = $form->id;
         
         $fields = Field::all()->mapWithKeys(function ($field) {
             return [$field->field_type => $field->id];
         });
 
         
-        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields) {
+        $section_index = 0;
+
+        // GV-8346: choice options are stored as a comma-joined string. Trim,
+        // drop blanks and de-duplicate before persisting — the builder's
+        // `Add "Other"` button could be clicked repeatedly, and every extra
+        // row was serialized as its own `__OTHER__` entry, so the founder-
+        // facing form rendered one "Other" choice per click. De-duplicating
+        // here also heals questions already saved with duplicates the next
+        // time their form is saved.
+        $normalizeOptions = function ($options) {
+            return collect($options ?? [])
+                ->map(fn($o) => trim((string) $o))
+                ->filter(fn($o) => $o !== '')
+                ->unique()
+                ->implode(',');
+        };
+
+        $config = collect($form_data['items'])->flatMap(function ($item) use ($fields, &$section_index, $normalizeOptions) {
             
             if (($item['type'] ?? null) === 'question') {
-               
                 $section_title = null; 
                 $questions = [$item]; 
+                $description = null;
             }
             elseif (($item['type'] ?? null) === 'section') {
-                $section_title = $item['title'] ?? null;
+                $section_index++;
+                $section_title = trim($item['title'] ?? '');
+                if ($section_title === '') {
+                    $section_title = 'Section ' . $section_index;
+                }
                 $description = $item['description'] ?? null;
                 $questions = $item['questions'] ?? [];
             }
@@ -400,7 +561,7 @@ class FormBuilderController extends Controller
                 return []; 
             }
 
-            return collect($questions)->map(function ($question) use ($fields, $section_title, $description) {
+            return collect($questions)->map(function ($question) use ($fields, $section_title, $description, $normalizeOptions) {
                 $field_type = $question['question_type'] ?? 'short_answer';
 
                 switch ($field_type) {
@@ -416,31 +577,44 @@ class FormBuilderController extends Controller
 
                     case 'multiple_choice':
                         $field_id = $fields['select'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'multiple_choice', 'values' => $values];
+                        $additional_config = ['type' => 'multiple_choice', 'values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'checkboxes':
                         $field_id = $fields['radio'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'checkboxes','values' => $values];
+                        $additional_config = ['type' => 'checkboxes','values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'dropdown':
                         $field_id = $fields['select'] ?? 0;
-                        $values = collect($question['options'] ?? [])->map(fn($o) => trim($o))->implode(',');
-                        $additional_config = ['type' => 'dropdown','values' => $values];
+                        $additional_config = ['type' => 'dropdown','values' => $normalizeOptions($question['options'] ?? [])];
                         break;
 
                     case 'linear_scale':
                         $field_id = $fields['input'] ?? 0;
-                        $min = $question['min'] ?? 1;
-                        $max = $question['max'] ?? 5;
+                        // GV-8349: the builder JS nests these under `scale`
+                        // (see extractQuestionData). Reading $question['min']
+                        // never matched, so every scale silently persisted as
+                        // the 1-5 default and the authored endpoint labels
+                        // were dropped entirely.
+                        $scaleConfig = $question['scale'] ?? [];
+                        $min = $scaleConfig['from'] ?? 1;
+                        $max = $scaleConfig['to'] ?? 5;
+                        $min = is_numeric($min) ? (int) $min : 1;
+                        $max = is_numeric($max) ? (int) $max : 5;
+                        // An inverted or zero-width range would render no
+                        // choices at all; fall back to the 1-5 default.
+                        if ($max <= $min) {
+                            $min = 1;
+                            $max = 5;
+                        }
                         $additional_config = [
                             'type' => 'linear_scale',
                             'min' => $min,
                             'max' => $max,
-                            'step' => 1
+                            'step' => 1,
+                            'label_low' => $scaleConfig['label_low'] ?? '',
+                            'label_high' => $scaleConfig['label_high'] ?? '',
                         ];
                         break;
 
@@ -452,6 +626,35 @@ class FormBuilderController extends Controller
                     case 'time':
                         $field_id = $fields['input'] ?? 0;
                         $additional_config = ['type' => 'time'];
+                        break;
+
+                    case 'number':
+                        $field_id = $fields['number'] ?? $fields['input'] ?? 0;
+                        $numberConfig = $question['number_config'] ?? [];
+                        $additional_config = [
+                            'type' => 'number',
+                            'min'  => $numberConfig['min']  ?? '',
+                            'max'  => $numberConfig['max']  ?? '',
+                            'step' => $numberConfig['step'] ?? '',
+                        ];
+                        break;
+
+                    case 'email':
+                        $field_id = $fields['input'] ?? 0;
+                        $emailConfig = $question['email_config'] ?? [];
+                        $additional_config = [
+                            'type'    => 'email',
+                            'confirm' => !empty($emailConfig['confirm']),
+                        ];
+                        break;
+
+                    case 'url':
+                        $field_id = $fields['input'] ?? 0;
+                        $urlConfig = $question['url_config'] ?? [];
+                        $additional_config = [
+                            'type'            => 'url',
+                            'allowed_domains' => $urlConfig['allowed_domains'] ?? '',
+                        ];
                         break;
 
                     case 'file':
@@ -471,7 +674,10 @@ class FormBuilderController extends Controller
                     'section' => $section_title,
                     'description' => $description,
                     'validation' => [
-                        'required' => !empty($question['required']) ? 1 : 0
+                        'required' => !empty($question['required']) ? 1 : 0,
+                        // Optional by default; only enforced when the builder
+                        // explicitly marks the "Other" free-text as required.
+                        'other_required' => !empty($question['other_required']) ? 1 : 0,
                     ],
                     'logic' => $question['logic'] ?? [],
                 ];
@@ -484,26 +690,32 @@ class FormBuilderController extends Controller
         });
 
         $save_success = true;
+        $error_message = null;
 
         try {
             DB::transaction(function () use ($config, $id) {
                 $builderForm = BuilderForm::findOrFail($id);
                 $builderForm->fields()->detach();
 
-                $config->each(function ($item) use ($builderForm) {
+                $config->values()->each(function ($item, $index) use ($builderForm) {
                     $builderForm->fields()->attach($item['field'], [
-                        'options' => json_encode($item['options'])
+                        'options' => json_encode($item['options']),
+                        'sort_order' => $index + 1
                     ]);
                 });
             });
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $save_success = false;
+            $error_message = $e->getMessage();
+            report($e);
         }
-        
+
         return response()->json([
-            'success' => $save_success,
-            'id' => $id,
+            'success'         => $save_success,
+            'id'              => $id,
             'organization_id' => $form_data['organization_id'],
+            'action'          => $is_edit ? 'updated' : 'created',
+            'message'         => $error_message,
         ]);
 
     }
@@ -626,6 +838,135 @@ class FormBuilderController extends Controller
                 'message_ar' => 'حدث خطأ أثناء حذف النموذج',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Reorder sections for a form.
+     *
+     * Payload (POST JSON):
+     *   {
+     *     "sections": [
+     *       { "title": "Section Name", "question_ids": [1, 5, 2] },
+     *       ...
+     *     ]
+     *   }
+     *
+     * Sections are purely logical groupings stored as the `section` key in
+     * each builder_field's options JSON. To persist a new section order, we
+     * process each section sequentially, assigning contiguous sort_orders
+     * and updating the `options.section` string value for all its questions.
+     */
+    public function reorderSections($id, Request $request)
+    {
+        $request->validate([
+            'sections'                => 'required|array',
+            'sections.*.title'        => 'nullable|string',
+            'sections.*.question_ids' => 'required|array',
+        ]);
+
+        $sectionsPayload = $request->input('sections');
+
+        try {
+            DB::transaction(function () use ($id, $sectionsPayload) {
+                $sortOrder = 1;
+                foreach ($sectionsPayload as $sec) {
+                    $title = $sec['title'] ?? '';
+                    $qids  = array_values(array_filter($sec['question_ids'], fn($v) => is_numeric($v)));
+                    
+                    foreach ($qids as $qid) {
+                        $field = BuilderField::where('id', $qid)
+                            ->where('builder_form_id', $id)
+                            ->first();
+                            
+                        if ($field) {
+                            $options = json_decode($field->getRawOriginal('options') ?? '{}', true) ?? [];
+                            $options['section'] = $title;
+                            
+                            $field->fill([
+                                'options'    => json_encode($options),
+                                'sort_order' => $sortOrder++
+                            ])->save();
+                        }
+                    }
+                }
+            });
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Reorder questions within a section (and optionally move between sections).
+     *
+     * Payload (POST JSON):
+     *   {
+     *     "section_title": "Section Title" | null,
+     *     "question_ids":  [3, 1, 7, ...]        ← builder_fields primary keys
+     *   }
+     *
+     * When section_title is provided and differs from a question's current
+     * options.section, the question's options JSON is updated so it belongs
+     * to the new section (cross-section drag-and-drop support).
+     */
+    public function reorderQuestions($id, Request $request)
+    {
+        $request->validate([
+            'question_ids'   => 'required|array',
+            'question_ids.*' => 'nullable',
+            'section_title'  => 'nullable|string',
+        ]);
+
+        $questionIds  = array_values(array_filter(
+            $request->input('question_ids'),
+            fn($v) => is_numeric($v)
+        ));
+        $sectionTitle = $request->input('section_title');
+
+        if (empty($questionIds)) {
+            return response()->json(['status' => 'success', 'message' => 'no db ids']);
+        }
+
+        try {
+            DB::transaction(function () use ($id, $questionIds, $sectionTitle) {
+                // Find the minimum sort_order slot occupied by these questions
+                // so we don't disturb the sort_order of other sections.
+                $minOrder = BuilderField::where('builder_form_id', $id)
+                    ->whereIn('id', $questionIds)
+                    ->min('sort_order') ?? 1;
+
+                $sortOrder = $minOrder;
+                foreach ($questionIds as $qid) {
+                    $field = BuilderField::where('id', $qid)
+                        ->where('builder_form_id', $id)
+                        ->first();
+
+                    if (!$field) {
+                        $sortOrder++;
+                        continue;
+                    }
+
+                    // Decode options to potentially update the section name.
+                    $options = json_decode($field->getRawOriginal('options') ?? '{}', true) ?? [];
+
+                    if ($sectionTitle !== null && ($options['section'] ?? null) !== $sectionTitle) {
+                        $options['section'] = $sectionTitle;
+                        $field->fill(['options' => json_encode($options)]);
+                    }
+
+                    $field->fill(['sort_order' => $sortOrder++])->save();
+                }
+            });
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Throwable $e) {
+            report($e);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 }

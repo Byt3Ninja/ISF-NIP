@@ -32,45 +32,102 @@ class OrganizationTypesController extends Controller
 		$this->middleware('auth');
 	}
  
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
 	public function index(Request $request)
 	{
 		$user = auth()->user();
-		$organizationTypes = OrganizationTypes::get();
+		$organizationTypes = OrganizationTypes::orderBy('id', 'desc')->get();
 
 		return view('admin.organizationTypes.index', compact('organizationTypes'));
 	}
 
+	/**
+	 * Show the form for creating a new resource.
+	 * Note: This route is now optional as the modal handles creation
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
 	public function create()
 	{
 		return view('admin.organizationTypes.create');
 	}
 
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+	 */
 	public function store(Request $request)
 	{
-		$this->validate($request, [
+		// Validate the request
+		$validatedData = $this->validate($request, [
 			'title_en' => ['required', 'string', 'max:255'],
 			'title_ar' => ['required', 'string', 'max:255'],
 		]);
 
-		$orgType = new OrganizationTypes;
-		$orgType->title_en = $request->title_en;
-		$orgType->title_ar = $request->title_ar;
+		try {
+			// Create new organization type
+			$orgType = new OrganizationTypes;
+			$orgType->title_en = $request->title_en;
+			$orgType->title_ar = $request->title_ar;
+			$orgType->save();
 
-		$orgType->save();
+			// Check if request is AJAX
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json([
+					'success' => true,
+					'message' => __('admin.StoredSuccessfully'),
+					'data' => [
+						'id' => $orgType->id,
+						'title_en' => $orgType->title_en,
+						'title_ar' => $orgType->title_ar,
+						'created_at' => $orgType->created_at->format('Y-m-d H:i'),
+						'updated_at' => $orgType->updated_at->format('Y-m-d H:i'),
+					]
+				], 201);
+			}
 
-		return redirect()->route('organization-types.index')->with(['msg' => 'StoredSuccessfully']);
+			// Traditional redirect for non-AJAX requests
+			return redirect()->route('organization-types.index')->with(['msg' => 'StoredSuccessfully']);
+
+		} catch (Exception $e) {
+			Log::error('Error creating organization type: ' . $e->getMessage());
+
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.unexpected_error'),
+					'error' => config('app.debug') ? $e->getMessage() : null
+				], 500);
+			}
+
+			return redirect()->back()
+				->withInput()
+				->with(['message2' => 'unexpected_error']);
+		}
 	}
 
 	/**
 	 * Show the form for editing the specified resource.
+	 * Note: This route is now optional as the modal handles editing
 	 *
-	 * @param  \App\User  $Type
+	 * @param  int  $id
 	 * @return \Illuminate\Http\Response
 	 */
 	public function edit($id)
 	{
 		$orgType = OrganizationTypes::find($id);
-		if( empty( $orgType ) ) { return abort(404); }
+		
+		if (empty($orgType)) {
+			return abort(404);
+		}
+
 		return view('admin.organizationTypes.edit', compact('orgType'));
 	}
 
@@ -78,32 +135,138 @@ class OrganizationTypesController extends Controller
 	 * Update the specified resource in storage.
 	 *
 	 * @param  \Illuminate\Http\Request  $request
-	 * @param  \App\Type  $Type
-	 * @return \Illuminate\Http\Response
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
 	 */
 	public function update($id, Request $request)
 	{
 		$orgType = OrganizationTypes::find($id);
-		if( empty( $orgType ) ) { return abort(404); }
-		$this->validate($request, [
+		
+		if (empty($orgType)) {
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.NotFound')
+				], 404);
+			}
+			return abort(404);
+		}
+
+		// Validate the request
+		$validatedData = $this->validate($request, [
 			'title_en' => ['required', 'string', 'max:255'],
 			'title_ar' => ['required', 'string', 'max:255'],
 		]);
 
-		$orgType->title_en = $request->title_en;
-		$orgType->title_ar = $request->title_ar;
+		try {
+			// Update organization type
+			$orgType->title_en = $request->title_en;
+			$orgType->title_ar = $request->title_ar;
+			$orgType->save();
 
-		$orgType->save();
+			// Reload the model to ensure fresh data
+			$orgType->refresh();
 
-		return redirect()->route('organization-types.index')->with(['msg' => 'UpdatedSuccessfully']);
+			// Check if request is AJAX
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json([
+					'success' => true,
+					'message' => __('admin.UpdatedSuccessfully'),
+					'data' => [
+						'id' => $orgType->id,
+						'title_en' => $orgType->title_en,
+						'title_ar' => $orgType->title_ar,
+						'created_at' => $orgType->created_at->format('Y-m-d H:i'),
+						'updated_at' => $orgType->updated_at->format('Y-m-d H:i'),
+					]
+				], 200);
+			}
+
+			// Traditional redirect for non-AJAX requests
+			return redirect()->route('organization-types.index')->with(['msg' => 'UpdatedSuccessfully']);
+
+		} catch (Exception $e) {
+			Log::error('Error updating organization type: ' . $e->getMessage());
+
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.unexpected_error'),
+					'error' => config('app.debug') ? $e->getMessage() : null
+				], 500);
+			}
+
+			return redirect()->back()
+				->withInput()
+				->with(['message2' => 'unexpected_error']);
+		}
 	}
 
-	public function destroy($id)
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+	 */
+	public function destroy($id, Request $request)
 	{
-		$orgType = OrganizationTypes::find($id);
-		if( !empty( $orgType ) )
-		{
+		try {
+			$orgType = OrganizationTypes::find($id);
+			
+			if (empty($orgType)) {
+				if ($request->ajax() || $request->wantsJson()) {
+					return response()->json([
+						'success' => false,
+						'message' => __('admin.NotFound')
+					], 404);
+				}
+				return abort(404);
+			}
+
+			// Check if organization type is being used
+			// Uncomment and modify based on your relationships
+			/*
+			$organizationsCount = Organization::where('organization_type_id', $id)->count();
+			if ($organizationsCount > 0) {
+				if ($request->ajax() || $request->wantsJson()) {
+					return response()->json([
+						'success' => false,
+						'message' => __('admin.Cannot delete organization type because it is being used by :count organization(s)', ['count' => $organizationsCount])
+					], 422);
+				}
+				
+				return redirect()->route('organization-types.index')
+					->with(['message2' => 'Cannot delete organization type because it is being used']);
+			}
+			*/
+
+			// Delete the organization type
 			$orgType->delete();
+
+			// Check if request is AJAX
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json([
+					'success' => true,
+					'message' => __('admin.DeletedSuccessfully')
+				], 200);
+			}
+
+			// Traditional redirect for non-AJAX requests
+			return redirect()->route('organization-types.index')->with(['msg' => 'DeletedSuccessfully']);
+
+		} catch (Exception $e) {
+			Log::error('Error deleting organization type: ' . $e->getMessage());
+
+			if ($request->ajax() || $request->wantsJson()) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.unexpected_error'),
+					'error' => config('app.debug') ? $e->getMessage() : null
+				], 500);
+			}
+
+			return redirect()->route('organization-types.index')
+				->with(['message2' => 'unexpected_error']);
 		}
 	}
 }

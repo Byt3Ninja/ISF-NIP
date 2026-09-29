@@ -35,8 +35,8 @@
 @endsection
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="card">
       <div class="card-header mb-6 border-bottom">
         <h5 class="card-title mb-0 text-capitalize">{{ __('admin.Add new user') }}</h5>
@@ -110,9 +110,16 @@
               <div class="form-group mb-4">
                 <label class="form-label" for="role">{{ __('admin.Role') }}</label>
                 <select class="form-select" id="role" name="role">
-                  <option disabled value="" selected>{{ __('admin.Select_Role') }}</option>
+                  <option disabled value=""
+                    {{ request('role') !== 'mentor' ? 'selected' : '' }}>
+                    {{ __('admin.Select_Role') }}
+                  </option>
+
                   @foreach ($roles as $role)
-                    <option value="{{ $role['name'] }}">{{ __('admin.' . $role['name']) }}</option>
+                    <option value="{{ $role['name'] }}"
+                        {{ request('role') === 'mentor' && $role['name'] === 'mentor' ? 'selected' : '' }}>
+                        {{ __('admin.' . $role['name']) }}
+                    </option>
                   @endforeach
                 </select>
               </div>
@@ -197,8 +204,11 @@
             </div>
           </div>
 
-          <div class="col-12 d-flex justify-content-end align-items-center gap-4 mt-8">
-            <a href="{{ route('users.index') }}" class="btn btn-label-secondary">{{ __('admin.Cancel') }}</a>
+          <div class="col-12 d-flex justify-content-between align-items-center gap-4 mt-8">
+            <a id="back-button" href="#" role="button" aria-label="Go back" class="btn btn-label-secondary">
+              <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
+              {{ __('admin.Back') }}
+            </a>
             <button type="submit" class="btn btn-primary">{{ __('admin.Save') }}</button>
           </div>
         </form>

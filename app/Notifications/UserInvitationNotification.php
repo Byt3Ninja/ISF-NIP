@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Invitation;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -12,7 +13,7 @@ use Throwable;
 
 class UserInvitationNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ConfiguresSmtp;
 
     /**
      * The number of times the job may be attempted.
@@ -41,11 +42,18 @@ class UserInvitationNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $org = $this->invitation->organization;
+        $smtpSettings = $org?->organizationSettings;
+
+        $this->configureSmtp($smtpSettings);
+        $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject(__('notifications.user_invitation.subject'))
-            ->view('emails.invitation', [
+            ->view('emails.invitation', array_merge([
                 'invitation' => $this->invitation,
-            ]);
+            ], $orgData));
     }
 
     /**

@@ -1,5 +1,5 @@
 <!-- Selected Managers Bar -->
-<div class="card bg-light-subtle shadow-none border-bottom border-top rounded-0">
+<div id="selectedManagersBar" class="card bg-light-subtle shadow-none border-bottom border-top rounded-0" style="display: none;">
   <div class="card-body py-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h6 class="card-title mb-0 ps-2">
@@ -11,7 +11,7 @@
     </div>
     
     <div id="selectedManagersContainer" class="d-flex flex-wrap gap-2 p-2 bg-light-subtle rounded border border-dashed" style="min-height: 50px;">
-      <span class="text-muted my-auto no-managers-message w-100 text-center">{{ __('admin.No managers selected') }}</span>
+        <!-- Message is handled by JS logic now -->
     </div>
     
     <!-- Hidden inputs container -->
@@ -42,7 +42,7 @@
       <div class="tab-pane fade show active" id="existing-manager-content">
         <div class="input-group input-group-lg mb-6">
           <span class="input-group-text bg-white"><i class="ti ti-search text-muted"></i></span>
-          <input type="text" class="form-control border-start-0" id="managerSearchInput" placeholder="{{ __('admin.Search by name, email, or role') }}...">
+          <input type="text" class="form-control border-start-0" id="managerSearchInput" autocomplete="off" placeholder="{{ __('admin.Search by name, email, or role') }}...">
         </div>
     
         <div id="managersList" class="list-group">
@@ -68,22 +68,38 @@
     
       <!-- Tab: Create New Manager -->
       <div class="tab-pane fade" id="create-manager-content">
-        <form id="createManagerForm">
-          <div class="row g-4">
+        <div id="createManagerWizardForm" autocomplete="off">
+          <div class="row">
             @foreach(['en' => 'English', 'ar' => 'Arabic'] as $key => $lang)
-            <div class="col-md-6">
+            <div class="col-md-6 mb-6">
               <label class="form-label">{{ __("admin.First Name ($lang)") }} @if($key == 'en')<span class="text-danger">*</span>@endif</label>
-              <input type="text" class="form-control" name="first_name_{{$key}}" id="manager_first_name_{{$key}}" dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}" placeholder="{{ $key == 'ar' ? __("admin.Enter first name in Arabic") : __("admin.Enter first name") }}">
+              <input
+                type="text"
+                class="form-control"
+                name="first_name_{{$key}}"
+                id="manager_first_name_{{$key}}"
+                dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}"
+                autocomplete="off"
+                placeholder="{{ $key == 'ar' ? __("admin.Enter first name in Arabic") : __("admin.Enter first name") }}"
+              >
               <div class="invalid-feedback"></div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 mb-6">
               <label class="form-label">{{ __("admin.Last Name ($lang)") }} @if($key == 'en')<span class="text-danger">*</span>@endif</label>
-              <input type="text" class="form-control" name="last_name_{{$key}}" id="manager_last_name_{{$key}}" dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}" placeholder="{{ $key == 'ar' ? __("admin.Enter last name in Arabic") : __("admin.Enter last name") }}">
+              <input
+                type="text"
+                class="form-control"
+                name="last_name_{{$key}}"
+                id="manager_last_name_{{$key}}"
+                dir="{{ $key == 'ar' ? 'rtl' : 'ltr' }}"
+                autocomplete="off"
+                placeholder="{{ $key == 'ar' ? __("admin.Enter last name in Arabic") : __("admin.Enter last name") }}"
+              >
               <div class="invalid-feedback"></div>
             </div>
             @endforeach
     
-            <div class="col-md-6">
+            <div class="col-md-6 mb-6">
               <label class="form-label">{{ __('admin.Gender') }} <span class="text-danger">*</span></label>
               <select class="form-select" name="gender" id="manager_gender">
                 <option value="">{{ __('admin.Select Gender') }}</option>
@@ -93,32 +109,32 @@
               <div class="invalid-feedback"></div>
             </div>
       
-            <div class="col-md-6">
+            <div class="col-md-6 mb-6">
               <label class="form-label">{{ __('admin.Email') }} <span class="text-danger">*</span></label>
-              <input type="email" class="form-control" name="email" id="manager_email" placeholder="{{ __('admin.Enter email address') }}">
+              <input type="email" class="form-control" name="email" id="manager_email" autocomplete="off" placeholder="{{ __('admin.Enter email address') }}">
               <div class="invalid-feedback"></div>
             </div>
       
-            <div class="col-md-6">
+            <div class="col-md-6 mb-6">
               <label class="form-label">{{ __('admin.Phone') }} <span class="text-danger">*</span></label>
-             <input type="tel" class="form-control" id="manager_phone" name="phone" placeholder="{{ __('admin.Enter phone number') }}">
+              <input type="tel" class="form-control" id="manager_phone" name="phone" autocomplete="off" placeholder="{{ __('admin.Enter phone number') }}">
               <input type="hidden" id="manager_country_code" name="country_code">
               <div class="invalid-feedback"></div>
             </div>
     
-            <div class="col-md-6 form-password-toggle">
+            <div class="col-md-6 mb-6 form-password-toggle">
               <label class="form-label" for="password">{{ __('auth.Password') }}</label>
               <div class="input-group input-group-merge shadow-none">
-                <input type="password" name="password" id="manager_password" class="form-control" placeholder="{{ __('admin.Enter password') }}" />
+                <input type="password" name="password" id="manager_password" class="form-control" autocomplete="new-password" placeholder="{{ __('admin.Enter password') }}" />
                 <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
               </div>
               <div class="invalid-feedback"></div>
             </div>
     
-            <div class="col-md-6 form-password-toggle">
+            <div class="col-md-6 mb-6 form-password-toggle">
               <label class="form-label" for="password_confirmation">{{ __('admin.Confirm Password') }}</label>
               <div class="input-group input-group-merge shadow-none">
-                <input type="password" name="password_confirmation" id="manager_password_confirmation" class="form-control" placeholder="{{ __('admin.Confirm password') }}" />
+                <input type="password" name="password_confirmation" id="manager_password_confirmation" class="form-control" autocomplete="new-password" placeholder="{{ __('admin.Confirm password') }}" />
                 <span class="input-group-text cursor-pointer border border-light"><i class="ti ti-eye-off"></i></span>
               </div>
               <div class="invalid-feedback"></div>
@@ -130,7 +146,7 @@
               </button>
             </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
@@ -138,34 +154,172 @@
 
 @push('scripts')
 <script>
-const passwordMismatchMessage = '{{ __("admin.Passwords do not match") }}';
-
 $(function () {
   const orgId = "{{ $organization->id ?? 0 }}";
   let selectedManagers = @json($assignedManagers ?? []);
+
   let searchTimeout = null;
   let currentPage = 0;
 
   let managerPhoneIti = null;
-  const managerPhoneInput = $('#manager_phone')[0];
-  const managerCountryCodeInput = $('#manager_country_code')[0];
+  const managerPhoneInput = document.getElementById('manager_phone');
+  const managerCountryCodeInput = document.getElementById('manager_country_code');
 
+  // ============================================================
+  // --- FormValidation (FV) — lazy init on first tab show ---
+  // ============================================================
+
+  let fv = null;
+
+  function initFV() {
+    if (fv) return;
+
+    const formEl = document.getElementById('createManagerWizardForm');
+    if (!formEl) return;
+
+    fv = FormValidation.formValidation(
+      formEl,
+      {
+        fields: {
+          first_name_en: {
+            validators: {
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
+              regexp:   { regexp: /^[a-zA-Z\s]+$/, message: '{{ __("admin.First name must contain only English letters") }}' },
+            }
+          },
+          last_name_en: {
+            validators: {
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
+              regexp:   { regexp: /^[a-zA-Z\s]+$/, message: '{{ __("admin.Last name must contain only English letters") }}' },
+            }
+          },
+          first_name_ar: {
+            validators: {
+              regexp: { regexp: /^[\u0600-\u06FF\s]+$/, message: '{{ __("admin.First name must contain only Arabic letters") }}' },
+            }
+          },
+          last_name_ar: {
+            validators: {
+              regexp: { regexp: /^[\u0600-\u06FF\s]+$/, message: '{{ __("admin.Last name must contain only Arabic letters") }}' },
+            }
+          },
+          gender: {
+            validators: {
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
+            }
+          },
+          email: {
+            validators: {
+              notEmpty:     { message: "{{ __('admin.Required_Field') }}" },
+              regexp: {
+                regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+                message: "{{ __('admin.Please enter a valid email address') }}",
+              }
+            }
+          },
+          phone: {
+            validators: {
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
+              callback: {
+                message: '{{ __("auth.Invalid_Phone_Number") }}',
+                callback: function () {
+                  if (!managerPhoneIti) return true;
+                  const val = managerPhoneInput.value.trim();
+                  return val === '' || managerPhoneIti.isValidNumber();
+                }
+              }
+            }
+          },
+          password: {
+            validators: {
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
+              stringLength: {
+                min: 8,
+                max: 20,
+                message: "{{ __('admin.password_length_validation') }}",
+              },
+              regexp: {
+                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
+                message: "{{ __('admin.strong_password_validation') }}"
+              }
+            }
+          },
+          password_confirmation: {
+            validators: {
+              notEmpty: { message: "{{ __('admin.Required_Field') }}" },
+              identical: {
+                compare: function () {
+                  return document.getElementById('createManagerWizardForm').querySelector('[name="password"]').value;
+                },
+                message: '{{ __("admin.Passwords do not match") }}',
+              },
+              stringLength: {
+                min: 8,
+                max: 20,
+                message: "{{ __('admin.password_length_validation') }}"
+              },
+              regexp: {
+                regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
+                message: "{{ __('admin.strong_password_validation') }}"
+              }
+            }
+          },
+        },
+        plugins: {
+          trigger:   new FormValidation.plugins.Trigger(),
+          autoFocus: new FormValidation.plugins.AutoFocus(),
+          message:   new FormValidation.plugins.Message({
+            clazz: 'invalid-feedback d-block',
+            container: function (field, element) {
+              // For password fields inside .input-group, place message after the group
+              const parent = element.parentElement;
+              if (parent && parent.classList.contains('input-group')) {
+                return parent.parentElement;
+              }
+              return element.closest('.mb-6');
+            }
+          }),
+        },
+      }
+    );
+
+    // Manually apply is-invalid / remove it on field validation
+    fv.on('core.element.validated', function (e) {
+      const row = e.element.closest('.mb-6');
+      if (!row) return;
+      if (e.valid) {
+        e.element.classList.remove('is-invalid');
+      } else {
+        e.element.classList.add('is-invalid');
+      }
+    });
+  }
+
+  // Initialize FV only when the create-manager tab becomes visible
+  document.getElementById('create-manager-tab').addEventListener('shown.bs.tab', function () {
+    initFV();
+  });
+
+  // ============================================================
   // --- Core UI Logic ---
+  // ============================================================
 
   function syncSelection() {
+    const $bar = $('#selectedManagersBar'); // The outer card
     const $container = $('#selectedManagersContainer');
     const $inputStore = $('#managerIdsContainer');
-    const $noMsg = $('.no-managers-message');
-    const $clearBtn = $('#clearAllManagers');
+    const $clearBtn  = $('#clearAllManagers');
 
-    $container.find('.badge').remove();
+    // Clear previous badges and inputs
+    $container.empty();
     $inputStore.empty();
 
     if (selectedManagers.length === 0) {
-      $noMsg.show();
-      $clearBtn.hide();
+      // Hide the entire section if no one is selected
+      $bar.hide();
     } else {
-      $noMsg.hide();
+      // Show the entire section
+      $bar.show();
       $clearBtn.show();
 
       selectedManagers.forEach(m => {
@@ -178,20 +332,22 @@ $(function () {
         $inputStore.append(`<input type="hidden" name="manager_ids[]" value="${m.id}">`);
       });
     }
-      
-    // Sync List Checkboxes
+
+    // Sync list checkboxes (existing logic)
     $('.manager-checkbox').prop('checked', false).closest('.list-group-item').removeClass('active bg-light-subtle');
     selectedManagers.forEach(m => {
       $(`.manager-card[data-id="${m.id}"]`).addClass('active bg-light-subtle').find('.manager-checkbox').prop('checked', true);
     });
   }
 
+  // ============================================================
   // --- Data Loading ---
+  // ============================================================
 
   function loadManagers(page = 0) {
     currentPage = page;
     const query = $('#managerSearchInput').val();
-    
+
     $('#managersList, #managersEmpty, #managersPagination').hide();
     $('#managersLoading').show();
 
@@ -199,15 +355,15 @@ $(function () {
       search_term: query,
       start: page * 5,
       length: 5
-    }, function(res) {
+    }, function (res) {
       $('#managersLoading').hide();
       if (!res.data || res.data.length === 0) return $('#managersEmpty').show();
 
       const items = res.data.map(m => {
         const isChecked = selectedManagers.some(s => s.id == m.id);
         return `
-          <div class="list-group-item list-group-item-action d-flex align-items-center p-3 cursor-pointer manager-card ${isChecked ? 'active bg-light-subtle' : ''}" 
-                data-id="${m.id}" data-name="${m.name}" data-email="${m.email}">
+          <div class="list-group-item list-group-item-action d-flex align-items-center p-3 cursor-pointer manager-card ${isChecked ? 'active bg-light-subtle' : ''}"
+               data-id="${m.id}" data-name="${m.name}" data-email="${m.email}">
             <div class="form-check mb-0 me-3">
               <input class="form-check-input manager-checkbox" type="checkbox" ${isChecked ? 'checked' : ''}>
             </div>
@@ -234,7 +390,7 @@ $(function () {
     if (total <= 1) return;
     const $list = $('#managersPaginationList').empty();
     $('#managersInfo').text(`Showing ${current * 5 + 1} - ${Math.min((current + 1) * 5, totalRecords)} of ${totalRecords}`);
-    
+
     $list.append(`<li class="page-item ${current === 0 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${current - 1}">&laquo;</a></li>`);
     for (let i = 0; i < total; i++) {
       if (i === 0 || i === total - 1 || Math.abs(i - current) <= 1) {
@@ -247,17 +403,19 @@ $(function () {
     $('#managersPagination').show();
   }
 
+  // ============================================================
   // --- Events ---
+  // ============================================================
 
-  $(document).on('click', '.manager-card', function(e) {
+  $(document).on('click', '.manager-card', function (e) {
     if ($(e.target).is('input')) return;
     const $cb = $(this).find('.manager-checkbox');
     $cb.prop('checked', !$cb.prop('checked')).trigger('change');
   });
 
-  $(document).on('change', '.manager-checkbox', function() {
+  $(document).on('change', '.manager-checkbox', function () {
     const $card = $(this).closest('.manager-card');
-    const data = { id: $card.data('id'), name: $card.data('name'), email: $card.data('email') };
+    const data  = { id: $card.data('id'), name: $card.data('name'), email: $card.data('email') };
 
     if (this.checked) {
       if (!selectedManagers.find(m => m.id == data.id)) selectedManagers.push(data);
@@ -267,133 +425,119 @@ $(function () {
     syncSelection();
   });
 
-  $(document).on('click', '.remove-manager', function() {
+  $(document).on('click', '.remove-manager', function () {
     selectedManagers = selectedManagers.filter(m => m.id != $(this).data('id'));
     syncSelection();
   });
 
-  $('#clearAllManagers').on('click', function() {
+  $('#clearAllManagers').on('click', function () {
     selectedManagers = [];
     syncSelection();
   });
 
-  $('#managerSearchInput').on('input', function() {
+  $('#managerSearchInput').on('input', function () {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => loadManagers(0), 400);
   });
 
-  $(document).on('click', '#managersPaginationList .page-link', function(e) {
+  $(document).on('click', '#managersPaginationList .page-link', function (e) {
     e.preventDefault();
     loadManagers($(this).data('page'));
   });
 
-  // --- Form Logic ---
+  // ============================================================
+  // --- Create Manager Button ---
+  // ============================================================
+
   $('#createManagerBtn').on('click', function () {
-    const $btn = $(this);
+    initFV(); // ensure FV is initialized if somehow button is clicked before tab shown event
+    fv.validate().then(function (status) {
+      if (status !== 'Valid') return;
 
-    // Client-side phone validation
-    if (managerPhoneIti && managerPhoneInput.value.trim() && !managerPhoneIti.isValidNumber()) {
-      // attach invalid feedback 
-      $('#manager_phone').addClass('is-invalid');
-      $('#manager_phone').closest('.col-md-6').find('.invalid-feedback').text('{{ __("auth.Invalid_Phone_Number") }}');
-      return; // Prevent submission if phone is invalid
-    }
+      const $btn = $('#createManagerBtn').prop('disabled', true);
 
-    $btn.prop('disabled', true);
-    $.ajax({
-      url: '{{ route("organization.wizard.managers.create", ":id") }}'.replace(':id', orgId),
-      method: 'POST',
-      data: {
-        _token: '{{ csrf_token() }}',
-        first_name_en: $('#manager_first_name_en').val(),
-        last_name_en: $('#manager_last_name_en').val(),
-        first_name_ar: $('#manager_first_name_ar').val(),
-        last_name_ar: $('#manager_last_name_ar').val(),
-        gender: $('#manager_gender').val(),
-        email: $('#manager_email').val(),
-        country_code: $('#manager_country_code').val(),
-        phone: $('#manager_phone').val(),
-        password: $('#manager_password').val(),
-        password_confirmation: $('#manager_password_confirmation').val()
-      },
-      success(res) {
-        if (res.success) {
-          selectedManagers.push(res.manager);
-          syncSelection();
-          $('#createManagerForm').trigger('reset');
-          $('#existing-manager-tab').tab('show');
-          loadManagers(0);
+      $.ajax({
+        url: '{{ route("organization.wizard.managers.create", ":id") }}'.replace(':id', orgId),
+        method: 'POST',
+        data: {
+          _token:               '{{ csrf_token() }}',
+          first_name_en:        $('#manager_first_name_en').val(),
+          last_name_en:         $('#manager_last_name_en').val(),
+          first_name_ar:        $('#manager_first_name_ar').val(),
+          last_name_ar:         $('#manager_last_name_ar').val(),
+          gender:               $('#manager_gender').val(),
+          email:                $('#manager_email').val(),
+          country_code:         $('#manager_country_code').val(),
+          phone:                $('#manager_phone').val(),
+          password:             $('#manager_password').val(),
+          password_confirmation: $('#manager_password_confirmation').val(),
+        },
+        success(res) {
+          if (res.success) {
+            selectedManagers.push(res.manager);
+            syncSelection();
 
-          // Hide validation errors
-          $('#createManagerForm').find('.is-invalid').removeClass('is-invalid');
-          $('#createManagerForm').find('.invalid-feedback').text('');
+            // Reset form fields and FV state
+            $('#createManagerWizardForm').find('input:not([type=hidden]), select, textarea').val('').trigger('change');
+            fv.resetForm(true);
 
-          releaseSuccessAlert({
-            title: '{{ __("admin.success") }}',
-            message: '{{ __("admin.Manager created successfully") }}'
-          });
+            $('#existing-manager-tab').tab('show');
+            loadManagers(0);
+
+            releaseSuccessAlert({
+              title:   '{{ __("admin.success") }}',
+              message: '{{ __("admin.Manager created successfully") }}',
+            });
+          }
+        },
+        error(xhr) {
+          // Surface server-side errors back into FV
+          if (xhr.responseJSON?.errors) {
+            const errors = xhr.responseJSON.errors;
+            Object.entries(errors).forEach(([field, messages]) => {
+              fv.updateFieldStatus(field, 'Invalid', 'callback');
+              // Update the visible invalid-feedback text manually
+              const $el = $(`[name="${field}"]`);
+              $el.closest('.col-md-6, .col-12').find('.invalid-feedback').text(messages[0]);
+            });
+          }
+        },
+        complete() {
+          $btn.prop('disabled', false);
         }
-      },
-      error(xhr) {
-        if (xhr.responseJSON?.errors) {
-          const errors = xhr.responseJSON.errors;
-          const fields = ['first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'gender', 'email', 'phone', 'password', 'password_confirmation'];
-
-          fields.forEach(field => {
-            const el = $(`[name="${field}"]`);
-            if (errors[field]) {
-              const messages = errors[field];
-              el.addClass('is-invalid');
-
-              const mismatchMsg = messages.find(msg => msg === passwordMismatchMessage);
-              if (field === 'password' && mismatchMsg) {
-                // Set mismatch error on both password fields
-                el.closest('.col-md-6').find('.invalid-feedback').text(mismatchMsg);
-                $(`[name="password_confirmation"]`).addClass('is-invalid').closest('.col-md-6').find('.invalid-feedback').text(mismatchMsg);
-              } else {
-                // Set the first message for other errors
-                el.closest('.col-md-6, .col-12').find('.invalid-feedback').text(messages[0]);
-              }
-            } else {
-              el.removeClass('is-invalid');
-              el.closest('.col-md-6, .col-12').find('.invalid-feedback').text('');
-            }
-          });
-        }
-      },
-      complete() {
-        $btn.prop('disabled', false);
-      }
+      });
     });
   });
 
-  // Initialize phone input for manager creation
+  // ============================================================
+  // --- Phone (intl-tel-input) ---
+  // ============================================================
+
   if (managerPhoneInput) {
     managerPhoneIti = intlTelInput(managerPhoneInput, {
-      initialCountry: 'eg',
+      initialCountry:     'eg',
       preferredCountries: ['eg', 'ae', 'sa', 'ma', 'dz', 'tn'],
-      utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
-      formatOnDisplay: false,
-      separateDialCode: true,
-      autoPlaceholder: 'aggressive',
+      utilsScript:        'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
+      formatOnDisplay:    false,
+      separateDialCode:   true,
+      autoPlaceholder:    'aggressive',
     });
 
-    managerPhoneInput.addEventListener('countrychange', function() {
-      const countryData = managerPhoneIti.getSelectedCountryData();
-      managerCountryCodeInput.value = countryData.dialCode;
+    managerPhoneInput.addEventListener('countrychange', function () {
+      managerCountryCodeInput.value = managerPhoneIti.getSelectedCountryData().dialCode;
+      fv.revalidateField('phone');
     });
 
-    setTimeout(function() {
+    setTimeout(function () {
       if (managerPhoneIti) {
-        const countryData = managerPhoneIti.getSelectedCountryData();
-        if (countryData.dialCode) {
-          managerCountryCodeInput.value = countryData.dialCode;
-        }
+        managerCountryCodeInput.value = managerPhoneIti.getSelectedCountryData().dialCode || '';
       }
     }, 100);
   }
 
+  // ============================================================
   // --- Initialization ---
+  // ============================================================
   syncSelection();
   loadManagers(0);
 });

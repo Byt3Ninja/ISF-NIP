@@ -19,14 +19,44 @@ class CompanyRepository
         $nameField = $locale == 'ar' ? 'name_ar' : 'name_en';
 
         $query = Company::query()->with(['teamMembers', 'country', 'state', 'city', 'cycleRelation.organization', 'sectoR', 'stagE']);
+
+        // Only show companies linked to 'registered' users and exclude admins/managers
+        $query->whereHas('user', function ($q) {
+            $q->whereHas('roles', function ($rq) {
+                $rq->where('default_for', 'registered');
+            })->whereDoesntHave('roles', function ($rq) {
+                $rq->whereIn('default_for', ['admin', 'organizationmanager', 'subadmin']);
+            });
+        });
         $user = auth()->user();
 
         if ($user && !$user->hasRole('admin')) {
             $orgIds = $user->organizations_ids;
             if (!empty($orgIds)) {
-                $query->whereHas('cycleRelation.organization', function ($q) use ($orgIds) {
-                    $q->whereIn('id', $orgIds);
-                });
+                $isAlumni = !empty($filters['status']) && $filters['status'] === 'alumni';
+                $isApplied = !empty($filters['status']) && $filters['status'] === 'applied';
+                if ($isAlumni) {
+                    $query->whereIn('id', function ($q) use ($orgIds) {
+                        $q->select('company_id')
+                            ->from('alumni')
+                            ->whereNotNull('company_id')
+                            ->whereIn('cycle_id', function ($q2) use ($orgIds) {
+                                $q2->select('id')->from('cycles')
+                                    ->whereIn('organization_id', $orgIds);
+                            });
+                    });
+                } elseif ($isApplied) {
+                    // "Applied" spans a company's whole application history, including
+                    // after disapproval nulls out its cycle, so org scoping here must
+                    // key off the applicant's own organization rather than the cycle.
+                    $query->whereHas('user', function ($q) use ($orgIds) {
+                        $q->whereIn('organization_id', $orgIds);
+                    });
+                } else {
+                    $query->whereHas('cycleRelation.organization', function ($q) use ($orgIds) {
+                        $q->whereIn('id', $orgIds);
+                    });
+                }
             }
         }
 
@@ -101,6 +131,29 @@ class CompanyRepository
         if (!empty($filters['programId'])) {
             $query->where('cycle', $filters['programId']);
         }
+    
+        if(!empty($filters['status'])){
+            if($filters['status'] == 'alumni') {
+                $query->whereIn('id', function ($q) {
+                    $q->select('company_id')
+                    ->from('alumni')
+                    ->whereNotNull('company_id');
+                });
+            } elseif($filters['status'] == 'incubated') {
+                $query->whereNotNull('cycle')->whereHas('stepdata', function ($q) {
+                    $q->where('stype', '!=', 1);
+                });
+            } elseif($filters['status'] == 'applied') {
+                // "Applied" = startups that actually submitted an application to a
+                // program, ever — regardless of current stage/approval status. A
+                // form_data row is written the moment a founder submits (see
+                // ExternalCyclesController::registerUser(), CyclesController::saveForm())
+                // and survives disapproval nulling out cycle/step, so its existence is
+                // what distinguishes "applied" from "registered but never applied".
+                $query->whereHas('formData');
+            }
+
+        }
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -113,8 +166,8 @@ class CompanyRepository
         }
 
         return $isApi
-            ? $query->paginate($filters['limit'] ?? 10)
-            : $query->paginate(9);
+            ? $query->paginate($filters['limit'] ?? 10)->withQueryString()
+            : $query->paginate(9)->withQueryString();
     }
 
      public function findWithRelations($id)
@@ -137,7 +190,11 @@ class CompanyRepository
         return $company->teamMembers()->create([
             'Name' => $data['name'],
             'Email' => $data['email'] ?? null,
+            'phone' => $data['phone'] ?? null,
             'LinkedIn' => $data['linkedin'] ?? null,
+            'join_date' => $data['join_date'] ?? null,
+            'founder_type' => $data['founder_type'] ?? null,
+            'working_commitment' => $data['working_commitment'] ?? null,
             'TeamMember' => 'Founder',
         ]);
     }
@@ -264,6 +321,7 @@ public function findAllMilestones($companyId)
 {
      $milestone = DB::table('milestones')
         ->where('Company_id', $companyId)
+        ->where('visibility', '!=', 'private')
         ->orderBy('created_at')
         ->get();
         return $milestone;
@@ -275,5 +333,65 @@ public function findCompanyRelation($companyId)
 
     return $companyRelation;
 }
+
+    /**
+     * Upsert the Founder team_members row attached to $company, matched by user_id.
+     */
+    public function upsertFounderFromImport(Company $company, array $data, int $userId): Team_member
+    {
+        $existing = $company->teamMembers()
+            ->where('TeamMember', 'Founder')
+            ->where('user_id', $userId)
+            ->first();
+
+        $attrs = [
+            'user_id'            => $userId,
+            'Name'               => trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')),
+            'Email'              => $data['email']  ?? null,
+            'phone'              => $data['phone']  ?? null,
+            'join_date'          => $data['join_date']          ?? null,
+            'founder_type'       => $data['founder_type']       ?? null,
+            'working_commitment' => $data['working_commitment'] ?? null,
+            'national_id'        => $data['national_id']        ?? null,
+            'educational_status' => $data['educational_status'] ?? null,
+            'date_of_birth'      => $data['date_of_birth']      ?? null,
+            'TeamMember'         => 'Founder',
+        ];
+
+        if ($existing) {
+            $existing->update($attrs);
+            return $existing->fresh();
+        }
+        return $company->teamMembers()->create($attrs);
+    }
+
+    /**
+     * Upsert the Co-founder team_members row attached to $company, matched by Email (case-insensitive).
+     * No User account is created — co-founders do not log in per spec.
+     */
+    public function upsertCoFounderFromImport(Company $company, array $data): Team_member
+    {
+        $emailLc = mb_strtolower(trim($data['email'] ?? ''), 'UTF-8');
+
+        $existing = $company->teamMembers()
+            ->where('TeamMember', 'Co-founder')
+            ->whereRaw('LOWER(COALESCE(Email, "")) = ?', [$emailLc])
+            ->first();
+
+        $attrs = [
+            'Name'               => $data['name']  ?? null,
+            'Email'              => $data['email'] ?? null,
+            'phone'              => $data['phone'] ?? null,
+            'working_commitment' => $data['working_commitment'] ?? null,
+            'educational_status' => $data['educational_status'] ?? null,
+            'TeamMember'         => 'Co-founder',
+        ];
+
+        if ($existing) {
+            $existing->update($attrs);
+            return $existing->fresh();
+        }
+        return $company->teamMembers()->create($attrs);
+    }
 
 }

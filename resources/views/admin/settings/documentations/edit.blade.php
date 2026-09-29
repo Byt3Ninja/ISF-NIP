@@ -4,8 +4,8 @@
 @section('subTitle', __('admin.Edit Document'))
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-overlay"></div>
       
       <div class="content-body">
@@ -108,7 +108,11 @@
                               </textarea>
                             </div>
                           </div>
-                          <div class="col-12 d-flex justify-content-end">
+                          <div class="col-12 d-flex justify-content-between align-items-center">
+                            <a id="back-button" href="#" role="button" aria-label="Go back" class="btn btn-label-secondary me-2">
+                              <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
+                              {{ __('admin.Back') }}
+                            </a>
                             <button type="submit" class="btn btn-primary mr-1 mb-1">{{ __('cycles.Submit') }}</button>
                           </div>
                         </div>

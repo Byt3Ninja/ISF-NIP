@@ -2,7 +2,9 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
 use App\User;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,7 +14,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class WelcomeUserMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
     public $user;
     public $password;

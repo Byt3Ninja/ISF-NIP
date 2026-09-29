@@ -14,12 +14,29 @@ class MicrosoftController extends Controller
 {
     protected $client;
     protected $graph;
+    protected $authenticated = false;
 
     public function __construct()
     {
         $this->client = new Client();
         $this->graph = new Graph();
-        $this->graph->setAccessToken($this->getAccessToken());
+    }
+
+    /**
+     * Lazily authenticate and return the Graph client.
+     *
+     * The access token is fetched over the network on first use rather than in
+     * the constructor, so instantiating this controller (e.g. when Laravel
+     * reflects over controllers for `route:list`) does not trigger an HTTP call.
+     */
+    protected function graph()
+    {
+        if (! $this->authenticated) {
+            $this->graph->setAccessToken($this->getAccessToken());
+            $this->authenticated = true;
+        }
+
+        return $this->graph;
     }
 //    public function redirect($mentorship_id)
 //    {
@@ -119,7 +136,7 @@ class MicrosoftController extends Controller
 
     public function getUserIdByEmail($email)
     {
-        $user = $this->graph->createRequest("GET", "/users?\$filter=mail eq '{$email}'")
+        $user = $this->graph()->createRequest("GET", "/users?\$filter=mail eq '{$email}'")
             ->setReturnType(Model\User::class)
             ->execute();
 
@@ -159,7 +176,7 @@ class MicrosoftController extends Controller
         ];
 
 
-        $response = $this->graph->createRequest('POST', "/users/{$userId}/onlineMeetings")
+        $response = $this->graph()->createRequest('POST', "/users/{$userId}/onlineMeetings")
             ->attachBody($meeting)
             ->setReturnType(Model\OnlineMeeting::class)
             ->execute();

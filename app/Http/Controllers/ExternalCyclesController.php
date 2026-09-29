@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use App\Services\WhatsAppService;
+use App\Services\FormSectionStructurer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -144,45 +145,33 @@ class ExternalCyclesController extends Controller
 	{
 		$request = request();
 		$program = $this->getProgram( $org_slug, $program_slug );
-		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => 'Program not found']); }
+		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => __('cycles.program_not_found') ]); }
 		else
 		{
 			if( $program->is_public == 1 )
 			{
+				// Validate at THIS first step with the same strictness the final
+				// register step applies (register-email => email:dns, see
+				// registerUser). Previously this used a lenient `email` rule, so
+				// an address with an unresolvable domain (e.g. "nano@niny.ts")
+				// passed the Email step and only failed at the final Application
+				// step — where the user could no longer correct it in context.
 				$request->validate([
 					'email' => 'required|email:dns',
+				], [
+					'email.email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.',
+					'email.required' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.',
 				]);
 				$checkForUser = User::where('email', $request->email)->first();
 				$_step = $checkForUser ? 'login' : 'register';
 				if( $_step == 'register' )
 				{
 					$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-					$formFields = Formfield::where('step_id', $step->id)->get();
-					$fields_ids = $formFields->pluck('id')->toArray();
-					$fields = $step->fields()->orderBy('form_fields.id', 'asc')->get();
-					$builderFields = DB::table('builder_fields')->whereIn('builder_form_id', $formFields->pluck('builder_forms_id')->unique()->toArray())->get();
-					$fields = $fields->map(function( $field, $loop ) use ( $builderFields ) {
-						$options = $field->pivot->options ? json_decode($field->pivot->options) : null;
-						$label = trim( strtolower( $options?->label ?? '' ) );
-						$check = $builderFields->filter(function( $item ) use ( $label ) {
-							$_options = is_string( $item->options ) ? json_decode( $item->options ) : $item->options;
-							$_label = trim( strtolower( $_options?->label ?? '' ) );
-							return $label == $_label;
-						})->where('field_id', $field->pivot->field_id)->where('builder_form_id', $field->pivot->builder_forms_id)->first();
-						if( !empty( $check ) )
-						{
-							if( is_string( $check->options ) ) { $options = json_decode( $check->options ); }
-						}
-						$output = new stdClass;
-						$output->field_name = 'field_' . $field->pivot->id;
-						$output->type = $field->field_type;
-						$output->options = $options;
-						$output->id_for = 'input-fld-'. $loop;
-						return $output;
-					});
-				} else { $fields = null; $fields_ids = null; }
-				return response()->json(['status' => true, 'message' => 'Email checked successfully', 'step' => $_step, 'fields' => $fields, 'fields_ids' => $fields_ids]);
-			} else { return response()->json(['status' => false, 'message' => 'Program not longer public']); }
+					$formFields = Formfield::where('step_id', $step->id)->orderBy('id')->get();
+					$sections = FormSectionStructurer::structure($formFields);
+				} else { $sections = null; }
+				return response()->json(['status' => true, 'message' => __('cycles.email_checked_successfully'), 'step' => $_step, 'sections' => $sections]);
+			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
 
@@ -190,7 +179,7 @@ class ExternalCyclesController extends Controller
 	{
 		$request = request();
 		$program = $this->getProgram( $org_slug, $program_slug );
-		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => 'Program not found']); }
+		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => __('cycles.program_not_found') ]); }
 		else
 		{
 			if( $program->is_public == 1 )
@@ -213,9 +202,9 @@ class ExternalCyclesController extends Controller
 							$url = URL::to("dashboard/cycles/view/" . $user->company->step );
 						}
 					}
-					return response()->json(['status' => true, 'message' => 'Logged in successfully', 'url' => $url]);
-				} else { return response()->json(['status' => false, 'message' => 'Invalid credentials']); }
-			} else { return response()->json(['status' => false, 'message' => 'Program not longer public']); }
+					return response()->json(['status' => true, 'message' => __('cycles.login_success') , 'url' => $url]);
+				} else { return response()->json(['status' => false, 'message' => __('cycles.invalid_credentials') ] ); }
+			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
 
@@ -223,7 +212,7 @@ class ExternalCyclesController extends Controller
 	{
 		$request = request();
 		$program = $this->getProgram( $org_slug, $program_slug );
-		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => 'Program not found']); }
+		if( empty( $program ) ) { return response()->json(['status' => false, 'message' => __('cycles.program_not_found') ]); }
 		else
 		{
 			if( $program->is_public == 1 )
@@ -233,6 +222,131 @@ class ExternalCyclesController extends Controller
 					'register-first-name' => 'required',
 					'register-last-name' => 'nullable|sometimes',
 				]);
+
+				// Validate the dynamic form fields (required/email/number rules) BEFORE
+				// creating any records, so a rejected submission never leaves an
+				// orphaned user/company.
+				$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
+				$fields = Formfield::where('step_id', $step->id)->orderBy('id')->get();
+
+				// Recompute the visited section path SERVER-SIDE from the submitted
+				// answers (never trust a client-declared path) so that fields from
+				// sections the wizard never showed are neither required nor saved,
+				// even if a tampered request includes them.
+				$sections = FormSectionStructurer::structure($fields);
+				$visitedSectionIndexes = FormSectionStructurer::resolveVisitedPath(
+					$sections,
+					fn ($fieldName) => $request->input($fieldName)
+				);
+				$visitedFieldIds = collect(FormSectionStructurer::visitedFieldIds($sections, $visitedSectionIndexes));
+				$fields = $fields->whereIn('id', $visitedFieldIds->all())->values();
+
+				$l = app()->getLocale();
+				// GV-3679: "positive number" is only accurate when the floor is 0
+				// (the default). When an author sets a non-zero min, state the
+				// actual bound instead. Mirrors numberMinMessage() on the client.
+				$number_min_msg = $l == 'ar' ? 'يرجى إدخال رقم موجب صحيح.' : 'Please enter a valid positive number.';
+				$number_min_msg_tpl = $l == 'ar' ? 'يرجى إدخال رقم لا يقل عن :min.' : 'Please enter a number no less than :min.';
+				$number_max_msg_tpl = $l == 'ar' ? 'يرجى إدخال رقم لا يتجاوز :max.' : 'Please enter a number no greater than :max.';
+				$numeric_msg = $l == 'ar' ? 'يرجى إدخال رقم صحيح.' : 'Please enter a valid number.';
+				$email_regex_msg = $l == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح (مثال: name@example.com).' : 'Please enter a valid email address (e.g. name@example.com).';
+				$dynamic_field_messages = [];
+
+				$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields, &$dynamic_field_messages, $number_min_msg, $number_min_msg_tpl, $number_max_msg_tpl, $numeric_msg, $email_regex_msg ) {
+					$field_options = $fields->where('id', $id)->first()->options;
+					$field_name = 'field_' . $id;
+					$required = isset($field_options->validation->required) && $field_options->validation->required == 1;
+
+					$rules = [$required ? 'required' : 'nullable'];
+					$type = $field_options->type ?? null;
+
+					if ($type == 'email') {
+						// email:rfc catches malformed addresses; the regex additionally
+						// requires a dotted domain (e.g. rejects "user@example") without
+						// a live DNS lookup, per GV-3832.
+						$rules[] = 'email:rfc';
+						$rules[] = 'regex:/.+@.+\..+/';
+						$dynamic_field_messages[$field_name . '.regex'] = $email_regex_msg;
+					} elseif ($type == 'number') {
+						// Non-negative by default (GV-3831/GV-3453): when the field
+						// author set no min, floor at 0. Respect an authored min/max
+						// when present.
+						$min = (isset($field_options->min) && $field_options->min !== '') ? $field_options->min : 0;
+						$rules[] = 'numeric';
+						$rules[] = 'min:' . $min;
+						$dynamic_field_messages[$field_name . '.numeric'] = $numeric_msg;
+						$dynamic_field_messages[$field_name . '.min'] = ((float) $min == 0.0)
+							? $number_min_msg
+							: str_replace(':min', $min, $number_min_msg_tpl);
+						if (isset($field_options->max) && $field_options->max !== '') {
+							$rules[] = 'max:' . $field_options->max;
+							$dynamic_field_messages[$field_name . '.max'] = str_replace(':max', $field_options->max, $number_max_msg_tpl);
+						}
+					}
+
+					return [
+						$field_name => implode("|", $rules)
+					];
+				});
+
+				// "Other" free-text is mandatory once picked, on both layers.
+				// Detection keys off the SUBMITTED ANSWER still carrying the
+				// "__OTHER__" marker — NOT the presence of the `{field}_other`
+				// companion input. The client deletes `{field}_other` before POST
+				// and only rewrites "__OTHER__"->typed-text when the box is
+				// non-empty, so an empty "Other" leaves the raw "__OTHER__" in the
+				// answer. Keying off the companion input (as before) meant the
+				// rule was never added and the check was dead on this layer; this
+				// mirrors Layer 1 (CyclesController@saveForm) and is bypass-safe.
+				$other_required_msg = app()->getLocale() == 'ar'
+					? 'هذا الحقل مطلوب عند اختيار "أخرى".'
+					: 'This field is required when "Other" is selected.';
+				$other_messages = [];
+				foreach ( $fields as $field ) {
+					$field_options = $field->options;
+					$optionValues = $field_options->values ?? [];
+					if (!is_array($optionValues)) {
+						$optionValues = array_map('trim', explode(',', (string) $optionValues));
+					}
+					if (in_array('__OTHER__', $optionValues, true)) {
+						$field_name = 'field_' . $field->id;
+						$answer = $request->input($field_name);
+						$answerHasOther = is_array($answer)
+							? in_array('__OTHER__', $answer, true)
+							: $answer === '__OTHER__';
+						if ($answerHasOther) {
+							// The answer still carries the marker => Other was
+							// selected but the free-text was left empty. APPEND a
+							// closure rule to the field's existing rule string
+							// (don't overwrite its required/type rules) that fails
+							// while the raw "__OTHER__" marker is still present.
+							// A closure handles both scalar (radio/dropdown) and
+							// array (checkbox) answers; `not_in` does not apply
+							// element-wise to arrays.
+							$existingRule = $field_required_rules->get($field_name, 'nullable');
+							$rulesForField = is_array($existingRule) ? $existingRule : explode('|', $existingRule);
+							$rulesForField[] = function ($attribute, $value, $fail) use ($other_required_msg) {
+								$hasMarker = is_array($value)
+									? in_array('__OTHER__', $value, true)
+									: $value === '__OTHER__';
+								if ($hasMarker) {
+									$fail($other_required_msg);
+								}
+							};
+							$field_required_rules->put($field_name, $rulesForField);
+						}
+					}
+				}
+
+				$dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), array_merge([
+					'required' => app()->getLocale() == 'ar' ? "هذا الحقل مطلوب." : "field can't be left blank",
+					'email' => app()->getLocale() == 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.'
+				], $other_messages, $dynamic_field_messages));
+				if( $dynamic_validator->fails() )
+				{
+					return response()->json(['error' => $dynamic_validator->errors()->all()], 422);
+				}
+
 				DB::beginTransaction();
 				try {
 					$password = Str::random(6);
@@ -262,7 +376,9 @@ class ExternalCyclesController extends Controller
 					$user->save();
 					$user->allotRole('registered');
 					// $user->sendEmailVerificationNotification();
-					$user->notify(new WelcomeUserNotification($user, $password));
+					if ($user->claimEmailSlot('user_welcome_sent_at')) {
+						$user->notify(new WelcomeUserNotification($user, $password));
+					}
 					$company = new Company();
 
                 	$company->name_en = $user->first_name_en . " " . $user->last_name_en;
@@ -277,29 +393,6 @@ class ExternalCyclesController extends Controller
 
 					$user_id = $user->id;
 					$company_id = $company->id;
-
-					$step = Step::where('cycle_id', $program->id)->orderBy('arr')->first();
-					$fields = Formfield::where('step_id', $step->id)->get();
-
-					$field_required_rules = collect( $fields->pluck('id')->toArray() )->mapWithKeys(function ( $id ) use ( $fields ) {
-						$field_options = $fields->where('id', $id)->first()->options;
-						if( $field_options->validation->required == 1 )
-						{
-							$rules = ['required'];
-							if( isset($field_options->type) && $field_options->type == "email" ) { $rules[] = 'email'; }
-							return [
-								'field_' . $id => implode("|", $rules)
-							];
-						} else { return ['field_' . $id => 'nullable']; }
-					});
-					$dynamic_validator = Validator::make($request->all(), $field_required_rules->toArray(), [
-						'required' => "field can't be left blank",
-						'email' => 'field must be a valid email address'
-					]);
-					if( $dynamic_validator->fails() )
-					{
-						return response()->json(['error' => $dynamic_validator->errors()->all()], 422);
-					}
 
 					$company->cycle = $program->id;
 					$company->step = $step->id;
@@ -324,7 +417,15 @@ class ExternalCyclesController extends Controller
                 			'form_id' => $step->id,
                 			'step_id' => $step->id,
                 			'question' => $field_options->label,
-                			'answer' => is_array($request->{$field_name}) ? implode(',', $request->{$field_name}) : $request->{$field_name},
+                			// Store multi-value answers as JSON, matching
+                			// CyclesController@saveForm. implode(',') was lossy and
+                			// ambiguous: a checkbox answer came back as one opaque
+                			// string, so the portal's read-only view could not tell
+                			// the selected options apart from the "Other" free text
+                			// (it showed everything as Other), and any free text
+                			// containing a comma was silently truncated. The reader
+                			// still accepts the legacy comma format for existing rows.
+                			'answer' => is_array($request->{$field_name}) ? json_encode($request->{$field_name}) : $request->{$field_name},
                 			'screening' => '{}',
                 			'comments' => '{}',
                 			'created_at' => now(),
@@ -339,13 +440,13 @@ class ExternalCyclesController extends Controller
             			'email' => $user->email,
             			'step' => $step->title,
             			'cycle' => $program->title,
+            			'cycle_id' => $program->id,
         			];
 
 					if( !in_array(env('APP_ENV', 'local'), ['local']) )
 					{
             			try {
                 			broadcast(new StartupJoining($data));
-                			$user->notify(new StartupJoiningNotification($data));
                 			log::info('Sent notification to ' . $user->email);
             			} catch (\Throwable $th) {
 							DB::rollBack();
@@ -366,6 +467,18 @@ class ExternalCyclesController extends Controller
 						}
         			}
 					DB::commit();
+
+					// Sent only once the join is committed, and once per program.
+					if( !in_array(env('APP_ENV', 'local'), ['local']) && $user->claimProgramJoinSlot((int) $program->id) )
+					{
+						try {
+							$user->notify(new StartupJoiningNotification($data));
+						} catch (\Throwable $th) {
+							User::where('id', $user->id)->update(['program_join_notified_cycle' => null]);
+							Log::error('StartupJoiningNotification failed: ' . $th->getMessage());
+						}
+					}
+
 					Auth::login( $user );
 					$url = URL::to("dashboard/");
 					return response()->json(['status' => true, 'message' => 'You have successfully joined the program', 'url' => $url]);
@@ -380,7 +493,7 @@ class ExternalCyclesController extends Controller
 					Log::info('Throwable: ', [$e] );
 					return response()->json(['status' => false, 'message' => 'Throwable: occur']);
 				}
-			} else { return response()->json(['status' => false, 'message' => 'Program not longer public']); }
+			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
 	}
 
@@ -396,6 +509,10 @@ class ExternalCyclesController extends Controller
 				'p.is_public',
 				'p.winners_announcement AS announced',
 				'p.winners_visibility AS visibility',
+				'p.start_color',
+				'p.end_color',
+				'p.main_color',
+				'o.slug AS org_slug',
 				'o.name_en AS en_org_name',
 				'o.name_ar AS ar_org_name',
 				'o.bio AS bio',
@@ -408,7 +525,10 @@ class ExternalCyclesController extends Controller
 			])
 			->leftJoin('organizations AS o', 'p.organization_id', '=', 'o.id')
 			->where('p.public_slug', $program_slug)
-			->where('o.short_code', $org_slug)
+			->where(function($query) use ($org_slug) {
+				$query->where('o.short_code', $org_slug)
+					->orWhere('o.slug', $org_slug);
+			})
 			->first();
 
 		if( !empty( $program ) )
@@ -422,8 +542,14 @@ class ExternalCyclesController extends Controller
 				if( !empty( $form_step->from ) ) { $start = $form_step->from; }
 				if( !empty( $form_step->to ) ) { $end = $form_step->to; }
 			}
+			$program->registration_start = $start . ' 00:00:00';
+			$program->registration_end = $end . ' 23:59:59';
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
 			$program->ranges = date_ranges( $start, $end );
+
+			$program->start_color = preg_replace('/^#+/', '#', $program->start_color ?: '#6366f114');
+			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: '#0891b214');
+			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: '#6366f1');
 		}
 		return $program;
 	}

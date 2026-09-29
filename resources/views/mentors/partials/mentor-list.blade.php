@@ -1,6 +1,12 @@
 <!-- Mentors -->
 <section class="mb-10 mt-8">
   <div class="row" id="mentorsContainer">
+    {{-- GV-3554: hide mentor cards until the founder's program reaches the mentorship stage --}}
+    @if (!($mentorshipActive ?? true))
+    <div class="col-12" id="mentorshipNotActive">
+      @include('includes.no-result', ['message' => __('cycles.Mentorship_Not_Available_Yet')])
+    </div>
+    @else
     <!-- Mentors List -->
     @if(count($mentors) > 0)
     @foreach ($mentors as $key => $mentor)
@@ -24,6 +30,7 @@
     </div>
     @endif
     <!-- / Mentors List -->
+    @endif
   </div>
 </section>
 <!-- / Mentors -->

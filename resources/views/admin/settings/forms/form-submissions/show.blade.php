@@ -2,9 +2,9 @@
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
 
     <!-- Submission Details Header -->
     <div class="d-flex justify-content-between mb-4">

@@ -80,9 +80,9 @@ class CatigoriesController extends Controller
         if($tags->category_type != $request->category_type){
             $subCategories = SubCategory::where('category_id', $tags->id)->get();
             foreach($subCategories as $subCat){
-            $subCat->update([
-                'Type' => $request->category_type ?? null, // في حال لم يتم العثور على نوع
-            ]);
+                $subCat->update([
+                    'Type' => $request->category_type ?? null, // في حال لم يتم العثور على نوع
+                ]);
             }
         }
         

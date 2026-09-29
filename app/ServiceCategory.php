@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ServiceCategory extends Model
 {
 	protected $table = 'service_categories';
-	protected $fillable = ['id', 'organization_id', 'name_en', 'name_ar'];
+	protected $fillable = ['id', 'organization_id', 'created_by', 'name_en', 'name_ar'];
 
 	public function getNameAttribute()
 	{
@@ -22,5 +22,10 @@ class ServiceCategory extends Model
 	public function organization()
 	{
 		return $this->belongsTo(Organization::class, 'organization_id');
+	}
+
+	public function creator()
+	{
+		return $this->belongsTo(User::class, 'created_by');
 	}
 }

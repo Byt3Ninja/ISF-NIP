@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Role;
 use App\Weight;
 use App\Company;
 use App\Category;
@@ -20,37 +21,55 @@ class AssessmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        $assessments = Assessment::with('user');
+	public function index(Request $request)
+	{
+		$_user = Auth::user();
+		$assessments = Assessment::with(['user', 'user.company']);
 
-        // فلترة حسب startup_id
-    if ($request->startup_id && $request->startup_id != 0) {
-        $founder = User::where('company_id', $request->startup_id)->get();
-        $assessments->whereIn('user_id', $founder->pluck('id'));
-    }
+		// فلترة حسب startup_id
+		if ($request->startup_id && $request->startup_id != 0) {
+			$founder = User::where('company_id', $request->startup_id)->get();
+			$assessments->whereIn('user_id', $founder->pluck('id'));
+		}
 
-    // فلترة حسب founder_id
-    if ($request->founder_id && $request->founder_id != 0) {
-        $assessments->where('user_id', $request->founder_id);
-    }
+		// فلترة حسب founder_id
+		if ($request->founder_id && $request->founder_id != 0) {
+			$assessments->where('user_id', $request->founder_id);
+		}
 
-    // فلترة حسب التاريخ (من)
-    if ($request->datefrom && !empty($request->datefrom)) {
-        $assessments->whereDate('created_at', '>=', $request->datefrom);
-    }
+		// فلترة حسب التاريخ (من)
+		if ($request->datefrom && !empty($request->datefrom)) {
+			$assessments->whereDate('created_at', '>=', $request->datefrom);
+		}
 
-    // فلترة حسب التاريخ (إلى)
-    if ($request->dateto && !empty($request->dateto)) {
-        $assessments->whereDate('created_at', '<=', $request->dateto);
-    }
+		// فلترة حسب التاريخ (إلى)
+		if ($request->dateto && !empty($request->dateto)) {
+			$assessments->whereDate('created_at', '<=', $request->dateto);
+		}
 
-    // الحصول على النتائج بعد التصفية
-    $assessments = $assessments->get();
+		// الحصول على النتائج بعد التصفية
+		$assessments = $assessments->get();
 
-        $users = User::role('Registered')->get();
-        return view('admin.Assessment.assessment', compact('assessments', 'users'));
-    }
+		$users = Role::where('default_for', 'registered')->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
+		$users = $users->flatMap(function ($role) {
+			return $role->users;
+		})->values();
+		if( $_user->hasRole('organizationManager') || $_user->hasRole('subadmin') )
+		{
+			$OrgIds = $_user->organizations_ids;
+			if( !is_array( $OrgIds ) ) { $OrgIds = [$OrgIds]; }
+			/* $users = $users->whereHas('company.cycledata', function ($q) use ($OrgIds) {
+				$q->where('organization_id', $OrgIds);
+			}); */
+			$users = $users->filter(function ($user) use ($OrgIds) {
+				return array_intersect( $OrgIds, $user->organizations_ids );
+			})->values();
+		}
+
+		$startups = Company::all();
+		$founders = $users;
+		return view('admin.Assessment.assessment', compact('assessments', 'users', 'startups', 'founders'));
+	}
 
     /**
      * Show the form for creating a new resource.
@@ -69,7 +88,12 @@ class AssessmentController extends Controller
             'user_id' => 'required|exists:users,id', // يجب أن يكون موجودًا في جدول المستخدمين
             'start_date' => 'required|date', // تاريخ صالح وأقل أو يساوي end_date
         ]);
-        
+
+        if( \Carbon\Carbon::parse($request->start_date)->startOfDay()->lt(now()->startOfDay()) )
+        {
+            return redirect()->back()->with(['class'=>'danger', 'message'=>__('admin.StartDateCannotBeInPast'), 'message_resolved' => true]);
+        }
+
         $userid = $request->user_id;
         $l = app()->getLocale();
         $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
@@ -85,45 +109,74 @@ class AssessmentController extends Controller
                 $companyid = $user->company_id;
                 $company = Company::find($companyid);
                 
-                $title = $company->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
-               
-                $assessment = Assessment::create([
-                    'user_id' => $userid,
-                    'title' => $title,
-                    'start_date' => $request->start_date,
-                    'is_published' => 0,
-                ]);
+                $title = $company?->{'name_'. $l } ." - ". now()->format('Y-m-d H:i:s');
 
-                $assessmentId = $assessment->id;
-                
-                $questions = QuestionsBank::where('group', 'assessment')->get();
-
-                if( $company->stage == null )
+                if( $company?->stage == null || !is_numeric($company->stage) )
                 {
-                    $assessment = Assessment::find($assessmentId);
-                    $assessment->delete();
-                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('NotStage')]);
-                }
+                    $founderName = trim($user->{'first_name_'.$l} .' '. $user->{'last_name_'.$l});
 
-                foreach( $questions as $question )
-                {
-                    $weight = Weight::where('stage_id', $company->stage)->where('category_id', $question->ascategory_id)->where('subcategory_id', $question->subcategory_id)->first();
-                   
-                    UserScore::create([
-                        'user_id' => $userid,
-                        'category_id' => $question->ascategory_id,
-                        'subcategory_id' => $question->subcategory_id,
-                        'stage_id' => $company->stage,
-                        'weight' => $weight->weight ?? null,
-                        'assessment_id' => $assessmentId,
-                        'QuestionBank' => $question->question,
-                        'explanation_QA_ar' => $question->explanation_QA_ar,
-                        'explanation_QA_en' => $question->explanation_QA_en,
-                        'Answers' => $question->answers,
-                        'company_id' => $companyid,
+                    return redirect()->back()->with([
+                        'class' => 'danger',
+                        'message' => __('admin.ChooseStageForCompany', [
+                            'founder' => $founderName,
+                        ]),
+                        'message_resolved' => true,
                     ]);
                 }
 
+                $company_weights = Weight::where('stage_id', $company->stage)->get();
+                $weightsByKey = $company_weights->keyBy(fn($w) => $w->category_id . '-' . $w->subcategory_id);
+                $questions = QuestionsBank::where('group', 'assessment')->whereIn('ascategory_id', $company_weights->pluck('category_id'))->get();
+
+                if( $questions->isEmpty() )
+                {
+                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('please_correct_stage_or_category_or_subcategory_in_your_company')]);
+                }
+
+                try {
+                    DB::beginTransaction();
+
+                    $assessment = Assessment::create([
+                        'user_id' => $userid,
+                        'title' => $title,
+                        'start_date' => $request->start_date,
+                        'is_published' => 0,
+                    ]);
+
+                    $userScores = [];
+                    foreach( $questions as $question )
+                    {
+                        $weight = $weightsByKey->get($question->ascategory_id . '-' . $question->subcategory_id);
+
+                        if( $weight == null ){
+                            DB::rollBack();
+                            return redirect()->back()->with(['class'=>'danger', 'message'=>__('please_correct_stage_or_category_or_subcategory_in_your_company')]);
+                        }
+
+                        $userScores[] = [
+                            'user_id' => $userid,
+                            'category_id' => $question->ascategory_id,
+                            'subcategory_id' => $question->subcategory_id,
+                            'stage_id' => $company->stage,
+                            'weight' => $weight->weight,
+                            'assessment_id' => $assessment->id,
+                            'QuestionBank' => $question->question,
+                            'explanation_QA_ar' => $question->explanation_QA_ar,
+                            'explanation_QA_en' => $question->explanation_QA_en,
+                            'Answers' => $question->answers,
+                            'company_id' => $companyid,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+
+                    UserScore::insert($userScores);
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error('Error creating assessment: ' . $e->getMessage());
+                    return redirect()->back()->with(['class'=>'danger', 'message'=>__('Failed to create assessment. Please try again.')]);
+                }
 
                 return redirect()->back()->with('class', 'success')->with('message', 'Assessment_Created_successfully');
             } else { return redirect()->back()->with(['class'=>'danger', 'message'=>__('YouHaveNotCompany')]); }
@@ -196,8 +249,7 @@ class AssessmentController extends Controller
 
     public function assessment(Request $request)
     {
-        if( Auth::user()->hasRole('Registered') )
-        {
+        if( Auth::user()->hasRole('Registered') ){
             $l = app()->getLocale();
             $userid = auth()->user()->id;
             $assessment_user = Assessment::where('user_id', $userid)->whereNull('end_date')->first();
@@ -233,7 +285,12 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Check if user can start a new assessment
+     * Check whether the given user may start a new assessment.
+     *
+     * Single source of truth for both the pre-flight check the view uses to
+     * enable/disable the "start" button and the guard MakeAssessment() applies
+     * to the POST. Failures carry a 'reason' the view can map to helper text,
+     * plus the 'message'/'redirect'/'class' the POST path needs.
      */
     protected function canStartAssessment($user)
     {
@@ -241,8 +298,9 @@ class AssessmentController extends Controller
         if ($user->HaveCompany === null) {
             return [
                 'can_proceed' => false,
+                'reason' => 'no_company',
                 'redirect' => route('company.profile_view_mine'),
-                'message' => __('YouHaveNotCompany'),
+                'message' => __('admin.YouHaveNotCompany'),
                 'class' => 'danger'
             ];
         }
@@ -252,8 +310,9 @@ class AssessmentController extends Controller
         if ($company === null) {
             return [
                 'can_proceed' => false,
+                'reason' => 'no_company',
                 'redirect' => route('company.profile_view_mine'),
-                'message' => __('YouHaveNotCompany'),
+                'message' => __('admin.YouHaveNotCompany'),
                 'class' => 'danger'
             ];
         }
@@ -261,8 +320,9 @@ class AssessmentController extends Controller
         if ($company->stage === null || !is_numeric($company->stage) || empty($company->stage)) {
             return [
                 'can_proceed' => false,
+                'reason' => 'no_stage',
                 'redirect' => route('company.profile_view_mine'),
-                'message' => __('ChooseYourStageFirst'),
+                'message' => __('admin.ChooseYourStageFirst'),
                 'class' => 'danger'
             ];
         }
@@ -275,13 +335,56 @@ class AssessmentController extends Controller
         if ($activeAssessment) {
             return [
                 'can_proceed' => false,
+                'reason' => 'assessment_in_progress',
                 'redirect' => route('assessments.take'),
-                'message' => __('AlreadyHaveAssessment'),
+                'message' => __('admin.AlreadyHaveAssessment'),
                 'class' => 'warning'
             ];
         }
 
-        return ['can_proceed' => true, 'company' => $company];
+        // Every question we are about to copy needs a matching weight row for
+        // this stage. Without one MakeAssessment() would roll back mid-way, so
+        // detect it here instead and keep the button disabled.
+        $companyWeights = Weight::where('stage_id', $company->stage)->get();
+        $questions = QuestionsBank::where('group', 'assessment')
+            ->whereIn('ascategory_id', $companyWeights->pluck('category_id'))
+            ->get();
+
+        if ($questions->isEmpty() || $this->hasMissingWeights($questions, $companyWeights)) {
+            return [
+                'can_proceed' => false,
+                'reason' => 'not_configured',
+                'redirect' => route('assessments.results_analysis_view'),
+                'message' => __('admin.AssessmentNotConfiguredForStage'),
+                'class' => 'danger'
+            ];
+        }
+
+        return [
+            'can_proceed' => true,
+            'company' => $company,
+            'company_weights' => $companyWeights,
+            'questions' => $questions,
+        ];
+    }
+
+    /**
+     * True when any question lacks a weight for its category/subcategory pair.
+     */
+    protected function hasMissingWeights($questions, $companyWeights)
+    {
+        foreach ($questions as $question) {
+            $weight = $companyWeights
+                ->where('category_id', $question->ascategory_id)
+                ->where('subcategory_id', $question->subcategory_id)
+                ->first();
+
+            if (!$weight) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function MakeAssessment()
@@ -309,6 +412,8 @@ class AssessmentController extends Controller
         }
 
         $company = $check['company'];
+        $company_weights = $check['company_weights'];
+        $questions = $check['questions'];
         $l = app()->getLocale();
         
         try {
@@ -322,7 +427,7 @@ class AssessmentController extends Controller
                 'is_published' => 0,
             ]);
 
-            // Get all assessment questions
+            // Questions and weights were loaded and validated by canStartAssessment().
             $userScores = [];
             $company_weights = Weight::where('stage_id', $company->stage)->get();
             $questions = QuestionsBank::where('group', 'assessment')->whereIn('ascategory_id', $company_weights->pluck('category_id'))->get();
@@ -338,10 +443,18 @@ class AssessmentController extends Controller
 
                 if (!$weight) {
                     DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => __('Invalid configuration for assessment questions. Please contact support.')
-                    ], 500);
+
+                    $message = __('admin.AssessmentNotConfiguredForStage');
+
+                    if (request()->ajax() || request()->wantsJson()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $message
+                        ], 500);
+                    }
+
+                    return redirect()->route('assessments.results_analysis_view')
+                        ->with(['class' => 'danger', 'message' => $message]);
                 }
 
                 $userScores[] = [
@@ -359,8 +472,9 @@ class AssessmentController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
+               
             }
-
+                
             // Bulk insert user scores for better performance
             UserScore::insert($userScores);
             DB::commit();
@@ -370,13 +484,13 @@ class AssessmentController extends Controller
                 return response()->json([
                     'success' => true,
                     'redirect' => route('assessments.take'),
-                    'message' => __('AssessmentCreated')
+                    'message' => __('admin.AssessmentCreated')
                 ]);
             }
 
             // For regular requests, redirect to assessment
             return redirect()->route('assessments.take')
-                ->with(['class' => 'success', 'message' => __('AssessmentCreated')]);
+                ->with(['class' => 'success', 'message' => __('admin.AssessmentCreated')]);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -385,12 +499,12 @@ class AssessmentController extends Controller
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Failed to create assessment. Please try again.')
+                    'message' => __('admin.AssessmentCreateFailed')
                 ], 500);
             }
 
             return redirect()->back()
-                ->with(['class' => 'danger', 'message' => __('Failed to create assessment. Please try again.')]);
+                ->with(['class' => 'danger', 'message' => __('admin.AssessmentCreateFailed')]);
         }
     }
 
@@ -407,7 +521,11 @@ class AssessmentController extends Controller
             $weightedSubCategories = $assessment_data['weightedSubCategories'];
             $weightedPreviousSubCategories = $assessment_data['weightedPreviousSubCategories'];
 
-            return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories'));
+            // Pre-flight the same guard the POST applies, so the view can
+            // disable the start button and say what is missing.
+            $startCheck = $this->canStartAssessment(Auth::user());
+
+            return view('admin/clients/assessment/analysis-assessment', compact('user_scores', 'categories', 'Analysis_user_scores', 'weightedSubCategories', 'weightedPreviousSubCategories', 'startCheck'));
         } else {
             return redirect()->route('core.dashboard_view')->with(['class' => 'danger', 'success' => __('YouHaveNotCompany')]);
         }
@@ -417,11 +535,35 @@ class AssessmentController extends Controller
     {
         if( Auth::user()->hasRole('Registered') )
         {
-            $l = app()->getLocale();
             $userid = auth()->user()->id;
-            $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->get();
-            $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->get();
-            return view('admin/clients/assessment/assessment-history', compact('assessmentsopen', 'assessments'));
+            $assessmentsopen = Assessment::where('user_id', $userid)->whereNull('end_date')->orderBy('id')->get();
+            $assessments = Assessment::where('user_id', $userid)->whereNotNull('end_date')->orderBy('end_date')->orderBy('id')->get();
+
+            // Total weighted score per assessment, in one query, so the view
+            // does not run a UserScore lookup per rendered card.
+            $weightedScores = UserScore::whereIn('assessment_id', $assessmentsopen->pluck('id')->merge($assessments->pluck('id')))
+                ->groupBy('assessment_id')
+                ->selectRaw('assessment_id, SUM(weighted_score) as total')
+                ->pluck('total', 'assessment_id');
+
+            // Compare chart: one point per completed assessment, ordered oldest
+            // to newest, spanning the real dates of those assessments.
+            $historySeries = $assessments->map(function ($assessment) use ($weightedScores) {
+                return round((float) ($weightedScores[$assessment->id] ?? 0), 2);
+            })->values();
+
+            $historyRangeStart = optional($assessments->first())->start_date
+                ?: optional($assessments->first())->created_at;
+            $historyRangeEnd = optional($assessments->last())->end_date;
+
+            return view('admin/clients/assessment/assessment-history', compact(
+                'assessmentsopen',
+                'assessments',
+                'weightedScores',
+                'historySeries',
+                'historyRangeStart',
+                'historyRangeEnd'
+            ));
         } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
 

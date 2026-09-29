@@ -46,11 +46,13 @@ class SettingsController extends Controller
 						['title' => 'general', 'route' => Auth::user()->hasRole('Admin') ? 'settings.system_general_view' : 'settings.organization_manage'],
 						['title' => 'roles_permissions', 'route' => 'roles.index'],
 						['title' => 'importer_tool', 'route' => 'importer.index'],
+						['title' => 'organization_types', 'route' => 'organization-types.index'],
 						['title' => 'currencies', 'route' => 'currencies.index'],
 						['title' => 'tags', 'route' => 'Tags.index'],
 						['title' => 'categories', 'route' => 'Category.index'],
 						['title' => 'subcategories', 'route' => 'subcategories.index'],
 						['title' => 'stages', 'route' => 'stages.index'],
+						['title' => 'countries', 'route' => 'country-management.index'],
 						['title' => 'labels', 'route' => 'Labels.index'],
 						['title' => 'queue_jobs', 'route' => 'queue.jobs'],
 						['title' => 'industry', 'route' => 'settings.industry_view'],
@@ -410,76 +412,22 @@ class SettingsController extends Controller
 	{
 		$id = $request->input('id');
 		$updateSittings = Settings::where('id', $id)->first();
+		$fileManager = app(\App\Services\FileManagerService::class);
 
 		if( $request->hasFile('logo') )
 		{
-			$image = $request->file('logo');
-
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			$newName = 'logo'; 
-
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-
-			// تركيب الاسم الجديد مع الامتداد
-			$logo = $newName . '.' . $extension;
-
-			if (Storage::disk('logo_uploads')->exists($logo)) { Storage::disk('logo_uploads')->delete($logo); }
-
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$path = $image->storeAs('', $logo, 'logo_uploads');
-		} else { $logo = $updateSittings->Logo; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$logo = $fileManager->update($request->file('logo'), $updateSittings->Logo, '', 'logo_uploads');
+		} else { $logo = $updateSittings->Logo; }
 
 		if ($request->hasFile('header'))
 		{
-			$image = $request->file('header');
-
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = 'mailheader'; 
-
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-
-			// تركيب الاسم الجديد مع الامتداد
-			$header = $newName . '.' . $extension;
-
-			if (Storage::disk('logo_uploads')->exists($header)) { Storage::disk('logo_uploads')->delete($header); }
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$path = $image->storeAs('', $header, 'logo_uploads');
-		} else { $header = $updateSittings->header; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$header = $fileManager->update($request->file('header'), $updateSittings->header, '', 'logo_uploads');
+		} else { $header = $updateSittings->header; }
 
 		if ($request->hasFile('footer'))
 		{
-			$image = $request->file('footer');
-
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = 'mailfooter'; 
-
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			
-			// تركيب الاسم الجديد مع الامتداد
-			$footer = $newName . '.' . $extension;
-
-			if (Storage::disk('logo_uploads')->exists($footer)) { Storage::disk('logo_uploads')->delete($footer); }
-
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$path = $image->storeAs('', $footer, 'logo_uploads');
-
-			// حفظ الصورة بالاسم الجديد
-			// $image->storeAs('public/images/footer', $footer);
-		} else { $footer = $updateSittings->footer; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$footer = $fileManager->update($request->file('footer'), $updateSittings->footer, '', 'logo_uploads');
+		} else { $footer = $updateSittings->footer; }
 
 		$updateSittings->Logo = $logo;
 		$updateSittings->header = $header;
@@ -503,8 +451,36 @@ class SettingsController extends Controller
 	public function update_settingsmail(Request $request)
 	{
 		$id = $request->input('id');
+		$emailProvider = $request->input('email_provider', 'smtp');
 		$updateSetting = Settings::where('id', $id)->first();
-		$updateSetting->host = $request->input('host', 'smtp');
+
+		if ($emailProvider === 'resend') {
+			$request->validate([
+				'resend_api_key' => ['required', 'string', 'max:64'],
+			], [
+				'resend_api_key.required' => __('settings.api_key_required'),
+			]);
+
+			if (!\App\Services\ResendApiKeyValidator::validate($request->input('resend_api_key'))) {
+				if ($request->expectsJson()) {
+					return response()->json(['message' => __('settings.invalid_api_key')], 422);
+				}
+				return redirect()->back()->with('message2', __('settings.invalid_api_key'));
+			}
+
+			$updateSetting->email_provider = 'resend';
+			$updateSetting->resend_api_key = $request->input('resend_api_key');
+			$updateSetting->save();
+
+			if ($request->expectsJson()) {
+				return response()->json(['message' => __('settings.email_config_saved')]);
+			}
+			return redirect()->back()->with('message', 'StoredSuccessfully');
+		}
+
+		// SMTP provider (existing logic)
+		$updateSetting->email_provider = $request->input('email_provider', 'smtp');
+		$updateSetting->host = $request->input('host');
 		$updateSetting->Mail = $request->input('Mail');
 		$updateSetting->Mailpassword = $request->input('Mailpassword');
 		$updateSetting->Port = $request->input('Port');
@@ -652,23 +628,13 @@ class SettingsController extends Controller
 		$Img1 =  Settings::findOrfail('7');
 		$Img2 =  Settings::findOrfail('8');
 		$Img3 =  Settings::findOrfail('9');
+		$fileManager = app(\App\Services\FileManagerService::class);
 	
 		//Image 1 =======================================
 		if ($request->hasFile('img1'))
 		{
-			$image = $request->file('img1');
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = $originalName; 
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			// تركيب الاسم الجديد مع الامتداد
-			$img1name = $newName . '.' . $extension;
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$img1 = $image->storeAs('', $img1name, 'Home_upload');
-		} else { $img1 = $Img1->img_url; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$img1 = $fileManager->update($request->file('img1'), $Img1->img_url, '', 'Home_upload');
+		} else { $img1 = $Img1->img_url; }
 
 		$ar_img1title = $request->input('ar_img1title');
 		$img1title = $request->input('img1title');
@@ -692,19 +658,8 @@ class SettingsController extends Controller
 		// Image 2 =======================================
 		if ($request->hasFile('img2'))
 		{
-			$image = $request->file('img2');
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = $originalName; 
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			// تركيب الاسم الجديد مع الامتداد
-			$img2name = $newName . '.' . $extension;
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$img2 = $image->storeAs('', $img2name, 'Home_upload');
-		} else { $img2 = $Img2->img_url; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$img2 = $fileManager->update($request->file('img2'), $Img2->img_url, '', 'Home_upload');
+		} else { $img2 = $Img2->img_url; }
 
 		$ar_img2title = $request->input('ar_img2title');
 		$img2title = $request->input('img2title');
@@ -728,19 +683,8 @@ class SettingsController extends Controller
 		// Image 3 =======================================
 		if ($request->hasFile('img3'))
 		{
-			$image = $request->file('img3');
-			// الحصول على اسم الصورة الأصلي بدون الامتداد
-			$originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-			// تعديل اسم الصورة الأصلي - يمكنك تغيير الاسم بالطريقة التي تريدها
-			// هنا نضيف "new_" كبادئة لاسم الصورة
-			$newName = $originalName; 
-			// تحديد الامتداد الأصلي للصورة
-			$extension = $image->getClientOriginalExtension();
-			// تركيب الاسم الجديد مع الامتداد
-			$img3name = $newName . '.' . $extension;
-			// استخدام storeAs بدلاً من move لنقل الصورة إلى المسار المطلوب
-			$img3 = $image->storeAs('', $img3name, 'Home_upload');
-		} else { $img3 = $Img3->img_url; } // إذا لم يتم رفع صورة، يمكنك التعامل معها هنا
+			$img3 = $fileManager->update($request->file('img3'), $Img3->img_url, '', 'Home_upload');
+		} else { $img3 = $Img3->img_url; }
 	
 		$ar_img3title = $request->input('ar_img3title');
 		$img3title = $request->input('img3title');
@@ -858,8 +802,9 @@ class SettingsController extends Controller
 
     public function showSettings()
     {
-        $organization = auth()->user()->organization; 
-        $currencies = Currency::where('enabled',1)->get();  
+        $user = auth()->user();
+        $organization = $user->organization ?? Organization::whereIn('id', $user->organizations_ids)->first();
+        $currencies = Currency::where('enabled',1)->get();
         $timezones = collect(\DateTimeZone::listIdentifiers())
         ->mapWithKeys(function ($timezone) {
 			$zone = new \DateTimeZone($timezone);
@@ -867,7 +812,12 @@ class SettingsController extends Controller
 			$formattedOffset = ($offset >= 0 ? 'GMT+' : 'GMT') . $offset;
 			return [$timezone => $timezone . ' (' . $formattedOffset . ')'];
     	})->sort();
+		if(isset($organization) && $organization->id != null){
 		$invitations = Invitation::where('organization_id', $organization->id)->get();
+		}
+		 else {
+			$invitations = collect([]);
+		}
 		$role = Role::where('name', 'organizationManager')->first();
 
 		
@@ -879,18 +829,23 @@ class SettingsController extends Controller
 		// $delete = ReminderLog::truncate();
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
-							if(auth()->user()->hasAnyRole(['organizationManager', 'subadmin'])) {
-                                $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-                                    return $q->whereIn('organization_id', $orgIds);
-                                })->get();
-                                $ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'));
-                            }elseif(auth()->user()->hasRole('Admin')) {
-                                $ReminderLogs = ReminderLog::all();
-                            }else{
-                                $ReminderLogs = [];
-                            }
+		if($user->hasAnyRole(['organizationManager', 'subadmin']))
+		{
+			$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->whereIn('organization_id', $orgIds);
+			})->get();
+			$ReminderLogs = ReminderLog::whereIn('cycle_id', $cycles->pluck('id'))->get();
+		}
+		elseif($user->hasRole('Admin'))
+		{
+			$ReminderLogs = ReminderLog::all();
+		}
+		else
+		{
+			$ReminderLogs = collect([]);
+		}
 
-							 $query = $ReminderLogs;
+		$query = $ReminderLogs;
 
         if ($request->filled('program')) {
             $query->where('cycle_id', $request->program);
@@ -914,18 +869,23 @@ class SettingsController extends Controller
             $query->whereBetween('created_at', [$from, $to]);
         }
 
-		$ReminderLogs = $query->get();
-    
+		$ReminderLogs = $query->values();
+		$users = Role::whereIn('default_for', ['mentor', 'registered'])->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
+		$users = $users->flatMap(function ($role) {
+			return $role->users;
+		})->unique('id')->values();
 
-		return view('admin.organizations.reminder_logs', compact('ReminderLogs'));
+		$organizations = auth()->user()->user_organizations();
+		$programs = Cycle::WhereIn('id', $ReminderLogs->pluck('cycle_id'))->get();
+		return view('admin.organizations.reminder_logs', compact('ReminderLogs', 'users', 'organizations', 'programs'));
 	}
     public function generalSetting(Request $request)
     {
          $request->validate([
             'name_en' => 'nullable|string|max:255',
-            'img_url' => 'nullable|image',
+            'img_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'contact_email' => 'nullable|email',
-            'contact_phone' => 'nullable|string|max:11',
+            'contact_phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'time_zone' => 'nullable|string|max:100',
             'currency_id' => 'nullable|exists:currencies,id',
@@ -969,10 +929,17 @@ class SettingsController extends Controller
             'MICROSOFT_CLIENT_SECRET_VALUE' => 'nullable|string',
             'MICROSOFT_TENANT_ID' => 'nullable|string',
             'MICROSOFT_REDIRECT_URI' => 'nullable|string',
+            'max_concurrent_sessions' => 'nullable|integer',
         ]);
 
         $organization = Organization::find($request->input('id'));
+
+        if (!$organization) {
+            return redirect()->back()->with('error', 'Organization not found.');
+        }
+
         $organization->meeting_platform = $request->input('meeting_platform');
+        $organization->max_concurrent_sessions = $request->input('max_concurrent_sessions');
 
         if ($request->input('meeting_platform') === 'zoom') {
             $organization->zoom_client_id = $request->input('ZOOM_CLIENT_ID');
@@ -1007,6 +974,11 @@ class SettingsController extends Controller
         ]);
     
         $organization = Organization::find($request->input('id'));
+
+        if (!$organization) {
+            return redirect()->back()->with('error', 'Organization not found.');
+        }
+
         $organization->website_url = $request->input('website_url');
         $organization->facebook_page_url = $request->input('facebook_url');
         $organization->twitter_handle = $request->input('twitter_handle');
@@ -1202,7 +1174,9 @@ class SettingsController extends Controller
 				}
 				return [
 					'id'       => $industry->id,
-					'industry' => $industry->{'name_'.$l} ?? 'N/A',
+					'industry' => $industry->{'name_'.$l} ?? $industry->name_en ?? 'N/A',
+					'name_en'  => $industry->name_en,
+					'name_ar'  => $industry->name_ar,
 					'created_at' => $industry->created_at,
 					'sectors'  => $sectorsList,
 				];

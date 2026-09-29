@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Header Section -->
     <div class="col-12 mb-8 text-white text-center p-12 rounded"
       style="background: linear-gradient(180deg, #7367f0 0%, #6610f2 100%);">

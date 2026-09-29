@@ -35,6 +35,9 @@ class MentorshipRequest extends Model
     public function mentor(){
         return $this->belongsTo(User::class, 'mentor_id','id');
     }
+    public function admin(){
+        return $this->belongsTo(User::class, 'admin_id','id');
+    }
     public function mentorshipTasks()
     {
         return $this->hasMany(MentorshipTask::class, 'mentorship_request_id', 'id');
@@ -48,6 +51,12 @@ class MentorshipRequest extends Model
     public function cycle(){
         return $this->belongsTo(Cycle::class, 'cycle_id','id');
     }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class, 'organization_id', 'id');
+    }
+
     public function orgnization(){
         return $this->belongsTo(Organization::class, 'organization_id','id');
     }

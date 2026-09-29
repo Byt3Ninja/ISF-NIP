@@ -15,6 +15,7 @@
 
   <!-- BEGIN: Body-->
   <body>
+    {{-- {{ dump(request()->route()->getName()) }} --}}
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
       <div class="layout-container">
@@ -31,8 +32,20 @@
           <!-- Navbar -->
           @include('admin.includes.header')
 
-          <!-- Content -->
-          @yield('content')
+          <div class="content-wrapper">
+            <div class="container-xxl flex-grow-1 pt-4 pb-8">
+
+              <!-- Breadcrumb -->
+              @include('components.breadcrumbs')
+
+              <!-- Content -->
+              @yield('content')
+            </div>
+          </div>
+
+          <!-- Profile Reminder Modal -->
+          @include('partials.profile_reminder_modal')
+          <!-- /Profile Reminder Modal -->
 
           <!-- Profile Reminder Modal -->
           @include('partials.profile_reminder_modal')
@@ -65,7 +78,7 @@
     <script src="/vuexy/assets/vendor/libs/node-waves/node-waves.js"></script>
     <script src="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="/vuexy/assets/vendor/libs/hammer/hammer.js"></script>
-    <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script>
+    {{-- <script src="/vuexy/assets/vendor/libs/i18n/i18n.js"></script> --}}
     <script src="/vuexy/assets/vendor/libs/typeahead-js/typeahead.js"></script>
     <script src="/vuexy/assets/vendor/js/menu.js"></script>
     <!-- For Searchable Select -->
@@ -75,6 +88,16 @@
     <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
     <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
     <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
+    @include('partials.flatpickr-locale')
+    {{-- Do NOT set a global moment locale here (moment.locale('ar')). The bundled
+         Arabic moment locale has a postformat() that rewrites Latin digits to
+         Arabic-Indic ones (١٢٣), which corrupts every machine-readable format()
+         we post to the backend -- e.g. the MM/DD/YYYY date_range value parsed by
+         Carbon in CyclesController::modify().
+
+         Widgets are localized individually instead, and views that need localized
+         human-facing dates call .locale(...) on the individual moment. --}}
+    @include('partials.daterangepicker-locale')
 
     <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
@@ -82,13 +105,14 @@
 
     <!-- Vendors JS -->
     <script src="/vuexy/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
-
+    <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
     <script src="/vuexy/assets/vendor/libs/swiper/swiper.js"></script>
     @yield('scripts')
     <!-- End Vendor JS-->
 
     <!-- Main JS -->
     <script src="/vuexy/assets/js/main.js"></script>
+    {{-- <script src="/vuexy/assets/js/form-page-close.js"></script> --}}
 
     <!-- Custom JS -->
     
@@ -131,40 +155,31 @@
       @endif
     @endauth
 
-    {{-- @auth
-      <script>
-        console.log('User roles:', @json(auth()->user()->roles->pluck('name')));
-        console.log('Has Registered role:', @json(auth()->user()->hasRole('Registered')));
-        console.log('Has Mentor role:', @json(auth()->user()->hasRole('Mentor')));
-        console.log('Has any role (Registered|Mentor):', @json(auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor')));
-      </script>
-    @endauth --}}
-
    @if (auth()->user()->hasRole('Registered') || auth()->user()->hasRole('Mentor'))
       <script>console.log('Echo script section executing - user has correct role');</script>
       <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
       <script>
-        console.log('Pusher script executed');
+        // console.log('Pusher script executed');
         const pusherConfig = @json(getPusherConfig());
-        console.log("pusherConfig", pusherConfig);
+        // console.log("pusherConfig", pusherConfig);
         const pusherAppKey = pusherConfig.PUSHER_APP_KEY;
         const pusherCluster = pusherConfig.PUSHER_APP_CLUSTER;
         
-        console.log('Pusher credentials:', { pusherAppKey, pusherCluster });
+        // console.log('Pusher credentials:', { pusherAppKey, pusherCluster });
         
         // Ensure Pusher is available globally
         window.Pusher = Pusher;
-        console.log('Pusher loaded:', typeof Pusher, Pusher);
+        // console.log('Pusher loaded:', typeof Pusher, Pusher);
         
         // Load Laravel Echo dynamically to ensure proper loading
         (function() {
-          console.log('Starting Echo dynamic load...');
+          // console.log('Starting Echo dynamic load...');
           const script = document.createElement('script');
           script.src = 'https://cdn.jsdelivr.net/npm/laravel-echo@1.17.1/dist/echo.iife.js';
           script.onload = function() {
-            console.log('Echo script loaded successfully');
-            console.log('typeof Echo after load:', typeof Echo);
-            console.log('window.Echo before init:', window.Echo);
+            // console.log('Echo script loaded successfully');
+            // console.log('typeof Echo after load:', typeof Echo);
+            // console.log('window.Echo before init:', window.Echo);
             
             // Initialize Laravel Echo after script loads
             if (typeof Echo !== 'undefined') {
@@ -181,7 +196,7 @@
                     }
                   }
                 });
-                console.log('Echo initialized successfully:', window.Echo);
+                // console.log('Echo initialized successfully:', window.Echo);
                 
                 // Test Echo connection
                 window.Echo.connector.pusher.connection.bind('connected', () => {
@@ -214,28 +229,51 @@
           forceTLS: true,
         });
 
+        // Broadcast events that legitimately drive the header notification bell.
+        // Anything else that travels over Pusher (chat messages on Echo's
+        // private-conversation.* channels, presence/connection frames, ...) must be
+        // ignored here: Pusher.log is a static on the Pusher class, so it sees every
+        // frame on every connection this page opens.
+        const NOTIFICATION_BELL_EVENTS = [
+          "ChangeStep",
+          "RequestMentorship",
+          "StartupJoining",
+          "JudgeAssigned",
+        ];
+
         Pusher.log = function (message) {
           const logMessage = message;
 
+          const start = logMessage.indexOf("[");
+          if (start === -1) {
+            return;
+          }
+
           // Extract the JSON part (after `: `)
-          const jsonPart = logMessage.substring(logMessage.indexOf("["));
+          const jsonPart = logMessage.substring(start);
 
-          // Parse it
-          const parsedLog = JSON.parse(jsonPart);
-
-          // console.log("parsedLog", parsedLog);
-
-          if (parsedLog?.length > 0 && parsedLog[0]) {
-            // console.log("parsedLog[0]", parsedLog[0]);
+          // Parse it -- most Pusher log lines are not JSON at all.
+          let parsedLog;
+          try {
+            parsedLog = JSON.parse(jsonPart);
+          } catch (e) {
+            return;
           }
 
           if (parsedLog?.length > 0 && parsedLog[1]) {
             // Access the data object
             const parsedLogData = parsedLog[1];
 
+            const eventName = parsedLogData?.event;
+            if (!NOTIFICATION_BELL_EVENTS.includes(eventName)) {
+              return;
+            }
+
             const data = parsedLogData?.data;
 
-            if (data && data.message) {
+            // Only a plain string is renderable; object payloads would print
+            // "[object Object]".
+            if (data && typeof data.message === "string" && data.message.trim() !== "") {
               // console.log("data.message", data.message);
               const notifContainer = document.querySelector(
                 ".position-relative .ti-bell"
@@ -249,8 +287,11 @@
                   ".badge-notifications"
                 );
                 if (existingBadge) {
-                  // Extract the current count
-                  count = parseInt(existingBadge.textContent, 10) + 1;
+                  // A badge hidden by "mark all as read" holds a stale count and
+                  // must not be carried forward.
+                  if (existingBadge.style.display !== "none") {
+                    count = parseInt(existingBadge.textContent, 10) + 1;
+                  }
                   existingBadge.remove(); // Remove old badge
                 }
 
@@ -262,16 +303,23 @@
 
                 let lang = document.documentElement.lang;
 
-                document.querySelector('#new-count').textContent = `${count} ${lang == 'ar' ? 'جديد' : 'New'}`;
+                const newCount = document.querySelector('#new-count');
+                if (newCount) {
+                  newCount.textContent = `${count} ${lang == 'ar' ? 'جديد' : 'New'}`;
+                }
 
-                document.querySelector('#notification-list').insertAdjacentHTML(
-                  "beforeend",
-                  `
-                  <li class="list-group item list-group-item-action dropdown-notifications-item border-bottom">
-                    <h6 class="media-heading">${data.message}</h6>
-                  </li>
-                  `
-                );
+                const notificationList = document.querySelector('#notification-list');
+                if (notificationList) {
+                  const heading = document.createElement('h6');
+                  heading.className = 'media-heading';
+                  heading.textContent = data.message;
+
+                  const item = document.createElement('li');
+                  item.className = 'list-group item list-group-item-action dropdown-notifications-item border-bottom';
+                  item.appendChild(heading);
+
+                  notificationList.appendChild(item);
+                }
               }
             }
           }
@@ -438,9 +486,6 @@
       }
     </script>
 
-    <!-- BEGIN: Page JS-->
-    @yield('pagescripts')
-
     <script>
       // Global Toast function
       function showToast(options) {
@@ -452,7 +497,7 @@
         const toast = `
           <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
             <div class="d-flex">
-              <div class="toast-body">${message}</div>
+              <div class="toast-body fs-6">${message}</div>
               <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
           </div>
@@ -465,7 +510,7 @@
       }
 
       // Global SweetAlert2 configuration
-      const releaseSuccessAlert = ({title, message}) => {
+      window.releaseSuccessAlert = ({title, message}) => {
         Swal.fire({
           icon: 'success',
           title: title || '',
@@ -482,17 +527,18 @@
         });
       }
 
-      const releaseWarningAlert = ({title, message, onConfirm, onCancel}) => {
+      window.releaseWarningAlert = ({title, message, html, onConfirm, onCancel, confirmText, cancelText, confirmColor}) => {
         Swal.fire({
           icon: 'warning',
           title: title || '',
-          html: message,
+          text: message,
+          html: html,
           showCancelButton: onConfirm ? true : false,
           showConfirmButton: true,
-          confirmButtonText: onConfirm ? "{{ __('admin.Confirm') }}" : "{{ __('admin.OK') }}",
-          cancelButtonText: onConfirm ? "{{ __('admin.Cancel') }}" : '',
+          confirmButtonText: onConfirm ? (confirmText || "{{ __('admin.Confirm') }}") : "{{ __('admin.OK') }}",
+          cancelButtonText: onConfirm ? cancelText || "{{ __('admin.Cancel') }}" : '',
           customClass: {
-            confirmButton: 'btn btn-primary ms-3',
+            confirmButton: `btn btn-${confirmColor || 'primary'} ms-3`,
             cancelButton: onConfirm ? 'btn btn-label-secondary' : '',
           },
           buttonsStyling: false,
@@ -509,7 +555,7 @@
         });
       }
 
-      const releaseFailureAlert = ({title, message}) => {
+      window.releaseFailureAlert = ({title, message}) => {
         Swal.fire({
           icon: 'error',
           title: title || '',
@@ -523,7 +569,88 @@
           buttonsStyling: false,
         });
       }
+      
+      window.releaseAlert = ({icon, title, message}) => {
+        Swal.fire({
+          icon,
+          title: title || '',
+          html: message,
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+        });
+      }
+
+      window.getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
+        const config = {
+          responsive: true,
+          pageLength: pageLength ?? 10,
+          order: descIndex ? [[descIndex, 'desc']] : [],
+          rowId: row => 'row_' + row.id,
+          language: {
+            url:
+              document.dir === 'rtl'
+                ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+                : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+            sLengthMenu: '_MENU_',
+            search: '',
+            searchPlaceholder: '{{ __('admin.Search') }}...',
+          },
+          dom: '<"d-flex justify-content-between align-items-center mx-0 mb-0 row"<"col-sm-12 col-md-1 mb-0"l><"col-sm-12 col-md-7 mb-0 filters"><"col-sm-12 col-md-3 mb-0"f>>Bt<"d-flex justify-content-between mx-0 mb-0 row"<"col-sm-12 col-md-6 mb-0"i><"col-sm-12 col-md-6 mb-0"p>>',
+          ...(actionsIndex && {
+            columnDefs: [
+              {
+                targets: [actionsIndex], // Actions column
+                orderable: false,
+                searchable: false
+              }
+            ],
+            buttons: [
+              {
+                extend: 'csv',
+                text: 'CSV',
+                className: 'd-none', // Hide default button, trigger via custom dropdown
+                title: title ? title + '_Export_' + new Date().toISOString().slice(0, 10) : '',
+                exportOptions: {
+                  columns: Array.from({ length: actionsIndex }, (_, index) => index), // Export these columns
+                }
+              },
+              {
+                extend: 'excel',
+                text: 'Excel',
+                className: 'd-none', // Hide default button, trigger via custom dropdown
+                title: title ? title + '_Export_' + new Date().toISOString().slice(0, 10) : '',
+                exportOptions: {
+                  columns: Array.from({ length: actionsIndex }, (_, index) => index), // Export these columns
+                }
+              }
+            ]
+          }),
+        };
+
+        if (withoutFilter) {
+          config.initComplete = function () {
+            setTimeout(() => {
+              $('.dataTables_filter .form-control').removeClass('form-control-sm');
+              $('.dataTables_length .form-select').removeClass('form-select-sm');
+            }, 300);
+          };
+        }
+
+        return config;
+      };
     </script>
+
+    <!-- Keeps bootstrap-daterangepicker dropdowns inside modals/offcanvas on screen -->
+    <script src="/js/daterangepicker-viewport.js"></script>
+
+    <!-- BEGIN: Page JS-->
+    @yield('pagescripts')
+
 
     <script>
       // Show/hide search menu
@@ -533,10 +660,12 @@
         const updateMenuState = () => {
           if (window.Helpers.isCollapsed()) {
             if (html.classList.contains('layout-menu-hover')) {
-              console.log('layout-menu-hover');
+              // console.log('layout-menu-hover');
+              $('#menu-footer').show(); // Show menu footer
               $('#search-menu').show();
               $('#search-menu-icon').hide();
             } else {
+              $('#menu-footer').hide(); // hide menu footer
               $('#search-menu').hide();
               $('#search-menu-icon').show();
             }
@@ -555,6 +684,17 @@
           attributes: true,
           attributeFilter: ['class']
         });
+      });
+    </script>
+
+    {{-- Add nav=menu parameter to all menu links for breadcrumb tracking --}}
+    <script>
+      document.querySelectorAll('#layout-menu a.menu-link').forEach(function(link) {
+        if (link.href && !link.href.includes('javascript:') && !link.href.includes('#')) {
+          const url = new URL(link.href, window.location.origin);
+          url.searchParams.set('nav', 'menu');
+          link.href = url.toString();
+        }
       });
     </script>
 

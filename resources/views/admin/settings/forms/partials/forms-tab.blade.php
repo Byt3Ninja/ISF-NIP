@@ -1,5 +1,5 @@
 <!-- Forms Table -->
-<div class="tab-pane fade" id="forms-pane" role="tabpanel">
+<div class="tab-pane fade {{ $activeTab == 'forms' ? 'show active' : '' }}" id="forms-pane" role="tabpanel">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center border-bottom">
       <h5 class="card-title mb-0">{{ __('forms.forms_list') }}</h5>
@@ -41,19 +41,20 @@
                 <td>{{ $created }}</td>
                 <td>
                   <div class="d-flex flex-nowrap justify-content-center gap-1">
-                    <a href="/dashboard/show-form/{{ $form_id }}" class="btn btn-icon btn-label-primary" title="{{ __('forms.search') }}">
-                      <i class="ti ti-eye ti-sm"></i>
+                    <a href="/dashboard/show-form/{{ $form_id }}" class="bbtn btn-icon btn-text-secondary waves-effect waves-light rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('forms.preview') }}">
+                      <i class="ti ti-eye ti-md"></i>
                     </a>
                     <a href="/dashboard/show-builder/{{ $form_id }}{{ $org_id ? '?org_id=' . $org_id : '' }}"
-                       class="btn btn-icon btn-label-info" title="Edit">
-                      <i class="ti ti-edit ti-sm"></i>
+                       class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ __('forms.edit') }}">
+                      <i class="ti ti-edit ti-md"></i>
                     </a>
                     <a 
-                      class="btn btn-icon btn-label-danger"
+                      class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill"
                       onclick="confirmDeleteWithSweetAlert({{ $form_id }}, '{{ $title }}', this)"
+                      data-bs-toggle="tooltip" data-bs-placement="top"
                       title="{{ __('forms.delete') }}"
                     >
-                      <i class="ti ti-trash ti-sm"></i>
+                      <i class="ti ti-trash ti-md text-dark"></i>
                     </a>
                   </div>
                 </td>

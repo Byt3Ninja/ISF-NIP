@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-header">
       @if (session()->has('message'))
         <x-alert 
@@ -25,8 +25,8 @@
     </div>
 
     <!-- Header -->
-    <div class="card shadow-sm mb-8">
-      <div class="card-body">
+    <div class="card shadow-sm mb-6">
+      <div class="card-body py-4">
         <div class="row">
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
             <div class="d-flex bg-label-primary p-2 justify-content-center align-items-center rounded shadow">
@@ -45,13 +45,13 @@
               <div class="input-group input-group-merge search-form" style="width: 300px;">
                 <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
                 <input
-                  type="text" 
-                  id="search-programs" 
+                  type="search" 
+                  id="debounced-search" 
                   class="form-control"
                   placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" 
                   aria-label="Search programs"
                   aria-describedby="search-programs"
-                  value="{{ request('search') }}"
+                  value="{{ request('search') ? request('search') : '' }}"
                 />
               </div>
               
@@ -100,10 +100,11 @@
             <div class="card h-100 shadow-sm">
               <div class="card-header d-flex align-items-center justify-content-between pb-3">
                 <div class="w-px-52 h-px-52 bg-white rounded overflow-hidden me-2 border shadow-xs d-flex justify-content-center align-items-center">
-                  @if ($cycle->img_url)
+                  @if ($cycle->logo)
                     <img 
-                      src="{{ asset($cycle->img_url) }}"
+                      src="{{ $cycle->logo }}"
                       alt="{{ __('admin.Logo') }}"
+                      onerror="this.src = '/images/logo-placeholder.png';"
                       class="img-fluid w-100 h-100 object-cover"
                     />
                   @else
@@ -116,7 +117,7 @@
                     {{ $cycle->type == 'Hackathon' ? __('cycles.' . $cycle->type) : __('cycles.general') }}
                   </span>
                   <div class="dropdown">
-                    <button type="button" class="btn btn-sm btn-icon rounded-circle shadow-xs border dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                    <button type="button" class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                       <i class="ti ti-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
@@ -179,21 +180,21 @@
                       @if ($_user->ableTo('cycles.list', $permissions))
                         <li>
                           <a class="dropdown-item" href="/dashboard/cycles/{{ $cycle->id }}">
-                            <i class="ti ti-settings me-1"></i> {{ __('admin.manage_steps') }}
+                            <i class="ti ti-adjustments-cog me-1"></i> {{ __('admin.manage_steps') }}
                           </a>
                         </li>
                       @endif
                       @if ($_user->ableTo('cycles.users_manage', $permissions))
                         <li>
                           <a class="dropdown-item" href="/dashboard/cycles/{{ $cycle->id }}/registered">
-                            <i class="ti ti-settings me-1"></i> {{ __('admin.manage_startups') }}
+                            <i class="ti ti-settings-cog me-1"></i> {{ __('admin.manage_startups') }}
                           </a>
                         </li>
                       @endif
                       @if ($_user->ableTo('mentorships.requests_list', $permissions))
                       <li>
                         <a class="dropdown-item" href="{{ route('mentorships.requests_list', $cycle->id) }}">
-                          <i class="ti ti-settings me-1"></i>  {{ __('admin.manage_mentors') }}
+                          <i class="ti ti-user-cog me-1"></i>  {{ __('admin.manage_mentors') }}
                         </a>
                       </li>
                       @endif
@@ -216,9 +217,13 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark"
+                    class="d-flex flex-column text-center text-dark btn btn-text-info waves-effect waves-light"
                   >
-                    <i class="ti ti-building-skyscraper ti-lg text-info"></i>
+                    <div class="avatar">
+                      <div class="avatar-initial bg-label-info rounded-circle">
+                        <i class="ti ti-building-skyscraper ti-lg text-info"></i>
+                      </div>
+                    </div>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <strong>{{ $cycle->companies->count() }}</strong>
                       <span>{{ __('admin.Startups') }}</span>
@@ -230,9 +235,13 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark"
+                    class="d-flex flex-column text-center text-dark btn btn-text-success waves-effect waves-light"
                   >
-                    <i class="ti ti-recycle ti-lg text-success"></i>
+                    <div class="avatar">
+                      <div class="avatar-initial bg-label-success rounded-circle">
+                        <i class="ti ti-recycle ti-lg text-success"></i>
+                      </div>
+                    </div>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <strong>{{ $cycle->steps->count() }}</strong>
                       <span>{{ __('cycles.steps') }}</span>
@@ -246,9 +255,13 @@
                     @else
                       href="javascript:void(0);" 
                     @endif
-                    class="d-flex flex-column text-center text-dark"
+                    class="d-flex flex-column text-center text-dark btn btn-text-warning waves-effect waves-light"
                   >
-                    <i class="ti ti-users ti-lg text-warning"></i>
+                    <div class="avatar">
+                      <div class="avatar-initial bg-label-warning rounded-circle">
+                        <i class="ti ti-users ti-lg text-warning"></i>
+                      </div>
+                    </div>
                     <div class="d-flex align-items-center gap-2 mt-1">
                       <strong>{{ $cycle->mentors->unique('id')->count() }}</strong>
                       <span>{{ __('admin.Mentors') }}</span>
@@ -303,7 +316,7 @@
           {{ $cycles->links('pagination::bootstrap-5') }}
         </div>
       @else 
-        @include('includes.no-result', ['message' => __('admin.No_Data_Found')])
+        @include('includes.no-result', ['message' => __('admin.No_Programs_Found')])
       @endif
     </div>
   </div>
@@ -454,29 +467,5 @@
 
     // Initialize Date Picker
     flatpickr(".datepicker", { dateFormat: "Y-m-d" });
-
-    // Debounce helper
-    const debounce = (fn, delay = 1000) => {
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn(...args), delay);
-      };
-    };
-
-    // Create debounced handler ONCE
-    const handleSearch = debounce((value) => {
-      const url = new URL(window.location);
-        value
-        ? url.searchParams.set('search', value)
-        : url.searchParams.delete('search');
-
-        window.location.href = url.href;
-      }, 1000);
-
-    // Bind event
-    $('#search-programs').on('keyup', function () {
-      handleSearch(this.value.toLowerCase());
-    });
   </script>
 @stop

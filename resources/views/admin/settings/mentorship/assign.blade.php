@@ -5,13 +5,19 @@
     .remove-tag:hover {
       color: #ff3e1d;
     }
+    .cursor-pointer {
+      cursor: pointer;
+    }
+    .cursor-pointer:hover {
+      opacity: 0.85;
+    }
   </style>
 @stop
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-body">
         
         <!-- Notifications -->
@@ -31,40 +37,55 @@
         </section>
 
         <!-- Cycle Selection -->
-        <section id="cycle-selection">
-          <div class="card-header mb-4">
-            <h4 class="mb-1">{{ __('cycles.manage_mentors') }}</h4>
-            <p class="mb-0">{{ __('cycles.manage_mentor_description1') }}</p>
-            <p class="mb-0">{{ __('cycles.manage_mentor_description2') }}</p>
-          </div>
-          <div class="card mb-6">
-            <div class="card-body overflow-x-hidden text-nowrap">
-              <div class="d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-md-center">
-                <div class="form-group d-flex flex-column flex-lg-row align-items-lg-center gap-2 mb-6 mb-lg-0 me-lg-4">
-                  <label class="form-label fs-6">{{ __('cycles.Select_Cycle') }}:</label>
-                  <select id="cstep" class="select2 form-select" style="width: 350px;"
-                    onchange="window.open('/dashboard/mentorship/assign/'+this.options[this.selectedIndex].value,'_self');">
+        <section id="cycle-selection" class="mb-4">
+          <div class="card">
+            <div class="card-body">
+
+              {{-- Header text --}}
+              <div class="row mb-3">
+                <div class="col-12">
+                  <h4 class="mb-1">{{ __('cycles.manage_mentors') }}</h4>
+                  <p class="mb-0 text-muted">{{ __('cycles.manage_mentor_description1') }}</p>
+                  <p class="mb-0 text-muted">{{ __('cycles.manage_mentor_description2') }}</p>
+                </div>
+              </div>
+
+              {{-- Cycle dropdown + action buttons --}}
+              <div class="row g-3 align-items-end">
+
+                {{-- Dropdown --}}
+                <div class="col-12 col-lg-5">
+                  <label class="form-label" for="cstep">{{ __('cycles.Select_Cycle') }}</label>
+                  <select id="cstep" class="form-select select2"
+                    onchange="window.open('/dashboard/mentorship/assign/'+this.value,'_self');">
                     @foreach ($cycles as $cycle)
-                      <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>
-                        {{ $cycle->title }} ({{ $cycle->start->format('d-m-Y') }} - {{ $cycle->end->format('d-m-Y') }})
+                      <option value="{{ $cycle->id }}" @selected($cycle->id == $id)>
+                        {{ $cycle->title }}
+                       ({{ $cycle->start->format('d-m-Y') ?? '-' }} - {{ $cycle->end->format('d-m-Y') ?? '-' }})
+                       — {{ optional($cycle->organization)->name }}
                       </option>
                     @endforeach
-                    @if (!$id)
-                      <option> {{ __('cycles.No records saved') }} </option>
-                    @endif
+                    @unless ($id)
+                      <option>{{ __('cycles.No records saved') }}</option>
+                    @endunless
                   </select>
                 </div>
-                <div class="d-flex flex-wrap flex-lg-nowrap align-items-center gap-3">
-                  <a class="btn btn-label-primary" href="/dashboard/cycles/{{ $id }}">
-                    <i class="ti ti-components me-2"></i> {{ __('cycles.Manage Cycle') }}
-                  </a>
-                  <a class="btn btn-primary" href="/dashboard/mentorship/view/{{ $id }}">
-                    <i class="ti ti-settings me-2"></i> {{ __('cycles.Manage sessions') }}
-                  </a>
-                  <a class="btn btn-label-secondary" href="/dashboard/mentorship/{{ $id }}/surveys">
-                    <i class="ti ti-question-mark me-2"></i> {{ __('cycles.Manage Surveys') }}
-                  </a>
+
+                {{-- Action buttons --}}
+                <div class="col-12 col-lg-7">
+                  <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                    <a class="btn btn-primary" href="/dashboard/cycles/{{ $id }}">
+                      <i class="ti ti-adjustments me-2"></i>{{ __('cycles.Manage Cycle') }}
+                    </a>
+                    <a class="btn btn-label-primary" href="/dashboard/mentorship/view/{{ $id }}">
+                      <i class="ti ti-settings me-2"></i>{{ __('cycles.Manage sessions') }}
+                    </a>
+                    <a class="btn btn-outline-primary" href="/dashboard/mentorship/{{ $id }}/surveys">
+                      <i class="ti ti-question-mark me-2"></i>{{ __('cycles.Manage Surveys') }}
+                    </a>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -73,66 +94,98 @@
         <!-- Main Content -->
         <section>
           <div class="card">
-            <div class="card-header d-flex flex-wrap justify-content-between align-items-lg-center border-bottom">
-              <div class="w-25">
+            <div class="card-header d-flex flex-column flex-md-row flex-wrap justify-content-between align-items-lg-center border-bottom">
+              <div class="d-flex flex-wrap align-items-center justify-content-between w-100 mb-8">
                 <h5 class="card-title mb-6 mb-lg-0">
                   {{ __('cycles.assign_mentors_to') }}
                   <span class="fw-bold ms-1">
                     {{ $cycles->where('id', request('id'))->pluck('title')->implode(', ') }}
                   </span>
                 </h5>
+                @if ($_user->hasAnyRole('admin'))
+                <div class="mb-6 mb-lg-0">
+                  <a class="btn btn-primary" href="{{ route('users.create', ['role' => 'mentor']) }}" target="_blank" rel="noopener">
+                    <i class="ti ti-user-plus me-2"></i>{{ __('admin.add_new_mentor') }}
+                  </a>
+                </div>
+                @endif
               </div>
               
               <!-- PHP Logic for Filters -->
               @php
                 $scopeOptions = [
                   ['key' => 'public', 'label' => __('admin.Public'), 'hint' => __('admin.public_scope_hint')],
-                  ['key' => 'organization', 'label' => __('admin.Organization'), 'hint' => __('admin.organization_scope_hint')],
                 ];
 
                 $specializations = [];
-                // Reusing your existing logic efficiently
-                $TMentors = App\User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-                        ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-                        ->where('roles.default_for', 'mentor')
-                        ->select('users.*')->get();
-                foreach ($TMentors as $mentor) {
-                        $spec = $mentor->bio->{'specialization_' . $l} ?? null;
-                        if ($spec && !in_array($spec, $specializations)) $specializations[] = $spec;
+                foreach ($mentors as $mentor) {
+                    $spec = $mentor->bio->{'specialization_' . $l} ?? null;
+                    if ($spec && !in_array($spec, $specializations)) $specializations[] = $spec;
                 }
-                $specializations = array_unique($specializations);
+                sort($specializations);
               @endphp
               <!-- Filters Section -->
-              <div class="w-75">
-                <div class="row g-3 justify-content-lg-end">
+             
+              <div class="w-100">
+                <div class="row g-3">
                   <div class="col-md-2">
+                    @php
+                      $organization_q = App\Organization::where('is_draft', 0);
+                      //$organization = auth()->user()->hasRole('admin') ? $organization_q->get() : $organization_q->where('id', auth()->user()->organization_id)->get();
+                      if ($_user->hasRole('admin')) {
+                          $organization = $organization_q->get();
+                      } elseif ($_user->hasRole('subadmin')) {
+                          $organization = $organization_q
+                              ->whereIn('id', $_user->organizations_ids)
+                              ->get();
+                      } elseif ($_user->hasRole('OrganizationManager')) {
+                          $organization = $organization_q
+                              ->where('id', $_user->organization_id)
+                              ->get();
+                      }else {
+                          $organization = collect(); 
+                      }
+                      if($id > 0) {
+                          $cycle = App\Cycle::find($id);
+                          $organization = $cycle->organization()->where('is_draft', 0)->get();
+                      }
+                    @endphp
                     <select id="scopeFilter" class="form-select">
                       <option value="">{{ __('admin.Scope') }} ({{ __('admin.All') }})</option>
                       @foreach ($scopeOptions as $option)
-                        <option value="{{ $option['key'] }}" {{ request('scope') == $option['key'] ? 'selected' : '' }}>
-                          {{ $option['label'] }}  ( {{ $option['hint'] }} )
-                        </option>
+                        <option value="{{ $option['key'] }}">{{ $option['label'] }} ({{ $option['hint'] }})</option>
+                      @endforeach
+                      @foreach ($organization as $org)
+                        <option value="{{ $org->id }}">{{ $org->name }}</option>
                       @endforeach
                     </select>
                   </div>
+
                   <div class="col-md-3">
                     <select id="specializationFilter" class="form-select">
-                      <option value="">{{ __('cycles.Specialization') }} ({{ __('admin.All') }})</option>
-                      @foreach ($specializations as $spec)
-                        <option value="{{ $spec }}" {{ request('specialization') == $spec ? 'selected' : '' }}>{{ $spec }}</option>
-                      @endforeach
+                      <option value="">{{ __('cycles.Expertise') }} ({{ __('admin.All') }})</option>
+                        @php
+                          $expertises = App\Expertise::where('parent_id', null)->get();
+                        @endphp
+                        @foreach ($expertises as $expertise_group)
+                          <optgroup label="{{ $expertise_group->title }}">
+                            @foreach ($expertise_group->children as $expertise)
+                              <option value="{{ $expertise->id }}"> {{ $expertise->title }} </option>
+                            @endforeach
+                          </optgroup>
+                        @endforeach
                     </select>
                   </div>
                   <div class="col-md-2">
                     <select id="ratingFilter" class="form-select">
                       <option value="0">{{ __('admin.Rating') }} ({{ __('admin.All') }})</option>
                       @for($i=1; $i<=5; $i++)
-                        <option value="{{ $i }}" {{ request('rate') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                        <option value="{{ $i }}">{{ $i }} {{ $i == 1 ? __('admin.star') : __('admin.star') }} {{ $i == 5 ? '' : '& ' .  __('admin.up') }}</option>
                       @endfor
                     </select>
                   </div>
                   <div class="col-md-3">
-                      <input type="text" id="clientSearchInput" class="form-control" placeholder="{{ (__('admin.Search')) }}...">
+                      <input type="search" id="clientSearchInput" class="form-control" placeholder="{{ __('admin.Search') }}...">
                   </div>
                 </div>
               </div>
@@ -159,8 +212,8 @@
               <!-- TOOLBAR & PAGINATION CONTROLS -->
               <div class="card shadow-none border-bottom mb-6">
                 <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-8">
+                  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div class="d-flex align-items-center gap-8 mb-6 mb-md-0">
                       <div class="form-check mb-0">
                           <input class="form-check-input" type="checkbox" id="checkAllVisible">
                           <label class="form-check-label fw-bold" for="checkAllVisible">
@@ -191,12 +244,34 @@
               <!-- MENTORS CARD GRID -->
               <div class="row g-4 mb-4" id="mentors-grid">
                 @foreach ($mentors as $mentor)
+                  @php
+                    // Get mentor's expertise IDs from the mentor_expertise relationship
+                    $mentorExpertiseIds = $mentor->mentorExpertises->pluck('id')->toArray();
+                    
+                    // Get organization names for this mentor
+                    $mentorOrgs = [];
+                    if ($mentor->scope === 'organization' && !empty($mentor->scope_org_ids)) {
+                        $orgIds = json_decode($mentor->scope_org_ids, true) ?? [];
+                        if (!empty($orgIds)) {
+                            $organizations = App\Organization::whereIn('id', $orgIds)
+                                ->where('is_draft', 0)
+                                ->get();
+                            
+                            foreach ($organizations as $org) {
+                                // Try localized name first, fallback to non-localized
+                                $mentorOrgs[] = $org->{'name_' . $l} ?? $org->name ?? '';
+                            }
+                        }
+                    }
+                  @endphp
                   <div class="col-lg-4 col-md-6 mentor-item-col"
-                       data-name="{{ strtolower($mentor->name) }} {{ strtolower($mentor->title) }}"
-                       data-specialization="{{ $mentor->bio->{'specialization_' . $l} ?? '' }}"
-                       data-scope="{{ $mentor->scope ?? 'null' }}"
-                       data-rating="{{ number_format($mentor->mrating(), 1) }}"
-                      >
+                        data-name="{{ strtolower($mentor->name) }} {{ strtolower($mentor->title) }}"
+                        data-specialization="{{ $mentor->bio->{'specialization_' . $l} ?? '' }}"
+                        data-expertise-ids="{{ json_encode($mentorExpertiseIds) }}"
+                        data-scope="{{ strtolower($mentor->scope) }}"
+                        data-scope-org-ids="{{ $mentor->scope_org_ids }}"
+                        data-rating="{{ number_format($mentor->mrating(), 1) }}"
+                    >
                         
                         <div class="card h-100 position-relative shadow-xs border" id="card-{{ $mentor->id }}">
                             <div class="card-body d-flex flex-column position-relative">
@@ -213,7 +288,14 @@
                                 <!-- Header -->
                                 <div class="d-flex justify-content-between align-items-start mb-4">
                                     <!-- Left side: Avatar + Name/Title block -->
-                                    <div class="d-flex align-items-center gap-3">
+                                    <a 
+                                        @if ($_user->ableTo('mentors.profile_view', $permissions))
+                                            href="/dashboard/show/UserProfile/{{ $mentor->id }}" 
+                                        @else
+                                            href="javascript:void(0)"
+                                        @endif
+                                        class="d-flex align-items-center gap-3"
+                                    >
                                         <img 
                                           src="{{ $mentor->image_url ?? '/icons/account.svg' }}" 
                                           alt="{{ $mentor->name }}" 
@@ -225,7 +307,7 @@
                                             <h6 class="mb-0 card-title fw-semibold text-truncate" title="{{ $mentor->name }}">{{ $mentor->name }}</h6>
                                             <p class="text-muted small mb-0 text-truncate">{{ $mentor->title }}</p>
                                         </div>
-                                    </div>
+                                    </a>
 
                                     <!-- Right side: LinkedIn icon + Checkbox -->
                                     @if ($mentor->bio->linkedin ?? 0)
@@ -241,21 +323,77 @@
                                 </p>
 
                                 <!-- Footer -->
-                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mt-auto flex-wrap gap-2">
                                     <!-- Left side: Specialization badge -->
                                     @if (isset($mentor->bio->{'specialization_' . $l}))
                                       <span class="badge bg-label-secondary">{{ $mentor->bio->{'specialization_' . $l} ?? '' }}</span>
                                     @endif
 
-                                    <!-- Right side: Rating badge -->
-                                    <span class="badge bg-light-subtle border d-flex align-items-center gap-2">
-                                        <i class="ti ti-star-filled ti-16px text-warning"></i>
-                                        <span class="text-dark fw-semibold">{{ number_format($mentor->mrating(), 1) }}</span>
-                                    </span>
+                                    <!-- Right side: Rating badge and Organization/Public badges -->
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="badge bg-light-subtle border d-flex align-items-center gap-2">
+                                            <i class="ti ti-star-filled ti-16px text-warning"></i>
+                                            <span class="text-dark fw-semibold">{{ number_format($mentor->mrating(), 1) }}</span>
+                                        </span>
+                                        
+                                        @if (!empty($mentorOrgs))
+                                            @php
+                                                $visibleOrgs = array_slice($mentorOrgs, 0, 2);
+                                                $remainingCount = count($mentorOrgs) - 2;
+                                            @endphp
+                                            
+                                            @foreach ($visibleOrgs as $orgName)
+                                                <span class="badge bg-label-info badge-sm">
+                                                    <i class="ti ti-building ti-xs me-1"></i>{{ $orgName }}
+                                                </span>
+                                            @endforeach
+                                            
+                                            @if ($remainingCount > 0)
+                                                <span class="badge bg-label-info badge-sm cursor-pointer" 
+                                                      data-bs-toggle="modal" 
+                                                      data-bs-target="#orgsModal{{ $mentor->id }}">
+                                                    <i class="ti ti-dots ti-xs me-1"></i>+{{ $remainingCount }} {{ __('admin.more') }}
+                                                </span>
+                                            @endif
+                                        @elseif ($mentor->scope === 'public')
+                                            <span class="badge bg-label-success badge-sm">
+                                                <i class="ti ti-world ti-xs me-1"></i>{{ __('admin.Public') }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                             
                         </div>
+                        
+                        <!-- Organizations Modal -->
+                        @if (!empty($mentorOrgs) && count($mentorOrgs) > 2)
+                            <div class="modal fade" id="orgsModal{{ $mentor->id }}" tabindex="-1" aria-labelledby="orgsModalLabel{{ $mentor->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="orgsModalLabel{{ $mentor->id }}">
+                                                <i class="ti ti-building me-2"></i>{{ __('admin.Organizations') }} - {{ $mentor->name }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <ul class="list-group list-group-flush">
+                                                @foreach ($mentorOrgs as $orgName)
+                                                    <li class="list-group-item d-flex align-items-center">
+                                                        <i class="ti ti-building text-info me-2"></i>
+                                                        <span>{{ $orgName }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">{{ __('admin.Close') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                       </div>
                     @endforeach
                     
@@ -520,38 +658,60 @@
         }
 
         function applyFilters() {
-            const searchTerm = searchInput.value.toLowerCase();
+            const searchTerm = searchInput.value.toLowerCase().trim();
             const selectedSpecialization = specializationFilter.value;
-            const selectedRating = parseFloat(ratingFilter.value);
-            const selectedScope = scopeFilter.value;
+            const selectedRating = parseInt(ratingFilter.value);
+            const selectedScope = scopeFilter.value; // '', 'public', or org ID string
 
             visibleItems = allMentorCols.filter(col => {
-                // Check search term
-                const matchesSearch = col.dataset.name.includes(searchTerm);
+                // Search: name + title
+                const matchesSearch = !searchTerm || col.dataset.name.includes(searchTerm);
 
-                // Check specialization
-                const matchesSpecialization = !selectedSpecialization || col.dataset.specialization === selectedSpecialization;
+                // Specialization - now check by expertise IDs
+                let matchesSpecialization = true;
+                if (selectedSpecialization) {
+                    try {
+                        const expertiseIds = JSON.parse(col.dataset.expertiseIds || '[]');
+                        // Convert both to strings for comparison
+                        matchesSpecialization = expertiseIds.map(String).includes(String(selectedSpecialization));
+                    } catch (e) {
+                        matchesSpecialization = false;
+                    }
+                }
 
-                // Check rating
-                const mentorRating = parseFloat(col.dataset.rating);
-                const matchesRating = selectedRating === 0 || (
-                    mentorRating >= selectedRating - 0.5 && mentorRating < selectedRating + 0.5
-                );
+                // Rating: use Math.round to match display
+                let matchesRating = true;
 
-                // Check scope
-                const matchesScope = !selectedScope || col.dataset.scope.toLowerCase() === selectedScope.toLowerCase();
+                if (selectedRating > 0) {
+                      const mentorRating = parseFloat(col.dataset.rating) || 0;
+                      matchesRating = mentorRating >= selectedRating;
+                  }
+
+                // Scope - fixed to use lowercase and proper comparison
+                let matchesScope = true;
+                if (selectedScope) {
+                    const mentorScope = col.dataset.scope; // already lowercase from backend
+                    if (selectedScope === 'public') {
+                        matchesScope = mentorScope === 'public';
+                    } else {
+                        // selectedScope is an org ID — check if mentor's org_ids includes it
+                        try {
+                            const orgIds = JSON.parse(col.dataset.scopeOrgIds || '[]');
+                            // Convert both to integers for comparison
+                            matchesScope = (mentorScope === 'organization') && 
+                                          orgIds.map(Number).includes(Number(selectedScope));
+                        } catch (e) {
+                            matchesScope = false;
+                        }
+                    }
+                }
 
                 return matchesSearch && matchesSpecialization && matchesRating && matchesScope;
             });
 
             currentPage = 1;
-            if(visibleItems.length === 0) {
-                noResultsDiv.style.display = 'block';
-            } else {
-                noResultsDiv.style.display = 'none';
-            }
+            noResultsDiv.style.display = visibleItems.length === 0 ? 'block' : 'none';
             renderGrid();
-            // Reset "Select All" check if filters change
             checkAllVisible.checked = false;
         }
 

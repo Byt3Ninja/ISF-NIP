@@ -37,7 +37,7 @@ if ($canRequestMentorship) {
 @endphp
 
 @section('content')
-  <div class="content-wrapper">
+  <div class="">
     {{-- Alert Messages --}}
     @if(session()->has('error'))
       <div class="row">
@@ -62,7 +62,7 @@ if ($canRequestMentorship) {
       </div>
     @endif
 
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
       {{-- Profile Header Section --}}
       <section class="row">
         <div class="col-12">
@@ -297,7 +297,7 @@ if ($canRequestMentorship) {
 
                     <li class="d-flex align-items-center mb-4">
                       <i class="ti ti-crown ti-lg"></i>
-                      <strong class="mx-2">{{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role:' }}:</strong>
+                      <strong class="mx-2">{{ $l == 'ar' ? 'المسمى الوظيفي' : 'Role' }}:</strong>
                       <span>{{ $l == 'ar' ? $client->title_ar : $client->title_en }}</span>
                     </li>
 
@@ -312,7 +312,15 @@ if ($canRequestMentorship) {
                     <li class="d-flex align-items-center mb-2">
                       <i class="ti ti-language ti-lg"></i>
                       <strong class="mx-2">{{ $l == 'ar' ? 'اللغات:' : 'Languages:' }}</strong>
-                      <span>{{ $l == 'ar' ? 'العربية, الإنجليزية' : 'Arabic, English' }}</span>
+                      <span>
+                        @if($client->language === 'ar')
+                          {{ $l == 'ar' ? 'العربية' : 'Arabic' }}
+                        @elseif($client->language === 'en')
+                          {{ $l == 'ar' ? 'الإنجليزية' : 'English' }}
+                        @else
+                          {{ __('admin.Not_Available') }}
+                        @endif
+                      </span>
                     </li>
                   </ul>
 

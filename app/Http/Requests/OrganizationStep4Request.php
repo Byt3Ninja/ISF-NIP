@@ -63,7 +63,7 @@ class OrganizationStep4Request extends FormRequest
             'articles.*.title' => 'nullable|string|max:255',
             'articles.*.summary' => 'nullable|string|max:1000',
             'articles.*.link' => 'nullable|url|max:500',
-            'articles.*.image' => 'nullable|image|mimes:png,jpg,jpeg|max:5120',
+            'articles.*.image' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:5120',
             'articles.*.existing_image' => 'nullable|string',
 
             // Partners Section
@@ -73,8 +73,11 @@ class OrganizationStep4Request extends FormRequest
             'partners_description' => 'nullable|string|max:1000',
             'partners_list' => 'nullable|array|max:20',
             'partners_list.*.name' => 'nullable|string|max:255',
-            'partners_list.*.logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+            'partners_list.*.logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
             'partners_list.*.existing_logo' => 'nullable|string',
+
+            // Section Type (for tab-isolated saves)
+            'section_type' => 'nullable|string|in:howItWorks,achievements,media,partners,programs,url',
 
             // Theme
             'landing_theme' => 'nullable|in:gradient,minimal,vuexy',
@@ -100,6 +103,19 @@ class OrganizationStep4Request extends FormRequest
             'partners_bg_color' => 'nullable|string|max:20',
             'partners_bg_gradient_start' => 'nullable|string|max:20',
             'partners_bg_gradient_end' => 'nullable|string|max:20',
+
+            // Programs Section
+            'programs_enabled' => 'nullable|boolean',
+            'programs_title' => 'nullable|string|max:255',
+            'programs_subtitle' => 'nullable|string|max:255',
+            'programs_description' => 'nullable|string|max:1000',
+            'programs_order_by' => 'nullable|in:newest,oldest,custom',
+            'programs_visibility' => 'nullable|array',
+            'programs_visibility.*' => 'nullable|integer',
+            'programs_bg_type' => 'nullable|in:solid,gradient',
+            'programs_bg_color' => 'nullable|string|max:20',
+            'programs_bg_gradient_start' => 'nullable|string|max:20',
+            'programs_bg_gradient_end' => 'nullable|string|max:20',
         ];
     }
 
@@ -126,18 +142,20 @@ class OrganizationStep4Request extends FormRequest
                 'articles.*.title.max' => 'عنوان المقال يجب أن لا يتجاوز 255 حرف',
                 'articles.*.summary.max' => 'ملخص المقال يجب أن لا يتجاوز 1000 حرف',
                 'articles.*.link.url' => 'يرجى إدخال رابط صالح',
-                'articles.*.image.image' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
-                'articles.*.image.mimes' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
+                'articles.*.image.image' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG أو SVG أو WebP فقط',
+                'articles.*.image.mimes' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG أو SVG أو WebP فقط',
                 'articles.*.image.max' => 'الملف اكبر من الحد المسموح. الحد الأقصى المسموح به هو 5 ميجابايت',
                 'partners_list.*.name.max' => 'اسم الشريك يجب أن لا يتجاوز 255 حرف',
-                'partners_list.*.logo.image' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG أو SVG فقط',
-                'partners_list.*.logo.mimes' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG أو SVG فقط',
+                'partners_list.*.logo.image' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG أو SVG أو WebP فقط',
+                'partners_list.*.logo.mimes' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG أو SVG أو WebP فقط',
                 'partners_list.*.logo.max' => 'الملف أكبر من الحد المسموح به. الحد الأقصى المسموح به هو 2 ميجابايت',
                 'how_it_works_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
                 'achievements_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
                 'media_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
                 'partners_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
                 'landing_theme.in' => 'يرجى اختيار قالب صالح',
+                'programs_description.max' => 'الوصف يجب أن لا يتجاوز 1000 حرف',
+                'programs_order_by.in' => 'يرجى اختيار ترتيب صالح',
             ];
         }
 
@@ -156,18 +174,20 @@ class OrganizationStep4Request extends FormRequest
             'articles.*.title.max' => 'Article title must not exceed 255 characters',
             'articles.*.summary.max' => 'Article summary must not exceed 1000 characters',
             'articles.*.link.url' => 'Please enter a valid URL',
-            'articles.*.image.image' => 'Invalid file format. Please upload PNG or JPG files only.',
-            'articles.*.image.mimes' => 'Invalid file format. Please upload PNG or JPG files only.',
+            'articles.*.image.image' => 'Invalid file format. Please upload PNG, JPG, SVG or WebP files only.',
+            'articles.*.image.mimes' => 'Invalid file format. Please upload PNG, JPG, SVG or WebP files only.',
             'articles.*.image.max' => 'File too large. Maximum size allowed is 5MB.',
             'partners_list.*.name.max' => 'Partner name must not exceed 255 characters',
-            'partners_list.*.logo.image' => 'Invalid file format. Please upload PNG, JPG, or SVG files only.',
-            'partners_list.*.logo.mimes' => 'Invalid file format. Please upload PNG, JPG, or SVG files only.',
+            'partners_list.*.logo.image' => 'Invalid file format. Please upload PNG, JPG, SVG or WebP files only.',
+            'partners_list.*.logo.mimes' => 'Invalid file format. Please upload PNG, JPG, SVG or WebP files only.',
             'partners_list.*.logo.max' => 'File too large. Maximum size allowed is 2MB.',
             'how_it_works_description.max' => 'Description must not exceed 1000 characters',
             'achievements_description.max' => 'Description must not exceed 1000 characters',
             'media_description.max' => 'Description must not exceed 1000 characters',
             'partners_description.max' => 'Description must not exceed 1000 characters',
             'landing_theme.in' => 'Please select a valid theme',
+            'programs_description.max' => 'Description must not exceed 1000 characters',
+            'programs_order_by.in' => 'Please select a valid ordering option',
         ];
     }
 
@@ -176,13 +196,30 @@ class OrganizationStep4Request extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Convert checkbox values to boolean
-        $this->merge([
-            'landing_enabled' => $this->has('landing_enabled'),
-            'how_it_works_enabled' => $this->has('how_it_works_enabled'),
-            'achievements_enabled' => $this->has('achievements_enabled'),
-            'media_enabled' => $this->has('media_enabled'),
-            'partners_enabled' => $this->has('partners_enabled'),
-        ]);
+        $sectionType = $this->input('section_type');
+
+        $checkboxMap = [
+            'howItWorks'   => ['how_it_works_enabled'],
+            'achievements' => ['achievements_enabled'],
+            'media'        => ['media_enabled'],
+            'partners'     => ['partners_enabled'],
+            'programs'     => ['programs_enabled'],
+        ];
+
+        // Always include landing_enabled
+        $fields = ['landing_enabled' => $this->has('landing_enabled')];
+
+        // Only convert checkboxes for the current section (or all if no section_type)
+        $sectionsToProcess = $sectionType ? [$sectionType] : array_keys($checkboxMap);
+        foreach ($sectionsToProcess as $section) {
+            if (!isset($checkboxMap[$section])) {
+                continue;
+            }
+            foreach ($checkboxMap[$section] as $field) {
+                $fields[$field] = $this->has($field);
+            }
+        }
+
+        $this->merge($fields);
     }
 }

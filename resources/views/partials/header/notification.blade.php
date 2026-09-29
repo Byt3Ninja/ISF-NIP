@@ -141,15 +141,22 @@ function markAllAsRead() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('new-count').textContent = `0 ${document.getElementById('new-count').textContent.includes('New') ? 'New' : 'جديد'}`;
+            // #new-count only exists when the page rendered with unread
+            // notifications; guard so the badge cleanup below always runs.
+            const countElement = document.getElementById('new-count');
+            if (countElement) {
+                countElement.textContent = `0 ${countElement.textContent.includes('New') ? 'New' : 'جديد'}`;
+            }
             const badge = document.querySelector('.badge-notifications');
-            if (badge) badge.style.display = 'none';
+            if (badge) badge.remove();
             document.querySelectorAll('.dropdown-notifications-item:not(:has(a[href="/dashboard/inbox"])):not(:has(a[href="/dashboard/mymsg"]))').forEach(item => item.remove());
             document.getElementById('notification-list').innerHTML = `
                 <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">
@@ -167,6 +174,8 @@ function markAsRead(notificationId) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         }
     })
@@ -176,10 +185,13 @@ function markAsRead(notificationId) {
             const notificationItem = document.querySelector(`[onclick="markAsRead('${notificationId}')"]`);
             if (notificationItem) notificationItem.remove();
             const countElement = document.getElementById('new-count');
-            let count = parseInt(countElement.textContent) - 1;
-            countElement.textContent = `${count} ${countElement.textContent.includes('New') ? 'New' : 'جديد'}`;
+            let count = 0;
+            if (countElement) {
+                count = Math.max(parseInt(countElement.textContent) - 1, 0);
+                countElement.textContent = `${count} ${countElement.textContent.includes('New') ? 'New' : 'جديد'}`;
+            }
             const badge = document.querySelector('.badge-notifications');
-            if (count === 0 && badge) badge.style.display = 'none';
+            if (count === 0 && badge) badge.remove();
             if (!document.querySelector('.dropdown-notifications-item:not([class*="text-center"]):not(:has(a[href="/dashboard/inbox"])):not(:has(a[href="/dashboard/mymsg"]))')) {
                 document.getElementById('notification-list').innerHTML = `
                     <li class="list-group-item list-group-item-action dropdown-notifications-item text-center">

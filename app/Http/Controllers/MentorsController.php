@@ -2,34 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
-use App\Cycle;
-use Exception;
+use App\AttendanceTrainingOffline;
 use App\Company;
-use App\Surveys;
-use App\Schedule;
-use App\Settings;
-use Carbon\Carbon;
-use App\SurveyScopes;
+use App\Cycle;
 use App\CyclesMentors;
-use App\Events\WebMessage;
-use App\MentorshipRequest;
-use Illuminate\Http\Request;
-use App\Jobs\ExportMentorsData;
+use App\Events\MentorshipSessionUpdated;
 use App\Events\RequestMentorship;
+use App\Events\WebMessage;
+use App\Factories\OnlineMeetingFactory;
+use App\Http\Resources\MentorResource;
+use App\Jobs\ExportMentorsData;
+use App\Jobs\SendMentorshipNotification;
+use App\Jobs\SendMentorshipRequestJob;
+use App\MentorshipRequest;
+use App\Notifications\MentorshipRequestNotification;
+use App\Notifications\MentorshipSession;
+use App\Notifications\MentorshipSessionFounderBookingNotification;
+use App\Notifications\TemplateEmail;
+use App\Schedule;
 use App\Services\WhatsAppService;
+use App\Settings;
+use App\SurveyQuestions;
+use App\SurveyResponses;
+use App\Surveys;
+use App\SurveyScopes;
+use App\User;
+use App\Role;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Notifications\TemplateEmail;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\MentorResource;
-use App\Jobs\SendMentorshipRequestJob;
-use App\Factories\OnlineMeetingFactory;
-use App\Events\MentorshipSessionUpdated;
-use App\Jobs\SendMentorshipNotification;
-use App\Notifications\MentorshipSession;
-use App\Notifications\MentorshipRequestNotification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use stdClass;
 use App\Notifications\MentorshipSessionRequestNotification;
+use App\Notifications\MentorshipSessionMentorBookingNotification;
 
 class MentorsController extends Controller
 {
@@ -83,81 +92,223 @@ class MentorsController extends Controller
 
 	public function list(Request $request, $id = 0)
 	{
-		$l = app()->getLocale();
-		$user = auth()->user();
-		$orgIds = $user->organizations_ids;
-		if ($id == 0) {
-			$id = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
-			})->orderBy('start', 'DESC')->pluck('id')->first();
-		}
-		// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
-		$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-			->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-			->where('roles.default_for', 'mentor')
-			->select('users.*')
-			->with('inviteMentors')
-			->get();
-		$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
-		$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-			return $q->whereIn('organization_id', $orgIds);
-		})->get();
-
-		$selectedSpecialization = $request->specialization; // الحصول على قيمة التصفية من query string
-
-		if ($selectedSpecialization != 0) {
-			$mentors = $mentors->filter(function ($mentor) use ($selectedSpecialization, $l) {
-				$mentorSpecialization = $mentor->bio->{'specialization_' . $l} ?? null;
-
-				return !is_null($mentorSpecialization) && $mentorSpecialization == $selectedSpecialization;
-			});
-		}
+			$l = app()->getLocale();
+			
+			$user = auth()->user();
+			$orgIds = $user->organizations_ids;
+			if ($id == 0) {
+					
+					$id = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+							return $q->whereIn('organization_id', $orgIds);
+					})->orderBy('start', 'DESC')->pluck('id')->first();
+			}
+			// $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
+			$mentors = User::role('mentor')->with('inviteMentors', 'mentorExpertises');
+			
+			$cList = CyclesMentors::where('cycle_id', $id)->pluck('user_id')->toArray();
 
 
-		if ($request->rate != 0) {
-			$rating = $request->rate;
-			$mentors = $mentors->filter(function ($mentor) use ($rating) {
-				$averageRating = $mentor->mrating() ?? 0; // حساب متوسط التقييم للمدرب
-				return round($averageRating) == $rating; // مقارنة التقييم مع القيمة المختارة
-			});
-		}
+			// $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+			// 	return $q->whereIn('organization_id', $orgIds);
+			// })->get();
 
-		$mentors = $mentors->map(function ($mentor) {
-			$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
+			$scopeFilter = $request->scopeFilter;
 
-			if ($scopes->isEmpty()) {
-				$mentor->scope = null;
-			} elseif ($scopes->count() > 1) {
-				$mentor->scope = 'all';
+			// Old scope filter logic (commented out — replaced by new logic below)
+			// if (!$user->hasRole('Admin') && !empty($orgIds)) {
+			// 		$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+			// 		if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+			// 				if ($scopeFilter === 'public') {
+			// 						$mentors->where(function ($q) {
+			// 								$q->whereDoesntHave('inviteMentors')
+			// 								->orWhere(function ($q2) {
+			// 										$q2->whereHas('inviteMentors', function ($q3) {
+			// 												$q3->where('scope', 'Public')
+			// 														->where('status', 'accepted');
+			// 										});
+			// 								});
+			// 						});
+			// 				} else {
+			// 						$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+			// 								$query->where('status', 'accepted');
+			// 								if ($request->scopeFilter != null) {
+			// 										$query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
+			// 								}
+			// 						});
+			// 				}
+			// 		}
+			// } else {
+			// 		$cycles = Cycle::all();
+			// 		if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+			// 				if ($scopeFilter === 'public') {
+			// 						$mentors->where(function ($q) {
+			// 								$q->whereDoesntHave('inviteMentors')
+			// 								->orWhere(function ($q2) {
+			// 										$q2->whereHas('inviteMentors', function ($q3) {
+			// 												$q3->where('scope', 'Public')
+			// 														->where('status', 'accepted');
+			// 										});
+			// 								});
+			// 						});
+			// 				} else {
+			// 						$mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter, $request) {
+			// 								$query->where('status', 'accepted');
+			// 								if ($request->scopeFilter != null) {
+			// 										$query->whereJsonContains('organization_ids', (string) $request->scopeFilter);
+			// 								}
+			// 						});
+			// 				}
+			// 		}
+			// }
+
+			if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+					if ($scopeFilter === 'public') {
+							// Public: no invitations OR has an accepted Public-scope invitation
+							$mentors = $mentors->where(function ($q) {
+									$q->whereDoesntHave('inviteMentors')
+									  ->orWhereHas('inviteMentors', function ($q2) {
+											$q2->where('scope', 'Public')->where('status', 'accepted');
+									  });
+							});
+					} else {
+							// Specific org: must have an accepted invitation with this org in organization_ids
+							$mentors = $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+									$query->where('status', 'accepted')
+									      ->whereJsonContains('organization_ids', (string) $scopeFilter);
+							});
+					}
 			} else {
-				$mentor->scope = $scopes->first(); // public أو organization
+					// scopeFilter = all (or empty)
+					// Old logic (commented out): used user's orgIds + cycleMentorIds
+					// if (!$user->hasRole('Admin') && !empty($orgIds)) {
+					// 		$cycleIds = Cycle::whereIn('organization_id', $orgIds)->pluck('id')->toArray();
+					// 		$cycleMentorIds = CyclesMentors::whereIn('cycle_id', $cycleIds)->pluck('user_id')->toArray();
+					// 		$mentors = $mentors->where(function ($q) use ($cycleMentorIds) {
+					// 				$q->whereIn('id', $cycleMentorIds)
+					// 				  ->orWhere(function ($q2) {
+					// 						$q2->whereDoesntHave('inviteMentors')
+					// 						  ->orWhereHas('inviteMentors', function ($q3) {
+					// 								$q3->where('scope', 'Public')->where('status', 'accepted');
+					// 						  });
+					// 				  });
+					// 		});
+					// }
+
+					// New logic: restrict to this cycle's organization + public mentors
+					$cycle = Cycle::find($id);
+					$cycleOrgId = $cycle ? $cycle->organization_id : null;
+
+					if ($cycleOrgId) {
+							$mentors = $mentors->where(function ($q) use ($cycleOrgId) {
+									// Public mentors
+									$q->where(function ($q2) {
+											$q2->whereDoesntHave('inviteMentors')
+											  ->orWhereHas('inviteMentors', function ($q3) {
+													$q3->where('scope', 'Public')->where('status', 'accepted');
+											  });
+									})
+									// OR mentors belonging to this cycle's organization
+									->orWhereHas('inviteMentors', function ($q2) use ($cycleOrgId) {
+											$q2->where('status', 'accepted')
+											   ->whereJsonContains('organization_ids', (string) $cycleOrgId);
+									});
+							});
+					}
 			}
 
-			return $mentor;
-		});
+			if (!$user->hasRole('Admin') && !empty($orgIds)) {
+					$cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+			} else {
+					$cycles = Cycle::all();
+			}
+			
+			$mentors = $mentors->get()->map(function ($mentor) {
+					// افتراضيًا public لو مفيش invites
+					$mentorScope = 'public';
+					$mentorOrgIds = [];
 
-		// تصفية حسب حالة الـ checked
-		if ($request->assigning != 0) {
-			$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
+					if ($mentor->inviteMentors && $mentor->inviteMentors->count() > 0) {
+							// هنجيب كل invites المقبولة
+							$acceptedInvites = $mentor->inviteMentors->filter(fn($i) => strtolower($i->status) === 'accepted');
+							
+							// لو فيه invite scopes مختلفة، ممكن تختار الأولى أو حسب منطقك
+							if ($acceptedInvites->count() > 0) {
+									$mentorOrgIds = $acceptedInvites
+											->flatMap(fn($invite) => $invite->organization_ids ?? [])
+											->unique()
+											->values()
+											->toArray();
+									
+									// FIX: Use lowercase 'organization' to match frontend
+									$mentorScope = count($mentorOrgIds) > 0 ? 'organization' : strtolower($acceptedInvites->first()->scope);
+							}
+					}
 
-			$mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
-				$isChecked = in_array($mentor->id, $cList);
-
-				// إذا كان المستخدم اختار "checked"، نعيد فقط المدربين الموجودين في الدورة
-				if ($checkedStatus == 'checked') {
-					return $isChecked;
-				}
-				// إذا كان المستخدم اختار "unchecked"، نعيد فقط المدربين غير المسجلين
-				elseif ($checkedStatus == 'Notchecked') {
-					return !$isChecked;
-				}
-				return true; // في حالة عدم تحديد أي فلتر
+					// إضافة الخصائص للـ mentor
+					// FIX: Return lowercase scope to match frontend expectations
+					$mentor->scope = strtolower($mentorScope);
+					
+					// FIX: Ensure org IDs are stored as integers in JSON
+					$mentor->scope_org_ids = json_encode(
+							collect($mentorOrgIds)->map(fn($id) => intval($id))->values()->toArray()
+					);
+					
+					return $mentor;
 			});
-		}
+					
+			$selectedSpecialization = $request->specialization; 
+
+			if ($selectedSpecialization != 0) {
+					$mentors = $mentors->filter(function ($mentor) use ($selectedSpecialization, $l) {
+							$mentorSpecialization = $mentor->bio->{'specialization_' . $l} ?? null;
+
+							return !is_null($mentorSpecialization) && $mentorSpecialization == $selectedSpecialization;
+					});
+			}
+
+
+			if ($request->rate != 0) {
+					$rating = $request->rate;
+					$mentors = $mentors->filter(function ($mentor) use ($rating) {
+							$averageRating = $mentor->mrating() ?? 0; // حساب متوسط التقييم للمدرب
+							return round($averageRating) == $rating; // مقارنة التقييم مع القيمة المختارة
+					});
+			}
+
+			// $mentors = $mentors->map(function ($mentor) {
+			// 	$scopes = $mentor->inviteMentors->pluck('scope')->unique()->values();
+
+			// 	if ($scopes->isEmpty()) {
+			// 		$mentor->scope = null;
+			// 	} elseif ($scopes->count() > 1) {
+			// 		$mentor->scope = 'all';
+			// 	} else {
+			// 		$mentor->scope = $scopes->first(); // public أو organization
+			// 	}
+
+			// 	return $mentor;
+			// });
+
+			// تصفية حسب حالة الـ checked
+			if ($request->assigning != 0) {
+					$checkedStatus = $request->assigning; // القيمة ستكون "checked" أو "unchecked"
+
+					$mentors = $mentors->filter(function ($mentor) use ($checkedStatus, $cList) {
+							$isChecked = in_array($mentor->id, $cList);
+							if ($checkedStatus == 'checked') {
+									return $isChecked;
+							}
+							elseif ($checkedStatus == 'Notchecked') {
+									return !$isChecked;
+							}
+							return true; // في حالة عدم تحديد أي فلتر
+					});
+			}
+			
 			$settings = Settings::where('id', 1)->first();
 			$offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
-		
-		return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
+
+			return view('admin.settings.mentorship.assign', compact('mentors', 'id', 'cList', 'cycles', 'offline_allowed'));
 	}
 
 	public function assign($id, Request $request)
@@ -204,8 +355,14 @@ class MentorsController extends Controller
 				$survey->engagementRate = $eligibleUsers > 0 ? (number_format(round(($engagedUsers / $eligibleUsers * 100), 2), 2)) : 0.00;
 				return $survey;
 			});
+			if(Auth::user()->hasAnyRole('organizationManager|subadmin')) {
+				$available_surveys = Surveys::where('organization_id', $organization_id)->get();
+			}
+			if(Auth::user()->hasRole('admin')) {
+				$available_surveys = Surveys::all();
+			}
+			
 
-			$available_surveys = Surveys::where('organization_id', $cycle->organization_id)->get();
 			return view('admin.settings.mentorship.surveys', compact('surveys', 'cycle', 'available_surveys'));
 		} else {
 			abort(404);
@@ -362,7 +519,12 @@ class MentorsController extends Controller
 		$settings = Settings::where('id', 1)->first();
 		
 		$request->validate([
-			'notes' => 'nullable|string|max:255',
+			'notes' => 'nullable|string|max:1000',
+			'file_url' => 'nullable|file|max:10240|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,png,jpeg,jpg',
+			'selected_dates' => 'nullable|array',
+		], [
+			'file_url.mimes' => __('mentor.unsupported_slot_attachment_format'),
+			'file_url.max'   => __('mentor.file_excced_10'),
 		]);
 		$user = auth()->user();
 		$getMentor = User::find($request->mentorid);
@@ -390,19 +552,61 @@ class MentorsController extends Controller
 			'message' => $requestDateTime,
 		];
 
+		// The booking modal submits via AJAX and expects a structured JSON
+		// summary (per-slot outcomes); legacy plain-form posts still get the
+		// redirect + flash behaviour.
+		$wantsJson = $request->ajax() || $request->wantsJson();
+
 		if($user->hasAnyRole(['admin', 'organizationManager', 'subadmin']))
 		{
 			$cycle = $getStartup?->company?->cycledata;
 			if ($request->has('selected_dates')) {
-				
+
+				// Only one session type may be booked per time range. The modal
+				// disables conflicting slots, but re-check here so a crafted
+				// payload cannot double-book the same range.
+				$seenRanges = [];
+				foreach ($request->selected_dates as $dateItem) {
+					$rangeKey = ($dateItem['date'] ?? '') . '|' . ($dateItem['time_from'] ?? '') . '|' . ($dateItem['time_to'] ?? '');
+					if (isset($seenRanges[$rangeKey])) {
+						if ($wantsJson) {
+							return response()->json([
+								'status'    => 'error',
+								'booked'    => 0,
+								'requested' => count($request->selected_dates),
+								'failed'    => [],
+								'message'   => __('mentor.duplicate_slot_selected'),
+							], 200);
+						}
+						return back()->with(['class' => 'danger', 'msg' => 'duplicate_slot_selected']);
+					}
+					$seenRanges[$rangeKey] = true;
+				}
+
 				$errors = [];
+				$failedSlots = [];
 				$successCount = 0;
+				$requestedCount = count($request->selected_dates);
+				$bookedSessions = [];
+
+				// Record a per-slot failure once, for both the JSON summary and
+				// the legacy flash ($errors) path.
+				$recordFailure = function ($date, $timeFrom, $timeTo, $reason) use (&$errors, &$failedSlots) {
+					$errors[] = trim("$reason ($date $timeFrom-$timeTo)");
+					$failedSlots[] = [
+						'date'      => $date,
+						'time_from' => $timeFrom,
+						'time_to'   => $timeTo,
+						'reason'    => $reason,
+					];
+				};
 
 				foreach ($request->selected_dates as $index => $dateItem)
 				{
 					$date = $dateItem['date'];
 					$time_from = $dateItem['time_from'];
 					$time_to = $dateItem['time_to'];
+					$slot_session_type = $dateItem['session_type'] ?? $request->session_type;
 
 					$this->meetingService = OnlineMeetingFactory::create();
 					$datefrom = $date . ' ' . $time_from;
@@ -411,48 +615,59 @@ class MentorsController extends Controller
 					$mentorshipnotadded = MentorshipRequest::where('zoom_date', $datefrom)->where('mentor_id', $request->mentorid)->first();
 
 					if($mentorshipnotadded){
-						$errors[] = "Mentor already scheduled on $date from $time_from to $time_to";
+						$recordFailure($date, $time_from, $time_to, __('mentor.slot_already_requested'));
 						continue;
 					}
 					
 					$period = $request->period ?: Carbon::parse($datefrom)->diffInMinutes(Carbon::parse($dateto));
 
 					if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
-						$errors[] = __('api.max_concurrent_sessions_reached');
+						$recordFailure($date, $time_from, $time_to, __('api.max_concurrent_sessions_reached'));
 						continue;
 					}
 
 					$dayName = Carbon::parse($date)->format('l');
 
-					$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+					$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `date` LIKE ? AND tfrom <= ? AND tto >= ?";
 					$schedules = DB::select($schedules_q, [
 						$request->mentorid,
-						'%' . $dayName . '%',
+						'%' . $date . '%',
 						$time_from,
 						$time_to
 					]);
 
 					if ($schedules == null) {
-						$errors[] = "Mentor not available on $date from $time_from to $time_to";
+						$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+						$schedules = DB::select($schedules_q, [
+							$request->mentorid,
+							'%' . $dayName . '%',
+							$time_from,
+							$time_to
+						]);
+					}
+
+					if ($schedules == null) {
+						$recordFailure($date, $time_from, $time_to, __('mentor.mentor_not_available_in_this_time'));
 						continue;
 					}
-					if($request->session_type == 'Offline'){
+					if($slot_session_type == 'Offline'){
 						if($settings->allow_offline_sessions == 0){
-							$errors[] = 'Offline sessions are not allowed';
+							$recordFailure($date, $time_from, $time_to, __('mentor.offline_not_allowed'));
+							continue;
 						}
 					}
 
-					if (Carbon::parse($date)->toDateString() < now()->toDateString()) {
-						$errors[] = "Cannot schedule meeting in the past: $date";
-						continue;
-					}
+						if (Carbon::parse($date . ' ' . $time_from)->isPast()) {
+							$recordFailure($date, $time_from, $time_to, __('mentor.slot_in_past'));
+							continue;
+						}
 
 					$fileName = '';
 					if ($request->hasFile('file_url')) {
-						$fileName = $request->file('file_url')->store($request->user_id, ['disk' => 'PrivateDisk']);
+						$file = $request->file('file_url');
+						$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor');
 					}
 
-					
 					$autoApprove = $cycle->auto_approve_mentorship_requests;
 					$approved = 'Yes';
 
@@ -462,7 +677,7 @@ class MentorsController extends Controller
 					$onlineMeeting = $this->meetingService->createMeeting($data);
 
 					if (!$onlineMeeting['success']) {
-						$errors[] = "Zoom meeting failed on $date";
+						$recordFailure($date, $time_from, $time_to, __('mentor.meeting_creation_failed'));
 						continue;
 					}
 
@@ -476,6 +691,7 @@ class MentorsController extends Controller
 						'user_id' => $userid,
 						'comment' => $request->notes,
 						'approved' => $approved,
+						'admin_id' => Auth::id(),
 						'start_url' => $startUrl,
 						'join_url' => $joinUrl,
 						'zoom_id' => $meetingId,
@@ -485,33 +701,97 @@ class MentorsController extends Controller
 						'organization_id' => $request->organization_id,
 						'cycle_id' => $request->cycle_id,
 						'fileurl' => $fileName,
-						'session_type' => $request->session_type
+						'session_type' => $slot_session_type
 					]);
 
+					// $this->notifyFounderOfReservedSession($createMentor);
+
 					$successCount++;
+
+					$start = Carbon::parse($datefrom);
+					$end = $start->copy()->addMinutes($period);
+					$sessionType = $slot_session_type;
+					$location = $sessionType === 'Offline'
+						? ($cycle->offline_location_address ?? optional($cycle->organization)->address ?? null)
+						: null;
+
+					$bookedSessions[] = [
+						'founder_name' => '',
+						'startup_name' => '',
+						'date' => $start->format('Y-m-d'),
+						'start_time' => $start->format('h:i A'),
+						'end_time' => $end->format('h:i A'),
+						'type' => $sessionType,
+						'location' => $location,
+						'link' => $sessionType === 'Online' ? $joinUrl : null,
+						'is_hackathon' => strtolower($cycle->type) === 'hackathon'
+					];
+
+					$founder = User::find($userid);
+					if ($founder) {
+						$founder->notify(new MentorshipSessionFounderBookingNotification(
+							$requestedMentor,
+							$date,
+							$time_from,
+							$time_to
+						));
+					}
 
 					if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 						SendMentorshipRequestJob::dispatch($request->mentorid, $date, $request->period, $userid, $onlineMeeting, $createMentor->id, $approved, 'addwait');
 					}
 				}
-				
 
+				/* $mentor = User::find($request->mentorid);
+				$founder = User::find($request->user_id);
+				if ($successCount > 0 && $mentor && $founder) {
+					$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
+				} */
+
+				if ($wantsJson) {
+					if ($successCount === 0) {
+						$status  = 'error';
+						$message = __('mentor.no_sessions_booked');
+					} elseif (count($failedSlots) > 0) {
+						$status  = 'partial';
+						$message = __('mentor.some_sessions_booked', [
+							'booked' => $successCount,
+							'total'  => $requestedCount,
+						]);
+					} else {
+						$status  = 'success';
+						$message = __('mentor.session_booked_successfully');
+					}
+
+					return response()->json([
+						'status'    => $status,
+						'booked'    => $successCount,
+						'requested' => $requestedCount,
+						'failed'    => $failedSlots,
+						'message'   => $message,
+					], 200);
+				}
+
+				// Legacy plain-form fallback.
 				if ($successCount > 0) {
 					return back()->with(['message' => "Request_successfully_added_Startup"]);
-				} else {
-					return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
 				}
+				return back()->with(['message2' => "Error, can't add request", 'errors' => $errors]);
 			}
 		}
 		else
 		{
 			$startupName = $user?->company?->name ?: $user->name;
 			$cycle = $user?->company?->cycledata;
-			$parties = $cycle->organization->assignedUsers;
-			$platform_admins = User::role('admin')->get()->filter(function ($admin) {
-				return $admin->hasRole('admin');
-			})->values();
-			$parties = $parties->merge($platform_admins)->unique('id');
+			// Recipients: the organization manager(s) of the organization that
+			// manages the program (cycle) the founder is currently enrolled in,
+			// the sub-admin(s) that organization is assigned to, and the
+			// platform's super admin(s). One role query covers both roles.
+			$rolesUsers = Role::_users(['organizationManager', 'admin'])->get();
+			$orgManagers = $rolesUsers->filter(fn ($u) => $u->hasRole('organizationManager') && $u->organization_id == $cycle->organization_id);
+			$superAdmins = $rolesUsers->filter(fn ($u) => $u->hasRole('admin'));
+			$subAdmins = $cycle->organization->assignedUsers;
+			$parties = $orgManagers->merge($subAdmins)->merge($superAdmins)->unique('id');
 
 			$this->meetingService = OnlineMeetingFactory::create();
 			$datefrom = $request->date . ' ' . $request->session_start_time;
@@ -522,17 +802,43 @@ class MentorsController extends Controller
 				$period = $request->period;
 			}
 			$dayName = Carbon::parse($request->date)->format('l');
+			
+			$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `date` LIKE ? AND tfrom <= ? AND tto >= ?";
+			$schedules = DB::select($schedules_q, [
+				$request->mentorid,
+				'%' . $request->date . '%',
+				$request->session_start_time,
+				$request->session_end_time
+			]);
 
-			$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
+			if ($schedules == null) {
+				$schedules_q = "SELECT * FROM schedules WHERE user_id = ? AND `days` LIKE ? AND tfrom <= ? AND tto >= ?";
 			$schedules = DB::select($schedules_q, [
 				$request->mentorid,
 				'%' . $dayName . '%',
-				$request->timeFrom,
-				$request->timeTo
+				$request->session_start_time,
+				$request->session_end_time
 			]);
+				// return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
+			}
 			if ($schedules == null) {
 				return back()->with(['class' => 'danger','msg' => 'mentor_not_available_in_this_time']);
 			}
+
+			// A slot belongs to one startup. The modal hides taken slots, but
+			// re-check here to cover a stale page or two founders submitting at
+			// the same time. 'No' (rejected) does not hold the slot.
+			$alreadyBooked = MentorshipRequest::where('mentor_id', $request->mentorid)
+				->where('zoom_date', $datefrom)
+				->where(function ($q) {
+					$q->where('approved', 'Yes')->orWhereNull('approved');
+				})
+				->exists();
+
+			if ($alreadyBooked) {
+				return back()->with(['class' => 'danger', 'msg' => 'slot_just_booked']);
+			}
+
 			if($request->session_type == 'Offline'){
 				
 				if($settings->allow_offline_sessions == 0){
@@ -540,20 +846,24 @@ class MentorsController extends Controller
 					return back()->with(['class' => 'danger','msg' => 'Offline sessions are not allowed']);
 				}
 			}
-			
+				
 			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($datefrom)->timestamp, $period)) {
 				return back()->with(['class' => 'danger', 'msg' => __('api.max_concurrent_sessions_reached')]);
 			}
 
 			if ($request->mentorid) {
 				
-				if (Carbon::parse($request->date)->toDateString() < now()->toDateString()) {
+				if (Carbon::parse($request->date . ' ' . $request->session_start_time)->isPast()) {
 					return back()->with(['msg' => 'cannot_schedule_past_meeting']);
 				}
 				$fileName = '';
+				// if ($request->hasFile('file_url')) {
+				// 	$fileName = $request->file('file_url');
+				// 	$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
+				// }
 				if ($request->hasFile('file_url')) {
-					$fileName = $request->file('file_url');
-					$fileName = $fileName->store(Auth::id(), ['disk' => 'PrivateDisk']);
+					$file = $request->file('file_url');
+					$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor');
 				}
 
 				$autoApprove = $cycle->auto_approve_mentorship_requests;
@@ -577,7 +887,7 @@ class MentorsController extends Controller
 					$dateFormat = new \DateTime($datefrom);
 					$zoom_date = $dateFormat->format('Y-m-d H:i');
 				}
-				MentorshipRequest::create([
+				$createMentorshipRequest = MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
 					'user_id' => $userid,
 					'comment' => $request->notes,
@@ -593,18 +903,54 @@ class MentorsController extends Controller
 					'cycle_id' => $cycle->id,
 					'session_type' => $request->session_type
 				]);
+				// $this->notifyFounderOfReservedSession($createMentorshipRequest);
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
-					// 
-					$numberOfParties = $parties->count();
-					$allowedPerSecond = 2;
-					$chunks = $parties->chunk( $allowedPerSecond );
-					foreach ($chunks as $chunkParties) {
-						foreach( $chunkParties as $party )
-						{
-							$party->notify( new MentorshipSessionRequestNotification( $startupName, $requestedMentor, $dateTimePayload, $requestNotes ) );
+
+					// Atomically claim the "notify org manager" step so a retry/duplicate
+					// call for this same request can never send the email twice.
+					$claimedNotify = MentorshipRequest::where('id', $createMentorshipRequest->id)
+						->whereNull('manager_notified_at')
+						->update(['manager_notified_at' => now()]);
+
+					if ($claimedNotify) {
+						$isOnlineRequest = strtolower($request->session_type ?? '') == 'online';
+						$requestAttachments = $fileName ? [[
+							'url'  => app(\App\Services\FileManagerService::class)->getUrl($fileName, 'UsersDiskInviteMentor'),
+							'name' => basename($fileName),
+						]] : [];
+
+						// MentorshipSessionRequestNotification is ShouldQueue, so notify()
+						// only writes a queue row here -- the old sleep(2) between chunks
+						// throttled nothing and simply held the founder's request open for
+						// two seconds per pair of recipients. Keep the same send pacing by
+						// staggering delivery on the queue instead of blocking the response.
+						$allowedPerSecond = 2;
+						$secondsBetweenChunks = 2;
+
+						foreach ($parties->chunk($allowedPerSecond) as $chunkIndex => $chunkParties) {
+							$sendAt = now()->addSeconds($chunkIndex * $secondsBetweenChunks);
+
+							foreach ($chunkParties as $party) {
+								$party->notify(
+									(new MentorshipSessionRequestNotification(
+										$startupName,
+										$requestedMentor,
+										$dateTimePayload,
+										$requestNotes,
+										$user,
+										$user->company,
+										$request->session_type,
+										$isOnlineRequest ? $joinUrl : null,
+										$isOnlineRequest ? $passcode : null,
+										!$isOnlineRequest ? ($cycle->offline_location_address ?? optional($cycle->organization)->address) : null,
+										!$isOnlineRequest ? ($cycle->offline_location_map ?? optional($cycle->organization)->google_map_url) : null,
+										!$isOnlineRequest ? (optional($cycle->organization)->address) : null,
+										$requestAttachments
+									))->delay($sendAt)
+								);
+							}
 						}
-						sleep(2);
 					}
 				}
 
@@ -627,6 +973,10 @@ class MentorsController extends Controller
 			if (count($dateDatabase) > 0) {
 				return back()->with(['message2' => "Cant_add_request_date_is_Exist", 'notAdd' => 2]);
 			}
+
+			$bookedSessions = [];
+			$cycle = Cycle::find($request->cycle_id);
+
 			foreach ($dates as $key) {
 				$date = ltrim($key);
 				
@@ -646,7 +996,7 @@ class MentorsController extends Controller
 				// $dateAM = substr($date1, -2);
 				$dateFormat = new \DateTime($date);
 				// dd($dateFormat->format('Y-m-d H:i'));
-				MentorshipRequest::create([
+				$createMentor = MentorshipRequest::create([
 					'mentor_id' => $request->mentorid,
 					'user_id' => $request->userid,
 					'admin_comment' => $request->notes,
@@ -662,10 +1012,34 @@ class MentorsController extends Controller
 					'cycle_id' => $request->cycle_id,
 				]);
 
+				$this->notifyFounderOfReservedSession($createMentor);
+				$start = Carbon::parse($date);
+				$end = $start->copy()->addMinutes($request->period);
+				$sessionType = 'Online';
+				$joinUrl = $onlineMeeting['data']['join_url'];
+
+				$bookedSessions[] = [
+					'founder_name' => '',
+					'startup_name' => '',
+					'date' => $start->format('Y-m-d'),
+					'start_time' => $start->format('h:i A'),
+					'end_time' => $end->format('h:i A'),
+					'type' => $sessionType,
+					'location' => null,
+					'link' => $joinUrl,
+					'is_hackathon' => $cycle ? (strtolower($cycle->type) === 'hackathon') : false
+				];
 
 				SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), $onlineMeeting, null, null, 'add');
 				/// End of mail send
 			}
+
+			$mentor = User::find($request->mentorid);
+			$founder = User::find($request->userid);
+			if ($mentor && $founder && !empty($bookedSessions)) {
+				$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
+			}
+
 			return back()->with([
 				'message' => 'Session added successfully',
 				'add' => 1
@@ -683,8 +1057,10 @@ class MentorsController extends Controller
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
 		if ($request->show == 'all') {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				// التأكد من أن التواريخ متوافقة مع التنسيق المناسب
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -697,8 +1073,10 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} elseif ($request->show == 'approved') {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->whereNotNull('start_url')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -708,8 +1086,10 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} elseif ($request->show == 'disapproved') {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->where('approved', 'No')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -719,8 +1099,10 @@ class MentorsController extends Controller
 				return $q->where('cycle_id', $request->cycle_id);
 			});
 		} else {
-			 $query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-				return $q->whereIn('organization_id', $orgIds);
+			$query = MentorshipRequest::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
+				return $q->where(function ($q) use ($orgIds) {
+					$q->whereHas('cycle', fn($c) => $c->whereIn('organization_id', $orgIds));
+				});
 			})->whereNull('approved')->when($request->start_date && $request->end_date, function ($q) use ($request) {
 				$startDate = Carbon::parse($request->start_date)->startOfDay();
 				$endDate = Carbon::parse($request->end_date)->endOfDay();
@@ -732,19 +1114,19 @@ class MentorsController extends Controller
 			});
 		}
 
-    	if ($request->filled('done') && $request->done !== 'all') {
-         $query->where('approved', 'Yes');
-   		 if ($request->done === 'yes') {
-        	$query->where('done', 1);
-    	} elseif ($request->done === 'no') {
-        	$query->whereNull('done');
-   		 }
-    	}
+		if ($request->filled('done') && $request->done !== 'all') {
+			$query->where('approved', 'Yes');
+			if ($request->done === 'yes') {
+				$query->where('done', 1);
+			} elseif ($request->done === 'no') {
+				$query->whereNull('done');
+			}
+		}
 		if ($request->filled('session_type') && $request->session_type != 'all') {
 			$query->where('session_type', $request->session_type);
 		}
 
-		$sessions = $query->orderBy('id', 'DESC')->get();
+		$sessions = $query->with(['user.company', 'mentor'])->orderBy('id', 'DESC')->get();
 
 		// Add rate filtering - filter after retrieval for better accuracy
 		if ($request->filled('rate') && $request->rate != 'all' && ($request->show == 'all' || $request->show == 'approved')) {
@@ -764,9 +1146,9 @@ class MentorsController extends Controller
 		if(!empty($orgIds) && !$user->hasRole('admin')) {
 			$cycles = \App\Cycle::whereIn('organization_id', $orgIds)->get();
 		} else {
-				$cycles = \App\Cycle::all();
+			$cycles = \App\Cycle::all();
 		}
-		// dd($sessions[300]);
+			
 		return view('admin.settings.mentorship.sessions', compact('sessions', 'cycles'));
 	}
 
@@ -784,7 +1166,7 @@ class MentorsController extends Controller
 	{
 
 		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
-
+		
 		if ($request) {
 			
 			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($request->date)->timestamp, $request->period)) {
@@ -796,9 +1178,11 @@ class MentorsController extends Controller
 				$approved = 'Yes';
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
 				$data = ['topic' => $topic, "start_time" => $request->date, 'duration' => $request->period, 'host_video' => 1, 'participant_video' => 1];
+				
 				$onlineMeeting = $this->meetingService->createMeeting($data);
+				
 				if (!$onlineMeeting['success']) {
-					return back()->with(['message2' => "Error, can't create Online meeting."]);
+					return back()->with(['message2' => "Error, can't create Online meeting"]);
 				}
 				$start = $onlineMeeting['data']['start_url'];
 				$join = $onlineMeeting['data']['join_url'];
@@ -806,7 +1190,7 @@ class MentorsController extends Controller
 				$passcode = $onlineMeeting['data']['passcode'] ?? null;
 			}
 			MentorshipRequest::find($request->id)->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'zoom_passcode' => $passcode, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
-
+				
 			SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, null, 'modifySession');
 			/// Notify Mentor
 			/// End of mail send
@@ -819,24 +1203,20 @@ class MentorsController extends Controller
 	public function modify(Request $request)
 	{
 		try {
-
+			
 			$type = $request->rtype;
 			if ($type == 6) {
-
 				$start = $join = null;
+				$mRequest = MentorshipRequest::findOrFail($request->id);
 				if ($request->stat == 'Yes') {
-
-					$mRequest = MentorshipRequest::findOrFail($request->id);
 					$topic = "Online mentorship meeting (M" . $mRequest->mentor_id . '- U' . $mRequest->user_id . ')';
 					$data = ['topic' => $topic, "start_time" => $mRequest->zoom_date, 'duration' => $mRequest->period, 'host_video' => 1, 'participant_video' => 1];
-					
 				}
-
-
-				MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
+				 MentorshipRequest::find($request->id)->update(['approved' => $request->stat]);
 				$locale = app()->getLocale() ?? 'en';
 				/// Notify Mentor
-				SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, $request->stat, 'modify');
+				// dd($request->all(), $mRequest->mentor_id, $mRequest->zoom_date->format('Y-m-d H:i:s'), $mRequest->period, auth()->id(), null, $request->id, $request->stat, 'modify');
+				SendMentorshipRequestJob::dispatch($mRequest->mentor_id, $mRequest->zoom_date->format('Y-m-d H:i:s'), $mRequest->period, auth()->id(), null, $request->id, $request->stat, 'modify');
 
 
 				return response()->json('success');
@@ -887,6 +1267,8 @@ class MentorsController extends Controller
 				$userId = Auth::id();
 				$periods = $request->input('periods');
 
+				$now = now();
+				$rows = [];
 				foreach ($periods as $day => $times) {
 					// التحقق من وجود بيانات "from" و "to"
 					if (isset($times['from']) && isset($times['to'])) {
@@ -895,18 +1277,22 @@ class MentorsController extends Controller
 
 							// تجاهل إذا كانت القيم فارغة
 							if (!is_null($from) && !is_null($to)) {
-								Schedule::create([
+								$rows[] = [
 									'user_id' => $userId,
 									'type' => $request->input('type'),
 									'days' => $day,
 									'tfrom' => $from,
 									'tto' => $to,
 									'notes' => $request->input('notes'),
-
-								]);
+									'created_at' => $now,
+									'updated_at' => $now,
+								];
 							}
 						}
 					}
+				}
+				if (!empty($rows)) {
+					Schedule::insert($rows);
 				}
 				return back()->with(['msg' => 'Saved', 'class' => 'success']);
 			}
@@ -917,7 +1303,13 @@ class MentorsController extends Controller
 
 	public function mine()
 	{
-		$sessions = MentorshipRequest::where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
+		$sessions = MentorshipRequest::with(['user', 'mentor', 'organization', 'cycle'])->where('user_id', Auth::id())->orderby('created_at', 'DESC')->get();
+		$sessions = $sessions->map(function ( $session ) {
+			$session->address = $session->cycle && $session->cycle->offline_location_address ? $session->cycle->offline_location_address : optional($session->organization)->address;
+			$session->google_map_url = $session->cycle && $session->cycle->offline_location_map ? $session->cycle->offline_location_map : optional($session->organization)->google_map_url;
+			$session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
+			return $session;
+		});
 		return view('admin.clients.mymentorships', compact('sessions'));
 	}
 
@@ -1232,15 +1624,243 @@ class MentorsController extends Controller
 			return view('mentor.availability.index');
 	}
 
-	public function removeSlot(Request $request, $id)
+	public function mentorshipSessions() 
 	{
-		try {
-			$schedule = Schedule::where('user_id', Auth::id())->findOrFail($id);
-			$schedule->delete();
-			return response()->json(['success' => true, 'message' => __('mentor.slot_removed_success')], 200);
-		} catch (Exception $e) {
-			return response()->json(['success' => false, 'message' => __('mentor.slot_removed_error')], 500);
+		$user = auth()->user();
+
+		$mentorshipRequests = MentorshipRequest::when($user->hasRole('mentor'), function($query) use ($user) {
+			$query->where('mentor_id', $user->id);
+		})->with(['mentor', 'user', 'user.company', 'cycle', 'orgnization'])->orderBy('created_at', 'DESC')->get();
+		$surveys = SurveyResponses::where('user_id', $user->id)->where('triggered_on', 'mentorship')->get();
+			
+		$now = date('Y-m-d H:i');
+		$mentorship_sessions = $mentorshipRequests->map(function ($session) use ( $surveys ) {
+			$survey = $surveys->get($session->id);
+			$_sesssion = new stdClass;
+			$_sesssion->id = $session->id;
+			$_sesssion->zoom_date = $session->zoom_date;
+			$_sesssion->period = $session->period;
+			if ($session->zoom_date) {
+				$meetingStatus = mentorshipMeetingStatus($session->zoom_date, $session->period);
+				$_sesssion->status = $meetingStatus === 'before' ? 'Upcoming' : ($meetingStatus === 'expired' ? 'Completed' : 'In-progress');
+				$_sesssion->start_time = date('Y-m-d H:i', strtotime($session->zoom_date . ' -30 minutes'));
+				$_sesssion->end_time   = date('Y-m-d H:i', strtotime($session->zoom_date . ' +' . $session->period . ' minutes'));
+			} else {
+				$_sesssion->status     = 'Upcoming';
+				$_sesssion->start_time = null;
+				$_sesssion->end_time   = null;
+			}
+			$_sesssion->session_type = $session->session_type;
+			$_sesssion->approved = $session->approved;
+			$_sesssion->start_url = $session->start_url;
+			$_sesssion->comment = $session->comment;
+			$_sesssion->location_address = $session->cycle->offline_location_address
+				?? optional($session->orgnization)->address
+				?? null;
+			$_sesssion->google_map_url = $session->cycle->offline_location_map
+				?? optional($session->orgnization)->google_map_url
+				?? null;
+
+			$_sesssion->mentor = new stdClass;
+			$_sesssion->mentor->id = $session->mentor->id;
+			$_sesssion->mentor->name = trim( $session->mentor->first_name_en . ' ' . $session->mentor->last_name_en );
+			$_sesssion->mentor->image_url = User::image_handler($session->mentor->img_url);
+
+			$_sesssion->user = new stdClass;
+			$_sesssion->user->id = $session->user->id;
+			$_sesssion->user->name = trim( $session->user->first_name_en . ' ' . $session->user->last_name_en );
+			$_sesssion->user->image_url = User::image_handler($session->user->img_url);
+			$_sesssion->user->company = new stdClass;
+			$_sesssion->user->company->id = optional($session->user->company)->id;
+			$_sesssion->user->company->name = optional($session->user->company)->name_en;
+			$_sesssion->user->company->logo_url = optional($session->user->company)->logo ? asset($session->user->company->logo) : '/images/logo-placeholder.png';
+			$_sesssion->survey = null;
+			if( isset($survey->id) )
+			{
+				$_sesssion->survey = new stdClass;
+				$_sesssion->survey->id = optional($survey)->id;
+				$_sesssion->survey->status = $survey->responses != null ? 'Completed' : 'Pending';
+				$_sesssion->survey->is_required = optional($survey)->survey->is_required ?? false;
+			}
+
+			return $_sesssion;
+		});
+
+		$mentorship_sessions = $mentorship_sessions->sortBy(function($session) {
+			$statusPriority = [
+				'In_Progress' => 1,
+				'Pending' => 2,
+				'Completed' => 3,
+			];
+			return $statusPriority[$session->status] ?? 999;
+		});
+
+		return view('mentor.mentorship-sessions.index', compact('mentorship_sessions', 'now'));
+	}	
+	
+	public function surveys() 
+	{
+		$user = auth()->user();
+
+		
+
+		$availableSurveys = SurveyResponses::where('user_id', $user->id)
+			->where('triggered_on', 'mentorship')
+			->with('survey_scope')
+			->orderBy('created_at', 'desc')
+			->get();
+			
+
+				$surveyQuestionsCount = SurveyQuestions::whereIn(
+				'survey_id',
+				$availableSurveys->pluck('survey_id')
+			)
+			->select('survey_id', DB::raw('count(*) as total'))
+			->groupBy('survey_id')
+			->pluck('total', 'survey_id');
+
+			$mentorshipRequests = MentorshipRequest::where('mentor_id', $user->id)
+			->with('user.company')
+			->orderBy('zoom_date', 'desc')
+			->get();
+
+				//dd($mentorshipRequests[0], $availableSurveys[0], $surveyQuestionsCount);
+			$surveys = $availableSurveys->map(function ($survey) use (
+			$mentorshipRequests,
+			$surveyQuestionsCount
+		) {
+			$responses = json_decode($survey->responses, true) ?? [];
+			$totalQuestions = $surveyQuestionsCount[$survey->survey_id] ?? 0;
+			$completedQuestions = count($responses);
+			$mentorship = $mentorshipRequests
+				->where('zoom_date', '<=', $survey->created_at)
+				->first();
+				 
+			return (object) [
+				'id' => $survey->id,
+				'title' => $survey->survey->title . ' Survey',
+				'created_at' => $survey->created_at->format('Y-m-d H:i'),
+				'due_date' => $survey->created_at->copy()->addDays(7)->format('Y-m-d H:i'),
+				'status' => $completedQuestions === 0
+					? 'Pending'
+					: ($completedQuestions < $totalQuestions ? 'Pending' : 'Completed'),
+				'survey_type' => ucfirst($survey->triggered_on),
+				'total_questions' => $totalQuestions,
+				'completed_questions' => $completedQuestions,
+				'is_required' => (bool) $survey->survey->is_required,
+				'user' => $mentorship
+					? (object)[
+						'id' => $mentorship->user->id,
+						'name' => trim(
+							$mentorship->user->first_name_en . ' ' .
+							$mentorship->user->last_name_en
+						),
+						'image_url' => $mentorship->user->img_url
+							? asset($mentorship->user->img_url)
+							: '/icons/avatar.svg',
+
+						'company' => (object)[
+							'id' => optional($mentorship->user->company)->id,
+							'name' => optional($mentorship->user->company)->name_en,
+							'logo_url' => optional($mentorship->user->company)->logo
+								? asset($mentorship->user->company->logo)
+								: '/images/logo-placeholder.png',
+						],
+					]
+					: null,
+				'session' => $mentorship
+					? (object)[
+						'id' => $mentorship->id,
+						'zoom_date' => $mentorship->zoom_date->format('Y-m-d H:i'),
+					]
+					: null,
+			];
+		});
+				
+		$surveys = $surveys->sortBy(function($survey) {
+			$statusPriority = [
+				'Pending' => 1,
+				'Completed' => 2,
+			];
+			return $statusPriority[$survey->status] ?? 999;
+		});
+
+		$surveys = collect($surveys)->sortByDesc('created_at')->values();
+
+		return view('mentor.surveys.index', compact('surveys'));
+	}
+	function surveyStatus($survey, $totalQuestions) {
+		$answered = count(json_decode($survey->responses, true) ?? []);
+
+		if ($answered === 0) return 'Pending';
+		if ($answered < $totalQuestions) return 'In_Progress';
+		return 'Completed';
+	}
+
+	public function joinSession($id)
+	{
+		$session = MentorshipRequest::findOrFail($id);
+		$user = Auth::user();
+		if($user->hasRole('mentor')){
+			$getDataFromMentor = $user->mentorSessions->where('id', $session->id)->first()->user->company;
+		}elseif($user->hasRole('registered')){
+			$getDataFromMentor = $user->company;
+		}else{
+			$getDataFromMentor = null;
+		}
+		$companyId = $getDataFromMentor ? $getDataFromMentor->id : $user->company_id;
+		$companyCycle = $getDataFromMentor ? $getDataFromMentor->cycle : $user->company->cycle;
+		$companyStep = $getDataFromMentor ? $getDataFromMentor->step : $user->company->step;
+		$data = [
+			'mentorship_request_id' => $session->id,
+			'user_id'               => $user->id,
+			'attendance'            => true,
+			'location'              => 'online',
+			'company_id'            => $companyId,
+			'cycle_id'              => $companyCycle,
+			'step_id'               => $companyStep
+			];
+
+		AttendanceTrainingOffline::updateOrCreate(
+			$data,
+			[
+				'attendance' => true,
+				'location'   => 'online',
+			]
+		);
+		if($user->hasRole('mentor')){
+			return redirect()->away($session->start_url);
+		}else{
+			return redirect()->away($session->join_url);
 		}
 	}
 
+	private function notifyFounderOfReservedSession($mentorshipRequest)
+	{
+		try {
+			$startupUser = $mentorshipRequest->user;
+			if ($startupUser && $startupUser->company) {
+				$founder = $startupUser->company->resolveUser();
+				if ($founder && $founder->id !== Auth::id()) {
+					$zoomDate = Carbon::parse($mentorshipRequest->zoom_date);
+					$duration = $mentorshipRequest->period ?? 60;
+					$endDate = $zoomDate->copy()->addMinutes($duration);
+
+					$sessionData = [
+						'mentor_name' => $mentorshipRequest->mentor->name ?? 'N/A',
+						'session_date' => $zoomDate->format('Y-m-d'),
+						'start_time' => $zoomDate->format('H:i:s'),
+						'end_time' => $endDate->format('H:i:s'),
+						'session_type' => $mentorshipRequest->session_type ?? 'Online',
+						'location' => $mentorshipRequest->orgnization->address ?? ($mentorshipRequest->orgnization->google_map_url ?? null),
+						'meeting_link' => $mentorshipRequest->join_url ?? null,
+					];
+
+					$founder->notify(new \App\Notifications\MentorshipSessionFounderNotification($sessionData));
+				}
+			}
+		} catch (\Exception $e) {
+			\Log::error('Failed to notify founder of reserved session: ' . $e->getMessage());
+		}
+	}
 }

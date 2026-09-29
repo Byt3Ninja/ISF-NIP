@@ -5,8 +5,8 @@
 @stop
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-overlay"></div>
       <div class="invoice-create-btn mb-4">
         <a href="/dashboard/add_slide" class="btn btn-primary glow"><i class="ti ti-plus me-2"></i>{{ __('settings.AddNew') }}</a>

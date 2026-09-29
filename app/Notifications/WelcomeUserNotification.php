@@ -70,8 +70,10 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
-        
+        // Always the platform's own branding (logo/name), never the user's
+        // organization -- SMTP routing still uses the org, above.
+        $orgData = $this->buildEmailOrganizationData(null);
+
         $this->configureSmtp($smtpSettings);
         $magicLoginUrl = $notifiable->generateMagicLoginUrl();
 

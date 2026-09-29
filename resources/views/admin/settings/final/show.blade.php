@@ -3,52 +3,63 @@
 @section('vendorstyle')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <style>
-/* Center Summernote modals */
-.note-modal .modal-dialog {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-}
+   /* Edit-step picker is positioned via JS using viewport-fixed coords so the
+      month/year selectors stay fully visible inside the offcanvas (GV-3736). */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
+  }
 
-/* Center buttons in Summernote modals */
-.note-modal .modal-footer {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
+  .note-modal {
+    margin-top: 100px !important;
+  }
 
-.note-modal .modal-footer .btn {
-    min-width: 100px;
-}
+  div.checkbox label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  div.note-modal-footer input[type="button"] {
+    margin-top: -20px !important;
+  }
 </style>
 @stop
 
 @php
 $status = strtolower($evaluationForm?->status);
-if( optional($cstep)->data == 'grouptogroup' )
-{
-  //
-}
-else
-{
-  $judgersList = collect( json_decode(optional($cstep)->list) ?? [] );
-  $judgersList = $judgersList->map(function($judger) { return intval($judger); });
-}
-$types = ['onetoall'=>'Assign One to all users','grouptoall'=>'Assign Group to all users','grouptogroup'=>'Assign Group to group of users'];
+$l = app()->getLocale();
+$maxVisible = 10;
 
 $pills = [
   ['title' => 'judging_panels', 'icon' => 'user-check'],
-  ['title' => 'screening_guidelines' , 'icon' => 'help-circle'],
-  ['title' => 'evaluation_model' , 'icon' => 'chart-dots'],
-]
+  ['title' => 'screening_guidelines', 'icon' => 'help-circle'],
+  ['title' => 'evaluation_model', 'icon' => 'chart-dots'],
+];
+
+$companiesById = $companies instanceof \Illuminate\Support\Collection ? $companies->keyBy('id') : collect($companies)->keyBy('id');
+
+$visibleJudgeIds = $assignedJudgeIds->take($maxVisible);
+$hiddenJudgeIds = $assignedJudgeIds->slice($maxVisible);
+$hiddenJudgeNames = $hiddenJudgeIds->map(fn($jid) => $judges->find($jid))
+  ->filter()
+  ->map(fn($j) => $j->{'first_name_' . $l} . ' ' . $j->{'last_name_' . $l})
+  ->implode("\n");
+
+$visibleCompanyIds = $assignedCompanyIds->take($maxVisible);
+$hiddenCompanyIds = $assignedCompanyIds->slice($maxVisible);
+$hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ?? null)
+  ->filter()
+  ->map(fn($c) => $c->{'name_' . $l})
+  ->implode("\n");
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Alerts -->
     @if (session()->has('message'))
       <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }} {{ Session::forget('message') }}" />
@@ -78,7 +89,7 @@ $pills = [
                 <i class="ti ti-file-text me-2"></i> {{ __('admin.view_results') }}
               </a>
               <a class="btn btn-label-primary" href="/dashboard/cycles/{{ $cstep->cycle_id }}">
-                <i class="ti ti-components me-2"></i> {{ __('cycles.Manage Cycle') }}
+                <i class="ti ti-adjustments me-2"></i> {{ __('cycles.Manage Cycle') }}
               </a>
               <a class="btn btn-primary" href="/dashboard/show-builder{{ $cstep->cycle->organization->id ? '?' . 'org_id=' . $cstep->cycle->organization->id : '' }}">
                 <i class="ti ti-plus me-2"></i> {{ __('builder.Add_New_Form') }}
@@ -123,8 +134,8 @@ $pills = [
                 </a>
               </div>
 
-              <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-success">
-                <a href="{{ route('organizations.edit', $cstep->cycle->organization->id) }}" class="d-flex align-items-start gap-3">
+              <div class="mb-3 px-3 py-4 bg-card rounded-2 border border-success">
+                <a href="{{ $_user->ableToAny(['organization.wizard.edit', 'organizations.edit'], $permissions) ? route('organization.wizard.edit', $cstep->cycle->organization->id) . '?step=1' : 'javascript:void(0);' }}" class="d-flex align-items-start gap-3">
                   <div class="avatar">
                     <div class="avatar-initial rounded-circle bg-label-success">
                       <i class="ti ti-building"></i>
@@ -132,7 +143,7 @@ $pills = [
                   </div>
                   <div class="flex-grow-1">
                     <div class="text-secondary small mb-1">{{ __('admin.Organization') }}</div>
-                    <div class="text-success fw-semibold">{{ optional($cstep->cycle->organization)->name ?? '-' }}</div>
+                    <div class="text-success fw-semibold mb-1">{{ optional($cstep->cycle->organization)->name ?? '-' }}</div>
                   </div>
                 </a>
               </div>
@@ -155,23 +166,26 @@ $pills = [
                 </div>
               </div>
 
-              @if (isset($form->id))
-                <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-warning">
-                  <a href="{{ route('forms.render_view', $form->id) }}" class="d-flex align-items-start gap-3">
+              <div class="mb-3 px-3 py-2 bg-card rounded-2 border border-warning">
+                <div class="d-flex align-items-start gap-3">
                   <div class="avatar">
-                      <div class="avatar-initial rounded-circle bg-label-warning">
-                        <i class="ti ti-file"></i>
-                      </div>
+                    <div class="avatar-initial rounded-circle bg-label-warning">
+                      <i class="ti ti-file"></i>
                     </div>
-                    <div class="flex-grow-1">
-                      <div class="text-secondary small mb-1">{{ __('builder.Form') }}</div>
-                      <div class="text-warning fw-semibold">
-                        {!! $form->title ?? __('cycles.NoForm') !!}
-                      </div>
-                    </div>
-                  </a>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="text-secondary small mb-1">{{ __('builder.Form') }}</div>
+                      <select id="step-form-select" class="form-select select2" data-step-id="{{ $cstep->id }}" data-placeholder="{{ __('admin.select_form') }}" data-allow-clear="true">
+                      <option value="">{{ __('admin.select_form') }}</option>
+                      @foreach($forms as $f)
+                        <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>
+                          {{ $f->form_name }}
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
                 </div>
-              @endif
+              </div>
             </div>
 
             <!-- Judges -->
@@ -181,28 +195,19 @@ $pills = [
                   <i class="ti ti-user-check me-2"></i>{{ __('cycles.Assigned Judges') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border">
+              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
                 <div id="assigned-judges" class="d-flex flex-wrap gap-2">
-                  @php
-                    $allJudges = collect($judgers_list ?? [])
-                        ->pluck('judgers')
-                        ->flatten()
-                        ->merge($judgersList ?? [])
-                        ->unique()
-                        ->filter();
-                  @endphp
-
-                  @forelse ($allJudges as $judgeId)
+                  @forelse ($visibleJudgeIds as $judgeId)
                     @php $judge = $judges->find($judgeId); @endphp
-                    
+
                     @if ($judge)
-                      <a 
-                        href="/dashboard/users/{{ $judge->id }}/edit" 
-                        class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
+                      <a
+                        href="/dashboard/users/{{ $judge->id }}/edit"
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center"
                       >
                         <div class="avatar avatar-xs me-2">
                           @if ($judge->img_url)
-                            <img src="{{ $judge->img_url }}" alt="img" class="rounded-circle object-fit-cover">
+                            <img src="/191014/{{ $judge->img_url }}" alt="img" class="rounded-circle object-fit-cover">
                           @else
                             <div class="avatar-initial rounded-circle bg-label-secondary">
                               <i class="ti ti-user ti-xs"></i>
@@ -218,6 +223,16 @@ $pills = [
                       {{ __('admin.no_judges_assigned') }}
                     </span>
                   @endforelse
+
+                  @if ($hiddenJudgeIds->count() > 0)
+                    <span
+                      class="badge badge-center bg-label-primary p-4 rounded-circle fw-semibold d-flex justify-content-center align-items-center mt-1"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      data-bs-custom-class="tooltip-wide"
+                      title="{{ $hiddenJudgeNames }}"
+                    >+{{ $hiddenJudgeIds->count() }}</span>
+                  @endif
                 </div>
               </div>
             </div>
@@ -229,29 +244,15 @@ $pills = [
                   <i class="ti ti-building-skyscraper me-2"></i>{{ __('admin.assigned_startups') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border">
+              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
                 <div id="assigned-companies" class="d-flex flex-wrap gap-2">
-                  @php
-                    $allCompanies = collect($judgers_list ?? [])
-                        ->pluck('companies')
-                        ->flatten()
-                        ->merge(
-                            \App\Company::whereIn('step', array_filter([$form->id ?? null, $cstep->id ?? null]))
-                                ->pluck('id')
-                        )
-                        ->unique()
-                        ->filter();
-
-                    $companiesById = $companies->keyBy('id');
-                  @endphp
-
-                  @forelse ($allCompanies as $companyId)
+                  @forelse ($visibleCompanyIds as $companyId)
                     @php $company = $companiesById[$companyId] ?? null; @endphp
 
                     @if ($company)
-                      <a 
-                        href="/dashboard/companyProfile/{{ $company->id }}" 
-                        class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center"
+                      <a
+                        href="/dashboard/companyProfile/{{ $company->id }}"
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center"
                       >
                         <div class="avatar avatar-xs me-2">
                           @if ($company->logo)
@@ -271,6 +272,16 @@ $pills = [
                       {{ __('admin.no_startups_assigned') }}
                     </span>
                   @endforelse
+
+                  @if ($hiddenCompanyIds->count() > 0)
+                    <span
+                      class="badge bg-label-primary px-3 py-2 rounded-pill fw-semibold"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      data-bs-custom-class="tooltip-wide"
+                      title="{{ $hiddenCompanyNames }}"
+                    >+{{ $hiddenCompanyIds->count() }}</span>
+                  @endif
                 </div>
               </div>
             </div>
@@ -338,7 +349,7 @@ $pills = [
 
         <!-- Evaluation Model Tab -->
         <div class="tab-pane fade" id="evaluation_model" role="tabpanel" aria-labelledby="evaluation_model_tab">
-          @if( $_user->ableTo('screening.evaluation_show', $permissions) )
+          @if($_user->ableTo('screening.evaluation_show', $permissions))
             @include('admin.settings.screening-evaluation')
           @endif
         </div>
@@ -350,54 +361,56 @@ $pills = [
 </div>
 
 @if ($cstep)
-<!-- Step Form Modal -->
-<div class="modal fade" id="step-form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
-  aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title mb-0" id="myModalLabel33">{{ __('admin.screening.modify_step') }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="_token" value="">
-        <div class="modal-body">
-          <input type="hidden" name="sid" id="step-id-value">
-          <input type="hidden" name="type" value="8">
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Title') }}</label>
-            <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
-              class="form-control" required>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.start_date') }}</label>
-            <input id="step-from-date" name="fromDate" type="text" class="form-control date"
-              required>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.end_date') }}</label>
-            <input id="step-to-date" name="toDate" type="text" class="form-control date"
-              required>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('cycles.Description') }}</label>
-            <textarea id="step-description" name="description" placeholder="{{ __('cycles.Description') }}"
-              class="form-control" style="min-height: 80px; resize: vertical;"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" value="submit" class="btn btn-primary">
-            <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
-          </button>
-          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-            <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
-          </button>
-        </div>
-      </form>
-    </div>
+<!-- Step Form Offcanvas -->
+<div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="step-form-modal" aria-labelledby="myModalLabel33">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title mb-0" id="myModalLabel33">{{ __('admin.screening.modify_step') }}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
+  <form id="stepForm" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
+    class="d-flex flex-column flex-grow-1 overflow-hidden">
+    <input type="hidden" name="_token" value="">
+    <div class="offcanvas-body">
+      <input type="hidden" name="sid" id="step-id-value">
+      <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
+      <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
+      <div class="form-group mb-3">
+        <label class="form-label" for="mFormSelect">{{ __('cycles.Choose form') }}:</label>
+        <select class="form-select select2" id="mFormSelect" name="mFormSelect">
+          <option value="" @selected(!$form)>{{ __('admin.no_form_option') }}</option>
+          @foreach($forms as $f)
+            <option value="{{ $f->id }}" @selected($form && $form->id == $f->id)>{{ $f->form_name }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label">{{ __('cycles.Title') }}</label>
+        <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
+          class="form-control" required>
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label" for="step-range-picker">{{ __('admin.start_date') }} - {{ __('admin.end_date') }}:</label>
+        <input type="hidden" name="fromDate" id="mfromDate">
+        <input type="hidden" name="toDate" id="mtoDate">
+        <input type="text" id="step-range-picker" class="form-control" name="date_range">
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label">{{ __('cycles.Description') }}</label>
+        <textarea id="step-description" name="description" placeholder="{{ __('cycles.Description') }}"
+          class="form-control" style="min-height: 80px; resize: vertical;"></textarea>
+      </div>
+    </div>
+    <div class="offcanvas-footer border-top p-3 d-flex justify-content-end gap-2">
+      <button type="submit" value="submit" class="btn btn-primary">
+        <span class="d-none d-sm-block">{{ __('cycles.Submit') }}</span>
+      </button>
+      <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">
+        <span class="d-none d-sm-block">{{ __('cycles.Close') }}</span>
+      </button>
+    </div>
+  </form>
 </div>
-<!--/ Step Form Modal -->
+<!--/ Step Form Offcanvas -->
 
 @if ($cstep->data == 'grouptogroup')
 <!-- Users form -->
@@ -438,6 +451,7 @@ $pills = [
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+    <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop
 
 @section('pagescripts')
@@ -519,29 +533,91 @@ $pills = [
         }, 100);
       }
 
-      // Initialize date pickers
-      $('.date').flatpickr({
-        enableTime: false,
-        dateFormat: 'Y-m-d'
-      });
     });
 
     $('.edit-step-btn').on('click', function () {
       const stepData = $(this).data('step');
 
-      console.log('stepData', stepData)
-
       if (stepData) {
         $('#stepForm input[name="_token"]').val($('meta[name="csrf-token"]').attr('content'));
-        $('#step-form-modal').modal('show');
+        $('#step-form-modal').offcanvas('show');
         $('#step-id-value').val(stepData.id);
         $('#step-title').val(stepData.title);
-        $('#step-from-date').val(stepData.to);
-        $('#step-to-date').val(stepData.from);
         $('#step-description').val(stepData.description);
 
+        // Preselect the current form only when the step's data column holds a form id.
+        // Legacy steps may have a stale/empty data column, so leave the server default in place.
+        if (stepData.data) {
+          $('#mFormSelect').val(stepData.data).trigger('change.select2');
+        }
+
+        // Seed hidden date inputs (correct mapping: from -> start, to -> end)
+        $('#mfromDate').val(stepData.from || moment().format('YYYY-MM-DD'));
+        $('#mtoDate').val(stepData.to || moment().format('YYYY-MM-DD'));
+
+        // Combined range picker, mirroring the Steps Page dialog. The picker is
+        // positioned via JS (viewport-fixed) instead of drops:'up', which clipped
+        // it inside the offcanvas and hid the month/year selectors (GV-3736).
+        const $stepRangeInput = $('#step-range-picker');
+        $stepRangeInput.daterangepicker({
+          opens: $('html').attr('dir') === 'rtl' ? 'left' : 'right',
+          startDate: stepData.from ? moment(stepData.from) : moment(),
+          endDate: stepData.to ? moment(stepData.to) : moment(),
+        }).on('apply.daterangepicker', function(ev, picker) {
+          $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+          $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+        });
+
+        positionStepRangePicker($stepRangeInput);
       }
     });
+
+    // Viewport-fixed positioning now lives in /js/daterangepicker-viewport.js
+    // (loaded globally by the admin layout) so every modal picker behaves the same.
+    function positionStepRangePicker($input) {
+      const drp = $input.data('daterangepicker');
+      if (!drp) return;
+      const $picker = drp.container;
+      $picker.addClass('drp-viewport-fixed');
+
+      const reposition = function () {
+        if (!drp.isShowing) return;
+        const inputRect = $input[0].getBoundingClientRect();
+        const pickerHeight = $picker.outerHeight();
+        const pickerWidth = $picker.outerWidth();
+        const viewportH = window.innerHeight;
+        const viewportW = window.innerWidth;
+        const gap = 4;
+
+        let top = inputRect.bottom + gap;
+        if (top + pickerHeight > viewportH - gap) {
+          const above = inputRect.top - pickerHeight - gap;
+          top = above >= gap ? above : Math.max(gap, viewportH - pickerHeight - gap);
+        }
+
+        let left;
+        if (drp.opens === 'left') {
+          left = inputRect.right - pickerWidth;
+        } else if (drp.opens === 'center') {
+          left = inputRect.left + inputRect.width / 2 - pickerWidth / 2;
+        } else {
+          left = inputRect.left;
+        }
+        left = Math.max(gap, Math.min(left, viewportW - pickerWidth - gap));
+
+        $picker.css({ top: top + 'px', left: left + 'px', right: 'auto', bottom: 'auto' });
+      };
+
+      $input.off('show.daterangepicker.viewport').on('show.daterangepicker.viewport', function () {
+        setTimeout(reposition, 0);
+      });
+      const $modal = $('#step-form-modal');
+      $modal.off('scroll.drpViewport').on('scroll.drpViewport', reposition);
+      $modal.find('.offcanvas-body').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
+      $(window).off('scroll.drpViewport resize.drpViewport').on('scroll.drpViewport resize.drpViewport', reposition);
+
+      if (drp.isShowing) reposition();
+    }
 
     function handleDeleteStep(stepId) {
       $.ajaxSetup({
@@ -568,7 +644,7 @@ $pills = [
             url: "/dashboard/cycles/modify",
             data: {
               "stepid": stepId,
-              "type": 6,
+              "type": "{{ \App\Enums\CycleModifyAction::DELETE_STEP }}",
             },
             success: function(response) {
               $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();
@@ -576,6 +652,7 @@ $pills = [
                 title: '{{__('Deleted!')}}',
                 message: '{{  $l == 'en' ? 'The screening step has been deleted successfully.' : 'تم حذف مرحلة التصفية بنجاح.' }}',
               });
+              window.location.href = "/dashboard/final";
             },
             error: function(error) {
               releaseFailureAlert({
@@ -644,7 +721,7 @@ $pills = [
            if (response.status) {
               releaseSuccessAlert({
                 title: '{{ __('admin.success') }}',
-                message: response.message ? response.message : 'Screening guidelines saved successfully',
+                message: response.message ? response.message : 'admin.Screening guidelines saved successfully',
               });
             } else {
               releaseFailureAlert({
@@ -662,6 +739,85 @@ $pills = [
           }
         });
       });
+      // Form selection change handler. The previous value is tracked so we can
+      // revert the select2 if the manager cancels a destructive change.
+      let lastFormSelectValue = $('#step-form-select').val();
+      $('#step-form-select').on('change', function() {
+        const $select = $(this);
+        const stepId = $select.data('step-id');
+        const formId = $select.val();
+
+        const sendUpdate = function(confirmed) {
+          $.ajax({
+            url: '{{ route("screening.update_step_form") }}',
+            type: 'POST',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: { step_id: stepId, form_id: formId || null, confirm: confirmed ? 1 : 0 },
+            success: function(response) {
+              if (response.success) {
+                lastFormSelectValue = formId;
+                releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: response.message });
+              } else if (response.needs_confirmation) {
+                const count = response.counts ? response.counts.total : 0;
+                releaseWarningAlert({
+                  title: '{{ __("admin.step_form_change_warning_title") }}',
+                  message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', count),
+                  confirmText: '{{ __("admin.Yes") }}',
+                  cancelText: '{{ __("admin.cancel") }}',
+                  confirmColor: 'danger',
+                  onConfirm: function() { sendUpdate(true); },
+                  onCancel: function() {
+                    $select.val(lastFormSelectValue).trigger('change.select2');
+                  }
+                });
+              }
+            },
+            error: function(xhr) {
+              $select.val(lastFormSelectValue).trigger('change.select2');
+              releaseFailureAlert({ title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
+            }
+          });
+        };
+
+        sendUpdate(false);
+      });
+
+      // NOTE: select2 allow-clear (the x) already fires a native `change` after
+      // emptying the element (AllowClear._handleClear), which drives the change
+      // handler above with an empty value — so clearing routes through the same
+      // needs_confirmation warning path with no extra binding. A manual
+      // select2:clear → trigger('change') here would double-fire the AJAX.
+
+      // Edit-step popup form change: warn before de-attaching the form (changed or
+      // removed) when the step has submissions for the old form. Same rule as the
+      // inline selector, but this dialog submits the full #stepForm to cycles/modify
+      // (which otherwise redirects back with a flash). $stepFormSubmissions is the
+      // founder form_data count for this step (server-embedded).
+      let stepFormOriginalValue = null;
+      $('#step-form-modal').on('shown.bs.offcanvas', function () {
+        stepFormOriginalValue = $('#mFormSelect').val();
+        $('#confirm_form_change').val('0');
+      });
+      $('#stepForm').on('submit', function (e) {
+        const current = $('#mFormSelect').val();
+        const changed = stepFormOriginalValue !== null && current !== stepFormOriginalValue;
+        const submissions = Number('{{ $stepFormSubmissions ?? 0 }}') || 0;
+        if (changed && submissions > 0 && $('#confirm_form_change').val() !== '1') {
+          e.preventDefault();
+          releaseWarningAlert({
+            title: '{{ __("admin.step_form_change_warning_title") }}',
+            message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', submissions),
+            confirmText: '{{ __("admin.Yes") }}',
+            cancelText: '{{ __("admin.cancel") }}',
+            confirmColor: 'danger',
+            onConfirm: function () { $('#confirm_form_change').val('1'); $('#stepForm')[0].submit(); }
+          });
+          return false;
+        }
+      });
+
+      // Initialize tooltips
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
     });
   </script>
 @stop

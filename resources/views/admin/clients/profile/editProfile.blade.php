@@ -3,11 +3,9 @@
 @section('subTitle', __('admin.Edit your profile information'))
 
 @section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/animate-css/animate.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @stop
 
@@ -45,36 +43,44 @@
 @stop
 
 @php
-$phone_codes = App\Country::all();
+  $phone_codes = App\Country::all();
+  $save_redirect_url = $_user->hasRole('serviceProvider') ? '/dashboard/show/myProfile' : '/dashboard/services_providers';
 
-$tabs = [
-['account', 'accountSection', 'users'],
-['security', 'securitySection', 'lock'],
-['notifications', 'notificationsSection', 'bell'],
-];
+  $tabs = [
+    ['account', 'accountSection', 'users'],
+    ['security', 'securitySection', 'lock'],
+    ['notifications', 'notificationsSection', 'bell'],
+  ];
 
-// إضافة الشرط بشكل منفصل
-if (auth()->user()->hasRole('Mentor')) {
-array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
-}
+  $serviceProviderSteps = [
+    ['id' => 'basics', 'title' => __('admin.profile_basics'), 'subtitle' => __('admin.provider_basics_subtitle')],
+    ['id' => 'booking', 'title' => __('admin.intro_booking'), 'subtitle' => __('admin.provider_booking_subtitle')],
+    ['id' => 'stats', 'title' => __('admin.key_stats'), 'subtitle' => __('admin.provider_stats_subtitle')],
+    ['id' => 'portfolio', 'title' => __('admin.portfolio'), 'subtitle' => __('admin.provider_portfolio_subtitle')],
+    ['id' => 'clients', 'title' => __('admin.clients'), 'subtitle' => __('admin.provider_clients_subtitle')]
+  ];
 
-$is_security_tab_forced = session('must_change_password') || (auth()->check() && auth()->user()->must_change_password) ? true : false;
-$tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) {
-  $is_active = false;
-  if( $tab[0] == 'account' && !$is_security_tab_forced ) { $is_active = true; }
-  if( $tab[0] == 'security' && $is_security_tab_forced ) { $is_active = true; }
-  return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2], 'active' => $is_active];
-})->toArray();
+  if ($_user->hasRole('Mentor')) {
+    array_splice($tabs, 2, 0, [['info_profile', 'InfoProfileSection', 'users']]);
+  }
 
-// Debug: Log the tabs structure
-// dd($tabsList);
+  $is_security_tab_forced = session('must_change_password') || (auth()->check() && auth()->user()->must_change_password) ? true : false;
+  $tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) {
+    $is_active = false;
+    if( $tab[0] == 'account' && !$is_security_tab_forced ) { $is_active = true; }
+    if( $tab[0] == 'security' && $is_security_tab_forced ) { $is_active = true; }
+    return ['label' => __('admin.' . $tab[0]), 'target' => $tab[1], 'icon' => $tab[2], 'active' => $is_active];
+  })->toArray();
+
+  // Debug: Log the tabs structure
+  // dd($tabsList);
 @endphp
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
     <div class="row">
       <div class="col-md-12">
         <!-- Tabs -->
@@ -103,13 +109,16 @@ $tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) 
 
         <!-- Alerts -->
         @if (session()->has('msg'))
-        <x-alert type="{{ session()->get('class') ?? 'danger' }}"
-          message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" />
+          <x-alert 
+            type="{{ session()->get('class') ?? 'danger' }}"
+            message="{{ __('admin.' . session()->get('msg')) }} {{ Session::forget('msg') }}" 
+          />
         @endif
+        
         @if (count($errors) > 0)
-        @foreach ($errors->all() as $error)
-        <x-alert type="danger" message="{{ $error }}" />
-        @endforeach
+          @foreach ($errors->all() as $error)
+            <x-alert type="danger" message="{{ $error }}" />
+          @endforeach
         @endif
         @if (session('must_change_password') || (auth()->check() && auth()->user()->must_change_password))
           <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
@@ -120,10 +129,14 @@ $tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) 
         <!-- /Alerts -->
 
         <!-- Tab Content -->
-        <div class="tab-content card rounded mb-6">
+        <div class="tab-content card rounded mb-6 {{ $_user->hasRole('serviceProvider') ? 'p-0 shadow-none' : '' }}">
           <!-- Account section -->
           <div class="tab-pane fade {{ !$is_security_tab_forced ? 'show active' : '' }}" id="accountSection">
-            @include('admin.clients.profile.partials._account_info_form')
+            @if ($_user->hasRole('serviceProvider'))
+              @include('admin.clients.profile.partials._service_provider_wizard')
+            @else
+              @include('admin.clients.profile.partials._account_info_form')
+            @endif
           </div>
           <!-- /Account section -->
 
@@ -156,10 +169,6 @@ $tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) 
                 {{ __('admin.Notification_Settings') }}
               </h5>
               @include('admin.clients.profile.partials._notification_settings_form')
-            </div>
-            <!-- Debug info -->
-            <div class="alert alert-info">
-              <strong>Debug:</strong> Notifications section loaded successfully
             </div>
           </div>
           <!-- /Notifications section -->
@@ -252,66 +261,52 @@ $tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) 
 
 @section('scripts')
 <!-- Vendors JS -->
+<script src="/vuexy/assets/vendor/libs/bs-stepper/bs-stepper.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
-<script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
-<script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-<script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+
+<script>
+  $(document).on('click', '.change-email-cta-button', function(e) {
+    e.preventDefault();
+    var get_form = $(this).data('form');
+    $("#" + get_form).submit();
+  });
+  window.CONFIG = {
+    csrf_token: "{{ csrf_token() }}",
+    user: @json(Auth::user()),
+    phoneCountryCode: "+{{ $client->country_code ? $client->country_code : '' }}",
+    whatsappCountryCode: "+{{ $client->country_code_w_a ? $client->country_code_w_a : '' }}",
+    countriesIso3Map: @json($countriesIso3Map ?? []),
+    routes: {
+      sendCode: "{{ route('security.2fa_code_send') }}",
+      verifyCode: "{{ route('security.2fa_code_verify') }}",
+    }
+  }
+</script>
 @stop
 
 @section('pagescripts')
+@if($_user->hasRole('serviceProvider'))
+<script src="/vuexy/assets/js/service-provider-wizard.js"></script>
 <script>
-  const lang = '{{ $l }}';
-  
-  // Debug: Check if notifications tab is working
-  $(document).ready(function() {
-    console.log('Profile page loaded');
-    
-    // Check if notifications tab exists
-    if ($('#notificationsSection').length) {
-      console.log('Notifications section found');
-    } else {
-      console.log('Notifications section NOT found');
-    }
-    
-    // Check if notifications tab link exists
-    if ($('a[href="#notificationsSection"]').length) {
-      console.log('Notifications tab link found');
-    } else {
-      console.log('Notifications tab link NOT found');
-    }
-    
-    // Test tab switching
-    $('a[href="#notificationsSection"]').on('click', function(e) {
-      console.log('Notifications tab clicked');
+  const lang = $('html').attr('lang') || 'en';
+  function submitFormData() {
+    releaseSuccessAlert({
+      title: lang === 'ar' ? 'تم!' : 'Done!',
+      message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
     });
-    
-    // Initialize Bootstrap tabs manually if needed
-    var triggerTabList = [].slice.call(document.querySelectorAll('#notificationsSection'))
-    triggerTabList.forEach(function (triggerEl) {
-      var tabTrigger = new bootstrap.Tab(triggerEl)
-    });
-    
-    // Alternative: Force tab activation
-    $('a[href="#notificationsSection"]').on('click', function(e) {
-      e.preventDefault();
-      var target = $(this).attr('href');
-      $('.tab-pane').removeClass('show active');
-      $(target).addClass('show active');
-      $('.nav-link').removeClass('active');
-      $(this).addClass('active');
-      console.log('Notifications tab manually activated');
-    });
-  });
+    setTimeout(() => { window.location.href = '{{ $save_redirect_url }}'; }, 1500);
+  }
+</script>
+@else
+<script>
+  window.lang = '{{ $l }}';
 </script>
 
 <!-- Page JS -->
-<script src="/vuexy/assets/js/edit-profile.js"></script>
-<script src="/vuexy/assets/js/forms-selects.js"></script>
+<script src="/vuexy/assets/js/app-edit-profile.js"></script>
 <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 
 <script>
@@ -475,91 +470,7 @@ $tabsList = collect($tabs)->map(function ($tab) use ( $is_security_tab_forced ) 
 </script>
 @endrole
 
-<script>
-  // Initialize the phone input
-const phoneInput = document.getElementById("phone");
-const whatsappInput = document.getElementById("whatsapp");
-const phoneError = document.getElementById('phone-error');
-const whatsappError = document.getElementById('whatsapp-error');
-
-const countryCodeFromDB = "+{{ $client->country_code ? $client->country_code : '' }}";
-const countryCodeWAFromDB = "+{{ $client->country_code_w_a ? $client->country_code_w_a : '' }}";
-
-// Get country code from dial code
-function getCountryCode(code) {
-  let dialCode = code.toString().trim();
-  const countryData = intlTelInputGlobals.getCountryData();
-  const country = countryData.find(country => `+${country.dialCode}` === dialCode);
-
-  if (country) {
-    console.log("Country Code Found: " + country.iso2);
-    return country.iso2;
-  }
-  return "eg";
-}
-
-// Initialize intl-tel-input
-const iti = intlTelInput(phoneInput, {
-  initialCountry: getCountryCode(countryCodeFromDB),
-  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-  formatOnDisplay: false,
-  separateDialCode: true,
-  autoPlaceholder: "aggressive",
-  customPlaceholder: (placeholder) => "e.g. " + placeholder,
-});
-
-// Access the phone number with code
-phoneInput.addEventListener('input', function() {
-  const fullPhoneNumber = iti.getNumber();
-  const countryCode = iti.getSelectedCountryData().dialCode;
-  const countryCodeInput = document.getElementById('country_code');
-  countryCodeInput.value = countryCode;
-
-  if (!iti.isValidNumber() && fullPhoneNumber.length !== 0) {
-    phoneError.style.display = 'block';
-    phoneError.innerText = '{{ __('auth.Invalid_Phone_Number') }}';
-  } else {
-    phoneError.style.display = 'none';
-  }
-});
-
-// Reset phone input value on select another country code
-phoneInput.addEventListener("countrychange", () => {
-  phoneInput.value = '';
-});
-
-// Initialize intl-tel-input for WhatsApp
-const whatsappIti = intlTelInput(whatsappInput, {
-  initialCountry: getCountryCode(countryCodeWAFromDB),
-  preferredCountries: ["eg", "ae", "sa", "ma", "dz", "tn"],
-  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-  separateDialCode: true,
-  formatOnDisplay: false,
-  autoPlaceholder: "aggressive",
-  customPlaceholder: (placeholder) => "e.g. " + placeholder,
-});
-
-// Access the WhatsApp number with code
-whatsappInput.addEventListener('input', function() {
-  const fullPhoneNumber = whatsappIti.getNumber();
-  const countryCode = whatsappIti.getSelectedCountryData().dialCode;
-  const countryCodeInput = document.getElementById('country_code_w_a');
-  countryCodeInput.value = countryCode;
-
-  if (!whatsappIti.isValidNumber() && fullPhoneNumber.length !== 0) {
-    whatsappError.style.display = 'block';
-    whatsappError.innerText = '{{ __('auth.Invalid_WhatsApp_Number') }}';
-  } else {
-    whatsappError.style.display = 'none';
-  }
-});
-
-// Reset WhatsApp input value on select another country code
-whatsappInput.addEventListener("countrychange", () => {
-  whatsappInput.value = '';
-});
-
+{{-- <script>
 // Send code
 function sendCode(type) {    
     if (type === 'whatsapp' && !whatsappIti.isValidNumber()) {
@@ -674,7 +585,6 @@ $(document).on('input', '.otp-input', function() {
     $(this).next('.otp-input').focus();
   }
 });
-
-
-</script>
+</script> --}}
+@endif
 @stop

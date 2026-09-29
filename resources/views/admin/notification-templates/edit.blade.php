@@ -8,8 +8,8 @@
 @endsection
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="ti ti-check me-2"></i>
@@ -37,7 +37,7 @@
           {{ __('notification_templates.edit_template') }}
         </h5>
         <a href="{{ route('notification-templates.index') }}" class="btn btn-label-secondary">
-          <i class="ti ti-arrow-left me-2"></i>
+          <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
           {{ __('notification_triggers.back_to_list') }}
         </a>
       </div>

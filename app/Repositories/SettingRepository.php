@@ -20,7 +20,14 @@ class SettingRepository
     {
         return Cache::remember("setting_{$key}", $this->cacheTime, function () use ($key) {
             $setting = Settings::where('type', $key)->first();
-            return $setting ? $setting->set1 : null;
+            if ($setting) {
+                return $setting->set1;
+            }
+            $singleton = Settings::first();
+            if ($singleton && array_key_exists($key, $singleton->getAttributes())) {
+                return $singleton->{$key};
+            }
+            return null;
         }) ?? $default;
     }
     /**

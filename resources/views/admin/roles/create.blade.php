@@ -15,8 +15,8 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
 @section('subTitle', __('admin.CreateRole'))
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     @if(session()->has('success'))
     <x-alert type="success"
       message=" {{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}" />

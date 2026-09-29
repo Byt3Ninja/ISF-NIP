@@ -19,13 +19,17 @@
 @endphp
 
 @section('content')
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <!-- Alert -->
       @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible" role="alert">
-          {{ __('admin.' . session()->get('message')) }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {{-- The controller flashes an already-translated string plus a bootstrap
+             variant in 'class'; fall back to success when none was supplied. --}}
+        <div class="alert alert-{{ session()->get('class', 'success') }} alert-dismissible d-flex align-items-center"
+          role="alert">
+          <i class="ti ti-info-circle me-2 flex-shrink-0"></i>
+          <span>{{ session()->get('message') }}</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('admin.Close') }}"></button>
         </div>
       @endif
       @if (session()->has('message2'))
@@ -41,18 +45,25 @@
           <ul class="nav nav-pills">
             @foreach ($pills as $key => $pill)
               <li class="nav-item me-1 mb-3 w-100">
-                <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
-                   class="nav-link {{ $key == 0 ? 'active' : '' }}">
-                  <span>
-                    @if ($pill == 'analysis-assessment')
-                      {{ __('admin.Analysis_Assessment') }}
-                    @elseif($pill == 'question-assessment')
-                      {{ __('admin.Question_assessment') }}
-                    @else
-                      {{ __('admin.History') }}
-                    @endif
+                @if ($pill == 'question-assessment' && !$assessment_user)
+                  <span class="nav-link" style="cursor: not-allowed; opacity: 0.5;"
+                        title="{{ __('admin.No_Questions_Available') }}">
+                    <span>{{ __('admin.Question_assessment') }}</span>
                   </span>
-                </a>
+                @else
+                  <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
+                     class="nav-link {{ $key == 0 ? 'active' : '' }}">
+                    <span>
+                      @if ($pill == 'analysis-assessment')
+                        {{ __('admin.Analysis_Assessment') }}
+                      @elseif($pill == 'question-assessment')
+                        {{ __('admin.Question_assessment') }}
+                      @else
+                        {{ __('admin.History') }}
+                      @endif
+                    </span>
+                  </a>
+                @endif
               </li>
             @endforeach
           </ul>
@@ -66,18 +77,25 @@
             <ul class="nav nav-pills flex-nowrap px-5 py-4">
               @foreach ($pills as $key => $pill)
                 <li class="nav-item me-1">
-                  <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
-                     class="nav-link {{ $key == 0 ? 'active' : '' }}">
-                    <span class="fs-6">
-                      @if ($pill == 'analysis-assessment')
-                        {{ __('admin.Analysis_Assessment') }}
-                      @elseif($pill == 'question-assessment')
-                        {{ __('admin.Question_assessment') }}
-                      @else
-                        {{ __('admin.History') }}
-                      @endif
+                  @if ($pill == 'question-assessment' && !$assessment_user)
+                    <span class="nav-link" style="cursor: not-allowed; opacity: 0.5;"
+                          title="{{ __('admin.No_Questions_Available') }}">
+                      <span class="fs-6">{{ __('admin.Question_assessment') }}</span>
                     </span>
-                  </a>
+                  @else
+                    <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
+                       class="nav-link {{ $key == 0 ? 'active' : '' }}">
+                      <span class="fs-6">
+                        @if ($pill == 'analysis-assessment')
+                          {{ __('admin.Analysis_Assessment') }}
+                        @elseif($pill == 'question-assessment')
+                          {{ __('admin.Question_assessment') }}
+                        @else
+                          {{ __('admin.History') }}
+                        @endif
+                      </span>
+                    </a>
+                  @endif
                 </li>
               @endforeach
             </ul>
@@ -97,7 +115,7 @@
                 <div class="badge bg-label-secondary">
                   <i class="ti ti-calendar ti-18px text-info"></i>
                   <span class="fw-semibold text-xs text-dark ms-1">
-                    {{ $assessment == null ? 'None' : $assessment->created_at }}
+                    {{ $assessment == null ? __('startup.none') : $assessment->created_at }}
                   </span>
                 </div>
               </div>
@@ -112,11 +130,47 @@
                   </div>
                 </div>
                 <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
-                  @if (!$assessment_user)
-                    <a href="{{ route('assessments.assign') }}" class="btn btn-sm btn-primary">
-                      {{ __('admin.Make_a_new_assessment') }}
-                    </a>
-                  @endif
+                  @php
+                    // canStartAssessment() ran in the controller; 'reason' tells us
+                    // which precondition is unmet so we can name it for the founder.
+                    // The button always renders -- disabled with the reason spelled
+                    // out underneath -- so it never silently disappears (GV-9668).
+                    $canStart = $startCheck['can_proceed'] ?? false;
+                    $blockedReason = $startCheck['reason'] ?? null;
+
+                    // Reasons the founder can act on carry a link to the fix.
+                    $blockedAction = [
+                        // Deep-link to the tab that owns the missing field:
+                        // Development Stage lives on the Financial Info tab.
+                        'no_company' => ['route' => route('company.profile_view_mine', ['tab' => 'company-info']), 'label' => __('admin.GoToMyStartup')],
+                        'no_stage' => ['route' => route('company.profile_view_mine', ['tab' => 'company-financial-info']), 'label' => __('admin.GoToMyStartup')],
+                        'assessment_in_progress' => ['route' => route('assessments.take'), 'label' => __('admin.ContinueAssessment')],
+                    ][$blockedReason] ?? null;
+                  @endphp
+
+                  <div class="d-flex flex-column align-items-start align-items-md-end gap-2">
+                    <form action="{{ route('assessments.assign') }}" method="post">
+                      @csrf
+                      <button type="submit" class="btn btn-sm btn-primary" @disabled(!$canStart)
+                        @if (!$canStart) aria-describedby="assessment-blocked-hint" @endif>
+                        {{ __('admin.Make_a_new_assessment') }}
+                      </button>
+                    </form>
+
+                    @unless ($canStart)
+                      <div id="assessment-blocked-hint"
+                        class="d-flex align-items-start gap-2 text-start text-md-end justify-content-md-end"
+                        style="max-width: 42ch;">
+                        <i class="ti ti-alert-circle ti-16px text-warning flex-shrink-0 mt-1"></i>
+                        <span class="text-xs text-muted">
+                          {{ __('admin.CannotStartAssessment_' . ($blockedReason ?? 'generic')) }}
+                          @if ($blockedAction)
+                            <a href="{{ $blockedAction['route'] }}" class="fw-semibold">{{ $blockedAction['label'] }}</a>
+                          @endif
+                        </span>
+                      </div>
+                    @endunless
+                  </div>
 
                   @if ($assessment && $assessment->end_date)
                     <a href="{{ route('assessments.results_export_pdf') }}" class="btn btn-sm btn-primary ms-3">

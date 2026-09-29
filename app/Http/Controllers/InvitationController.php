@@ -24,14 +24,30 @@ class InvitationController extends Controller
             $allOrganizations = Organization::all();
         }elseif($user->hasAnyRole(['organizationManager', 'subadmin'])) {
             $orgIds = $user->organizations_ids;
-            $inviteMentors = InviteMentor::where('user_id', $user->id)->get();
+           
+            $inviteMentors = InviteMentor::where(function ($q) use ($orgIds) {
+                $q->where('scope', 'Public');
+                $q->orWhere(function ($q2) use ($orgIds) {
+                    foreach ($orgIds as $id) {
+                        $q2->orWhereJsonContains('organization_ids', (string) $id);
+                    }
+                });
+            })->get();
             $allOrganizations = Organization::whereIn('id', $orgIds)->get();
         }
 
         $organizationMap = collect($allOrganizations)->keyBy('id');
-        $invitations = $inviteMentors->map(function ($invite) use ($organizationMap) {
-            $orgIds = is_string($invite->organization_ids) ? json_decode($invite->organization_ids, true) : ($invite->organization_ids ?? []);
 
+        $invitations = $inviteMentors->map(function ($invite) use ($organizationMap) {
+            // $orgIds = is_string($invite->organization_ids) ? json_decode($invite->organization_ids, true) : ($invite->organization_ids ?? []);
+            $orgIds = [];
+
+            if (is_string($invite->organization_ids)) {
+                $orgIds = json_decode($invite->organization_ids, true) ?? [];
+            } elseif (is_array($invite->organization_ids)) {
+                $orgIds = $invite->organization_ids;
+            }
+            
             // جلب name لكل ID من الـ organizationMap
             $organizations = collect($orgIds)->map(function ($id) use ($organizationMap) {
                 return $organizationMap->has($id) ? [
@@ -39,8 +55,13 @@ class InvitationController extends Controller
                     'name' => $organizationMap[$id]['name_en']
                 ] : null;
             })->filter()->values()->toArray(); 
-
+            
             return [
+                'inviter' => [
+                    'id'   => $invite->user->id,
+                    'name' => $invite->user->name,
+                    'img_url' => $invite->user->img_url,
+                ],
                 'invitee_name'     => $invite->name,
                 'invitee_email'    => $invite->email,
                 'subject'          => $invite->subject,
@@ -54,7 +75,7 @@ class InvitationController extends Controller
                 'organizations'    => $organizations,
             ];
         })->values()->toArray();
-
+       
         // dd($invitations);
         // $invitations = [
         //     [
@@ -121,7 +142,7 @@ class InvitationController extends Controller
                             ];
                         })->toArray();
         
-                        
+                    //  dd($invitations);
         return view('mentors.invitations.index', compact('invitations', 'organizations'));
     }
 
@@ -145,14 +166,14 @@ class InvitationController extends Controller
         
         // Retrieve the data from the request
         $data = $request->all();
-       // dd($data);
+        //    dd($data);
         $request->validate([
             'invitee_name' => 'required|string',
             'invitee_email' => 'required|email',
             'invitation_scope' => 'required',
             'organizations' => 'nullable|array',
-            'invitation_subject' => 'required',
-            'invitation_message' => 'required',
+            'invitation_subject' => 'nullable|string',
+            'invitation_message' => 'nullable|string',
             'attachments' => 'nullable',
         ]);
 
@@ -166,14 +187,49 @@ class InvitationController extends Controller
         $invitation->status = 'Sent';
         $invitation->scope = $data['invitation_scope'];
         $invitation->organization_ids = $data['organizations'] ?? [];
-        $invitation->subject = $data['invitation_subject'];
-        $invitation->message_content = trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])));
+        // Custom subject/message are optional -- when left blank, the mail
+        // falls back to the platform's default "invited as a mentor" template.
+        $invitation->subject = $data['invitation_subject'] ?: null;
+        $invitation->message_content = !empty($data['invitation_message'])
+            ? trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])))
+            : null;
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
 
-        dispatch(new SendInviteMentorEmail($invitation));
+        // Atomically claim the "send invitation email" step so a retry/duplicate
+        // call for this same invitation can never send the email twice.
+        $claimedInviteNotify = InviteMentor::where('id', $invitation->id)
+            ->whereNull('email_sent_at')
+            ->update(['email_sent_at' => now()]);
 
-        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) {
+        if ($claimedInviteNotify) {
+            dispatch(new SendInviteMentorEmail($invitation, auth()->user()->email));
+        }
+        if($data['invitation_scope'] == 'Organization'){
+            $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
+            $organizationMap = collect($allOrganizations)->keyBy('id');
+        }else{
+            $organizationMap = [];
+        }
+       
+        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) use ($organizationMap) {
+
+         $orgIds = [];
+
+            if (is_string($invite->organization_ids)) {
+                $orgIds = json_decode($invite->organization_ids, true) ?? [];
+            } elseif (is_array($invite->organization_ids)) {
+                $orgIds = $invite->organization_ids;
+            }
+            
+            // جلب name لكل ID من الـ organizationMap
+            $organizations = collect($orgIds)->map(function ($id) use ($organizationMap) {
+                return $organizationMap->has($id) ? [
+                    'id' => $id,
+                    'name' => $organizationMap[$id]['name_en']
+                ] : null;
+            })->filter()->values()->toArray(); 
+
             return [
                 'invitee_name'     => $invite->name,
                 'invitee_email'    => $invite->email,
@@ -185,9 +241,10 @@ class InvitationController extends Controller
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
                 'attachments'      => $invite->attachments ?? [],
+                'organizations'    => $organizations,
             ];
         });
-        
+
         return response()->json(['success' => true,
          'message' => 'Invitation sent successfully.',
         'data' => $invitation], 200);
@@ -196,17 +253,14 @@ class InvitationController extends Controller
     private function uploadToUsersDisk(UploadedFile $file): array
     {
          $extension = $file->guessExtension();
-        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $safeName = Str::slug($originalName);
-        $date = now()->format('Y-m-d_H-i-s');
-        $fileName = $safeName . '_' . $date . '.' . $extension;
-        Storage::disk('UsersDiskInviteMentor')->putFileAs('', $file, $fileName);
-        return [
-            'file_name' => $fileName,
-            'file_url'  => Storage::disk('UsersDiskInviteMentor')->url($fileName),
-            'extension' => $extension,
-            'size'      => $file->getSize(),
-        ];
+         $fileManager = app(\App\Services\FileManagerService::class);
+         $fileName = $fileManager->upload($file, '', 'UsersDiskInviteMentor');
+         return [
+             'file_name' => $fileName,
+             'file_url'  => $fileManager->getUrl($fileName, 'UsersDiskInviteMentor'),
+             'extension' => $extension,
+             'size'      => $file->getSize(),
+         ];
     }
 
     /**
@@ -215,7 +269,7 @@ class InvitationController extends Controller
     public function updateFile(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,pptx|max:10240',
+            'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx|max:10240',
         ]);
 
         // استدعاء دالة الرفع
@@ -229,11 +283,7 @@ class InvitationController extends Controller
 
     private function deleteFromUsersDisk(string $fileName): bool
     {
-        if (Storage::disk('UsersDiskInviteMentor')->exists($fileName)) {
-            return Storage::disk('UsersDiskInviteMentor')->delete($fileName);
-        }
-
-        return false;
+        return app(\App\Services\FileManagerService::class)->delete($fileName, 'UsersDiskInviteMentor');
     }
 
     public function deleteFile(Request $request)
@@ -255,5 +305,21 @@ class InvitationController extends Controller
             'success' => true,
             'message' => 'File deleted successfully'
         ]);
+    }
+
+    public function showAttachment($path)
+    {
+        $safeName = basename($path);
+        $basePath = storage_path('app/uploads/InviteMentor');
+        $filePath = $basePath . DIRECTORY_SEPARATOR . $safeName;
+
+        $realBase = realpath($basePath);
+        $realFile = realpath($filePath);
+
+        if (!$realBase || !$realFile || !str_starts_with($realFile, $realBase)) {
+            abort(404);
+        }
+
+        return response()->file($realFile);
     }
 }

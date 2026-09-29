@@ -1,29 +1,25 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+    <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+@stop
+
+@section('scripts')
+    <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+@stop
+
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
-   <!-- Navigation Tabs -->
-    <nav class="nav-align-top mb-6">
-      @php
-        $tabs = [
-          ['title' => __('admin.initial_screening'), 'url' => 'dashboard/screening', 'icon' => 'scale'],
-          ['title' => __('admin.Final Screening'), 'url' => 'dashboard/final', 'icon' => 'gavel'],
-        ];
-      @endphp
-      <ul class="nav nav-pills">
-        @foreach($tabs as $tab)
-          <li class="nav-item">
-            <a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-              <i class="ti ti-{{ $tab['icon'] }} me-2 d-none d-md-inline"></i>
-              {{ $tab['title'] }}
-            </a>
-          </li>
-        @endforeach
-      </ul>
-    </nav>
-    <!--/ Navigation Tabs -->
-  
+<div class="">
+  <div class="">
+    @php
+      $tabs = [
+        ['title' => __('admin.initial_screening'), 'url' => 'dashboard/screening', 'icon' => 'scale'],
+        ['title' => __('admin.Final Screening'), 'url' => 'dashboard/final', 'icon' => 'gavel'],
+      ];
+    @endphp
+    
+    <x-navigation-pills :tabs="$tabs" />
+
     <!-- Alerts -->
     @if (session()->has('message'))
       <x-alert type="success" message="{{ __('admin.' . session()->get('message')) }} {{ Session::forget('message') }}" />
@@ -55,46 +51,44 @@
       </div>
 
       <!-- Filters Section -->
-      <div class="card bg-light-subtle shadow-none rounded-0 border-bottom">
+      <div class="card shadow-none rounded-0 border-bottom">
         <div class="card-body py-4">
-          <form id="filter-form" method="GET" action="/dashboard/screening">
+          <form id="filter-form" method="GET" action="/dashboard/screening" data-ignore-dirty>
             <div class="row g-3 align-items-center">
               <div class="col-md-6 col-lg-3">
                 <div class="input-group input-group-merge">
-                  <span class="input-group-text" id="basic-addon-search31"><i class="ti ti-search"></i></span>
+                  <span class="input-group-text" id="basic-addon-search31"><i class="ti ti-search ti-sm text-muted"></i></span>
                   <input type="text" class="form-control bg-card" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.screening.search_steps_placeholder') }}" aria-label="Search" aria-describedby="basic-addon-search31">
                 </div>
               </div>
-
+              <div class="col-md-6 col-lg-2">
+                <select class="form-select select2" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
+                  <option value="all">{{ __('admin.All_Programs') }}</option>
+                  @foreach($programs_in_screening->pluck('cycle')->unique('id') as $program)
+                    <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
+                  @endforeach
+                </select>
+              </div>
 
               <div class="col-md-6 col-lg-2">
-                <select class="form-select select2 bg-card" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
-                  <option value=""></option>
+                <select class="form-select select2" name="status" data-placeholder="{{ __('admin.All_statuses') }}">
+                  <option value="all">{{ __('admin.All_statuses') }}</option>
                   <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>{{ __('admin.In_Progress') }}</option>
                   <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('admin.Upcoming') }}</option>
                   <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('admin.completed') }}</option>
                 </select>
               </div>
 
-              <div class="col-md-6 col-lg-2">
-                <select class="form-select select2 bg-card" name="program" data-placeholder="{{ __('admin.All_Programs') }}">
-                  <option value=""></option>
-                  @foreach($screeningSteps->pluck('program')->unique('id') as $program)
-                    <option value="{{ $program->id }}" {{ request('program') == $program->id ? 'selected' : '' }}>{{ Str::limit($program->title, 25) }}</option>
-                  @endforeach
-                </select>
-              </div>
-
               <div class="col-md-6 col-lg-3">
                 <div class="d-flex gap-2">
-                  <select class="form-select select2 bg-card flex-grow-1" name="judge" data-placeholder="{{ __('cycles.All Judges') }}">
-                    <option value=""></option>
+                  <select class="form-select select2 flex-grow-1" name="judge" data-placeholder="{{ __('cycles.All Judges') }}">
+                    <option value="all">{{ __('cycles.All Judges') }}</option>
                     @foreach($screeningSteps->pluck('judges')->flatten()->unique('id') as $judge)
                       <option value="{{ $judge->id }}" {{ request('judge') == $judge->id ? 'selected' : '' }}>{{ $judge->name }}</option>
                     @endforeach
                   </select>
-                  <select class="form-select select2 bg-card flex-grow-1" name="startup" data-placeholder="{{ __('admin.all_startups') }}">
-                    <option value=""></option>
+                  <select class="form-select select2 flex-grow-1" name="startup" data-placeholder="{{ __('admin.all_startups') }}">
+                    <option value="all">{{ __('admin.all_startups') }}</option>
                     @foreach($screeningSteps->pluck('companies')->flatten()->unique('id') as $company)
                       <option value="{{ $company->id }}" {{ request('startup') == $company->id ? 'selected' : '' }}>{{ Str::limit($company->name, 25) }}</option>
                     @endforeach
@@ -104,7 +98,7 @@
 
               <div class="col-lg-2">
                 <div class="d-flex justify-content-end gap-2">
-                  @if(request('search') || request('screening_type') || request('status') || request('program') || request('judge') || request('startup'))
+                  @if(request('search') || request('status') || request('program') || request('judge') || request('startup'))
                     <a href="/dashboard/screening" class="btn btn-label-secondary">
                       <i class="ti ti-refresh me-1"></i> {{ __('admin.Reset') }}
                     </a>
@@ -122,7 +116,7 @@
       <div class="card-body">
         <!-- Steps Grid -->
         <div class="row g-4">
-          @forelse($screeningSteps as $step)
+          @foreach($paginatedSteps as $step)
             <div class="col-xl-4 col-lg-6 col-md-6">
               <div class="card shadow-sm border h-100" data-step-id="{{ $step->id }}">
                 <!-- Card Header with Status Indicator -->
@@ -134,8 +128,13 @@
                   </h6>
                   <div class="d-flex align-items-center gap-1">
                     @php
+                      // Status from the step's date window vs today. Guard null
+                      // dates (treat a missing window as active, not "completed",
+                      // which a null < today comparison would wrongly produce).
                       $today = date('Y-m-d');
-                      $status = ($step->end_date < $today) ? 'completed' : (($step->start_date > $today) ? 'upcoming' : 'in progress');
+                      $status = (!empty($step->end_date) && $step->end_date < $today)
+                        ? 'completed'
+                        : ((!empty($step->start_date) && $step->start_date > $today) ? 'upcoming' : 'in_progress');
                       $statusColor = ($status == 'completed') ? 'success' : (($status == 'upcoming') ? 'warning' : 'primary');
                     @endphp
                     <span class="badge bg-label-{{ $statusColor }} text-capitalize">
@@ -149,9 +148,9 @@
                         <a class="dropdown-item" href="/dashboard/show-builder{{ $step->organization->id ? '?' . 'org_id=' . $step->organization->id : '' }}">
                           <i class="ti ti-plus me-1"></i> {{ __('builder.Add_New_Form') }}
                         </a>
-                        <button class="dropdown-item edit-step-btn" data-step='@json($step)'>
+                        {{--  <button class="dropdown-item edit-step-btn" data-step='@json($step)'>
                           <i class="ti ti-pencil me-1"></i> {{ __('admin.edit_step') }}
-                        </button>
+                        </button>  --}}
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item text-danger" onclick="handleDeleteStep({{ $step->id }})">
                           <i class="ti ti-trash me-1"></i> {{ __('admin.delete') }}
@@ -174,7 +173,7 @@
                       class="badge bg-label-primary rounded-pill text-decoration-none px-2 py-1">
                       <i class="ti ti-rocket ti-xs me-1"></i>{{ Str::limit($step->program->title, 30) }}
                     </a>
-                    <a href="{{ route('organizations.edit', $step->organization->id) }}"
+                    <a href="{{ $_user->ableTo('organization.wizard.edit', $permissions) ? route('organization.wizard.edit', $step->organization->id) . '?step=1' : 'javascript:void(0);' }}"
                       class="badge bg-label-secondary rounded-pill text-decoration-none px-2 py-1">
                       <i class="ti ti-building ti-xs me-1"></i>{{ Str::limit($step->organization->name, 20) }}
                     </a>
@@ -235,13 +234,18 @@
                     </a>
                   </div>
                 </div>
+                
+
               </div>
             </div>
-          @empty
+            @endforeach
+          {{ $paginatedSteps->links('pagination::bootstrap-5') }}
+          @if(count($paginatedSteps) == 0)
             @include('includes.no-result')
-          @endforelse
+          @endif
         </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -260,21 +264,25 @@
         <div class="modal-body">
 
           <input type="hidden" name="sid" id="step-id-value">
-          <input type="hidden" name="type" value="8">
+          <input type="hidden" name="type" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
           <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Title') }}</label>
             <input name="title" id="step-title" type="text" placeholder="{{ __('cycles.Title') }}"
               class="form-control" required>
           </div>
+          {{--  <div class="form-group mb-3">
+            <label class="form-label" for="ScreeningSelect">{{ __('cycles.Choose screening type') }}:</label>
+            <select class="form-control select2" id="ScreeningSelect" name="mScreeningSelect" required>
+              <option value="onetoall">{{ __('cycles.Assign One to all users') }}</option>
+              <option value="grouptoall">{{ __('cycles.Assign Group to all users') }}</option>
+              <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
+            </select>
+          </div>  --}}
+          <input type="hidden" id="mfromDate" name="fromDate">
+          <input type="hidden" id="mtoDate" name="toDate">
           <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.start_date') }}</label>
-            <input id="step-from-date" name="fromDate" type="text" class="form-control date"
-              required>
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label">{{ __('admin.end_date') }}</label>
-            <input id="step-to-date" name="toDate" type="text" class="form-control date"
-              required>
+            <label class="form-label">{{ __('admin.Date Range') }}</label>
+            <input id="step-range-picker" name="date_range" type="text" class="form-control" required>
           </div>
           <div class="form-group mb-3">
             <label class="form-label">{{ __('cycles.Description') }}</label>
@@ -306,20 +314,16 @@
       $this.wrap('<div class="position-relative"></div>').select2({
         placeholder: $this.data('placeholder'),
         dropdownParent: $this.parent(),
-        allowClear: true
+        // allowClear: true,
       });
     });
 
-    // Initialize date pickers
-    $('.date').flatpickr({
-      enableTime: false,
-      dateFormat: 'Y-m-d'
-    });
   });
 
-  // No-op for button enabling as it is no longer disabled by default
-  // and we want filters to be easily reapplied/cleared.
-
+  // // Toggle submit button disable state on form change
+  // $('#filter-form select, #filter-form input').on('change input', function () {
+  //   $('#filter-form button[type="submit"]').prop('disabled', $(this).val() ? false : true);
+  // });
 
   $('.edit-step-btn').on('click', function () {
     const stepData = $(this).data('step');
@@ -329,11 +333,41 @@
       $('#step-form-modal').modal('show');
       $('#step-id-value').val(stepData.id);
       $('#step-title').val(stepData.title);
-      $('#step-from-date').val(stepData.start_date);
-      $('#step-to-date').val(stepData.end_date);
       $('#step-description').val(stepData.description);
+
+      // Preselect the current screening type; default to grouptogroup for null or legacy values.
+      let stype = stepData.screening_type_value;
+      if (stype !== 'onetoall' && stype !== 'grouptoall' && stype !== 'grouptogroup') {
+        stype = 'grouptogroup';
+      }
+      $('#ScreeningSelect').val(stype).trigger('change.select2');
+
+      // Seed hidden date inputs (start_date maps to from, end_date maps to to), with a today fallback.
+      $('#mfromDate').val(stepData.start_date || moment().format('YYYY-MM-DD'));
+      $('#mtoDate').val(stepData.end_date || moment().format('YYYY-MM-DD'));
+
+      // Combined range picker; no locale so date_range posts MM/DD/YYYY matching the controller m/d/Y parse.
+      // Positioned via JS (viewport-fixed) instead of drops:'up', which clipped
+      // the picker inside the modal and hid the month/year selectors (GV-3736).
+      const $stepRangeInput = $('#step-range-picker');
+      $stepRangeInput.daterangepicker({
+        opens: $('html').attr('dir') === 'rtl' ? 'left' : 'right',
+        startDate: stepData.start_date ? moment(stepData.start_date) : moment(),
+        endDate: stepData.end_date ? moment(stepData.end_date) : moment(),
+      }).on('apply.daterangepicker', function (ev, picker) {
+        $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
+        $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
+      });
+
+      positionStepRangePicker($stepRangeInput);
     }
   });
+
+  // Viewport-fixed positioning now lives in /js/daterangepicker-viewport.js
+  // (loaded globally by the admin layout) so every modal picker behaves the same.
+  function positionStepRangePicker($input) {
+    window.attachViewportDateRangePicker($input);
+  }
 
   function handleDeleteStep(stepId) {
     $.ajaxSetup({
@@ -360,7 +394,7 @@
           url: "/dashboard/cycles/modify",
           data: {
             "stepid": stepId,
-            "type": 6,
+            "type": "{{ \App\Enums\CycleModifyAction::DELETE_STEP }}",
           },
           success: function(response) {
             $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();
@@ -379,5 +413,6 @@
       }
     });
   }
+
 </script>
 @stop

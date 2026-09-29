@@ -30,7 +30,7 @@
           enctype="multipart/form-data"
         >
           @csrf
-          <input type="hidden" value="9" name="CompanyN" />
+          <input type="hidden" value="{{ \App\Enums\CompanyFormStep::PitchDeckFile->value }}" name="CompanyN" />
           <div class="card">
             <div class="card-body">
               <h5 class="card-title">{{ __('admin.Pitch_Deck') }}</h5>
@@ -40,7 +40,7 @@
                 @if($client->company)
                 @if ($client->company->pitch_deck != null)
                 <iframe
-                  src="{{ asset($client->company->pitch_deck) }}"
+                  src="/pitch_decks/{{ $client->company->pitch_deck }}"
                   class="mb-2 border rouned"
                   target="_blank"
                   width="100%"
@@ -110,7 +110,7 @@
           id="pitch-deck-video-form"
         >
           @csrf
-          <input type="hidden" value="10" name="CompanyN" />
+          <input type="hidden" value="{{ \App\Enums\CompanyFormStep::PitchDeckVideo->value }}" name="CompanyN" />
           <div class="card">
             <div class="card-header">
               <h5 class="card-title">{{ __('admin.Pitch_Deck_Video') }}</h5>
@@ -232,7 +232,7 @@
           <form method="post" action="{{ $formAction }}" enctype="multipart/form-data">
             @csrf
             <fieldset>
-              <input type="hidden" value="11" name="CompanyN" />
+              <input type="hidden" value="{{ \App\Enums\CompanyFormStep::SupplementaryDocuments->value }}" name="CompanyN" />
               <div class="form-group mt-3">
                 <input
                   id="document"

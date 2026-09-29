@@ -52,24 +52,25 @@ Route::get('company', [RegistrationController::class, 'getCompany']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/expertise',[ExpertiseController::class, 'index']);
-Route::post('/expertise',[ExpertiseController::class, 'store']);
-Route::put('/expertise/{id}',[ExpertiseController::class, 'update']);
-Route::post('/expertise/import',[ExpertiseController::class, 'import']);
-Route::delete('/expertise/{id}',[ExpertiseController::class, 'destroy']);
 Route::get('/specializations',[ExpertiseController::class, 'children']);
-Route::post('/specializations',[ExpertiseController::class, 'store']);
-Route::put('/specializations/{id}',[ExpertiseController::class, 'update']);
-Route::delete('/specializations/{id}',[ExpertiseController::class, 'destroy']);
-Route::post('/specializations/import',[ExpertiseController::class, 'importSpecialization']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('sanctum.custom')->group(function () {
+    // Expertise management (protected)
+    Route::post('/expertise',[ExpertiseController::class, 'store']);
+    Route::put('/expertise/{id}',[ExpertiseController::class, 'update']);
+    Route::post('/expertise/import',[ExpertiseController::class, 'import']);
+    Route::delete('/expertise/{id}',[ExpertiseController::class, 'destroy']);
+    Route::post('/specializations',[ExpertiseController::class, 'store']);
+    Route::put('/specializations/{id}',[ExpertiseController::class, 'update']);
+    Route::delete('/specializations/{id}',[ExpertiseController::class, 'destroy']);
+    Route::post('/specializations/import',[ExpertiseController::class, 'importSpecialization']);
     Route::get('/countries', [CountryController::class, 'index']);
     Route::get('/dashboard',[DashboardController::class, 'index']);
     Route::get('/me', [ProfileController::class, 'me']);
     Route::patch('/users/{user}/deactivate', [UserController::class, 'deactivate']);
     Route::apiResource('users', UserController::class);
-    Route::get('users/companies', 'UserController@companies');
+    Route::get('users/companies', [UserController::class, 'companies']);
     Route::put('users/{user}/password', [UserController::class,'updatePassword']);
     Route::apiResource('roles',RoleController::class);
     Route::get('/countries/{id}/states', [CountryController::class, 'getStates']);
@@ -234,4 +235,26 @@ Route::prefix('mentorship')->group(function () {
     Route::post('session-reports', [MentorshipReportController::class, 'sessionReportsData']);
 });
 
+});
+
+Route::middleware(['auth:sanctum'])->prefix('v1/importer')->name('api.v1.importer.')->group(function () {
+    Route::get('/template',                               [\App\Http\Controllers\Importer\ImporterController::class, 'downloadTemplate']);
+    Route::get('/schema',                                 [\App\Http\Controllers\Importer\ImporterController::class, 'schema']);
+    Route::get('/organizations',                          [\App\Http\Controllers\Importer\ImporterController::class, 'organizations']);
+
+    Route::middleware('throttle:importer-general')->group(function () {
+        Route::post('/sessions',                          [\App\Http\Controllers\Importer\ImporterController::class, 'createSession']);
+        Route::get('/sessions/{uuid}',                    [\App\Http\Controllers\Importer\ImporterController::class, 'showSession']);
+        Route::delete('/sessions/{uuid}',                 [\App\Http\Controllers\Importer\ImporterController::class, 'discardSession']);
+        Route::delete('/sessions/{uuid}/file',            [\App\Http\Controllers\Importer\ImporterController::class, 'deleteFile']);
+        Route::post('/sessions/{uuid}/automap',           [\App\Http\Controllers\Importer\ImporterController::class, 'autoMap']);
+        Route::post('/sessions/{uuid}/validate',          [\App\Http\Controllers\Importer\ImporterController::class, 'validateRows']);
+        Route::post('/sessions/{uuid}/conflicts',         [\App\Http\Controllers\Importer\ImporterController::class, 'detectConflicts']);
+        Route::get('/sessions/{uuid}/preview',            [\App\Http\Controllers\Importer\ImporterController::class, 'preview']);
+        Route::post('/sessions/{uuid}/execute',           [\App\Http\Controllers\Importer\ImporterController::class, 'execute']);
+    });
+
+    Route::middleware('throttle:importer-upload')->group(function () {
+        Route::post('/sessions/{uuid}/file',              [\App\Http\Controllers\Importer\ImporterController::class, 'uploadFile']);
+    });
 });

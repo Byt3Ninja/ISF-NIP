@@ -11,7 +11,7 @@
       novalidate
     >
       {!! csrf_field() !!}
-      <input name="CompanyN" type="hidden" value="14">
+      <input name="CompanyN" type="hidden" value="{{ \App\Enums\CompanyFormStep::Classification->value }}">
       <fieldset class="row">
         <div class="col-12">
           <div class="form-group mb-6">
@@ -469,19 +469,7 @@ $(function() {
         'X-Requested-With': 'XMLHttpRequest'
       },
       success: function(response) {
-        if (typeof releaseSuccessAlert === 'function') {
-          releaseSuccessAlert({
-            title: '{{ $l == "en" ? "Success" : "تم بنجاح" }}',
-            message: '{{ $l == "en" ? "Company classification updated successfully" : "تم تحديث تصنيف الشركة بنجاح" }}'
-          });
-        } else if (typeof showToast === 'function') {
-          showToast({
-            type: 'success',
-            message: '{{ $l == "en" ? "Company classification updated successfully" : "تم تحديث تصنيف الشركة بنجاح" }}'
-          });
-        } else {
-          alert('{{ $l == "en" ? "Company classification updated successfully" : "تم تحديث تصنيف الشركة بنجاح" }}');
-        }
+        toastr.success("{{ __('admin.startup_profile_updated') }}")
         saveInitialState(); // Update initial state after successful save
         checkForChanges();
       },

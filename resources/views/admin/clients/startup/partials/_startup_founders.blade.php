@@ -3,9 +3,9 @@ $foundersList = (is_iterable($founders) && !is_string($founders)) ? collect($fou
 @endphp
 
 <div class="col-md-4">
-  <div class="card shadow-sm" style="height: 300px; overflow-y: hidden;">
+  <div class="card shadow-sm" style="height: 320px; overflow-y: hidden;">
     <div class="py-4 px-8">
-      <h5 class="card-title mb-3">{{ __('admin.Founders') }} ( {{count($founders)}} )</h5>
+      <h5 class="card-title mb-2">{{ __('admin.Founders') }} ( {{ $foundersList->count() }} )</h5>
       @if ($foundersList->count() > 0)
       <div class="row" style="position: relative; height: 90%;">
         @if ($foundersList->count() > 2)
@@ -32,7 +32,8 @@ $foundersList = (is_iterable($founders) && !is_string($founders)) ? collect($fou
               default     => '',
           };
         @endphp
-        <div class="card item-card shadow-none border mb-0">
+        <div class="founder-col-2 col-12 mb-2">
+          <div class="card item-card shadow-none border mb-0">
             <div class="card-body py-2 px-3">
               <div class="d-flex align-items-center justify-content-between">
                 <div>
@@ -80,6 +81,7 @@ $foundersList = (is_iterable($founders) && !is_string($founders)) ? collect($fou
               </div>
             </div>
           </div>
+        </div>
         @endforeach
       </div>
       @else
@@ -94,6 +96,7 @@ $foundersList = (is_iterable($founders) && !is_string($founders)) ? collect($fou
   </div>
 </div>
 
+@push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const founderCols2 = document.querySelectorAll('.founder-col-2');
@@ -152,3 +155,4 @@ $foundersList = (is_iterable($founders) && !is_string($founders)) ? collect($fou
     updateVisibility2();
   });
 </script>
+@endpush

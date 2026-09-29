@@ -6,8 +6,8 @@
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-overlay"></div>
       <div class="content-body">
         <!-- Zero configuration table -->
@@ -92,38 +92,40 @@
                                   {{ $session->session_type ?? __('admin.All') }}
                                 </small>
                               </td>
-                              @php
-                                $now = date('Y-m-d H:i');
-                                $start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-                                $end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+'. $session->period .' minutes'));
-                              @endphp
                               <td>
-                                @if ($session->approved === 'Yes')
-                                  @if ($now < $start_time)
-                                    <span class="text-warning">
-                                        <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
-                                    </span>
-                                  @elseif ($now > $end_time)
-                                    <small class="text-danger">{{ __('admin.Meeting_Expired') }}</small>
-                                  @else
-                                    @if (isset($session->session_type) && $session->session_type == 'Offline')
-                                      <td>
-                                        {{ isset($session->session_location) && $session->session_type == 'Offline' ? $session->session_location : 'N/A' }}
-                                      </td>
+                                @if (isset($session->session_type) && $session->session_type == 'Online')
+                                  @if ($session->approved === 'Yes')
+                                    @if ($session->meeting_status === 'before')
+                                      <span class="text-warning">
+                                          <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+                                      </span>
+                                    @elseif ($session->meeting_status === 'expired')
+                                      <small class="text-danger">{{ __('admin.Meeting_Expired') }}</small>
+                                    @else
+                                      <a href="{{ $session?->join_url }}" target="_blank">
+                                        <button type="button" class="btn btn-sm btn-primary">
+                                          <i class="ti ti-brand-zoom"></i> {{ __('startup.mentorship_requests.join_now') }}
+                                        </button>
+                                      </a>
                                     @endif
-                                    <a href="{{ $session?->join_url }}" target="_blank">
-                                      <button type="button" class="btn btn-sm btn-primary">
-                                        <i class="ti ti-brand-zoom"></i> {{ __('startup.mentorship_requests.join_now') }}
-                                      </button>
-                                    </a>
-                                  @endif
 
-                                @elseif ($session->approved === 'No')
-                                  <small class="text-muted">{{ __('startup.mentorship_requests.no_link') }}</small>
+                                  @elseif ($session->approved === 'No')
+                                    <small class="text-muted">{{ __('startup.mentorship_requests.no_link') }}</small>
+                                  @else
+                                    <small class="text-info">
+                                      {{ __('admin.Waiting_for_approval') }}
+                                    </small>
+                                  @endif
                                 @else
-                                  <small class="text-info">
-                                    {{ __('admin.Waiting_for_approval') }}
-                                  </small>
+                                  <span class="warning">
+                                    <a class="btn btn-sm btn-label-success" href="{{ $session->google_map_url ?? '#' }}" target="_blank">
+                                      <i class="ti ti-map me-2"></i>
+                                      {{ __('admin.Location') }}
+                                    </a>
+                                    <div class="mt-1">
+                                      <small> <i class="fas fa-map-marker-alt"></i> {{ $session->address }} </small>
+                                    </div>
+                                  </span>
                                 @endif
                               </td>
 

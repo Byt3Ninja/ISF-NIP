@@ -68,6 +68,16 @@ class OrganizationLandingPage extends Model
         'partners_bg_color',
         'partners_bg_gradient_start',
         'partners_bg_gradient_end',
+        // Programs
+        'programs_enabled',
+        'programs_title',
+        'programs_subtitle',
+        'programs_description',
+        'programs_order_by',
+        'programs_bg_type',
+        'programs_bg_color',
+        'programs_bg_gradient_start',
+        'programs_bg_gradient_end',
     ];
 
     /**
@@ -81,6 +91,7 @@ class OrganizationLandingPage extends Model
         'achievements_enabled' => 'boolean',
         'media_enabled' => 'boolean',
         'partners_enabled' => 'boolean',
+        'programs_enabled' => 'boolean',
         'process_steps' => 'array',
         'metrics' => 'array',
         'articles' => 'array',

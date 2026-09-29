@@ -2,7 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Organization;
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -36,7 +39,7 @@ class MentorshipSession extends Notification implements ShouldQueue
      *
      * @var array
      */
-    public $Message;
+    public $data;
 
     /**
      * Action text.
@@ -55,9 +58,9 @@ class MentorshipSession extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-   public function __construct(array $Message = [])
+   public function __construct(array $data = [])
     {
-        $this->Message = $Message;
+        $this->data = $data;
     }
 
     /**
@@ -112,22 +115,116 @@ class MentorshipSession extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail($notifiable)
+     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
-        $smtpSettings = $org?->organizationSettings;
+        if (($this->data['action'] ?? '') === 'modifySession' && ($this->data['user'] ?? '') === 'user') {
+            return $this->toFounderUpdatedMail($notifiable);
+        }
+
+        // $org = $notifiable->organization;
+        // $smtpSettings = $org?->organizationSettings;
         
-        // Get from address and name
-        $from = $this->getFromAddress($smtpSettings);
-        $url = is_null($this->ActionUrl) ? url($this->Message[3]) : $this->ActionUrl;
+        // // Get from address and name
+        // $from = $this->getFromAddress($smtpSettings);
+        // $url = is_null($this->ActionUrl) ? $this->ActionUrl : '';
+        // return (new MailMessage)
+        //     ->subject($this->data['subject'])
+        //     ->view('emails.mentorship_request_status', ['data' => $this->data]);
+
+           
+
+            $mail = (new MailMessage)
+                ->subject($this->data['subject'])
+                ->view('emails.mentorship_request_status', [
+                    'data' => $this->data
+                ]);
+
+
+foreach ($this->data['attachments'] ?? [] as $attachment) {
+        $filePath = $attachment['path'] ?? null;
+        if (empty($filePath)) continue;
+        $fullPath = storage_path('app/users/' . $filePath);
+        if (file_exists($fullPath)) {
+            $mail->attach($fullPath, [
+                'as' => $attachment['name'] ?? basename($filePath),
+            ]);
+        } else {
+            \Log::error('Attachment not found at: ' . $fullPath);
+        }
+    }
+
+    return $mail;
+
+    }
+
+    /**
+     * Founder "mentorship session updated" email: platform default language,
+     * organization branding, and session-type specific details.
+     */
+    protected function toFounderUpdatedMail($notifiable): MailMessage
+    {
+        $d = $this->data;
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $isRtl = $locale === 'ar';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $organization = ! empty($d['organizationId']) ? Organization::find($d['organizationId']) : null;
+        $orgData = $this->buildEmailOrganizationData($organization);
+        if ($organization && empty($organization->img_url)) {
+            $orgData['org_logo_url'] = null;
+        }
+        $orgName = $organization
+            ? (trim((string) $organization->getAttribute('name_' . $locale)) ?: $organization->getAttribute('name_en'))
+            : $platformName;
+
+        $firstName = $isRtl ? trim((string) $notifiable->first_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+        }
+
+        $startupName = $isRtl
+            ? (trim((string) ($d['startupNameAr'] ?? '')) ?: trim((string) ($d['startupNameEn'] ?? '')))
+            : trim((string) ($d['startupNameEn'] ?? ''));
+
+        $start = Carbon::parse($d['startAt']);
+        $end = $start->copy()->addMinutes((int) ($d['periodMinutes'] ?: 60));
+        $sessionTime = $start->format('h:i A') . ' – ' . $end->format('h:i A');
+        if ($isRtl) {
+            $sessionTime = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $sessionTime);
+        }
+
+        $isOnline = strtolower(trim((string) ($d['sessionType'] ?? 'online'))) !== 'offline';
+        $dash = fn ($v) => trim((string) $v) !== '' ? trim((string) $v) : '-';
+
+        $subject = $startupName !== ''
+            ? __('email.founder_session_updated_email.subject', ['startup_name' => $startupName], $locale)
+            : __('email.founder_session_updated_email.subject_plain', [], $locale);
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
         return (new MailMessage)
-            ->subject($this->Message[0])
-            ->greeting($this->Message[1]) 
-            ->level('info')
-            ->line($this->Message[2])
-            ->action($this->ActionText, $url)
-            ->line('Thank you for using our system!')
-            ->salutation('Kind regards,');
+            ->subject($subject)
+            ->view('emails.mentorship_session_updated_founder', array_merge([
+                'updLocale' => $locale,
+                'updFounderName' => $firstName,
+                'updGender' => strtolower(trim((string) $notifiable->gender)),
+                'updOrgName' => $orgName,
+                'updMentorName' => $dash($d['mentorName'] ?? ''),
+                'updDate' => $dash($start->format('Y-m-d')),
+                'updTime' => $sessionTime,
+                'updDuration' => empty($d['periodMinutes']) ? '-' : __('email.founder_session_updated_email.duration_value', ['count' => $d['periodMinutes']], $locale),
+                'updIsOnline' => $isOnline,
+                'updMeetingLink' => $dash($d['joinUrl'] ?? ''),
+                'updHasMeetingLink' => trim((string) ($d['joinUrl'] ?? '')) !== '',
+                'updPasscode' => trim((string) ($d['passcode'] ?? '')),
+                'updLocation' => $dash($d['offlineLocation'] ?? ''),
+                'updMapLink' => trim((string) ($d['offlineMapLink'] ?? '')),
+                'updAddress' => $dash($d['offlineAddress'] ?? ''),
+                'updNotes' => trim((string) ($d['founderNotes'] ?? '')),
+                'updAttachments' => $d['attachmentLinks'] ?? [],
+                'updViewUrl' => route('mentorships.list_mine'),
+            ], $orgData));
     }
 
     /**
@@ -137,8 +234,30 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
     public function toDatabase(object $notifiable): array
     {
+        $userType   = $this->data['user']; // mentor | registered
+        $action     = $this->data['action'] ?? null;
+        $status     = $this->data['status'] ?? null;
+        $date       = $this->data['sessionDate'] ?? 'N/A';
+        
+        $name = $userType == 'mentor'
+            ? $this->data['startupName']
+            : $this->data['mentorName'];
+
+            
+                    $message = "New mentorship session created with {$name} | Date: {$date}";
+                if ($status === 'Yes') {
+                    $message = "Your mentorship session is approved with {$name} | Date: {$date}";
+                } elseif ($status === 'No') {
+                    $message = "Your mentorship session is rejected with {$name} | Date: {$date}";
+                }
+                if ($action === 'modifySession') {
+                    $message = "Mentorship session Rescheduled with {$name} | Date: {$date}";
+                }
+           
+
         return [
-            'message' =>$this->Message[4],
+            'message' => $message,
+            'details' => $this->data,
         ];
     }
 
@@ -149,8 +268,8 @@ class MentorshipSession extends Notification implements ShouldQueue
     {
         // Expecting $this->Message indices: [0]=subject/title, [1]=greeting, [2]=line, [3]=url, [4]=database message
         return __('notifications.mentorship_session.whatsapp', [
-            'greeting' => $this->Message[1] ?? '',
-            'line' => $this->Message[2] ?? '',
+            'greeting' => $this->data['title'] ?? '',
+            'line' => $this->data['sessionDate'] . ' / company name: ' . $this->data['startupName'] ?? '',
         ]);
     }
 
@@ -159,11 +278,20 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
+        //return new BroadcastMessage([
+         //   'subject' => $this->data['title'] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
+         //   'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->data['title'] . ' - ' . $this->data['startupName'] ?? '']),
+         //   'time' => now()->toDateTimeString(),
+      //  ]);
         return new BroadcastMessage([
-            'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
-            'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? '']),
+            'subject' => $this->data['title'] ?? 'New Mentorship Session',
+            'message' =>
+                'Startup: ' . ($this->data['startupName'] ?? 'N/A') .
+                ' | Date: ' . ($this->data['sessionDate'] ?? 'N/A'),
             'time' => now()->toDateTimeString(),
         ]);
+
+
     }
 
     /**
@@ -174,10 +302,10 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
-        Log::error('MentorshipSession notification failed after all retries', [
+        Log::error('MentorshipSessionMentor notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
-            'message' => $this->Message,
+            'message' => $this->data,
         ]);
     }
 }

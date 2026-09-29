@@ -1,7 +1,7 @@
 <form method="POST" action="{{ route('settings.organization.notifications_update') }}" class="row g-3">
   @csrf
   @method('PUT')
-  @php($os = $organization->organizationSettings)
+  @php($os = $organization?->organizationSettings)
   <div class="col-12">
     <div class="form-check form-switch">
       <input class="form-check-input" type="checkbox" id="accept_email" name="accept_email" value="1" {{ old('accept_email', $os->accept_email ?? true) ? 'checked' : '' }}>

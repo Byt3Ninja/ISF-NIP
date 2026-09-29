@@ -58,6 +58,8 @@
     @endif
   @endif
 
+  // Single source of truth, shared with the backend validator.
+  const NAME_MAX_LENGTH = {{ \App\ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH }};
   let evaluationModelData = @json( $evaluationForm );
   let fv = null;
 
@@ -101,6 +103,10 @@
           notEmpty: {
             message: '{{ __('cycles.Category name is required') }}'
           },
+          stringLength: {
+            max: NAME_MAX_LENGTH,
+            message: '{{ __('cycles.evaluation_criterion_name_too_long', ['max' => \App\ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]) }}'
+          },
           regexp: {
             regexp: /^[A-Za-z\s\u0600-\u06FF]+$/,
             message: '{{ __('cycles.Only letters and spaces allowed') }}'
@@ -131,6 +137,10 @@
           validators: {
             notEmpty: {
               message: '{{ __('cycles.Sub-criterion name is required') }}'
+            },
+            stringLength: {
+              max: NAME_MAX_LENGTH,
+              message: '{{ __('cycles.evaluation_subcriterion_name_too_long', ['max' => \App\ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]) }}'
             },
             regexp: {
               regexp: /^[A-Za-z\s\u0600-\u06FF]+$/,
@@ -192,6 +202,7 @@
               <input type="text" 
                 class="form-control subcriterion-name" 
                 name="subcriterion_name_${categoryIndex}_${subIndex}"
+                maxlength="${NAME_MAX_LENGTH}"
                 placeholder="{{ __('cycles.Sub Criteria Name') }}" 
                 value="${sub.name || ''}" 
                 data-category-index="${categoryIndex}" 
@@ -202,8 +213,8 @@
                 <input type="number" 
                   class="form-control text-center subcriterion-weight" 
                   name="subcriterion_weight_${categoryIndex}_${subIndex}"
-                  placeholder="{{ __('cycles.Weight (%)') }}" 
-                  value="${sub.weight * 100}" 
+                  placeholder="{{ __('cycles.Weight (%)') }}"
+                  value="${Math.round(sub.weight * 1000) / 10}"
                   min="0" 
                   max="100" 
                   step="0.1" 
@@ -231,6 +242,7 @@
               <input type="text" 
                 class="form-control category-name" 
                 name="category_name_${categoryIndex}"
+                maxlength="${NAME_MAX_LENGTH}"
                 placeholder="{{ __('cycles.Category Name') }}" 
                 value="${category.name || ''}" 
                 data-category-index="${categoryIndex}">
@@ -240,8 +252,8 @@
                 <input type="number" 
                   class="form-control text-center category-weight" 
                   name="category_weight_${categoryIndex}"
-                  placeholder="{{ __('cycles.Weight (%)') }}" 
-                  value="${category.weight * 100}" 
+                  placeholder="{{ __('cycles.Weight (%)') }}"
+                  value="${Math.round(category.weight * 1000) / 10}"
                   min="0" 
                   max="100" 
                   step="0.1" 
@@ -469,6 +481,22 @@
     return { isValid: !hasWeightErrors, errors: errorMessages };
   }
 
+  // Returns a message naming the first criterion / sub-criterion whose name
+  // exceeds the cap, or null when every name is within it.
+  function findNameOverLimit() {
+    for (const category of evaluationModelData.categories) {
+      if ((category.name || '').trim().length > NAME_MAX_LENGTH) {
+        return '{{ __('cycles.evaluation_criterion_name_too_long', ['max' => \App\ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]) }}';
+      }
+      for (const sub of (category.subCriteria || [])) {
+        if ((sub.name || '').trim().length > NAME_MAX_LENGTH) {
+          return '{{ __('cycles.evaluation_subcriterion_name_too_long', ['max' => \App\ScreeningEvaluation::CRITERION_NAME_MAX_LENGTH]) }}';
+        }
+      }
+    }
+    return null;
+  }
+
   @if( $status == 'draft' )
     @if( $_user->ableTo('screening.evaluation_publish') )
     function handleSaveModel() {
@@ -555,6 +583,17 @@
 
     @if( $_user->ableTo('screening.evaluation_save_draft') )
     function handleDraftModel() {
+      // A draft skips fv.validate() on purpose (partial models are allowed to be
+      // saved), but the name cap is a hard limit, so it is enforced here too.
+      const tooLong = findNameOverLimit();
+      if (tooLong) {
+        releaseFailureAlert({
+          title: '{{ __('admin.error') }}',
+          message: tooLong
+        });
+        return;
+      }
+
       $.ajax({
         type: "POST",
         url: "{{ route('screening.evaluation_save_draft') }}",

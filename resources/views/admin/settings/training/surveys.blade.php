@@ -8,8 +8,8 @@
 @section('title', __('admin.trainingSurveys') )
 @section('subTitle', __('admin.surveysList'))
 @section('content')
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
+	<div class="">
+		<div class="">
 			<div class="content-overlay"></div>
 			<div class="content-header">
 				<h4 class="content-title">{{__('admin.trainingSurveys')}}</h4>

@@ -13,7 +13,7 @@
               <div class="border-bottom pb-2 mb-4">
                 <h5 style="text-transform: capitalize">
                   <i class="ti ti-clipboard-list ti-28px"></i>
-                  <span class="mx-2"> {{ __('dashboard.My Latest training') }} ::
+                  <span class="mx-2"> {{ __('dashboard.My Latest training') }}
                     <a href="/dashboard/training/my">{{ __('dashboard.Show all') }}</a>
                   </span>
                 </h5>
@@ -174,7 +174,7 @@
                           @if(now() > $endTime)
                             <span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
                           @else
-                          <a class="btn btn-sm btn-label-primary" href="{{ $session->join_url }}" target="_blank">
+                          <a class="btn btn-sm btn-label-primary" href="{{ route('mentorship.join', $session->id) }}" target="_blank">
                             <i class="ti ti-brand-zoom me-2"></i>
                             {{ __('dashboard.Join now') }}
                           </a>

@@ -149,6 +149,7 @@ class CompanyProfileResource extends JsonResource
             'financialPlanAttachment' => $this->financial_plan ? Storage::disk('pitch_deck')->url( ltrim(preg_replace('/^financial_plan\//', '', $this->financial_plan), '/')) : null,
             'achievedMilestones' => $this->milestones
                 ->where('plan', 'Achieved_Milestones')
+                ->where('private', false)
                  ->map(fn($m) => [
                     'id' => $m->id,
                     'name' => $m->name,
@@ -156,6 +157,7 @@ class CompanyProfileResource extends JsonResource
                 ])->values(),
             'plannedMilestones' => $this->milestones
                 ->where('plan', 'Planned_Milestones')
+                ->where('private', false)
                 ->map(fn($m) => [
                     'id' => $m->id,
                     'name' => $m->name,
@@ -163,6 +165,7 @@ class CompanyProfileResource extends JsonResource
                 ])->values(),
             'archivedMilestones' => $this->milestones
                 ->where('plan', 'Archived_Milestones')
+                ->where('private', false)
                 ->map(fn($m) => [
                     'id' => $m->id,
                     'name' => $m->name,

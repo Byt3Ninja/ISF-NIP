@@ -285,7 +285,7 @@ return [
 	'arspec' => 'Specialization in Arabic',
 	'enspec' => 'Specialization in English',
 	'Request Date/ Time' => 'Request Date/ Time',
-	'Add your note' => 'Add your note',
+	'Add your notes' => 'Add your note',
 	'Add comment' => 'Add comment',
 	'Make a request' => 'Make a service request',
 	'Close' => 'Close',
@@ -658,7 +658,7 @@ return [
 	'HomePageSetting'=>' Home Page Settings ',
 	'empty'=>' Empty ',
 	'Experties_Search'=>' Experties Search ',
-	'Sustainable_development'=>' Sustainable_development ',
+	'Sustainable_development'=>' Sustainable Development ',
 	'no_poverty' => 'No Poverty',
     'zero_hunger' => 'Zero Hunger',
     'good_health' => 'Good Health and Well-being',
@@ -858,5 +858,9 @@ return [
 	'Tax_Card'=>'Tax Card No. ',
 	'Have_Rgister_Company'=>'Have Rgister Company',
 	'Country_Register'=>'Where you registered ?',
-	
+	'criteria_not_configured_title' => 'Bewertungskriterien nicht konfiguriert',
+	'criteria_not_configured_message' => 'Die Bewertungskriterien für diesen Screening-Schritt wurden noch nicht konfiguriert. Die Bewertung kann erst durchgeführt werden, wenn die Kriterien verfügbar sind.',
+
+	'You are not authorized to view this team.' => 'Sie sind nicht berechtigt, dieses Team anzuzeigen.',
+	'You are not authorized to edit the project idea.' => 'Sie sind nicht berechtigt, die Projektidee zu bearbeiten.',
 ];

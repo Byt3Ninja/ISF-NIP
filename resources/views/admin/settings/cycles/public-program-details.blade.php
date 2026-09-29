@@ -1,71 +1,156 @@
 <!DOCTYPE html>
 <html lang="{{ $l }}" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}" data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-	class="light-style layout-navbar-fixed layout-compact" data-theme="theme-default" data-assets-path="/vuexy/assets/"
+	class="light-style" data-theme="theme-default" data-assets-path="/vuexy/assets/"
 	data-template="vertical-menu-template" data-style="light">
 
 <head>
 	@include('admin.includes.head')
 
-	<!-- Additional Styles -->
-	<link rel="stylesheet" href="/vuexy/assets/vendor/libs/swiper/swiper.css" />
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
 	<style>
+		:root {
+			--primary: {{ $program->main_color }};
+			--on-primary: #ffffff;
+			--background: #f8fafc;
+			--surface: #ffffff;
+			--surface-variant: #f1f5f9;
+			--on-surface: #0f172a;
+			--on-surface-variant: #64748b;
+			--secondary: #0891b2;
+			--tertiary: #d97706;
+			--outline: #e2e8f0;
+		}
+
+		/* Override default theme purple/primary colors with the customized main color */
+		.text-primary {
+			color: var(--primary) !important;
+		}
+		.bg-primary {
+			background-color: var(--primary) !important;
+		}
+		.bg-label-primary {
+			background-color: color-mix(in srgb, var(--primary) 14%, transparent) !important;
+			color: var(--primary) !important;
+		}
+		.btn-primary {
+			background-color: var(--primary) !important;
+			border-color: var(--primary) !important;
+		}
+		.spinner-grow.text-primary {
+			color: var(--primary) !important;
+		}
+
 		body {
+			background-color: var(--background);
+			color: var(--on-surface);
+			font-family: 'Inter', sans-serif;
+			overflow-x: hidden;
 			display: flex;
 			flex-direction: column;
 			min-height: 100vh;
 			margin: 0;
 		}
-		.page-container {
-			flex: 1;
+		.page-container { flex: 1; }
+
+		.glass-card {
+			background: rgba(255, 255, 255, 0.8);
+			backdrop-filter: blur(10px);
+			border: 1px solid var(--outline);
+			box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+			transition: transform 0.3s ease, border-color 0.3s ease;
 		}
-		.hackathon-banner {
-			background: linear-gradient(45deg, #7367f0, #9c88ff);
-			padding: 40px 20px;
-			border-radius: 15px;
-			color: #fff;
-			margin-bottom: 30px;
+		.glass-card:hover {
+			border-color: var(--primary);
+			transform: translateY(-5px);
 		}
 
-		.hackathon-banner .banner-content {
-			max-width: 800px;
-			margin: auto;
+		.hero-gradient {
+			background: radial-gradient(circle at 20% 30%, {{ $program->start_color }} 0%, transparent 50%),
+						radial-gradient(circle at 80% 70%, {{ $program->end_color }} 0%, transparent 50%);
 		}
 
-		#hackathon-main-title {
+		.btn-primary-custom {
+			background-color: var(--primary);
+			color: var(--on-primary);
+			border: none;
 			font-weight: 700;
-			font-size: 3.5rem;
-		}
-
-		#hackathon-dates-location {
-			font-size: 1.2rem;
-			opacity: 0.9;
-		}
-
-		#countdown-timer {
-			margin: 30px 0;
-		}
-
-		.timer-box {
-			background: rgba(255, 255, 255, 0.2);
-			padding: 20px;
+			padding: 12px 32px;
 			border-radius: 10px;
-			margin: 0 10px;
+			transition: all 0.3s ease;
+		}
+		.btn-primary-custom:hover {
+			background-color: var(--primary);
+			opacity: 0.9;
+			box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+			color: white;
 		}
 
-		.timer-box .timer-number {
-			font-size: 2.5rem;
+		.btn-outline-custom {
+			border: 2px solid var(--primary);
+			color: var(--primary);
 			font-weight: 700;
+			padding: 12px 32px;
+			border-radius: 10px;
+		}
+		.btn-outline-custom:hover {
+			background-color: var(--primary);
+			color: white;
 		}
 
-		.timer-box .timer-label {
-			font-size: 1rem;
-			opacity: 0.8;
+		.navbar-custom {
+			background: rgba(255, 255, 255, 0.8) !important;
+			backdrop-filter: blur(15px);
+			border-bottom: 1px solid var(--outline);
+		}
+		.navbar-custom .navbar-brand {
+			color: var(--on-surface) !important;
+			font-weight: 900;
+			letter-spacing: -1px;
+		}
+		.navbar-custom .nav-link {
+			color: var(--on-surface-variant) !important;
+			font-weight: 500;
+		}
+		.navbar-custom .nav-link.active {
+			color: var(--primary) !important;
 		}
 
-		#action-buttons-placeholder .btn {
-			font-size: 1.2rem;
+		.nav-tabs-custom { border: none; }
+		.nav-tabs-custom .nav-link {
+			border: none;
+			color: var(--on-surface-variant);
+			border-bottom: 3px solid transparent;
+			margin: 0 10px;
+			background: transparent;
+		}
+		.nav-tabs-custom .nav-link.active {
+			background: transparent !important;
+			color: var(--primary) !important;
+			border-bottom-color: var(--primary);
+		}
+
+		.countdown-box {
+			padding: 1.5rem;
+			border-radius: 1rem;
+		}
+		.countdown-number {
+			font-size: 2.5rem;
+			font-weight: 800;
+			color: var(--on-surface);
+		}
+
+		.footer-custom {
+			background-color: #f1f5f9;
+			border-top: 1px solid var(--outline);
+			padding: 80px 0 30px;
+		}
+
+		.navbar-custom .dropdown-menu {
+			background: rgba(255,255,255,0.95);
+			backdrop-filter: blur(15px);
+			border: 1px solid var(--outline);
 		}
 	</style>
 </head>
@@ -74,533 +159,429 @@
 $authUser = auth()->user();
 $isLoggedIn = $authUser ? true : false;
 
-// --- Logic to Parse End Date from the 'ranges' string ---
-$ranges = $program->ranges; // e.g., "July 1 – August 15, 2025"
-
-// Split the string by '–' or '-'
+$ranges = $program->ranges;
 $dateParts = preg_split('/[–-]/', $ranges);
-
-// Get the end date part (e.g., " August 15, 2025")
 $endDatePart = trim(end($dateParts));
-
-// Extract the year from the original string to handle cases where the year is only at the end.
 preg_match('/(\d{4})/', $ranges, $yearMatch);
-$year = $yearMatch[0] ?? date('Y'); // Use current year as fallback
-
-// Check if the end date part contains a month name (e.g., "August")
+$year = $yearMatch[0] ?? date('Y');
 if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
-	// If it has a month, it's a complete date string
 	$endDateForCountdown = $endDatePart;
 } else {
-	// If it only has a day (e.g., "15, 2025"), get the month from the start of the range
 	preg_match('/^[a-zA-Z]+/', trim($dateParts[0]), $monthMatch);
 	$month = $monthMatch[0] ?? '';
-	// Combine month, day, and year
 	$endDateForCountdown = trim($month . ' ' . $endDatePart);
 }
+$endDateForCountdown = $program->registration_end;
+$startDateForCountdown = $program->registration_start;
 @endphp
 
 <body>
-	<!-- Enhanced Navbar -->
-	<nav class="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm py-3">
+	<nav class="navbar navbar-expand-md navbar-custom fixed-top py-3">
 		<div class="container">
-			<a class="navbar-brand fw-bold fs-4 mb-0 d-flex align-items-center" href="/dashboard">
-				<i class="ti ti-planet ti-lg text-primary me-2"></i>
-				<span class="line-clamp-1">{{ $program->org }}</span>
+			<a class="navbar-brand fs-3 d-flex align-items-center gap-2" href="/dashboard">
+				<i class="ti ti-planet ti-lg text-primary"></i>
+				{{ $program->org }}
 			</a>
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-				aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
-				<ul class="navbar-nav flex-row align-items-center ms-auto">
-					<!-- Language -->
-					<li class="nav-item dropdown-language dropdown">
-						<a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
-							href="javascript:void(0);" data-bs-toggle="dropdown">
-							<i class="ti ti-language rounded-circle ti-md"></i>
-						</a>
-						<ul class="dropdown-menu dropdown-menu-end">
-							<li class="dropdown dropdown-language nav-item">
-								@if ($l == 'ar')
-								<a class="dropdown-item" href="/lang/en" data-language="en" data-text-direction="ltr">
-									<i class="flag-icon flag-icon-us me-2"></i>
-									<span class="selected-language">English</span>
-								</a>
-								@else
-								<a class="dropdown-item" href="/lang/ar" data-language="ar" data-text-direction="rtl">
-									<i class="flag-icon flag-icon-sa me-2"></i>
-									<span class="selected-language">عربي</span>
-								</a>
-								@endif
-							</li>
-						</ul>
+				<ul class="navbar-nav mx-auto">
+					@foreach( $pages as $tab )
+					<li class="nav-item">
+						<a class="nav-link {{ $loop->first ? 'active' : '' }}" href="#{{ $tab->code }}">{{ $tab->title }}</a>
 					</li>
-					<!--/ Language -->
-
+					@endforeach
+					@if( $program->announced )
+					<li class="nav-item">
+						<a class="nav-link" href="#results-winners">{{ $l == 'en' ? 'Winners' : 'الفائزون' }}</a>
+					</li>
+					@endif
+				</ul>
+				<div class="d-flex align-items-center gap-2">
 					@if ($isLoggedIn)
-					<!-- User -->
-					<li class="nav-item navbar-dropdown dropdown-user dropdown ms-8">
-						<a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
-							<div class="avatar avatar-online">
+					<div class="dropdown ms-1">
+						<a class="dropdown-toggle hide-arrow p-0 d-block" href="javascript:void(0);" data-bs-toggle="dropdown">
+							<div class="avatar avatar-online" style="width:36px;height:36px;">
 								@if (auth()->user()->image_url)
 								<img class="rounded-circle" src="{{ auth()->user()->image_url }}"
-									onerror="this.src='/images/user-placeholder.jpeg'" />
+									onerror="this.src='/images/user-placeholder.jpeg'" width="36" height="36" />
 								@else
-								<img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+								<img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" width="36" height="36" />
 								@endif
 							</div>
 						</a>
 						<ul class="dropdown-menu dropdown-menu-end">
 							<li>
 								<a class="dropdown-item mt-0" href="/dashboard/show/myProfile">
-									<div class="d-flex align-items-center">
-										<div class="flex-shrink-0 me-2">
-											<div class="avatar avatar-online">
-												@if (auth()->user()->image_url)
-												<img class="rounded-circle" src="{{ auth()->user()->image_url }}"
-													onerror="this.src='/images/user-placeholder.jpeg'" />
-												@else
-												<img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
-												@endif
-											</div>
+									<div class="d-flex align-items-center gap-2">
+										<div class="avatar avatar-online" style="width:36px;height:36px;">
+											@if (auth()->user()->image_url)
+											<img class="rounded-circle" src="{{ auth()->user()->image_url }}"
+												onerror="this.src='/images/user-placeholder.jpeg'" width="36" height="36" />
+											@else
+											<img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" width="36" height="36" />
+											@endif
 										</div>
-										<div class="flex-grow-1">
+										<div>
 											<h6 class="mb-0">{{ Auth::user()->name }}</h6>
-											<small class="text-muted">{{ Auth::user()->title }}</small>
+											<small style="color:var(--on-surface-variant);">{{ Auth::user()->title }}</small>
 										</div>
 									</div>
 								</a>
 							</li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a class="dropdown-item" href="/dashboard"><i class="ti ti-dashboard me-2"></i>{{ __('admin.Dashboard') }}</a></li>
+							<li><a class="dropdown-item" href="/dashboard/show/myProfile"><i class="ti ti-user me-2"></i>{{ __('admin.Profile') }}</a></li>
+							<li><a class="dropdown-item" href="/dashboard/myProfile"><i class="ti ti-settings me-2"></i>{{$l=='ar'?'الاعدادات':'Settings'}}</a></li>
+							<li><a class="dropdown-item" href="/dashboard/documentation"><i class="ti ti-question-mark me-2"></i>FAQ</a></li>
+							<li><hr class="dropdown-divider"></li>
 							<li>
-								<div class="dropdown-divider my-1 mx-n2"></div>
-							</li>
-							<li>
-								<a class="dropdown-item" href="/dashboard">
-									<i class="ti ti-dashboard me-3 ti-md"></i>
-									<span class="align-middle">{{ __('admin.Dashboard') }}</span>
+								<a class="dropdown-item text-danger" href="{{ route('logout') }}"
+									onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+									<i class="ti ti-logout me-2"></i>{{ __('admin.Logout') }}
 								</a>
-							</li>
-							<li>
-								<a class="dropdown-item" href="/dashboard/show/myProfile">
-									<i class="ti ti-user me-3 ti-md"></i>
-									<span class="align-middle">{{ __('admin.Profile') }}</span>
-								</a>
-							</li>
-							<li>
-								<a class="dropdown-item" href="/dashboard/myProfile">
-									<i class="ti ti-settings me-3 ti-md"></i>
-									<span class="align-middle">
-										{{$l=='ar'?'الاعدادات':'Settings'}}
-									</span>
-								</a>
-							</li>
-							<li>
-								<a class="dropdown-item" href="/dashboard/documentation">
-									<i class="ti ti-question-mark me-3 ti-md"></i><span class="align-middle">FAQ</span>
-								</a>
-							</li>
-							<li>
-								<div class="d-grid px-2 pt-2 pb-1">
-									<a class="btn btn-sm btn-danger d-flex" href="{{ route('logout') }}"
-										onclick="event.preventDefault();document.getElementById('logout-form').submit();">
-										<small class="align-middle">{{ __('admin.Logout') }}</small>
-										<i class="ti ti-logout ms-2 ti-14px"></i>
-									</a>
-									<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-										@csrf
-									</form>
-								</div>
+								<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
 							</li>
 						</ul>
-					</li>
-					<!--/ User -->
+					</div>
 					@else
-					<!-- Login Button -->
-					<li class="nav-item ms-8">
-						<a class="btn btn-outline-primary" href="/register">
-							<i class="ti ti-user-plus ti-md me-2"></i>
-							{{ $l == 'en' ? 'Register' : 'تسجيل' }}
-						</a>
-					</li>
-					<li class="nav-item ms-3">
-						<a class="btn btn-primary" href="/login">
-							<i class="ti ti-login ti-md me-2"></i>
-							{{ $l == 'en' ? 'Login' : 'تسجيل الدخول' }}
-						</a>
-					</li>
-					<!--/ Login Button -->
+					<button class="btn btn-sm fw-semibold" onclick="location.href='/login'" style="color:var(--on-surface);">{{ $l == 'en' ? 'Login' : 'تسجيل الدخول' }}</button>
+					<button class="btn btn-primary-custom btn-sm" onclick="location.href='/register'">{{ $l == 'en' ? 'Register' : 'تسجيل' }}</button>
 					@endif
-				</ul>
+					<a href="/lang/{{ $l == 'ar' ? 'en' : 'ar' }}" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+						<span class="material-symbols-outlined fs-5">language</span>
+					</a>
+				</div>
 			</div>
 		</div>
 	</nav>
-	<!-- Main Content -->
+
 	<div class="page-container">
-		<main class="content">
+		<main>
+			<section class="hero-gradient text-center" style="padding-top:140px;padding-bottom:80px;">
+				<div class="container">
+					<div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4"
+						style="background:white;border:1px solid var(--outline);box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+						<span class="spinner-grow spinner-grow-sm text-primary" role="status"></span>
+						<span class="small fw-bold text-uppercase text-primary" style="font-size:11px;letter-spacing:1px;">
+							{{ $l == 'en' ? 'Registration Open' : 'التسجيل مفتوح' }}
+						</span>
+					</div>
 
-			<div class="container mt-8" style="direction: {{ $l == 'ar' ? 'rtl' : 'ltr' }};">
+					<h1 class="display-2 fw-bolder mb-3">{{ $program->title }}</h1>
+					<p class="lead mx-auto mb-5" style="max-width:700px;color:var(--on-surface-variant);">
+						{{ $program->description }}
+					</p>
 
-				<div class="hackathon-banner text-center shadow">
-					<div class="banner-content">
-						<h1 class="display-5 fw-bold text-black" id="hackathon-main-title"> {{ $program->title }} </h1>
-						<p class="lead fw-semibold line-clamp-5">{{ $program->description }}</p>
-						<p class="lead fw-semibold" id="hackathon-dates-location">
-							<i class="ti ti-calendar-event me-2"></i>
-							{{ $program->ranges }}
-							<span class="mx-3">|</span>
-							<i class="ti ti-map-pin me-2"></i>
-							{{ $program->org }}
-						</p>
+					<div class="d-flex align-items-center justify-content-center gap-3 flex-wrap mb-5">
+						<span class="badge bg-label-primary rounded-pill px-3 py-2">
+							<i class="ti ti-calendar-event me-1"></i>{{ $program->ranges }}
+						</span>
+						<span class="badge bg-label-secondary rounded-pill px-3 py-2">
+							<i class="ti ti-building me-1"></i>{{ $program->org }}
+						</span>
+					</div>
 
-						<!-- Countdown Timer -->
-						<div id="countdown-timer" class="d-flex justify-content-center">
-							<div class="timer-box">
-								<div id="days" class="timer-number">00</div>
-								<div class="timer-label">{{ $l == 'en' ? 'Days' : 'أيام' }}</div>
-							</div>
-							<div class="timer-box">
-								<div id="hours" class="timer-number">00</div>
-								<div class="timer-label">{{ $l == 'en' ? 'Hours' : 'ساعات' }}</div>
-							</div>
-							<div class="timer-box">
-								<div id="minutes" class="timer-number">00</div>
-								<div class="timer-label">{{ $l == 'en' ? 'Minutes' : 'دقائق' }}</div>
-							</div>
-							<div class="timer-box">
-								<div id="seconds" class="timer-number">00</div>
-								<div class="timer-label">{{ $l == 'en' ? 'Seconds' : 'ثواني' }}</div>
+					<div class="row g-4 justify-content-center mb-5 mx-auto" style="max-width:900px;" id="countdown-timer">
+						<div class="col-6 col-md-3">
+							<div class="glass-card countdown-box text-center">
+								<div class="countdown-number" id="days">00</div>
+								<div class="small fw-bold text-uppercase" style="color:var(--on-surface-variant);">{{ $l == 'en' ? 'Days' : 'أيام' }}</div>
 							</div>
 						</div>
-
-						<div id="action-buttons-placeholder" class="mt-4">
-							<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" type="button"
-								class="btn btn-white text-primary btn-lg" style="flex: 1;">
-								<i class="ti ti-send me-2"></i> {{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}
-							</a>
+						<div class="col-6 col-md-3">
+							<div class="glass-card countdown-box text-center">
+								<div class="countdown-number" id="hours">00</div>
+								<div class="small fw-bold text-uppercase" style="color:var(--on-surface-variant);">{{ $l == 'en' ? 'Hours' : 'ساعات' }}</div>
+							</div>
+						</div>
+						<div class="col-6 col-md-3">
+							<div class="glass-card countdown-box text-center">
+								<div class="countdown-number" id="minutes">00</div>
+								<div class="small fw-bold text-uppercase" style="color:var(--on-surface-variant);">{{ $l == 'en' ? 'Minutes' : 'دقائق' }}</div>
+							</div>
+						</div>
+						<div class="col-6 col-md-3">
+							<div class="glass-card countdown-box text-center">
+								<div class="countdown-number" id="seconds">00</div>
+								<div class="small fw-bold text-uppercase" style="color:var(--on-surface-variant);">{{ $l == 'en' ? 'Seconds' : 'ثواني' }}</div>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				@if( $pages->count() > 0 )
-				<ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0 px-0" role="tablist" id="hackathonTab">
-					@foreach( $pages as $tab )
-					<li class="nav-item {{ $l == 'en' ? 'me-3' : '' }}" role="presentation">
-						<button class="nav-link rounded {{ $loop->first ? 'active' : '' }}" id="{{ $tab->code }}-tab"
-							data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}" type="button" role="tab"
-							aria-controls="{{ $tab->code }}" aria-selected="false">
-							{{-- <i class="bi bi-list me-2"></i> --}}
-							{{ $tab->title }}
-						</button>
-					</li>
-					@endforeach
-					@if( $program->announced )
-					<li class="nav-item {{ $l == 'en' ? 'me-3' : '' }}" role="presentation">
-						<button class="nav-link rounded" id="results-winners-tab" data-bs-toggle="tab"
-							data-bs-target="#results-winners" type="button" role="tab" aria-controls="results-winners"
-							aria-selected="false">
-							{{ $l == 'en' ? 'Results & winners' : 'النتائج والفائزون' }}
-						</button>
-					</li>
+					@if( now()->gt( $program->registration_start ) && now()->lt( $program->registration_end ) )
+					<div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+						<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" class="btn btn-primary-custom px-5 py-3 fs-5">
+							<i class="ti ti-send me-2"></i>{{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}
+						</a>
+					</div>
 					@endif
-				</ul>
+				</div>
+			</section>
 
-				<div class="tab-content p-0 mb-12" id="hackathonTabContent">
-					<!-- Pages Tab -->
-					@foreach( $pages as $tab )
-					<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab->code }}" role="tabpanel"
-						aria-labelledby="{{ $tab->code }}-tab">
-						<div class="card">
-							<div class="card-body"> {!! $tab->content !!} </div>
+			@if( $pages->count() > 0 )
+			<section class="py-5 bg-white border-top border-bottom">
+				<div class="container py-4">
+					<h2 class="text-center mb-5 fw-bold display-6">{{ $l == 'en' ? 'Competition Details' : 'تفاصيل المسابقة' }}</h2>
+
+					<ul class="nav nav-tabs-custom justify-content-center mb-5" id="detailsTab">
+						@foreach( $pages as $tab )
+						<li class="nav-item">
+							<button class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#{{ $tab->code }}">
+								{{ $tab->title }}
+							</button>
+						</li>
+						@endforeach
+						@if( $program->announced )
+						<li class="nav-item">
+							<button class="nav-link" data-bs-toggle="tab" data-bs-target="#results-winners">
+								<i class="ti ti-trophy me-1"></i>{{ $l == 'en' ? 'Winners' : 'الفائزون' }}
+							</button>
+						</li>
+						@endif
+					</ul>
+
+					<div class="tab-content">
+						@foreach( $pages as $tab )
+						<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab->code }}">
+							<div class="glass-card p-4 p-lg-5 mx-auto" style="max-width:900px;">
+								{!! $tab->content !!}
+							</div>
 						</div>
-					</div>
-					@endforeach
-					@if( $program->announced )
-					<div class="tab-pane fade" id="results-winners" role="tabpanel" aria-labelledby="results-winners-tab">
-						<!-- Enhanced Results & Winners Section -->
-						<div>
-							<!-- Winners Content Area -->
+						@endforeach
+
+						@if( $program->announced )
+						<div class="tab-pane fade" id="results-winners">
 							@if( $program->visibility == 'public' )
-								<!-- Public Winners Display -->
-								<div class="card card-body shadow-none">
-									<div class="row mb-4">
-										<div class="col-12 border-bottom pb-3">
-											<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-												<div class="d-flex flex-column align-items-start mb-4 mb-md-0">
-													<h3 class="fw-bold text-primary mb-1">
-														{{ $l == 'en' ? 'Competition Winners' : 'الفائزون في المسابقة' }}
-													</h3>
-													<p class="text-muted mb-0">
-														{{ $l == 'en' ? 'Innovative solutions that stood out from the competition' : 'الحلول المبتكرة التي تميزت في المسابقة' }}
-													</p>
-												</div>
-												<!-- Social Share Section -->
-												<div class="d-flex align-items-center gap-3">
-													<h6 class="mb-0 opacity-90 d-none d-md-flex">{{ $l == 'en' ? 'Share the Results via:' : 'شارك النتائج عبر:' }}</h6>
-													<div class="d-flex justify-content-center flex-wrap gap-3">
-														<!-- Facebook Share Button -->
-														<a 
-															class="btn d-flex align-items-center gap-2" 
-															style="background-color: #3b5998; color: white;"
-															href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"
-															target="_blank">
-															<i class="ti ti-brand-facebook"></i>
-															{{ $l == 'en' ? 'Facebook' : 'فيسبوك' }}
-														</a>
-														
-														<a 
-															class="btn d-flex align-items-center gap-2" 
-															style="background-color: #0077B5; color: white;"
-															href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(url()->current()) }}"
-															target="_blank">
-															<i class="ti ti-brand-linkedin"></i>
-															{{ $l == 'en' ? 'LinkedIn' : 'لينكد إن' }}
-														</a>
-														
-														<a 
-															class="btn btn-dark d-flex align-items-center gap-2" 
-															href="https://twitter.com/intent/tweet?text={{ urlencode($program->title . ' - Results Announced! ' . url()->current()) }}"
-															target="_blank">
-															<i class="ti ti-brand-x"></i>
-															{{ $l == 'en' ? 'Tweet' : 'تغريدة' }}
-														</a>
-
-														<button 
-															class="btn btn-light d-flex align-items-center gap-2" 
-															type="button" 
-															onclick="copyLink('{{url()->current()}}')" 
-															id="copy-link-btn">
-															<i class="bi bi-link-45deg"></i>
-															{{ $l == 'en' ? 'Copy Link' : 'نسخ الرابط' }}
-														</button>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-
-									<!-- Winners Grid (from partial) -->
-									@include('admin.hackathon.partials.winners-tab', ['winners' => $winnersData, 'currentHackathon' => $currentHackathon])
-								</div>
-							@else
-								<!-- Private/Login Required Message -->
-								<div class="card border-0 shadow-sm">
-									<div class="card-body text-center py-5">
-										<div class="mb-4">
-											<i class="bi bi-lock-fill text-muted" style="font-size: 3rem;"></i>
-										</div>
-										<h4 class="fw-semibold text-dark mb-3">
-											{{ $l == 'en' ? 'Results Restricted' : 'النتائج مقيدة' }}
+							<div class="glass-card p-4 p-lg-5 mx-auto" style="max-width:1100px;">
+								<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 mb-5">
+									<div>
+										<h4 class="fw-bold mb-1">
+											<i class="ti ti-trophy text-primary me-2"></i>
+											{{ $l == 'en' ? 'Competition Winners' : 'الفائزون في المسابقة' }}
 										</h4>
-										<p class="text-muted mb-4 lead">
-											{{ $l == 'en' 
-												? 'This program results have been announced, please login to view the winners and detailed results.' 
-												: 'تم الإعلان عن نتائج هذا البرنامج، يرجى تسجيل الدخول لمشاهدة الفائزين والنتائج التفصيلية.' 
-											}}
+										<p style="color:var(--on-surface-variant);" class="mb-0">
+											{{ $l == 'en' ? 'Innovative solutions that stood out from the competition' : 'الحلول المبتكرة التي تميزت في المسابقة' }}
 										</p>
-										<div class="d-flex justify-content-center gap-3">
-											<a href="/login" class="btn btn-primary">
-												<i class="bi bi-box-arrow-in-right me-1"></i>
-												{{ $l == 'en' ? 'Login to View Results' : 'تسجيل الدخول لمشاهدة النتائج' }}
-											</a>
-											<a href="/register" class="btn btn-outline-primary">
-												<i class="bi bi-person-plus me-1"></i>
-												{{ $l == 'en' ? 'Register' : 'التسجيل' }}
-											</a>
-										</div>
+									</div>
+									<div class="d-flex align-items-center gap-2 flex-wrap">
+										<span class="small fw-semibold" style="color:var(--on-surface-variant);">{{ $l == 'en' ? 'Share:' : 'شارك:' }}</span>
+										<a class="btn btn-sm rounded-pill d-flex align-items-center gap-1 program-share-btn"
+											style="background-color:#3b5998;color:#fff;"
+											href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url()->current()) }}"
+											target="_blank" data-platform="facebook">
+											<i class="ti ti-brand-facebook"></i> Facebook
+										</a>
+										<a class="btn btn-sm rounded-pill d-flex align-items-center gap-1 program-share-btn"
+											style="background-color:#0077B5;color:#fff;"
+											href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode(url()->current()) }}"
+											target="_blank" data-platform="linkedin">
+											<i class="ti ti-brand-linkedin"></i> LinkedIn
+										</a>
+										<a class="btn btn-sm rounded-pill d-flex align-items-center gap-1 program-share-btn btn-dark"
+											href="https://twitter.com/intent/tweet?text={{ urlencode($program->title . ' - Results Announced! ' . url()->current()) }}"
+											target="_blank" data-platform="twitter">
+											<i class="ti ti-brand-x"></i> Tweet
+										</a>
+										<button class="btn btn-sm rounded-pill d-flex align-items-center gap-1 btn-outline-secondary"
+											type="button" onclick="copyLink('{{url()->current()}}')" id="copy-link-btn">
+											<i class="ti ti-link"></i> {{ $l == 'en' ? 'Copy Link' : 'نسخ الرابط' }}
+										</button>
 									</div>
 								</div>
+								@include('admin.hackathon.partials.winners-tab', ['winners' => $winnersData, 'currentHackathon' => $currentHackathon])
+							</div>
+							@else
+							<div class="glass-card p-5 mx-auto text-center" style="max-width:600px;">
+								<div class="mb-4">
+									<span class="material-symbols-outlined" style="font-size:48px;color:var(--on-surface-variant);">lock</span>
+								</div>
+								<h4 class="fw-bold mb-2">{{ $l == 'en' ? 'Results Restricted' : 'النتائج مقيدة' }}</h4>
+								<p style="color:var(--on-surface-variant);" class="mb-4">
+									{{ $l == 'en'
+										? 'This program results have been announced, please login to view the winners and detailed results.'
+										: 'تم الإعلان عن نتائج هذا البرنامج، يرجى تسجيل الدخول لمشاهدة الفائزين والنتائج التفصيلية.'
+									}}
+								</p>
+								<div class="d-flex justify-content-center gap-3">
+									<a href="/login" class="btn btn-primary-custom"><i class="ti ti-login me-1"></i>{{ $l == 'en' ? 'Login to View Results' : 'تسجيل الدخول لمشاهدة النتائج' }}</a>
+									<a href="/register" class="btn btn-outline-custom"><i class="ti ti-user-plus me-1"></i>{{ $l == 'en' ? 'Register' : 'التسجيل' }}</a>
+								</div>
+							</div>
 							@endif
 						</div>
+						@endif
 					</div>
-					@endif
 				</div>
-				@endif
-			</div>
+			</section>
+			@endif
 		</main>
 	</div>
 
-	<!-- Enhanced Footer -->
-	<footer id="contact-section" class="text-white pt-5 pb-4" style="background-color: var(--bs-primary-text-emphasis);">
-		<div class="container text-center text-md-start">
-			<div class="row text-center text-md-start">
-				<div class="col-md-4 col-lg-5 mt-3">
-					<h5 class="text-white text-uppercase mb-4 fw-bold">{{ $l == 'en' ? 'About Us' : 'معلومات عنا' }}</h5>
-					<p>{{ $program?->bio ?: '' }}</p>
-				</div>
-
-				<div class="col-md-4 col-lg-2 mx-auto mt-3">
-					@if( $program?->facebook || $program?->twitter || $program?->linkedin || $program?->instagram || $program?->youtube || $program?->tiktok )
-					<h5 class="text-white text-uppercase mb-4 fw-bold">{{ $l == 'en' ? 'Follow Us' : 'تابعنا' }}</h5>
-					<div class="d-flex justify-content-center justify-content-md-start">
+	<footer class="footer-custom">
+		<div class="container">
+			<div class="row g-4">
+				<div class="col-lg-5">
+					<h3 class="fw-black mb-3">{{ $program->org }}</h3>
+					<p style="color:var(--on-surface-variant);max-width:400px;" class="mb-4">{{ $program?->bio ?: '' }}</p>
+					<div class="d-flex gap-3">
 						@if( $program?->facebook )
-						<a href="{{ $program?->facebook ?: '#' }}" class="text-white me-3">
-							<i class="bi bi-facebook fs-4"></i>
+						<a href="{{ $program->facebook }}" class="text-reset text-decoration-none">
+							<i class="ti ti-brand-facebook ti-lg text-primary"></i>
 						</a>
 						@endif
 						@if( $program?->twitter )
-						<a href="{{ $program?->twitter ?: '#' }}" class="text-white me-3">
-							<i class="bi bi-twitter fs-4"></i>
+						<a href="{{ $program->twitter }}" class="text-reset text-decoration-none">
+							<i class="ti ti-brand-x ti-lg text-primary"></i>
 						</a>
 						@endif
 						@if( $program?->linkedin )
-						<a href="{{ $program?->linkedin ?: '#' }}" class="text-white me-3">
-							<i class="bi bi-linkedin fs-4"></i>
+						<a href="{{ $program->linkedin }}" class="text-reset text-decoration-none">
+							<i class="ti ti-brand-linkedin ti-lg text-primary"></i>
 						</a>
 						@endif
 						@if( $program?->instagram )
-						<a href="{{ $program?->instagram ?: '#' }}" class="text-white">
-							<i class="bi bi-instagram fs-4"></i>
+						<a href="{{ $program->instagram }}" class="text-reset text-decoration-none">
+							<i class="ti ti-brand-instagram ti-lg text-primary"></i>
 						</a>
 						@endif
 						@if( $program?->youtube )
-						<a href="{{ $program?->youtube ?: '#' }}" class="text-white">
-							<i class="bi bi-youtube fs-4"></i>
+						<a href="{{ $program->youtube }}" class="text-reset text-decoration-none">
+							<i class="ti ti-brand-youtube ti-lg text-primary"></i>
 						</a>
 						@endif
 						@if( $program?->tiktok )
-						<a href="{{ $program?->tiktok ?: '#' }}" class="text-white">
-							<i class="bi bi-tiktok fs-4"></i>
+						<a href="{{ $program->tiktok }}" class="text-reset text-decoration-none">
+							<i class="ti ti-brand-tiktok ti-lg text-primary"></i>
 						</a>
 						@endif
 					</div>
-					@endif
+				</div>
+				<div class="col-lg-3">
+					<h6 class="fw-bold text-uppercase mb-4">{{ $l == 'en' ? 'Quick Links' : 'روابط سريعة' }}</h6>
+					<ul class="list-unstyled" style="color:var(--on-surface-variant);">
+						<li class="mb-2"><a href="/dashboard" class="text-reset text-decoration-none">{{ __('admin.Dashboard') }}</a></li>
+						<li class="mb-2"><a href="{{ setting('privacy_url', '#') }}" class="text-reset text-decoration-none" {{ setting('privacy_url') ? 'target="_blank"' : '' }}>{{ $l == 'en' ? 'Privacy Policy' : 'سياسة الخصوصية' }}</a></li>
+					</ul>
+				</div>
+				<div class="col-lg-4">
+					<h6 class="fw-bold text-uppercase mb-4">{{ $l == 'en' ? 'Newsletter' : 'النشرة البريدية' }}</h6>
+					<div class="input-group">
+						<input type="email" class="form-control" placeholder="{{ $l == 'en' ? 'Enter email' : 'أدخل البريد الإلكتروني' }}" style="border-color:var(--outline);">
+						<button class="btn btn-primary-custom">{{ $l == 'en' ? 'Join' : 'انضمام' }}</button>
+					</div>
 				</div>
 			</div>
-
-			<hr class="mb-4">
-
-			<div class="row align-items-center">
-				<div class="col-md-7 col-lg-8">
-					<p class="text-center text-md-start mb-3 mb-md-0">
-						© {{ date('Y') }} {{ $platformName }} {{ $l == 'en' ? '. All rights reserved.' : '. جميع الحقوق محفوظة.' }}
-					</p>
-				</div>
+			<hr class="my-5" style="opacity:0.1;">
+			<div class="text-center small" style="color:var(--on-surface-variant);">
+				© {{ date('Y') }} {{ $platformName }}. {{ $l == 'en' ? 'All rights reserved.' : 'جميع الحقوق محفوظة.' }}
 			</div>
 		</div>
 	</footer>
 
-	<!-- Core JS -->
 	<script src="/vuexy/assets/vendor/libs/jquery/jquery.js"></script>
 	<script src="/vuexy/assets/vendor/js/bootstrap.js"></script>
 	<script src="/vuexy/assets/js/main.js"></script>
 
 	@include('includes.winnerModal', ['winners' => $winnersData])
-	
-	<script src="https://platform.linkedin.com/in.js" type="text/javascript">
-		lang: en_US
-	</script>
-
 
 	<script>
 		$(document).on('click', '.like-project-action', function(e) {
 			e.preventDefault();
-			let element = $(this);
-			let teamProjectId = element.data('project');
-			$.ajaxSetup({
-				headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),},
-			});
-
+			var $el = $(this);
 			$.ajax({
+				headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
 				type: "POST",
 				url: "/dashboard/hackathon/likeProject",
-				data: {
-					teamProjectId: teamProjectId,
+				data: { teamProjectId: $el.data('project') },
+				success: function(r) {
+					$el.parent().find('.likes-count').text(r.total);
+					$el.toggleClass('fas far');
 				},
-				success: function (response) {
-					element.parent().find('.likes-count').text(response.total);
-					if( element.hasClass('fas') )
-					{
-						element.removeClass('fas');
-						element.addClass('far');
-					}
-					else if( element.hasClass('far') )
-					{
-						element.removeClass('far');
-						element.addClass('fas');
-					}
-				},
-				error: function (error) {
-					console.log("Error Occurred, like failed");
-				},
+				error: function() { console.log("Like failed"); }
 			});
 		});
+
 		function copyLink(url) {
-			navigator.clipboard.writeText(url).then(() => {
-				// Enhanced feedback for copy action
-				const btn = document.getElementById('copy-link-btn');
-				const originalText = btn.innerHTML;
-				
-				// Show success feedback
-				btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>' + 
-					('{{ $l }}' === 'en' ? 'Copied!' : 'تم النسخ!');
+			var btn = document.getElementById('copy-link-btn');
+			var orig = btn.innerHTML;
+			var done = '{{ $l }}' === 'en' ? 'Copied!' : 'تم النسخ!';
+			function show() {
+				trackProgramShare('copy_link');
+				btn.innerHTML = '<i class="ti ti-check me-1"></i>' + done;
 				btn.classList.add('btn-success');
-				btn.classList.remove('btn-light');
-				
-				// Reset after 2 seconds
-				setTimeout(() => {
-					btn.innerHTML = originalText;
+				btn.classList.remove('btn-outline-secondary');
+				setTimeout(function() {
+					btn.innerHTML = orig;
 					btn.classList.remove('btn-success');
-					btn.classList.add('btn-light');
+					btn.classList.add('btn-outline-secondary');
 				}, 2000);
-				
-			}).catch(() => {
-				// Fallback for older browsers
-				const textArea = document.createElement('textarea');
-				textArea.value = url;
-				document.body.appendChild(textArea);
-				textArea.select();
-				document.execCommand('copy');
-				document.body.removeChild(textArea);
-				
-				alert('{{ $l == "en" ? "Link copied!" : "تم نسخ الرابط!" }}');
-			});
+			}
+			function fallback() {
+				var ta = document.createElement('textarea');
+				ta.value = url;
+				ta.style.cssText = 'position:fixed;left:-9999px';
+				document.body.appendChild(ta);
+				ta.select();
+				try { document.execCommand('copy'); show(); }
+				catch (e) { alert('{{ $l == "en" ? "Failed to copy link" : "فشل نسخ الرابط" }}'); }
+				document.body.removeChild(ta);
+			}
+			if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function')
+				navigator.clipboard.writeText(url).then(show).catch(fallback);
+			else fallback();
 		}
 
-		// Update total winners count dynamically if needed
+		function trackProgramShare(platform) {
+			if (typeof gtag === 'function')
+				gtag('event', 'share', { method: platform, content_type: 'program_results', item_id: '{{ $program->id ?? "unknown" }}' });
+			fetch('{{ route("hackathon.trackProgramShare") }}', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+				body: JSON.stringify({ cycle_id: {{ $program->id ?? 0 }}, platform: platform })
+			}).catch(function(e) { console.error('Track share failed:', e); });
+		}
+
 		document.addEventListener('DOMContentLoaded', function() {
-			const winnersContainer = document.querySelector('.winners-grid-container .row');
-			if (winnersContainer) {
-				const winnerCards = winnersContainer.querySelectorAll('.col-md-6, .col-lg-4');
-				const totalWinnersSpan = document.getElementById('total-winners');
-				if (totalWinnersSpan && winnerCards.length > 0) {
-					totalWinnersSpan.textContent = winnerCards.length;
-				}
+			document.querySelectorAll('.program-share-btn').forEach(function(btn) {
+				btn.addEventListener('click', function() {
+					var p = this.getAttribute('data-platform');
+					if (p) trackProgramShare(p);
+				});
+			});
+			var wc = document.querySelector('.winners-grid-container .row');
+			if (wc) {
+				var cards = wc.querySelectorAll('.col-md-6, .col-lg-4');
+				var span = document.getElementById('total-winners');
+				if (span && cards.length) span.textContent = cards.length;
 			}
 		});
-	</script>
-	<script>
-		// Set the date we're counting down to using the parsed PHP variable
-		var countDownDate = new Date("{{ $endDateForCountdown }}").getTime();
 
-		// Update the count down every 1 second
-		var x = setInterval(function () {
-
-			// Get today's date and time
-			var now = new Date().getTime();
-
-			// Find the distance between now and the count down date
-			var distance = countDownDate - now;
-
-			// Time calculations for days, hours, minutes and seconds
-			var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-			var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-			var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-			var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-			// Display the result, ensuring two digits
-			document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
-			document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
-			document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
-			document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
-
-			// If the count down is finished, write some text
-			if (distance < 0) {
-				clearInterval(x);
-				document.getElementById("countdown-timer").innerHTML = "<h4>{{ $l == 'en' ? 'The event has ended' : 'انتهى الحدث' }}</h4>";
+		(function() {
+			var end = new Date("{{ $endDateForCountdown }}").getTime();
+			var start = new Date("{{ $startDateForCountdown }}").getTime();
+			function tick() {
+				var now = new Date().getTime();
+				var dist = end - now;
+				if (dist < 0) {
+					document.getElementById("countdown-timer").innerHTML =
+						'<span class="badge bg-label-secondary rounded-pill px-4 py-2 fs-6">{{ $l == 'en' ? 'The event has ended' : 'انتهى الحدث' }}</span>';
+					return;
+				}
+				if( now < start ) {
+					document.getElementById("countdown-timer").innerHTML =
+						'<span class="badge bg-label-secondary rounded-pill px-4 py-2 fs-6">{{ $l == 'en' ? 'Coming soon' : 'قريبا' }}</span>';
+					return;
+				}
+				document.getElementById("days").innerText = Math.floor(dist / 864e5).toString().padStart(2,'0');
+				document.getElementById("hours").innerText = Math.floor(dist / 36e5 % 24).toString().padStart(2,'0');
+				document.getElementById("minutes").innerText = Math.floor(dist / 6e4 % 60).toString().padStart(2,'0');
+				document.getElementById("seconds").innerText = Math.floor(dist / 1e3 % 60).toString().padStart(2,'0');
 			}
-		}, 1000);
+			tick();
+			setInterval(tick, 1000);
+		})();
 	</script>
 </body>
-
 </html>

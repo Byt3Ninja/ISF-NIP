@@ -11,8 +11,8 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     @if(session()->has('message'))
     <div class="alert alert-success alert-dismissible mt-2" role="alert">
       {{ __('admin.'.session()->get('message')) }} {{ Session::forget('message') }}
@@ -146,6 +146,7 @@
 <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  @include('partials.flatpickr-locale')
 <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

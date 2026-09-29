@@ -69,6 +69,9 @@ class MentorshipTaskController extends Controller
         try{
 
             $task= MentorshipTask::findOrFail($request->mentorship_task_id);
+            if ($task->status === 'completed') {
+                return back()->with(['message2' => 'TaskAlreadyCompleted']);
+            }
             if ( $task->comments()->where('user_id',auth()->id())->first()){
                 $task->update(['status'=>'completed','done_date'=>now()->format('Y-m-d')]);
             }

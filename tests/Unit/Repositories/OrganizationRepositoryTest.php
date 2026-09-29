@@ -26,7 +26,9 @@ class OrganizationRepositoryTest extends TestCase
     public function it_can_get_all_organizations_with_relations()
     {
         $organization = Organization::factory()->create();
-        $user = User::factory()->create(['organization_id' => $organization->id]);
+        $user = User::factory()->create();
+        $user->organization_id = $organization->id;
+        $user->save();
         $cycle = Cycle::factory()->create(['organization_id' => $organization->id]);
 
         $result = $this->organizationRepository->allWithRelations();

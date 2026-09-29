@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
-    <ul class="nav nav-pills flex-nowrap mb-6" role="tablist" style="max-width: 100%; overflow-x: auto;">
+<div class="">
+  <div class="">
+    {{-- <ul class="nav nav-pills flex-nowrap mb-6" role="tablist" style="max-width: 100%; overflow-x: auto;">
       <li class="nav-item me-2" role="presentation">
         <a class="nav-link active" id="enrolled-programs-tab" data-bs-toggle="tab" href="#enrolled-programs" role="tab" aria-controls="enrolled-programs" aria-selected="true">
           <i class="ti ti-components me-2"></i>{{ __('mentor.enrolled_programs') }}
@@ -14,7 +14,7 @@
           <i class="ti ti-versions me-2"></i>{{ __('admin.Mentorship Sessions') }}
         </a>
       </li>
-    </ul>
+    </ul> --}}
     <div class="tab-content p-0 shadow-none">
       <div class="tab-pane fade show active" id="enrolled-programs" role="tabpanel" aria-labelledby="enrolled-programs-tab">
         @foreach($cycles as $cycle)
@@ -143,26 +143,19 @@
                       </td>
                       <td>{{ $session->admin_comment }}</td>
                       <td>
-                        @php
-                          $now = date('Y-m-d H:i');
-                          $start_time = date('Y-m-d H:i', strtotime($session->zoom_date . '-15 minutes'));
-                          $end_time = date('Y-m-d H:i', strtotime($session->zoom_date . '+' . $session->period .' minutes'));
-                        @endphp
-                        @if($now >= $start_time)
-                          @if($now <= $end_time)
+                        @if($session->meeting_status === 'joinable')
                             <a href="{{ $session->start_url }}" target="_blank">
-                              <button title="Start Meeting" type="button" data-value="{{ $session->id }}" 
+                              <button title="Start Meeting" type="button" data-value="{{ $session->id }}"
                                       class="btn btn-label-primary rounded">
-                                <i class="ti ti-link"></i> {{ __('admin.Join Meeting') }}
+                                <i class="ti ti-link me-2"></i> {{ __('admin.Join Meeting') }}
                               </button>
                             </a>
-                          @else
+                        @elseif($session->meeting_status === 'expired')
                             <span class="text-danger">
-                              <i class="ti ti-alarm"></i> {{ __('admin.Meeting_Expired') }}
+                              <i class="ti ti-alarm me-2"></i> {{ __('admin.Meeting_Expired') }}
                             </span>
-                          @endif
                         @else
-                          <i class="ti ti-alarm"></i> {{ __('admin.Meeting_will_start_at_time') }}
+                          <i class="ti ti-alarm me-2"></i> {{ __('admin.Meeting_will_start_at_time') }}
                         @endif
                       </td>
                     </tr>

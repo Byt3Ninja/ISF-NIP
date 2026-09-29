@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
       resetFileInput = document.querySelector('.account-image-reset');
 
     if (accountUserImage) {
-      const resetImage = accountUserImage.src;
+      const placeholderImage = '/images/user-placeholder.jpeg';
       const validExtensions = ['image/png', 'image/jpg', 'image/jpeg'];
       // Max size is 2048 KB
       const maxFileSize = 2048;
@@ -182,11 +182,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
             return;
           }
           accountUserImage.src = window.URL.createObjectURL(fileInput.files[0]);
+          document.getElementById("should_remove_image").value = "0";
         }
       };
       resetFileInput.onclick = () => {
         fileInput.value = '';
-        accountUserImage.src = resetImage;
+        accountUserImage.src = placeholderImage;
+        document.getElementById("should_remove_image").value = "1";
       };
     }
   })();

@@ -2,12 +2,11 @@
 
 @section('content')
   @php
-    $clist = [$cstep?->id];
-    if ($form) {
-      $clist = [$form->id, $cstep?->id];
-    }
-    $companies = \App\Company::whereIn('step', $clist);
-    
+    // Filter over the full evaluated set (same source as the card list below),
+    // not just startups currently at the step — otherwise filtering by judge or
+    // result silently drops startups that have advanced past this screening step.
+    $companies = $_companies;
+
     if (request('startup_id') != 0) {
       $companies = $companies->where('id', request('startup_id'));
     }
@@ -17,20 +16,18 @@
       $formId = $form->id ?? null;
       $judges = collect();
       $judges = $companies
-        ->get()
         ->map(function ($company) use ($formId) {
           return \App\User::whereIn('id', $company->judges($company->id, $formId))->get();
         })
         ->flatten();
     }
-    
+
     if (request('result_id') != 0) {
       $companyModel = new \App\Company();
       $comparison = request('result2_id'); // نوع المقارنة (==, <, >, <=, >=)
       $threshold = request('result_id'); // القيمة التي تتم المقارنة معها
 
       $filteredCompanies = $companies
-        ->get()
         ->filter(function ($company) use ($form, $companyModel, $comparison, $threshold) {
           $weight = $companyModel->companyWeight([$company->id], $form->id ?? '', 0);
 
@@ -47,7 +44,7 @@
 
       $companies = $filteredCompanies;
     } else {
-      $companies = $companies->get();
+      $companies = $companies->values();
     }
     $types = [
       'onetoall' => 'Assign One to all users',
@@ -58,8 +55,8 @@
   @endphp
 
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-body">
         @if ($cstep)
           <!-- Enhanced Page Header -->
@@ -240,7 +237,7 @@
                     </div>
 
                     <!-- Second Row for Sort -->
-                    {{-- <div class="row g-3 mt-2">
+                    <div class="row g-3 mt-2">
                       <!-- Sort Options -->
                       <div class="col-lg-3 col-md-6">
                         <label class="form-label fw-semibold mb-2 text-dark">
@@ -252,9 +249,11 @@
                           <option value="name-desc">{{ __('cycles.Name Z-A') }}</option>
                           <option value="score-desc">{{ __('cycles.Score High-Low') }}</option>
                           <option value="score-asc">{{ __('cycles.Score Low-High') }}</option>
+                          <option value="approval-desc">{{ __('cycles.Approval % High-Low') }}</option>
+                          <option value="approval-asc">{{ __('cycles.Approval % Low-High') }}</option>
                         </select>
                       </div>
-                    </div> --}}
+                    </div>
 
                     <!-- Filter Actions -->
                     <div class="filter-actions mt-3 d-flex flex-wrap gap-2 align-items-center">
@@ -350,20 +349,37 @@
                           $filterScore = round($filterTotalScore / $filterEvaluationsCount, 1);
                         }
                         
-                        // Get judge IDs for this company
+                        // Get judge IDs for this company and collect approval data
                         $companyJudgeIds = [];
+                        $companyApprovals = [];
                         foreach ($judges as $judge) {
                           if (in_array($company->id, $judge->startups->toArray())) {
                             $companyJudgeIds[] = $judge->id;
+                            $scoped_company_approval = collect($judge->companies)->where('id', $company->id)->first();
+                            if ($scoped_company_approval) {
+                              $companyApprovals[] = $scoped_company_approval->approval ?? 'pending';
+                            } else {
+                              $companyApprovals[] = 'pending';
+                            }
                           }
                         }
+
+                        // Approval statistics
+                        $approvalStatsCollection = collect($companyApprovals);
+                        $totalJudges = $approvalStatsCollection->count();
+                        $approvedCount = $approvalStatsCollection->filter(fn($a) => $a === 'approved')->count();
+                        $disapprovedCount = $approvalStatsCollection->filter(fn($a) => $a === 'disapproved')->count();
+                        $totalDecisions = $approvalStatsCollection->filter(fn($a) => $a !== 'pending')->count();
+                        $approvalPct = $totalDecisions > 0 ? round(($approvedCount / $totalDecisions) * 100) : 0;
+                        $disapprovalPct = $totalDecisions > 0 ? round(($disapprovedCount / $totalDecisions) * 100) : 0;
                       @endphp
                       
-                      <div class="col-xl-4 col-lg-6 col-md-12 company-card" 
+                      <div class="col-xl-4 col-lg-6 col-md-12 company-card"
                            data-company-name="{{ strtolower($company->name) }}"
                            data-user-name="{{ strtolower($company->user->name) }}"
                            data-category="{{ strtolower($categoryString) }}"
                            data-score="{{ $filterScore }}"
+                           data-approval-pct="{{ $approvalPct }}"
                            data-status="{{ $primaryStatus }}"
                            data-evaluation-statuses="{{ implode(',', $evaluationStatuses) }}"
                            data-judge-ids="{{ implode(',', $companyJudgeIds) }}">
@@ -372,7 +388,7 @@
                           <div class="card-header bg-transparent border-0 pb-2">
                             <div class="d-flex align-items-center justify-content-between">
                               <div class="d-flex align-items-center">
-                                <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
+                                @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                                   <div class="company-avatar me-3">
                                     <img
                                       src="{{ $company->logo_url }}"
@@ -382,11 +398,11 @@
                                       width="50"
                                     />
                                   </div>
-                                </a>
+                                @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                                 <div>
-                                  <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none">
+                                  @if( $_user->ableTo('company.profile_view', $permissions) ) <a href="/dashboard/companyProfile/{{ $company->id }}" class="text-decoration-none"> @endif
                                     <h6 class="mb-1 fw-bold text-dark">{{ Str::limit($company->name, 20) }}</h6>
-                                  </a>
+                                  @if( $_user->ableTo('company.profile_view', $permissions) ) </a> @endif
                                   <small class="text-muted line-clamp-1">
                                     @php
                                       $categories = is_string($company->business_categories) ? json_decode($company->business_categories, true) : $company->business_categories;
@@ -430,7 +446,7 @@
                             <!-- User Information -->
                             <div class="user-info bg-label-light border rounded-3 p-2 mb-4">
                               <div class="d-flex align-items-center">
-                                <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+                                @if( $_user->ableTo('users.edit', $permissions) ) <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none"> @endif
                                   <img
                                     src="{{ $company->user->image_url ?? '/icons/account.svg' }}"
                                     alt="img"
@@ -438,12 +454,32 @@
                                     height="40"
                                     width="40"
                                   />
-                                </a>
+                                @if( $_user->ableTo('users.edit', $permissions) ) </a> @endif
                                 <div class="flex-grow-1">
-                                  <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none">
+                                  @if( $_user->ableTo('users.edit', $permissions) ) <a href="/dashboard/users/{{ $company->user->id }}/edit" class="text-decoration-none"> @endif
                                     <h6 class="mb-0 fw-semibold text-dark">{{ $company->user->name }}</h6>
                                     <small class="text-muted">{{ $company->user->title ?: __('cycles.No title') }}</small>
-                                  </a>
+                                  @if( $_user->ableTo('users.edit', $permissions) ) </a> @endif
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Approval Statistics -->
+                            <div class="approval-stats d-flex align-items-center gap-2 mb-4 px-1">
+                              <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <small class="fw-semibold text-success"><i class="ti ti-circle-check me-1"></i>{{ __('cycles.Approved') }}</small>
+                                  <small class="fw-bold text-success">{{ $approvedCount }}/{{ $totalJudges }} ({{ $approvalPct }}%)</small>
+                                </div>
+                                <div class="progress mb-2" style="height: 6px;">
+                                  <div class="progress-bar bg-success" style="width: {{ $approvalPct }}%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <small class="fw-semibold text-danger"><i class="ti ti-circle-x me-1"></i>{{ __('cycles.Disapproved') }}</small>
+                                  <small class="fw-bold text-danger">{{ $disapprovedCount }}/{{ $totalJudges }} ({{ $disapprovalPct }}%)</small>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                  <div class="progress-bar bg-danger" style="width: {{ $disapprovalPct }}%"></div>
                                 </div>
                               </div>
                             </div>
@@ -576,7 +612,7 @@
                     {{ __('cycles.No records screening from') }}
                   </p>
                   <a href="/dashboard/cycles" class="btn btn-primary rounded-pill px-4">
-                    <i class="ti ti-arrow-left me-2"></i>
+                    <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
                     {{ __('cycles.Cycles') }}
                   </a>
                 </div>
@@ -746,6 +782,10 @@
               return (parseFloat($cardB.data('score')) || 0) - (parseFloat($cardA.data('score')) || 0);
             case 'score-asc':
               return (parseFloat($cardA.data('score')) || 0) - (parseFloat($cardB.data('score')) || 0);
+            case 'approval-desc':
+              return (parseFloat($cardB.data('approval-pct')) || 0) - (parseFloat($cardA.data('approval-pct')) || 0);
+            case 'approval-asc':
+              return (parseFloat($cardA.data('approval-pct')) || 0) - (parseFloat($cardB.data('approval-pct')) || 0);
             default:
               return 0;
           }
@@ -915,8 +955,23 @@
 
     function buildEvaluationModal(data) {
       const totalScore = (data.total * 100).toFixed(1);
-      
+
       let modalContent = `
+        <style>
+          .judge-card-ribbon { position: relative; overflow: hidden; }
+          .approval-ribbon {
+            position: absolute; top: 2px; right: -8px;
+            width: 180px; padding: 6px 0;
+            transform: translate(50px, 18px) rotate(45deg);
+            font-size: 10px; font-weight: 600;
+            text-align: center; white-space: nowrap;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            z-index: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+          }
+          .approval-ribbon.ribbon-approved { background: #28a745; color: #fff; }
+          .approval-ribbon.ribbon-disapproved { background: #dc3545; color: #fff; }
+          .approval-ribbon.ribbon-pending { background: #ffc107; color: #212529; }
+        </style>
         <div class="px-4 py-3">
           <!-- Overall Score Header -->
           <div class="row mb-5">
@@ -955,14 +1010,19 @@
       // Add judges summary cards
       data.judges.forEach(judge => {
         const judgeScore = (judge.evaluation.value * 100).toFixed(1);
-        const statusClass = judge.evaluation.status === 'Published' ? 'success' : 
+        const statusClass = judge.evaluation.status === 'Published' ? 'success' :
                            judge.evaluation.status === 'Draft' ? 'warning' : 'danger';
-        const statusIcon = judge.evaluation.status === 'Published' ? 'circle-check' : 
+        const statusIcon = judge.evaluation.status === 'Published' ? 'circle-check' :
                           judge.evaluation.status === 'Draft' ? 'clock' : 'circle-x';
-        
+        const approvalLabel = judge.evaluation.approval === 'approved' ? '{{ __("cycles.Approved") }}' :
+                          judge.evaluation.approval === 'disapproved' ? '{{ __("cycles.Disapproved") }}' : '{{ __("cycles.Pending") }}';
+        const ribbonClass = judge.evaluation.approval === 'approved' ? 'ribbon-approved' :
+                          judge.evaluation.approval === 'disapproved' ? 'ribbon-disapproved' : 'ribbon-pending';
+
         modalContent += `
                 <div class="col-md-4">
-                  <div class="card border shadow-sm h-100">
+                  <div class="card border shadow-sm h-100 judge-card-ribbon">
+                    <span class="approval-ribbon ${ribbonClass}">${approvalLabel}</span>
                     <div class="card-body text-center py-4">
                       <img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle mb-3" width="60" height="60">
                       <h6 class="fw-semibold mb-2">${judge.name}</h6>
@@ -1011,22 +1071,22 @@
                       <h6 class="mb-0 fw-semibold text-dark">${subCriterion.name}</h6>
                       <span class="fw-bold text-primary fs-6">${subScore} %</span>
                     </div>
-                    
+
                     <!-- Judge Details for this sub-criterion -->
                     <div class="row g-3">`;
 
           subCriterion.details.forEach(judgeDetail => {
-            const judgeScore = (judgeDetail.score * 100).toFixed(1);
-            const statusClass = judgeDetail.status === 'Published' ? 'success' : 
+            const judgeScore = (judgeDetail.value * 100).toFixed(1);
+            const statusClass = judgeDetail.status === 'Published' ? 'success' :
                                judgeDetail.status === 'Draft' ? 'warning' : 'danger';
-            
+
             modalContent += `
                       <div class="col-md-6">
                         <div class="card border-0 bg-white shadow-sm">
                           <div class="card-body p-4">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                               <div class="d-flex align-items-center">
-                                <img src="${data.judges.find(j => j.id === judgeDetail.judger.id)?.image_url || '/icons/account.svg'}" 
+                                <img src="${data.judges.find(j => j.id === judgeDetail.judger.id)?.image_url || '/icons/account.svg'}"
                                      alt="${judgeDetail.judger.name}" class="rounded-circle me-3" width="32" height="32">
                                 <div>
                                   <div class="fw-medium text-dark">${judgeDetail.judger.name}</div>
@@ -1070,19 +1130,28 @@
       // Add individual judge evaluations
       data.judges.forEach((judge, index) => {
         const judgeScore = (judge.evaluation.value * 100).toFixed(1);
-        const statusClass = judge.evaluation.status === 'Published' ? 'success' : 
+        const statusClass = judge.evaluation.status === 'Published' ? 'success' :
                            judge.evaluation.status === 'Draft' ? 'warning' : 'danger';
-        
+        const approvalBadgeClass = judge.evaluation.approval === 'approved' ? 'success' :
+                           judge.evaluation.approval === 'disapproved' ? 'danger' : 'warning';
+        const approvalBadgeIcon = judge.evaluation.approval === 'approved' ? 'circle-check' :
+                           judge.evaluation.approval === 'disapproved' ? 'times-circle' : 'clock';
+        const approvalLabel = judge.evaluation.approval === 'approved' ? '{{ __("cycles.Approved") }}' :
+                           judge.evaluation.approval === 'disapproved' ? '{{ __("cycles.Disapproved") }}' : '{{ __("cycles.Pending") }}';
+
         modalContent += `
                 <div class="accordion-item border shadow-sm mb-3">
                   <h2 class="accordion-header" id="heading${judge.id}">
-                    <button class="accordion-button ${index === 0 ? '' : 'collapsed'} py-4" type="button" data-bs-toggle="collapse" 
+                    <button class="accordion-button ${index === 0 ? '' : 'collapsed'} py-4" type="button" data-bs-toggle="collapse"
                             data-bs-target="#collapse${judge.id}" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="collapse${judge.id}">
                       <div class="d-flex align-items-center w-100">
                         <img src="${judge.image_url}" alt="${judge.name}" class="rounded-circle me-4" width="40" height="40">
                         <div class="flex-grow-1">
                           <div class="fw-bold text-dark">${judge.name}</div>
                           <div class="small text-muted mt-1">${judge.email}</div>
+                        </div>
+                        <div class="me-2">
+                          <span class="badge bg-${approvalBadgeClass} bg-opacity-10 text-${approvalBadgeClass} px-3 py-2"><i class="far fa-fw fa-sm fa-${approvalBadgeIcon} me-1"></i>${approvalLabel}</span>
                         </div>
                         <div class="me-4">
                           <span class="badge bg-${statusClass} bg-opacity-10 text-${statusClass} px-3 py-2">${judge.evaluation.status}</span>
@@ -1093,7 +1162,7 @@
                       </div>
                     </button>
                   </h2>
-                  <div id="collapse${judge.id}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" 
+                  <div id="collapse${judge.id}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}"
                        aria-labelledby="heading${judge.id}" data-bs-parent="#judgeAccordion">
                     <div class="accordion-body p-4">`;
 
@@ -1147,6 +1216,27 @@
                         <h6 class="fw-bold mb-3">{{ __('cycles.Overall Comment') }}</h6>
                         <div class="bg-light rounded-3 p-4">
                           <p class="mb-0 text-dark fst-italic">"${judge.evaluation.comment}"</p>
+                        </div>
+                      </div>`;
+          }
+
+          // Form submission comments
+          if (judge.form_comments && judge.form_comments.length > 0) {
+            modalContent += `
+                      <div class="mt-5 pt-4 border-top">
+                        <h6 class="fw-bold mb-3">
+                          <i class="ti ti-message-dots text-primary me-2"></i>
+                          {{ __('cycles.Submission Comments') }}
+                        </h6>
+                        <div class="list-group list-group-flush">`;
+            judge.form_comments.forEach(fc => {
+              modalContent += `
+                          <div class="list-group-item border-start border-primary border-3 mb-2 rounded bg-light">
+                            <div class="fw-semibold text-dark mb-1">${fc.question}</div>
+                            <div class="text-muted fst-italic">"${fc.comment}"</div>
+                          </div>`;
+            });
+            modalContent += `
                         </div>
                       </div>`;
           }

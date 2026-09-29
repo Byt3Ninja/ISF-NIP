@@ -6,6 +6,12 @@ return [
         'broadcast' => 'You have been invited to join the ":team" hackathon team.',
     ],
 
+    'hackathon_status' => [
+        'accepted' => ':member has accepted your invitation to join the ":team" hackathon team.',
+        'rejected' => ':member has declined your invitation to join the ":team" hackathon team.',
+        'cancelled' => 'The invitation to join the ":team" hackathon team has been cancelled.',
+    ],
+
     'startup_join' => [
         'whatsapp' => 'Congratulations! You have joined the :cycle. Welcome aboard from :app.',
         'broadcast' => 'You have joined the :cycle. Welcome aboard!',
@@ -23,6 +29,16 @@ return [
         'database'  => 'Welcome to our platform!',
         'broadcast' => 'Welcome to our platform! We are excited to have you.',
         'whatsapp'  => 'Welcome, :name! Your account has been set up successfully.',
+    ],
+
+    'organization_manager_welcome' => [
+        'database'  => 'Welcome! Your account has been created as Organization Manager of :organization_name.',
+        'broadcast' => 'Welcome! Your account has been created as Organization Manager of :organization_name.',
+    ],
+
+    'organization_assigned' => [
+        'database'  => 'You have been assigned to :organization_name.',
+        'broadcast' => 'You have been assigned to :organization_name.',
     ],
 
     'mentorship_request' => [
@@ -44,9 +60,14 @@ return [
     ],
 
     'task' => [
-        'broadcast' => 'Task update: :message',
-        'whatsapp'  => 'Task update: :message',
-        'subject'   => 'Task Update',
+        'broadcast'          => 'Task added: :message',
+        'whatsapp'           => 'Task added: :message',
+        'subject'            => 'Task Added',
+        'subject_add'        => 'Task Added',
+        'subject_update'     => 'Task Updated',
+        'subject_archive'    => 'Task Archived',
+        'subject_reopen'     => 'Task Reopened',
+        'subject_feedback'   => 'Task Review Update',
     ],
 
     'mentorship_session' => [
@@ -54,6 +75,7 @@ return [
         'whatsapp'  => ':greeting :line',
         'database' => 'New mentorship session notification',
         'subject' => 'Mentorship Session Update',
+        'founder_booking' => 'You have a new mentorship session with :mentor_name on :session_date at :start_time – :end_time (AM/PM).',
     ],
 
     'confirm_email_update' => [

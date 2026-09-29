@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 // Illuminate\Support\Facades\Http; // لم نعد بحاجة إليه إذا استخدمنا Guzzle فقط
 
@@ -18,6 +19,16 @@ class ZoomService implements OnlineMeetingServiceInterface
     const MEETING_TYPE_RECURRING = 3;
     const MEETING_TYPE_FIXED_RECURRING_FIXED = 8;
 
+    /**
+     * Hard ceilings on every Zoom call. Without these Guzzle waits forever, so a
+     * slow or unresponsive Zoom endpoint stalled the whole web request.
+     */
+    const CONNECT_TIMEOUT = 5;
+    const REQUEST_TIMEOUT = 15;
+
+    /** How long a host's licensed/basic status stays cached. */
+    const LICENSE_CACHE_TTL = 21600; // 6 hours
+
     public Client $client;
     protected ?array $jwt = null; // Nullable and type hinted
     protected ?array $headers = null; // Nullable and type hinted
@@ -25,7 +36,10 @@ class ZoomService implements OnlineMeetingServiceInterface
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->client = new Client([
+            'timeout'         => self::REQUEST_TIMEOUT,
+            'connect_timeout' => self::CONNECT_TIMEOUT,
+        ]);
         // لا تقم بإنشاء التوكن هنا لتجنب مشكلة Auth::user() == null
     }
 
@@ -104,12 +118,25 @@ class ZoomService implements OnlineMeetingServiceInterface
             ];
     }
 
+        // The account-credentials token is valid for ~1 hour and is identical for
+        // every request made with the same credential set. Minting a fresh one on
+        // each booking added a full round-trip to every meeting creation, so cache
+        // it against a hash of the credentials (never the credentials themselves)
+        // and expire it slightly early to stay clear of the boundary.
+        $tokenCacheKey = 'zoom:token:' . sha1($ZOOM_CLIENT_ID . '|' . $ZOOM_ACCOUNT_ID);
+        $cachedToken = Cache::get($tokenCacheKey);
+        if (is_string($cachedToken) && $cachedToken !== '') {
+            return ['status' => true, 'data' => $cachedToken];
+        }
+
         try {
             $client = new Client([ // Guzzle client for token generation
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode($ZOOM_CLIENT_ID . ':' . $ZOOM_CLIENT_SECRET),
                     'Host' => 'zoom.us', // هذا الهيدر قد لا يكون ضرورياً مع Guzzle الأحدث
                 ],
+                'timeout'         => self::REQUEST_TIMEOUT,
+                'connect_timeout' => self::CONNECT_TIMEOUT,
             ]);
 
             $response = $client->request('POST', "https://zoom.us/oauth/token", [
@@ -122,6 +149,11 @@ class ZoomService implements OnlineMeetingServiceInterface
             $responseBody = json_decode($response->getBody()->getContents(), true);
 
             if (isset($responseBody['access_token'])) {
+                // Zoom reports expires_in in seconds (typically 3600). Renew a
+                // minute early so an in-flight request never uses a dead token.
+                $ttl = max(60, ((int) ($responseBody['expires_in'] ?? 3600)) - 60);
+                Cache::put($tokenCacheKey, $responseBody['access_token'], $ttl);
+
                 return ['status' => true, 'data' => $responseBody['access_token']];
             }
             Log::error('ZoomService: Access token not found in Zoom OAuth response.', ['response_body' => $responseBody]);
@@ -174,14 +206,32 @@ class ZoomService implements OnlineMeetingServiceInterface
     protected function getAvailableZoomUserEmail(string $startTime, int $duration): ?string
     {
         $startTimestamp = strtotime($startTime);
+        if ($startTimestamp === false) {
+            Log::warning('ZoomService: Unparseable start time for host selection.', ['start_time' => $startTime]);
+            return null;
+        }
         $endTimestamp = $startTimestamp + ($duration * 60);
 
-        $licensedHosts = explode(',', env('ZOOM_LICENSED_HOSTS')); 
+        $licensedHosts = array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('ZOOM_LICENSED_HOSTS'))
+        )));
 
         if (empty($licensedHosts)) {
             Log::error('ZoomService: No licensed hosts configured.');
             return null;
         }
+
+        // Only meetings on the booking's own day can overlap it. Previously this
+        // pulled every scheduled meeting each host had ever created and paged
+        // through all of them, which cost several round-trips per host and grew
+        // without bound. Zoom's from/to filters narrow that to a single small
+        // page. The window is padded by a day on each side so meetings recorded
+        // in another timezone still surface.
+        $window = [
+            'from' => gmdate('Y-m-d', $startTimestamp - 86400),
+            'to'   => gmdate('Y-m-d', $endTimestamp + 86400),
+        ];
 
         foreach ($licensedHosts as $email) {
             if (!$this->isLicensedZoomUser($email)) {
@@ -194,8 +244,10 @@ class ZoomService implements OnlineMeetingServiceInterface
                 $nextPageToken = null;
                 do {
                     $query = [
-                        'type' => 'scheduled',
-                        'page_size' => 100,
+                        'type'            => 'scheduled',
+                        'page_size'       => 100,
+                        'from'            => $window['from'],
+                        'to'              => $window['to'],
                         'next_page_token' => $nextPageToken,
                     ];
                     $response = $this->client->get($url, [
@@ -208,11 +260,18 @@ class ZoomService implements OnlineMeetingServiceInterface
                     $nextPageToken = $responseData['next_page_token'] ?? null;
 
                     foreach ($meetings as $meeting) {
+                        if (empty($meeting['start_time'])) {
+                            continue; // Recurring meetings with no fixed time cannot clash.
+                        }
+
                         $existingStart = strtotime($meeting['start_time']);
-                        $existingEnd = $existingStart + ($meeting['duration'] * 60);
+                        if ($existingStart === false) {
+                            continue;
+                        }
+                        $existingEnd = $existingStart + (((int) ($meeting['duration'] ?? 0)) * 60);
 
                         if ($startTimestamp < $existingEnd && $endTimestamp > $existingStart) {
-                            continue 2; // Conflict found, try next user
+                            continue 3; // Conflict found, try next host.
                         }
                     }
                 } while ($nextPageToken);
@@ -230,7 +289,10 @@ class ZoomService implements OnlineMeetingServiceInterface
 
     public function createMeeting($data): array
     {
-        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null)) {
+        $user = Auth::user();
+        $orgId = optional(optional($user)->organization)->id;
+
+        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null, $orgId)) {
             return [
                 'success' => false,
                 'data'    => __('settings.max_concurrent_sessions_reached'),
@@ -335,12 +397,27 @@ class ZoomService implements OnlineMeetingServiceInterface
             return false;
         }
 
+        // A host's plan type effectively never changes, but this was re-checked
+        // over the network for every host on every booking. Cache the answer so
+        // host selection costs no round-trips in the common case. Only a
+        // definitive answer is cached — transient failures must not pin a host
+        // to "unlicensed" for hours.
+        $cacheKey = 'zoom:licensed:' . sha1(strtolower(trim((string) $email)));
+        $cached = Cache::get($cacheKey);
+        if (is_bool($cached)) {
+            return $cached;
+        }
+
         try {
             $response = $this->client->get("https://api.zoom.us/v2/users/" . urlencode($email), [
                 'headers' => $this->headers,
             ]);
             $userData = json_decode($response->getBody(), true);
-            return $userData['type'] === 2;
+            $isLicensed = isset($userData['type']) && (int) $userData['type'] === 2;
+
+            Cache::put($cacheKey, $isLicensed, self::LICENSE_CACHE_TTL);
+
+            return $isLicensed;
         } catch (\Exception $e) {
             Log::error("ZoomService: User validation failed for $email: " . $e->getMessage());
             return false;

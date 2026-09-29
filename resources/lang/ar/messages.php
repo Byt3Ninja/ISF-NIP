@@ -60,6 +60,8 @@ return [
     'approved_message' => 'نود إعلامك أن طلبك لجلسة إرشادية قد تمت الموافقة عليه من قبل مدير البرنامج. شكرًا لاهتمامك الكبير.',
     'denied_message' => 'نود إعلامك أن طلبك لجلسة إرشادية قد تم رفضه من قبل مدير البرنامج. شكرًا لاهتمامك، ونتمنى لك النجاح في مساعيك.',
     'mentorship_session_action' => 'تم :action طلب جلسة الارشاد مع :name',
+    'mentorship_session_notification_message' => 'لديك جلسة إرشاد جديدة مع :name بتاريخ :session_date في :session_time',
     'Approved' => 'قبول',
     'Denied' => 'رفض',
+    'New_mentorship_session' => 'جلسة إرشادية جديدة',
 ];

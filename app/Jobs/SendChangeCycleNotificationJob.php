@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Step;
 use App\User;
+use App\Role;
 use App\Events\ChangeStep;
 use Illuminate\Bus\Queueable;
 use App\Notifications\ChangeCycle;
@@ -67,21 +68,21 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         // // إرسال الحدث بالبث
         // broadcast(new ChangeStep($data));
         //     log::info(" notifying user: " . $company_owner->email);
-        $recipients = User::role("Registered")
-            ->where('email', $company_owner->email)
-            ->get();
 
-             
-            foreach ($recipients as $recipient) {
-                try {
-                    $data['preferred_language'] = $recipient->language;
-                    $recipient->notify(new ChangeCycle( $data ) );
-                } catch (\Throwable $th) {
-                    // يمكنك التسجيل هنا بدلاً من الرمي
-                    Log::error("Error notifying user: " . $th->getMessage());
-                }
+        // $recipients = User::role("Registered")->where('email', $company_owner->email)->get();
+        $recipients = Role::where('default_for', 'registered')->with(['users', 'users.roles', 'users.organizations', 'users.company', 'users.company.cycledata'])->get();
+		$recipients = $recipients->flatMap(function ($role) {
+			return $role->users;
+		})->where('email', $company_owner->email)->values();
+    
+        foreach ($recipients as $recipient) {
+            try {
+                $data['preferred_language'] = $recipient->language;
+                $recipient->notify(new ChangeCycle( $data ) );
+            } catch (\Throwable $th) {
+                // يمكنك التسجيل هنا بدلاً من الرمي
+                Log::error("Error notifying user: " . $th->getMessage());
             }
-        
-         
+        }
     }
 }

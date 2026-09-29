@@ -43,8 +43,8 @@
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="row  d-flex justify-content-center">
         <div class="col-12 col-md-8 col-lg-9">
           <div class="card">
@@ -148,6 +148,33 @@
                       </div>
                     </div>
                   </div>
+
+                  @if(isset($organizations) && $organizations->count() > 0)
+                    <div class="row mb-3">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="form-label font-semibold fs-6 mb-1">
+                            {{ $l == 'en' ? 'Organization' : 'المنظمة' }}
+                          </label>
+                          <select name="organization_id" class="select2 form-select">
+                            <option value="">{{ $l == 'en' ? 'Platform-wide (No Organization)' : 'على مستوى المنصة (بدون منظمة)' }}</option>
+                            @foreach($organizations as $org)
+                              <option value="{{ $org->id }}" @if($course->organization_id == $org->id) selected @endif>{{ $org->{"name_{$l}"} }}</option>
+                            @endforeach
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check form-switch mb-2">
+                          <input class="form-check-input" type="checkbox" name="is_public" value="1" id="isPublicToggle" @if($course->is_public) checked @endif>
+                          <label class="form-check-label" for="isPublicToggle">
+                            {{ $l == 'en' ? 'Visible to all organizations' : 'مرئي لجميع المنظمات' }}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  @endif
+
                   <div class="form-group mb-4">
                     <label class="form-label font-semibold fs-6 mb-1">{{ __('cycles.Add a description') }}:</label>
                     <textarea class="form-control" id="dsc" name='dsc' rows="4"
@@ -180,6 +207,7 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
   <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+  @include('partials.flatpickr-locale')
   <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
 
   <!-- Page JS -->

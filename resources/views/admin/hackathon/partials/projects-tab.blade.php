@@ -7,33 +7,46 @@
       </h5>
     </div>
   @else
+
     <div class="card">
       <div class="card-body">
-        @if($data_evi['start']?->format('Y-m-d H:i:s') < date('Y-m-d H:i:s') && $data_evi['end']?->format('Y-m-d H:i:s') > date('Y-m-d H:i:s'))
-          <h5 class="card-title">
-            {{ $l == 'en' ? 'Project Submission' : 'رفع المشاريع والحلول' }}
-          </h5>
-          <p>
-            {{ $l == 'en' ? 'Please upload your team\'s project before the hackathon deadline. Make sure to include
-            all required files and a clear presentation.' : 'يرجى رفع مشروع فريقك قبل انتهاء وقت الهاكثون. تأكد من
-            تضمين جميع الملفات المطلوبة وعرض تقديمي واضح.' }}
-          </p>
-          <div id="submission-status-message" class="alert alert-info">
-            {{ $l == 'en' ? 'You can upload your project now. Deadline: '. $data_evi['end']->format('F j, Y,') .'.'
-            : 'يمكنك رفع مشروعك الآن. الموعد النهائي: '. $data_evi['end']->format('F j, Y,') .'.' }}
+        <h5 class="card-title">
+          {{ $l == 'en' ? 'Project Submission' : 'رفع المشاريع والحلول' }}
+        </h5>
+        <p>
+          {{ $l == 'en' ? 'Please upload your team\'s project before the hackathon deadline. Make sure to include
+          all required files and a clear presentation.' : 'يرجى رفع مشروع فريقك قبل انتهاء وقت الهاكثون. تأكد من
+          تضمين جميع الملفات المطلوبة وعرض تقديمي واضح.' }}
+        </p>
+
+        @if ($hasSubmission)
+          <div id="submission-status-message" class="alert alert-success d-flex align-items-center mb-4">
+            <i class="ti ti-circle-check-filled me-2" style="font-size: 1.25rem;"></i>
+            <div>
+              {{ $l == 'en' ? 'Project submitted' : 'تم إرسال المشروع.' }}
+            </div>
           </div>
-          {{-- <div id="already-submitted-message" class="alert alert-success" style="display:none;">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            {{ $l == 'en' ? 'Your project has been uploaded successfully! You can update it until the deadline.' :
-            'تم رفع مشروعكم بنجاح! يمكنكم تحديثه حتى الموعد النهائي.' }}
-            <p class="mt-2">
-              <strong>{{ $l == 'en' ? 'Uploaded Project:' : 'المشروع المرفوع:' }}</strong>
-              MyAwesomeSolution.zip (2.5MB) -
-              {{ $l == 'en' ? 'Upload Date: March 16, 2024, 05:30 PM' : 'تاريخ الرفع: 16 مارس 2024, 05:30 مساءً' }}
-            </p>
-          </div> --}}
-          @if($data_evi['stype'] == 5)
-            @if(count($data_evi['fields'] ) > 0)
+        @elseif ($isOpen)
+          <div id="submission-status-message" class="alert alert-info d-flex align-items-center mb-4">
+            <i class="ti ti-info-circle-filled me-2" style="font-size: 1.25rem;"></i>
+            <div>
+              {{ $l == 'en' 
+                  ? 'Submissions are open until ' . ($end ? $end->locale($l)->translatedFormat('F j, Y, g:i A') : '') . '.' 
+                  : 'الإرسال متاح حتى ' . ($end ? $end->locale($l)->translatedFormat('F j, Y, g:i A') : '') . '. .' }}
+            </div>
+          </div>
+        @else
+          <div id="submission-status-message" class="alert alert-danger d-flex align-items-center mb-4">
+            <i class="ti ti-circle-x-filled me-2" style="font-size: 1.25rem;"></i>
+            <div>
+              {{ $l == 'en' ? 'Submissions are closed.' : 'تم إغلاق استقبال المشاريع.' }}
+            </div>
+          </div>
+        @endif
+
+        @if($data_evi['stype'] == 5)
+          @if(count($data_evi['fields'] ) > 0)
+            @if ($isOpen || $hasSubmission)
               <form method="post" action="/dashboard/cycles/save" enctype="multipart/form-data">
                 {!! csrf_field() !!}
                 <input type="hidden" name="cycle" value="{{ $data_evi['cycle_id'] }}" />
@@ -57,7 +70,7 @@
                     <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
                     @endif
                     <select class="form-select @error($field_name) is-invalid @enderror" id="{{ $id_for }}"
-                      name='{{ $field_name }}' required>
+                      name='{{ $field_name }}' required {{ !$isOpen ? 'disabled' : '' }}>
                       <option value="">{{$l=='ar'?'اختر':'Choose'}}...</option>
                       @foreach(explode(",", $options->values) as $value)
                       <option value="{{ trim($value) }}" {{ old($field_name)==trim($value)? "selected" : "" }}
@@ -78,7 +91,7 @@
                     <label for="{{ $id_for }}" class="form-label fw-bold">{{ $options->label }}</label>
                     @endif
                     <textarea class="form-control @error($field_name) is-invalid @enderror" id="{{ $id_for }}"
-                      name="{{ $field_name }}" rows="{{ $options->rows ?? 4 }}">{{ old($field_name) }}{{$answer}}</textarea>
+                      name="{{ $field_name }}" rows="{{ $options->rows ?? 4 }}" {{ !$isOpen ? 'disabled' : '' }}>{{ old($field_name) }}{{$answer}}</textarea>
                     @error($field_name)
                     <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
                     @enderror
@@ -92,7 +105,7 @@
                     @endif
                     <div class="d-flex flex-column">
                       <input type="file" class="form-control @error($field_name) is-invalid @enderror" id="{{ $id_for }}"
-                        name="{{ $field_name }}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                        name="{{ $field_name }}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" {{ !$isOpen ? 'disabled' : '' }}>
                       @if($answer)
                       <div class="mt-4">
                         <a href="/{{ $answer }} " target="_blank" class="btn btn-sm btn-outline-primary">
@@ -118,6 +131,7 @@
                     id="{{$id_for}}"
                     name="{{ $field_name }}"
                     value="{{ !empty( $answer ) ? $answer : ( !empty( old($field_name) ) ? old($field_name) : '' ) }}"
+                    {{ !$isOpen ? 'disabled' : '' }}
                     />
                     @error($field_name)
                     <div class="invalid-feedback">{{ $errors->first($field_name) }}</div>
@@ -127,85 +141,25 @@
                 </div>
                 @endforeach
 
-                <div class="d-flex justify-content-end mt-4">
-                  <button type="submit" class="btn btn-primary">
-                    {{ __('admin.submit') }}
-                  </button>
-                </div>
+                @if ($isOpen)
+                  <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-primary">
+                      {{ __('admin.submit') }}
+                    </button>
+                  </div>
+                @endif
               </form>
-            @else
-              <div class="text-center">
-                <h5 class="text-muted">{{ __('cycles.No Fields') }}</h5>
-              </div>
             @endif
           @else
+            <div class="text-center">
+              <h5 class="text-muted">{{ __('cycles.No Fields') }}</h5>
+            </div>
+          @endif
+        @else
           <div class="text-center">
             <h5 class="text-muted">{{ __('admin.You are not allowed to submit answers') }}</h5>
           </div>
-          @endif
-
-          {{-- <form id="projectSubmissionForm" class="mt-3">
-            <div class="mb-3">
-              <label for="projectName" class="form-label">
-                {{ $l == 'en' ? 'Project Name' : 'اسم المشروع' }}
-                <span class="text-danger">*</span>
-              </label>
-              <input type="text" class="form-control" id="projectName" required>
-            </div>
-            <div class="mb-3">
-              <label for="projectDescription" class="form-label">
-                {{ $l == 'en' ? 'Brief Project Description' : 'وصف مختصر للمشروع' }}
-                <span class="text-danger">*</span>
-              </label>
-              <textarea class="form-control" id="projectDescription" rows="3" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="projectFiles" class="form-label">
-                {{ $l == 'en' ? 'Project Files (single compressed file: zip, rar)' : 'ملفات المشروع (ملف مضغوط واحد:
-                zip, rar)' }}
-                <span class="text-danger">*</span>
-              </label>
-              <input class="form-control" type="file" id="projectFiles" accept=".zip,.rar" required>
-              <small class="form-text text-muted">
-                {{ $l == 'en' ? 'Maximum size: 25MB' : 'الحد الأقصى للحجم: 25MB' }}
-              </small>
-            </div>
-            <div class="mb-3">
-              <label for="projectLink" class="form-label">
-                {{ $l == 'en' ? 'Presentation Link (Google Slides, YouTube, etc.) (Optional)' : 'رابط العرض التقديمي
-                (Google Slides, YouTube, etc.) (اختياري)' }}
-              </label>
-              <input type="url" class="form-control" id="projectLink" placeholder="https://">
-            </div>
-            <div class="mb-3">
-              <label for="projectRepo" class="form-label">
-                {{ $l == 'en' ? 'Code Repository Link (GitHub, GitLab, etc.) (Optional)' : 'رابط مستودع الكود
-                (GitHub, GitLab, etc.) (اختياري)' }}
-              </label>
-              <input type="url" class="form-control" id="projectRepo" placeholder="https://">
-            </div>
-            <div class="progress mb-3" style="display:none;" id="uploadProgressBarContainer">
-              <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary">
-              <i class="bi bi-cloud-upload-fill me-2"></i>
-              {{ $l == 'en' ? 'Upload Project' : 'رفع المشروع' }}
-            </button>
-            <button type="button" class="btn btn-outline-secondary ms-2" onclick="saveDraft()">
-              {{ $l == 'en' ? 'Save as Draft' : 'حفظ كمسودة' }}
-            </button>
-          </form> --}}
-          @else
-          <div class="text-center">
-            <h5 class="alert alert-danger">
-              {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }},
-              {{ $l == 'en' ? 'will be opening on '. $data_evi['start']?->format('F j, Y') : 'سوف يتم فتحها' .
-              $data_evi['start']?->format('F j, Y') }}
-            </h5>
-          </div>
-          @endif
+        @endif
       </div>
     </div>
   @endif
@@ -215,7 +169,7 @@
       @if($user->hasRole('Admin') || $user->hasRole('organizationmanager'))
       {{ $l == 'en' ? 'Add Final Evaluation Step First' : ' لا يمكنك تقديم المشاريع الان' }}
       @else
-      {{ $l == 'en' ? 'You can not submit projects now' : ' لا يمكنك تقديم المشاريع الان' }}
+      {{ $l == 'en' ? 'Submissions are closed.' : 'تم إغلاق استقبال المشاريع.' }}
       @endif
     </h5>
   </div>

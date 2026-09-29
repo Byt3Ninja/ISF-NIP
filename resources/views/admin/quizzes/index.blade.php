@@ -20,28 +20,15 @@ if ($user->hasRole('Admin')) {
 
 @section('content')
 	<!-- BEGIN: Content-->
-	<div class="content-wrapper">
-		<div class="container-xxl flex-grow-1 container-p-y">
-			<!-- Navigation Tabs -->
-			<nav class="nav-align-top mb-6">
-				@php
-					$tabs = [
-						['title' => __('admin.quizzes'), 'url' => 'dashboard/quizzes', 'icon' => 'clock-bolt'],
-						['title' => __('admin.quizzes_results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
-					]
-				@endphp
-				<ul class="nav nav-pills">
-					@foreach($tabs as $tab)
-						<li class="nav-item">
-							<a href="/{{ $tab['url'] }}" class="nav-link {{ Request::is($tab['url'] . '*') ? 'active' : '' }}">
-								<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-								{{ $tab['title'] }}
-							</a>
-						</li>
-					@endforeach
-				</ul>
-			</nav>
-			<!--/ Navigation Tabs -->
+	<div class="">
+		<div class="">
+			@php
+				$tabs = [
+					['title' => __('admin.quizzes'), 'url' => 'dashboard/quizzes', 'icon' => 'clock-bolt'],
+					['title' => __('admin.quizzes_results'), 'url' => 'dashboard/quizResults', 'icon' => 'checklist'],
+				]
+			@endphp
+			<x-navigation-pills :tabs="$tabs" />
 
 			@if( session()->has('success') )
 				<div class="w-100">
@@ -197,7 +184,7 @@ if ($user->hasRole('Admin')) {
         searching: true,
         lengthChange: true,
         pageLength: 10,
-				order: [[ 5, "desc" ]],
+				order: [[ 6, "desc" ]],
 				dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
 				  buttons: [
           {

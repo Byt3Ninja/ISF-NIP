@@ -7,6 +7,8 @@ use App\SubCategory;
 use App\Organization;
 use App\QuestionsBank;
 use App\QuestionCategories;
+use App\Stage;
+use App\Weight;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -235,7 +237,6 @@ class QuestionsBankController extends Controller
 			$question->save();
 			$question->organizations()->attach($request->organization_id);
 		} else {
-
 			$rules = [
 				'ascategory_id' => 'required|exists:categories,id',
 				'subcategory_id' => 'required|exists:sub_categories,id',
@@ -277,6 +278,26 @@ class QuestionsBankController extends Controller
 			$question->explanation_QA_ar = $request->explanation_QA_ar;
 			$question->explanation_QA_en = $request->explanation_QA_en;
 			$question->save();
+			/* Add Relation Between Question And Organization  from OrgQuestionBank */
+			$question->organizations()->attach($request->organization_id);
+
+			$stageIds = Stage::pluck('id');
+			$existingStageIds = Weight::where('category_id', $question->ascategory_id)
+				->where('subcategory_id', $question->subcategory_id)
+				->pluck('stage_id');
+			$missingStageIds = $stageIds->diff($existingStageIds);
+
+			if ($missingStageIds->isNotEmpty()) {
+				$now = now();
+				Weight::insert($missingStageIds->map(fn($stageId) => [
+					'stage_id' => $stageId,
+					'category_id' => $question->ascategory_id,
+					'subcategory_id' => $question->subcategory_id,
+					'weight' => 0,
+					'created_at' => $now,
+					'updated_at' => $now,
+				])->values()->all());
+			}
 		}
 
 		return redirect()->route('questions-bank.index')->with('success', 'StoredSuccessfully');

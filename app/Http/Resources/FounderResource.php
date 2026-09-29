@@ -18,7 +18,11 @@ class FounderResource extends JsonResource
             'id' => $this->id,
             'name' => $this->Name,
             'email' => $this->Email,
+            'phone' => $this->phone,
             'linkedin' => $this->LinkedIn,
+            'join_date' => optional($this->join_date)->format('Y-m-d'),
+            'founder_type' => $this->founder_type,
+            'working_commitment' => $this->working_commitment,
         ];
     }
 }

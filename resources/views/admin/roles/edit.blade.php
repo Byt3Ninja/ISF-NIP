@@ -11,9 +11,9 @@ $tabs = $_permissions->groupBy('group')->map(function ($groupPermissions, $group
 
 @section('content')
 <!-- Content wrapper -->
-<div class="content-wrapper">
+<div class="">
   <!-- Content -->
-  <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
     @if(session()->has('success'))
       <x-alert type="success" message=" {{ __('admin.' . session()->get('success')) }} {{ Session::forget('success') }}" />
     @elseif(session()->has('msg'))

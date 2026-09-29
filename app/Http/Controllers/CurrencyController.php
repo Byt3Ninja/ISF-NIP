@@ -38,6 +38,7 @@ class CurrencyController extends Controller
         $currency = new Currency();
         $currency->currency_code = $request->currency_code;
         $currency->currency_name = $request->currency_name;
+        $currency->currency_name_ar = $request->currency_name_ar;
         $currency->exchange_rate_to_usd = $request->exchange_rate_to_usd;
         $currency->enabled = $request->enabled ? 1 : 0;
         ini_set('memory_limit', '512M');
@@ -82,6 +83,7 @@ class CurrencyController extends Controller
     {
         $currency->currency_code = $request->currency_code;
         $currency->currency_name = $request->currency_name;
+        $currency->currency_name_ar = $request->currency_name_ar;
         $currency->currency_symbol = $request->currency_symbol;
         $currency->exchange_rate_to_usd = $request->exchange_rate_to_usd;
         $currency->enabled = $request->enabled ? 1 :0;

@@ -7,8 +7,8 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-overlay"></div>
     <div class="content-body">
       <section id="multiple-column-form">
@@ -53,16 +53,16 @@
                         <td> {{ $session->enddatetime ?? '-' }} </td>
                         <td>
                           @if( $session->type == 'sessions' )
-                            {{--  @if( strtotime( $session->enddatetime ) > time() )  --}}
-                              {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+                            {{ __('cycles.Duration') }}: {{ $session->duration }} {{ __('cycles.Minutes') }} :
+                            @if( $session->can_join )
                               <a title="Click to join" href="{{ route('trainings.sessions_join', $session->id ?? '0') }}" target="_blank">
                                 <button title="Join only" type="button" class="btn btn-icon rounded-circle btn-label-primary">
                                   <i class="ti ti-brand-zoom"></i>
                                 </button>
                               </a>
-                            {{--  @else
+                            @else
                               {{ __('admin.Finished') }}
-                            @endif  --}}
+                            @endif
                           @elseif ($session->type == 'offline')
                             <b>{{ __('cycles.trainer name') }}:</b>
                             {{ $session->trainer_name }}<br><b>{{ __('cycles.training location') }}:</b>
@@ -618,7 +618,7 @@
             }
 
             // 8. Join Link
-            if (response.type == 'sessions') {
+            if (response.type == 'sessions' && response.can_join) {
               $('#join-link').attr('href', response.join_url);
               $('#join-link').text(response.join_url);
               $('#join-button').show();

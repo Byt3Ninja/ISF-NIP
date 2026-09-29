@@ -11,10 +11,14 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\OrganizationRepository;
 use Illuminate\Http\UploadedFile;
+
 class OrganizationService
 {
-    public function __construct(protected OrganizationRepository $organizationRepo)
-    {
+    public function __construct(
+        protected OrganizationRepository $organizationRepo,
+        protected ?FileManagerService $fileManager = null
+    ) {
+        $this->fileManager = $fileManager ?? app(FileManagerService::class);
     }
 
     public function listOrganizations(?int $status = null)
@@ -26,7 +30,9 @@ class OrganizationService
 
     public function createOrganization(array $data,?UploadedFile $file, $countryCode): Organization
     {
-        $img_url = $this->uploadImage($file);
+        $img_url = $file 
+            ? $this->fileManager->upload($file, 'organizations', 'organizations')
+            : '/images/background/logo.png';
         return DB::transaction(function () use ($data, $img_url, $countryCode) {
             $password = $data['password'];
 
@@ -69,7 +75,10 @@ class OrganizationService
 
     public function updateOrganization(Organization $organization, array $data,?UploadedFile $file): Organization
     {
-        $img_url = $file ? $this->uploadImage($file) : $organization->img_url;
+        $img_url = $file 
+            ? $this->fileManager->update($file, $organization->img_url, 'organizations', 'organizations') 
+            : $organization->img_url;
+
         return DB::transaction(function () use ($organization, $data, $img_url) {
             $user = $organization->user;
 
@@ -122,18 +131,19 @@ class OrganizationService
             return 'soft';
         }
 
+        if ($organization->img_url && $organization->img_url !== '/images/background/logo.png') {
+            $this->fileManager->delete($organization->img_url, 'organizations');
+        }
+
         $organization->forceDelete();
         return true;
     }
 
     protected function uploadImage(?UploadedFile $file): string
-{
-    if (!$file) {
-        return '/images/background/logo.png';
+    {
+        if (!$file) {
+            return '/images/background/logo.png';
+        }
+        return $this->fileManager->upload($file, 'organizations', 'organizations');
     }
-
-    $filename = 'organizations/' . time() . '.' . $file->getClientOriginalExtension();
-    $file->move(public_path('organizations'), basename($filename));
-    return $filename;
-}
 }

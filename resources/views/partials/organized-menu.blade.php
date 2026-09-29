@@ -1,65 +1,5 @@
 @php
-$navigationItems = [
-  'dashboard' => [
-    'title' => 'dashboard_and_analytics',
-    'children' => [
-      ['title' => 'dashboard', 'route' => 'core.dashboard_view'],
-      ['title' => 'reports', 'route' => 'reports.list'],
-      ['title' => 'activities', 'route' => 'activities.index'],
-      ['title' => 'projects', 'route' => 'projects.index'],
-    ],
-  ],
-
-  'programs' => [
-    'title' => 'program_management',
-    'children' => [
-      ['title' => 'programs', 'route' => 'programlist.index'],
-      ['title' => 'forms', 'route' => 'forms.index'],
-      ['title' => 'screening', 'route' => 'screening.index'],
-      ['title' => 'assessment', 'route' => 'assessments.index'],
-      ['title' => 'training', 'route' => 'trainings.sessions_list'],
-      ['title' => 'mentorship', 'route' => 'mentorships.requests_view'],
-      ['title' => 'mentorship_sessions', 'route' => 'mentorships.sessions_list'],
-      ['title' => 'tasks', 'route' => 'tasks.index'],
-      ['title' => 'questions', 'route' => 'question-categories.index'],
-      ['title' => 'quizzes', 'route' => 'quizzes.index'],
-      ['title' => 'surveys', 'route' => 'surveys.index'],
-    ],
-  ],
-
-  'people' => [
-    'title' => 'people_and_organizations',
-    'children' => [
-      ['title' => 'organization_types', 'route' => 'organization-types.index'],
-      ['title' => 'organizations', 'route' => 'organizations.index'],
-      ['title' => 'users', 'route' => 'users.index'],
-      ['title' => 'startups', 'route' => 'users.view_companies'],
-      ['title' => 'judges', 'route' => 'users.judger'],
-      ['title' => 'mentors', 'route' => 'mentors.list'],
-      ['title' => 'service_providers', 'route' => 'services_providers.index'],
-    ],
-  ],
-
-  'services' => [
-    'title' => 'services_and_resources',
-    'children' => [
-      ['title' => 'services', 'route' => 'services.index'],
-      ['title' => 'file_manager', 'route' => 'my_files.list'],
-      ['title' => 'rooms', 'route' => 'rooms.index'],
-      ['title' => 'timesheets', 'route' => 'TimeSheet.index'],
-    ],
-  ],
-
-  'admin' => [
-    'title' => 'system_and_settings',
-    'children' => [
-      ['title' => 'settings', 'route' => 'settings.index'],
-      ['title' => 'logs_viewer', 'route' => 'audit-logs.index'],
-      ['title' => 'reminder_logs', 'route' => 'organization.ReminderLogs'],
-      ['title' => 'documentations', 'route' => 'documentation.index'],
-    ],
-  ],
-];
+$navigationItems = config('navigation')();
 
 $navigationIcons = [
   'dashboard' => 'smart-home',
@@ -97,6 +37,12 @@ if ($currentRoute) {
   }
 }
 
+// Special case: Make services active if URL contains 'requests/all' or 'serviceCategories'
+if (strpos(request()->getRequestUri(), 'requests/all') !== false || strpos(request()->getRequestUri(), 'serviceCategories') !== false) {
+  $activeGroup = 'services';
+  $activeItem = 'services.index';
+}
+
 // Special case: Make screening active if URL contains 'final' or 'screening'
 if (strpos(request()->getRequestUri(), 'final') !== false || strpos(request()->getRequestUri(), 'screening') !== false) {
   $activeGroup = 'programs';
@@ -109,8 +55,14 @@ if (strpos(request()->getRequestUri(), 'mentorship/sessions') !== false) {
   $activeItem = 'mentorships.sessions_list';
 }
 
+// Special case: Make mentorship management active if URL contains 'mentorship/view'
+if (strpos(request()->getRequestUri(), 'mentorship/view') !== false) {
+  $activeGroup = 'programs';
+  $activeItem = 'mentorships.requests_view';
+}
+
 // Special case: Make startups active if URL contains '/companies'
-if (strpos(request()->getRequestUri(), '/companies') !== false) {
+if (strpos(request()->getRequestUri(), '/companies') !== false || strpos(request()->getRequestUri(), '/companyProfile') !== false) {
   $activeGroup = 'people';
   $activeItem = 'users.view_companies';
 }
@@ -127,22 +79,25 @@ if (strpos(request()->getRequestUri(), '/organization-types') !== false) {
   $activeItem = 'organization-types.index';
 }
 
-// Special case: Make questions active if URL contains '/questions-bank'
-if (strpos(request()->getRequestUri(), '/questions-bank') !== false) {
+// Special case: Make questions active if URL contains '/questions-bank' or '/question-categories' or '/weights'
+if (strpos(request()->getRequestUri(), '/questions-bank') !== false || strpos(request()->getRequestUri(), '/question-categories') !== false || strpos(request()->getRequestUri(), '/weights') !== false) {
   $activeGroup = 'programs';
-  $activeItem = 'question-categories.index';
+  $activeItem = 'questions-bank.index';
 }
 
-// Special case: Make questions active if URL contains '/weights'
-if (strpos(request()->getRequestUri(), '/weights') !== false) {
-  $activeGroup = 'programs';
-  $activeItem = 'question-categories.index';
-}
-
-// Special case: Make mentors active if URL contains '/invitations'
-if (strpos(request()->getRequestUri(), '/invitations') !== false) {
+if (
+  (request()->is('*invitations*') || request()->is('*mentors*'))
+  && !request()->is('*mentorship/view*')
+  && !request()->is('*mentorship/sessions*')
+) {
   $activeGroup = 'people';
   $activeItem = 'mentors.list';
+}
+
+// Special case: Make startups active if URL contains '/myCompany'
+if (strpos(request()->getRequestUri(), '/myCompany') !== false) {
+  $activeGroup = 'people';
+  $activeItem = 'users.view_companies';
 }
 
 // Special case: Make programs active if URL contains 'programlist' or 'hackathon' or 'cycles' or '/mentorship/assign/'
@@ -151,10 +106,18 @@ if (strpos(request()->getRequestUri(), 'programlist') !== false || strpos(reques
   $activeItem = 'programlist.index';
 }
 
+// Special case: Make reminder logs active under admin group
+if (Route::is('organization.ReminderLogs', 'organization.destroyReminderLogs')) {
+  $activeGroup = 'admin';
+  $activeItem = 'organization.ReminderLogs';
+}
+
 // Special case: Make settings active if route matches specified patterns
 if (Route::is(
   'settings.*',
   'roles.*',
+  'permissions.*',
+  'permission-groups.*',
   'importer.*',
   'currencies.*',
   'Tags.*',
@@ -165,7 +128,10 @@ if (Route::is(
   'queue.*',
   'notification-templates.*',
   'notification-triggers.*',
-  'license.*'
+  'license.*',
+  'country-management.*',
+  'state-management.*',
+  'city-management.*'
 )) {
   $activeGroup = 'admin';
   $activeItem = 'settings.index';
@@ -183,14 +149,14 @@ $getSetting = App\Settings::find(1);
     <a href="/dashboard" class="app-brand-link">
       <img 
         @if (!is_null($_user->organization) && isset($_user->organization->img_url))
-          src="{{ $_user->organization->imageUrl }}"
+          src="{{ route('organizations.logo', $_user->organization?->img_url ?? '') }}"
         @elseif (!empty($getSetting->Logo))
           src="/images/logo/{{ $getSetting->Logo }}"
         @else
           src="/images/background/logo.png" 
         @endif
         alt="avatar" 
-        class="object-fit-contain me-2 rounded-circle border p-1 bg-card"
+        class="object-fit-cover me-2 rounded-circle border p-1 bg-card"
         style="width: 50px; height: 50px;"
       />
     </a>
@@ -210,7 +176,7 @@ $getSetting = App\Settings::find(1);
         </div>
         <input 
           id="search-menu-input" 
-          type="text" 
+          type="search" 
           class="form-control" 
           placeholder="{{ __('settings.navigation.search_menu') }}" 
         />
@@ -232,11 +198,11 @@ $getSetting = App\Settings::find(1);
         </a>
         <ul class="menu-sub">
           @foreach ($item['children'] as $child)
-            @if ($_user->ableTo($child['route'], $permissions))
+            @if ($_user->ableTo($child['route'], $permissions) && isset($child['menuOnly']) && $child['menuOnly'] == true)
               <li 
                 class="menu-item 
                 {{ $_user->hasRole('Admin') && $child['title'] === 'reminder_logs' ? 'd-none' : '' }} 
-                {{ in_array(env('APP_ENV'), ['production', 'beta']) && ($child['title'] === 'timesheets' || $child['title'] === 'projects') ? 'd-none' : '' }} 
+                {{ app()->environment(['production', 'beta']) && ($child['title'] === 'timesheets' || $child['title'] === 'projects') ? 'd-none' : '' }} 
                 {{ $child['route'] === $activeItem ? 'active' : '' }}"
               >
                 <a 
@@ -252,4 +218,14 @@ $getSetting = App\Settings::find(1);
       </li>
     @endforeach
   </ul>
+
+  <div id="menu-footer" class="px-6 py-4 border-top">
+    <span style="direction: ltr">
+        Incubator Pro
+        {{ config('app.version') ? 'v' . config('app.version') : '' }}
+        <br />
+        {{ config('app.build') ? '(Build ' . config('app.build') . ')' : '' }}
+        - &copy; {{ now()->year }}
+    </span>
+  </div>
 </aside>

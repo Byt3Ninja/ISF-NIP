@@ -37,6 +37,7 @@ class Formdata extends Model
             'FD.company_id as FD_company_id',
             'FD.user_id as FD_user_id',
             'FD.step_id as FD_step_id',
+            'S.data as S_form_id',
             'FD.question as FD_question',
             'FD.answer as FD_answer',
             'FD.created_at as FD_created_at',
@@ -79,13 +80,18 @@ class Formdata extends Model
         ->get();
 
         $C = 1;
-        $grouped = $forms->groupBy('FD_step_id');
-        $data = $grouped->map(function ($group, $stepId) use ($l, &$C) {
+        // One submission is one startup's set of answers for a step. Grouping by
+        // step alone would collapse every startup that submitted the same step into
+        // a single row and hide the rest.
+        $grouped = $forms->groupBy(fn($row) => $row->FD_step_id . '-' . $row->FD_company_id);
+        $data = $grouped->map(function ($group, $key) use ($l, &$C) {
             $first = $group->first();
 
             $item = new stdClass;
             $item->submission_id = $C++;
-            $item->step_id = $stepId;
+            $item->step_id = $first->FD_step_id;
+            $item->form_id = $first->S_form_id;
+            $item->company_id = $first->FD_company_id;
             $item->startup_name = $first->{'C_name_' . $l};
             $item->submitted_by = $group->pluck('user_name_' . $l)->unique()->implode(', ') ?? '';
             $item->step_name = $first->S_title;

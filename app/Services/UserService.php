@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Log;
 use App\User;
+use App\Cycle;
 use App\InviteMentor;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Http\UploadedFile;
@@ -49,20 +50,20 @@ class UserService
         if($paginate){        
         $users = $this->userRepository->paginate($query, $filters['per_page'] ?? 10, $filters['page'] ?? 1,'desc');
                 return [
-            'data' => UserResource::collection($users),
-            'meta' => [
-                'currentPage' => $users->currentPage(),
-                'lastPage' => $users->lastPage(),
-                'total' => $users->total(),
-                'path' => $users->path(),
-                'links' => [
-                    'first' => $users->url(1),
-                    'last' => $users->url($users->lastPage()),
-                    'prev' => $users->previousPageUrl(),
-                    'next' => $users->nextPageUrl(),
-                ]
-            ]
-        ];
+                    'data' => UserResource::collection($users),
+                    'meta' => [
+                        'currentPage' => $users->currentPage(),
+                        'lastPage' => $users->lastPage(),
+                        'total' => $users->total(),
+                        'path' => $users->path(),
+                        'links' => [
+                            'first' => $users->url(1),
+                            'last' => $users->url($users->lastPage()),
+                            'prev' => $users->previousPageUrl(),
+                            'next' => $users->nextPageUrl(),
+                        ]
+                    ]
+                ];
         }else {
             $users = $query->with(['roles', 'company'])->get();
         }
@@ -86,29 +87,62 @@ class UserService
      * @throws \Exception
      * @return array{message: string, status: int, success: bool|array{success: bool, user: mixed}}
      */
-    public function store(array $data): array
-    {
-        try{
+	public function store(array $data): array
+	{
+		try{
+			$result = $this->userRepository->create( $data );
+			if( $result['success'] == true )
+			{
+				if( $data['role'] == 'serviceProvider' && array_key_exists('contact_name', $data) )
+				{
+					$data['user'] = $result['data'];
+					$result_service_provider = $this->userRepository->registerServiceProvider( $data );
+				}
+				$update_invite_mentor = InviteMentor::where('email', $data['email'])->orderBy('created_at', 'desc')->first();
+				if($update_invite_mentor)
+				{
+					$update_invite_mentor->update([
+						'mentor_id' => $result['data']->id,
+						'status' => 'Accepted',
+					]);
+					if($update_invite_mentor->organization_ids != null){
+						$mentorId = $result['data']->id;
+						$cycles = Cycle::whereIn(
+							'organization_id',
+							$update_invite_mentor->organization_ids
+						)->get();
+						foreach ($cycles as $cycle) {
+							$cycle->mentors()->syncWithoutDetaching([$mentorId]);
+						}
+					}
+				}
+				$user = $result['data'];
+				Storage::disk('UsersLFM')->makeDirectory("$user->id");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/BusinessPlans");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/FinancialPlans");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/PitchDeck");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
+				Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
 
+				$isJudge = $user->hasRole('Judger')
+					|| $user->hasRole('judge')
+					|| in_array(strtolower($data['role'] ?? ''), ['judger', 'judge']);
 
-        $result = $this->userRepository->create($data);
-         
-        if($result['success'] ==true){
-            $update_invite_mentor = InviteMentor::where('email', $data['email'])->first();
-            if($update_invite_mentor){
-                $update_invite_mentor->update(['mentor_id' => $result['data']->id, 'status' => 'Accepted']);
-            }
-        $user=$result['data'];
-        Storage::disk('UsersLFM')->makeDirectory("$user->id");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/BusinessPlans");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/FinancialPlans");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/PitchDeck");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/Shared");
-		Storage::disk('UsersLFM')->makeDirectory("$user->id/Others");
-
-				if($user->hasRole('Judger')) { $user->notify(new WelcomeJudgerNotification($user)); }
-				elseif($user->hasRole('mentor')) { $user->notify(new WelcomeMentorNotification($user, $data['password'])); }
-				else { $user->notify(new WelcomeUserNotification($user, $data['password'])); }
+				if($isJudge) {
+					if ($user->claimEmailSlot('judge_welcome_sent_at')) {
+						$user->notify(new WelcomeJudgerNotification($user));
+					}
+				}
+				elseif($user->hasRole('mentor') || strtolower($data['role'] ?? '') === 'mentor') {
+					if ($user->claimEmailSlot('mentor_welcome_sent_at')) {
+						$user->notify(new WelcomeMentorNotification($user, $data['password']));
+					}
+				}
+				else {
+					if ($user->claimEmailSlot('user_welcome_sent_at')) {
+						$user->notify(new WelcomeUserNotification($user, $data['password']));
+					}
+				}
 			}
 			return $result;
 		} catch (\Throwable $e) {

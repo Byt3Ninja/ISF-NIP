@@ -2,8 +2,8 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-overlay"></div>
 
     <div class="content-body">
@@ -60,50 +60,36 @@
                 <div class="row g-3">
                   @if(auth()->user()->hasAnyRole(['Admin']))
                   <div class="col-12 col-md-6 col-lg-4">
-                    <select name="organization_id" class="form-select select2"
-                      data-placeholder="{{ __('admin.Organization') }}">
+                    <select name="organization_id" class="form-select select2" data-placeholder="{{ __('admin.Organization') }}">
                       <option value="">{{ __('admin.Organization') }}</option>
                       @if(auth()->user()->hasAnyRole(['Admin']))
-                      <option value="0">{{ __('admin.All') }}</option>
+                        <option value="0">{{ __('admin.All') }}</option>
                       @endif
-                      @php
-                      $user = auth()->user();
-                      if($user->hasRole('Admin')) {
-                        $organizations = App\Organization::all();
-                      } elseif($user->hasRole('organizationManager') || $user->isSubAdmin()) {
-                        $orgIds = $user->organizations_ids;
-                        $organizations = App\Organization::whereIn('id', $orgIds)->get();
-                      } else {
-                        $organizations = collect();
-                      }
-                      @endphp
                       @foreach ($organizations as $organization)
-                      <option value="{{ $organization->id }}" {{ $organization->id == request('organization_id') ?
-                        'selected' : '' }}>
-                        {{ $organization->{'name_' . $l} }}</option>
+                        <option value="{{ $organization->id }}" {{ $organization->id == request('organization_id') ? 'selected' : '' }}>
+                          {{ $organization->{'name_' . $l} }}
+                        </option>
                       @endforeach
                     </select>
                   </div>
                   @endif
 
                   <div class="col-6 col-md-3 col-lg-2">
-                    <input class="form-control datepicker" placeholder="{{ __('admin.StartDate') }}" name="date_from"
-                      value="{{ request('date_from') }}" />
+                    <input class="form-control datepicker" placeholder="{{ __('admin.StartDate') }}" name="date_from" value="{{ request('date_from') }}" />
                   </div>
 
                   <div class="col-6 col-md-3 col-lg-2">
-                    <input class="form-control datepicker" placeholder="{{ __('admin.EndDate') }}" name="date_to"
-                      value="{{ request('date_to') }}" />
+                    <input class="form-control datepicker" placeholder="{{ __('admin.EndDate') }}" name="date_to" value="{{ request('date_to') }}" />
                   </div>
 
                   <div class="col-12 col-md-6 col-lg-2">
                     <select name="channel" class="form-select select2" data-placeholder="{{ $l == 'en' ? 'Select channel' : 'اختر قناة' }}">
                       <option value="">{{ $l == 'en' ? 'All Channels' : 'جميع القنوات' }}</option>
                       <option value="whatsapp" {{ 'whatsapp'==request('channel') ? 'selected' : '' }}>
-                         {{ __('admin.Whatsapp') }}
+                        {{ __('admin.Whatsapp') }}
                       </option>
                       <option value="email" {{ 'email'==request('channel') ? 'selected' : '' }}>
-                         {{ __('admin.Email') }}
+                        {{ __('admin.Email') }}
                       </option>
                       <option value="in-app" {{ 'in-app'==request('channel') ? 'selected' : '' }}> 
                         {{ __('admin.in-app') }}
@@ -114,10 +100,9 @@
                   <div class="col-12 col-md-6 col-lg-2">
                     <select name="user" class="form-select select2" data-placeholder="{{ $l == 'en' ? 'Select user' : 'اختر مستخدمًا' }}">
                       <option value="">{{ $l == 'en' ? 'All Users' : 'جميع المستخدمين' }}</option>
-                      @foreach (\App\User::role(['mentor', 'registered'])->get() as $user)
+                      @foreach ($users as $user)
                       <option value="{{ $user->id }}" {{ request('user')==$user->id ? 'selected' : '' }}>
-                        {{ $user->{'first_name_' . app()->getLocale()} }} {{ $user->{'last_name_' . app()->getLocale()}
-                        }}
+                        {{ $user->{'first_name_' . app()->getLocale()} }} {{ $user->{'last_name_' . app()->getLocale()} }}
                       </option>
                       @endforeach
                     </select>
@@ -125,14 +110,10 @@
 
                   <div class="col-12 col-md-6 col-lg-2">
                     <select name="program" class="form-select select2" data-placeholder="{{ $l == 'en' ? 'Select program' : 'اختر برنامجًا' }}">
-
                       <option value="">{{ $l == 'en' ? 'All Programs' : 'جميع البرامج' }}</option>
-                      @foreach(\App\Cycle::WhereIn('id', $ReminderLogs->pluck('cycle_id'))->get() as $program)
-                      <option value="{{ $program->id }}" {{ $program->id == request('program') ? 'selected' : '' }}> {{
-                        $program->title }}
-                      </option>
+                      @foreach($programs as $program)
+                        <option value="{{ $program->id }}" {{ $program->id == request('program') ? 'selected' : '' }}> {{ $program->title }} </option>
                       @endforeach
-
                     </select>
                   </div>
                   <div class="col-12 col-md-6 col-lg-2">

@@ -119,12 +119,15 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
 
         $this->configureSmtp($smtpSettings);
 
+        $signOffName = $orgData['org_name'] ?? $platformName;
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
             ->subject( __('email.startup_mentorship_session_notify_email.rejection.subject') )
             ->view('emails.mentorship_notify_startup_rejection_email', array_merge([
                 'party'             => $notifiable,
-                'platformName'      => $platformName,
+                'platformName'      => $signOffName,
+                'submitNewRequestUrl' => url('/dashboard/mentors?nav=menu'),
             ], $orgData));
     }
 

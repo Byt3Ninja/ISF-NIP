@@ -159,6 +159,98 @@
 
 
 @push('scripts')
+    {{--
+        These rules live with the partial rather than in a host page's @section('style')
+        so they reach every page that includes it - the standalone Custom Pages screen
+        and the Program Setup wizard's Custom Pages tab both render this editor. The
+        layout only exposes a 'scripts' stack, so the <style> rides along here; it lands
+        late in <body> and still wins the cascade over Summernote's CDN stylesheet.
+    --}}
+    <style>
+        /* Hide stray Bootstrap-3 style close buttons. Summernote's own dialog
+           dismiss button is re-shown by the .note-modal .close rule below, which
+           wins on specificity. */
+        button.close {
+            display: none;
+        }
+
+        /* Summernote ships Bootstrap-3 flavoured dialog markup (.note-modal) for its
+           Link/Picture/Video dialogs, which misbehaves over a Bootstrap 5 modal
+           (Create/Edit Page). The editors pass dialogsInBody:true so these render in
+           <body> rather than inheriting the page modal's stacking context; the rules
+           below then fix the remaining Bootstrap-3 assumptions:
+           1. .note-modal-footer is height:40px with a floated .note-btn, so the CTA
+              escapes the dialog border.
+           2. Summernote's z-index (dialog 1050, backdrop 1040) sits under this theme's
+              modal (--bs-modal-zindex: 1090, backdrop 1089), so the dialog and its
+              backdrop would render behind the page modal.
+           3. The dismiss button needs to stay visible and clickable. */
+        .note-modal {
+            /* Above the theme's .modal (1090) and its in-modal tooltip/popover
+               layers (1091/1092) so the dialog is on top. */
+            z-index: 1094;
+            overflow-y: auto;
+        }
+
+        .note-modal-backdrop {
+            /* Above those same layers, but below .note-modal itself. */
+            z-index: 1093;
+        }
+
+        .note-modal .note-modal-content {
+            /* Keep the dialog clear of the fixed admin header. */
+            margin-top: 5rem;
+            margin-bottom: 2rem;
+        }
+
+        .note-modal .note-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        /* Summernote renders .close BEFORE the title and relies on float:right to
+           push it over. The float is removed above, so use flex order instead to keep
+           it on the trailing edge - which follows the text direction, so it lands on
+           the right in English and the left in Arabic. */
+        .note-modal .note-modal-header .note-modal-title {
+            order: 1;
+        }
+
+        /* Restore the dismiss button: visible, aligned, and easy to hit. */
+        .note-modal .note-modal-header .close {
+            display: block;
+            float: none;
+            flex: 0 0 auto;
+            order: 2;
+            font-size: 1.5rem;
+            line-height: 1;
+            opacity: .6;
+            padding: .25rem .5rem;
+        }
+
+        .note-modal .note-modal-header .close:hover,
+        .note-modal .note-modal-header .close:focus {
+            opacity: 1;
+        }
+
+        /* Un-float the CTA and let the footer grow to contain it. */
+        .note-modal .note-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: auto;
+            padding: .75rem 1.25rem 1.25rem;
+            text-align: initial;
+        }
+
+        .note-modal .note-modal-footer .note-btn {
+            float: none;
+            margin: 0;
+        }
+    </style>
+
     <script>
         $(document).ready(function() {
             $('.custom-table').DataTable({
@@ -185,9 +277,13 @@
             });
 
             // Initialize Summernote editors for custom pages with image upload
+            // Render the Link/Picture/Video dialogs in <body> instead of inside the
+            // editor. Nested in the Bootstrap 5 modal they inherit the modal's
+            // stacking context, so their z-index/backdrop can never sit above it.
             $('#custom-page-content').summernote({
                 placeholder: '{{ $l == 'ar' ? 'أدخل محتوى الصفحة' : 'Enter page content' }}',
                 height: 200,
+                dialogsInBody: true,
                 callbacks: {
                     onImageUpload: function(files) {
                         uploadSummernoteImage(files[0], $('#custom-page-content'));
@@ -197,11 +293,65 @@
             $('#edit-custom-page-content').summernote({
                 placeholder: '{{ $l == 'ar' ? 'أدخل محتوى الصفحة' : 'Enter page content' }}',
                 height: 200,
+                dialogsInBody: true,
                 callbacks: {
                     onImageUpload: function(files) {
                         uploadSummernoteImage(files[0], $('#edit-custom-page-content'));
                     }
                 }
+            });
+
+            /**
+             * Esc while a Link/Picture/Video dialog is open must close only that
+             * dialog. Summernote binds Esc on the dialog element itself, so it fires
+             * only when focus is inside it, and it does not stopPropagation - so the
+             * key otherwise reaches Bootstrap's document handler and closes the
+             * surrounding Create/Edit Page modal. Handle it in the capture phase,
+             * ahead of Bootstrap, and drive the dismissal explicitly.
+             */
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') {
+                    return;
+                }
+
+                var $dialog = $('.note-modal.open').last();
+                if (!$dialog.length) {
+                    return;
+                }
+
+                // Stop Bootstrap from closing the page modal underneath...
+                e.stopPropagation();
+                // ...and close the Summernote dialog ourselves. Summernote binds Esc on
+                // the dialog element, which only fires while focus is inside it, so we
+                // cannot rely on that listener here.
+                $dialog.find('.note-modal-header .close').trigger('click');
+            }, true);
+
+            /**
+             * Summernote only binds dismissal to its .close button - it has no
+             * click-outside-to-dismiss. Add it, and stop dialog clicks from reaching the
+             * Bootstrap 5 modal's click-outside handler, which would otherwise dismiss
+             * the Create/Edit Page modal underneath.
+             *
+             * This must bind on the dialog element itself, not delegated on document:
+             * delegated handlers run only after the event has bubbled past the page
+             * modal, far too late to stop it, while a capture-phase handler would run
+             * before Summernote's own delegated .close handler and break the X button.
+             * Dialogs are built lazily, so bind each one as it is first shown.
+             */
+            $('#custom-page-content, #edit-custom-page-content').on('summernote.dialog.shown', function() {
+                $('.note-modal').not('[data-outside-dismiss-bound]').each(function() {
+                    $(this)
+                        .attr('data-outside-dismiss-bound', '1')
+                        .on('click', function(e) {
+                            e.stopPropagation();
+
+                            // Only a click on the dialog shell counts as "outside".
+                            if (e.target === this) {
+                                $(this).find('.note-modal-header .close').trigger('click');
+                            }
+                        });
+                });
             });
 
             // Image upload handler function

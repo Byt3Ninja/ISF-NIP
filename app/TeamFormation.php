@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use stdClass;
+use App\Enums\StepType;
 
 class TeamFormation extends Model
 {
@@ -27,7 +28,8 @@ class TeamFormation extends Model
         'project_status',
         'region',
         'winner_status',
-        'img_team'
+        'img_team',
+        'group_id_chat'
     ];
 
     public function cycle()
@@ -45,6 +47,17 @@ class TeamFormation extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public static function maxAcceptedMembers($stepId)
+    {
+        $members = self::where('step_id', $stepId)->with(['teamMembers'])->get();
+        $numberOfMembers = $members->map(function ($team) {
+            $teamMembers = $team->teamMembers->where('acceptInvition', 'accepted')->values();
+            return $teamMembers->count();
+        })->max();
+
+        return $numberOfMembers;
     }
 
     public static function teams( $cycleId )
@@ -86,9 +99,22 @@ class TeamFormation extends Model
             ->leftJoin('team_members AS tm', 'tm.team_formation_id', '=', 'tf.id')
             ->leftJoin('users AS u', 'u.id', '=', 'tm.user_id')
             ->leftJoin('companies AS c', 'tm.Company_id', '=', 'c.id')
-            ->leftJoin('screening_evaluation_results AS ser', 'ser.company_id', '=', 'c.id')
-            ->leftJoin('screening_evaluation AS se', 'ser.evaluation_id', '=', 'se.id')
-            ->leftJoin('steps AS stp', 'stp.id', '=', 'se.step_id')
+            // The cycle's final-evaluation step, resolved from the CYCLE rather
+            // than from `companies.step`. `companies.step` is a moving pointer to
+            // wherever the startup currently sits, so joining on it only matched
+            // during the window a startup was parked on the final step: every
+            // other team resolved a null step and was then dropped by winners(),
+            // leaving the winner-selection table empty (GV-3798 / GV-3799).
+            ->leftJoin('steps AS stp', function( $join ) use ( $cycleId ) {
+                $join->on('stp.cycle_id', '=', 'c.cycle')
+                     ->where('stp.stype', '=', StepType::FINAL_EVALUATION)
+                     ->where('stp.cycle_id', '=', $cycleId);
+            })
+            ->leftJoin('screening_evaluation AS se', 'se.step_id', '=', 'stp.id')
+            ->leftJoin('screening_evaluation_results AS ser', function( $join ) {
+                $join->on('ser.company_id', '=', 'c.id')
+                     ->on('ser.evaluation_id', '=', 'se.id');
+            })
             ->leftJoin('project_likes AS pl', 'pl.team_id', '=', 'tf.id')
             ->where('tf.cycle_id', $cycleId)
             ->where('tm.acceptInvition', 'accepted')
@@ -101,7 +127,10 @@ class TeamFormation extends Model
             $team->region = $t->team_region;
             $team->name = $t->team_name;
             $team->winner = $t->team_winner_status;
-            $team->img = $t->team_img_team;
+            // Team logos live outside the web root; expose the authorized route.
+            $team->img = $t->team_img_team
+                ? route('hackathon.teamLogo', basename($t->team_img_team))
+                : null;
             $team->project = new stdClass;
             $team->project->name = $t->{'team_project_name_' . $l};
             $team->project->description = $t->{'team_project_description_' . $l};
@@ -154,7 +183,12 @@ class TeamFormation extends Model
 				$evaluation->save();
 			}
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
-            $metadata = ScreeningEvaluationResults::metadata( $stepId );
+            // $allCompanies = true: metadata() otherwise scopes companies to
+            // `where('step', $stepId)`, the same moving-pointer trap fixed in
+            // teams(). Without it a startup that has already advanced past the
+            // final step loses its judges and score even though a published
+            // result exists for it.
+            $metadata = ScreeningEvaluationResults::metadata( $stepId, null, null, true );
             $judges = $metadata['judges'];
             $judges = $judges->map(function( $item ) {
                 $item->companies_ids = collect($item->companies)->pluck('id')->toArray();
@@ -169,7 +203,6 @@ class TeamFormation extends Model
                 $company_id = $team->company->id;
                 $publishedEvaluations = 0;
                 $averageScore = 0;
-                $published = true;
 
                 foreach( $judges as $judge )
                 {
@@ -178,8 +211,7 @@ class TeamFormation extends Model
                         $scoped_company = collect($judge->companies)->where('id', $company_id)->first();
                         if( $scoped_company )
                         {
-                            if( strtolower($scoped_company->status) != 'published' ) { $published = false; }
-                            if( $published == false ) { continue( 2 ); }
+                            if( strtolower($scoped_company->status) != 'published' ) { continue; }
                             if( strtolower($scoped_company->status) === 'published' && isset( $scoped_company->score ) )
                             {
                                 $scopedJudge = new stdClass;
@@ -200,13 +232,25 @@ class TeamFormation extends Model
                 if( $publishedEvaluations > 0 ) { $averageScore = round($totalScore / $publishedEvaluations, 1); }
                 $scoped_teams[$index]->score = $averageScore;
                 $scoped_teams[$index]->judges = $teamJudges;
-                $scoped_teams[$index]->published = $published;
             }
             $output = $output->merge($scoped_teams);
         }
-        $output = $output->where('published', true)->filter(function($item) {
-            return count( $item->judges ) > 0;
-        })->values();
+
+        // Teams whose step never resolved (no final-evaluation step on the cycle
+        // yet, or no company linked to the leader) are still submitted projects
+        // and must appear in the winner-selection table so a rank can be assigned
+        // -- previously they were silently dropped here. They render unscored,
+        // behind the view's existing "awaiting evaluation" badge.
+        $scored_ids = $output->pluck('id')->all();
+        $unscored = $teams->whereNotIn('id', $scored_ids)->values();
+        foreach( $unscored as $team )
+        {
+            $team->score = 0;
+            $team->judges = [];
+        }
+        $output = $output->merge($unscored);
+
+        $output = $output->values();
         $winnersData = $output->map(function( $team ) {
             return [
                 'id' => $team->id,

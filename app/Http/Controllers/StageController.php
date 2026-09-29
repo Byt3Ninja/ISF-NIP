@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Stage;
+use App\Weight;
+use App\QuestionsBank;
 use Illuminate\Http\Request;
 
 class StageController extends Controller
@@ -39,7 +41,25 @@ class StageController extends Controller
         $stages->description_ar = $request->stage_Description_ar;
         $stages->description_en = $request->stage_Description_en;
         $stages->save();
-    
+
+        $categorySubcategoryPairs = QuestionsBank::where('group', 'assessment')
+            ->whereNotNull('ascategory_id')
+            ->whereNotNull('subcategory_id')
+            ->get(['ascategory_id', 'subcategory_id'])
+            ->unique(fn($question) => $question->ascategory_id . '-' . $question->subcategory_id);
+
+        if ($categorySubcategoryPairs->isNotEmpty()) {
+            $now = now();
+            Weight::insert($categorySubcategoryPairs->map(fn($pair) => [
+                'stage_id' => $stages->id,
+                'category_id' => $pair->ascategory_id,
+                'subcategory_id' => $pair->subcategory_id,
+                'weight' => 0,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->values()->all());
+        }
+
         // إرجاع استجابة ناجحة (يمكن تعديلها حسب الحاجة)
         return back()->with(['class'=>'success','message'=>__('Stage_stored_successfully')]);
     }

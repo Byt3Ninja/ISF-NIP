@@ -4,8 +4,8 @@
 <link rel="stylesheet" href="/css/hackathon.css" />
 @stop
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="text-center hackathon-banner">
       <div class="banner-content">
         <div class="hackathon-status-badge"> {{ $hackathon->status }} </div>
@@ -95,11 +95,19 @@
                     {{--  <td class="px-4 py-2">{{ $winner['team'] }}</td>  --}}
                     <td class="px-4 py-2">{{ $winner['step'] }}</td>
                     <td class="px-4 py-2">
-                      @foreach( $winner['judges'] as $judge )
+                      @forelse( $winner['judges'] as $judge )
                         <div>( {{ $judge->score }} ) {{ $judge->name }}</div>
-                      @endforeach
+                      @empty
+                        <span class="badge bg-label-secondary">{{ __('admin.awaiting_evaluation') }}</span>
+                      @endforelse
                     </td>
-                    <td class="px-4 py-2">{{ $winner['score'] }}</td>
+                    <td class="px-4 py-2">
+                      @if( count($winner['judges']) > 0 )
+                        {{ $winner['score'] }}
+                      @else
+                        <span class="text-muted">&mdash;</span>
+                      @endif
+                    </td>
                     <td class="px-4 py-2">
                       <select name="winners[{{ $winner['id'] }}]" onchange="updateWinnerClass(this)" class="border px-2 py-1 rounded">
                         <option value="" {{ $winner['rank'] == '' ? 'selected' : '' }}> {{ $l == 'en' ? 'None' : 'لا شيء' }} </option>

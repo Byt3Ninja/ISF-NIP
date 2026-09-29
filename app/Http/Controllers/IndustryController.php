@@ -29,14 +29,15 @@ class IndustryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-				'name' => 'required',
+				'name_en' => 'required|string|max:255',
+				'name_ar' => 'nullable|string|max:255',
 			]);
 			$industry = new StaticCategory();
-            $industry->name_ar = $request->name;
-            $industry->name_en = $request->name;
+            $industry->name_en = $request->name_en;
+            $industry->name_ar = $request->name_ar ?: $request->name_en;
 			$industry->save();
-			
-			return response()->json(['status'=> 'success','message' => 'AddedSuccessfully']);
+
+			return response()->json(['status'=> 'success','message' => 'AddedSuccessfully', 'id' => $industry->id]);
     }
 
     /**
@@ -61,11 +62,10 @@ class IndustryController extends Controller
     public function update(Request $request, string $id)
     {
         $id = $request->input('id');
-			$name = $request->input('newName');
 
 			$updateindustry = StaticCategory::where('id', $id)->first();
-			$updateindustry->name_ar = $name;
-            $updateindustry->name_en = $name;
+			$updateindustry->name_en = $request->input('newNameEn', $request->input('newName'));
+			$updateindustry->name_ar = $request->input('newNameAr') ?: $updateindustry->name_en;
 			$updateindustry->save();
 
 			return response()->json(['message' => 'UpdatedSuccessfully']);

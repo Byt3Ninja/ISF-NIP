@@ -4,7 +4,7 @@
 
 <!-- Goggle Tag Manger -->
 @if ($gtag)
-  <script async src="https://www.googletagmanager.com/gtag/js?id={!! $gtag->url !!}"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id={!! (is_string($gtag) ? json_decode($gtag)->url : $gtag->url) !!}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
 
@@ -72,7 +72,7 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.css" />
-
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/toastr/toastr.css" />
 <!-- For Searchable Select -->
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
@@ -88,6 +88,34 @@
 
 <!-- BEGIN: Page CSS-->
 @yield('style')
+<style>
+  .hide-before::before {
+    display: none;
+  }
+
+  .dataTables_wrapper .row {
+    margin-bottom: 0 !important;
+  }
+
+  .dataTables_wrapper .dataTables_info,
+  .dataTables_wrapper .dataTables_paginate {
+    margin-top: 0 !important;
+  }
+
+  .card-datatable {
+    padding-top: 0 !important;
+  }
+
+  /* Daterangepicker dropdowns inside a modal/offcanvas are positioned by
+     /js/daterangepicker-viewport.js using viewport-fixed coordinates, so they
+     stay fully visible instead of drifting off-screen after a date is picked.
+     The margin-top override neutralises the per-page offsets that fought it. */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
+  }
+</style>
 <!-- END: Page CSS-->
 
 <!-- BEGIN: Custom CSS-->

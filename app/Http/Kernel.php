@@ -40,7 +40,9 @@ class Kernel extends HttpKernel
             Permissions::class,
             \App\Http\Middleware\SetUserTimezone::class,
              \App\Http\Middleware\SetLocaleFromSession::class,
+            \App\Http\Middleware\NavigationHistoryMiddleware::class,
             \App\Http\Middleware\EnsurePasswordChanged::class,
+            \App\Http\Middleware\refreshMySurveys::class
         ],
 
         'api' => [

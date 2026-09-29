@@ -148,43 +148,90 @@ class SlotController extends Controller
 	}
 
 	public function getSlots(Request $request, $id = null)
-	{
+	{	
 		
 		$settings = Settings::where('id', 1)->first();
 		$offline_allowed = $settings ? ($settings->allow_offline_sessions == 1 ? true : false) : false;
+		$mentorId = $id ?? auth()->id();
 
-		$schedules = Schedule::where('user_id', $id ?? auth()->id())
-						->where(function ($query) {$query
-								->whereNull('date')
-								->orWhere('date', '>', date('Y-m-d'))
+		$isOwner = $mentorId == auth()->id();
+
+		$query = Schedule::where('user_id', $mentorId)
+						->where(function ($query) use ($isOwner) {$query
+								->where(function ($weekly) use ($isOwner) {
+									$weekly->whereNull('date');
+									// dfrom filter: only hide not-yet-active Weekly slots for non-owners (booking view)
+									if (!$isOwner) {
+										$weekly->where(function ($q) {
+											$q->whereNull('dfrom')
+											  ->orWhere('dfrom', '<=', date('Y-m-d'));
+										});
+									}
+								})
+								//->orWhere('date', '>=', date('Y-m-d'))
 								->orWhere(function ($q) {
-									$q->where('date', date('Y-m-d'))
-									->where('tto', '>', date('H:i:s'));
+									$q->where('date', '>', date('Y-m-d'))
+									  ->orWhere(function ($q2) {
+										$q2->where('date', date('Y-m-d'))
+										   ->where('tto', '>', date('H:i:s'));
+									  });
 								});
-						})
-						->get();
+						});
+						// Booked Period slots are intentionally NOT filtered out here: they are
+						// returned and rendered as locked/disabled on the frontend via
+						// blocked_intervals (see mentor bookings block below), so a manager sees
+						// why a slot is unavailable instead of it silently vanishing.
+
 		// Active-only filter
 		if ($request->has('active_only') && $request->active_only == 'true') {
-			$schedules = Schedule::where('user_id', $id ?? auth()->id())
-						->where(function ($query) {$query
-								->whereNull('date')
-								->orWhere('date', '>', date('Y-m-d'))
-								->orWhere(function ($q) {
-									$q->where('date', date('Y-m-d'))
-									->where('tto', '>', date('H:i:s'));
-								});
-						})
-						->get();
+			// placeholder for future active-state filtering
 		}
 
+		$schedules = $query->get();
+			
 		if($offline_allowed == false){
 			$schedules = $schedules->where('session_type', '!=','Offline');
+		}
+
+		// Resolve location and address based on cycle/program or organization
+		$cycleId = $request->input('cycle_id');
+		$organizationId = $request->input('organization_id');
+		
+		$cycle = null;
+		if ($cycleId) {
+			$cycle = \App\Cycle::with('organization')->find($cycleId);
+		}
+		if (!$cycle) {
+			$user = auth()->user();
+			if ($user && $user->company) {
+				$cycle = $user->company->cycledata;
+			}
+		}
+
+		$location = null;
+		$address = null;
+		if ($cycle) {
+			$location = $cycle->offline_location_map ?: ($cycle->organization->google_map_url ?: null);
+			$address = $cycle->offline_location_address ?: ($cycle->organization->address ?: null);
+		} elseif ($organizationId) {
+			$org = \App\Organization::find($organizationId);
+			if ($org) {
+				$location = $org->google_map_url;
+				$address = $org->address;
+			}
 		}
 
 		$slots = collect(); // we will push items manually
 
 		foreach ($schedules as $item) {
 			$isWeekly = $item->type == 'Weekly';
+
+			$slotLoc = null;
+			$slotAddr = null;
+			if ($item->session_type === 'Offline') {
+				$slotLoc = $location;
+				$slotAddr = $address;
+			}
 
 			if ($isWeekly) {
 				// cleanWeekday() must return an array of weekdays
@@ -199,9 +246,13 @@ class SlotController extends Controller
 						'end_time'     => substr($item->tto, 0, 5),
 						'session_type' => $item->session_type,
 						'weekly'       => true,
+						'location'     => $slotLoc,
+						'Address'      => $slotAddr,
+						'starts_from'  => $item->dfrom ? $item->dfrom->format('Y-m-d') : null,
 					]);
 				}
 			} else {
+				
 				// Non-weekly: single slot per row
 				$slots->push([
 					'id'           => $item->id,
@@ -211,14 +262,50 @@ class SlotController extends Controller
 					'end_time'     => substr($item->tto, 0, 5),
 					'session_type' => $item->session_type,
 					'weekly'       => false,
+					'location'     => $slotLoc,
+					'Address'      => $slotAddr,
 				]);
 			}
+			
 		}
-
-		// Calculate blocked intervals
+		// Calculate blocked intervals (max concurrent sessions)
 		$settings = Settings::where('id', 1)->first();
 		$maxLimit = $settings ? (int)$settings->max_concurrent_sessions : 0;
 		$blockedIntervals = $this->getBlockedIntervals($maxLimit);
+
+		// اضافة حجوزات المنتور كـ blocked intervals عشان الـ weekly slots تتفلتر per-date فى الـ frontend
+		$mentorBookings = \DB::table('mentorship_requests')
+			->where('mentor_id', $mentorId)
+			->where(function ($q) {
+				$q->where('approved', 'Yes')->orWhereNull('approved');
+			})
+			->where('zoom_date', '>=', now()->toDateString())
+			->get(['zoom_date', 'period']);
+
+		foreach ($mentorBookings as $booking) {
+			$start = Carbon::parse($booking->zoom_date);
+			$end = (clone $start)->addMinutes($booking->period ?: 60);
+			$blockedIntervals[] = [
+				'start' => $start->timestamp,
+				'end' => $end->timestamp,
+			];
+		}
+		
+		// If user is admin/subadmin/orgManager, return list of startups in that cycle
+		$startups = [];
+		if ($cycleId && auth()->user()->hasAnyRole(['admin', 'organizationManager', 'subadmin'])) {
+			$startups = \App\Company::where('cycle', $cycleId)
+				->with('user')
+				->get()
+				->map(function ($c) {
+					return [
+						'id' => $c->user->id ?? 0,
+						'name' => $c->name . ' (' . ($c->user->name ?? '') . ')',
+					];
+				})
+				->filter(fn($item) => $item['id'] > 0)
+				->values();
+		}
 
 		// If fetching for a mentor, include mentor info
 		if ($id) {
@@ -232,15 +319,17 @@ class SlotController extends Controller
 				'data' => $slots,
 				'blocked_intervals' => $blockedIntervals,
 				'offline_allowed' => $offline_allowed,
+				'startups' => $startups,
 			], 200);
 		}
 
-		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed], 200);
+		return response()->json(['success' => true, 'data' => $slots, 'blocked_intervals' => $blockedIntervals, 'offline_allowed' => $offline_allowed, 'startups' => $startups], 200);
 	}
 
 
 	public function store(Request $request)
 	{
+		
 		$settings = Settings::where('id', 1)->first();
 			$validated = $request->validate([
 					'session_type' => 'required',
@@ -267,43 +356,112 @@ class SlotController extends Controller
 							], 422);
 					}
 				}
-			// Build base search query
-			$query = Schedule::where('user_id', auth()->id())
-					->where('type', $validated['type'])
-					->where('tfrom', $validated['tfrom'])
-					->where('tto', $validated['tto'])
-					->where('session_type', $sessionType);
-
-			// Add type-specific conditions
-			if ($validated['type'] === 'Weekly') {
-					$query->where('days', $validated['days']);
-			} else {
-					$query->where('date', $validated['date']);
-			}
-
-			// Check if duplicate exists
-			$exists = $query->exists();
-
-			if ($exists) {
+				
+				if($validated['type'] == 'Period' && $validated['date'].' '.$validated['tfrom'] <= date('Y-m-d H:i')){
 					return response()->json([
 							'success' => false,
-							'message' => __('mentor.slot_already_exists'),
+							'message' => __('mentor.this_time_before_now'),
 					], 422);
-			}
-			$dayName = Carbon::parse($validated['date'])->format('l');
-			// Create slot
+				}
+				$dayName = $validated['type'] !== 'Weekly'
+					? Carbon::parse($validated['date'])->format('l')
+					: ($this->weekdayMap[$validated['days']] ?? $validated['days']);
+
+				// Build base search query with proper overlap detection
+				$query = Schedule::where('user_id', auth()->id())
+						->where('type', $validated['type'])
+						->where('tfrom', '<=', $validated['tto'].':00')
+						->where('tto', '>=', $validated['tfrom'].':00')
+						->where('session_type', $sessionType);
+
+				// Add type-specific conditions
+				if ($validated['type'] === 'Weekly') {
+						$query->where('days', $dayName);
+				} else {
+						$query->where('date', $validated['date']);
+				}
 			
+				// Check if duplicate exists
+				$getschedule = $query->orderBy('created_at', 'desc')->first();
+				//dd($validated, $sessionType, $getschedule);
+				if ($getschedule != null) {
+					// If existing slot hasn't started yet (dfrom in future), replace it
+					if ($getschedule->dfrom && $getschedule->dfrom > now()) {
+						return response()->json([
+								'success' => false,
+								// message includes between time and date of existing slot for better UX
+								'message' =>  __('mentor.overlap', ['date' => $validated['date'],'from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
+						], 422);
+						// $getschedule->delete();
+					} elseif ($getschedule->tfrom == $validated['tfrom'].':00' && $validated['tto'] >= $getschedule->tto) {
+						return response()->json([
+							'success' => false,
+							'message' =>  __('mentor.overlap', ['date' => $validated['date'],'from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
+						], 422);
+					} else {
+						return response()->json([
+								'success' => false,
+								'message' =>  __('mentor.overlap', ['date' => $validated['date'],'from' => $getschedule->tfrom, 'to' => $getschedule->tto]),
+						], 422);
+					}
+				}
+
+				// Cross-type check: Weekly blocks Period
+				if ($validated['type'] === 'Period') {
+					$weeklySlots = Schedule::where('user_id', auth()->id())
+						->where('type', 'Weekly')
+						->where('session_type', $sessionType)
+						->where('tfrom', '<', $validated['tto'].':00')
+						->where('tto', '>', $validated['tfrom'].':00')
+						->get();
+
+					foreach ($weeklySlots as $weekly) {
+						$weekdays = $this->cleanWeekday($weekly->days);
+						if (in_array($dayName, $weekdays)) {
+							return response()->json([
+								'success' => false,
+								'message' =>  __('mentor.between', ['from' => $weekly->tfrom, 'to' => $weekly->tto]),
+							], 422);
+						}
+					}
+				}
+
+				// Cross-type check: Period exists → Weekly starts after it
+				$dfrom = null;
+				if ($validated['type'] === 'Weekly') {
+					$conflictingPeriods = Schedule::where('user_id', auth()->id())
+						->where('type', 'Period')
+						->where('session_type', $sessionType)
+						->where('tfrom', '<', $validated['tto'].':00')
+						->where('tto', '>', $validated['tfrom'].':00')
+						->orderBy('date', 'desc')
+						->get();
+
+					foreach ($conflictingPeriods as $period) {
+						$periodDay = $this->cleanWeekday($period->days);
+						if (in_array($dayName, $periodDay)) {
+							$dfrom = Carbon::parse($period->date)
+								->addDay()
+								->toDateString();
+							break;
+						}
+					}
+				}
+
+				// Create slot
 				$slotData = [
 					'user_id' => auth()->id(),
 					'type' => $validated['type'],
 					'session_type' => $sessionType,
 					'tfrom' => $validated['tfrom'],
 					'tto' => $validated['tto'],
-					'days' => $validated['type'] === 'Weekly' ? $validated['days'] : $dayName,
+					'days' => $dayName,
 					'date' => $validated['type'] !== 'Weekly' ? $validated['date'] : null,
+					'dfrom' => $dfrom,
 				];
 
 				$schedules[] = Schedule::create($slotData);
+			
 			}
 			
 			return response()->json([
@@ -318,6 +476,7 @@ class SlotController extends Controller
 						'end_time' => substr($schedule->tto, 0, 5),
 						'session_type' => $schedule->session_type,
 						'weekly' => $schedule->type === 'Weekly',
+						'starts_from' => $schedule->dfrom ? $schedule->dfrom->format('Y-m-d') : null,
 					];
 				})
 			], 200);
@@ -329,12 +488,11 @@ class SlotController extends Controller
 			$validated = $request->validate([
 					'selectedDays' => 'required|array',
 			]);
-
+		
 			// 1. Find original schedule slot
 			$original = Schedule::findOrFail($id);
-
 			$createdSlots = [];
-
+		
 			foreach ($validated['selectedDays'] as $day) {
 
 					// 2. Build new schedule data
@@ -345,23 +503,37 @@ class SlotController extends Controller
 					// 3. Apply day/date depending on type
 					if ($original->type === 'Weekly') {
 							$slotData['days'] = $day; // single weekday (0–6)
+							
 							unset($slotData['date']); // remove date if exists
 					} else {
 							// date‐specific slot
-							$slotData['date'] = $day; // here $day must be a date (Y-m-d)
+							$slotData['date'] = Carbon::parse($day)->toDateString(); // here $day must be a date (Y-m-d)
+							$slotData['dfrom'] = Carbon::parse($day)->toDateString(); // set dfrom same as date to prevent immediate availability of copied Weekly slots
+							$slotData['days'] = $day;
 							unset($slotData['days']); // remove weekday if exists
 					}
-
+					// if the original slot equals new slot, skip creation to prevent duplicates
+					if(isset($slotData['date'])) {
+						$found = Schedule::where('date', $slotData['date'])->where('days', $slotData['days'])->first();
+					} else {
+						$found = null;
+					}
+					if ($found && $found->tfrom == $slotData['tfrom'] && $found->tto == $slotData['tto'] && $found->session_type == $slotData['session_type']) {
+						return response()->json([
+								'success' => false,
+								'message' => __('mentor.slot_already_exists') . ' ' . __('mentor.between', ['from' => $found->tfrom, 'to' => $found->tto]),
+						], 422);
+					}
 					// 4. Create new duplicated schedule
 					$newSchedule = Schedule::create($slotData);
-
-					$isWeekly = $newSchedule->type === 'Weekly';
-
+	
+					$isWeekly = $newSchedule->type === 'Weekly' ?? 'period';
+					
 					// 5. Format response slot
 					$createdSlots[] = [
 							'id'           => $newSchedule->id,
 							'weekday'      => $isWeekly ? $newSchedule->days : null,
-							'date'         => $isWeekly ? null : ($newSchedule->date ?? $newSchedule->dto),
+							'date'         => $isWeekly ? null : ($newSchedule->date ?? $newSchedule->tto),
 							'start_time'   => substr($newSchedule->tfrom, 0, 5),
 							'end_time'     => substr($newSchedule->tto, 0, 5),
 							'session_type' => $newSchedule->session_type,

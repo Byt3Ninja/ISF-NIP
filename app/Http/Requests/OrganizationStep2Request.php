@@ -21,14 +21,14 @@ class OrganizationStep2Request extends FormRequest
     {
         return [
             // Contact Information
-            'contact_email' => 'required|email|max:255',
+            'contact_email' => 'nullable|email|max:255|regex:/^[a-zA-Z0-9._%+\-@]+$/',
             'country_code' => 'required_with:contact_phone|nullable|string|max:10',
             'contact_phone' => 'nullable|string|max:20|regex:/^[0-9\s\-\+\(\)]+$/',
             'country_id' => 'required|exists:countries,id',
-            'state_id' => 'required|exists:states,id',
-            'city_id' => 'required|exists:cities,id',
-            'address' => 'required|string|max:500',
-            'google_map_url' => ['required', 'string', 'max:500', 'regex:#^https?://(www\.)?(google\.[a-z]{2,3}(/maps)?|maps\.google\.[a-z]{2,3}|goo\.gl|maps\.app\.goo\.gl)#i'],
+            'state_id' => 'nullable|exists:states,id',
+            'city_id' => 'nullable|exists:cities,id',
+            'address' => 'nullable|string|max:500',
+            'google_map_url' => ['nullable', 'string', 'max:500', 'regex:#^https?://(www\.)?(google\.[a-z]{2,3}(/maps)?|maps\.google\.[a-z]{2,3}|goo\.gl|maps\.app\.goo\.gl)#i'],
 
             // Social Media (all optional)
             'linkedin_company_url' => 'nullable|url|max:255',
@@ -60,7 +60,6 @@ class OrganizationStep2Request extends FormRequest
                 'country_id.exists' => 'الدولة المحددة غير صالحة',
                 'state_id.required' => 'يرجى اختيار المنطقة',
                 'state_id.exists' => 'المنطقة المحددة غير صالحة',
-                'city_id.required' => 'يرجى اختيار المدينة',
                 'city_id.exists' => 'المدينة المحددة غير صالحة',
                 'address.required' => 'يرجى إدخال العنوان',
                 'address.max' => 'العنوان يجب أن لا يتجاوز 500 حرف',
@@ -96,7 +95,6 @@ class OrganizationStep2Request extends FormRequest
             'country_id.exists' => 'The selected country is invalid.',
             'state_id.required' => 'Please select the state/region.',
             'state_id.exists' => 'The selected state/region is invalid.',
-            'city_id.required' => 'Please select the city.',
             'city_id.exists' => 'The selected city is invalid.',
             'address.required' => 'Please enter the address.',
             'address.max' => 'Address must not exceed 500 characters.',

@@ -1,53 +1,12 @@
 @extends('layouts.admin')
 
-@section('style')
-<style>
-  .rounded,
-  .card,
-  .nav-link {
-    border-radius: 1rem !important;
-  }
-
-  .text-sm {
-    font-size: 0.85rem;
-  }
-
-  .text-xs {
-    font-size: 0.65rem;
-  }
-
-  .light-shadow {
-    box-shadow: 0px 2px 0px 0px #F2F1F3;
-  }
-
-  .assessment-tab:hover {
-    background-color: #F2F1F3;
-    border: 1px solid #000;
-    cursor: pointer;
-  }
-
-  .active-cat {
-    background-color: #F2F1F3;
-    border: 1px solid #000;
-  }
-
-  .line-clamp-2-elipsis {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-</style>
-@stop
-
 @php
 $pills = ['analysis-assessment', 'question-assessment', 'history'];
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Pills (Mobile) -->
     <div class="row mb-4 d-block d-md-none">
       <div class="col-12">
@@ -98,20 +57,20 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
     <!-- / Pills -->
 
     @if(!$assessment_user)
-      <div class="row mt-8 d-flex justify-content-center">
-        <div class="col-12 col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <div class="d-flex flex-column align-items-center justify-content-center gap-3">
-                <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
-                <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
-                <button 
-                  id="startAssessmentBtn"
-                  class="btn btn-lg btn-primary"
-                  data-loading-text="<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span> {{ __('admin.Creating_Assessment') }}...">
-                  {{ __('admin.Make_a_new_assessment') }}
-                </button>
-              </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex flex-column align-items-center justify-content-center gap-3">
+            <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
+            <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
+
+            <div class="w-px-250">
+              <button 
+                id="startAssessmentBtn"
+                class="btn btn-lg btn-primary w-100"
+                data-loading-text="<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>">
+                <i class="ti ti-plus me-2"></i>
+                {{ __('admin.new_assessment') }}
+              </button>
             </div>
           </div>
         </div>
@@ -143,11 +102,11 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
 
           <div 
             id="assessmentTab"
-            class="CategoryGetId assessment-tab card shadow-sm mb-3 position-relative"
+            class="CategoryGetId assessment-tab card shadow-sm mb-5 position-relative cursor-pointer"
             {{-- style="border: {{ $key == 0 ? '1px solid black;' : 'none' }};" --}}
             onclick="changeAssessment({{ $key }})"
           >
-            <div class="d-flex justify-content-between align-items-center p-4">
+            <div class="d-flex justify-content-between align-items-center p-5">
               <div class="d-flex flex-column">
                 <h6 class="mb-0 text-capitalize">
                   @if($assessment != null)
@@ -155,7 +114,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                   @endif
                 </h6>
                 {{-- @if ($totalAnswered && $totalAnswered == $totalQuestions) --}}
-                <span id="category-completed" class="text-success fw-bold text-sm mt-2" style="display: {{ $totalAnswered > 0 && $totalAnswered == $totalQuestions ? 'block' : 'none' }};">
+                <span id="category-completed" class="text-success fw-bold small mt-2" style="display: {{ $totalAnswered > 0 && $totalAnswered == $totalQuestions ? 'block' : 'none' }};">
                   {{ __('admin.Done_All') }}
                 </span>
                 {{-- @else --}}
@@ -207,14 +166,14 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                 @endphp
 
                 <div 
-                  class="shadow-sm cursor-pointer p-3 bg-white d-flex justify-content-center align-items-center" 
-                  style="width: 140px; height: 80px; border-radius: 1rem; {{ $key == 0 ? 'border: 1px solid black;' : '' }}"
+                  class="shadow-sm cursor-pointer p-3 rounded bg-white d-flex flex-fill me-5 justify-content-center align-items-center" 
+                  style="width: 140px; height: 80px; {{ $key == 0 ? 'border: 1px solid black;' : '' }}"
                   {{-- style="{{ $key == 0 ? 'border: 1px solid black;' : '' }}" --}}
                   id="category-tab" 
                   onclick="changeCategory({{ $key }})"
                 >
                   <div class="d-flex flex-column gap-2 text-center" style="width: 100%;">
-                    <span class="text-capitalize fw-bold text-sm line-clamp-2-elipsis">
+                    <span class="text-capitalize fw-bold small line-clamp-2">
                       {{ str_replace('-', ' ', $subcategory['name_' . $l]) }}
                     </span>
                     {{-- @if ($totalAnsweredSub > 0 && $totalQuestionsSub == $totalAnsweredSub) --}}
@@ -234,8 +193,17 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
               @if($assessment != null)
               @foreach ($assessment['subcategories'] as $key => $subcategory)
               <div class="row" style="display: {{ $key == 0 ? 'block' : 'none' }};" id="questionsContainer">
+                @if ($subcategory['questions']->isEmpty())
+                <div class="col-12">
+                  <div class="card shadow-sm">
+                    <div class="card-body text-center text-secondary">
+                      {{ __('admin.No_Questions_Available') }}
+                    </div>
+                  </div>
+                </div>
+                @else
                 @foreach ($subcategory['questions'] as $key => $question)
-                
+
                 <div class="col-12 question-card-bus-con mb-3 " data-category="question-{{ $key }}" >
                   <div class="card shadow-sm">
                     <div class="card-body">
@@ -276,6 +244,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
                   </div>
                 </div>
                 @endforeach
+                @endif
               </div>
               @endforeach
               @endif
@@ -288,7 +257,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
             @foreach ($assessment['subcategories'] as $key => $subcategory)
             <div id="submitContainer" style="{{ $key == 0 ? 'display: flex;' : 'display: none;' }}">
               <div class="w-100 d-flex justify-content-end">
-                <button id="submitButton" class="btn btn-primary">{{ __('admin.Next') }}</button>
+                <button id="submitButton" class="btn btn-primary" {{ $subcategory['questions']->isEmpty() ? 'disabled' : '' }}>{{ __('admin.Next') }}</button>
               </div>
             </div>
             @endforeach
@@ -321,97 +290,106 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
       },
       dataType: 'json',
       success: function(response) {
-        if (response.success) {
-          // Redirect to assessment page on success
-          window.location.href = response.redirect;
-        } else {
-          // Show error message
-          showToast('error', response.message || '{{ __("An error occurred. Please try again.") }}');
-          if (response.redirect) {
-            // Redirect to profile if needed
-            setTimeout(() => {
-              window.location.href = response.redirect;
-            }, 2000);
-          } else {
-            // Re-enable button
-            $btn.prop('disabled', false).html(originalText);
-          }
+        if (!response.success) {
+          releaseFailureAlert({
+            title: '{{ __('admin.Error') }}',
+            message: response.message ? response.message : '{{ __('admin.unexpected_error') }}',
+          });          
+          return;
         }
+
+        // Redirect to assessment page on success
+        window.location.href = response.redirect;
       },
       error: function(xhr) {
-        let errorMessage = '{{ __("An error occurred. Please try again.") }}';
-        if (xhr.responseJSON && xhr.responseJSON.message) {
-          errorMessage = xhr.responseJSON.message;
-        }
-        showToast('error', errorMessage);
+        let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : '{{ __("admin.unexpected_error") }}';
+        releaseFailureAlert({
+          title: '{{ __('admin.Error') }}',
+          message: errorMessage
+        })
         $btn.prop('disabled', false).html(originalText);
       }
     });
   });
   
-  // Helper function to show toast messages
-  function showToast(type, message) {
-    const toast = `
-      <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body">
-              ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    $('.toast-container').remove(); // Remove any existing toasts
-    $('body').append(toast);
-    $('.toast').toast({ autohide: true, delay: 5000 }).toast('show');
+ // Get the total count of current subcategory
+const getSubCategoryTotalCount = (userScores) => {
+  if (!userScores || userScores.length === 0) return;
+
+  const activeCategoryTab = parseInt(localStorage.getItem('activeCategoryTab') || 0);
+  const activeSubCategoryTab = parseInt(localStorage.getItem('activeSubCategoryTab') || 0);
+  
+  const currentAssessment = userScores[activeCategoryTab];
+  if (!currentAssessment || !currentAssessment.subcategories) return;
+  
+  const currentSubCategory = currentAssessment.subcategories[activeSubCategoryTab];
+  if (!currentSubCategory) return;
+
+  // Find the active assessment content section
+  const activeAssessmentContent = document.querySelectorAll('#assessmentContent')[activeCategoryTab];
+  if (!activeAssessmentContent) return;
+
+  const subCategoryTabs = activeAssessmentContent.querySelectorAll('#category-tab');
+  const subCategoryTab = subCategoryTabs[activeSubCategoryTab];
+  if (!subCategoryTab) return;
+
+  const subCategoryTotalCount = subCategoryTab.querySelector('#subCategory-count');
+  const subcategoryCompleted = subCategoryTab.querySelector('#subcategory-completed');
+  
+  if (!subCategoryTotalCount || !subcategoryCompleted) return;
+
+  // Calculate totals - handle both property name formats
+  const totalAnswered = currentSubCategory.contAnswered || currentSubCategory.answered || 0;
+  const totalNotAnswered = currentSubCategory.contNotAnswered || currentSubCategory.not_answered || 0;
+  const totalQuestions = totalAnswered + totalNotAnswered;
+  
+  if (totalQuestions === 0) return;
+
+  const progressPercentage = Math.round((totalAnswered / totalQuestions) * 100);
+  const subCategoryCountText = `{{ __('admin.Questions_answered') }} ${totalAnswered}/${totalQuestions}`;
+  
+  subCategoryTotalCount.textContent = subCategoryCountText;
+
+  // Update visibility based on completion
+  if (progressPercentage === 100) {
+    subcategoryCompleted.style.display = 'block';
+    subCategoryTotalCount.style.display = 'none';
+  } else {
+    subcategoryCompleted.style.display = 'none';
+    subCategoryTotalCount.style.display = 'block';
   }
+};
 
-  // Get the total count of current category
-  const getSubCategoryTotalCount = (userScores) => {
-    if (!userScores || userScores.length === 0) return;
+// Get the total count of current assessment
+const getAssessmentTotalCount = (userScores) => {
+  if (!userScores || userScores.length === 0) return;
 
-    const activeCategoryTab = localStorage.getItem('activeCategoryTab');
-    const activeSubCategoryTab = localStorage.getItem('activeSubCategoryTab');
-    const currentAssessment = userScores[activeCategoryTab];
-    const currentSubCategory = currentAssessment?.subcategories[activeSubCategoryTab];
-    const subCategoryTabs = document.querySelectorAll('#assessmentContent:nth-child(' + (parseInt(activeCategoryTab) + 1) + ') #category-tab');
-    const subCategoryTab = subCategoryTabs[activeSubCategoryTab];
-    const subCategoryTotalCount = subCategoryTab.querySelector('#subCategory-count');
-    const totalQuestions = currentSubCategory?.contNotAnswered + currentSubCategory?.contAnswered;
-    const subCategoryCountText = `{{ __('admin.Questions_answered') }} ${currentSubCategory?.contAnswered}/${totalQuestions}`;
-    
-    subCategoryTotalCount.textContent = subCategoryCountText;
+  const activeCategoryTab = parseInt(localStorage.getItem('activeCategoryTab') || 0);
+  const assessmentTabs = document.querySelectorAll('#assessmentTab');
+  
+  if (!assessmentTabs[activeCategoryTab]) return;
+  
+  const currentAssessment = userScores[activeCategoryTab];
+  if (!currentAssessment) return;
 
-    const progressPercentage = Math.floor((currentSubCategory?.contAnswered / totalQuestions) * 100);
+  const assessmentTab = assessmentTabs[activeCategoryTab];
+  
+  // Calculate totals - handle both property name formats
+  const totalAnswered = currentAssessment.contAnswered || currentAssessment.answered || 0;
+  const totalNotAnswered = currentAssessment.contNotAnswered || currentAssessment.not_answered || 0;
+  const assessmentTotalQuestions = totalAnswered + totalNotAnswered;
+  
+  if (assessmentTotalQuestions === 0) return;
 
-    const subcategoryCompleted = subCategoryTab.querySelector('#subcategory-completed');
+  const progressPercentage = Math.round((totalAnswered / assessmentTotalQuestions) * 100);
 
-    if (progressPercentage === 100) {
-      subcategoryCompleted.style.display = 'block';
-      subCategoryTotalCount.style.display = 'none';
-    } else {
-      subcategoryCompleted.style.display = 'none';
-      subCategoryTotalCount.style.display = 'block';
-    }
-  }
+  // Update completion icons
+  const completedIcon = assessmentTab.querySelector('#completedIcon');
+  const notCompletedIcon = assessmentTab.querySelector('#notCompletedIcon');
+  const categoryCompleted = assessmentTab.querySelector('#category-completed');
+  const assessmentTotalCount = assessmentTab.querySelector('#assessmentTotalCount');
 
-  // Get the total count of current assessment
-  const getAssessmentTotalCount = (userScores) => {
-    if (!userScores || userScores.length === 0) return;
-
-    const activeCategoryTab = localStorage.getItem('activeCategoryTab');
-    const assessmentTabs = document.querySelectorAll('#assessmentTab');
-    const currentAssessment = userScores[activeCategoryTab];
-    const assessmentTotalQuestions = currentAssessment?.contNotAnswered + currentAssessment?.contAnswered;
-    const assessmentTab = assessmentTabs[activeCategoryTab];
-    const progressPercentage = Math.floor((currentAssessment?.contAnswered / assessmentTotalQuestions) * 100);
-
-    const completedIcon = assessmentTab.querySelector('#completedIcon');
-    const notCompletedIcon = assessmentTab.querySelector('#notCompletedIcon');
-
+  if (completedIcon && notCompletedIcon) {
     if (progressPercentage === 100) {
       completedIcon.style.display = 'block';
       notCompletedIcon.style.display = 'none';
@@ -419,104 +397,175 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
       completedIcon.style.display = 'none';
       notCompletedIcon.style.display = 'block';
     }
+  }
 
-    updateProgressCircle(assessmentTab, progressPercentage);
-    updateAssessmentTotalCount({assessmentTab, currentAssessment, assessmentTotalQuestions});
-  };
+  // Update progress circle
+  updateProgressCircle(assessmentTab, progressPercentage);
+  
+  // Update total count text
+  updateAssessmentTotalCount({
+    assessmentTab, 
+    totalAnswered, 
+    assessmentTotalQuestions,
+    progressPercentage
+  });
+};
 
-  // Update the progress circle
-  const updateProgressCircle = (assessmentTab, progressPercentage) => {
-    const assessmentTabProgress = assessmentTab.querySelector('.progress-circle span');
-    const pathProgress = assessmentTab.querySelector('.progress-circle svg path:nth-child(2)');
+// Update the progress circle
+const updateProgressCircle = (assessmentTab, progressPercentage) => {
+  if (!assessmentTab) return;
+  
+  const progressCircle = assessmentTab.querySelector('.progress-circle');
+  if (!progressCircle) return;
+  
+  const assessmentTabProgress = progressCircle.querySelector('span');
+  const pathProgress = progressCircle.querySelector('svg path:nth-child(2)');
+  
+  if (assessmentTabProgress) {
+    assessmentTabProgress.textContent = `${progressPercentage?.toFixed(1)}%`;
+  }
+  
+  if (pathProgress) {
     const dashArrayValue = `${progressPercentage}, 100`;
-
-    assessmentTabProgress.textContent = `${progressPercentage}%`;
     pathProgress.setAttribute('stroke-dasharray', dashArrayValue);
-  };
+  }
+};
 
-  // Update the total count of answered questions
-  const updateAssessmentTotalCount = (payload) => {
-    const { assessmentTab, currentAssessment, assessmentTotalQuestions } = payload;
-    if (!assessmentTab) return;
-    
-    const assessmentTotalCount = assessmentTab.querySelector('#assessmentTotalCount');
-    if (!assessmentTotalCount) return;
-    
-    const textContentValue = `{{ __('admin.Questions_answered') }} ${currentAssessment?.contAnswered}/${assessmentTotalQuestions}`;
-    assessmentTotalCount.textContent = textContentValue;
+// Update the total count of answered questions
+const updateAssessmentTotalCount = (payload) => {
+  const { assessmentTab, totalAnswered, assessmentTotalQuestions, progressPercentage } = payload;
+  
+  if (!assessmentTab) return;
+  
+  const assessmentTotalCount = assessmentTab.querySelector('#assessmentTotalCount');
+  const categoryCompleted = assessmentTab.querySelector('#category-completed');
+  
+  if (!assessmentTotalCount || !categoryCompleted) return;
+  
+  const textContentValue = `{{ __('admin.Questions_answered') }} ${totalAnswered}/${assessmentTotalQuestions}`;
+  assessmentTotalCount.textContent = textContentValue;
 
-    if (currentAssessment?.contAnswered === assessmentTotalQuestions) {
-      const categoryCompleted = assessmentTab.querySelector('#category-completed');
-      categoryCompleted.style.display = 'block';
-      assessmentTotalCount.style.display = 'none';
-      setTimeout(() => {
-        changeAssessment(parseInt(localStorage.getItem('activeCategoryTab')) + 1);
+  // Handle completion state
+  if (progressPercentage === 100) {
+    categoryCompleted.style.display = 'block';
+    assessmentTotalCount.style.display = 'none';
+    
+    // Auto-navigate to next assessment after delay
+    setTimeout(() => {
+      const activeCategoryTab = parseInt(localStorage.getItem('activeCategoryTab') || 0);
+      const nextAssessment = activeCategoryTab + 1;
+      const assessmentTabs = document.querySelectorAll('#assessmentTab');
+      
+      // Only navigate if there's a next assessment
+      if (nextAssessment < assessmentTabs.length) {
+        changeAssessment(nextAssessment);
         changeCategory(0);
-      }, 1000);
-    } else {
-      const categoryCompleted = assessmentTab.querySelector('#category-completed');
-      categoryCompleted.style.display = 'none';
-      assessmentTotalCount.style.display = 'block';
-    }
-  };
+      }
+    }, 1500);
+  } else {
+    categoryCompleted.style.display = 'none';
+    assessmentTotalCount.style.display = 'block';
+  }
+};
 
-  // Handle the answer question
-  const handleAnswerQuestion = (questionId, answer) => {
-    $.ajax({
-      url: '/dashboard/answer-assessment',
-      method: 'post',
-      data: {
-        'questionId': questionId,
-        'answer': answer,
-        _token: $('meta[name="csrf-token"]').attr('content'),
-      },
-      success: function(response) {
-        // console.log(response);
-        if (response.message == 1) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: '{{ __('admin.Assessment_completed_successfully') }}',
-           	showCancelButton: false,
-            showConfirmButton: true,
-            confirmButtonText: "{{ __('admin.OK') }}",
-            customClass: {
-                confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
-            timer: 2000,
-          });
-
+// Handle the answer question
+const handleAnswerQuestion = (questionId, answer) => {
+  $.ajax({
+    url: '/dashboard/answer-assessment',
+    method: 'post',
+    data: {
+      'questionId': questionId,
+      'answer': answer,
+      _token: $('meta[name="csrf-token"]').attr('content'),
+    },
+    success: function(response) {
+      // Check if assessment is fully completed
+      if (response.message == 1) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: '{{ __('admin.Assessment_completed_successfully') }}',
+          showCancelButton: false,
+          showConfirmButton: true,
+          confirmButtonText: "{{ __('admin.OK') }}",
+          customClass: {
+            confirmButton: 'btn btn-primary',
+          },
+          buttonsStyling: false,
+          timer: 2000,
+        }).then(() => {
+          // Reset to first assessment and category
           localStorage.setItem('activeCategoryTab', 0);
           localStorage.setItem('activeSubCategoryTab', 0);
-          if (response?.user_scores) {
-            const userScores = response.user_scores;
-            getAssessmentTotalCount(userScores);
-            getSubCategoryTotalCount(userScores);
-          }
-          setTimeout(() => {
-            location.reload();
-          }, 1000);
-        }
-
-        if (response?.user_scores) {
-          const userScores = response.user_scores;
-          getAssessmentTotalCount(userScores);
-          getSubCategoryTotalCount(userScores);
-        }
-      },
-      error: function(error) {
-        console.log(error.responseText);
+          location.reload();
+        });
+        return;
       }
-    });
-  };
 
-  // Handle the change assessment
-  $('.AnswerQuestion').click(function() {
-    const questionId = $(this).attr('do');
-    const answer = $('input[name="answer_' + questionId + '"]:checked').val();
-    handleAnswerQuestion(questionId, answer);
+      // Update counts and progress if user_scores are provided
+      if (response?.user_scores) {
+        const userScores = response.user_scores;
+        
+        // Update both assessment and subcategory counts
+        getAssessmentTotalCount(userScores);
+        getSubCategoryTotalCount(userScores);
+        
+        // Check if current subcategory is complete
+        const activeCategoryTab = parseInt(localStorage.getItem('activeCategoryTab') || 0);
+        const activeSubCategoryTab = parseInt(localStorage.getItem('activeSubCategoryTab') || 0);
+        const currentAssessment = userScores[activeCategoryTab];
+        
+        if (currentAssessment && currentAssessment.subcategories) {
+          const currentSubCategory = currentAssessment.subcategories[activeSubCategoryTab];
+          
+          if (currentSubCategory) {
+            const totalAnswered = currentSubCategory.contAnswered || currentSubCategory.answered || 0;
+            const totalNotAnswered = currentSubCategory.contNotAnswered || currentSubCategory.not_answered || 0;
+            const totalQuestions = totalAnswered + totalNotAnswered;
+            
+            // Auto-navigate to next subcategory if current is complete
+            if (totalQuestions > 0 && totalAnswered === totalQuestions) {
+              setTimeout(() => {
+                const activeCategoryTabs = document.querySelectorAll('#assessmentContent:not([style*="display: none"]) #category-tab');
+                const nextSubCategory = activeSubCategoryTab + 1;
+                
+                // Navigate to next subcategory if it exists
+                if (nextSubCategory < activeCategoryTabs.length) {
+                  changeCategory(nextSubCategory);
+                }
+              }, 1000);
+            }
+          }
+        }
+      }
+    },
+    error: function(error) {
+      console.error('Error submitting answer:', error);
+      
+      // Show error message to user
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: '{{ __('admin.An_error_occurred_please_try_again') }}',
+        confirmButtonText: "{{ __('admin.OK') }}",
+        customClass: {
+          confirmButton: 'btn btn-primary',
+        },
+        buttonsStyling: false,
+      });
+    }
   });
+};
+
+// Handle the change assessment
+$('.AnswerQuestion').click(function() {
+  const questionId = $(this).attr('do');
+  const answer = $('input[name="answer_' + questionId + '"]:checked').val();
+  
+  if (answer !== undefined) {
+    handleAnswerQuestion(questionId, answer);
+  }
+});
 </script>
 <script>
   const assessmentTabs = document.querySelectorAll('.assessment-tab');
@@ -567,19 +616,14 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
       } else {
         container.style.display = 'none';
       }
-
-      // submitContainers.forEach((submitContainer, i) => {
-      //   if (i === index) {
-      //     submitContainer.classList.replace('d-none', 'd-flex');
-      //   } else {
-      //     submitContainer.classList.replace('d-flex', 'd-none');
-      //   }
-      // });
     });
   }
 
   submitContainers.forEach((submitContainer, i) => {
     submitContainer.addEventListener('click', () => {
+      const button = submitContainer.querySelector('#submitButton');
+      if (button && button.disabled) return;
+
       const activeCategoryTabs = document.querySelectorAll('#assessmentContent:not([style*="display: none"]) #category-tab');
       const activeIndex = Array.from(activeCategoryTabs).findIndex(tab => tab.style.border === '1px solid black');
       const nextIndex = (activeIndex + 1) % activeCategoryTabs.length;
@@ -600,18 +644,5 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
       changeCategory(parseInt(activeSubCategoryTab || 0));
     }
   });
-
-  // const submitButton = document.querySelector('#submitButton');
-  // submitButton.addEventListener('click', () => {
-  //   // console.log('Submit button clicked');
-  //   // const activeCategoryTabs = document.querySelectorAll('#assessmentContent:not([style*="display: none"]) #category-tab');
-  //   // const activeIndex = Array.from(activeCategoryTabs).findIndex(tab => tab.style.border === '1px solid black');
-  //   // const nextIndex = (activeIndex + 1) % activeCategoryTabs.length;
-  //   let currentIndex = 0;
-
-  //   currentIndex += 1;
-
-  //   changeCategory(currentIndex); // Increase index by 1
-  // });
 </script>
 @stop

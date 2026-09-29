@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 @section('content')
     <!-- BEGIN: Content-->
-    <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
+    <div class="">
       <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
@@ -88,7 +88,14 @@
                                                             </textarea>
                                                         </div>
                                                     </div>
-                                                    <div class="col-12 d-flex justify-content-end">
+                                                    <div class="col-12 d-flex justify-content-end align-items-center">
+                                                        <form action="{{ route('mentorshipTasks.destroy', $task->id) }}" method="POST" id="deleteTaskForm" class="mr-1 mb-1">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="button" class="btn btn-danger" id="deleteTaskBtn">
+                                                                <i class="ti ti-trash"></i> {{ __('admin.Delete') }}
+                                                            </button>
+                                                        </form>
                                                         <button type="submit" class="btn btn-success mr-1 mb-1">{{__('settings.Edit')}}</button>
                                                     </div>
                                                 </div>
@@ -163,5 +170,26 @@
         @if($l=='ar')
             tinyMCE.settings['directionality'] = 'rtl';
         @endif
+
+        $('#deleteTaskBtn').on('click', function() {
+            Swal.fire({
+                title: "{{__('admin.SureDelete')}}",
+                text: "{{__('admin.Recover')}}",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: "{{ __('admin.DYes') }}",
+                cancelButtonText: "{{ __('admin.No') }}",
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn btn-danger me-2',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteTaskForm').submit();
+                }
+            });
+        });
     </script>
 @stop

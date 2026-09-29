@@ -12,7 +12,7 @@ class StagesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('stages')->insert([
+        $toInsert = [
             [
                 'name_ar' => 'الفكرة/الإبداع',
                 'name_en' => 'Idea/Ideation',
@@ -61,6 +61,13 @@ class StagesTableSeeder extends Seeder
                 'description_ar' => 'المرحلة التي يصل فيها المنتج أو العمل إلى النضوج.',
                 'description_en' => 'The stage where the product or business reaches maturity.',
             ],
-        ]);
+        ];
+        $stored_stages = DB::table('stages')->get();
+
+        $toInsert = collect( $toInsert )->filter( function ( $stage ) use ( $stored_stages ) {
+            return ! $stored_stages->contains( 'name_en', $stage['name_en'] );
+        })->values()->toArray();
+
+        DB::table('stages')->insert( $toInsert );
     }
 }

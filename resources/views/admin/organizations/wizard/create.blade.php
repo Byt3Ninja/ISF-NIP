@@ -13,7 +13,7 @@
 
 @php
   $isEdit = isset($organization);
-  $maxStep = $isEdit ? ($organization->wizard_step ?? 1) : 1;
+  $maxStep = $isEdit ? min($organization->wizard_step ?? 1, 3) : 1;
   $isDraft = $isEdit ? $organization->is_draft : true;
   $hasManagers = $isEdit ? $organization->assignedUsers()->count() > 0 : false;
   $canPublish = $isDraft && $hasManagers;
@@ -24,14 +24,12 @@
     ['id' => 'basics', 'title' => __('admin.Organization Basics'), 'step' => 1],
     ['id' => 'contact', 'title' => __('admin.Contact Info'), 'step' => 2],
     ['id' => 'managers', 'title' => __('admin.Organization Manager'), 'step' => 3],
-    ['id' => 'landing', 'title' => __('admin.Landing Page'), 'step' => 4],
-    ['id' => 'custom_sections', 'title' => __('admin.Custom Sections'), 'step' => 5],
   ];
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="row">
       <div class="col-12">
         <div class="mb-4">
@@ -44,14 +42,6 @@
         <!-- Alerts -->
         @if (session()->has('success'))
           <x-alert type="success" message="{{ session()->get('success') }}" />
-        @endif
-        @if (session()->has('error'))
-          <x-alert type="danger" message="{{ session()->get('error') }}" />
-        @endif
-        @if ($errors->any())
-          @foreach ($errors->all() as $error)
-            <x-alert type="danger" message="{{ $error }}" />
-          @endforeach
         @endif
 
         <div class="bs-stepper wizard-numbered">
@@ -67,7 +57,7 @@
                 >
                   <span class="bs-stepper-circle">{{ $tab['step'] }}</span>
                   <span class="bs-stepper-label">
-                    <span class="bs-stepper-title">{{ __('admin.' . $tab['title']) }}</span>
+                    <span class="bs-stepper-title">{{ $tab['title'] }}</span>
                     <span class="bs-stepper-subtitle">{{ __('admin.Add') }} {{ $tab['title'] }}</span>
                   </span>
                 </button>
@@ -94,15 +84,29 @@
               <input type="hidden" name="current_step" id="current_step" value="{{ $activeStep }}">
               <input type="hidden" name="redirect_to" id="redirect_to" value="next">
 
-              <!-- Error Alert -->
-              <div class="px-8 mt-6" id="errorAlert" style="display: none;">
-                <div class="alert alert-danger alert-dismissible">
-                  <i class="ti ti-alert-triangle me-2"></i>
-                  <span id="errorAlertMessage"></span>
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              <!-- Alerts -->
+              <div class="px-8">
+                @if (session()->has('error'))
+                  <div class="mt-6">
+                    <x-alert type="danger" message="{{ session()->get('error') }}" />
+                  </div>
+                @endif
+                @if ($errors->any())
+                  <div class="mt-6">
+                    @foreach ($errors->all() as $error)
+                      <x-alert type="danger" message="{{ $error }}" />
+                    @endforeach
+                  </div>
+                @endif
+
+                <div class="mt-6" id="errorAlert" style="display: none;">
+                  <div class="alert alert-danger alert-dismissible">
+                    <i class="ti ti-alert-triangle me-2"></i>
+                    <span id="errorAlertMessage"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
                 </div>
               </div>
-              <!--/ Error Alert -->
 
               @foreach ($tabs as $tab)
                 <div id="{{ $tab['id'] }}" class="content {{ $activeStep == $tab['step'] ? 'active' : '' }}">
@@ -123,7 +127,7 @@
               <div class="row border-top py-6 px-8">
                 <div class="col-12 d-flex justify-content-between">
                   <button type="button" class="btn btn-label-secondary btn-prev" {{ $activeStep <= 1 ? 'disabled' : '' }}>
-                    <i class="ti ti-arrow-left ti-xs me-sm-2"></i>
+                    <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} ti-xs me-sm-2"></i>
                     <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
                   </button>
                   <div class="d-flex align-items-center gap-3">
@@ -132,10 +136,15 @@
                         <i class="ti ti-file me-2"></i>{{ __('admin.Save as Draft') }}
                       </button>
                     @endif
-                    @if($canPublish)
-                      <button type="button" class="btn btn-success" id="publishBtn">
-                        <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
+                    @if($activeStep == 3)
+                      <button type="button" class="btn btn-primary" data-action="same">
+                        <i class="ti ti-device-floppy me-2"></i>{{ __('admin.Save') }}
                       </button>
+                      @if($canPublish)
+                        <button type="button" class="btn btn-success" id="publishBtn">
+                          <i class="ti ti-world me-2"></i>{{ __('admin.Publish') }}
+                        </button>
+                      @endif
                     @else
                       <button type="button" class="btn btn-primary btn-next">
                         <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Save & Continue') }}</span>
@@ -147,7 +156,7 @@
               </div>
             </form>
 
-            <div class="px-8">
+            <div class="px-8 pb-6">
               @if(isset($organization) && $organization->is_draft)
                 <div class="alert alert-warning d-flex align-items-center mt-3" role="alert">
                   <i class="ti ti-alert-triangle me-2"></i>
@@ -160,7 +169,7 @@
             </div>
 
             @if($isEdit)
-              @foreach(range(2, 5) as $step)
+              @foreach(range(2, 3) as $step)
                 <form action="{{ route('organization.wizard.update.step' . $step, $organization->id) }}" method="POST" id="step{{ $step }}Form" style="display:none;" enctype="multipart/form-data">
                   @csrf @method('PUT')
                   <input type="hidden" name="redirect_to" value="next">
@@ -198,8 +207,6 @@
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/toastr/toastr.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.10.2/tinymce.min.js" referrerpolicy="origin"></script>
 
   <script>
     (function() {
@@ -282,16 +289,33 @@
       const validationRules = {
         step1: {
           fields: {
+            img_url: {
+              validators: {
+                file: {
+                  extension: 'png,jpg,jpeg',
+                  maxSize: 5 * 1024 * 1024,
+                  message: '{{ __("admin.accepted_formats") }}: PNG, JPG | {{ __("admin.max_size") }}: 5MB'
+                }
+              }
+            },
             name_en: {
               validators: {
                 notEmpty: { message: '{{ __("admin.organization_name_required") }}' },
-                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' }
+                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' },
+                regexp: {
+                  regexp: /^[a-zA-Z\u0600-\u06FF ]+$/,
+                  message: '{{ __("admin.Organization name must contain only English letters") }}'
+                }
               }
             },
             name_ar: {
               validators: {
                 notEmpty: { message: '{{ __("admin.organization_name_required") }}' },
-                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' }
+                stringLength: { max: 255, message: '{{ __("admin.Organization name must not exceed 255 characters") }}' },
+                regexp: {
+                  regexp: /^[a-zA-Z\u0600-\u06FF ]+$/,
+                  message: '{{ __("admin.Organization name must contain only Arabic letters") }}'
+                }
               }
             },
             organization_type_id: {
@@ -316,8 +340,22 @@
           fields: {
             contact_email: {
               validators: {
-                notEmpty: { message: '{{ __("admin.Please enter the email address") }}' },
+                regexp: {
+                  regexp: /^[a-zA-Z0-9._%+\-@]+$/,
+                  message: '{{ __("admin.Please enter a valid email address") }}'
+                },
                 emailAddress: { message: '{{ __("admin.Please enter a valid email address") }}' }
+              }
+            },
+            contact_phone: {
+              validators: {
+                callback: {
+                  message: '{{ __("auth.Invalid_Phone_Number") }}',
+                  callback: function(input) {
+                    if (!input.value.trim()) return true;
+                    return window.contactPhoneIti && window.contactPhoneIti.isValidNumber();
+                  }
+                }
               }
             },
             country_id: {
@@ -326,24 +364,18 @@
               }
             },
             state_id: {
-              validators: {
-                notEmpty: { message: '{{ __("admin.Please select the state") }}' }
-              }
+              validators: {}
             },
             city_id: {
-              validators: {
-                notEmpty: { message: '{{ __("admin.Please select the city") }}' }
-              }
+              validators: {}
             },
             address: {
               validators: {
-                notEmpty: { message: '{{ __("admin.Please enter the address") }}' },
                 stringLength: { max: 500, message: '{{ __("admin.Address must not exceed 500 characters") }}' }
               }
             },
             google_map_url: {
               validators: {
-                notEmpty: { message: '{{ __("admin.Please enter the Google Maps URL") }}' },
                 regexp: {
                   regexp: /^https?:\/\/(www\.)?(google\.[a-z]{2,3}(\/maps)?|maps\.google\.[a-z]{2,3}|goo\.gl|maps\.app\.goo\.gl)/i,
                   message: '{{ __("admin.Please enter a valid Google Maps URL") }}'
@@ -404,6 +436,14 @@
                 eleValidClass: '',
                 rowSelector: '.mb-4, .mb-6'
               }),
+              excluded: new FormValidation.plugins.Excluded({
+                excluded: function(field, element, elements) {
+                  if (field === 'img_url') return false;
+                  return element.getAttribute('type') === 'hidden'
+                    || element.style.display === 'none'
+                    || element.offsetWidth === 0 && element.offsetHeight === 0;
+                }
+              }),
               submitButton: new FormValidation.plugins.SubmitButton(),
               autoFocus: new FormValidation.plugins.AutoFocus()
             },
@@ -411,6 +451,12 @@
               instance.on('plugins.message.placed', function (e) {
                 if (e.element.parentElement.classList.contains('input-group')) {
                   e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+                }
+                if (e.field === 'img_url') {
+                  const container = e.element.closest('.mb-6') || e.element.closest('.col-12');
+                  if (container) {
+                    container.appendChild(e.messageElement);
+                  }
                 }
               });
             }
@@ -510,7 +556,7 @@
         const validator = validators[currentStep];
         
         if (action === 'draft') {
-          const selector = currentStep === 1 ? '#wizardForm' : `#${['basics', 'contact', 'managers', 'landing', 'custom_sections'][currentStep - 1]}`;
+          const selector = currentStep === 1 ? '#wizardForm' : `#${['basics', 'contact', 'managers'][currentStep - 1]}`;
           utils.copyFormDataToTarget(selector, '#draftForm', ['current_step', '_token', '_method']);
           $('#draftForm').find('[name="current_step"]').val(currentStep);
           $('#draftForm').submit();
@@ -540,27 +586,6 @@
           return;
         }
 
-        // For step 5, sync TinyMCE content before submitting
-        if (currentStep === 5) {
-          $('.custom-section-card.editing').each(function() {
-            const card = $(this);
-            const textarea = card.find('.rich-text-editor');
-            const editorId = textarea.attr('id');
-            if (editorId && typeof tinymce !== 'undefined') {
-              const editor = tinymce.get(editorId);
-              if (editor) {
-                editor.save();
-              }
-            }
-            // Sync to hidden inputs
-            const form = card.find('.section-form-container');
-            const hidden = card.find('.section-hidden-inputs');
-            hidden.find('.hidden-title').val(form.find('.section-title-input').val());
-            hidden.find('.hidden-content').val(form.find('.section-content-input').val());
-            hidden.find('.hidden-visibility').val(form.find('.visibility-radio:checked').val());
-          });
-        }
-
         if (!validator) {
           submitForm(action, currentStep);
           return;
@@ -582,7 +607,7 @@
           $('#wizardForm').submit();
         } else if (config.isEdit) {
           const $form = $(`#step${step}Form`);
-          const selector = `#${['basics', 'contact', 'managers', 'landing', 'custom_sections'][step - 1]}`;
+          const selector = `#${['basics', 'contact', 'managers'][step - 1]}`;
 
           utils.copyFormDataToTarget(selector, $form, ['redirect_to', '_token', '_method']);
           $form.find('[name="redirect_to"]').val(action === 'same' ? 'same' : 'next');
@@ -619,21 +644,21 @@
           handleFormSubmit('next', step);
         });
 
-        $('.save-changes-step1-btn, .save-changes-step2-btn', '.save-changes-step3-btn', '.save-changes-step4-btn', '.save-changes-step5-btn').on('click', function(e) {
+        $('.save-changes-step1-btn, .save-changes-step2-btn, .save-changes-step3-btn').on('click', function(e) {
           e.preventDefault();
-          const step = $(this).hasClass('save-changes-step1-btn') ? 1 : 2;
+          const step = $(this).hasClass('save-changes-step1-btn') ? 1 : $(this).hasClass('save-changes-step2-btn') ? 2 : 3;
           handleFormSubmit('same', step);
         });
 
-        $('.save-continue-step1-btn, .save-continue-step2-btn', '.save-continue-step3-btn', '.save-continue-step4-btn', '.save-continue-step5-btn').on('click', function(e) {
+        $('.save-continue-step1-btn, .save-continue-step2-btn, .save-continue-step3-btn').on('click', function(e) {
           e.preventDefault();
-          const step = $(this).hasClass('save-continue-step1-btn') ? 1 : 2;
+          const step = $(this).hasClass('save-continue-step1-btn') ? 1 : $(this).hasClass('save-continue-step2-btn') ? 2 : 3;
           handleFormSubmit('next', step);
         });
 
-        $('.save-draft-step1-btn, .save-draft-step2-btn', '.save-draft-step3-btn', '.save-draft-step4-btn', '.save-draft-step5-btn').on('click', function(e) {
+        $('.save-draft-step1-btn, .save-draft-step2-btn, .save-draft-step3-btn').on('click', function(e) {
           e.preventDefault();
-          const step = $(this).hasClass('save-draft-step1-btn') ? 1 : 2;
+          const step = $(this).hasClass('save-draft-step1-btn') ? 1 : $(this).hasClass('save-draft-step2-btn') ? 2 : 3;
           handleFormSubmit('draft', step);
         });
 
@@ -643,57 +668,87 @@
         });
       }
 
-      // Override Stepper behavior for validation
       function initStepperWithValidation() {
         const wizardIcons = document.querySelector('.wizard-numbered');
         if (!wizardIcons) return;
 
-        // Initialize Stepper with linear: false to allow going back always
         const iconsStepper = new Stepper(wizardIcons, {
           linear: false
         });
 
-        // 2. Jump to the step from URL
         if (config.activeStep > 1) {
-          iconsStepper.to(config.activeStep); // bs-stepper .to() is 1-indexed in some versions, check yours
+          iconsStepper.to(config.activeStep);
         }
 
-        // Override next/previous to include validation
-        const originalNext = iconsStepper.next.bind(iconsStepper);
-        const originalPrevious = iconsStepper.previous.bind(iconsStepper);
+        // COMPLETELY disable step trigger clicks from stepper
+        document.querySelectorAll('.step-trigger').forEach(trigger => {
+          trigger.removeAttribute('data-bs-toggle');
+          
+          // Remove any existing click handlers from bs-stepper
+          const newTrigger = trigger.cloneNode(true);
+          trigger.parentNode.replaceChild(newTrigger, trigger);
+        });
 
-        iconsStepper.next = function() {
-          const currentStep = parseInt($('#current_step').val()) || config.activeStep;
-          const validator = validators[currentStep];
+        wizardIcons.addEventListener('shown.bs-stepper', function(event) {
+          const newStep = (event.detail.indexStep !== undefined) ? event.detail.indexStep + 1 : config.activeStep;
+          $('#current_step').val(newStep);
+        });
 
-          if (validator) {
-            validator.validate().then(status => {
-              if (status === 'Valid') {
-                originalNext();
-              } else {
-                // Validation failed, show error
-                utils.scrollToError();
-                utils.showError(config.translations.fixErrors);
-              }
-            });
-          } else {
-            originalNext();
-          }
-        };
-
-        iconsStepper.previous = function() {
-          originalPrevious();
-        };
-
-        // Store reference for later use
         window.iconsStepper = iconsStepper;
       }
+
+      function initStepperClickHandlers() {
+        // Now attach fresh handlers after cloning
+        $(document).on('click', '.step-trigger', function(e) {
+          e.preventDefault();
+          e.stopImmediatePropagation(); // Stop ALL other handlers
+          
+          const $trigger = $(this);
+          const targetStep = parseInt($trigger.data('tab-index'));
+          const currentStep = parseInt($('#current_step').val()) || config.activeStep;
+          
+          if ($trigger.is(':disabled') || $trigger.prop('disabled')) {
+            utils.showWarning(config.translations.completeStepsFirst);
+            return false;
+          }
+          
+          if (targetStep === currentStep) {
+            return false;
+          }
+          
+          if (targetStep > currentStep) {
+            const validator = validators[currentStep];
+            if (validator) {
+              validator.validate().then(status => {
+                if (status === 'Valid') {
+                  updateUrlStep(targetStep);
+                } else {
+                  utils.scrollToError();
+                  utils.showError(config.translations.fixErrors);
+                }
+              });
+              return false;
+            }
+          }
+          
+          updateUrlStep(targetStep);
+          return false;
+        });
+      }
+
+      function updateUrlStep(step) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('step', step);
+        window.location.href = window.location.pathname + '?' + urlParams.toString();
+      }
+
 
       // Initialize Everything
       $(document).ready(function() {
         initSelect2();
         initValidation(1);
         initValidation(2);
+        initStepperClickHandlers();
         initStepperWithValidation();
         initTabNavigation();
         initEventHandlers();

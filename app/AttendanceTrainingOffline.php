@@ -13,6 +13,7 @@ class AttendanceTrainingOffline extends Model
     protected $fillable = [
         'user_id',
         'training_session_id',
+        'mentorship_request_id',
         'step_id',
         'cycle_id',
         'company_id',
@@ -44,5 +45,10 @@ class AttendanceTrainingOffline extends Model
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function mentorshipRequest()
+    {
+        return $this->belongsTo(MentorshipRequest::class);
     }
 }

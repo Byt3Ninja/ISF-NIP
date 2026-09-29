@@ -100,9 +100,14 @@ return [
         'UsersDiskInviteMentor' => [
             'driver' => 'local',
             'root' => storage_path('app/uploads/InviteMentor'),
-            'url' => env('APP_URL') . 'dashboard/uploads/InviteMentor',
-            'visibility' => 'private',
-            'throw' => true, 
+            'url' => env('APP_URL') . '/dashboard/uploads/InviteMentor',
+            'visibility' => 'public',
+            'throw' => true,
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                ],
+            ],
         ],
         'TrainingDisk' => [
             'driver' => 'local',
@@ -185,6 +190,24 @@ return [
             'root' => storage_path('app/organization_landing'),
             'url' => env('APP_URL') . '/organization-wizard',
             'visibility' => 'public',
+        ],
+
+        'service_messages' => [
+            'driver' => 'local',
+            'root' => storage_path('app/service_messages'),
+            'visibility' => 'private',
+        ],
+
+        'hackathon_shared' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/hackathon'),
+            'visibility' => 'private',
+        ],
+
+        'importer' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/importer'),
+            'throw' => false,
         ],
     ],
 

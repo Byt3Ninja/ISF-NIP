@@ -11,7 +11,15 @@
 <style>
 
   .daterangepicker {
-    margin-top: 8rem !important;
+    margin-top: 2rem !important;
+  }
+
+  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
+     stays fully visible no matter where in the list the row sits. */
+  .daterangepicker.drp-viewport-fixed {
+    margin-top: 0 !important;
+    position: fixed !important;
+    z-index: 1080;
   }
 
   /* Edit-step picker is positioned via JS using viewport-fixed coords so it
@@ -38,8 +46,8 @@
 
 @section('content')
 <!-- BEGIN: Content-->
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-overlay"></div>
     <div class="content-body">
       @if (count($cycles) > 0)
@@ -53,6 +61,12 @@
         @if (session()->has('message2'))
         <div class="alert alert-danger alert-dismissible" role="alert">
           {{ __('admin.' . session()->get('message2')) }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+        @if (session()->has('failure'))
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          {{ session()->get('failure') }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @endif
@@ -122,7 +136,7 @@
                         @if ($selectedCycle && $selectedCycle->type === 'Hackathon' && $_user->hasAnyRole(['Admin', 'organizationManager']))
                             <option value="6">{{ __('admin.Team Formation') }}</option>
                         @endif
-                        <option value="7">{{ __('admin.Almuni') }}</option>
+                        {{-- <option value="7">{{ __('admin.Almuni') }}</option> --}}
                       </select>
                     </div>
                   </div>
@@ -187,7 +201,7 @@
                         </div>
 
                         <div class="d-flex align-items-center" id="mob">
-                          <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }})" id="{{ $step->id }}"
+                          <a href="javascript:void(0)" onclick="ModifyStep(1,{{ $step->id }},{{ \App\Formdata::where('step_id', $step->id)->distinct('company_id')->count('company_id') }})" id="{{ $step->id }}"
                             title="{{ __('cycles.Edit Title and dates') }}">
                             <span class="btn btn-icon btn-label-info rounded-circle">
                               <i class="ti ti-edit text-info"></i></span>
@@ -378,13 +392,15 @@
         </div>
         <div class="modal-body">
           <input type="hidden" name="cid" id="cid" value="{{ $id }}">
-          <input type="hidden" name="type" id="type5" value="5">
+          <input type="hidden" name="type" id="type5" value="{{ \App\Enums\CycleModifyAction::ADD_STEP }}">
           <input type="hidden" name="arr" id="sarr" value="{{ isset($step) ? $step->arr + 1 : 1 }}">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-4" id="menu1">
             <div class="form-group mb-0">
               <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
-              <span><a href="/dashboard/forms" target="_blank">{{ __('admin.Create_form') }}</a></span>
+              @if( $_user->ableTo('forms.builder_view', $permissions) )
+              <span><a href="{{ route('forms.builder_view') }}" target="_blank">{{ __('admin.Create_form') }}</a></span>
+              @endif
               <select class="select form-control" name="FormSelect" id="FormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
@@ -392,7 +408,7 @@
               </select>
             </div>
           </div>
-          <div class="mb-4" id="menu2">
+          {{--  <div class="mb-4" id="menu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div class="form-group mb-0">
               <select class="form-select" name="ScreeningSelect">
@@ -402,7 +418,7 @@
                 <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
               </select>
             </div>
-          </div>
+          </div>  --}}
           <div class="col-12 mb-4">
             <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="fromDate" name="fromDate" />
@@ -459,7 +475,7 @@
 <!--Modify custom form step Modal -->
 <div class="modal fade" id="ModifyStepForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel33"
   aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
         autocomplete="off" id="editStepForm">
@@ -471,12 +487,13 @@
 
         <div class="modal-body">
           <input type="hidden" name="sid" id="sid">
-          <input type="hidden" name="type" id="type7" value="8">
+          <input type="hidden" name="confirm_form_change" id="confirm_form_change" value="0">
+          <input type="hidden" name="type" id="type7" value="{{ \App\Enums\CycleModifyAction::UPDATE_STEP }}">
           <input type="hidden" name="stype" id="stype" value="1">
           <div class="mb-2" id="mmenu1">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose form') }}: </label>
             <div class="form-group mb-4">
-              <select class="select form-control" id="mFormSelect" name="mFormSelect" required>
+              <select class="select form-control" id="mFormSelect" name="mFormSelect">
                 {{-- @foreach (\App\BuilderForm::all() as $form) --}}
                 {{-- <option value="{{$form->id}}">{{$form->form_name}}</option> --}}
                 {{-- @endforeach --}}
@@ -494,7 +511,7 @@
             <label class="form-label" for="public_slug">{{ __('cycles.Public URL') }}: </label>
             <input type="text" id="public_slug" name="public_slug" class="form-control" value="" placeholder="{{ __('cycles.Public URL placeholder') }}" >
           </div>
-          <div class="mb-4" id="mmenu2">
+          {{--  <div class="mb-4" id="mmenu2">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Choose screening type') }}: </label>
             <div>
               <select class="form-select" id="mScreeningSelect" name="mScreeningSelect" required>
@@ -504,7 +521,7 @@
                 <option value="grouptogroup">{{ __('cycles.Assign Group to group of users') }}</option>
               </select>
             </div>
-          </div>
+          </div>  --}}
           <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Form title') }}: </label>
           <div class="mb-4">
             <input id='mtitle' name='title' type="text" placeholder="{{ __('cycles.Title') }}" class="form-control"
@@ -532,7 +549,7 @@
 
           <div class="form-group mb-4" id="mteam_number" style="display: none;">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('admin.maxInTeam') }}: </label>
-             <input id='mcount_team_number' name='count_team_number' type="number" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
+             <input id='mcount_team_number' name='count_team_number' type="number" min="0" placeholder="{{ __('admin.maxInTeam') }}" class="form-control">
           </div>
 
 
@@ -573,7 +590,7 @@
 
 <script>
   const currentLang = '{{ $l }}';
-
+  var minimumMembers = 1; // Default minimum members
   const errors = {
     title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
     description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
@@ -622,17 +639,14 @@
   }
 
   // Check for conditional required fields based on step type
-  if ((stepType.value === '1' || stepType.value === '5') && formSelect && formSelect.hasAttribute('required') && !formSelect.value) {
-    showError(formSelect, currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار نموذج.');
-    return false;
-  }
+  // Form is optional: a step may intentionally have no form ("— No form —").
 
-  if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
+  /* if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
     showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
     return false;
-  }
+  } */
 
-  if (stepType.value === '6' && teamNumberInput && (!teamNumberInput.value || teamNumberInput.value < 1)) {
+  if (stepType.value === '6' && teamNumberInput && (!teamNumberInput.value || teamNumberInput.value < minimumMembers)) {
     showError(teamNumberInput, errors.teamNumber);
     return false;
   }
@@ -667,12 +681,42 @@ if (addStepForm) {
 }
 
 if (editStepForm) {
+  // Tracks the form value the dialog was opened with, so we only warn when the
+  // manager actually changed the selected form.
+  let editStepOriginalFormId = null;
+  $('#ModifyStepForm').on('shown.bs.modal', function () {
+    editStepOriginalFormId = $('#mFormSelect').val();
+    $('#confirm_form_change').val('0');
+  });
+
   editStepForm.addEventListener('submit', function (event) {
     event.preventDefault();
-    if (validateStepForm(editStepForm, 'edit')) {
-      disableFormWithLoading(editStepForm);
-      editStepForm.submit();
+    if (!validateStepForm(editStepForm, 'edit')) {
+      return;
     }
+
+    const mFormSelect = document.getElementById('mFormSelect');
+    const stepHasSubmissions = $('#ModifyStepForm').data('has-submissions') ? Number($('#ModifyStepForm').data('has-submissions')) : 0;
+    const formChanged = mFormSelect && editStepOriginalFormId !== null && mFormSelect.value !== editStepOriginalFormId;
+
+    if (formChanged && stepHasSubmissions > 0 && $('#confirm_form_change').val() !== '1') {
+      releaseWarningAlert({
+        title: '{{ __("admin.step_form_change_warning_title") }}',
+        message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', stepHasSubmissions),
+        confirmText: '{{ __("admin.Yes") }}',
+        cancelText: '{{ __("admin.cancel") }}',
+        confirmColor: 'danger',
+        onConfirm: function () {
+          $('#confirm_form_change').val('1');
+          disableFormWithLoading(editStepForm);
+          editStepForm.submit();
+        }
+      });
+      return;
+    }
+
+    disableFormWithLoading(editStepForm);
+    editStepForm.submit();
   });
 }
 function clearValidationOnChange(form, mode = 'add') {
@@ -724,6 +768,15 @@ if (editStepForm) {
 
 <script>
 
+  const CYCLE_MODIFY_ACTION = {
+    EDIT_CYCLE: '{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}',
+    SAVE_CYCLE_NOOP: '{{ \App\Enums\CycleModifyAction::SAVE_CYCLE_NOOP }}',
+    DELETE_CYCLE: '{{ \App\Enums\CycleModifyAction::DELETE_CYCLE }}',
+    ARRANGE_STEPS: '{{ \App\Enums\CycleModifyAction::ARRANGE_STEPS }}',
+    DELETE_STEP: '{{ \App\Enums\CycleModifyAction::DELETE_STEP }}',
+    FETCH_STEP: '{{ \App\Enums\CycleModifyAction::FETCH_STEP }}',
+  };
+
   // $('#count_team_number, #mcount_team_number').on('input', function () {
   //   let val = $(this).val();
   //   if (val < 1) {
@@ -753,8 +806,8 @@ if (editStepForm) {
     // });
     // $('#fromDate,#toDate,#mfromDate,#mtoDate').datetimepicker({
     //   format: 'Y-m-d',
-    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start->format('Y/m/d') : now()->format('Y/m/d') }}',
-    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end->format('Y/m/d') : now()->addDays(15)->format('Y/m/d') }}',
+    //   minDate: '{{ !is_null($ccycle) ? $ccycle->start ? $ccycle->start->format('Y/m/d') : null : now()->format('Y/m/d') }}',
+    //   maxDate: '{{ !is_null($ccycle) ? $ccycle->end ? $ccycle->end->format('Y/m/d') : null : now()->addDays(15)->format('Y/m/d') }}',
     //   timepicker: false
     // });
     $(document).ready(function() {
@@ -777,7 +830,7 @@ if (editStepForm) {
           url: "/dashboard/cycles/modify",
           data: {
             "steps": ids,
-            "type": 4,
+            "type": CYCLE_MODIFY_ACTION.ARRANGE_STEPS,
           },
           success: function(response) {
             // console.log(response);
@@ -809,7 +862,7 @@ if (editStepForm) {
               $('#title').val(response.title);
               $('#description').val(response.description);
               $('#cycleid').val(cycle);
-              $('#type').val(1);
+              $('#type').val(CYCLE_MODIFY_ACTION.EDIT_CYCLE);
 
               var bsRangePickerBasic = $('#bs-rangepicker-basic');
               // $('#start').val(response.start);
@@ -844,7 +897,7 @@ if (editStepForm) {
           $('#title').val('');
           $('#description').val('');
           $('#cycleid').val('');
-          $('#type').val(2);
+          $('#type').val(CYCLE_MODIFY_ACTION.SAVE_CYCLE_NOOP);
 
           var bsRangePickerBasic = $('#bs-rangepicker-basic');
           // $('#start').val(response.start);
@@ -870,7 +923,7 @@ if (editStepForm) {
                 url: "/dashboard/cycles/modify",
                 data: {
                   "cycleid": cycle,
-                  "type": 3,
+                  "type": CYCLE_MODIFY_ACTION.DELETE_CYCLE,
                 },
                 success: function(response) {
                   // console.log(response);
@@ -950,7 +1003,7 @@ if (editStepForm) {
       }
     }
 
-    function ModifyStep(set, id) {
+    function ModifyStep(set, id, submissionsCount) {
       var cycle = $('#ccycle').find(":selected").val();
       $.ajaxSetup({
         headers: {
@@ -963,7 +1016,7 @@ if (editStepForm) {
             type: "POST",
             url: "/dashboard/cycles/modify",
             data: {
-              "type": 7,
+              "type": CYCLE_MODIFY_ACTION.FETCH_STEP,
               "sid": id,
               "cycleid": 0,
             },
@@ -975,7 +1028,15 @@ if (editStepForm) {
               let menu = $('#mmenu' + step);
               $('#mmenu1,#mmenu2').hide();
               $('.public-data-form-fields').hide();
-              if( step == 6 ) { $('#mteam_number').show(); }
+              if( step == 6 )
+              {
+                minimumMembers = response.minimumMembers;
+                var minimumMembers = 1; // Default minimum members
+                errors.teamNumber = currentLang == 'en' ? 'Team number must be at least ' + minimumMembers + '.' : 'عدد الفرق يجب أن يكون على الأقل ' + minimumMembers + '.';
+
+                $('#mcount_team_number').attr('min', response.minimumMembers);
+                $('#mteam_number').show();
+              }
               else { $('#mteam_number').hide(); }
 
               if( response.data !== null )
@@ -995,12 +1056,15 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty();
+                    const $mFormSelect = $('#mFormSelect').empty();
+                    $mFormSelect.append($('<option>').val('').text('{{ __('admin.no_form_option') }}'));
                     let appends = '';
                     response.data.forEach(function(form) {
                       appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
                     });
-                    $('#mFormSelect').append(appends);
+                    $mFormSelect.append(appends);
+                    if (!sData) { $mFormSelect.val(''); }
+                    $mFormSelect.trigger('change.select2');
                     menu.show();
                   },
                   error: function(error) {
@@ -1015,12 +1079,15 @@ if (editStepForm) {
                   url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected")
                     .data('organization'),
                   success: function(response) {
-                    $('#mFormSelect').empty();
+                    const $mFormSelect = $('#mFormSelect').empty();
+                    $mFormSelect.append($('<option>').val('').text('{{ __('admin.no_form_option') }}'));
                     let appends = '';
                     response.data.forEach(function(form) {
                       appends += `<option value="${form.id}" ${form.id == sData ? 'selected' : ''}>${form.form_name}</option>`;
                     });
-                    $('#mFormSelect').append(appends);
+                    $mFormSelect.append(appends);
+                    if (!sData) { $mFormSelect.val(''); }
+                    $mFormSelect.trigger('change.select2');
                     $('#mmenu1').show();
                   },
                   error: function(error) {
@@ -1050,6 +1117,7 @@ if (editStepForm) {
 
               // $('#mfromDate').val(response.from);
               // $('#mtoDate').val(response.to);
+              $('#ModifyStepForm').attr('data-has-submissions', submissionsCount || 0);
               $('#ModifyStepForm').modal('show');
             },
             error: function(error) {
@@ -1081,7 +1149,7 @@ if (editStepForm) {
           data: {
             "stepid": id,
             "steps": ids,
-            "type": 6,
+            "type": CYCLE_MODIFY_ACTION.DELETE_STEP,
           },
           success: function(response) {
             // console.log(response);
@@ -1094,49 +1162,10 @@ if (editStepForm) {
         });
       }
     }
+    // Viewport-fixed positioning now lives in /js/daterangepicker-viewport.js
+    // (loaded globally by the admin layout) so every modal picker behaves the same.
     function positionStepRangePicker($input) {
-      const drp = $input.data('daterangepicker');
-      if (!drp) return;
-      const $picker = drp.container;
-      $picker.addClass('drp-viewport-fixed');
-
-      const reposition = function () {
-        if (!drp.isShowing) return;
-        const inputRect = $input[0].getBoundingClientRect();
-        const pickerHeight = $picker.outerHeight();
-        const pickerWidth = $picker.outerWidth();
-        const viewportH = window.innerHeight;
-        const viewportW = window.innerWidth;
-        const gap = 4;
-
-        let top = inputRect.bottom + gap;
-        if (top + pickerHeight > viewportH - gap) {
-          const above = inputRect.top - pickerHeight - gap;
-          top = above >= gap ? above : Math.max(gap, viewportH - pickerHeight - gap);
-        }
-
-        let left;
-        if (drp.opens === 'left') {
-          left = inputRect.right - pickerWidth;
-        } else if (drp.opens === 'center') {
-          left = inputRect.left + inputRect.width / 2 - pickerWidth / 2;
-        } else {
-          left = inputRect.left;
-        }
-        left = Math.max(gap, Math.min(left, viewportW - pickerWidth - gap));
-
-        $picker.css({ top: top + 'px', left: left + 'px', right: 'auto', bottom: 'auto' });
-      };
-
-      $input.off('show.daterangepicker.viewport').on('show.daterangepicker.viewport', function () {
-        setTimeout(reposition, 0);
-      });
-      const $modal = $('#ModifyStepForm');
-      $modal.off('scroll.drpViewport').on('scroll.drpViewport', reposition);
-      $modal.find('.modal-body, .modal-dialog').off('scroll.drpViewport').on('scroll.drpViewport', reposition);
-      $(window).off('scroll.drpViewport resize.drpViewport').on('scroll.drpViewport resize.drpViewport', reposition);
-
-      if (drp.isShowing) reposition();
+      window.attachViewportDateRangePicker($input);
     }
 
     $(document).on('change', '#is_public', function() {

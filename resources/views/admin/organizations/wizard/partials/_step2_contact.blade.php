@@ -14,7 +14,7 @@
     <div class="col-md-6 mb-4">
       <div class="form-group">
         <label class="form-label" for="contact_email">
-          {{ __('admin.Email') }} <span class="text-danger">*</span>
+          {{ __('admin.Email') }}
         </label>
         <div class="input-group input-group-merge">
           <input 
@@ -85,7 +85,7 @@
     <div class="col-md-4 mb-4">
       <div class="form-group">
         <label class="form-label" for="state_id">
-          {{ __('admin.State') }} <span class="text-danger">*</span>
+          {{ __('admin.State/Governorate/Province') }}
         </label>
         <select
           class="form-select select2 @error('state_id') is-invalid @enderror"
@@ -111,13 +111,13 @@
     <div class="col-md-4 mb-4">
       <div class="form-group">
         <label class="form-label" for="city_id">
-          {{ __('admin.City') }} <span class="text-danger">*</span>
+          {{ __('admin.District') }}
         </label>
         <select
           class="form-select select2 @error('city_id') is-invalid @enderror"
           id="city_id"
           name="city_id"
-          data-placeholder="{{ __('admin.Select City') }}"
+          data-placeholder="{{ __('admin.Select District') }}"
         >
           <option value=""></option>
           @foreach($cities ?? [] as $city)
@@ -137,7 +137,7 @@
     <div class="col-12 mb-4">
       <div class="form-group">
         <label class="form-label" for="address">
-          {{ __('admin.Address') }} <span class="text-danger">*</span>
+          {{ __('admin.Address') }}
         </label>
         <textarea
           class="form-control @error('address') is-invalid @enderror"
@@ -155,7 +155,7 @@
     <div class="col-12 mb-4">
       <div class="form-group">
         <label class="form-label" for="google_map_url">
-          {{ __('admin.Google Maps URL') }} <span class="text-danger">*</span>
+          {{ __('admin.Google Maps URL') }}
         </label>
         <div class="input-group input-group-merge shadow-none">
           <input
@@ -166,7 +166,6 @@
             value="{{ old('google_map_url', $org->google_map_url ?? '') }}"
             placeholder="https://maps.google.com/..."
             maxlength="500"
-            required
           />
           <span class="input-group-text text-muted"><i class="ti ti-map-pin"></i></span>
         </div>
@@ -198,6 +197,7 @@
             value="{{ old('linkedin_company_url', $org->linkedin_company_url ?? '') }}"
             placeholder="https://linkedin.com/organization/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-linkedin"></i></span>
         </div>
@@ -218,6 +218,7 @@
             value="{{ old('twitter_handle', $org->twitter_handle ?? '') }}"
             placeholder="https://x.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-x"></i></span>
         </div>
@@ -238,6 +239,7 @@
             value="{{ old('facebook_page_url', $org->facebook_page_url ?? '') }}"
             placeholder="https://facebook.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-facebook"></i></span>
         </div>
@@ -258,6 +260,7 @@
             value="{{ old('instagram_profile_url', $org->instagram_profile_url ?? '') }}"
             placeholder="https://instagram.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-instagram"></i></span>
         </div>
@@ -278,6 +281,7 @@
             value="{{ old('youtube_channel_url', $org->youtube_channel_url ?? '') }}"
             placeholder="https://youtube.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-youtube"></i></span>
         </div>
@@ -298,6 +302,7 @@
             value="{{ old('tiktok_url', $org->tiktok_url ?? '') }}"
             placeholder="https://tiktok.com/..."
             maxlength="255"
+            autocomplete="off"
           />
           <span class="input-group-text text-muted"><i class="ti ti-brand-tiktok"></i></span>
         </div>
@@ -310,12 +315,12 @@
 @push('scripts')
 <script>
   $(function () {
-    let iti = null;
+    window.contactPhoneIti = null;
 
     // Initialize intl-tel-input for phone number input
     function initPhoneInput() {
       const $phoneInput = $('#contact_phone');
-      if (!$phoneInput.length || iti) return;
+      if (!$phoneInput.length || window.contactPhoneIti) return;
 
       const dialCodeMap = {
         '20': 'eg', '971': 'ae', '966': 'sa', '212': 'ma', '213': 'dz',
@@ -330,7 +335,7 @@
         initialCountry = dialCodeMap[savedDialCode] || 'eg';
       @endif
 
-      iti = intlTelInput($phoneInput[0], {
+      window.contactPhoneIti = intlTelInput($phoneInput[0], {
         initialCountry,
         preferredCountries: ['eg', 'ae', 'sa', 'ma', 'dz', 'tn'],
         utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js',
@@ -339,11 +344,11 @@
       });
 
       $phoneInput.on('countrychange', function() {
-        $('#country_code').val(iti.getSelectedCountryData().dialCode);
+        $('#country_code').val(window.contactPhoneIti.getSelectedCountryData().dialCode);
       });
 
       setTimeout(() => {
-        const countryData = iti.getSelectedCountryData();
+        const countryData = window.contactPhoneIti.getSelectedCountryData();
         if (countryData.dialCode && !$('#country_code').val()) {
           $('#country_code').val(countryData.dialCode);
         }

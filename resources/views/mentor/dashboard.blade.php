@@ -244,8 +244,8 @@
 
 
   <!-- Content wrapper -->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-body">
         @if (session()->has('msg'))
           <div class="col-12">
@@ -582,7 +582,7 @@
                       {{ $session->admin_comment ?? '...' }}
                     </td>
                     <td>
-                      @if (now()->format('Y-m-d') == date('Y-m-d', strtotime($session->zoom_date)))
+                      @if ($session->is_today)
                       <a href="{{ $session->start_url }}" target="_blank">
                         <button title="Start Meeting" type="button" data-value="{{ $session->id }}" type="button"
                           class="btn btn-label-primary rounded">

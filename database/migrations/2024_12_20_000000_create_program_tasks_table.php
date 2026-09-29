@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->unsignedBigInteger('program_id');
             $table->enum('priority', ['Low', 'Medium', 'High']);
-            $table->enum('status', ['Pending', 'In Progress', 'In Review', 'Completed'])->default('Pending');
+            $table->enum('status', ['pending', 'progress', 'review', 'completed', 'archived'])->default('pending');
             $table->date('due_date')->nullable();
             $table->json('tags')->nullable();
             $table->json('attachments')->nullable();
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('program_task_id');
             $table->unsignedBigInteger('company_id');
-            $table->enum('status', ['Pending', 'In Progress', 'In Review', 'Completed'])->default('Pending');
+            $table->enum('status', ['pending', 'progress', 'review', 'completed', 'archived'])->default('pending');
             $table->timestamp('last_updated')->nullable();
             $table->timestamps();
 

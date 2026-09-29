@@ -2,17 +2,15 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Settings;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Lang;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
-class ResetPassword extends Notification implements ShouldQueue
+class ResetPassword extends Notification
 {
-    use Queueable;
+    use ConfiguresSmtp;
 
     /**
      * The password reset token.
@@ -59,17 +57,39 @@ class ResetPassword extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         try {
+            $org = $notifiable->organization;
+            $smtpSettings = $org?->organizationSettings;
+
+            $this->configureSmtp($smtpSettings);
+            $from = $this->getFromAddress($smtpSettings);
+            // Platform-branded email (platform logo/name); the org only routes SMTP.
+            $orgData = $this->buildEmailOrganizationData(null);
+
             $resetUrl = $this->resetUrl($notifiable);
-            $expire = config('auth.passwords.'.config('auth.defaults.passwords').'.expire');
+            $expire = (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire');
+
+            $setting = Settings::first();
+            $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+            $platformName = $setting?->Platform_Name ?: config('app.name');
+
+            $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+            if ($firstName === '') {
+                $firstName = trim((string) $notifiable->first_name_en);
+            }
 
             return (new MailMessage)
-                ->subject('Reset Your Password')
-                ->view('emails.password-reset', [
+                ->subject(__('email.password_reset_email.subject', [], $locale))
+                ->view('emails.password-reset', array_merge([
                     'resetUrl' => $resetUrl,
-                    'expire' => $expire,
-                    'user' => $notifiable,
-                ]);
-                
+                    'resetExpireMinutes' => $expire,
+                    'resetLocale' => $locale,
+                    // Named distinctly from 'platformName': a global view composer
+                    // (AppServiceProvider) sets that key on every view and would
+                    // silently override it.
+                    'resetPlatformName' => $platformName,
+                    'resetUserName' => $firstName,
+                ], $orgData));
+
         } catch (\Exception $e) {
             // Log the error with context
             \Log::error('Failed to send password reset email', [
@@ -78,7 +98,7 @@ class ResetPassword extends Notification implements ShouldQueue
                 'email' => $notifiable->email ?? null,
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             // Re-throw the exception to let Laravel handle it
             throw $e;
         }

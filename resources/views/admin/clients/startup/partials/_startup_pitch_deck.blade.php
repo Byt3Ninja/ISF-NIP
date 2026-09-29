@@ -28,7 +28,7 @@
         @if ($company->pitch_deck != null)
         <div class="card-body text-center h-100">
           <div class="d-flex flex-column justify-content-between align-items-center h-100">
-            <iframe src="{{ url($company->pitch_deck) }}" target="_blank"
+            <iframe src="/pitch_decks/{{ $company->pitch_deck }}" target="_blank"
               style="width: 100%; height: 350px; object-fit:" class="img-fluid">
               <p>
                 {{ $l == 'en' ? 'Your browser does not support iframes.' : 'متصفحك لا يدعم إطارات iframe.' }}

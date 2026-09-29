@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Settings;
+use Carbon\Carbon;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
+use App\Services\FileManagerService;
 use Throwable;
 
 class MentorNotifyMentorshipNotification extends Notification implements ShouldQueue
@@ -120,22 +122,60 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
         $this->configureSmtp($smtpSettings);
 
         $mentorship_session = $this->mentorship_session;
+        $cycle = $mentorship_session->cycle;
         $session_date = strtotime($mentorship_session->zoom_date);
+        $start = Carbon::parse($mentorship_session->zoom_date);
+        $end = $start->copy()->addMinutes($mentorship_session->period);
         $sessionDate = date('Y-m-d', $session_date);
-        $sessionTime = date('h:i A', $session_date);
+        $sessionTime = date('h:i A', $session_date) . ' - ' . date('h:i A', $end->timestamp);
+        if( app()->getLocale() == 'ar' )
+        {
+            $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
+            $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
+        }
+        $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
+        $locationName = $sessionType == 'offline' ? ($cycle->offline_location_address ?: null) : null;
+        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: null) : null;
+        $address = $sessionType == 'offline' ? (optional($cycle->organization)->address ?: null) : null;
+        $attachments = $mentorship_session->attachments;
+        if( empty( $attachments ) )
+        {
+            $attachments = $mentorship_session->fileurl ? [
+                [
+                    'url' => app(FileManagerService::class)->getUrl($mentorship_session->fileurl, 'UsersDiskInviteMentor'),
+                    'name' => basename($mentorship_session->fileurl),
+                    'path' => $mentorship_session->fileurl
+                ]
+            ] : [];
+        }
 
-        $startupName = $mentorship_session?->user?->company?->name ?? $mentorship_session?->user?->name;
+        $founder = $mentorship_session?->user;
+        $startup = $founder?->company;
+        $founderName = $founder?->name ?? '';
+        $subject = app()->getLocale() === 'ar'
+            ? "جلسة إرشاد مع {$founderName}."
+            : "Upcoming Mentorship Session with {$founderName}";
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
-            ->subject( __('email.mentor_notify_email.subject') . ' ' . $startupName )
+            ->subject($subject)
             ->view('emails.mentorship_notify_mentor_email', array_merge([
                 'party'             => $notifiable,
-                'startupName'       => $startupName,
-                'sessionNotes'      => $mentorship_session?->comment ?? '-',
-                'sessionDate'      => $sessionDate,
-                'sessionTime'      => $sessionTime,
-                'sessionLink'      => $mentorship_session?->join_url ?? '',
+                'founder'           => $founder,
+                'startup'           => $startup,
+                'startupName'       => $startup?->name_en ?? $startup?->name_ar ?? '',
+                'sessionType'       => $sessionType,
+                'sessionNotes'      => $mentorship_session?->comment ?? '',
+                'sessionDate'       => $sessionDate,
+                'sessionTime'       => $sessionTime,
+                'sessionLink'       => $mentorship_session?->join_url ?? '',
+                'passcode'          => $mentorship_session?->zoom_passcode ?? '',
                 'platformName'      => $platformName,
+                'locationName'      => $locationName,
+                'mapLink'           => $mapLink,
+                'address'           => $address,
+                'attachments'       => $attachments,
+                'viewSessionUrl'    => route('mentorships.sessions_list_detailed'),
             ], $orgData));
 
     }

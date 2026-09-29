@@ -14,9 +14,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.css" rel="stylesheet">
 
     <style>
-        button.close {
-            display: none;
-        }
+        {{-- Summernote .note-modal dialog fixes live in the _edit_custom_pages partial
+             so they also apply to the Program Setup wizard's Custom Pages tab. --}}
         .bg-first { background-color: #fff0e1 !important; }
         .bg-second { background-color: #ebebed !important; }
         .bg-third { background-color: #ddf6e8 !important; }
@@ -24,8 +23,8 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+    <div class="">
         <div class="row">
             <div class="col-10">
                 <h4 class="fw-bold mb-4">
@@ -56,10 +55,10 @@
         <div class="card p-4 p-md-8">
             <form id="modify-app-form" action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="tab_id" value="1">
+                <input type="hidden" name="tab_id" value="{{ \App\Enums\CycleTabAction::CREATE_CYCLE }}">
                 <input type="hidden" name="id" id="cycleid" value="{{ $id }}">
-                <input type="hidden" name="typeedit" id="type" value="1">
-                <input type="hidden" name="type" id="type" value="1">
+                <input type="hidden" name="typeedit" id="type" value="{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}">
+                <input type="hidden" name="type" id="type" value="{{ \App\Enums\CycleModifyAction::EDIT_CYCLE }}">
                 <input type="hidden" name="organization_id" value="{{ $ccycle->organization_id ?? 0 }}">
 
                 

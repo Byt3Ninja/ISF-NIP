@@ -53,8 +53,8 @@
 
 @section('content')
 <!-- Main Content -->
-<div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+    <div class="">
         <!-- Simple Header -->
         <div class="mb-4">
             <h3 class="mb-1">
@@ -154,9 +154,9 @@
                                     $fullPath = $file->sf_file;
                                     $pathInfo = pathinfo($fullPath);
                                     $filename = $pathInfo['filename'];
-                                    $extension = $pathInfo['extension'];
-                                    if (file_exists($fullPath)) {
-                                        $bytes = filesize($fullPath);
+                                    $extension = $pathInfo['extension'] ?? '';
+                                    if (\Illuminate\Support\Facades\Storage::disk('hackathon_shared')->exists($fullPath)) {
+                                        $bytes = \Illuminate\Support\Facades\Storage::disk('hackathon_shared')->size($fullPath);
                                         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
                                         $factor = floor((strlen($bytes) - 1) / 3);
                                         $sizeReadable = sprintf('%.2f', $bytes / pow(1024, $factor)) . $units[$factor];
@@ -169,14 +169,14 @@
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <i class="ti ti-file-type-ppt text-danger me-2"></i>
-                                            {{ $filename.".".$extension }}
+                                            {{ $file->sf_original_name ?? ($filename.".".$extension) }}
                                             <small class="text-muted d-block">
                                                 ( {{ $sizeReadable }} - {{ $l == 'en' ? 'Uploaded by: ' . $file->{"user_name_". $l} : 'رفع بواسطة: ' . $file->{"user_name_". $l} }})
                                             </small>
                                         </div>
                                         <div>
-                                            <a href="{{ asset($file->sf_file) }}" 
-                                                download 
+                                            <a href="{{ route('hackathon.downloadSharedFile', $file->sf_id) }}"
+                                                onclick="downloadFile(event, {{ $file->sf_id }})"
                                                 class="btn btn-sm btn-outline-primary me-1"
                                                 title="{{ $l == 'en' ? 'Download' : 'تنزيل' }}">
                                                 <i class="ti ti-download"></i>
@@ -486,22 +486,11 @@
         console.log('Swal:', typeof Swal);
     });
 
-    function downloadFile(fileName, downloadName) {
-        console.log('downloadFile called with:', fileName, downloadName);
-        
-        // In a real application, you would have a server endpoint for downloading files
-        // For now, we'll simulate the download or use a placeholder
-        
-        // Get URL parameters to build the download path
-        const urlParams = new URLSearchParams(window.location.search);
-        const hackathonId = urlParams.get('hackathonId') || '1';
-        const teamId = urlParams.get('teamId') || '123';
-        
-        // Build the download URL - this should point to your Laravel route
-        const downloadUrl = `/dashboard/hackathon/team-workspace/download/${hackathonId}/${teamId}/${encodeURIComponent(fileName)}`;
-        
-        // Try to download the file
-        fetch(downloadUrl, {
+    function downloadFile(event, fileId) {
+        if (event && typeof event.preventDefault === 'function') event.preventDefault();
+        const l = '{{ $l }}';
+
+        fetch(`/dashboard/hackathon/sharedFile/${fileId}/download`, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -509,74 +498,35 @@
             }
         })
         .then(response => {
-            if (response.ok) {
-                return response.blob();
-            } else if (response.status === 404) {
-                throw new Error('File not found');
-            } else {
-                throw new Error('Download failed');
-            }
+            if (!response.ok) throw new Error('download-failed');
+            const disposition = response.headers.get('Content-Disposition') || '';
+            const match = disposition.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+            const name = match ? decodeURIComponent(match[1].replace(/"/g, '')) : 'download';
+            return response.blob().then(blob => ({ blob, name }));
         })
-        .then(blob => {
-            // Create a temporary download link
+        .then(({ blob, name }) => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            a.download = downloadName || fileName;
+            a.download = name;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-            
-            // Show success message
+        })
+        .catch(() => {
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    icon: 'success',
-                    title: '{{ $l == "en" ? "Download Started" : "بدأ التنزيل" }}',
-                    text: `{{ $l == "en" ? "Downloading: " : "جاري تنزيل: " }}"${fileName}"`,
-                    timer: 2000,
-                    showConfirmButton: false
+                    icon: 'error',
+                    title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                    text: '{{ $l == "en" ? "File download failed. Please try again." : "فشل تحميل الملف. يرجى المحاولة مرة أخرى." }}',
+                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
                 });
             }
-        })
-        .catch(error => {
-            console.error('Download error:', error);
-            
-            // For demo purposes, create a sample file download
-            if (error.message === 'File not found' || error.message === 'Download failed') {
-                // Create a sample file for demonstration
-                const sampleContent = `{{ $l == "en" ? "This is a sample file for: " : "هذا ملف تجريبي لـ: " }}"${fileName}"\n{{ $l == "en" ? "Created on: " : "تم إنشاؤه في: " }}${new Date().toLocaleString()}\n\n{{ $l == "en" ? "In a real application, this would be the actual file content." : "في التطبيق الحقيقي، سيكون هذا محتوى الملف الفعلي." }}`;
-                const blob = new Blob([sampleContent], { type: 'text/plain' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = downloadName || fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'info',
-                        title: '{{ $l == "en" ? "Demo Download" : "تنزيل تجريبي" }}',
-                        text: `{{ $l == "en" ? "Downloaded sample file: " : "تم تنزيل ملف تجريبي: " }}"${fileName}"`,
-                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-                    });
-                }
-            } else {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: '{{ $l == "en" ? "Download Failed" : "فشل التنزيل" }}',
-                        text: '{{ $l == "en" ? "Could not download the file. Please try again." : "لا يمكن تنزيل الملف. يرجى المحاولة مرة أخرى." }}',
-                        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
-                    });
-                }
-            }
         });
+
+        return false;
     }
 
     function uploadFile() {
@@ -619,20 +569,22 @@
                 return 'ti-file-text';
             };
 
-            const createListItem = (file) => {
+            const createListItem = (file, record) => {
                 const fileList = document.getElementById('fileList');
                 if (!fileList) return;
                 const newItem = document.createElement('li');
                 newItem.className = 'list-group-item d-flex justify-content-between align-items-center file-list-item';
 
+                const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
                 const iconClass = getIconClass(file.name);
                 const uploadedByText = l === 'en' ? 'Uploaded by: You' : 'رفع بواسطة: أنت';
+                const displayName = escapeHtml((record && record.original_name) || file.name);
 
                 newItem.innerHTML = `
-                    <div><i class="ti ${iconClass} me-2"></i> ${file.name} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - ${uploadedByText})</small></div>
+                    <div><i class="ti ${iconClass} me-2"></i> ${displayName} <small class="text-muted">(${(file.size / 1024).toFixed(1)}KB - ${uploadedByText})</small></div>
                     <div>
-                        <a href="#" class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile('${file.name}', '${file.name.replace(/\s+/g, '_')}')" title="${l === 'en' ? "Download" : "تنزيل"}"><i class="ti ti-download"></i></a>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${file.name}')" title="${l === 'en' ? "Delete" : "حذف"}"><i class="ti ti-trash"></i></button>
+                        <a href="/dashboard/hackathon/sharedFile/${record.id}/download" onclick="downloadFile(event, ${record.id})" class="btn btn-sm btn-outline-primary me-1" title="${l === 'en' ? "Download" : "تنزيل"}"><i class="ti ti-download"></i></a>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(this, '${record.id}')" title="${l === 'en' ? "Delete" : "حذف"}"><i class="ti ti-trash"></i></button>
                     </div>`;
                 fileList.prepend(newItem);
             };
@@ -660,7 +612,7 @@
                         text: data.message,
                         confirmButtonText: l === 'en' ? "OK" : "موافق"
                     });
-                    createListItem(file);
+                    createListItem(file, data);
                 } else {
                     Swal.fire({
                         icon: 'error',

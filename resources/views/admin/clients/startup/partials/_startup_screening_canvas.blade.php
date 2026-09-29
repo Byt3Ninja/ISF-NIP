@@ -2,6 +2,13 @@
   // Show the canvas if the query parameter 'screening' is set to 'true'
   $showCanvas = request()->query('screening') === 'true';
   $hasGuidelines = (trim(strip_tags($evaluationForm->screening_guidelines ?? '')) !== '') || !empty($evaluationForm->screening_guidelines_file);
+
+  // The evaluation is "ready" only when its form is published AND has at least
+  // one criterion configured. When it is not ready we still show the judge an
+  // icon (a warning instead of the gavel) that, on click, explains evaluation
+  // cannot be performed until the criteria are configured. (GV-3786)
+  $criteriaCount = ( !empty( $evaluationForm ) && $evaluationForm->categories ) ? $evaluationForm->categories->count() : 0;
+  $evaluationReady = !empty( $evaluationForm ) && $evaluationForm->status == 'Published' && $criteriaCount > 0;
 @endphp
 
 <style>
@@ -25,7 +32,7 @@
 </style>
 
 
-@if( !empty( $evaluationForm ) && $evaluationForm->status == 'Published' )
+@if( $evaluationReady )
 <div class="screening-gavel" data-bs-target="#rightModalCanvas" data-bs-toggle="offcanvas" aria-controls="rightModalCanvas"
   onclick="document.querySelector('.template-customizer-open-btn').style.display = 'none';">
   <img src="/icons/not-started.svg" />
@@ -117,7 +124,7 @@
                   </div>
                   @endif
                   <div class="d-flex justify-content-end">
-                    <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-form-data-tab').click()">
+                    <button type="button" class="btn btn-primary" id="continue-btn">
                       {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
                     </button>
                   </div>
@@ -300,10 +307,11 @@
 
                             <div class="col-12 d-flex justify-content-between mt-12">
                               <button type="button" class="btn btn-label-secondary btn-prev" {{ $loop->first ? 'disabled' : '' }}>
-                                <i class="ti ti-arrow-left ti-xs me-sm-2 me-0"></i>
+                                <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} ti-xs me-sm-2 me-0"></i>
                                 <span class="align-middle d-sm-inline-block d-none">{{ __('admin.Previous') }}</span>
                               </button>
-                              <button type="button" class="btn btn-primary btn-next" {{ $loop->last ? 'disabled' : '' }}>
+
+                              <button type="button" class="btn btn-primary next-btn">
                                 <span class="align-middle d-sm-inline-block d-none me-sm-2">{{ __('admin.Next') }}</span>
                                 <i class="ti ti-arrow-right ti-xs"></i>
                               </button>
@@ -319,7 +327,7 @@
             </div>
             <div class="tab-pane fade" id="pills-final-comments" role="tabpanel" aria-labelledby="pills-final-comments-tab">
               <div class="form-group mb-5">
-                <label for="is_approved" class="form-label">{{ __('admin.Your Decision')}}</label>
+                <label for="is_approved" class="form-label">{{ __('admin.Your Recommendation')}}</label>
                 <select class="form-select" name="is_approved" id="is_approved">
                   <option value="" {{ is_null( $evaluationForm->is_approved ) ? 'selected' : '' }}>{{ __('admin.Not Decided yet') }}</option>
                   <option value="1" {{ ( $evaluationForm->is_approved === 1 || $evaluationForm->is_approved === true ) ? 'selected' : '' }}>{{ __('admin.Decision Approved') }}</option>
@@ -328,14 +336,19 @@
               </div>
               <div class="form-group">
                 <label for="final_comments" class="form-label">{{ __('admin.Final Comments')}}</label>
-                <textarea 
-                  oninput="this.value = this.value.replace(/^\s+/g, '')"
-                  class="form-control" 
-                  id="final_comments" 
-                  name="final_comments" 
+                <textarea
+                  oninput="this.value = this.value.replace(/^\s+/g, ''); if (this.value.trim() !== '') { this.classList.remove('is-invalid'); }"
+                  class="form-control"
+                  id="final_comments"
+                  name="final_comments"
                   rows="16"
                   placeholder="{{ __('admin.Enter your comments here...')}}"
                   >{{ $evaluationForm->final_comment ?? '' }}</textarea>
+              </div>
+              <div class="d-flex justify-content-end mt-12">
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('pills-view-evaluation-tab').click()">
+                  {{ __('admin.Continue') }} <i class="ti ti-arrow-right ms-2"></i>
+                </button>
               </div>
             </div>
             <div class="tab-pane fade" id="pills-view-evaluation" role="tabpanel" aria-labelledby="pills-view-evaluation-tab">
@@ -382,11 +395,28 @@
     </form>
   </div>
 </div>
+@else
+<div class="screening-gavel screening-criteria-warning" role="button"
+  title="{{ __('admin.criteria_not_configured_title') }}">
+  <i class="ti ti-alert-triangle fs-2 text-warning"></i>
+</div>
 @endif
 
 @push('scripts')
   <script>
-    var categories = @json( $evaluationForm->categories );
+    var categories = @json( $evaluationForm->categories ?? [] );
+
+    // Warning icon (shown when the evaluation form isn't ready): explain that
+    // the criteria haven't been configured yet, so evaluation can't be done.
+    $(document).on('click', '.screening-criteria-warning', function () {
+      if (typeof window.releaseWarningAlert === 'function') {
+        window.releaseWarningAlert({
+          title: '{{ __('admin.criteria_not_configured_title') }}',
+          message: '{{ __('admin.criteria_not_configured_message') }}',
+        });
+      }
+    });
+
     $(document).on('click', '#pills-view-evaluation-tab', function() {
       $.each(categories, function(index, category) {
         var totalScore = 0;
@@ -435,5 +465,63 @@
         }
       });
     });
+
+   $('#continue-btn').on('click', function () {
+      $('.nav-pills .active')
+        .parent()
+        .next('li')
+        .find('button[data-bs-toggle="pill"]')
+        .trigger('click');
+    });
+
+    $('.next-btn').on('click', function () {
+      const $currentContent = $(this).closest('.content');
+      const $nextTab = $currentContent
+        .find('.subcriteria-tabs .nav-link.active')
+        .parent()
+        .next('li')
+        .find('button[data-bs-toggle="tab"]');
+
+      // If this is the last tab, stop here
+      if (!$nextTab.length) {
+        console.log('Already on last tab');
+        moveToNextStep(); // Move to next stepper content
+        return;
+      }
+
+      $nextTab.trigger('click');
+    });
+
+    function moveToNextStep() {
+      const $currentStep = $('.bs-stepper-header .step.active');
+      const $nextStep = $currentStep.nextAll('.step').first();
+
+      if (!$nextStep.length) {
+        console.log('Already on last step');
+
+        // Show final comments tab
+        const $finalTab = $('#pills-final-comments-tab');
+        if ($finalTab.length) {
+          $finalTab.tab('show'); // Works reliably with Bootstrap tabs
+        }
+
+        return;
+      }
+
+      // Move stepper
+      $nextStep.find('.step-trigger').trigger('click');
+
+      // Get the related content pane
+      const target = $nextStep.data('target'); // e.g. "#_2"
+
+      setTimeout(() => {
+        const $content = $(target);
+        const $firstTab = $content.find('.nav-tabs .nav-link').first();
+
+        if ($firstTab.length) {
+          new bootstrap.Tab($firstTab[0]).show();
+        }
+      }, 0);
+    }
   </script>
 @endpush

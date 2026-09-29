@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Traits\RoutesTenantMail;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -10,7 +12,7 @@ use Illuminate\Support\Facades\Password;
 
 class CustomEmail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, ConfiguresSmtp, RoutesTenantMail;
 
     public $user;
     public $resetUrl;
@@ -31,11 +33,14 @@ class CustomEmail extends Mailable implements ShouldQueue
 
     public function build()
     {
+        $org = $this->user->organization ?? null;
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return $this->subject('بيانات الدخول لمنصة نمو السياحة')
                     ->view('emails.custom-mail')
-                    ->with([
+                    ->with(array_merge([
                         'user' => $this->user,
                         'resetUrl' => $this->resetUrl,
-                    ]);
+                    ], $orgData));
     }
 }

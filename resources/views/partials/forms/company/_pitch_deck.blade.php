@@ -10,7 +10,7 @@
         method="post"
       >
         @csrf
-        <input type="hidden" value="9" name="CompanyN" />
+        <input type="hidden" value="{{ \App\Enums\CompanyFormStep::PitchDeckFile->value }}" name="CompanyN" />
           <div class="dz-message needsclick">
           Drop files here or click to upload
           <span class="note needsclick">

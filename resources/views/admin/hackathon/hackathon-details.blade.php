@@ -13,7 +13,7 @@
   // ====================================
   
   $user = Auth::user();
-  $isAdmin = $user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('organizationmanager');
+  $isAdmin = $user->hasRole('admin') || $user->hasRole('subadmin') || $user->hasRole('organizationmanager');
   
   // Determine if hackathon is finished and has results to display
   $isFinishedHackathon = isset($currentHackathon['status']) && 
@@ -146,19 +146,27 @@
   // ====================================
   
   $tabs = collect($tabsData)->map(function ($tab) {
+    $action = 'normal';
+    $href = '#';
+    if( $tab['title'] == 'mentors' )
+    {
+      $action = 'redirect';
+      $href = route('mentors.list');
+    }
     return [
+      'action' => $action, 
+      'href' => $href,
       'target' => $tab['title'], 
       'icon' => $tab['icon'], 
       'label' => $tab['label'], 
       'type' => $tab['type']
     ];
   })->toArray();
-  
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <!-- Hackathon Details Banner -->
     @include('admin.hackathon.partials.details-banner') 
 
@@ -170,18 +178,30 @@
     <ul class="nav nav-pills flex-nowrap max-w-100 overflow-auto mb-2 pb-3" id="hackathonTab" role="tablist">
       @foreach($tabs as $tab)
       <li class="nav-item me-1" role="presentation">
-        <button 
-          type="button" 
-          role="tab"
-          class="nav-link {{ $loop->first ? 'active' : '' }}" 
-          id="{{ $tab['target'] }}-tab"
-          data-bs-toggle="tab" 
-          data-bs-target="#{{ $tab['target'] }}" 
-          aria-controls="{{ $tab['target'] }}" 
-          aria-selected="{{ $loop->first ? 'true' : 'false' }}"
-        >
-          <i class="{{ $tab['icon'] }} me-2"></i> {{ $tab['label'] }}
-        </button>
+        @if( $tab['action'] == 'normal' )
+          <button 
+            type="button" 
+            role="tab"
+            class="nav-link {{ $loop->first ? 'active' : '' }}" 
+            id="{{ $tab['target'] }}-tab"
+            data-bs-toggle="tab" 
+            data-bs-target="#{{ $tab['target'] }}" 
+            aria-controls="{{ $tab['target'] }}" 
+            aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+          >
+            <i class="{{ $tab['icon'] }} me-2"></i> {{ $tab['label'] }}
+          </button>
+        @elseif( $tab['action'] == 'redirect' )
+          <a
+            href="{{ $tab['href'] }}"
+            class="nav-link {{ $loop->first ? 'active' : '' }}"
+            id="{{ $tab['target'] }}-tab"
+            aria-controls="{{ $tab['target'] }}"
+            aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+          >
+            <i class="{{ $tab['icon'] }} me-2"></i> {{ $tab['label'] }}
+          </a>
+        @endif
       </li>
       @endforeach
     </ul>
@@ -190,89 +210,91 @@
     <!-- Tabs Content -->
     <div class="tab-content p-0 shadow-none mb-12" id="hackathonTabContent">
       @foreach($tabs as $tab)
-        @if( $tab['type'] == 'dynamic' )
-          @php $get_page = $pages->where('code', $tab['target'])->first(); @endphp
-          <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
-            <div class="card">
-              <div class="card-body">
-                 {!! $get_page->content !!}
+        @if( $tab['action'] == 'normal' )
+          @if( $tab['type'] == 'dynamic' )
+            @php $get_page = $pages->where('code', $tab['target'])->first(); @endphp
+            <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
+              <div class="card">
+                <div class="card-body">
+                  {!! $get_page->content !!}
+                </div>
               </div>
             </div>
-          </div>
-        @else
-          @php
-            // ====================================
-            // Partials Mapping Configuration
-            // ====================================
-            
-            $partials = [
-              // Overview and Information tabs
-              'overview' => $isFinishedHackathon ? 'admin.hackathon.partials.finished-overview-tab' : '',
-              'themes' => 'admin.hackathon.partials.themes-tab',
-              'schedule' => 'admin.hackathon.partials.schedule-tab',
-              'prizes' => 'admin.hackathon.partials.prizes-tab',
-              'evaluation' => 'admin.hackathon.partials.evaluation-tab',
+          @else
+            @php
+              // ====================================
+              // Partials Mapping Configuration
+              // ====================================
               
-              // People and Teams tabs  
-              'mentors' => 'admin.hackathon.partials.mentors-tab',
-              'teams' => 'admin.hackathon.partials.teams-tab',
+              $partials = [
+                // Overview and Information tabs
+                'overview' => $isFinishedHackathon ? 'admin.hackathon.partials.finished-overview-tab' : '',
+                'themes' => 'admin.hackathon.partials.themes-tab',
+                'schedule' => 'admin.hackathon.partials.schedule-tab',
+                'prizes' => 'admin.hackathon.partials.prizes-tab',
+                'evaluation' => 'admin.hackathon.partials.evaluation-tab',
+                
+                // People and Teams tabs  
+                'mentors' => 'admin.hackathon.partials.mentors-tab',
+                'teams' => 'admin.hackathon.partials.teams-tab',
+                
+                // Projects tabs
+                'projects' => 'admin.hackathon.partials.projects-gallery-tab',
+                
+                // Results and Winners tabs
+                'winners' => 'admin.hackathon.partials.finished-winners-tab',
+                'results-winners' => 'admin.hackathon.partials.winners-tab',
+                'results' => 'admin.hackathon.partials.results-tab',
+                
+                // Activities tabs
+                'submission' => 'admin.hackathon.partials.projects-tab',
+                'mentorship' => 'admin.hackathon.partials.mentorship-tab',
+                
+                // Admin tabs
+                'submissions' => 'admin.hackathon.partials.submissions-tab',
+              ];
               
-              // Projects tabs
-              'projects' => 'admin.hackathon.partials.projects-gallery-tab',
+              $partial = $partials[$tab['target']] ?? null;
               
-              // Results and Winners tabs
-              'winners' => 'admin.hackathon.partials.finished-winners-tab',
-              'results-winners' => 'admin.hackathon.partials.winners-tab',
-              'results' => 'admin.hackathon.partials.results-tab',
+              // ====================================
+              // Tab Visibility Logic
+              // ====================================
               
-              // Activities tabs
-              'submission' => 'admin.hackathon.partials.projects-tab',
-              'mentorship' => 'admin.hackathon.partials.mentorship-tab',
-              
-              // Admin tabs
-              'submissions' => 'admin.hackathon.partials.submissions-tab',
-            ];
-            
-            $partial = $partials[$tab['target']] ?? null;
-            
-            // ====================================
-            // Tab Visibility Logic
-            // ====================================
-            
-            $showTab = true;
-            
-            if ($isFinishedHackathon) {
-              // For finished hackathons, only show the 3 configured tabs
-              $allowedFinishedTabs = ['overview', 'projects', 'winners'];
-              $showTab = in_array($tab['target'], $allowedFinishedTabs);
-            } else {
-              // For active hackathons, apply original visibility rules
-              if ($tab['target'] === 'teams' && !$isAdmin && (!isset($showStep) || $showStep == false || (isset($companyStep) && $companyStep?->stype == 1))) { 
-                $showTab = true; // Allow teams view for participants
-              }
-              if ($tab['target'] === 'submissions' && !$isAdmin) {
-                $showTab = false; // Hide submissions from non-admins
-              }
-            }
-          if ($isAdmin) {
               $showTab = true;
-          } 
-          @endphp
-          @if($showTab && $partial)
-            <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
-              @if($isFinishedHackathon)
-                {{-- Pass finished hackathon data to partials --}}
-                @include($partial, [
-                  'hackathon' => $finishedHackathon,
-                  'teams' => $finishedHackathon['teams'] ?? collect([]),
-                  'winners' => $finishedHackathon['winners'] ?? collect([]),
-                  'isFinished' => true
-                ])
-              @else
-                {{-- Regular hackathon partials with existing data --}}
-                @include($partial)
-              @endif
-            </div>
+              
+              if ($isFinishedHackathon) {
+                // For finished hackathons, only show the 3 configured tabs
+                $allowedFinishedTabs = ['overview', 'projects', 'winners'];
+                $showTab = in_array($tab['target'], $allowedFinishedTabs);
+              } else {
+                // For active hackathons, apply original visibility rules
+                if ($tab['target'] === 'teams' && !$isAdmin && (!isset($showStep) || $showStep == false || (isset($companyStep) && $companyStep?->stype == 1))) { 
+                  $showTab = true; // Allow teams view for participants
+                }
+                if ($tab['target'] === 'submissions' && !$isAdmin) {
+                  $showTab = false; // Hide submissions from non-admins
+                }
+              }
+            if ($isAdmin) {
+                $showTab = true;
+            } 
+            @endphp
+            @if($showTab && $partial)
+              <div class="tab-pane fade{{ $loop->first ? ' show active' : '' }}" id="{{ $tab['target'] }}" role="tabpanel" aria-labelledby="{{ $tab['target'] }}-tab">
+                @if($isFinishedHackathon)
+                  {{-- Pass finished hackathon data to partials --}}
+                  @include($partial, [
+                    'hackathon' => $finishedHackathon,
+                    'teams' => $finishedHackathon['teams'] ?? collect([]),
+                    'winners' => $finishedHackathon['winners'] ?? collect([]),
+                    'isFinished' => true
+                  ])
+                @else
+                  {{-- Regular hackathon partials with existing data --}}
+                  @include($partial)
+                @endif
+              </div>
+            @endif
           @endif
         @endif
       @endforeach

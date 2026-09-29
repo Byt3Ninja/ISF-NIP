@@ -14,8 +14,8 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 		@if(session()->has('msg'))
 			<div class="row">
 				<div class="col-md-12">
@@ -256,7 +256,7 @@
 					<h4 class="mt-3">{{ __('admin.NoResultFound') }}</h4>
 					<p class="text-muted">{{ __('admin.TheRequestedQuizResultCouldNotBeFound') }}</p>
 					<a href="{{ route('quizzes.quiz_Results_view') }}" class="btn btn-primary">
-						<i class="ti ti-arrow-left me-2"></i>
+						<i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-2"></i>
 						{{ __('admin.BackToResults') }}
 					</a>
 				</div>

@@ -189,7 +189,7 @@ class MentorshipSessionController extends Controller
         $mentorship->save();
 
         if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-            SendMentorshipRequestJob::dispatch($mentorId,$date,$duration,$userId,null,null,'addwait');
+            SendMentorshipRequestJob::dispatch($mentorId, $date, $duration, $userId, null, $mentorship->id, null, 'addwait');
         }
 
           return $this->created(

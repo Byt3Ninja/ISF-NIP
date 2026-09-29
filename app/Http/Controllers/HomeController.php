@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Almuni;
 use App\Step;
 use App\User;
+use App\Role;
 use stdClass;
 use App\Cycle;
 use App\Sector;
@@ -32,6 +34,8 @@ use App\SurveyResponses;
 use App\SustainableIcon;
 use App\TrainingSession;
 use App\ServicesRequests;
+use App\Services\MeetingWindowService;
+use App\Services\MentorshipAvailabilityService;
 use App\Events\WebMessage;
 use App\MentorshipRequest;
 use Illuminate\Http\Request;
@@ -68,6 +72,9 @@ class HomeController extends Controller
             if ($user->hasAnyRole('Admin|Editor|Manager')) {
 
                 return $this->AdminDashboard();
+            } elseif ($user->hasRole('serviceProvider')) {
+
+                return redirect()->route('service_provider_dashboard.view');
             } elseif ($user->hasAnyRole('Registered|Page Manager|Pages Editor')) {
 
                 return view('admin.clients.dashboard');
@@ -95,9 +102,16 @@ class HomeController extends Controller
     protected function combinedDashboard()
     {
         $user = auth()->user();
+
+        // Service Provider gets its own dashboard
+        if ($user->hasRole('serviceProvider')) {
+            return app(ServiceProviderDashboardController::class)->index();
+        }
+
         $l = App::getLocale();
         $permissions = [];
         $organizations_ids = $user->organizations_ids;
+        $orgIds = $organizations_ids;
         $has_org = !empty($organizations_ids);
         if (auth()->check()) {
             $permissions = $user->myPermissions();
@@ -216,7 +230,6 @@ class HomeController extends Controller
             if($user->hasRole('Registered')){
                 $services_requests_q .= " AND sr.user_id = " . $user->id;
             }
-            $orgIds = $user->organizations_ids;
             if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
                 $services_requests_q .= " AND s.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
@@ -233,7 +246,6 @@ class HomeController extends Controller
                 WHERE
                     o.deleted_at IS NULL
             ";
-            $orgIds = $user->organizations_ids;
             if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
                 $organizations_q .= " AND o.id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
@@ -258,7 +270,6 @@ class HomeController extends Controller
                 WHERE
                     c.deleted_at IS NULL
             ";
-            $orgIds = $user->organizations_ids;
             if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
                 $cycles_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
             }
@@ -282,7 +293,7 @@ class HomeController extends Controller
         }
 
         if (array_intersect(['dashboard.widgets_cards_startups_view'], $permissions)) {
-            $companies_q = "SELECT 
+            $companies_q = "SELECT
                     s.id,
                     c.organization_id
                 FROM
@@ -293,11 +304,106 @@ class HomeController extends Controller
                     s.deleted_at IS NULL
             ";
             if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-                $companies_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
+                // Scoping via the company's CURRENT cycle misses founders who applied
+                // to this org's program but were later disapproved (which nulls
+                // companies.cycle) or moved on — so key off form_data instead, which
+                // is written at application time and never cleared afterward.
+                $companies_q .= " AND EXISTS (
+                        SELECT 1 FROM form_data fd
+                        JOIN steps st ON st.id = fd.step_id
+                        JOIN cycles cyc ON cyc.id = st.cycle_id
+                        WHERE fd.company_id = s.id
+                        AND cyc.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")
+                    )";
             }
             $companies = collect(DB::select($companies_q));
+            $registeredUserFilter = function ($q) {
+                $q->whereHas('roles', function ($rq) {
+                    $rq->where('default_for', 'registered');
+                })->whereDoesntHave('roles', function ($rq) {
+                    $rq->whereIn('default_for', ['admin', 'organizationmanager', 'subadmin']);
+                });
+            };
+            if ($organizations_ids != null) {
+                $incubators_company = Company::whereHas('cycle', function ($q) use ($organizations_ids) {
+                    $q->whereIn('organization_id', $organizations_ids);
+                })->whereHas('stepdata', function ($q) {
+                    $q->where('stype', '!=', 1);
+                })->whereHas('user', $registeredUserFilter)->get();
+            } else {
+                $incubators_company = Company::whereNotNull('cycle')->whereHas('stepdata', function ($q) {
+                    $q->where('stype', '!=', 1);
+                })->whereHas('user', $registeredUserFilter)->get();
+            }
+
+            if ($organizations_ids != null || $user->hasRole('admin')) {
+                // "Applied Startups" counts every startup that has actually submitted
+                // an application to at least one program, ever — regardless of its
+                // current pipeline stage or approval status. Disapproval nulls out
+                // companies.cycle/step (ScreeningController::changestep()), so those
+                // columns can't tell "applied then rejected" apart from "registered,
+                // never applied". form_data rows are written the moment a founder
+                // submits an application (ExternalCyclesController::registerUser(),
+                // CyclesController::saveForm()) and are never cleared on disapproval,
+                // so their existence is the durable signal of "this company applied".
+                $applied_form_data_org_filter = '';
+                if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                    $applied_form_data_org_filter = " AND EXISTS (
+                            SELECT 1 FROM steps st
+                            JOIN cycles cyc ON cyc.id = st.cycle_id
+                            WHERE st.id = fd.step_id
+                            AND cyc.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")
+                        )";
+                }
+                $applied_companies_by_cycle_q = "SELECT
+                        COUNT(comp.id) AS company_count
+                    FROM
+                        companies comp
+                    WHERE
+                        comp.deleted_at IS NULL
+                        AND EXISTS (
+                            SELECT 1 FROM form_data fd
+                            WHERE fd.company_id = comp.id
+                            {$applied_form_data_org_filter}
+                        )
+                        AND EXISTS (
+                            SELECT 1 FROM users u
+                            JOIN model_has_roles mhr ON mhr.model_id = u.id
+                            JOIN roles r ON r.id = mhr.role_id
+                            WHERE u.company_id = comp.id
+                            AND r.default_for = 'registered'
+                        )
+                        AND NOT EXISTS (
+                            SELECT 1 FROM users u
+                            JOIN model_has_roles mhr ON mhr.model_id = u.id
+                            JOIN roles r ON r.id = mhr.role_id
+                            WHERE u.company_id = comp.id
+                            AND r.default_for IN ('admin', 'organizationmanager', 'subadmin')
+                        )
+                ";
+
+                $applied_companies_by_cycle = collect(DB::select($applied_companies_by_cycle_q));
+                $applied_company_count = $applied_companies_by_cycle->sum('company_count');
+
+                $alumni_company = Almuni::whereHas('cycle', function ($q) use ($organizations_ids) {
+                    $q->whereIn('organization_id', $organizations_ids);
+                })
+                ->select('company_id')
+                ->distinct()
+                ->get();
+                               
+            } else {
+                $applied_companies_by_cycle = collect([]);
+                $applied_company_count = 0;
+                $alumni_company = Almuni::select('company_id')->distinct()->get();
+
+            }
         } else {
             $companies = collect([]);
+            $incubators_company = collect([]);
+            $alumni_company = collect([]);
+            $applied_companies_by_cycle = collect([]);
+            $applied_company_count = 0;
         }
 
         if (array_intersect(['dashboard.widgets_cards_mentorship_requests_view', 'dashboard.widgets_cards_mentorship_sessions_durations_view'], $permissions)) {
@@ -315,8 +421,24 @@ class HomeController extends Controller
                 $mentorship_requests_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $mentorship_requests = collect(DB::select($mentorship_requests_q));
+
+            $completed_mentorship_sessions_q = "SELECT
+                    mr.id
+                FROM
+                    mentorship_requests mr
+                LEFT JOIN
+                    cycles c ON mr.cycle_id = c.id
+                WHERE
+                    mr.deleted_at IS NULL
+                    AND mr.done = 1
+            ";
+            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+                $completed_mentorship_sessions_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
+            }
+            $completed_mentorship_sessions = collect(DB::select($completed_mentorship_sessions_q));
         } else {
             $mentorship_requests = collect([]);
+            $completed_mentorship_sessions = collect([]);
         }
 
         if (array_intersect(['dashboard.widgets_cards_training_sessions_view', 'dashboard.widgets_cards_training_sessions_durations_view'], $permissions)) {
@@ -345,26 +467,35 @@ class HomeController extends Controller
         }
 
         if (array_intersect(['dashboard.widgets_cards_services_view'], $permissions)) {
-            $services_q = "SELECT DISTINCT
-                    s.id,
-                    s.name_en,
-                    s.name_ar,
-                    s.price,
-                    s.description_en,
-                    s.description_ar,
-                    sc.id AS service_category_id,
-                    sc.name_en AS service_category_name_en,
-                    sc.name_ar AS service_category_name_ar
-                FROM
-                    services s
-                LEFT JOIN
-                    service_categories sc ON s.service_category_id = sc.id
-                INNER JOIN
-                     organization_service so ON s.id = so.service_id
-                WHERE
-                    s.deleted_at IS NULL
-            ";
-            $services = collect(DB::select($services_q))->map(function ($service) use ($l) {
+            $services = DB::table('services AS s')
+                ->select([
+                    's.id',
+                    's.name_en',
+                    's.name_ar',
+                    's.price',
+                    's.description_en',
+                    's.description_ar',
+                    'sc.id AS service_category_id',
+                    'sc.name_en AS service_category_name_en',
+                    'sc.name_ar AS service_category_name_ar',
+                ])
+                ->leftJoin('service_categories AS sc', 'sc.id', '=', 's.service_category_id')
+                ->join('organization_service AS so', 'so.service_id', '=', 's.id')
+                ->where('s.deleted_at', null)
+                // ->where('so.organization_id', $user->organization_id)
+                ->when($user->hasRole('serviceProvider'), function ($query) use ($user) {
+					$provider_id = $user?->service_provider?->id ?? 0;
+					$query->where('s.service_provider_id', $provider_id);
+				})
+				->when($user->hasRole('registered'), function ($query) {
+					$query->where('s.status', true);
+				})
+				->whereIn('so.organization_id', $orgIds)
+                ->orderBy('s.created_at', 'desc')
+        	    ->get();
+
+            $services = $services->groupBy('id')->map(function ($groupedService) use ($l) {
+                $service = $groupedService->first();
                 $output = new stdClass;
                 $output->id = $service->id;
                 $output->name = $service->{'name_' . $l};
@@ -375,7 +506,7 @@ class HomeController extends Controller
                 $service_category->name = $service->{'service_category_name_' . $l};
                 $output->service_category = $service_category;
                 return $output;
-            });
+            })->values();
         } else {
             $services = collect([]);
         }
@@ -418,9 +549,9 @@ class HomeController extends Controller
                     u.deleted_at IS NULL
                     AND r.default_for = 'mentor'
             ";
-            if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-                $my_mentors_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-            }
+            // if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
+            //     $my_mentors_q .= " AND c.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
+            // }
             $my_mentors = collect(DB::select($my_mentors_q));
             $my_mentors = $my_mentors->groupBy('id')->map(function ($user) {
                 $oneUser = $user->first();
@@ -434,12 +565,26 @@ class HomeController extends Controller
         } else {
             $my_mentors = collect([]);
         }
-        $cycle = $user->company->cycle ?? 0;
-        $mentorIds = DB::table('cycles_mentors')->where('cycle_id', $cycle)->pluck('user_id')->toArray();
-        $my_mentors =  $my_mentors->whereIn('id', $mentorIds);
+        if( $user->hasRole('Registered') )
+        {
+            $cycle = $user->company->cycle ?? 0;
+            $mentorIds = DB::table('cycles_mentors')->where('cycle_id', $cycle)->pluck('user_id')->toArray();
+            $my_mentors =  $my_mentors->whereIn('id', $mentorIds);
+        }
+
         if (array_intersect(['dashboard.widgets_cards_filtration_view'], $permissions)) {
-            $today = date("Y-m-d");
-            $inputs = [$today];
+            // A startup belongs to "First screening" based on its CURRENT step
+            // (companies.step = the screening step), not on whether today falls
+            // inside the step's from/to window. The old `today BETWEEN from AND to`
+            // gate hid valid in-progress initial screenings whose date window had
+            // already passed (e.g. a judge still had startups sitting at the step).
+            // The company join below already restricts to startups currently at
+            // the screening step, so the window filter only ever dropped real rows.
+            $inputs = [];
+            $isJudgeOnly = !$user->hasAnyRole(['admin', 'organizationmanager']);
+            $screeningJoinUserClause = $isJudgeOnly ? ' AND sc.user_id = ?' : '';
+            if ($isJudgeOnly) { array_unshift($inputs, $user->id); }
+
             $filtration_q = "SELECT
                     s.id,
                     s.arr,
@@ -455,6 +600,12 @@ class HomeController extends Controller
                     sc.user_id AS `screening_user_id`,
                     sc.users AS `screening_users`,
                     sc.panel AS `screening_panel`,
+                    sc.session_date AS `screening_session_date`,
+                    sc.start_time AS `screening_start_time`,
+                    sc.end_time AS `screening_end_time`,
+                    sc.`interval` AS `screening_interval`,
+                    sc.meeting_link AS `screening_meeting_link`,
+                    sc.meeting_password AS `screening_meeting_password`,
                     cp.id AS company_id,
                     cp.name_en AS `company_name_en`,
                     cp.name_ar AS `company_name_ar`,
@@ -472,14 +623,19 @@ class HomeController extends Controller
                 LEFT JOIN
                     cycles c ON c.id = s.cycle_id
                 LEFT JOIN
-                    screenings sc ON sc.step_id = s.id
+                    screenings sc ON sc.step_id = s.id $screeningJoinUserClause
                 LEFT JOIN
                     companies cp ON cp.step = sc.step_id
+                        AND (
+                            sc.users IS NULL
+                            OR JSON_LENGTH(sc.users) = 0
+                            OR JSON_CONTAINS(sc.users, CAST(cp.id AS CHAR))
+                        )
                 LEFT JOIN
                     users u ON u.company_id = cp.id AND u.HaveCompany = 1
                 WHERE
-                    ? BETWEEN s.from AND s.to
-                    AND s.deleted_at IS NULL
+                    s.deleted_at IS NULL
+                    AND s.stype = 2
                     AND s.id IN (
                         SELECT
                             step_id
@@ -488,7 +644,7 @@ class HomeController extends Controller
                         WHERE
                             deleted_at IS NULL
             ";
-            if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
+            if ($isJudgeOnly) {
                 $filtration_q .= " AND user_id = ? ";
                 $inputs[] = $user->id;
             }
@@ -523,7 +679,22 @@ class HomeController extends Controller
             });
             $step->companies = $groupedSteps->filter(function ($step) {
                 return !is_null($step->company_id);
-            })->groupBy('company_id')->map(function ($oneStep) use ($l) {
+            })
+                // Keyed by (company, PANEL), not by company alone.
+                //
+                // A judge may sit on several panels of one step, each with its
+                // own date, window and meeting link, and the same startup can be
+                // scheduled in all of them. Grouping on company_id alone
+                // collapsed those panels into a single row and ->first() kept
+                // whichever came back first, so a judge with three panels saw
+                // only one -- typically the earliest, already finished, showing
+                // "Session Completed" while the upcoming panels were invisible.
+                //
+                // One row per panel matches how the startup side already renders
+                // and how `screenings` actually stores the data.
+                ->groupBy(function ($row) {
+                    return $row->company_id . ':' . $row->screening_panel;
+                })->map(function ($oneStep) use ($l) {
                 $c = $oneStep->first();
                 $company = new stdClass;
                 $company->id = $c->company_id;
@@ -541,6 +712,25 @@ class HomeController extends Controller
                     $user->logo = User::image_handler($step->company_user_img_url);
                     return $user;
                 })->unique('id')->values();
+
+                // Per-startup meeting slot (GV-3311). Derived from the panel's
+                // start time, the admin's interval and this startup's position
+                // within the panel, so each startup sees its own window rather
+                // than the panel-wide one.
+                $slot = \App\Services\ScreeningSlotService::slotFor(
+                    $c->screening_session_date ?? null,
+                    $c->screening_start_time ?? null,
+                    isset($c->screening_interval) ? (int) $c->screening_interval : null,
+                    \App\Services\ScreeningSlotService::positionOf($c->screening_users ?? [], $c->company_id),
+                    $c->screening_end_time ?? null
+                );
+                $company->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
+                $company->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+                $company->meeting_start = $slot['start'];
+                $company->meeting_end = $slot['end'];
+                $company->join_url = $c->screening_meeting_link ?? null;
+                $company->passcode = $c->screening_meeting_password ?? null;
+
                 return $company;
             })->values();
             $step->panel = $groupedSteps->map(function ($oneStep) {
@@ -584,7 +774,12 @@ class HomeController extends Controller
                     fs.zoom_id,
                     fs.zoom_passcode,
                     fs.start_url,
-                    fs.join_url
+                    fs.join_url,
+                    sc.session_date AS `panel_session_date`,
+                    sc.start_time AS `panel_start_time`,
+                    sc.end_time AS `panel_end_time`,
+                    sc.`interval` AS `panel_interval`,
+                    sc.users AS `panel_users`
                 FROM
                     finalscreenings fs
                 LEFT JOIN
@@ -595,20 +790,65 @@ class HomeController extends Controller
                     steps s ON fs.step_id = s.id
                 LEFT JOIN
                     cycles cy ON s.cycle_id = cy.id
-                WHERE   
+                LEFT JOIN
+                    screenings sc ON sc.id = (
+                        -- One panel per company, chosen deterministically.
+                        --
+                        -- `screenings` holds ONE ROW PER JUDGE PER PANEL, and a
+                        -- company may sit in several panels of the same step, so
+                        -- joining on (step_id, JSON_CONTAINS(users)) alone matched
+                        -- many rows carrying DIFFERENT meeting windows. Which one
+                        -- won was down to arbitrary row order, so a judge could be
+                        -- shown another panel window -- or an unscheduled panel
+                        -- empty one, which never expires and leaves the row stuck
+                        -- reading as not started.
+                        --
+                        -- Prefer a panel that is actually scheduled; among those,
+                        -- the NEXT ONE that has not finished yet, falling back to
+                        -- the most recent past panel when every panel is over.
+                        -- Picking the earliest outright would surface a finished
+                        -- 09:00 session and hide a live 19:50 one.
+                        SELECT sc2.id
+                        FROM screenings sc2
+                        WHERE sc2.step_id = fs.step_id
+                            AND sc2.deleted_at IS NULL
+                            AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
+                        ORDER BY
+                            (sc2.session_date IS NULL) ASC,
+                            (TIMESTAMP(sc2.session_date, COALESCE(sc2.end_time, '23:59:59')) < NOW()) ASC,
+                            TIMESTAMP(sc2.session_date, COALESCE(sc2.start_time, '00:00:00')) ASC,
+                            sc2.panel ASC,
+                            sc2.id ASC
+                        LIMIT 1
+                    )
+                WHERE
                     fs.deleted_at IS NULL
+                    AND c.step = fs.step_id
             ";
             if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
-                $evaluation_q .= " AND fs.judges LIKE '%\"{$user->id}\"%'";
+                // judges may be stored either as a JSON array of string IDs (legacy: ["15","16"])
+                // or as a double-encoded JSON string of int IDs ("[15,16]") from older addJudgingPanels.
+                // Normalize via JSON_UNQUOTE when STRING, then check both string and int membership.
+                $uid = (int) $user->id;
+                $evaluation_q .= " AND (
+                    JSON_CONTAINS(
+                        CASE WHEN JSON_TYPE(fs.judges) = 'STRING' THEN JSON_UNQUOTE(fs.judges) ELSE fs.judges END,
+                        JSON_QUOTE('{$uid}')
+                    ) = 1
+                    OR JSON_CONTAINS(
+                        CASE WHEN JSON_TYPE(fs.judges) = 'STRING' THEN JSON_UNQUOTE(fs.judges) ELSE fs.judges END,
+                        '{$uid}'
+                    ) = 1
+                )";
             }
             if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                 $evaluation_q .= " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
             }
             $evaluation = collect(DB::select($evaluation_q))->map(function ($e) {
                 $judges = json_decode($e->judges, true);
-                if (!is_array($judges)) {
-                    $judges = [];
-                }
+                // Handle double-encoded values like "\"[1,2]\"" by decoding once more.
+                if (is_string($judges)) { $judges = json_decode($judges, true); }
+                if (!is_array($judges)) { $judges = []; }
                 $e->judges = array_map('intval', $judges);
                 return $e;
             });
@@ -638,7 +878,7 @@ class HomeController extends Controller
                         $user->title = $u->{'company_user_title_' . $l};
                         $user->logo = User::image_handler( $u->company_user_img_url );
                         return $user;
-                    })->values();
+                    })->unique('id')->values();
                     $company->judges = $_company->judges;
                     $company->datetime = $_company->datetime;
                     $company->duration = $_company->duration;
@@ -646,6 +886,23 @@ class HomeController extends Controller
                     $company->passcode = $_company->zoom_passcode;
                     $company->start_url = $_company->start_url;
                     $company->join_url = $_company->join_url;
+
+                    // Per-startup meeting slot (GV-3312). When the admin scheduled
+                    // the panel with an interval, each startup gets its own window
+                    // derived from the panel start time and its position in the
+                    // panel; otherwise fall back to the stored panel datetime.
+                    $slot = \App\Services\ScreeningSlotService::slotFor(
+                        $_company->panel_session_date ?? null,
+                        $_company->panel_start_time ?? null,
+                        isset($_company->panel_interval) ? (int) $_company->panel_interval : null,
+                        \App\Services\ScreeningSlotService::positionOf($_company->panel_users ?? [], $_company->company_id),
+                        $_company->panel_end_time ?? null
+                    );
+                    $company->meeting_start = $slot['start'];
+                    $company->meeting_end = $slot['end'];
+                    $company->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
+                    $company->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+
                     return $company;
                 })->values();
                 return $step;
@@ -679,6 +936,9 @@ class HomeController extends Controller
                     c.name_ar AS `company_name_ar`,
                     c.name_en AS `company_name_en`,
                     o.google_map_url AS `google_map_url`,
+                    o.address AS `org_address`,
+                    cy.offline_location_address AS `offline_location_address`,
+                    cy.offline_location_map AS `offline_location_map`,
                     o.name_en AS `organization_name_en`,
                     o.name_ar AS `organization_name_ar`
                 FROM
@@ -688,11 +948,14 @@ class HomeController extends Controller
                 LEFT JOIN
                     companies c ON c.id = u.company_id
                 LEFT JOIN
+                    cycles cy ON cy.id = mr.cycle_id
+                LEFT JOIN
                     organizations o ON o.id = mr.organization_id
                 WHERE   
                     mr.deleted_at IS NULL
-                    AND mr.zoom_date >= ?
+                    AND DATE_ADD(mr.zoom_date, INTERVAL mr.period MINUTE) >= ?
                     AND mr.approved = 'Yes'
+                    
             ";
             if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                 $upcoming_sessions_q .= " AND mr.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
@@ -704,7 +967,7 @@ class HomeController extends Controller
                 $upcoming_sessions_q .= " AND mr.mentor_id = " . $user->id;
             }
             $params = [];
-            $params[] = date("Y-m-d 00:00:00");
+            $params[] = date("Y-m-d H:i:s");
             $l = app()->getLocale();
             $upcoming_sessions = collect(DB::select($upcoming_sessions_q, $params))->map(function ($session) use ($l) {
                 $output = new stdClass;
@@ -735,9 +998,12 @@ class HomeController extends Controller
 
                 $organization = new stdClass;
                 $organization->id = $session->organization_id;
-                $organization->google_map_url = $session->google_map_url;
+                $organization->google_map_url = $session->offline_location_map ? $session->offline_location_map : $session->google_map_url;
+                $organization->address = $session->offline_location_address ? $session->offline_location_address : $session->org_address;
                 $organization->name = $session->{"organization_name_{$l}"};
                 $output->organization = $organization;
+
+                $output->meeting_status = mentorshipMeetingStatus($output->zoom_date, $output->period);
 
                 return $output;
             });
@@ -846,7 +1112,7 @@ class HomeController extends Controller
             return in_array('registered', $user->roles);
         })->values();
         $managers = $users->filter(function ($user) {
-            return in_array('admin', $user->roles) || in_array('manager', $user->roles);
+            return /*in_array('admin', $user->roles) ||*/ in_array('organizationmanager', $user->roles);
         })->values();
 
         $data = [];
@@ -941,10 +1207,9 @@ class HomeController extends Controller
             $cycle->allow_non_company = $item->allow_non_company;
             $preRequests = [];
             $user = auth()->user();
-        if (isset($cycle->type) && $cycle->type === 'General_Program' && $user) {
+            if (isset($cycle->type) && $cycle->type === 'General_Program' && $user) {
 
-            // Only require profile and startup if program doesn't allow non-company
-            if (empty($cycle->allow_non_company)) {
+
                 if (method_exists($user, 'hasCompletedProfile')) {
                     $profileComplete = $user->hasCompletedProfile();
                 } else {
@@ -972,45 +1237,52 @@ class HomeController extends Controller
                     ];
                 }
 
-                if (method_exists($user, 'hasCompletedStartup')) {
-                    $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : $user->hasCompletedCompany();
-                } else {
-                    $startupComplete = false;
-                    if (method_exists($user, 'company') || isset($user->company)) {
-                        $company = $user->company ?? null;
-                        $startupComplete = $company
-                            && filled($company->name_en ?? '')
-                            && filled($company->est_date ?? '')
-                            && filled($company->address_en ?? '')
-                            && filled($company->stage ?? '');
-                    }
-                }
-
-                if (!$startupComplete) {
-                    if (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
-                        $startupUrl = route('company.profile_view_mine');
-                    } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
-                        $startupUrl = route('company.profile_view_mine');
-                    } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
-                        $startupUrl = route('company.profile_view_mine');
+                // Only require startup profile if program doesn't allow non-company
+                if (empty($cycle->allow_non_company)) {
+                    if (method_exists($user, 'hasCompletedStartup')) {
+                        $startupComplete = method_exists($user, 'hasCompletedStartup') ? $user->hasCompletedStartup() : $user->hasCompletedCompany();
                     } else {
-                        $startupUrl = url('/dashboard/myCompany');
+                        $startupComplete = false;
+                        if (method_exists($user, 'company') || isset($user->company)) {
+                            $company = $user->company ?? null;
+                            $startupComplete = $company
+                                && filled($company->name_en ?? '')
+                                && filled($company->est_date ?? '')
+                                && filled($company->address_en ?? '')
+                                && filled($company->stage ?? '');
+                        }
                     }
-                    $preRequests[] = [
-                        'key'   => 'startup',
-                        'label' => 'admin.Complete Startup/Idea',
-                        'url'   => $startupUrl,
-                        'id'    => 'pre-request-startup-' . $cycle->id,
-                    ];
+
+                    if (!$startupComplete) {
+                        if (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                            $startupUrl = route('company.profile_view_mine');
+                        } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                            $startupUrl = route('company.profile_view_mine');
+                        } elseif (function_exists('route_exists') && route_exists('company.profile_view_mine')) {
+                            $startupUrl = route('company.profile_view_mine');
+                        } else {
+                            $startupUrl = url('/dashboard/myCompany');
+                        }
+                        $preRequests[] = [
+                            'key'   => 'startup',
+                            'label' => 'admin.Complete Startup/Idea',
+                            'url'   => $startupUrl,
+                            'id'    => 'pre-request-startup-' . $cycle->id,
+                        ];
+                    }
                 }
             }
-        }
 
             $cycle->pre_requests = $preRequests;
             return $cycle;
         });
+        
         $myFinal = null;
         $myInitial = null;
+        // GV-3320/3321: defaults so the Evaluation Session header renders even
+        // when the user has no company/step yet.
+        $data['evaluation_step_title'] = null;
+        $data['evaluation_program_title'] = null;
         $days = request()->query('days', 14);
         $company = $user->company;
         $sessions = collect([]);
@@ -1035,12 +1307,30 @@ class HomeController extends Controller
                 LIMIT 5";
             $sessions = collect(DB::select($sessions_q, [$company->step]));
 
+            // GV-8301: the widget's join icon must close once the session has ended.
+            $sessions = $sessions->map(function ($session) use ($user) {
+                $session->can_join = MeetingWindowService::isOpen(
+                    TrainingSession::wallClock($session->datetime),
+                    TrainingSession::wallClock($session->end_datetime),
+                    $user,
+                    'founder'
+                );
+
+                return $session;
+            });
+
             $myFinal_q = "SELECT
                     fs.id,
                     fs.judges,
                     fs.join_url,
                     fs.datetime,
                     fs.duration,
+                    fs.zoom_passcode,
+                    sc.session_date AS `panel_session_date`,
+                    sc.start_time AS `panel_start_time`,
+                    sc.end_time AS `panel_end_time`,
+                    sc.`interval` AS `panel_interval`,
+                    sc.users AS `panel_users`,
                     u.id AS `user_id`,
                     u.img_url AS `user_image_url`,
                     u.first_name_en AS `user_first_name_en`,
@@ -1055,13 +1345,88 @@ class HomeController extends Controller
                     companies c ON c.id = fs.company_id
                 LEFT JOIN
                     users u ON u.company_id = c.id AND u.id = ?
+                LEFT JOIN
+                    screenings sc ON sc.id = (
+                        -- One panel per company, chosen deterministically.
+                        --
+                        -- `screenings` holds ONE ROW PER JUDGE PER PANEL, and a
+                        -- company may sit in several panels of the same step, so
+                        -- joining on (step_id, JSON_CONTAINS(users)) alone matched
+                        -- many rows carrying DIFFERENT meeting windows. Which one
+                        -- won was down to arbitrary row order, so a judge could be
+                        -- shown another panel window -- or an unscheduled panel
+                        -- empty one, which never expires and leaves the row stuck
+                        -- reading as not started.
+                        --
+                        -- Prefer a panel that is actually scheduled; among those,
+                        -- the NEXT ONE that has not finished yet, falling back to
+                        -- the most recent past panel when every panel is over.
+                        -- Picking the earliest outright would surface a finished
+                        -- 09:00 session and hide a live 19:50 one.
+                        SELECT sc2.id
+                        FROM screenings sc2
+                        WHERE sc2.step_id = fs.step_id
+                            AND sc2.deleted_at IS NULL
+                            AND JSON_CONTAINS(sc2.users, CAST(fs.company_id AS CHAR))
+                        ORDER BY
+                            (sc2.session_date IS NULL) ASC,
+                            (TIMESTAMP(sc2.session_date, COALESCE(sc2.end_time, '23:59:59')) < NOW()) ASC,
+                            TIMESTAMP(sc2.session_date, COALESCE(sc2.start_time, '00:00:00')) ASC,
+                            sc2.panel ASC,
+                            sc2.id ASC
+                        LIMIT 1
+                    )
                 WHERE
                     fs.company_id = ?
-                AND fs.step_id = ?
-                LIMIT 1";
-            $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]))->first();
-            if (!empty($myFinal)) {
-                $judges = json_decode($myFinal->judges, true) ?? [];
+                AND fs.step_id = ?";
+            // GV-9620: a startup can sit in more than one final panel, so this
+            // returns every one of its rows for the step. It used to end in
+            // `LIMIT 1` and collapse to ->first(), which silently hid all but
+            // one meeting.
+            $myFinal = collect(DB::select($myFinal_q, [$user->id, $company->id, $company->step]));
+            $myFinal = $myFinal->map(function ($final) use ($company, $l) {
+                // GV-3321: this startup's own slot within the final panel.
+                $finalSlot = \App\Services\ScreeningSlotService::slotFor(
+                    $final->panel_session_date ?? null,
+                    $final->panel_start_time ?? null,
+                    isset($final->panel_interval) ? (int) $final->panel_interval : null,
+                    \App\Services\ScreeningSlotService::positionOf($final->panel_users ?? [], $company->id),
+                    $final->panel_end_time ?? null
+                );
+                $final->meeting_start = $finalSlot['start'];
+                $final->meeting_end = $finalSlot['end'];
+                $final->meeting_date = $finalSlot['start'] ? $finalSlot['start']->format('d-m-Y') : null;
+                $final->meeting_time = \App\Services\ScreeningSlotService::formatRange($finalSlot);
+                $final->passcode = $final->zoom_passcode ?? null;
+
+                // GV-7381: when the panel carries no schedule the row falls back to
+                // finalscreenings.datetime/duration -- but `duration` is floored to
+                // 30 on write (ScreeningController), so a 22:00-22:15 session was
+                // shown as "(30M)" and stayed joinable until 22:30. Prefer the
+                // panel's real end_time, and only fall back to the stored duration
+                // when there is genuinely nothing better to use.
+                $final->session_start = $finalSlot['start']
+                    ?: (!empty($final->datetime) ? \Carbon\Carbon::parse($final->datetime) : null);
+
+                $final->session_end = $finalSlot['end'];
+                if (is_null($final->session_end) && !empty($final->datetime)) {
+                    if (!empty($final->panel_session_date) && !empty($final->panel_end_time)) {
+                        try {
+                            $final->session_end = \Carbon\Carbon::parse(
+                                $final->panel_session_date . ' ' . $final->panel_end_time
+                            );
+                        } catch (\Exception $e) {
+                            $final->session_end = null;
+                        }
+                    }
+
+                    if (is_null($final->session_end) && !empty($final->duration)) {
+                        $final->session_end = \Carbon\Carbon::parse($final->datetime)
+                            ->addMinutes((int) $final->duration);
+                    }
+                }
+
+                $judges = json_decode($final->judges, true) ?? [];
                 if (!is_array($judges)) {
                     $judges = [];
                 }
@@ -1086,36 +1451,54 @@ class HomeController extends Controller
                         $judger = new stdClass;
                         $judger->id = $item->id;
                         $judger->name = trim($item->{'first_name_' . $l} . ' ' . $item->{'last_name_' . $l});
-                        $judger->img_url = User::image_handler($item->img_url);
+                        // `image_url` so the shared judges-cell partial renders
+                        // final and initial screening rows identically.
+                        $judger->image_url = User::image_handler($item->img_url);
+                        $judger->img_url = $judger->image_url;
                         return $judger;
                     });
 
-                    $myFinal->judges = $judgers;
-                    $myFinal->company = new stdClass;
-                    $myFinal->company->id = $company->id;
-                    $myFinal->company->user = new stdClass;
-                    $myFinal->company->user->id = $myFinal->user_id;
-                    $myFinal->company->user->image_url = User::image_handler($myFinal->user_image_url);
-                    $myFinal->company->user->first_name = $myFinal->{'user_first_name_' . $l};
-                    $myFinal->company->user->last_name = $myFinal->{'user_last_name_' . $l};
-                    $myFinal->company->user->name = trim($myFinal->company->user->first_name . ' ' . $myFinal->company->user->last_name);
-                    $myFinal->company->user->title = $myFinal->{'user_title_' . $l};
+                    $final->judges = $judgers;
+                } else {
+                    // GV-8357: leaving the raw JSON string here made the blade
+                    // @foreach fatal on judge-less final screenings.
+                    $judgers = collect();
+                    $final->judges = $judgers;
+                }
 
-                    unset($myFinal->user_id);
-                    unset($myFinal->user_image_url);
-                    unset($myFinal->user_first_name_en);
-                    unset($myFinal->user_first_name_ar);
-                    unset($myFinal->user_last_name_en);
-                    unset($myFinal->user_last_name_ar);
-                    unset($myFinal->user_title_en);
-                    unset($myFinal->user_title_ar);
-                } else { $judgers = collect(); }
-            }
+                // GV-9620: the founder/company cell is built for every row. It
+                // used to sit inside the `count($judges) > 0` branch, so a
+                // judge-less panel reached the blade with no ->company at all.
+                $final->company = new stdClass;
+                $final->company->id = $company->id;
+                $final->company->user = new stdClass;
+                $final->company->user->id = $final->user_id;
+                $final->company->user->image_url = User::image_handler($final->user_image_url);
+                $final->company->user->first_name = $final->{'user_first_name_' . $l};
+                $final->company->user->last_name = $final->{'user_last_name_' . $l};
+                $final->company->user->name = trim($final->company->user->first_name . ' ' . $final->company->user->last_name);
+                $final->company->user->title = $final->{'user_title_' . $l};
+
+                unset($final->user_id);
+                unset($final->user_image_url);
+                unset($final->user_first_name_en);
+                unset($final->user_first_name_ar);
+                unset($final->user_last_name_en);
+                unset($final->user_last_name_ar);
+                unset($final->user_title_en);
+                unset($final->user_title_ar);
+
+                return $final;
+            });
 
             $stepData = $company->stepdata;
             if (!empty($stepData)) {
                 $cType = $stepData->stype;
             }
+            // GV-3320/3321: the Evaluation Session section shows which program and
+            // step the scheduled meeting belongs to.
+            $data['evaluation_step_title'] = $stepData->title ?? null;
+            $data['evaluation_program_title'] = $company->cycledata->title ?? null;
             $cycle_id = $company->cycle;
             $cycleData = $company->cycledata;
             if ($cycleData) {
@@ -1136,7 +1519,7 @@ class HomeController extends Controller
                 return in_array($companyId, $item->users);
             })->values();
 
-            $myInitial = $myInitial->map(function ($item) {
+            $myInitial = $myInitial->map(function ($item) use ($companyId) {
                 $item->judge = $item->user;
                 if( !is_null( $item->session_date ) )
                 {
@@ -1150,8 +1533,42 @@ class HomeController extends Controller
                     $item->endTime = null;
                     $item->duration = null;
                 }
+
+                // GV-3320: this startup's own slot within the panel, derived from
+                // the admin's interval and the startup's position in the panel.
+                $slot = \App\Services\ScreeningSlotService::slotForCompany($item, $companyId);
+                $item->meeting_start = $slot['start'];
+                $item->meeting_end = $slot['end'];
+                $item->meeting_date = $slot['start'] ? $slot['start']->format('d-m-Y') : null;
+                $item->meeting_time = \App\Services\ScreeningSlotService::formatRange($slot);
+
                 return $item;
             });
+
+            // GV-8357: `screenings` holds one row per judge per panel, so a
+            // 3-judge panel produced 3 identical rows for the startup. Collapse
+            // each panel into a single row whose `judges` collection carries
+            // every judge on it; the panel keeps its own time slot and link.
+            $myInitial = $myInitial->groupBy(function ($item) {
+                return $item->step_id . '-' . $item->panel;
+            })->map(function ($panelRows) {
+                $row = $panelRows->first();
+
+                $row->judges = $panelRows
+                    ->pluck('judge')
+                    ->filter()
+                    ->unique('id')
+                    ->map(function ($judge) {
+                        $entry = new stdClass;
+                        $entry->id = $judge->id;
+                        $entry->name = $judge->name;
+                        $entry->image_url = $judge->image_url;
+                        return $entry;
+                    })
+                    ->values();
+
+                return $row;
+            })->values();
         }
 
         $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
@@ -1246,6 +1663,7 @@ class HomeController extends Controller
                     }
                 }
             }
+            
             $trType = $fLink = null;
             if ($company->approved) {
                 $trType = 'my/' . $step->id;
@@ -1262,6 +1680,7 @@ class HomeController extends Controller
             $step->fLink = $fLink;
             return $step;
         });
+        
         $nextSessions_q = "SELECT
                 mr.id,
                 mr.mentor_id,
@@ -1297,7 +1716,9 @@ class HomeController extends Controller
                 o.name_ar AS `org_name_ar`,
                 o.img_url AS `org_img_url`,
                 o.google_map_url AS `org_google_map_url`,
-                o.address AS `org_address`
+                o.address AS `org_address`,
+                cy.offline_location_address AS `offline_location_address`,
+                cy.offline_location_map AS `offline_location_map`
             FROM
                 mentorship_requests mr
             LEFT JOIN
@@ -1306,6 +1727,8 @@ class HomeController extends Controller
                 users u ON u.id = mr.user_id
             LEFT JOIN
                 companies c ON c.id = u.company_id
+            LEFT JOIN
+                cycles cy ON cy.id = mr.cycle_id
             LEFT JOIN
                mentorship_requests msr ON msr.mentor_id = m.id
             LEFT JOIN
@@ -1367,9 +1790,10 @@ class HomeController extends Controller
             $org->id = $_session->organization_id;
             $org->name = $_session->{'org_name_' . $l};
             $org->image_url = Organization::image_handler($_session->org_img_url);
-            $org->google_map_url = $_session->org_google_map_url;
-            $org->address = $_session->org_address;
+            $org->google_map_url = $_session->offline_location_map ? $_session->offline_location_map : $_session->org_google_map_url;
+            $org->address = $_session->offline_location_address ? $_session->offline_location_address : $_session->org_address;
             $session->organization = $org;
+            $session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
             return $session;
         })->values();
 
@@ -1431,11 +1855,21 @@ class HomeController extends Controller
         })->values();
 
         $setting = collect(DB::select("SELECT * FROM settings where `id` = 1 limit 1"))->first();
+        
+        if($user->hasAnyRole(['mentor'])){
+            $cyclementor = $user->mentorCycles->pluck('id')->toArray();
+            $cycle_idMentor = implode(',', $cyclementor);
+        } else {
+            $cycle_idMentor = [];
+        }
 
-        if ($company && $cycle_id != 0) {
+        /* if( $cycle_id != 0 || $cycle_idMentor != 0 )
+        {
             $surveyEligible = [];
-            foreach ($steps as $step) {
-                if ((optional($step)->stype == 3 || optional($step)->stype == 4) && (now() > Carbon::parse($step->to)->format('Y-m-d H:i:s'))) {
+            foreach( $steps as $step )
+            {
+                if( (optional($step)->stype == 3 || optional($step)->stype == 4) && (now() > Carbon::parse($step->to)->format('Y-m-d H:i:s')) )
+                {
                     $surveyEligible[] = [
                         'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
                         'triggered_at' => $step->id,
@@ -1444,155 +1878,245 @@ class HomeController extends Controller
                 }
             }
 
-            $my_mentorship_requests_q = "SELECT
-                    mr.id,
-                    mr.period,
-                    mr.zoom_date
-                FROM
-                    mentorship_requests mr
-                WHERE
-                    mr.user_id = $user->id
-                    AND mr.approved = 'Yes'
-                    AND mr.cycle_id = $cycle_id
-            ";
+            if( $user->hasAnyRole(['mentor']) )
+            {
+                if( empty( $cycle_idMentor ) )
+                {
+                    $my_mentorship_requests_q = "SELECT
+                            mr.id,
+                            mr.period,
+                            mr.zoom_date,
+                            mr.created_at
+                        FROM mentorship_requests mr
+                        WHERE 1 = 0
+                    ";
+                }
+                else
+                {
+                    $my_mentorship_requests_q = "SELECT
+                            mr.id,
+                            mr.period,
+                            mr.zoom_date,
+                            mr.created_at
+                        FROM mentorship_requests mr
+                        WHERE
+                            mr.mentor_id = {$user->id}
+                            AND mr.approved = 'Yes'
+                            AND mr.cycle_id IN ($cycle_idMentor)
+                    ";
+                }
+            }
+            else
+            {
+                $my_mentorship_requests_q = "SELECT
+                        mr.id,
+                        mr.period,
+                        mr.zoom_date,
+                        mr.created_at
+                    FROM
+                        mentorship_requests mr
+                    INNER JOIN attendance_training_offline ato
+                        ON ato.mentorship_request_id = mr.id
+                        AND ato.user_id = {$user->id}
+                        AND ato.attendance = 1
+                    WHERE
+                        mr.user_id = {$user->id}
+                        AND mr.approved = 'Yes'
+                        AND mr.rating IS NOT NULL
+                        AND mr.cycle_id = $cycle_id
+                ";
+            }
+
             $my_mentorship_requests = collect(DB::select($my_mentorship_requests_q))->map(function ($item) {
                 $item->end_at = Carbon::parse($item->zoom_date)->addMinutes($item->period)->format('Y-m-d H:i:s');
+                $item->added_at = $item->created_at;
                 return $item;
             })->filter(function ($item) {
                 return !empty($item->zoom_date) && !empty($item->period) && now() > $item->end_at;
             })->values();
 
-            $my_trainings_q = "SELECT
-                    ts.id,
-                    ts.type,
-                    ts.duration,
-                    ts.datetime
-                FROM
-                    training_sessions ts
-                INNER JOIN
-                    steps s ON ts.step_id = s.id
-                WHERE
-                    s.cycle_id = $cycle_id;
-            ";
-            $my_trainings = collect(DB::select($my_trainings_q))->filter(function ($item) {
-                if ($item->type == 'sessions' && (empty($item->datetime) || empty($item->duration))) {
-                    return false;
-                } elseif (in_array($item->type, ['online', 'offline', 'sessions']) && empty($item->datetime)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            })->values()->map(function ($item) {
-                $item->end_at = null;
-                if ($item->type == 'sessions') {
-                    $item->end_at = Carbon::createFromTimestamp($item->datetime)->addMinutes($item->duration)->format('Y-m-d H:i:s');
-                } elseif (in_array($item->type, ['online', 'offline', 'sessions'])) {
-                    $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s');
-                }
-                return $item;
-            })->filter(function ($item) {
-                return now() > $item->end_at;
-            })->values();
+            if( $user->hasAnyRole(['registered']) )
+            {
+                $my_trainings_q = "SELECT
+                        ts.id,
+                        ts.type,
+                        ts.duration,
+                        ts.datetime,
+                        ts.created_at
+                    FROM
+                        training_sessions ts
+                    INNER JOIN
+                        steps s ON ts.step_id = s.id
+                    INNER JOIN
+                        attendance_training_offline ato ON ato.training_session_id = ts.id
+                            AND ato.user_id = {$user->id}
+                            AND ato.attendance = 1
+                    WHERE
+                        s.cycle_id = $cycle_id;
+                ";
+                $my_trainings = collect(DB::select($my_trainings_q))->map(function ($item) {
+                    // Calculate end_at based on session type
+                    $item->end_at = null;
+                    $item->added_at = $item->created_at;
+                    if( $item->type == 'sessions' && !empty($item->datetime) && !empty($item->duration) ) {
+                        $sessionStart = Carbon::createFromTimestamp($item->datetime);
+                        $item->end_at = $sessionStart->copy()->addMinutes($item->duration)->format('Y-m-d H:i:s');
+                    } elseif( in_array($item->type, ['online', 'offline']) && !empty($item->datetime) ) {
+                        $item->end_at = FormatDate($item->datetime, 'Y-m-d H:i:s');
+                    }
+                    return $item;
+                })->filter(function ($item) {
+                    // Same logic as mentorship: must have end_at and session must have ended
+                    return !empty($item->end_at) && now() > $item->end_at;
+                })->values();
 
-            $my_quizzes_q = "SELECT
-                    q.id,
-                    q.end,
-                    q.attempts,
-                    q.passing_criteria AS criteria,
-                    qr.id AS attempt_id,
-                    qr.score AS attempt_score
-                FROM
-                    quizzes q
-                LEFT JOIN
-                    quiz_results qr ON qr.quiz_id = q.id AND qr.user_id = $user->id
-                WHERE
-                    q.status = 'published'
-                    AND q.organization_id = $organization_id
-            ";
-            $my_quizzes = collect(DB::select($my_quizzes_q))->groupBy('id')->map(function ($items) {
-                $item = $items->first();
-                $quiz = new stdClass;
-                $quiz->id = $item->id;
-                $quiz->criteria = $item->criteria;
-                $quiz->end = Carbon::parse($item->end)->format('Y-m-d H:i:s');
-                $quiz->trials = $item->attempts;
-                $quiz->attempts = $items->map(function ($result) {
-                    $attempt = new stdClass;
-                    $attempt->id = $result->attempt_id;
-                    $attempt->score = $result->attempt_score;
-                    return $attempt;
-                });
-                return $quiz;
-            })->values()->filter(function ($quiz) {
-                $attempts = $quiz->attempts;
-                if ($attempts->count() > 0) {
-                    if (
-                        $attempts->where('score', '>=', $quiz->criteria)->count() >= 1
-                        || $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
-                        || now()->format('Y-m-d H:i:s') > $quiz->end
-                    ) {
-                        return true;
+                $my_quizzes_q = "SELECT
+                        q.id,
+                        q.end,
+                        q.attempts,
+                        q.passing_criteria AS criteria,
+                        qr.id AS attempt_id,
+                        qr.score AS attempt_score
+                    FROM
+                        quizzes q
+                    LEFT JOIN
+                        quiz_results qr ON qr.quiz_id = q.id AND qr.user_id = ?
+                    WHERE
+                        q.status = 'published'
+                ";
+                if($organization_id != null){
+                    $my_quizzes_q .= " AND q.organization_id = $organization_id ";
+                }
+                $my_quizzes = collect(DB::select($my_quizzes_q, [$user->id]))->groupBy('id')->map(function ($items) {
+                    $item = $items->first();
+                    $quiz = new stdClass;
+                    $quiz->id = $item->id;
+                    $quiz->criteria = $item->criteria;
+                    $quiz->end = Carbon::parse($item->end)->format('Y-m-d H:i:s');
+                    $quiz->trials = $item->attempts;
+                    $quiz->attempts = $items->map(function ($result) {
+                        $attempt = new stdClass;
+                        $attempt->id = $result->attempt_id;
+                        $attempt->score = $result->attempt_score;
+                        return $attempt;
+                    });
+                    return $quiz;
+                })->values()->filter(function ($quiz) {
+                    $attempts = $quiz->attempts;
+                    if( $attempts->count() > 0 )
+                    {
+                        if (
+                            $attempts->where('score', '>=', $quiz->criteria)->count() >= 1
+                            || $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
+                            || now()->format('Y-m-d H:i:s') > $quiz->end
+                        ) {
+                            return true;
+                        } else {
+                            return false;
+                        }
                     } else {
                         return false;
                     }
-                } else {
-                    return false;
-                }
-            })->values();
+                })->values();
+            }
 
-            foreach ($my_mentorship_requests as $mentorship) {
+            foreach( $my_mentorship_requests as $mentorship )
+            {
                 $surveyEligible[] = [
                     'triggered_on' => 'mentorship',
                     'triggered_at' => $mentorship->id,
-                    'triggered_by' => 'session'
+                    'triggered_by' => 'session',
+                    'added_at' => $mentorship->added_at,
+                    'end_at' => $mentorship->end_at
                 ];
+            }
+            
+            if( $user->hasAnyRole(['registered']) )
+            {
+                foreach( $my_trainings as $session )
+                {
+                    $surveyEligible[] = [
+                        'triggered_on' => 'training',
+                        'triggered_at' => $session->id,
+                        'triggered_by' => 'session',
+                        'added_at' => $session->added_at,
+                        'end_at' => $session->end_at
+                    ];
+                }
+
+                foreach( $my_quizzes as $quiz )
+                {
+                    $surveyEligible[] = [
+                        'triggered_on' => 'training',
+                        'triggered_at' => $quiz->id,
+                        'triggered_by' => 'quiz'
+                    ];
+                }
             }
 
-            foreach ($my_trainings as $session) {
-                $surveyEligible[] = [
-                    'triggered_on' => 'training',
-                    'triggered_at' => $session->id,
-                    'triggered_by' => 'session'
-                ];
-            }
-
-            foreach ($my_quizzes as $quiz) {
-                $surveyEligible[] = [
-                    'triggered_on' => 'training',
-                    'triggered_at' => $quiz->id,
-                    'triggered_by' => 'quiz'
-                ];
-            }
             $surveysToAdd = [];
-            $surveys = SurveyScopes::where('cycle_id', $cycle_id)->whereIn('type', ['startup', 'both'])->orWhereNull('type')->with(['myResponses'])->get();
+            if( $user->hasAnyRole(['mentor']) )
+            {
+                $surveys = SurveyScopes::whereIn('cycle_id', $user->mentorCycles->pluck('id'))
+                    ->where(function($query) { $query->whereIn('type', ['mentor', 'both'])->orWhereNull('type'); })
+                    ->with(['myResponses'])
+                ->get()->unique('survey_id');
+            }
+            else
+            {
+                $surveys = SurveyScopes::where('cycle_id', $cycle_id)
+                    ->where(function($query) { $query->whereIn('type', ['startup', 'both'])->orWhereNull('type'); })
+                    ->with(['myResponses'])
+                ->get()->unique('survey_id');
+            }
 
-            foreach ($surveys as $survey_scope) {
-                $my_responses = $survey_scope->myResponses;
-                if ($survey_scope->scope == 'mentorship' && array_key_exists('mentorship', $surveyEligible)) {
+            // Query responses by survey_id (not scope_id) to prevent duplicates across cycles
+            $responsesBySurvey = SurveyResponses::where('user_id', $user->id)
+                ->whereIn('survey_id', $surveys->pluck('survey_id')->unique())
+            ->get()->groupBy('survey_id');
+
+            foreach( $surveys as $survey_scope )
+            {
+                $my_responses = $responsesBySurvey->get($survey_scope->survey_id, collect());
+
+                // Initialize fresh collection for each survey to avoid overwriting issues
+                $mentorshipFiltered = collect($surveyEligible)->where('triggered_on', 'mentorship');
+                $trainingFiltered = collect($surveyEligible)->where('triggered_on', 'training');
+
+                if( $survey_scope->scope == 'mentorship' && $mentorshipFiltered->isNotEmpty() )
+                {
                     $due = $survey_scope->trigger_by_due;
                     $session = $survey_scope->trigger_by_session;
-                    $mentorship = collect($surveyEligible['mentorship']);
                     $triggers = [];
-                    if ($due == true) {
-                        $triggers[] = 'due';
-                    }
-                    if ($session == true) {
-                        $triggers[] = 'session';
-                    }
+                    if( $due == true ) { $triggers[] = 'due'; }
+                    if( $session == true ) { $triggers[] = 'session'; }
+
                     $triggers = array_unique($triggers);
-                    if (count($triggers) == 0) {
-                        $mentorship = $mentorship->where('triggered_at', null);
+                    if( count( $triggers ) == 0)  {
+                        $mentorshipFiltered = $mentorshipFiltered->where('triggered_at', null);
                     } else {
-                        $mentorship = $mentorship->whereIn('triggered_by', $triggers);
+                        $mentorshipFiltered = $mentorshipFiltered->whereIn('triggered_by', $triggers);
                     }
-                    $mentorship = $mentorship->values();
-                    foreach ($mentorship as $conditions) {
+
+                    // Filter sessions: must be added after survey creation AND session must have ended
+                    $surveyCreatedAt = $survey_scope->created_at;
+                    $mentorshipFiltered = $mentorshipFiltered->filter(function ($item) use ($surveyCreatedAt) {
+                        // Session must be added to system after survey scope creation
+                        if( !empty($item['added_at']) && Carbon::parse($item['added_at']) <= Carbon::parse($surveyCreatedAt) ) { return false; }
+                        // Session must have ended
+                        if( !empty($item['end_at']) && now() <= Carbon::parse($item['end_at']) ) { return false; }
+                        return true;
+                    })->values();
+
+                    foreach( $mentorshipFiltered as $conditions )
+                    {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-                        if (empty($checkResponse)) {
+                        if( empty( $checkResponse ) )
+                        {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
                                 'survey_id' => $survey_scope->survey_id,
-                                'cycle_id' => $cycle_id,
+                                'cycle_id' => $survey_scope->cycle_id,
                                 'scope_id' => $survey_scope->id,
                                 'triggered_on' => $conditions['triggered_on'],
                                 'triggered_at' => $conditions['triggered_at'],
@@ -1601,34 +2125,40 @@ class HomeController extends Controller
                             ];
                         }
                     }
-                } elseif ($survey_scope->scope == 'training' && array_key_exists('training', $surveyEligible)) {
+                }
+                elseif( $survey_scope->scope == 'training' && $trainingFiltered->isNotEmpty() )
+                {
                     $due = $survey_scope->trigger_by_due;
                     $quiz = $survey_scope->trigger_by_quiz;
                     $session = $survey_scope->trigger_by_session;
-                    $training = collect($surveyEligible['training']);
-                    if ($due == true) {
-                        $triggers[] = 'due';
-                    }
-                    if ($quiz == true) {
-                        $triggers[] = 'quiz';
-                    }
-                    if ($session == true) {
-                        $triggers[] = 'session';
-                    }
+                    $triggers = [];
+                    if( $due == true ) { $triggers[] = 'due'; }
+                    if( $quiz == true ) { $triggers[] = 'quiz'; }
+                    if( $session == true ) { $triggers[] = 'session'; }
                     $triggers = array_unique($triggers);
-                    if (count($triggers) == 0) {
-                        $training = $training->where('triggered_at', null);
+                    if( count( $triggers ) == 0 ) {
+                        $trainingFiltered = $trainingFiltered->where('triggered_at', null);
                     } else {
-                        $training = $training->whereIn('triggered_by', $triggers);
+                        $trainingFiltered = $trainingFiltered->whereIn('triggered_by', $triggers);
                     }
-                    $training = $training->values();
-                    foreach ($training as $conditions) {
+                    // Filter sessions: must be added after survey creation AND session must have ended
+                    $surveyCreatedAt = $survey_scope->created_at;
+                    $trainingFiltered = $trainingFiltered->filter(function ($item) use ($surveyCreatedAt) {
+                        // Session must be added to system after survey scope creation
+                        if( !empty($item['added_at']) && Carbon::parse($item['added_at']) <= Carbon::parse($surveyCreatedAt) ) { return false; }
+                        // Session must have ended
+                        if( !empty($item['end_at']) && now() <= Carbon::parse($item['end_at']) ) { return false; }
+                        return true;
+                    })->values();
+                    foreach( $trainingFiltered as $conditions )
+                    {
                         $checkResponse = $my_responses->where('triggered_on', $conditions['triggered_on'])->where('triggered_at', $conditions['triggered_at'])->where('triggered_by', $conditions['triggered_by'])->first();
-                        if (empty($checkResponse)) {
+                        if( empty($checkResponse) )
+                        {
                             $surveysToAdd[] = [
                                 'user_id' => $user->id,
                                 'survey_id' => $survey_scope->survey_id,
-                                'cycle_id' => $cycle_id,
+                                'cycle_id' => $survey_scope->cycle_id,
                                 'scope_id' => $survey_scope->id,
                                 'triggered_on' => $conditions['triggered_on'],
                                 'triggered_at' => $conditions['triggered_at'],
@@ -1640,12 +2170,16 @@ class HomeController extends Controller
                 }
             }
 
-            if (!empty($surveysToAdd)) {
+            if( !empty( $surveysToAdd ) )
+            {
+                $surveysToAdd = collect($surveysToAdd)->unique(function ($item) {
+                    return $item['user_id'].'-'.$item['survey_id'].'-'.$item['triggered_on'].'-'.$item['triggered_at'].'-'.$item['triggered_by'];
+                })->values()->toArray();
                 SurveyResponses::insert($surveysToAdd);
             }
-        }
-
+        } */
         $available_surveys = SurveyResponses::where('user_id', $user->id)->where('cycle_id', $cycle_id)->whereNull('responses')->get();
+        
         $available_surveys = $available_surveys->map(function ($item) {
             $middleware = collect([]);
             if ($item->triggered_on == 'mentorship') {
@@ -1675,6 +2209,44 @@ class HomeController extends Controller
             } elseif (!$middleware->count()) {
                 return false;
             }
+
+            // الحصول على تاريخ إنشاء الـ survey scope
+            $surveyScope = $item->survey_scope;
+            $surveyCreatedAt = $surveyScope ? $surveyScope->created_at : null;
+
+            // فحص التوقيت للـ mentorship sessions
+            if ($item->triggered_on == 'mentorship' && $item->triggered_by == 'session') {
+                if (!empty($middleware->zoom_date) && !empty($middleware->period)) {
+                    // 1. فحص أن الـ request تم بعد إنشاء الـ survey
+                    if ($surveyCreatedAt && Carbon::parse($middleware->zoom_date) <= Carbon::parse($surveyCreatedAt)) {
+                        return false; // الـ request قديم وتم قبل إنشاء الـ survey
+                    }
+
+                    // 2. فحص أن الجلسة انتهت
+                    $endAt = Carbon::parse($middleware->zoom_date)->addMinutes($middleware->period);
+                    if (now() <= $endAt) {
+                        return false; // الجلسة لم تنتهي بعد
+                    }
+                }
+            }
+
+            // فحص التوقيت للـ training sessions (للـ startup فقط)
+            if ($item->triggered_on == 'training' && $item->triggered_by == 'session') {
+                if ($middleware->type == 'sessions' && !empty($middleware->datetime) && !empty($middleware->duration)) {
+                    // 1. فحص أن الـ session تم بعد إنشاء الـ survey
+                    $sessionDate = Carbon::createFromTimestamp($middleware->datetime);
+                    if ($surveyCreatedAt && $sessionDate <= Carbon::parse($surveyCreatedAt)) {
+                        return false; // الـ session قديم وتم قبل إنشاء الـ survey
+                    }
+
+                    // 2. فحص أن الجلسة انتهت
+                    $endAt = $sessionDate->copy()->addMinutes($middleware->duration);
+                    if (now() <= $endAt) {
+                        return false; // الجلسة لم تنتهي بعد
+                    }
+                }
+            }
+
             return true;
         })->values();
 
@@ -1700,7 +2272,7 @@ class HomeController extends Controller
         $data['countCards'] =[
             [
                 'color' => 'success',
-                'href' => '/dashboard/users#search=Manager',
+                'href' => '/dashboard/users?r=organizationmanager',
                 'icon' => 'ti ti-user-share',
                 'text' => 'Managers',
                 'permissions' => ['users.index', 'dashboard.widgets_cards_managers_view'],
@@ -1708,18 +2280,69 @@ class HomeController extends Controller
                 'isRating' => false,
             ]
         ];
-            $data['countCards'][] = [
-                'color' => 'warning',
-                'href' => '/dashboard/organizations',
-                'icon' => 'ti-businessplan',
-                'text' => 'Organizations',
-                'permissions' => ['organizations.index', 'dashboard.widgets_cards_organizations_view'],
-                'count' => $organizations->count(),
-                'isRating' => false,
-            ];
-            if(Auth::user()->hasRole('Registered')){
-            if(Auth::user()->company?->cycle != null){
+        $data['countCards'][] = [
+            'color' => 'warning',
+            'href' => '/dashboard/organizations',
+            'icon' => 'ti-businessplan',
+            'text' => 'Organizations',
+            'permissions' => ['organizations.index', 'dashboard.widgets_cards_organizations_view'],
+            'count' => $organizations->count(),
+            'isRating' => false,
+        ];
 
+        if( $user->hasRole('Registered') )
+        {
+            if( $user->company?->cycle != null )
+            {
+                $data['countCards'][] = [
+                    'color' => 'secondary',
+                    'href' => '/dashboard/requests/all',
+                    'icon' => 'ti-speakerphone',
+                    'text' => 'Services Requests',
+                    'permissions' => ['service_requests.list_all', 'dashboard.widgets_cards_service_requests_view'],
+                    'count' => $services_requests->count(),
+                    'isRating' => false,
+                ];
+                $data['countCards'][] = [
+                    'color' => 'success',
+                    'href' => '/dashboard/directory',
+                    'icon' => 'ti ti-briefcase',
+                    'text' => 'Services',
+                    'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
+                    'count' => $services->count(),
+                    'isRating' => false,
+                ];
+                $data['countCards'][] = [
+                    'color' => 'primary',
+                    'href' => '/dashboard/requests/mine',
+                    'icon' => 'ti ti-speakerphone',
+                    'text' => 'My Requests',
+                    'permissions' => ['service_requests.list_mine', 'dashboard.widgets_cards_my_requests_view'],
+                    'count' => $my_requests->count(),
+                    'isRating' => false,
+                ];
+                $data['countCards'][] = [
+                    'color' => 'secondary',
+                    'href' => '/dashboard/mentors',
+                    'icon' => 'ti ti-school',
+                    'text' => 'Mentors',
+                    'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
+                    'count' => $my_mentors->count(),
+                    'isRating' => false,
+                ];
+                /* $data['countCards'][] = [
+                    'color' => 'danger',
+                    'href' => '#',
+                    'icon' => 'ti ti-star',
+                    'text' => 'Rate',
+                    'permissions' => ['dashboard.widgets_cards_rate_view'],
+                    'count' => $my_rating,
+                    'isRating' => true, // Only this card has the isRating key
+                ]; */
+            }
+        }
+        else
+        {
             $data['countCards'][] = [
                 'color' => 'secondary',
                 'href' => '/dashboard/requests/all',
@@ -1729,15 +2352,15 @@ class HomeController extends Controller
                 'count' => $services_requests->count(),
                 'isRating' => false,
             ];
-            $data['countCards'][] = [
-                'color' => 'success',
-                'href' => '/dashboard/directory',
-                'icon' => 'ti ti-briefcase',
-                'text' => 'Services',
-                'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
-                'count' => $services->count(),
-                'isRating' => false,
-            ];
+            // $data['countCards'][] = [
+            //     'color' => 'success',
+            //     'href' => '/dashboard/directory',
+            //     'icon' => 'ti ti-briefcase',
+            //     'text' => 'Services',
+            //     'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
+            //     'count' => $services->count(),
+            //     'isRating' => false,
+            // ];
             $data['countCards'][] = [
                 'color' => 'primary',
                 'href' => '/dashboard/requests/mine',
@@ -1756,7 +2379,7 @@ class HomeController extends Controller
                 'count' => $my_mentors->count(),
                 'isRating' => false,
             ];
-            $data['countCards'][] = [
+            /* $data['countCards'][] = [
                 'color' => 'danger',
                 'href' => '#',
                 'icon' => 'ti ti-star',
@@ -1764,222 +2387,213 @@ class HomeController extends Controller
                 'permissions' => ['dashboard.widgets_cards_rate_view'],
                 'count' => $my_rating,
                 'isRating' => true, // Only this card has the isRating key
-            ];
+            ]; */
         }
-        }else{
+        $data['countCards'][] = [
+            'color' => 'success',
+            'href' => '/dashboard/inbox',
+            'icon' => 'ti-message',
+            'text' => 'New messages',
+            'permissions' => ['inbox', 'dashboard.widgets.cards.new_messages.view'],
+            'count' => $messenger->count(),
+            'isRating' => false,
+        ];
+        /* $data['countCards'][] = [
+            'color' => 'danger',
+            'href' => '/dashboard/mymsg',
+            'icon' => 'ti-network',
+            'text' => 'Contact us',
+            'permissions' => ['messages.view', 'dashboard.widgets_cards_contact_us_view'],
+            'count' => $messages->count(),
+            'isRating' => false,
+        ];*/
+        $data['countCards'][] = [
+            'color' => 'danger',
+            'href' => '/dashboard/programlist',
+            'icon' => 'ti-circles',
+            'text' => 'Cycles',
+            'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
+            'count' => $cycles->count(),
+            'isRating' => false,
+        ];
             $data['countCards'][] = [
-                'color' => 'secondary',
-                'href' => '/dashboard/requests/all',
-                'icon' => 'ti-speakerphone',
-                'text' => 'Services Requests',
-                'permissions' => ['service_requests.list_all', 'dashboard.widgets_cards_service_requests_view'],
-                'count' => $services_requests->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'success',
-                'href' => '/dashboard/directory',
-                'icon' => 'ti ti-briefcase',
-                'text' => 'Services',
-                'permissions' => ['users.directory_view', 'dashboard.widgets_cards_services_view'],
-                'count' => $services->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'primary',
-                'href' => '/dashboard/requests/mine',
-                'icon' => 'ti ti-speakerphone',
-                'text' => 'My Requests',
-                'permissions' => ['service_requests.list_mine', 'dashboard.widgets_cards_my_requests_view'],
-                'count' => $my_requests->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'secondary',
-                'href' => '/dashboard/mentors',
-                'icon' => 'ti ti-school',
-                'text' => 'Mentors',
-                'permissions' => ['mentors.list', 'dashboard.widgets_cards_my_mentors_view'],
-                'count' => $my_mentors->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'danger',
-                'href' => '#',
-                'icon' => 'ti ti-star',
-                'text' => 'Rate',
-                'permissions' => ['dashboard.widgets_cards_rate_view'],
-                'count' => $my_rating,
-                'isRating' => true, // Only this card has the isRating key
-            ];
-        }
-           $data['countCards'][] = [
-                'color' => 'success',
-                'href' => '/dashboard/inbox',
-                'icon' => 'ti-message',
-                'text' => 'New messages',
-                'permissions' => ['inbox', 'dashboard.widgets.cards.new_messages.view'],
-                'count' => $messenger->count(),
-                'isRating' => false,
-           ];
-            $data['countCards'][] = [
-                'color' => 'danger',
-                'href' => '/dashboard/mymsg',
-                'icon' => 'ti-network',
-                'text' => 'Contact us',
-                'permissions' => ['messages.view', 'dashboard.widgets_cards_contact_us_view'],
-                'count' => $messages->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'danger',
-                'href' => '/dashboard/programlist',
-                'icon' => 'ti-circles',
-                'text' => 'Cycles',
-                'permissions' => ['cycles.list', 'dashboard.widgets_cards_programs_view'],
-                'count' => $cycles->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'info',
-                'href' => '/dashboard/companies',
-                'icon' => 'ti-building',
-                'text' => 'Startups',
-                'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
-                'count' => $companies->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'danger',
-                'href' => '/dashboard/mentors',
-                'icon' => 'ti-school',
-                'text' => 'Mentors',
-                'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
-                'count' => $mentors->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'secondary',
-                'href' => '/dashboard/mentorship/sessions',
-                'icon' => 'ti-brand-my-oppo',
-                'text' => 'Mentorship requests',
-                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_requests_view'],
-                'count' => $mentorship_requests->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'success',
-                'href' => '/dashboard/mentorship/sessions',
-                'icon' => 'ti-calendar-event',
-                'text' => 'Mentorship requests Duration',
-                'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
-                'count' => number_format( ( $mentorship_requests->sum('period') / 60 ), 2 ),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'primary',
-                'href' => route('users.judger'),
-                'icon' => 'ti-certificate',
-                'text' => 'Judgers',
-                'permissions' => ['users.index', 'dashboard.widgets_cards_judgers_view'],
-                'count' => $judgers->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'warning',
-                'href' => '/dashboard/training/sessions',
-                'icon' => 'ti-camera-question',
-                'text' => 'Training sessions',
-                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_view'],
-                'count' => $training_sessions->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'info',
-                'href' => '/dashboard/training/sessions',
-                'icon' => 'ti-alarm',
-                'text' => 'Training sessions Duration',
-                'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
-                'count' => number_format($training_sessions->sum('duration') / 60, 2),
-                'isRating' => false,
-            ];
-            
-            
-            $data['countCards'][] = [
-                'color' => 'secondary',
-                'href' => '#',
-                'icon' => 'ti ti-chalkboard',
-                'text' => 'First screening',
-                'permissions' => ['dashboard.widgets_cards_filtration_view'],
-                'count' => $filtration->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'warning',
-                'href' => '#',
-                'icon' => 'ti ti-calendar',
-                'text' => 'Final screening',
-                'permissions' => ['dashboard.widgets_cards_evaluation_view'],
-                'count' => $evaluation->map(function($e) { return $e->companies; })->flatten()->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'secondary',
-                'href' => '#',
-                'icon' => 'ti ti-chalkboard',
-                'text' => 'Coming sessions',
-                'permissions' => ['dashboard.widgets_cards_coming_sessions_view'],
-                'count' => $upcoming_sessions->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'warning',
-                'href' => '#',
-                'icon' => 'ti ti-calendar',
-                'text' => 'Cycles',
-                'permissions' => ['dashboard_cards.my_programs'],
-                'count' => $my_cycles->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'info',
-                'href' => '#',
-                'icon' => 'ti ti-server',
-                'text' => 'Company Attendance Rate',
-                'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
-                'count' => preg_match('/^\d+(\.\d+)?%$/', $attends_rate) ? number_format((float)rtrim($attends_rate, '%'), 1) . '%' : $attends_rate,
-                'isRating' => false,
-            ];
-            
-            $data['countCards'][] = [
-                'color' => 'warning',
-                'href' => '#',
-                'icon' => 'ti ti-select',
-                'text' => 'withoutTasks',
-                'permissions' => ['dashboard.widgets_cards_sessions_without_tasks_view'],
-                'count' => $sessionWithoutTasks->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'success',
-                'href' => '#',
-                'icon' => 'ti ti-check',
-                'text' => 'completedTasks',
-                'permissions' => ['dashboard.widgets_cards_completed_tasks_view'],
-                'count' => $completedTasks->count(),
-                'isRating' => false,
-            ];
-            $data['countCards'][] = [
-                'color' => 'info',
-                'href' => '#',
-                'icon' => 'ti ti-archive',
-                'text' => 'nonCompletedTasks',
-                'permissions' => ['dashboard.widgets_cards_non_completed_tasks_view'],
-                'count' => $nonCompletedTasks->count(),
-                'isRating' => false,
-            ];
+            'color' => 'success',
+            'href' => '/dashboard/mentorship/sessions?show=all&done=yes',
+            'icon' => 'ti-calendar-check',
+            'text' => 'completed_mentorship_sessions',
+            'permissions' => ['mentorships.sessions_list'],
+            'count' => $completed_mentorship_sessions->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/companies?status=alumni',
+            'icon' => 'ti-building',
+            'text' => 'Alumni_Startups',
+            'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => $alumni_company->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/companies?status=incubated',
+            'icon' => 'ti-building',
+            'text' => 'Incubated_Startups',
+            'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => $incubators_company->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/companies?status=applied',
+            'icon' => 'ti-building',
+            'text' => 'Applied_Startups',
+            'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => $applied_company_count,
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/companies',
+            'icon' => 'ti-building',
+            'text' => 'Founders',
+            'permissions' => ['users.index', 'users.view_companies', 'dashboard.widgets_cards_startups_view'],
+            'count' => Role::_users('registered')->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'danger',
+            'href' => '/dashboard/mentors',
+            'icon' => 'ti-school',
+            'text' => 'Mentors',
+            'permissions' => ['users.index', 'dashboard.widgets_cards_mentors_view'],
+            'count' => $mentors->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'secondary',
+            'href' => '/dashboard/mentorship/sessions',
+            'icon' => 'ti-brand-my-oppo',
+            'text' => 'Mentorship requests',
+            'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_requests_view'],
+            'count' => $mentorship_requests->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'success',
+            'href' => '/dashboard/mentorship/sessions',
+            'icon' => 'ti-calendar-event',
+            'text' => 'Mentorship requests Duration',
+            'permissions' => ['mentorships.sessions_list', 'dashboard.widgets_cards_mentorship_sessions_durations_view'],
+            'count' => number_format( ( $mentorship_requests->sum('period') / 60 ), 2 ),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'primary',
+            'href' => route('users.judger'),
+            'icon' => 'ti-certificate',
+            'text' => 'Judgers',
+            'permissions' => ['users.index', 'dashboard.widgets_cards_judgers_view'],
+            'count' => $judgers->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'warning',
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti-camera-question',
+            'text' => 'Training sessions',
+            'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_view'],
+            'count' => $training_sessions->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '/dashboard/training/sessions',
+            'icon' => 'ti-alarm',
+            'text' => 'Training sessions Duration',
+            'permissions' => ['trainings.sessions_list', 'dashboard.widgets_cards_training_sessions_durations_view'],
+            'count' => number_format($training_sessions->sum('duration') / 60, 2),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'secondary',
+            'href' => '#',
+            'icon' => 'ti ti-chalkboard',
+            'text' => 'First screening',
+            'permissions' => ['dashboard.widgets_cards_filtration_view'],
+            // Count startups currently in initial screening (not the number of
+            // steps). Mirrors the Final screening card, which counts companies.
+            // An initial step the judge owns but with no startup currently sitting
+            // at it contributes 0.
+            'count' => $filtration->map(function ($step) { return $step->companies; })->flatten()->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'warning',
+            'href' => '#',
+            'icon' => 'ti ti-calendar',
+            'text' => 'Final screening',
+            'permissions' => ['dashboard.widgets_cards_evaluation_view'],
+            'count' => $evaluation->map(function($e) { return $e->companies; })->flatten()->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'secondary',
+            'href' => '#',
+            'icon' => 'ti ti-chalkboard',
+            'text' => 'Coming sessions',
+            'permissions' => ['dashboard.widgets_cards_coming_sessions_view'],
+            'count' => $upcoming_sessions->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'warning',
+            'href' => '#',
+            'icon' => 'ti ti-calendar',
+            'text' => 'Cycles',
+            'permissions' => ['dashboard_cards.my_programs'],
+            'count' => $my_cycles->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '#',
+            'icon' => 'ti ti-server',
+            'text' => 'Company Attendance Rate',
+            'permissions' => ['dashboard.widgets_cards_startup_attendance_rate_view'],
+            'count' => preg_match('/^\d+(\.\d+)?%$/', $attends_rate) ? number_format((float)rtrim($attends_rate, '%'), 1) . '%' : $attends_rate,
+            'isRating' => false,
+        ];
+        
+        $data['countCards'][] = [
+            'color' => 'warning',
+            'href' => '#',
+            'icon' => 'ti ti-select',
+            'text' => 'withoutTasks',
+            'permissions' => ['dashboard.widgets_cards_sessions_without_tasks_view'],
+            'count' => $sessionWithoutTasks->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'success',
+            'href' => '#',
+            'icon' => 'ti ti-check',
+            'text' => 'completedTasks',
+            'permissions' => ['dashboard.widgets_cards_completed_tasks_view'],
+            'count' => $completedTasks->count(),
+            'isRating' => false,
+        ];
+        $data['countCards'][] = [
+            'color' => 'info',
+            'href' => '#',
+            'icon' => 'ti ti-archive',
+            'text' => 'nonCompletedTasks',
+            'permissions' => ['dashboard.widgets_cards_non_completed_tasks_view'],
+            'count' => $nonCompletedTasks->count(),
+            'isRating' => false,
+        ];
        
-
+            
         // start of graphs queries ----
         $country_data_q = "SELECT
                 c.name_en AS `country_name_en`,
@@ -2422,16 +3036,16 @@ class HomeController extends Controller
                 'id' => 'targetMarketChart',
                 'permissions' => ['dashboard.widgets_graphs_startups_target_markets_view']
             ],
-            [
-                'div-class' => 'col-12 col-md-6 mt-6',
-                'card-title' => __('admin.Project_Status_Over_Time'),
-                'type' => 'div',
-                'id' => 'projectStatusOverTimeChart',
-                'permissions' => ['dashboard.widgets_graphs_program_progress_view']
-            ],
+            // [
+            //     'div-class' => 'col-12 col-md-6 mt-6',
+            //     'card-title' => __('admin.Project_Status_Over_Time'),
+            //     'type' => 'div',
+            //     'id' => 'projectStatusOverTimeChart',
+            //     'permissions' => ['dashboard.widgets_graphs_program_progress_view']
+            // ],
         ];
 
-        $dateRate = date("Y-m-d 17:00:00");
+        $dateRate = date("Y-m-d 23:59:59");
         $notRated_men = "SELECT
                 *, 
                 CONCAT(TRIM(COALESCE(u.first_name_en, '')), ' ', TRIM(COALESCE(u.last_name_en, ''))) AS MentorName_en,
@@ -2560,7 +3174,7 @@ class HomeController extends Controller
                             FROM 
                             cycles
                             WHERE `type` = 'hackathon' ";
-                            if($cycle != null){
+                            if(isset($cycle) && $cycle != null){
                                 $newhackathon_q .= "AND id = ? ";
                                 $params[] = $cycle;
                                 $newhackathon_q .= "ORDER BY created_at DESC LIMIT 1";
@@ -2634,6 +3248,10 @@ class HomeController extends Controller
             $data['profile_completed'] = $profileComplete;
             $data['company_completed'] = $startupComplete;
         }
+
+        // GV-3691: the mentors widget offers "Request Mentorship", so it is only
+        // relevant while the founder's program sits on its mentorship stage.
+        $data['mentorshipActive'] = MentorshipAvailabilityService::isActiveForCompany($user->company);
 
         return view('includes.dashboard', $data);
     }
@@ -3329,7 +3947,12 @@ class HomeController extends Controller
         $data['services_count'] = Service::count();
         $data['service_requests_count'] = ServicesRequests::where('user_id', Auth::id())->count();
         $data['nm_count'] = Messenger::where('receiver', Auth::id())->whereNull('read')->count();
-        $data['mysessions'] = auth()->user()->mentorSessions()->where('zoom_date', '>=', date("Y-m-d 00:00:00"))->where('approved', 'Yes')->get();
+        $data['mysessions'] = auth()->user()->mentorSessions()->where('zoom_date', '>=', date("Y-m-d 00:00:00"))->where('approved', 'Yes')->get()
+            ->each(function ($session) {
+                // zoom_date is stored as local wall-clock time (see book-session-modal.blade.php), not UTC (app.timezone)
+                $today = \Carbon\Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d');
+                $session->is_today = $today == date('Y-m-d', strtotime($session->zoom_date));
+            });
         $data['mycycles'] = auth()->user()->mentorCycles;
         $data['myschedules'] = Schedule::where('user_id', Auth::id())->get();
         if (auth()->user()->mentorSessions()->whereNotNull('start_url')->whereDate('zoom_date', '<=', now()->format('Y-m-d'))->count()) {
@@ -3457,29 +4080,30 @@ class HomeController extends Controller
         return view('admin.documentation', compact('doc', 'menu'));
     }
 
-    public function checkCompletionStatus()
+    public function checkCompletionStatus(Request $request)
     {
         $user = auth()->user();
         $profileComplete = false;
         $startupComplete = false;
 
-        // Check if user has access to any General_Program cycle that allows non-company
-        $hasAllowNonCompanyCycle = DB::table('cycles')
-            ->where('type', 'General_Program')
-            ->whereNull('private')
-            ->whereRaw('? BETWEEN start AND end', [now()->format('Y-m-d')])
-            ->where('allow_non_company', 1)
-            ->exists();
+        // Check allow_non_company for the specific cycle if cycle_id is provided
+        $allowNonCompany = false;
+        if ($request->has('cycle_id')) {
+            $allowNonCompany = DB::table('cycles')
+                ->where('id', $request->get('cycle_id'))
+                ->value('allow_non_company');
+        }
 
-        // Only check profile and startup completion if NO active cycle allows non-company
-        if (!$hasAllowNonCompanyCycle) {
-            if (method_exists($user, 'hasCompletedProfile')) {
-                $profileComplete = $user->hasCompletedProfile();
-            } else {
-                // fallback logic
-                $profileComplete = !empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone);
-            }
+        // Profile check always runs
+        if (method_exists($user, 'hasCompletedProfile')) {
+            $profileComplete = $user->hasCompletedProfile();
+        } else {
+            // fallback logic
+            $profileComplete = !empty($user->phone) && !empty($user->country_id) && !empty($user->address) && !empty($user->timezone);
+        }
 
+        // Only check startup completion if cycle doesn't allow non-company
+        if (!$allowNonCompany) {
             if (method_exists($user, 'hasCompletedStartup')) {
                 $startupComplete = $user->hasCompletedStartup();
             } else {
@@ -3487,8 +4111,6 @@ class HomeController extends Controller
                 $startupComplete = $user->company && !empty($user->company->name_en) && !empty($user->company->address_en) && !empty($user->company->sector) && !empty($user->company->stage);
             }
         } else {
-            // If there's a cycle allowing non-company, skip both profile and startup checks
-            $profileComplete = true;
             $startupComplete = true;
         }
 

@@ -19,270 +19,331 @@ $tabs = [
   content: "\f0c6";
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
-  color: black;
+  color: #6c757d;
 }
 </style>
 @endsection
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+{{-- Tabs Navigation --}}
+<x-navigation-pills :tabs="$tabs" />
 
-    {{-- Tabs Navigation --}}
-    <ul class="nav nav-pills mb-6">
-      @foreach($tabs as $tab)
-        <li class="nav-item">
-          <a 
-            class="nav-link {{ $currentRoute === $tab['route'] ? 'active' : '' }}" 
-            href="{{ route($tab['route']) }}"
-          >
-            <i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-            {{ $tab['title'] }}
-          </a>
-        </li>
-      @endforeach
-    </ul>
-    
-    <div class="row">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header border-bottom">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="card-title mb-0">{{ __('admin.invitations') }}</h5>
-              <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#newInvitationOffcanvas">
-                <i class="ti ti-plus me-1"></i> {{ __('admin.new_invitation') }}
-              </button>
-            </div>
+{{-- Invitations Table --}}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header border-bottom">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">{{ __('admin.invitations') }}</h5>
+          <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#newInvitationOffcanvas">
+            <i class="ti ti-plus me-1"></i> {{ __('admin.new_invitation') }}
+          </button>
+        </div>
+      </div>
+      <div class="card-datatable table-responsive">
+        <table id="invitationsTable" class="table">
+          <thead class="table-light">
+            <tr>
+              <th>{{ __('admin.invitee') }}</th>
+              <th>{{ __('admin.subject') }}</th>
+              <th>{{ __('admin.Scope') }}</th>
+              <th>{{ __('admin.status') }}</th>
+              <th>{{ __('admin.Accepted_At') }}</th>
+              <th>{{ __('admin.Created At') }}</th>
+              <th>{{ __('admin.Created By') }}</th>
+              <th>{{ __('admin.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($invitations as $item)
+            <tr data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}">
+              <td style="min-width: 150px; max-width: 150px">
+                <h6 class="mb-0 fw-semibold">{{ $item['invitee_name'] }}</h6>
+                <small>{{ $item['invitee_email'] }}</small>
+              </td>
+              <td>{{ $item['subject'] }}</td>
+              <td>
+                <span class="badge bg-label-{{ $item['scope'] == 'Public' ? 'primary' : 'info' }}">
+                  {{ __('admin.' . strtolower($item['scope'])) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge
+                  @if($item['status'] == 'Accepted') bg-label-success
+                  @elseif($item['status'] == 'Pending') bg-label-warning
+                  @elseif($item['status'] == 'Sent') bg-label-info
+                  @else bg-label-danger
+                  @endif">
+                  {{ __('admin.' . strtolower($item['status'])) }}
+                </span>
+              </td>
+              <td>{{ $item['accepted_at'] }}</td>
+              <td>{{ $item['created_at'] }}</td>
+              <td>
+                <a
+                  href="/dashboard/show/UserProfile/{{ $item['inviter']['id'] }}"
+                  class="d-flex align-items-center"
+                >
+                  <img
+                    src="{{ $item['inviter']['img_url'] ? '/191014/' . $item['inviter']['img_url'] : '/icons/account.svg' }}"
+                    alt="avatar"
+                    class="img-fluid w-px-30 h-px-30 rounded-circle me-2 flex-shrink-0"
+                  />
+                  <span class="ms-2 text-dark">{{ $item['inviter']['name'] }}</span>
+                </a>
+              </td>
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-primary text-nowrap view-details"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#invitationOffcanvas"
+                  data-invitee-name="{{ $item['invitee_name'] }}"
+                  data-invitee-email="{{ $item['invitee_email'] }}"
+                  data-subject="{{ $item['subject'] }}"
+                  data-scope="{{ $item['scope'] }}"
+                  data-status="{{ $item['status'] }}"
+                  data-message="{{ $item['message_content'] }}"
+                  data-date="{{ $item['created_at'] }}"
+                  data-attachments="{{ implode(',', $item['attachments']) }}"
+                  data-response-message="{{ $item['response_message'] }}"
+                  data-orgs="{{ e(json_encode($item['organizations'])) }}"
+                >
+                  <i class="ti ti-eye me-1"></i> {{ __('admin.view_details') }}
+                </button>
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Invitation Details Offcanvas --}}
+<div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="invitationOffcanvas" aria-labelledby="invitationOffcanvasLabel">
+  <!-- Header -->
+  <div class="offcanvas-header border-bottom pb-0">
+    <div class="d-flex justify-content-between w-100">
+      <div class="d-flex flex-column">
+        <h5 class="offcanvas-title fw-bold mb-1" id="invitationTitle">
+          @lang('admin.invitation_subject')
+        </h5>
+        <small class="text-muted mb-2">
+          <i class="ti ti-calendar me-1"></i>
+          @lang('admin.sent_on'): <span id="dateTimestamp"></span>
+        </small>
+        <div class="d-flex align-items-center gap-2 mb-4">
+          <div id="invitationScopeDisplay"></div>
+          <div id="invitationStatus"></div>
+        </div>
+      </div>
+      <button type="button" class="btn-close m-0 p-0" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+  </div>
+
+  <div class="d-flex flex-column gap-2 border-bottom px-8 pb-4 pt-3" id="invitationOrgsContainer" style="display: none;">
+    <h6 class="mb-0">{{ __('admin.Organizations') }}:</h6>
+    <div class="d-flex flex-wrap align-items-center gap-2" id="invitationOrgs">
+      <!-- JS injected -->
+    </div>
+  </div>
+
+  <div class="offcanvas-body d-flex flex-column">
+    <!-- Conversation Area -->
+    <div class="conversation-thread flex-grow-1">
+
+      <!-- Original Invitation (sent by admin) -->
+      <div class="mail-message mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <div class="avatar avatar-sm me-2">
+            @if (auth()->user()->image_url)
+              <img
+                src="{{ auth()->user()->image_url }}"
+                alt="{{ auth()->user()->name }}"
+                class="rounded-circle"
+                onerror="this.src='/images/user-placeholder.jpeg'"
+              >
+            @else
+              <span class="avatar-initial rounded-circle bg-secondary">
+                {{ strtoupper(substr(auth()->user()->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name_en ?? 'U', 0, 1)) }}
+              </span>
+            @endif
           </div>
-          <div class="card-datatable table-responsive">
-            <table id="invitationsTable" class="table">
-              <thead class="table-light">
-                <tr>
-                  <th>{{ __('admin.invitee') }}</th>
-                  <th>{{ __('admin.subject') }}</th>
-                  <th>{{ __('admin.Scope') }}</th>
-                  <th>{{ __('admin.status') }}</th>
-                  <th>{{ __('admin.Accepted_At') }}</th>
-                  <th>{{ __('admin.Created At') }}</th>
-                  <th>{{ __('admin.actions') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach($invitations as $item)
-                <tr data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}">
-                  <td><h6 class="mb-0 fw-semibold">{{ $item['invitee_name'] }}</h6> <small>{{ $item['invitee_email'] }}</small></td>
-                  <td>{{ $item['subject'] }}</td>
-                  <td>
-                    <span class="badge bg-label-{{ $item['scope'] == 'Public' ? 'primary' : 'info' }}">
-                      {{ __('admin.' . strtolower($item['scope'])) }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge
-                      @if($item['status'] == 'Accepted') bg-label-success
-                      @elseif($item['status'] == 'Pending') bg-label-warning
-                      @else bg-label-danger
-                      @endif">
-                      <i class="ti ti-{{ $item['status'] == 'Accepted' ? 'circle-check' : ($item['status'] == 'Pending' ? 'clock' : 'circle-x') }} ti-xs me-1"></i>
-                      {{ __('admin.' . strtolower($item['status'])) }}
-                    </span>
-                  </td>
-                  <td>{{ $item['accepted_at'] }}</td>
-                  <td>{{ $item['created_at'] }}</td>
-                  <td>
-                    <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="{{ $item['invitee_name'] }}" data-invitee-email="{{ $item['invitee_email'] }}" data-subject="{{ $item['subject'] }}" data-scope="{{ $item['scope'] }}" data-status="{{ $item['status'] }}" data-message="{{ $item['message_content'] }}" data-date="{{ $item['created_at'] }}" data-attachments="{{ implode(',', $item['attachments']) }}" data-response-message="{{ $item['response_message'] }}">
-                      <i class="ti ti-eye me-1"></i> {{ __('admin.view_details') }}
-                    </button>
-                  </td>
-                </tr>
-                @endforeach
-              </tbody>
-            </table>
+          <div>
+            <h6 class="mb-0 small fw-bold">{{ auth()->user()->name }} (@lang('admin.you'))</h6>
+            <small class="text-muted">@lang('admin.original_message')</small>
+          </div>
+        </div>
+        <div class="p-3 bg-card border rounded shadow-none">
+          <div id="originalMessageContent" class="text-body small"></div>
+        </div>
+      </div>
+
+      <!-- Invitee Reply -->
+      <div class="mail-message mb-4">
+        <div class="d-flex align-items-center mb-2 flex-row-reverse">
+          <div class="avatar avatar ms-2">
+            <span class="avatar-initial rounded-circle bg-label-primary" id="inviteeInitials">
+              <i class="ti ti-user"></i>
+            </span>
+          </div>
+          <div class="text-end">
+            <h6 class="mb-0 small fw-bold" id="inviteeNameDisplay"></h6>
+            <small class="text-muted m-0" id="inviteeEmailDisplay"></small>
+          </div>
+        </div>
+        <div class="p-3 border rounded shadow-none bg-light-subtle">
+          <div id="replyMessageContent" class="text-body small mb-3 border-bottom pb-3">
+            <!-- JS injected -->
+          </div>
+
+          <!-- Attachments -->
+          <div id="attachmentsSection">
+            <p class="small fw-bold mb-2"><i class="ti ti-paperclip me-1"></i>@lang('admin.attachments')</p>
+            <div class="d-flex flex-column gap-2 ps-6" id="attachmentsList">
+              <!-- JS injected -->
+            </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Invitation Details Offcanvas -->
-    <div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="invitationOffcanvas" aria-labelledby="invitationOffcanvasLabel">
-      <!-- Header: Mail Subject Style -->
-      <div class="offcanvas-header border-bottom">
-        <div class="d-flex justify-content-between w-100">
-          <div class="d-flex flex-column">
-            <h5 class="offcanvas-title fw-bold mb-1" id="invitationTitle">
-              @lang('admin.invitation_subject')
-            </h5>
-            <small class="text-muted mb-2">
-              <i class="ti ti-calendar me-1"></i>
-              @lang('admin.sent_on'): <span id="dateTimestamp"></span>
-            </small>
-            <div class="d-flex align-items-center gap-2">
-              <div id="invitationScopeDisplay"></div>
-              <div id="invitationStatus"></div>
-            </div>
-          </div>
-          <button type="button" class="btn-close m-0 p-0" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-      </div>
-    
-      <div class="offcanvas-body d-flex flex-column">
-        <!-- Scrollable Conversation Area -->
-        <div class="conversation-thread flex-grow-1">
-    
-          <!-- 1. The Original Invitation (Admin Perspective) -->
-          <div class="mail-message mb-4">
-            <div class="d-flex align-items-center mb-2">
-              <div class="avatar avatar-sm me-2">
-                @if (auth()->user()->image_url)
-                  <img src="{{ auth()->user()->image_url }}" alt="{{ auth()->user()->name }}" class="rounded-circle" onerror="this.src='/images/user-placeholder.jpeg'">
-                @else
-                  <span class="avatar-initial rounded-circle bg-secondary">
-                    {{ strtoupper(substr(auth()->user()->first_name_en ?? 'U', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name_en ?? 'U', 0, 1)) }}
-                  </span>
-                @endif
-              </div>
-              <div>
-                <h6 class="mb-0 small fw-bold">{{ auth()->user()->name }} (@lang('admin.you'))</h6>
-                <small class="text-muted">@lang('admin.original_message')</small>
-              </div>
-            </div>
-            <div class="p-3 bg-card border rounded shadow-none">
-              <div id="originalMessageContent" class="text-body small">
-                <!-- Original message text goes here -->
-              </div>
-            </div>
-          </div>
-    
-          <!-- Divider -->
-          <div class="text-center my-8 position-relative">
-            <hr>
-            <span class="position-absolute top-50 start-50 translate-middle badge bg-label-secondary small">@lang('admin.replies')</span>
-          </div>
-    
-          <!-- 2. Invitee Replies (Incoming) -->
-          <div class="mail-message mb-4">
-            <div class="d-flex align-items-center mb-2 flex-row-reverse">
-              <div class="avatar avatar ms-2">
-                <span class="avatar-initial rounded-circle bg-label-primary" id="inviteeInitials">
-                  <i class="ti ti-user"></i>
-                </span>
-              </div>
-              <div class="text-end">
-                <h6 class="mb-0 small fw-bold" id="inviteeNameDisplay"></h6>
-                <small class="text-muted m-0" id="inviteeEmailDisplay"></small>
-              </div>
-            </div>
-            <div class="p-3 border rounded shadow-none bg-light-subtle">
-              <div id="replyMessageContent" class="text-body small mb-3 border-bottom pb-3">
-                <!-- Invitee reply text goes here -->
-              </div>
-    
-              <!-- Attachments specifically for this reply -->
-              <div id="attachmentsSection">
-                <p class="small fw-bold mb-2"><i class="ti ti-paperclip me-1"></i>@lang('admin.attachments')</p>
-                <div class="d-flex flex-column gap-2 ps-6" id="attachmentsList">
-                  <!-- JS injected: <a class="btn btn-xs btn-white border">filename.pdf</a> -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-    
-        <!-- 3. Sticky Follow-up Section (Footer) -->
-        <div class="offcanvas-footer border-top pt-4">
-          <label class="form-label fw-bold small text-primary mb-2">
-            <i class="ti ti-arrow-back-up me-1"></i> 
-            @lang('admin.send_follow_up_message')
+{{-- New Invitation Offcanvas --}}
+<div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="newInvitationOffcanvas" aria-labelledby="newInvitationOffcanvasLabel">
+  <div class="offcanvas-header border-bottom">
+    <div class="d-flex justify-content-between w-100">
+      <h5 class="offcanvas-title" id="newInvitationOffcanvasLabel">@lang('admin.new_invitation')</h5>
+      <button type="button" class="btn-close m-0 p-0" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="offcanvas-body">
+    <form id="invitationForm" enctype="multipart/form-data" class="d-flex flex-column h-100">
+      <input type="hidden" id="uploadedAttachments" name="attachments" value="[]">
+      <div class="row">
+
+        <div class="col-12 mb-4">
+          <label for="inviteeName" class="form-label">
+            @lang('admin.invitee_name') <span class="text-danger">*</span>
           </label>
-          <div class="input-group">
-            <textarea class="form-control" id="followUpMessage" rows="3" placeholder="@lang('admin.write_your_message')..."></textarea>
-          </div>
-          <div class="d-flex justify-content-between align-items-center mt-6">
-            <div class="attachment-upload">
-              {{-- <button class="btn btn-sm btn-outline-secondary border-0" title="Attach Files">
-                <i class="ti ti-paperclip fs-4"></i>
-              </button> --}}
-            </div>
-            <button type="button" class="btn btn-primary px-4" id="btnSendFollowUp">
-              @lang('admin.Send_Message') <i class="ti ti-send ms-2"></i>
+          <input
+            type="text"
+            class="form-control"
+            id="inviteeName"
+            name="invitee_name"
+            placeholder="@lang('admin.enter_invitee_name')"
+            required
+            maxlength="255"
+          >
+          <div class="invalid-feedback" id="inviteeNameError"></div>
+        </div>
+
+        <div class="col-12 mb-4">
+          <label for="mentorEmail" class="form-label">
+            @lang('admin.invitee_email') <span class="text-danger">*</span>
+          </label>
+          <input
+            type="email"
+            class="form-control"
+            id="mentorEmail"
+            name="invitee_email"
+            placeholder="@lang('admin.enter_invitee_email')"
+            required
+            maxlength="255"
+          >
+          <div class="invalid-feedback" id="mentorEmailError"></div>
+        </div>
+
+        <div class="col-12 mb-4">
+          <label for="invitationScope" class="form-label">
+            @lang('admin.invitation_scope') <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" id="invitationScope" name="invitation_scope" required>
+            <option value="">@lang('admin.select_scope')</option>
+            <option value="Public">@lang('admin.Not_Associated') (@lang('admin.Public'))</option>
+            <option value="Organization">@lang('admin.Associated') (@lang('admin.organization'))</option>
+          </select>
+          <div class="invalid-feedback" id="invitationScopeError"></div>
+        </div>
+
+        <div class="col-12 mb-4" id="organizationsContainer" style="display: none;">
+          <label for="organizations" class="form-label">
+            @lang('admin.Organizations') <span class="text-danger">*</span>
+          </label>
+          <select
+            class="form-select select2"
+            id="organizations"
+            name="organizations[]"
+            data-placeholder="@lang('admin.Select Organizations')"
+            multiple
+          >
+            @foreach($organizations as $organization)
+              <option value="{{ $organization['id'] }}">{{ $organization['name'] }}</option>
+            @endforeach
+          </select>
+          <div class="invalid-feedback" id="organizationsError"></div>
+        </div>
+
+        <div class="col-12 mb-4">
+          <label for="invitationSubject" class="form-label">
+            @lang('admin.invitation_subject')
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="invitationSubject"
+            name="invitation_subject"
+            placeholder="@lang('admin.enter_invitation_subject')"
+            maxlength="255"
+          >
+          <div class="invalid-feedback" id="invitationSubjectError"></div>
+        </div>
+
+        <div class="col-12 mb-4">
+          <label for="invitationMessage" class="form-label">
+            @lang('admin.invitation_message')
+          </label>
+          <div id="invitationMessageEditor" style="height: 150px; overflow-y: scroll;"></div>
+          <textarea
+            class="d-none"
+            id="invitationMessage"
+            name="invitation_message"
+            maxlength="10000"
+          ></textarea>
+          <div class="invalid-feedback" id="invitationMessageError"></div>
+        </div>
+
+      </div>
+
+      <div class="row mt-auto py-6 border-top">
+        <div class="col-12">
+          <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">
+              <i class="ti ti-x me-2"></i>
+              @lang('admin.cancel')
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="ti ti-send me-2"></i> @lang('admin.send_invitation')
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </form>
+  </div>
+</div>
 
-    <!-- New Invitation Offcanvas -->
-    <div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="newInvitationOffcanvas" aria-labelledby="newInvitationOffcanvasLabel">
-      <div class="offcanvas-header border-bottom">
-        <div class="d-flex justify-content-between w-100">
-          <h5 class="offcanvas-title" id="newInvitationOffcanvasLabel">@lang('admin.new_invitation')</h5>
-          <button type="button" class="btn-close m-0 p-0" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
+{{-- Organizations overflow modal --}}
+<div class="modal fade" id="invitationOrgsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ __('admin.Organizations') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="offcanvas-body">
-        <form id="invitationForm" enctype="multipart/form-data" class="d-flex flex-column h-100">
-          <meta name="csrf-token" content="{{ csrf_token() }}">
-          <input type="hidden" id="uploadedAttachments" name="attachments" value="[]">
-          <div class="row">
-            <div class="col-12 mb-4">
-              <label for="inviteeName" class="form-label">
-                @lang('admin.invitee_name')
-                <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="inviteeName" name="invitee_name" placeholder="@lang('admin.enter_invitee_name')" required maxlength="255">
-              <div class="invalid-feedback" id="inviteeNameError"></div>
-            </div>
-            <div class="col-12 mb-4">
-              <label for="mentorEmail" class="form-label">
-                @lang('admin.invitee_email')
-                <span class="text-danger">*</span></label>
-              <input type="email" class="form-control" id="mentorEmail" name="invitee_email" placeholder="@lang('admin.enter_invitee_email')" required>
-              <div class="invalid-feedback" id="mentorEmailError"></div>
-            </div>
-            <div class="col-12 mb-4">
-              <label for="invitationScope" class="form-label">@lang('admin.invitation_scope') <span class="text-danger">*</span></label>
-              <select class="form-select" id="invitationScope" name="invitation_scope" required>
-                <option value="">@lang('admin.select_scope')</option>
-                <option value="Public">@lang('admin.public')</option>
-                <option value="Organization">@lang('admin.organization')</option>
-              </select>
-              <div class="invalid-feedback" id="invitationScopeError"></div>
-            </div>
-            <div class="col-12 mb-4" id="organizationsContainer" style="display: none;">
-              <label for="organizations" class="form-label">@lang('admin.Organizations') <span class="text-danger">*</span></label>
-              <select class="form-select select2" id="organizations" name="organizations[]" data-placeholder="@lang('admin.Select Organizations')" multiple required>
-                @foreach($organizations as $organization)
-                  <option value="{{ $organization['id'] }}">{{ $organization['name'] }}</option>
-                @endforeach
-              </select>
-              <div class="invalid-feedback" id="organizationsError"></div>
-            </div>
-            <div class="col-12 mb-4">
-              <label for="invitationSubject" class="form-label">@lang('admin.invitation_subject') <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="invitationSubject" name="invitation_subject" placeholder="@lang('admin.enter_invitation_subject')" required>
-              <div class="invalid-feedback" id="invitationSubjectError"></div>
-            </div>
-            <div class="col-12 mb-4">
-              <label for="invitationMessage" class="form-label">@lang('admin.invitation_message') <span class="text-danger">*</span></label>
-              <div id="invitationMessageEditor" style="height: 150px; overflow-y: scroll;"></div>
-              <textarea class="d-none" id="invitationMessage" name="invitation_message" maxlength="10000" required></textarea>
-              <div class="invalid-feedback" id="invitationMessageError"></div>
-            </div>
-          </div>
-
-          <div class="row mt-auto py-6 border-top">
-            <div class="col-12">
-              <div class="d-flex align-items-center gap-3">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">
-                  <i class="ti ti-x me-2"></i>
-                  @lang('admin.cancel')
-                </button>
-                <button type="submit" class="btn btn-primary">
-                  <i class="ti ti-send me-2"></i> @lang('admin.send_invitation')
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
+      <div class="modal-body">
+        <div id="invitationOrgsModalBody"></div>
       </div>
     </div>
   </div>
@@ -302,572 +363,570 @@ $tabs = [
 @section('pagescripts')
 <script>
 $(function () {
-  // Translation variables for JavaScript
-  const translations = {
-    public: '{{ __("admin.public") }}',
-    organization: '{{ __("admin.organization") }}',
-    accepted: '{{ __("admin.accepted") }}',
-    pending: '{{ __("admin.pending") }}',
-    declined: '{{ __("admin.declined") }}',
-    view_details: '{{ __("admin.view_details") }}',
-    no_replies_yet: '{{ __("admin.no_replies_yet") }}',
-    no_attachments: '{{ __("admin.no_attachments") }}'
-  };
-  /* =======================
-   * Quill Editor
-   * ======================= */
-  
-  // Toolbar
-  const toolbarOptions = [
-    [{ header: [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    [{ color: [] }, { background: [] }],
-    ['image', 'file'],
-    ['clean']
-  ];
 
-  // Init Quill
+  /* ── Translation map ──────────────────────────────────────────── */
+  const translations = {
+    public:          '{{ __("admin.public") }}',
+    organization:    '{{ __("admin.organization") }}',
+    accepted:        '{{ __("admin.accepted") }}',
+    pending:         '{{ __("admin.pending") }}',
+    declined:        '{{ __("admin.declined") }}',
+    sent:            '{{ __("admin.sent") }}',
+    view_details:    '{{ __("admin.view_details") }}',
+    no_replies_yet:  '{{ __("admin.no_replies_yet") }}',
+    no_attachments:  '{{ __("admin.no_attachments") }}',
+    uploading:       '{{ __("admin.uploading") }}',
+  };
+
+  /* ── Authenticated user (for "Created By" cell in real-time rows) ── */
+  const authUser = {
+    id:      {{ auth()->id() }},
+    name:    '{{ addslashes(auth()->user()->name) }}',
+    img_url: '{{ auth()->user()->img_url ? "/191014/" . auth()->user()->img_url : "/icons/account.svg" }}',
+  };
+
+  /* ================================================================
+   * Quill Rich-Text Editor
+   * ============================================================== */
   const quill = new Quill('#invitationMessageEditor', {
     theme: 'snow',
-    placeholder: '{{ __('admin.compose_your_invitation_message') }}...',
+    placeholder: '{{ __("admin.compose_your_invitation_message") }}...',
     modules: {
       toolbar: {
-        container: toolbarOptions,
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          [{ color: [] }, { background: [] }],
+          ['image', 'file'],
+          ['clean']
+        ],
         handlers: {
-          image: imageHandler,
-          file: fileHandler
+          image: () => pickAndUpload('image'),
+          file:  () => pickAndUpload('file')
         }
       }
     }
   });
 
-  // ==========================
-  // IMAGE HANDLER (MULTIPLE)
-  // ==========================
-  function imageHandler() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.multiple = true;
-    input.click();
+  /* ── File picker + upload ─────────────────────────────────────── */
+  function pickAndUpload(type) {
+    const isImage = type === 'image';
+    const icon    = isImage ? '🖼️' : '📎';
 
-    input.onchange = () => {
-      const files = Array.from(input.files);
-      const range = quill.getSelection(true);
+    const input      = document.createElement('input');
+    input.type       = 'file';
+    input.accept     = isImage ? 'image/*' : '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+    input.multiple   = true;
 
-      const totalSize = files.reduce((total, file) => total + file.size, 0);
-      const maxSize = 10 * 1024 * 1024; // 10 MB
+    input.addEventListener('change', function () {
+      const files     = Array.from(this.files);
+      const totalSize = files.reduce((sum, f) => sum + f.size, 0);
 
-      if (totalSize > maxSize) {
-        alert('{{ __('admin.file_exceeds_limit') }}');
-        return;
+      if (totalSize > 10 * 1024 * 1024) {
+        return releaseFailureAlert({
+          title:   '{{ __("admin.Error") }}!',
+          message: '{{ __("admin.file_exceeds_10_limit") }}'
+        });
       }
 
-      // Show loading indicator
-      const loadingText = '🖼️ Uploading images...';
-      quill.insertText(range.index, loadingText);
-      quill.insertText(range.index + loadingText.length, '\n');
+      const range       = quill.getSelection(true);
+      const loadingText = `${icon} ${translations.uploading}`;
+      quill.insertText(range.index, loadingText + '\n');
 
-      // Upload images sequentially
-      let uploadedCount = 0;
-      const uploadedImages = [];
+      let uploaded = 0;
+      const items  = [];
 
-      files.forEach((file, index) => {
+      files.forEach(file => {
         const formData = new FormData();
         formData.append('file', file);
 
         $.ajax({
-          url: '{{ route("invitations.upload") }}',
-          method: 'POST',
-          data: formData,
+          url:         '{{ route("invitations.upload") }}',
+          method:      'POST',
+          data:        formData,
           processData: false,
           contentType: false,
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          },
-          success: function(response) {
+          headers:     { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          success(response) {
             if (response.success) {
-              uploadedImages.push({
-                name: file.name,
-                url: response.data.file_url
-              });
-              uploadedCount++;
-
-              // If all images uploaded, update the editor
-              if (uploadedCount === files.length) {
-                // Remove loading text
-                quill.deleteText(range.index, loadingText.length + 1);
-
-                // Insert uploaded image links
-                let insertIndex = range.index;
-                uploadedImages.forEach(image => {
-                  quill.insertText(insertIndex, `🖼️ ${image.name}`, { link: image.url });
-                  quill.insertText(insertIndex + image.name.length + 3, '\n');
-                  insertIndex += image.name.length + 4;
-                });
-
-                // Move cursor to end
-                quill.setSelection(insertIndex);
-
-                // Update the hidden attachments field
-                const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
-                const newAttachments = [...currentAttachments, ...uploadedImages.map(i => i.url)];
-                $('#uploadedAttachments').val(JSON.stringify(newAttachments));
+              items.push({ name: file.name, url: response.data.file_url });
+              if (++uploaded === files.length) {
+                insertUploadedItems(range, loadingText, items, icon);
               }
             } else {
-              alert('{{ __("admin.upload_failed") }}: ' + (response.message || 'Unknown error'));
+              handleUploadError(range, loadingText, response.message);
             }
           },
-          error: function(xhr) {
-            alert('{{ __("admin.upload_failed") }}: ' + (xhr.responseJSON?.message || 'Unknown error'));
+          error(xhr) {
+            handleUploadError(range, loadingText, xhr.responseJSON?.message);
           }
         });
       });
-    };
-  }
+    });
 
-  // ==========================
-  // FILE HANDLER (PDF, DOCX, XLSX, PPTX)
-  // ==========================
-  function fileHandler() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
     input.click();
-
-    input.onchange = () => {
-      const files = Array.from(input.files);
-      const totalSize = files.reduce((total, file) => total + file.size, 0);
-      const maxSize = 10 * 1024 * 1024; // 10 MB
-
-      if (totalSize > maxSize) {
-        alert('{{ __('admin.file_exceeds_limit') }}');
-        return;
-      }
-
-      // Show loading indicator
-      const range = quill.getSelection(true);
-      const loadingText = '📎 Uploading files...';
-      quill.insertText(range.index, loadingText);
-      quill.insertText(range.index + loadingText.length, '\n');
-
-      // Upload files sequentially
-      let uploadedCount = 0;
-      const uploadedFiles = [];
-
-      files.forEach((file, index) => {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        $.ajax({
-          url: '{{ route("invitations.upload") }}',
-          method: 'POST',
-          data: formData,
-          processData: false,
-          contentType: false,
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          },
-          success: function(response) {
-            if (response.success) {
-              uploadedFiles.push({
-                name: file.name,
-                url: response.data.file_url
-              });
-              uploadedCount++;
-
-              // If all files uploaded, update the editor
-              if (uploadedCount === files.length) {
-                // Remove loading text
-                quill.deleteText(range.index, loadingText.length + 1);
-
-                // Insert uploaded file links
-                let insertIndex = range.index;
-                uploadedFiles.forEach(file => {
-                  quill.insertText(
-                    insertIndex,
-                    `📎 ${file.name}`,
-                    { link: file.url }
-                  );
-                  quill.insertText(insertIndex + file.name.length + 2, '\n');
-                  insertIndex += file.name.length + 3;
-                });
-
-                // Move cursor to end
-                quill.setSelection(insertIndex);
-
-                // Update the hidden attachments field
-                const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
-                const newAttachments = [...currentAttachments, ...uploadedFiles.map(f => f.url)];
-                $('#uploadedAttachments').val(JSON.stringify(newAttachments));
-              }
-            } else {
-              alert('{{ __("admin.upload_failed") }}: ' + (response.message || 'Unknown error'));
-            }
-          },
-          error: function(xhr) {
-            alert('{{ __("admin.upload_failed") }}: ' + (xhr.responseJSON?.message || 'Unknown error'));
-          }
-        });
-      });
-    };
   }
+
+  function insertUploadedItems(range, loadingText, items, icon) {
+    quill.deleteText(range.index, loadingText.length + 1);
+    let i = range.index;
+    items.forEach(({ name, url }) => {
+      quill.insertText(i, `${icon} ${name}`, { link: url });
+      quill.insertText(i + name.length + 4, '\n');
+      i += name.length + 5;
+    });
+    quill.setSelection(i);
+
+    const current = JSON.parse($('#uploadedAttachments').val() || '[]');
+    $('#uploadedAttachments').val(JSON.stringify([...current, ...items.map(it => it.url)]));
+  }
+
+  function handleUploadError(range, loadingText, message) {
+    quill.deleteText(range.index, loadingText.length + 1);
+    releaseFailureAlert({
+      title:   '{{ __("admin.Error") }}!',
+      message: message || '{{ __("admin.unexpected_error") }}'
+    });
+  }
+
+  /* ── Sync Quill → hidden textarea + orphan-file detection ──────── */
+  let _deleteDebounceTimer = null;
 
   quill.on('text-change', () => {
     $('#invitationMessage').val(quill.root.innerHTML);
-    fv && fv.revalidateField('invitation_message');
+    clearTimeout(_deleteDebounceTimer);
+    _deleteDebounceTimer = setTimeout(detectAndDeleteRemovedFiles, 900);
   });
 
-  /* =======================
-   * DataTable
-   * ======================= */
+  function detectAndDeleteRemovedFiles() {
+    try {
+      const currentAttachments = JSON.parse($('#uploadedAttachments').val() || '[]');
+      if (!currentAttachments.length) return;
+
+      const doc     = new DOMParser().parseFromString(quill.root.innerHTML, 'text/html');
+      const present = [
+        ...Array.from(doc.querySelectorAll('a')).map(a => a.href),
+        ...Array.from(doc.querySelectorAll('img')).map(img => img.src)
+      ].filter(Boolean);
+
+      currentAttachments
+        .filter(u => !present.includes(u))
+        .forEach(url => {
+          $.ajax({
+            url:     '{{ route("invitations.DeleteAttachment") }}',
+            method:  'POST',
+            data:    { file_name: url.split('/').pop() },
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            success() {
+              const cur = JSON.parse($('#uploadedAttachments').val() || '[]');
+              $('#uploadedAttachments').val(JSON.stringify(cur.filter(u => u !== url)));
+            },
+            error(xhr) {
+              releaseFailureAlert({
+                title:   '{{ __("admin.Error") }}!',
+                message: xhr.responseJSON?.message || '{{ __("admin.File upload failed") }}'
+              });
+            }
+          });
+        });
+    } catch (e) {
+      releaseFailureAlert({
+        title:   '{{ __("admin.Error") }}!',
+        message: e?.message || '{{ __("admin.File upload failed") }}'
+      });
+    }
+  }
+
+  /* ================================================================
+   * DataTable — custom sort type (status priority)
+   * ============================================================== */
+  $.fn.dataTable.ext.type.order['status-priority-pre'] = function (data) {
+    const div = document.createElement('div');
+    div.innerHTML = data;
+    const s = div.textContent.toLowerCase().trim();
+    if (s.includes('accepted'))                                                      return 1;
+    if (s.includes('pending') || s.includes('sent'))                                return 2;
+    if (s.includes('declined') || s.includes('rejected') ||
+        s.includes('cancelled') || s.includes('notsent'))                           return 3;
+    return 4;
+  };
+
   const table = $('#invitationsTable').DataTable({
-    responsive: true,
-    processing: true,
-    pageLength: 10,
-    order: [[4, 'desc']],
+    responsive:  true,
+    processing:  true,
+    pageLength:  10,
+    order: [[3, 'asc'], [5, 'desc']],
+    columnDefs: [
+      {
+        targets: [2, 3],
+        render(data, type) {
+          if (type === 'filter' || type === 'sort') {
+            const div = document.createElement('div');
+            div.innerHTML = data;
+            return div.textContent.replace(/\s+/g, ' ').trim();
+          }
+          return data;
+        }
+      },
+      { targets: 3, type: 'status-priority' }
+    ],
     dom:
       '<"row"' +
       '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6"l>' +
       '<"col-12 col-lg-3 dt-action-buttons d-flex justify-content-lg-end pe-0 pe-lg-6"f>' +
-      '>' +
-      't' +
-      '<"row px-6"' +
-      '<"col-lg-6"i>' +
-      '<"col-lg-6 d-flex justify-content-end"p>' +
-      '>',
+      '>t<"row px-6"<"col-lg-6"i><"col-lg-6 d-flex justify-content-end"p>>',
     language: {
-      url:
-        '{{ app()->getLocale() }}' === 'ar'
-          ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
-          : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
-      sLengthMenu: '_MENU_',
-      search: '',
-      searchPlaceholder: '{{ __('admin.Search') }}...'
+      url: '{{ app()->getLocale() }}' === 'ar'
+        ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+        : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+      sLengthMenu:       '_MENU_',
+      search:            '',
+      searchPlaceholder: '{{ __("admin.Search") }}...'
     },
     initComplete() {
-      const api = this.api();
-      const container = $('<div class="d-flex gap-3 ms-3"></div>').insertAfter('.dataTables_length');
-
-      const addFilter = (col, id, label, width = 150) => {
-        const select = $(`
-          <select id="${id}" class="form-select" style="min-width:${width}px">
-            <option value="">${label}</option>
-          </select>
-        `)
-          .appendTo(container)
-          .on('change', function () {
-            const val = $(this).val();
-            api
-              .column(col)
-              .search(val ? `^\\s*${$.fn.dataTable.util.escapeRegex(val)}\\s*$` : '', true, false)
-              .draw();
-          });
-
-        api
-          .column(col)
-          .data()
-          .unique()
-          .sort()
-          .each(d => {
-            const text = $('<div>').html(d).text().replace(/\s+/g, ' ').trim();
-            text && select.append(`<option value="${text.toLowerCase()}">${text}</option>`);
-          });
-      };
-
-      addFilter(2, 'scopeFilter', '@lang('admin.all_scopes')');
-      addFilter(3, 'statusFilter', '@lang('admin.All_statuses')');
-
-      setTimeout(() => {
-        $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm');
-      }, 300);
+      buildTableFilters(this.api());
+      setTimeout(
+        () => $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm'),
+        300
+      );
     }
   });
 
-  /* =======================
-   * View Details
-   * ======================= */
+  /* ── Column filters ───────────────────────────────────────────── */
+  function buildTableFilters(api) {
+    // which duplicates the filter bar. Guard with a flag.
+    if ($('#scopeFilter').length) return;
+
+    const container = $('<div class="d-flex gap-3 ms-3"></div>').insertAfter('.dataTables_length');
+
+    const addColumnFilter = (col, id, label) => {
+      const select = $(
+        `<select id="${id}" class="form-select" style="min-width:150px">` +
+        `<option value="">${label}</option></select>`
+      )
+        .appendTo(container)
+        .on('change', function () {
+          api.column(col).search($(this).val(), false, false).draw();
+        });
+
+      api.column(col).data().unique().sort().each(d => {
+        const div  = document.createElement('div');
+        div.innerHTML = d;
+        const text = div.textContent.replace(/\s+/g, ' ').trim();
+        if (text) select.append(`<option value="${text.toLowerCase()}">${text}</option>`);
+      });
+    };
+
+    addColumnFilter(2, 'scopeFilter',   '@lang("admin.all_scopes")');
+    addColumnFilter(3, 'statusFilter',  '@lang("admin.All_statuses")');
+
+    $(`<select id="sortOrderFilter" class="form-select" style="min-width:150px">
+        <option value="desc">@lang("admin.newest_first")</option>
+        <option value="asc">@lang("admin.oldest_first")</option>
+      </select>`)
+      .appendTo(container)
+      .on('change', function () {
+        api.order([[5, $(this).val()]]).draw();
+      });
+  }
+
+  /* ================================================================
+   * View Details — offcanvas population
+   * ============================================================== */
   $(document).on('click', '.view-details', function () {
     const d = $(this).data();
+
+    const scopeLabels  = { Public: translations.public,       Organization: translations.organization };
+    const statusLabels = { Accepted: translations.accepted,   Pending: translations.pending,
+                           Declined: translations.declined,   Sent:    translations.sent };
+    const statusColors = { Accepted: 'success', Pending: 'warning', Sent: 'info', Declined: 'danger' };
 
     $('#inviteeNameDisplay').text(d.inviteeName);
     $('#inviteeEmailDisplay').text(d.inviteeEmail);
     $('#invitationTitle').text(d.subject);
-    $('#originalMessageContent').text(d.message);
+
+    // emoji lines to avoid dangling icon text, keep bold/italic/lists intact).
+    // We sanitise with a text-only DOMParser pass so no scripts execute.
+    const rawMsg = d.message || '';
+
+    const cleanedMsg = rawMsg.replace(
+      /(🖼️|📎)\s*.*?\.(png|jpg|jpeg|gif|webp|pdf|doc|docx|xls|xlsx)/gi,
+      ''
+    );
+
+    $('#originalMessageContent').html(cleanedMsg.trim());
+
     $('#replyMessageContent').text(d.responseMessage || translations.no_replies_yet);
     $('#dateTimestamp').text(d.date);
 
-    const scopeLabels = {
-      Public: '@lang("admin.public")',
-      Organization: '@lang("admin.organization")'
-    };
-
-    const statusLabels = {
-      Accepted: '@lang("admin.accepted")',
-      Pending: '@lang("admin.pending")',
-      Declined: '@lang("admin.declined")'
-    };
-
     $('#invitationScopeDisplay').html(
-      `<span class="badge bg-label-${d.scope === 'Public' ? 'primary' : 'info'}">
-        ${scopeLabels[d.scope] || d.scope}
-      </span>`
+      `<span class="badge bg-label-${d.scope === 'Public' ? 'primary' : 'info'}">` +
+      `${scopeLabels[d.scope] || d.scope}</span>`
     );
-
     $('#invitationStatus').html(
-      `<span class="badge bg-label-${
-        d.status === 'Accepted' ? 'success' :
-        d.status === 'Pending' ? 'warning' : 'danger'
-      }">
-        ${statusLabels[d.status] || d.status}
-      </span>`
+      `<span class="badge bg-label-${statusColors[d.status] || 'danger'}">` +
+      `${statusLabels[d.status] || d.status}</span>`
     );
 
-    const attachments = (d.attachments || '').split(',').filter(a => a.trim());
-    $('#attachmentsSection').show();
-    if (attachments.length > 0) {
-      $('#attachmentsList').html(
-        attachments.map(a => `<a href="${a}" target="_blank" class="badge bg-card text-start text-primary border">${a.split('/').pop()}</a>`).join('')
-      );
-    } else {
-      $('#attachmentsList').html(`<span class="text-muted small">${translations.no_attachments}</span>`);
+    // Always reset org container visibility before deciding whether to show it.
+    $('#invitationOrgsContainer').hide();
+    const $orgs = $('#invitationOrgs').empty();
+    const MAX_ORGS = 10;
+
+    // stored in data-* when accessed via .data(), so it should already be an array.
+    // Guard against it being a raw string just in case.
+    let orgs = d.orgs;
+    if (typeof orgs === 'string') {
+      try { orgs = JSON.parse(orgs); } catch (_) { orgs = []; }
     }
 
-    $('#invitationOffcanvas').offcanvas('show');
+    if (Array.isArray(orgs) && orgs.length) {
+      $('#invitationOrgsContainer').show();
+      orgs.slice(0, MAX_ORGS).forEach(org =>
+        $orgs.append(`<span class="badge bg-label-secondary me-1">${$('<div>').text(org.name).html()}</span>`)
+      );
+      if (orgs.length > MAX_ORGS) {
+        const hidden = orgs.slice(MAX_ORGS);
+        $orgs.append(
+          `<button type="button" class="badge bg-label-primary border-0"
+             data-bs-toggle="modal" data-bs-target="#invitationOrgsModal"
+             data-orgs='${JSON.stringify(hidden)}'>` +
+          `+${hidden.length} @lang("admin.more")</button>`
+        );
+      }
+    }
+
+    // Attachments
+    const attachments = (d.attachments || '').split(',').filter(a => a.trim());
+    $('#attachmentsSection').show();
+    $('#attachmentsList').html(
+      attachments.length
+        ? attachments.map(a => {
+            const safe = $('<div>').text(a).html(); // escape for href display
+            return `<a href="${a}" target="_blank" rel="noopener noreferrer"
+                       class="badge bg-card text-start text-primary border text-truncate">` +
+                   `${a.split('/').pop()}</a>`;
+          }).join('')
+        : `<span class="text-muted small">${translations.no_attachments}</span>`
+    );
   });
 
-  /* =======================
-   * Scope / Organizations
-   * ======================= */
-  const toggleOrganizations = show => {
-    $('#organizationsContainer').toggle(show);
-    $('#organizations').val(null).trigger('change');
-    fv.revalidateField('organizations[]');
-  };
-
+  /* ================================================================
+   * Form — scope change handler
+   * ============================================================== */
   $('#invitationScope').on('change', function () {
-    toggleOrganizations($(this).val() === 'Organization');
-  });
-
-  $('#organizations').on('change select2:select select2:unselect', () => {
+    const isOrg = $(this).val() === 'Organization';
+    $('#organizationsContainer').toggle(isOrg);
+    if (!isOrg) $('#organizations').val(null).trigger('change');
     fv.revalidateField('organizations[]');
   });
 
-  /* =======================
-   * Form Validation
-   * ======================= */
+  $('#organizations').on('change select2:select select2:unselect', () =>
+    fv.revalidateField('organizations[]')
+  );
+
+  /* ================================================================
+   * FormValidation.js
+   * ============================================================== */
   const fv = FormValidation.formValidation(document.getElementById('invitationForm'), {
     fields: {
       invitee_name: {
         validators: {
-          notEmpty: { message: '{{ __('admin.invitee_name_required') }}' },
-          stringLength: { max: 255, message: '{{ __('admin.invitee_name_max_length') }}' }
+          notEmpty:     { message: '{{ __("admin.invitee_name_required") }}' },
+          stringLength: { max: 255, message: '{{ __("admin.invitee_name_max_length") }}' }
         }
       },
       invitee_email: {
         validators: {
-          notEmpty: { message: '{{ __('admin.Please enter the email address') }}' },
-          emailAddress: { message: '{{ __('admin.Please enter a valid email address') }}' },
-          stringLength: { max: 255, message: '{{ __('admin.email_max_length') }}' }
+          notEmpty:     { message: '{{ __("admin.Please enter the email address") }}' },
+          emailAddress: { message: '{{ __("admin.Please enter a valid email address") }}' },
+          stringLength: { max: 255, message: '{{ __("admin.email_max_length") }}' }
         }
       },
       invitation_scope: {
-        validators: { notEmpty: { message: '{{ __('admin.invitation_scope_required') }}' } }
+        validators: {
+          notEmpty: { message: '{{ __("admin.invitation_scope_required") }}' }
+        }
       },
       'organizations[]': {
         validators: {
           callback: {
-            message: '{{ __('admin.organizations_select_required') }}',
-            callback: function () {
-              const scope = $('#invitationScope').val();
-              const value = $('#organizations').val();
-  
-              if (scope === 'Organization') {
-                return value && value.length > 0;
-              }
-              return true;
-            }
+            message:  '{{ __("admin.organizations_select_required") }}',
+            callback: () =>
+              $('#invitationScope').val() !== 'Organization' ||
+              ($('#organizations').val()?.length > 0)
           }
         }
       },
       invitation_subject: {
         validators: {
-          notEmpty: { message: '{{ __('admin.invitation_subject_required') }}' },
-          stringLength: { max: 255, message: '{{ __('admin.invitation_subject_max_length') }}' }
+          stringLength: { max: 255, message: '{{ __("admin.invitation_subject_max_length") }}' }
         }
-      },
-      invitation_message: {
-        validators: { notEmpty: { message: '{{ __('admin.invitation_message_required') }}' } }
       }
     },
     plugins: {
-      trigger: new FormValidation.plugins.Trigger(),
-      bootstrap5: new FormValidation.plugins.Bootstrap5({
-        eleValidClass: '',
-        eleInvalidClass: 'is-invalid',
-        rowSelector: '.mb-4'
-      }),
+      trigger:      new FormValidation.plugins.Trigger(),
+      bootstrap5:   new FormValidation.plugins.Bootstrap5({
+                      eleValidClass:   '',
+                      eleInvalidClass: 'is-invalid',
+                      rowSelector:     '.mb-4'
+                    }),
       submitButton: new FormValidation.plugins.SubmitButton(),
-      autoFocus: new FormValidation.plugins.AutoFocus()
+      autoFocus:    new FormValidation.plugins.AutoFocus()
     }
   });
 
-  /* =======================
-   * Submit Form
-   * ======================= */
+  /* ── Submit handler ───────────────────────────────────────────── */
   fv.on('core.form.valid', () => {
     const $btn = $('#invitationForm button[type="submit"]')
       .prop('disabled', true)
       .html('<i class="ti ti-loader me-1"></i> @lang("admin.sending")...');
 
     $.ajax({
-      url: '/dashboard/mentors/invitations',
-      method: 'POST',
-      data: new FormData($('#invitationForm')[0]),
+      url:         '/dashboard/mentors/invitations',
+      method:      'POST',
+      data:        new FormData($('#invitationForm')[0]),
       processData: false,
       contentType: false,
-      headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+      headers:     { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
       success(response) {
-        if (response.success === true || response.success === "true") {
+        // original checked response.success === true || === 'true' but never
+        // handled the case where the server returns a non-boolean truthy value.
+        // Normalise with a loose truthy check covering both.
+        if (response.success) {
           releaseSuccessAlert({
-            title: '{{ __('admin.success') }}',
-            message:
-              '{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}'
+            title:   '{{ __("admin.success") }}',
+            message: '{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}'
           });
           $('#newInvitationOffcanvas').offcanvas('hide');
           resetForm();
-
-          // Add new row to table in real-time
-          if (response.invitation) {
-            addInvitationToTable(response.invitation);
-          }
+          if (response.data?.[0]) addInvitationToTable(response.data[0]);
         } else {
-          // Handle server-side validation errors
           releaseFailureAlert({
-            title: '{{ __('admin.error') }}',
-            message: response.message || '{{ __('admin.unexpected_error') }}'
+            title:   '{{ __("admin.error") }}',
+            message: response.message || '{{ __("admin.unexpected_error") }}'
           });
         }
       },
       error(xhr) {
         releaseFailureAlert({
-          title: '{{ __('admin.error') }}',
-          message: xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}'
+          title:   '{{ __("admin.error") }}',
+          message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}'
         });
       },
       complete() {
-        $btn.prop('disabled', false).html('<i class="ti ti-send me-1"></i> Send Invitation');
+        $btn
+          .prop('disabled', false)
+          .html('<i class="ti ti-send me-1"></i> @lang("admin.send_invitation")');
+        // FIX #13: Original hardcoded English "Send Invitation" in the complete() callback,
+        // ignoring the locale. Use the Blade translation helper instead.
       }
     });
   });
 
-  /* =======================
-   * Add Invitation to Table (Real-time)
-   * ======================= */
-  function addInvitationToTable(invitation) {
-    const scopeBadgeClass = invitation.scope === 'Public' ? 'primary' : 'info';
-    const scopeLabel = translations[invitation.scope.toLowerCase()] || invitation.scope;
+  /* ================================================================
+   * Add new row to DataTable in real-time
+   * ============================================================== */
+  function addInvitationToTable(inv) {
+    const statusMap = {
+      Accepted: { cls: 'success', label: translations.accepted },
+      Pending:  { cls: 'warning', label: translations.pending  },
+      Sent:     { cls: 'info',    label: translations.sent     },
+    };
+    const { cls: statusCls, label: statusLabel } =
+      statusMap[inv.status] || { cls: 'danger', label: translations.declined };
 
-    let statusBadgeClass, statusIcon, statusLabel;
-    switch (invitation.status) {
-      case 'Accepted':
-        statusBadgeClass = 'success';
-        statusIcon = 'circle-check';
-        statusLabel = translations.accepted;
-        break;
-      case 'Pending':
-        statusBadgeClass = 'warning';
-        statusIcon = 'clock';
-        statusLabel = translations.pending;
-        break;
-      default:
-        statusBadgeClass = 'danger';
-        statusIcon = 'circle-x';
-        statusLabel = translations.declined;
-        break;
-    }
+    const scopeCls   = inv.scope === 'Public' ? 'primary' : 'info';
+    const scopeLabel = translations[inv.scope?.toLowerCase()] || inv.scope;
 
-    const newRow = `
-      <tr data-scope="${invitation.scope}" data-status="${invitation.status}">
-        <td>${invitation.invitee_name}<br><small>${invitation.invitee_email}</small></td>
-        <td>${invitation.subject}</td>
+    // Original parsed inv.attachments as JSON (array) then joined with ','.
+    // But the server may return attachments already as an array or as a JSON string —
+    // normalise both.
+    let attachmentsStr = '';
+    try {
+      const raw = inv.attachments;
+      attachmentsStr = Array.isArray(raw) ? raw.join(',') : JSON.parse(raw || '[]').join(',');
+    } catch (_) { attachmentsStr = ''; }
+
+    // follow-up: row must match new column order:
+    // invitee | subject | scope | status | accepted_at | created_at | inviter | actions
+    const row = `
+      <tr>
         <td>
-          <span class="badge bg-label-${scopeBadgeClass}">
-            ${scopeLabel}
-          </span>
+          <h6 class="mb-0 fw-semibold">${escHtml(inv.invitee_name)}</h6>
+          <small>${escHtml(inv.invitee_email)}</small>
+        </td>
+        <td>${escHtml(inv.subject)}</td>
+        <td><span class="badge bg-label-${scopeCls}">${escHtml(scopeLabel)}</span></td>
+        <td><span class="badge bg-label-${statusCls}">${escHtml(statusLabel)}</span></td>
+        <td>${escHtml(inv.accepted_at ?? '')}</td>
+        <td>${escHtml(inv.created_at ?? '')}</td>
+        <td>
+          <a href="/dashboard/show/UserProfile/${authUser.id}" class="d-flex align-items-center">
+            <img
+              src="${escAttr(authUser.img_url)}"
+              alt="avatar"
+              class="img-fluid w-px-30 h-px-30 rounded-circle me-2 flex-shrink-0"
+              onerror="this.src='/icons/account.svg'"
+            />
+            <span class="ms-2 text-dark">${escHtml(authUser.name)}</span>
+          </a>
         </td>
         <td>
-          <span class="badge bg-label-${statusBadgeClass}">
-            <i class="ti ti-${statusIcon} ti-xs me-1"></i>
-            ${statusLabel}
-          </span>
-        </td>
-        <td>${invitation.created_at}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary text-nowrap view-details" data-bs-toggle="offcanvas" data-bs-target="#invitationOffcanvas" data-invitee-name="${invitation.invitee_name}" data-invitee-email="${invitation.invitee_email}" data-subject="${invitation.subject}" data-scope="${invitation.scope}" data-status="${invitation.status}" data-message="${invitation.message_content}" data-date="${invitation.created_at}" data-attachments="${(invitation.attachments || []).join(',')}" data-response-message="${invitation.response_message || ''}">
+          <button
+            class="btn btn-sm btn-outline-primary text-nowrap view-details"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#invitationOffcanvas"
+            data-invitee-name="${escAttr(inv.invitee_name)}"
+            data-invitee-email="${escAttr(inv.invitee_email)}"
+            data-subject="${escAttr(inv.subject)}"
+            data-scope="${escAttr(inv.scope)}"
+            data-status="${escAttr(inv.status)}"
+            data-message="${escAttr(inv.message_content ?? '')}"
+            data-date="${escAttr(inv.created_at ?? '')}"
+            data-attachments="${escAttr(attachmentsStr)}"
+            data-response-message="${escAttr(inv.response_message ?? '')}"
+            data-orgs='${JSON.stringify(inv.organizations || [])}'>
             <i class="ti ti-eye me-1"></i> ${translations.view_details}
           </button>
         </td>
-      </tr>
-    `;
+      </tr>`;
 
-    // Add row to DataTable
-    table.row.add($(newRow)[0]).draw(false);
+    // Reset sort to "Created At DESC" so the newly added row (with the latest
+    // timestamp) surfaces immediately at the top, then redraw.
+    table
+      .row.add($(row)[0])
+      .order([[5, 'desc']])
+      .draw();
 
-    // Update filters if needed
-    updateTableFilters();
+    // Sync the sort-order dropdown so it reflects the new state visually.
+    $('#sortOrderFilter').val('desc');
+
+    // buildTableFilters now guards against duplicate filter bars internally.
+    buildTableFilters(table.api ? table.api() : table);
   }
 
-  function updateTableFilters() {
-    // Rebuild the filter options to include the new row data
-    const api = table;
-    const container = $('.dataTables_length').next('.d-flex');
-
-    // Remove existing filters
-    container.empty();
-
-    // Re-add filters
-    const addFilter = (col, id, label, width = 150) => {
-      const select = $(`
-        <select id="${id}" class="form-select" style="min-width:${width}px">
-          <option value="">${label}</option>
-        </select>
-      `)
-        .appendTo(container)
-        .on('change', function () {
-          const val = $(this).val();
-          api
-            .column(col)
-            .search(val ? `^\\s*${$.fn.dataTable.util.escapeRegex(val)}\\s*$` : '', true, false)
-            .draw();
-        });
-
-      api
-        .column(col)
-        .data()
-        .unique()
-        .sort()
-        .each(d => {
-          const text = $('<div>').html(d).text().replace(/\s+/g, ' ').trim();
-          text && select.append(`<option value="${text.toLowerCase()}">${text}</option>`);
-        });
-    };
-
-    addFilter(2, 'scopeFilter', '@lang('admin.all_scopes')');
-    addFilter(3, 'statusFilter', '@lang('admin.All_statuses')');
-
-    setTimeout(() => {
-      $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm');
-    }, 300);
+  /* ================================================================
+   * Helpers — HTML escaping for dynamic content
+   * Dynamic user data injected into HTML without escaping
+   * (invitee_name, subject, etc.) is an XSS risk. Centralise escaping.
+   * ============================================================== */
+  function escHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g,  '&amp;')
+      .replace(/</g,  '&lt;')
+      .replace(/>/g,  '&gt;')
+      .replace(/"/g,  '&quot;')
+      .replace(/'/g,  '&#039;');
+  }
+  function escAttr(str) {
+    return escHtml(str);
   }
 
-  /* =======================
-   * Reset
-   * ======================= */
-  $('#newInvitationOffcanvas').on('hidden.bs.offcanvas', resetForm);
-
+  /* ================================================================
+   * Form reset
+   * ============================================================== */
   function resetForm() {
     $('#invitationForm')[0].reset();
     fv.resetForm();
@@ -876,6 +935,33 @@ $(function () {
     $('#uploadedAttachments').val('[]');
     quill.setContents([]);
   }
+
+  // Auto-reset when offcanvas is closed by any means (× button, backdrop, ESC)
+  $('#newInvitationOffcanvas').on('hidden.bs.offcanvas', resetForm);
+
+  /* ================================================================
+   * Organizations overflow modal
+   * ============================================================== */
+  $('#invitationOrgsModal').on('show.bs.modal', function (e) {
+    // FIX #16: e.relatedTarget may be null if the modal is opened programmatically.
+    const $trigger = $(e.relatedTarget);
+    let orgs = $trigger.data('orgs');
+    if (typeof orgs === 'string') {
+      try { orgs = JSON.parse(orgs); } catch (_) { orgs = []; }
+    }
+
+    const $body = $('#invitationOrgsModalBody').empty();
+    if (Array.isArray(orgs) && orgs.length) {
+      orgs.forEach(org =>
+        $body.append(
+          `<span class="badge bg-label-secondary me-2 mb-2">${$('<div>').text(org.name).html()}</span>`
+        )
+      );
+    } else {
+      $body.text('No organizations found.');
+    }
+  });
+
 });
 </script>
 @endsection

@@ -14,8 +14,11 @@ class GeminiController extends Controller
     {
         $user = auth()->user();
         $company = $user->company;
-        $swotAnalysis = SwotAnalysis::where('company_id', $company->id)->first();
-
+        if (!empty($company)) {
+        $swotAnalysis = SwotAnalysis::where('company_id', $company?->id)->first();
+        } else {
+        $swotAnalysis = null;
+        }
         return view('admin.swot', compact('swotAnalysis'));
     }
 

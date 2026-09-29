@@ -1,0 +1,16 @@
+Program Name,Program Type,Program Start Date,Program End Date,Founder First Name,Founder Last Name,Founder Email,Founder Gender,Founder Phone,Country Code,Startup Name,Country
+Accelerator A,General_Program,4/1/2026,7/31/2026,Alex,Morgan,alex.morgan@example.com,Male,1020453664,20,Acme Robotics,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Sara,Hassan,,Female,1112233445,20,BlueWave Labs,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Omar,Khaled,not-an-email,Male,1554433221,20,Pyramid Cloud,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Mona,Adel,mona.adel@example.com,Female,abc-defg,20,Nile Energy,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Karim,Nabil,karim.nabil@example.com,Male,1223344556,XYZ,Desert Foods,Egypt
+Accelerator A,General_Program,13/45/2026,7/31/2026,Hana,Reda,hana.reda@example.com,Female,1667788990,20,Oasis Mobility,Egypt
+Accelerator A,General_Program,4/1/2026,4/1/abcd,Yusuf,Tarek,yusuf.tarek@example.com,Male,1335577990,20,Cairo Analytics,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Tamer,Fouad,tamer.fouad@example.com,Other,1771122334,20,Phoenix Drinks,Egypt
+Accelerator A,UnknownType,4/1/2026,7/31/2026,Salma,Magdy,salma.magdy@example.com,Female,1882244668,20,Verdant Farms,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,,Ahmed,ahmed.ali@example.com,Male,1112223330,20,Sigma Trade,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Rana,,rana.fares@example.com,Female,1112223331,20,Delta Print,Egypt
+,General_Program,4/1/2026,7/31/2026,Maya,Hany,maya.hany@example.com,Female,1112223332,20,Helios Tech,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Selim,Awad,selim.awad@example.com,Male,1112223333,20,,Egypt
+Accelerator A,General_Program,4/1/2026,7/31/2026,Dina,Wahba,dina.wahba@example.com,Female,1112223334,20,Sahara Foods,
+Accelerator A,General_Program,4/1/2026,7/31/2026,Layla,Samir,layla.samir@example.com,Female,1112223335,20,Atlas Robotics,Egypt

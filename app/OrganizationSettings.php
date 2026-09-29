@@ -13,6 +13,8 @@ class OrganizationSettings extends Model
 
     protected $fillable = [
         'organization_id',
+        'email_provider',
+        'resend_api_key',
         'smtp_host',
         'smtp_port',
         'smtp_encryption',
@@ -20,6 +22,8 @@ class OrganizationSettings extends Model
         'smtp_password',
         'smtp_from_address',
         'smtp_from_name',
+        'smtp_last_error',
+        'smtp_failed_at',
         'accept_email',
         'accept_whatsapp',
         'accept_pusher',
@@ -29,6 +33,7 @@ class OrganizationSettings extends Model
         'accept_email' => 'boolean',
         'accept_whatsapp' => 'boolean',
         'accept_pusher' => 'boolean',
+        'smtp_failed_at' => 'datetime',
     ];
 
     /**
@@ -44,7 +49,17 @@ class OrganizationSettings extends Model
      */
     public function toMailConfigArray(): array
     {
+        if ($this->email_provider === 'resend') {
+            return [
+                'transport' => 'resend',
+                'api_key' => $this->resend_api_key,
+                'from_address' => $this->smtp_from_address,
+                'from_name' => $this->smtp_from_name,
+            ];
+        }
+
         return [
+            'transport' => 'smtp',
             'host' => $this->smtp_host,
             'port' => $this->smtp_port,
             'username' => $this->smtp_username,

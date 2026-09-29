@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 
+@section('vendorstyle')
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" /> 
+@stop
+
 @section('style')
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
   <!-- Summernote CSS -->
@@ -24,26 +28,26 @@
 @stop
 
 @php
-  $ccycle = new \App\Cycle(); // Create a new empty Cycle instance for form initialization
+$ccycle = new \App\Cycle(); // Create a new empty Cycle instance for form initialization
 
-   $labels = [
-      'program_info' => $l == 'ar' ? 'معلومات البرنامج' : 'Program Info',
-      // 'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
-      'Program_Settings' => $l == 'ar' ? 'إعدادات البرنامج' : 'Program Settings',
-    ];
+$labels = [
+  'program_info' => $l == 'ar' ? 'معلومات البرنامج' : 'Program Info',
+  // 'custom_pages' => $l == 'ar' ? 'صفحات مخصصة' : 'Custom Pages',
+  'Program_Settings' => $l == 'ar' ? 'إعدادات البرنامج' : 'Program Settings',
+];
 
-  $tabs = [
-    ['id' => 'program_info', 'label' => $labels['program_info'], 'active' => true],
-    ['id' => 'program_settings', 'label' => $labels['Program_Settings'], 'active' => false],
-    // ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
-  ];
+$tabs = [
+  ['id' => 'program_info', 'label' => $labels['program_info'], 'active' => true],
+  ['id' => 'program_settings', 'label' => $labels['Program_Settings'], 'active' => false],
+  // ['id' => 'custom_pages', 'label' => $labels['custom_pages'], 'active' => false],
+];
 @endphp
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="row">
-      <h4 class="fw-bold mb-4">
+      <h4 class="mb-4">
         {{ __('cycles.program_setup') }}
       </h4>
       @if (session()->has('message'))
@@ -61,7 +65,7 @@
     <div class="card p-4 p-md-8">
       <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data" id="programForm">
         @csrf 
-        <input type="hidden" name="tab_id" value="1">
+        <input type="hidden" name="tab_id" value="{{ \App\Enums\CycleTabAction::CREATE_CYCLE }}">
         <input type="hidden" name="typecreate" id="type" value="1">
         <!-- Tabs (mobile) -->
         <div style="max-width: 100%; overflow-x: auto;" class="mb-4 d-md-none pb-3">
@@ -130,6 +134,11 @@
                       <i class="ti ti-arrow-{{$l == 'en' ? 'left' : 'right'}} me-2"></i>
                       {{ __('cycles.Previous') }}
                     </button>
+                  @else 
+                   <a href="{{ route('programlist.index') }}" type="button" class="btn btn-label-secondary">
+                      <i class="ti ti-arrow-{{$l == 'en' ? 'left' : 'right'}} me-2"></i>
+                      {{ __('cycles.Back') }}
+                    </a>
                   @endif
                 </div>
                 
@@ -163,7 +172,8 @@
   <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
   <!-- Summernote JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
-
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
+  
   <script>
     $(document).ready(function() {
       // Tab navigation state
@@ -227,6 +237,22 @@
             title.addClass('is-invalid');
             title.next('.invalid-feedback').text('{{ $l == "en" ? "Title must be at least 3 characters" : "العنوان يجب أن يكون 3 أحرف على الأقل" }}');
             isValid = false;
+          } else if (title.val().length > {{ \App\Cycle::TITLE_MAX_LENGTH }} ) {
+            title.addClass('is-invalid');
+            title.next('.invalid-feedback').text('{{ $l == "en" ? "Title cannot exceed 50 characters" : "العنوان لا يمكن أن يتجاوز 50 حرف" }}');
+            isValid = false;
+          }
+
+          // Validate title_ar
+          const title_ar = $('#title_ar');
+          if (!title_ar.val().trim()) {
+            title_ar.addClass('is-invalid');
+            title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Program Title in Arabic is required." : "عنوان البرنامج باللغة العربية مطلوب." }}');
+            isValid = false;
+          } else if (title_ar.val().length > {{ \App\Cycle::TITLE_MAX_LENGTH }} ) {
+            title_ar.addClass('is-invalid');
+            title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Title in Arabic cannot exceed 50 characters." : "العنوان باللغة العربية لا يمكن أن يتجاوز 50 حرف." }}');
+            isValid = false;
           }
 
           // Validate date range
@@ -249,6 +275,18 @@
             isValid = false;
           }
 
+          // Validate description_ar
+          const description_ar = $('#description_ar');
+          if (!description_ar.val().trim()) {
+            description_ar.addClass('is-invalid');
+            description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic is required." : "وصف البرنامج باللغة العربية مطلوب." }}');
+            isValid = false;
+          } else if (description_ar.val().length > 250) {
+            description_ar.addClass('is-invalid');
+            description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic cannot exceed 250 characters." : "الوصف باللغة العربية لا يمكن أن يتجاوز 250 حرف." }}');
+            isValid = false;
+          }
+
           return isValid;
         },
         
@@ -258,6 +296,7 @@
           // Clear previous errors
           $('.form-control', '#pills-Program_Settings-edit').removeClass('is-invalid');
           $('.invalid-feedback', '#pills-Program_Settings-edit').text('');
+          $('.start-color-error, .end-color-error, .main-color-error').text('').hide();
           
           // Validate public URL when visibility is public
           const isPublic = $('#is_public').val();
@@ -282,6 +321,30 @@
           if (reminderEnabled && (!hoursReminder || parseInt(hoursReminder) < 1)) {
             $('#hours_reminder_input').addClass('is-invalid');
             $('#hours_reminder_input').siblings('.invalid-feedback').text('{{ $l == "en" ? "Hours reminder must be at least 1 hour" : "تذكير الساعات يجب أن يكون ساعة واحدة على الأقل" }}');
+            isValid = false;
+          }
+
+          // Validate branding colors
+          const startColor = $('#start_color_input').val();
+          const endColor = $('#end_color_input').val();
+          const mainColor = $('#main_color_input').val();
+          const colorRegex = /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
+          // Start Color
+          if (!startColor || !colorRegex.test(startColor.replace(/^#+/, '#'))) {
+            $('.start-color-error').text('{{ $l == "en" ? "Please enter a valid start color." : "يرجى إدخال لون صالح." }}').show();
+            isValid = false;
+          }
+
+          // End Color
+          if (!endColor || !colorRegex.test(endColor.replace(/^#+/, '#'))) {
+            $('.end-color-error').text('{{ $l == "en" ? "Please enter a valid end color." : "يرجى إدخال لون صالح." }}').show();
+            isValid = false;
+          }
+
+          // Main Color
+          if (!mainColor || !colorRegex.test(mainColor.replace(/^#+/, '#'))) {
+            $('.main-color-error').text('{{ $l == "en" ? "Please enter a valid button color." : "يرجى إدخال لون صالح." }}').show();
             isValid = false;
           }
           

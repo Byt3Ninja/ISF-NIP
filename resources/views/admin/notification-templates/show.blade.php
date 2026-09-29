@@ -3,8 +3,8 @@
 @section('title', __('notification_templates.view_template'))
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="card">
       <div class="card-header mb-6 border-bottom">
         <div class="d-flex justify-content-between align-items-center">
@@ -18,7 +18,7 @@
               {{ __('notification_templates.edit') }}
             </a>
             <a href="{{ route('notification-templates.index') }}" class="btn btn-label-secondary">
-              <i class="ti ti-arrow-left me-1"></i>
+              <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-1"></i>
               {{ __('notification_templates.back') }}
             </a>
           </div>
@@ -235,7 +235,7 @@
         <!-- Actions -->
         <div class="d-flex justify-content-between align-items-center mt-6">
           <a href="{{ route('notification-templates.index') }}" class="btn btn-label-secondary">
-            <i class="ti ti-arrow-left me-1"></i>
+            <i class="ti ti-arrow-{{ $l == 'en' ? 'left' : 'right' }} me-1"></i>
             {{ __('notification_templates.back') }}
           </a>
           

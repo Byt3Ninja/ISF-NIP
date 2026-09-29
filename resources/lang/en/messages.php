@@ -60,6 +60,8 @@ return [
     'approved_message' => 'We would like to inform you that your request for a guidance session has been approved by the program manager. Thank you for being so interested.',
     'denied_message' => 'We would like to inform you that your request for a guidance session has been denied by the program manager. Thank you for your interest, and we wish you success in your endeavors.',
     'mentorship_session_action' => 'Mentorship Session with :name has been :action',
+    'mentorship_session_notification_message' => 'You have a new mentorship session with :name on :session_date at :session_time',
     'Approved' => 'Approved',
     'Rejected' => 'Rejected',
+    'New_mentorship_session' => 'New Mentorship Session',
 ];

@@ -14,8 +14,9 @@ trait Auditable
         });
 
         static::updated(function (Model $model) {
-            $model->attributes = array_merge($model->getChanges(), ['id' => $model->id]);
-            self::audit('audit:updated', $model);
+            $auditModel = clone $model;
+            $auditModel->attributes = array_merge($model->getChanges(), ['id' => $model->id]);
+            self::audit('audit:updated', $auditModel);
         });
 
         static::deleted(function (Model $model) {

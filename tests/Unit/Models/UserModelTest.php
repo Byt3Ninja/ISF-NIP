@@ -52,7 +52,9 @@ class UserModelTest extends TestCase
     public function it_can_belong_to_organization()
     {
         $organization = Organization::factory()->create();
-        $user = User::factory()->create(['organization_id' => $organization->id]);
+        $user = User::factory()->create();
+        $user->organization_id = $organization->id;
+        $user->save();
         
         // Refresh to ensure relationship is loaded
         $user->refresh();

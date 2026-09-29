@@ -7,8 +7,8 @@
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="">
+    <div class="">
       <div class="content-header">
         <div class="col">
           <h3 class="fw-bold">{{ __('cycles.Mentorship Sessions') }}</h3>

@@ -6,8 +6,8 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 
 		<div class="row mb-6">
 			<div class="col-12 col-md-8">

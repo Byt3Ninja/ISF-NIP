@@ -8,6 +8,8 @@
     ['id' => 'submissions', 'label' => __('forms.submissions_tab'), 'icon' => 'send'],
   ];
 
+  $activeTab = request('tab', 'overview');
+
   $kpis = [
     ['label' => __('forms.total_forms'), 'value' => $analytics['total_forms']],
     ['label' => __('forms.total_submissions'), 'value' => $analytics['total_submissions']],
@@ -31,15 +33,15 @@
   }
 @endphp
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
 
     <!-- Navigation Pills -->
     <div class="card shadow-sm p-4 mb-4">
       <ul class="nav nav-pills gap-2" id="formsSubmissionsTab" role="tablist">
         @foreach($pills as $key => $pill)
           <li class="nav-item" role="presentation">
-            <button class="nav-link {{ $pill['id'] == 'overview' ? 'active' : '' }}" id="{{ $pill['id'] }}-tab" data-bs-toggle="pill" data-bs-target="#{{ $pill['id'] }}-pane" type="button" role="tab">
+            <button class="nav-link {{ $pill['id'] == $activeTab ? 'active' : '' }}" id="{{ $pill['id'] }}-tab" data-bs-toggle="pill" data-bs-target="#{{ $pill['id'] }}-pane" type="button" role="tab">
               <i class="ti ti-{{ $pill['icon'] }} me-2"></i>
               {{ $pill['label'] }}
             </button>
@@ -49,9 +51,9 @@
     </div>
 
     <div class="tab-content p-0 shadow-none" id="formsSubmissionsTabContent">
-      @include('admin.settings.forms.partials.overview-tab')
-      @include('admin.settings.forms.partials.forms-tab')
-      @include('admin.settings.forms.partials.submissions-tab')
+      @include('admin.settings.forms.partials.overview-tab', ['activeTab' => $activeTab])
+      @include('admin.settings.forms.partials.forms-tab', ['activeTab' => $activeTab])
+      @include('admin.settings.forms.partials.submissions-tab', ['activeTab' => $activeTab])
     </div>
   </div>
 
@@ -110,10 +112,14 @@ document.addEventListener('DOMContentLoaded', function () {
     order: [[5, 'desc']],
     lengthMenu: [ [7, 10, 25, 50, -1], [7, 10, 25, 50, "@lang('admin.All')"] ],
     columnDefs: [{ orderable: false, targets: -1 }],
-    language: {
-      url: '{{ $l }}' === 'ar'
-        ? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
-        : "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json"
+   language: {
+      url:
+        document.dir === 'rtl'
+          ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+          : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+      sLengthMenu: '_MENU_',
+      search: '',
+      searchPlaceholder: '{{ __('admin.Search') }}...',
     },
     dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'fB>>" +
          "<'row'<'col-sm-12'tr>>" +
@@ -142,6 +148,11 @@ document.addEventListener('DOMContentLoaded', function () {
           formsTable.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
         });
       @endif
+
+      setTimeout(() => {
+        $('.dataTables_filter .form-control').removeClass('form-control-sm');
+        $('.dataTables_length .form-select').removeClass('form-select-sm');
+      }, 300);
     }
   });
 
@@ -212,10 +223,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     },
     language: {
-      url: '{{ $l }}' === 'ar'
-        ? "https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json"
-        : "https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json"
-    }
+      url:
+        document.dir === 'rtl'
+          ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+          : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+      sLengthMenu: '_MENU_',
+      search: '',
+      searchPlaceholder: '{{ __('admin.Search') }}...',
+    },
   });
 
 
@@ -415,6 +430,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Initialize charts on page load
   initializeCharts();
+
+  // Handle tab clicks to update URL
+  $('#formsSubmissionsTab .nav-link').on('click', function() {
+    const tabId = $(this).attr('id').replace('-tab', '');
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabId);
+    window.history.pushState({}, '', url);
+  });
 });
 </script>
 @stop

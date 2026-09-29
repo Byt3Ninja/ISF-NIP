@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Settings;
+use Carbon\Carbon;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -120,21 +121,41 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
         $this->configureSmtp($smtpSettings);
 
         $mentorship_session = $this->mentorship_session;
+        $cycle = $mentorship_session->cycle;
         $session_date = strtotime($mentorship_session->zoom_date);
+        $start = Carbon::parse($mentorship_session->zoom_date);
+        $end = $start->copy()->addMinutes($mentorship_session->period);
         $sessionDate = date('Y-m-d', $session_date);
-        $sessionTime = date('h:i A', $session_date);
+        $sessionTime = date('h:i A', $session_date) . ' - ' . date('h:i A', $end->timestamp);
+        if( app()->getLocale() == 'ar' )
+        {
+            $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
+            $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
+        }
+        $sessionType = trim(strtolower($mentorship_session->session_type ?: 'online'));
+        $locationName = $sessionType == 'offline' ? ($cycle->offline_location_address ?: null) : null;
+        $mapLink = $sessionType == 'offline' ? ($cycle->offline_location_map ?: optional($cycle->organization)->google_map_url ?: null) : null;
+        $address = $sessionType == 'offline' ? (optional($cycle->organization)->address ?: null) : null;
 
         $mentorName = $mentorship_session?->mentor?->name ?? '';
+        $signOffName = $orgData['org_name'] ?? $platformName;
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
             ->subject( __('email.startup_mentorship_session_notify_email.approval.subject') )
             ->view('emails.mentorship_notify_startup_approval_email', array_merge([
                 'party'             => $notifiable,
                 'mentorName'        => $mentorName,
+                'sessionType'       => $sessionType,
                 'sessionDate'       => $sessionDate,
                 'sessionTime'       => $sessionTime,
                 'sessionLink'       => $mentorship_session?->join_url ?? '',
-                'platformName'      => $platformName,
+                'passcode'          => $mentorship_session?->zoom_passcode ?? '',
+                'platformName'      => $signOffName,
+                'locationName'      => $locationName,
+                'mapLink'           => $mapLink,
+                'address'           => $address,
+                'viewSessionUrl'    => route('mentorships.list_mine'),
             ], $orgData));
     }
 

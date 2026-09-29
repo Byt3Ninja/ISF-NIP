@@ -2,21 +2,24 @@
 
 namespace App\Providers;
 
-
 use App\Settings;
+use App\SurveyResponses;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use App\Services\BroadcastConfigService;
+use App\Services\MailConfig;
 use Illuminate\Support\Facades\Broadcast;
 use App\Observers\WireChatMessageObserver;
 use Namu\WireChat\Models\Message;
 use App\Services\BreadcrumbService;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\GmailTransport;
-
+use App\Repositories\SettingRepository;
+use App\AttendanceTrainingOffline;
+use App\ServicesRequests;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -24,9 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-    $this->app->singleton(\App\Repositories\SettingRepository::class, function ($app) {
-        return new \App\Repositories\SettingRepository();
-    });
+        $this->app->singleton(SettingRepository::class, function ($app) {
+            return new SettingRepository();
+        });
     }
 
     /**
@@ -36,13 +39,24 @@ class AppServiceProvider extends ServiceProvider
     {
         Broadcast::routes();
 
+        $settings = null;
+
         if (Schema::hasTable('settings'))
         {
             try {
                 $settings = Settings::find(1);
 
                 if ($settings) {
-                    Config::set('mail.default', env('MAIL_MAILER', 'gmail'));
+                    if ($settings->email_provider === 'resend' && $settings->resend_api_key) {
+                        $data = [
+                            'transport' => 'resend',
+                            'api_key' => $settings->resend_api_key,
+                            'from_address' => $settings->Mail ?? config('mail.from.address'),
+                            'from_name' => $settings->title ?? config('mail.from.name', 'Your App Name'),
+                        ];
+                        MailConfig::set($data);
+                    } else {
+                        Config::set('mail.default', $settings?->email_provider ?? 'smtp');
                         Config::set('mail.mailers.smtp.host', $settings->host ?? env('MAIL_HOST'));
                         Config::set('mail.mailers.smtp.port', $settings->Port ?? env('MAIL_PORT'));
                         Config::set('mail.mailers.smtp.username', $settings->Mail ?? env('MAIL_USERNAME'));
@@ -60,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
                         Config::set('mail.from.name', 
                             $settings->mail_from_name ?? ( $settings->title ?? env('MAIL_FROM_NAME', config('app.name')) )
                         );
-                    // }
+                    }
                 }
             } catch (\Exception $e) {
                 $settings = null;
@@ -75,7 +89,11 @@ class AppServiceProvider extends ServiceProvider
                 config('mail.mailers.smtp.password') ?? env('MAIL_PASSWORD')
             );
         });
-        view()->composer('*', function ($view) use ($settings) {
+        view()->composer('*', function ($view) use (&$settings) {
+            $_user = auth()->user();
+            if (!$settings && Schema::hasTable('settings')) {
+                $settings = Settings::find(1);
+            }
             $profile_completed = true;
             $company_completed = true;
             if (session()->has('locale')) {
@@ -87,7 +105,6 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
             $permissions = [];
-            $_user = auth()->user();
             if( auth()->check() )
             {
                 $permissions = $_user->myPermissions();
@@ -113,6 +130,19 @@ class AppServiceProvider extends ServiceProvider
 
                     if( $view->getName() === 'admin.clients.profile.editProfile' ) { $profile_completed = true; $company_completed = true; }
                     if( $view->getName() === 'admin.clients.company' ) { $profile_completed = true; $company_completed = true; }
+
+                    if( $user->company )
+                    {
+                        $program = $user->company->cycledata;
+                        if( $program )
+                        {
+                            if( $program->allow_non_company == 1 )
+                            {
+                                // $profile_completed = true;
+                                $company_completed = true;
+                            }
+                        }
+                    }
                 }
             }
             $platformName = config('app.name');
@@ -124,6 +154,144 @@ class AppServiceProvider extends ServiceProvider
             $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'platformName' => $platformName, 'is_profile_completed' => $profile_completed, 'is_company_completed' => $company_completed]);
         });
 
+        view()->composer('partials.menu', function ($view) {
+            $pendingRequestsCount = 0;
+            if (auth()->check()) {
+                $_user = auth()->user();
+                if ($_user->hasRole('serviceProvider')) {
+                    if ($_user->service_provider) {
+                        $provider_id = $_user->service_provider->id;
+                        $pendingRequestsCount = ServicesRequests::whereNull('approved')
+                            ->whereHas('service', function ($q) use ($provider_id) {
+                                $q->where('service_provider_id', $provider_id);
+                            })->count();
+                    } else {
+                        $orgIds = $_user->organizations_ids;
+                        $pendingRequestsCount = ServicesRequests::whereNull('approved')
+                            ->whereHas('service', function ($q) use ($orgIds) {
+                                $q->whereExists(function ($sub) use ($orgIds) {
+                                    $sub->select(\DB::raw(1))
+                                        ->from('organization_service')
+                                        ->whereColumn('organization_service.service_id', 'services.id')
+                                        ->whereIn('organization_service.organization_id', $orgIds);
+                                });
+                            })->count();
+                    }
+                }
+            }
+            $view->with('pendingRequestsCount', $pendingRequestsCount);
+        });
+
+        // Breadcrumb view composer
+        view()->composer('components.breadcrumbs', function ($view) {
+            if (auth()->check() && !request()->is('api/*') && !request()->expectsJson()) {
+                $breadcrumbService = app(BreadcrumbService::class);
+                $view->with([
+                    'breadcrumbs' => $breadcrumbService->getTrail(),
+                    'backUrl' => $breadcrumbService->getPreviousUrl(),
+                ]);
+            } else {
+                $view->with([
+                    'breadcrumbs' => [],
+                    'backUrl' => null,
+                ]);
+            }
+        });
+
+        view()->composer('partials.survey_reminder_modal', function ($view) {
+            $_user = auth()->user();
+            $completed_survey_ids = \App\SurveyResponses::where('user_id', $_user->id)
+                ->whereNotNull('responses')
+                ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
+                    $query->where('cycle_id', $_user->company?->cycle);
+                })
+                ->pluck('survey_id')
+            ->toArray();
+            
+            $incomplete_responses = \App\SurveyResponses::where('user_id', $_user->id)
+                ->whereNull('responses')
+                ->when($_user->hasRole('Registered'), function ($query) use ($_user) {
+                    $query->where('cycle_id', $_user->company?->cycle);
+                })
+                ->whereHas('survey', function($query) {
+                $query->where('is_required', 1);
+                })
+                ->with(['survey', 'survey_scope', 'mentorship_session', 'mentorship_step', 'training_session', 'training_step', 'training_quiz', 'mentorship_session.user', 'mentorship_session.mentor']) 
+            ->get();
+
+            $allTrainingsAttendance = AttendanceTrainingOffline::where('user_id', $_user->id)->get();
+            $incomplete_responses = $incomplete_responses->filter(function ( $response ) use ( $allTrainingsAttendance, $_user ) {
+                if( $response->triggered_on === 'training' && ( auth()->check() && $_user->hasAnyRole('registered') ) )
+                {
+                    return $allTrainingsAttendance->where('training_session_id', $response->triggered_at)->isEmpty();
+                } else { return true; }
+            })->values();
+            /* foreach ($incomplete_responses as $key => $response)
+            {
+                if ($response->triggered_on === 'training') {
+                    if (auth()->check() && $_user->hasAnyRole('registered'))
+                    {
+                        $existsInTraining = \DB::table('attendance_training_offline')
+                            ->where('training_session_id', $response->triggered_at)
+                            ->where('user_id', $_user->id)
+                            ->exists();
+
+                        // لو مش موجود في الحضور، نصفي الرد من الـ collection
+                        if (!$existsInTraining) {
+                            $incomplete_responses->forget($key);
+                        }
+                    }
+                }
+            } */
+
+            $survey_data = [];
+            if( auth()->check() && $_user->hasAnyRole(['registered','mentor']) )
+            {
+                foreach ($incomplete_responses as $response)
+                {
+                    $type = $response->triggered_on;
+                    $metadata = [];
+                    if( $type == 'training' )
+                    {
+                        $metadata = [
+                            'session' => $response->training_session,
+                            'step' => $response->training_step,
+                            'quiz' => $response->training_quiz
+                        ];
+                    }
+                    if( $type == 'mentorship' )
+                    {
+                        $metadata = [
+                            'session' => $response->mentorship_session,
+                            'step' => $response->mentorship_step,
+                            'mentor' => $response->mentorship_session?->mentor,
+                            'startup' => $response->mentorship_session?->user,
+                        ];
+                    }
+                    if( $type == 'quiz' )
+                    {
+                        $metadata = [
+                            'session' => $response->training_session,
+                            'step' => $response->training_step,
+                            'quiz' => $response->training_quiz
+                        ];
+                    }
+                    
+                    $survey_data[] = [
+                        'id' => $response->id,
+                        'survey_id' => $response->survey->id,
+                        'title' => $response->survey->title,
+                        'description' => $response->survey->description,
+                        'is_required' => $response->survey->is_required,
+                        'type' => $type,
+                        'trigger_id' => $response->triggered_at,
+                        'trigger_by' => $response->triggered_by,
+                        'metadata' => $metadata
+                    ];
+                }
+            }
+            $view->with(['survey_data' => $survey_data]);
+        });
 
         $pusherConfig = BroadcastConfigService::getPusherConfig();
 
@@ -177,7 +345,5 @@ class AppServiceProvider extends ServiceProvider
 
         // Register the WireChat Message observer
         Message::observe(WireChatMessageObserver::class);
-    
-    
     }
 }

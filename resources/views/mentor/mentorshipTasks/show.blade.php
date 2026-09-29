@@ -12,8 +12,8 @@
         }
     </style>
     <!-- BEGIN: Content .users-view .table-borderless td -->
-    <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
+    <div class="">
       <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">
@@ -45,7 +45,16 @@
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="col-12">
-                                            <h5 class="mb-1"><i class="bx bx-info-circle"></i> {{__('mentor.mentorshipTasks.show')}}</h5>
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <h5 class="mb-0"><i class="bx bx-info-circle"></i> {{__('mentor.mentorshipTasks.show')}}</h5>
+                                                <form action="{{ route('mentorshipTasks.destroy', $task['id']) }}" method="POST" id="deleteTaskForm">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn btn-danger btn-sm" id="deleteTaskBtn">
+                                                        <i class="ti ti-trash"></i> {{ __('admin.Delete') }}
+                                                    </button>
+                                                </form>
+                                            </div>
                                             <hr>
                                             <table class="table table-borderless table-hover">
                                                 <tbody>
@@ -153,6 +162,27 @@
     <script>
         $(document).ready(function() {
             $('#summernote').summernote();
+
+            $('#deleteTaskBtn').on('click', function() {
+                Swal.fire({
+                    title: "{{__('admin.SureDelete')}}",
+                    text: "{{__('admin.Recover')}}",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: "{{ __('admin.DYes') }}",
+                    cancelButtonText: "{{ __('admin.No') }}",
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'btn btn-danger me-2',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('deleteTaskForm').submit();
+                    }
+                });
+            });
         });
     </script>
 @endsection

@@ -6,15 +6,34 @@ use URL;
 use App\Step;
 use Carbon\Carbon;
 use App\Traits\Auditable;
+use App\Traits\HasFileCleanup;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use stdClass;
 
 class Cycle extends Model
 {
-    use Auditable;
+    public const TITLE_MAX_LENGTH = 50;
+
+    use HasFactory, Auditable, HasFileCleanup;
     public static $module = 'Program';
-    protected $casts = ['start'  => 'date:Y-m-d', 'end' => 'date:Y-m-d', 'is_public' => 'boolean',];
+    protected array $fileFields = [
+        'img_url' => 'public_uploads',
+        'program_guideline_file' => 'public_uploads',
+        'financial_guideline_file' => 'public_uploads',
+        'legal_guideline_file' => 'public_uploads',
+        'delegation_file' => 'public_uploads',
+    ];
+
+    protected $casts = [
+        'start'  => 'date:Y-m-d',
+        'end' => 'date:Y-m-d',
+        'is_public' => 'boolean',
+        'landing_visible' => 'boolean',
+        'landing_sort_order' => 'integer',
+    ];
     protected $guarded = [];
 
     // =============> Attributes <======================
@@ -31,21 +50,42 @@ class Cycle extends Model
     {
         return date('Y-m-d',strtotime($this->attributes['end']));
     }
+    public function getIsExpiredAttribute()
+    {
+        return $this->end && $this->end->isPast();
+    }
+
     public function getLogoAttribute()
     {
-        $img = $this->img_url;
-        if( trim( $img ) ) { return URL::to( $img ); }
-
-        $org = $this->organization;
-        if( $org && $org->imageUrl )
-        {
-            if (str_starts_with($org->imageUrl, 'http') || str_starts_with($org->imageUrl, '/'))
-            {
-                return $org->imageUrl;
-            }
-            return URL::to( $org->imageUrl );
+        if ($this->img_url) {
+            return app(\App\Services\FileManagerService::class)->getUrl($this->img_url, 'public_uploads');
         }
-        return URL::to('/images/background/logo.png');
+
+        if ($this->organization && $this->organization->img_url) {
+            return route('organizations.logo', $this->organization->img_url ?? '');
+        }
+
+        return asset('/images/background/logo.png');
+    }
+
+    public function getProgramGuidelineFileUrlAttribute()
+    {
+        return app(\App\Services\FileManagerService::class)->getUrl($this->program_guideline_file, 'public_uploads');
+    }
+
+    public function getFinancialGuidelineFileUrlAttribute()
+    {
+        return app(\App\Services\FileManagerService::class)->getUrl($this->financial_guideline_file, 'public_uploads');
+    }
+
+    public function getLegalGuidelineFileUrlAttribute()
+    {
+        return app(\App\Services\FileManagerService::class)->getUrl($this->legal_guideline_file, 'public_uploads');
+    }
+
+    public function getDelegationFileUrlAttribute()
+    {
+        return app(\App\Services\FileManagerService::class)->getUrl($this->delegation_file, 'public_uploads');
     }
     // =============> Relations <========================
     public function organization(){
@@ -99,6 +139,26 @@ class Cycle extends Model
         return $this->hasMany(CycleCustomPages::class);
     }
 
+    public function focusAreas()
+    {
+        return $this->belongsToMany(
+            StaticCategory::class,
+            'cycle_focus_areas',
+            'cycle_id',
+            'static_category_id'
+        )->withTimestamps();
+    }
+
+    public function benefits()
+    {
+        return $this->hasMany(CycleBenefit::class)->orderBy('sort_order');
+    }
+
+    public function scopeLandingVisible($query)
+    {
+        return $query->where('landing_visible', true);
+    }
+
     public function getProgress()
     {
         $totalSteps = Step::where('cycle_id', $this->id)->count();
@@ -132,5 +192,18 @@ class Cycle extends Model
         return $hackathon;
     }
 
-   
+    public function getStartColorAttribute($value)
+    {
+        return $value ?: '#6366f114';
+    }
+
+    public function getEndColorAttribute($value)
+    {
+        return $value ?: '#0891b214';
+    }
+
+    public function getMainColorAttribute($value)
+    {
+        return $value ?: '#6366f1';
+    }
 }

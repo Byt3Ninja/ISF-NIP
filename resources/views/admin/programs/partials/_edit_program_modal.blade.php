@@ -31,7 +31,7 @@
       @include('partials.modal.modal-header', ['title' => __('cycles.' . $mode . '_program')])
       <form action="{{ route('cycles.modify') }}" method="POST" enctype="multipart/form-data">
         @csrf 
-        <input type="hidden" name="tab_id" value="1">
+        <input type="hidden" name="tab_id" value="{{ \App\Enums\CycleTabAction::CREATE_CYCLE }}">
         <div class="rounded bg-white border-0 border-md-1 border-secondary py-4 px-2">
           <ul
             class="nav nav-pills flex-nowrap justify-content-center py-1 bg-label-light rounded-pill gap-1 gap-md-2"

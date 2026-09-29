@@ -13,7 +13,6 @@ class CompanyFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
             'name_en' => $this->faker->company,
             'name_ar' => $this->faker->company,
             'email' => $this->faker->unique()->companyEmail,

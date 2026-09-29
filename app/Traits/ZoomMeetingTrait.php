@@ -96,7 +96,8 @@ trait ZoomMeetingTrait
 
     public function create($data)
     {
-        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null)) {
+        $orgId = optional(optional(auth()->user())->organization)->id;
+        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null, $orgId)) {
             return [
                 'success' => false,
                 'data'    => ['message' => __('settings.max_concurrent_sessions_reached')],

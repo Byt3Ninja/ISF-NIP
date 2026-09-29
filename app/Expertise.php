@@ -33,4 +33,13 @@ class Expertise extends Model
         return $query->whereNotNull('parent_id');
     }
 
+    public function companies()
+    {
+        return $this->belongsToMany(
+            \App\Company::class,
+            'company_expertise',
+            'expertise_id',
+            'company_id'
+        )->withTimestamps();
+    }
 }

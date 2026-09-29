@@ -5,8 +5,8 @@
 @section('content')
 <!-- BEGIN: Content-->
 
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="content-body">
       <section id="basic-input">
         <div class="row">
@@ -24,6 +24,13 @@
                         <label for="currency_name" class="form-label fw-semibold mb-1 fs-6">{{ __('admin.Name') }}</label>
                         <input type="text" name="currency_name" class="form-control" id="currency_name" required>
                         @error('currency_name')
+                          <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                      </div>
+                      <div class="col-md-6">
+                        <label for="currency_name_ar" class="form-label fw-semibold mb-1 fs-6">{{ __('admin.Name_AR') }}</label>
+                        <input type="text" name="currency_name_ar" class="form-control" id="currency_name_ar" required>
+                        @error('currency_name_ar')
                           <div class="text-danger">{{ $message }}</div>
                         @enderror
                       </div>

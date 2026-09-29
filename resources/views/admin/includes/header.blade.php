@@ -10,7 +10,7 @@
   $all = $msgs + $unread_messages;
   $companyid = $_user->company?->id ?? null;
 
-  $menuItems = [
+$menuItems = [
     // Main Dashboard
     [
         'label' => $l == 'en' ? 'Dashboard' : 'لوحة القيادة',
@@ -33,8 +33,8 @@
 
     // Settings
     [
-        'label' => __('admin.settings'),
-        'icon' => 'ti ti-settings me-3 ti-md',
+        'label' => $l == 'en' ? 'Profile Settings' : 'اعدادات الملف الشخصي',
+        'icon' => 'ti ti-user-cog me-3 ti-md',
         'route' => 'user.profile_Edit',
         'permission' => 'user.profile_Edit',
         'isVisible' => true,
@@ -47,21 +47,21 @@
         'icon' => 'ti-building me-3',
         'route' => 'company.profile_view_mine',
         'permission' => ['company.profile_view', 'assessments.results_analysis_view', 'swot.view'],
-        'isVisible' => $_user->HaveCompany == 1 && !$_user->company,
+        'isVisible' => ( $_user->HaveCompany == 1 && !$_user->company ) || $_user->ableTo('swot.view', $permissions),
         'subItems' => [
             [
                 'label' => $l == 'en' ? 'Analysis & Assessment' : 'التحليل والتقييم',
                 'icon' => 'ti ti-report-analytics',
                 'route' => '/dashboard/analysis-assessment',
                 'permission' => 'assessments.results_analysis_view',
-                'isVisible' => $_setting->assessment == 1
+                'isVisible' => $_setting->assessment == 1 && $_user->ableTo('assessments.results_analysis_view', $permissions) && !$_user->hasRole("organizationManager")
             ],
             [
                 'label' => $l == 'en' ? 'SWOT Analysis' : 'تحليل SWOT',
                 'icon' => 'ti ti-target-arrow',
                 'route' => 'swot.view',
                 'permission' => 'swot.view',
-                'isVisible' => "in_array(env('APP_ENV', 'local'), ['dev', 'local'])"
+                'isVisible' => $_user->ableTo('swot.view', $permissions)
             ]
         ]
     ],
@@ -86,8 +86,15 @@
                 'icon' => 'ti ti-report-analytics',
                 'route' => '/dashboard/analysis-assessment',
                 'permission' => 'assessments.results_analysis_view',
-                'isVisible' => $_setting->assessment == 1
+                'isVisible' => $_setting->assessment == 1 && $_user->ableTo('assessments.results_analysis_view', $permissions) && !$_user->hasRole("organizationManager")
             ],
+            [
+                'label' => $l == 'en' ? 'SWOT Analysis' : 'تحليل SWOT',
+                'icon' => 'ti ti-target-arrow',
+                'route' => 'swot.view',
+                'permission' => 'swot.view',
+                'isVisible' => $_user->ableTo('swot.view', $permissions)
+            ]
         ]
     ],
 
@@ -113,7 +120,7 @@
 
     // Companies
     [
-        'label' => $l == 'en' ? 'Startup Hub' : 'الشركات',
+        'label' => $_user->hasRole('Mentor') ? __('breadcrumb.startup_hub') : __('breadcrumb.startups'),
         'icon' => 'ti ti-building ti-md me-2 me-lg-4 ti-lg',
         'route' => 'users.view_companies',
         'permission' => 'users.view_companies',
@@ -125,11 +132,44 @@
     [
         'label' => $l == 'en' ? 'Mentors' : 'المرشدون',
         'icon' => 'ti ti-users ti-md me-2 me-lg-4 ti-lg',
-        'route' => '/dashboard/mentors',
-        'permission' => 'mentors.list',
-        'isVisible' => $_user->hasAnyRole("Registered|Mentor|organizationManager"),
-        'subItems' => []
+        'route' => null,
+        'permission' => $_user->ableToAny(['mentors.list', 'invitations.index'], $permissions),
+        'isVisible' => $_user->ableToAny(['mentors.list', 'invitations.index'], $permissions),
+        'subItems' => [
+            [
+            'label' => __('admin.Mentors'),
+            'icon' => 'ti ti-users',
+            'route' => '/dashboard/mentors',
+            'permission' => $_user->ableTo('mentors.list', $permissions),
+            'isVisible' => $_user->ableTo('mentors.list', $permissions)
+          ],
+          [
+            'label' => $l == 'en' ? 'Mentors Invitations' : 'دعوات المرشدون',
+            'icon' => 'ti ti-inbox',
+            'route' => '/dashboard/mentors/invitations',
+            'permission' => $_user->ableTo('invitations.index', $permissions),
+            'isVisible' => $_user->ableTo('invitations.index', $permissions)
+          ],
+        ]
     ],
+
+    // Tasks
+    /* [
+        'label' => $l == 'en' ? 'Tasks' : 'المهام',
+        'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/mentorshipSessions',
+        'permission' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
+        'isVisible' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
+        'subItems' => [
+          [
+            'label' => $l == 'en' ? 'Tasks' : 'المهام',
+            'icon' => 'ti ti-layout-kanban',
+            'route' => '/dashboard/mentor/mentorshipSessions',
+            'permission' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions),
+            'isVisible' => $_user->ableTo('mentorships.sessions_list_detailed', $permissions)
+          ]
+        ]
+    ], */
 
     // Mentorship Tasks (for Mentors)
     [
@@ -137,7 +177,7 @@
         'icon' => 'ti ti-calendar-cog ti-md me-2 me-lg-4 ti-lg',
         'route' => 'slots.index',
         'permission' => 'slots.index',
-        'isVisible' => $_user->hasRole("Mentor"),
+        'isVisible' => $_user->hasRole("Mentor") || $_user->ableTo('tasks.index', $permissions),
         'subItems' => []
     ],
 
@@ -145,9 +185,19 @@
     [
         'label' => $l == 'en' ? 'Tasks' : 'المهام',
         'icon' => 'ti ti-layout-kanban ti-md me-2 me-lg-4 ti-lg',
-        'route' => 'mentorships.sessions_list_detailed',
-        'permission' => 'mentorships.sessions_list_detailed',
-        'isVisible' => $_user->hasAnyRole("Mentor|Registered"),
+        'route' => 'tasks.index',
+        'permission' => 'tasks.index',
+        'isVisible' => $_user->hasAnyRole("Mentor|Registered") || $_user->ableTo('tasks.index', $permissions),
+        'subItems' => []
+    ],
+
+    // Service Providers
+    [
+        'label' => $l == 'en' ? 'Services Providers' : 'مقدمي الخدمات',
+        'icon' => 'ti ti-users ti-md me-2 me-lg-4 ti-lg',
+        'route' => 'services_providers.index',
+        'permission' => 'services_providers.index',
+        'isVisible' => $_user->ableTo('services_providers.index', $permissions),
         'subItems' => []
     ],
  
@@ -160,7 +210,35 @@
         'isVisible' => $_user->hasRole("Mentor"),
         'subItems' => []
     ],
+    // mentorship sessions (for Mentors)
+    [
+        'label' => __('admin.Mentorship Sessions'),
+        'icon' => 'ti ti-calendar-event ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/sessions',
+        'permission' => $_user->ableTo('mentorships.sessions', $permissions),
+        'isVisible' => $_user->hasRole("Mentor"),
+        'subItems' => []
+    ],
+    // Surveys (for Mentors)
+    [
+        'label' => __('admin.Surveys'),
+        'icon' => 'ti ti-notes ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/surveys',
+        'permission' => null,
+        'isVisible' => $_user->hasRole("Mentor"),
+        'subItems' => []
+    ],
 
+
+    // Surveys (for Mentors)
+    [
+        'label' => __('admin.Surveys'),
+        'icon' => 'ti ti-notes ti-md me-2 me-lg-4 ti-lg',
+        'route' => '/dashboard/mentor/surveys',
+        'permission' => null,
+        'isVisible' => $_user->hasRole("Mentor"),
+        'subItems' => []
+    ],
     // Hackathon
     [
         'label' => $l == 'en' ? 'Hackathon' : 'هاكاثون',
@@ -190,30 +268,52 @@
         'isVisible' => $_user->hasRole("Registered"),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'My Services Requests' : 'طلبات خدماتي',
+                'label' => $l == 'en' ? 'Services Requests' : 'طلبات خدماتي',
                 'icon' => 'ti ti-briefcase',
                 'route' => '/dashboard/requests/mine',
-                'permission' => 'service_requests.list_mine',
-                'isVisible' => true
+                'permission' => $_user->ableTo('service_requests.list_mine', $permissions),
+                'isVisible' => $_user->hasRole("Registered")
             ],
             [
                 'label' => $l == 'en' ? 'Mentorship Requests' : 'طلبات الارشاد',
                 'icon' => 'ti ti-users-group',
                 'route' => '/dashboard/mentorship/mine',
-                'permission' => 'mentorships.list_mine',
-                'isVisible' => true
+                'permission' => $_user->ableTo('mentorships.list_mine', $permissions),
+                'isVisible' => $_user->hasRole("Registered")
             ]
         ]
     ],
 
     // Services Directory
     [
-        'label' => __('admin.Services'),
+        'label' => __('settings.navigation.services_directory'),
         'icon' => 'ti ti-search',
-        'route' => 'users.directory_view',
-        'permission' => 'users.directory_view',
-        'isVisible' => $_user->hasAnyRole("Registered|Mentor"),
-        'subItems' => []
+        'route' => null,
+        'permission' => ['services.index', 'service_requests.list_all', 'serviceCategories.index'],
+        'isVisible' => $_user->hasAnyRole("Registered|Mentor") || $_user->ableToAny(['services.index', 'service_requests.list_all', 'serviceCategories.index'], $permissions),
+        'subItems' => [
+          [
+            'label' => $_user->hasAnyRole('Admin|OrganizationManager|SubAdmin') ? __('admin.All Services') : __('admin.Services'),
+            'icon' => 'ti ti-arrows-move',
+            'route' => '/dashboard/services',
+            'permission' => $_user->ableTo('services.index', $permissions),
+            'isVisible' => $_user->ableTo('services.index', $permissions)
+          ],
+          [
+            'label' => __('admin.Services Requests'),
+            'icon' => 'ti ti-briefcase',
+            'route' => __('service_requests.list_all'),
+            'permission' => $_user->ableTo('service_requests.list_all', $permissions),
+            'isVisible' => $_user->ableTo('service_requests.list_all', $permissions)
+          ],
+          [
+            'label' => __('admin.Services Categories'),
+            'icon' => 'ti ti-layout-grid',
+            'route' => '/dashboard/serviceCategories',
+            'permission' => $_user->ableTo('serviceCategories.index', $permissions),
+            'isVisible' => $_user->ableTo('serviceCategories.index', $permissions)
+          ],
+        ]
     ],
 
     // My Courses
@@ -228,7 +328,7 @@
 
     // My Quizzes
     [
-        'label' => $l == 'en' ? 'My Quizzes' : 'اختباراتي',
+        'label' => $l == 'en' ? 'Quizzes' : 'الاختبارات',
         'icon' => 'ti ti-question-mark',
         'route' => '/dashboard/quizzes/my',
         'permission' => 'quizzes.dashboard_view',
@@ -248,10 +348,10 @@
 
     // Program (for Mentors)
     [
-        'label' => $l == 'en' ? 'Program' : 'البرنامج',
+        'label' => __('mentor.enrolled_programs'),
         'icon' => 'ti ti-device-desktop-code',
         'route' => '/dashboard/program/show',
-        'permission' => 'programs.view',
+        'permission' => $_user->ableTo('programs.view', $permissions),
         'isVisible' => $_user->hasRole("Mentor"),
         'subItems' => []
     ],
@@ -286,13 +386,23 @@
         'subItems' => []
     ],
 
+    // Custom Landing Pages
+    [
+        'label' => __('admin.Custom Landing Pages'),
+        'icon' => 'ti ti-layout',
+        'route' => 'landing-pages.index',
+        'permission' => 'landing-pages.index',
+        'isVisible' => $_user->hasAnyRole('subAdmin|Admin') && $_user->ableTo('landing-pages.index', $permissions),
+        'subItems' => []
+    ],
+
     // Projects
     [
         'label' => $l == 'en' ? 'Projects' : 'المشاريع',
         'icon' => 'ti ti-folder',
         'route' => 'projects.index',
         'permission' => 'projects.index',
-        'isVisible' => true,
+        'isVisible' => $_user->ableTo('projects.index', $permissions) && app()->environment(['local', 'dev', 'test']),
         'subItems' => []
     ],
 
@@ -305,9 +415,9 @@
         'isVisible' => $_user->hasAnyRole("Admin|organizationManager"),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Forms List' : 'قائمة النماذج',
+                'label' => __('admin.Forms'),
                 'icon' => 'ti ti-list',
-                'route' => '/dashboard/forms',
+                'route' => '/dashboard/forms?tab=forms',
                 'permission' => 'forms.index',
                 'isVisible' => true
             ],
@@ -321,7 +431,7 @@
             [
                 'label' => $l == 'en' ? 'Forms Submissions' : 'إرسالات النماذج',
                 'icon' => 'ti ti-send',
-                'route' => '/dashboard/forms-submissions',
+                'route' => '/dashboard/forms?tab=submissions',
                 'permission' => 'forms_submissions.index',
                 'isVisible' => true
             ]
@@ -337,7 +447,7 @@
         'isVisible' => $_user->ableToAny(["cycles.list", "programlist.index"], $permissions),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Program List' : 'قائمة البرامج',
+                'label' => __('admin.Cycles'),
                 'icon' => 'ti ti-clipboard-list',
                 'route' => '/dashboard/programlist',
                 'permission' => 'programlist.index',
@@ -351,7 +461,7 @@
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Registered Startups' : 'الشركات الناشئة المسجلة',
+                'label' => $l == 'en' ? 'Program Startups' : 'برنامج الشركات الناشئة',
                 'icon' => 'ti ti-rocket',
                 'route' => '/dashboard/cycles/0/registered',
                 'permission' => 'cycles.users_manage',
@@ -366,28 +476,28 @@
         'icon' => 'ti ti-clock-hour-2 me-3 ti-md',
         'route' => null,
         'permission' => ['TimeSheet.index', 'time_sheets.reports.finance.view', 'time_sheets.view.mine'],
-        'isVisible' => $_user->ableToAny(["TimeSheet.index", "time_sheets.reports.finance.view", "time_sheets.view.mine"], $permissions),
+        'isVisible' => $_user->ableToAny(["TimeSheet.index", "time_sheets.reports.finance.view", "time_sheets.view.mine"], $permissions) && app()->environment(['local', 'dev', 'test']),
         'subItems' => [
             [
                 'label' => $l == 'en' ? 'Time sheet' : 'الجدول الزمني',
                 'icon' => 'ti ti-clock-record',
                 'route' => 'TimeSheet.index',
-                'permission' => 'TimeSheet.index',
-                'isVisible' => true
+                'permission' => $_user->ableTo('TimeSheet.index', $permissions) && app()->environment(['local', 'dev', 'test']),
+                'isVisible' => $_user->ableTo('TimeSheet.index', $permissions) && app()->environment(['local', 'dev', 'test'])
             ],
             [
                 'label' => $l == 'en' ? 'Financial Report' : 'التقرير المالي',
                 'icon' => 'ti ti-report-money',
                 'route' => 'time_sheets.reports.finance.view',
-                'permission' => 'time_sheets.reports.finance.view',
-                'isVisible' => true
+                'permission' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager"),
+                'isVisible' => $_user->ableTo('time_sheets.reports.finance.view', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager")
             ],
             [
                 'label' => $l == 'en' ? 'Users TimeSheets' : 'الجدول الزمني للمستخدمين',
                 'icon' => 'ti ti-user-check',
                 'route' => 'time_sheets.view.mine',
-                'permission' => 'time_sheets.view.mine',
-                'isVisible' => true
+                'permission' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager"),
+                'isVisible' => $_user->ableTo('time_sheets.view.mine', $permissions) && app()->environment(['local', 'dev', 'test']) && !$_user->hasRole("organizationManager")
             ]
         ]
     ],
@@ -401,7 +511,7 @@
         'isVisible' => $_user->ableToAny(["assessments.index"], $permissions),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Manage Assessments' : 'إدارة التقييمات',
+                'label' => __('admin.Assessments'),
                 'icon' => 'ti ti-checklist',
                 'route' => 'assessments.index',
                 'permission' => 'assessments.index',
@@ -411,27 +521,26 @@
     ],
     // Screening
     [
-        'label' => $l == 'en' ? 'Screening Management' : 'إدارة الفحص',
-        'icon' => 'ti ti-hourglass me-3 ti-md',
+        'label' => __('admin.initial_screening'),
+        'icon' => 'ti ti-scale me-3 ti-md',
         'route' => null,
         'permission' => ['screening.index', 'screening.results_view'],
         'isVisible' => $_user->ableToAny(["screening.index", "screening.results_view"], $permissions),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Screening Management' : 'إدارة الفحص',
-                'icon' => 'ti ti-settings-cog',
+                'label' => __('admin.initial_screening'),
+                'icon' => 'ti ti-scale',
                 'route' => '/dashboard/screening',
                 'permission' => 'screening.index',
                 'isVisible' => true
             ],
-            [
-
+            /* [
                 'label' => $l == 'en' ? 'Screening Results' : 'نتائج الفحص',
                 'icon' => 'ti ti-chart-dots',
                 'route' => '/dashboard/screening/results',
                 'permission' => 'screening.results_view',
                 'isVisible' => true
-            ]
+            ] */
         ]
     ],
 
@@ -444,55 +553,46 @@
         'isVisible' => $_user->ableToAny(["mentorships.requests_list", "mentorships.requests_view", "mentorships.sessions_list"], $permissions),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Programs Mentors' : 'مرشدو البرامج',
-                'icon' => 'ti ti-school',
-                'route' => '/dashboard/mentorship/assign',
-                'permission' => 'mentorships.requests_list',
-                'isVisible' => true
+              'label' => $l == 'en' ? 'Programs Mentors' : 'مرشدو البرامج',
+              'icon' => 'ti ti-school',
+              'route' => '/dashboard/mentorship/assign',
+              'permission' => 'mentorships.requests_list',
+              'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Manage mentorships' : 'إدارة جلسات الإرشاد',
-                'icon' => 'ti ti-settings',
-                'route' => '/dashboard/mentorship/view',
-                'permission' => 'mentorships.requests_view',
-                'isVisible' => true
+              'label' => __('admin.mentorship_management'),
+              'icon' => 'ti ti-settings',
+              'route' => '/dashboard/mentorship/view',
+              'permission' => 'mentorships.requests_view',
+              'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Mentorship Sessions' : 'جلسات الإرشاد',
-                'icon' => 'ti ti-calendar-time',
-                'route' => null,
-                'permission' => 'mentorships.sessions_list',
-                'isVisible' => true,
-                'subItems' => [
-                    [
-                        'label' => $l == 'en' ? 'All requests' : 'كل الطلبات',
-                        'icon' => 'ti ti-list-details',
-                        'route' => '/dashboard/mentorship/sessions?show=all',
-                        'permission' => 'mentorships.sessions_list',
-                        'isVisible' => true
-                    ],
-                    [
-                        'label' => $l == 'en' ? 'New requests only' : 'الطلبات الجديدة فقط',
-                        'icon' => 'ti ti-new-section',
-                        'route' => '/dashboard/mentorship/sessions',
-                        'permission' => 'mentorships.sessions_list',
-                        'isVisible' => true
-                    ],
-                    [
-                        'label' => $l == 'en' ? 'Approved mentorship requests' : 'الطلبات الموافق عليها',
-                        'icon' => 'ti ti-check',
-                        'route' => '/dashboard/mentorship/sessions?show=approved',
-                        'permission' => 'mentorships.sessions_list',
-                        'isVisible' => true
-                    ],
-                    [
-                        'label' => $l == 'en' ? 'Disapproved mentorship requests' : 'الطلبات المرفوضة',
-                        'icon' => 'ti ti-x',
-                        'route' => '/dashboard/mentorship/sessions?show=disapproved',
-                        'permission' => 'mentorships.sessions_list',
-                        'isVisible' => true
-                    ]
-                ]
+              'label' => $l == 'en' ? 'All Mentorship requests' : 'كل طلبات الارشاد',
+              'icon' => 'ti ti-list-details',
+              'route' => '/dashboard/mentorship/sessions?show=all',
+              'permission' => $_user->ableTo('mentorships.sessions_list', $permissions),
+              'isVisible' => true
+            ],
+            [
+              'label' => $l == 'en' ? 'New Mentorship requests only' : 'طلبات الارشاد الجديدة فقط',
+              'icon' => 'ti ti-new-section',
+              'route' => '/dashboard/mentorship/sessions',
+              'permission' => $_user->ableTo('mentorships.sessions_list', $permissions),
+              'isVisible' => true
+            ],
+            [
+              'label' => $l == 'en' ? 'Approved mentorship requests' : 'طلبات الارشاد الموافق عليها',
+              'icon' => 'ti ti-check',
+              'route' => '/dashboard/mentorship/sessions?show=approved',
+              'permission' => $_user->ableTo('mentorships.sessions_list', $permissions),
+              'isVisible' => true
+            ],
+            [
+              'label' => $l == 'en' ? 'Disapproved mentorship requests' : 'طلبات الارشاد المرفوضة',
+              'icon' => 'ti ti-x',
+              'route' => '/dashboard/mentorship/sessions?show=disapproved',
+              'permission' => $_user->ableTo('mentorships.sessions_list', $permissions),
+              'isVisible' => true
             ]
         ]
     ],
@@ -602,26 +702,26 @@
 
     // Final Screening
     [
-        'label' => $l == 'en' ? 'Final Screening' : 'الفرز النهائي',
-        'icon' => 'ti ti-trophy me-3 ti-md',
+        'label' => __('admin.Final Screening'),
+        'icon' => 'ti ti-gavel me-3 ti-md',
         'route' => null,
         'permission' => ['screening.index', 'screening.results_view'],
         'isVisible' => $_user->ableToAny(["screening.index", "screening.results_view"], $permissions),
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'Manage Final Screening' : 'إدارة الفحص النهائي',
-                'icon' => 'ti ti-adjustments',
+                'label' => __('admin.Final Screening'),
+                'icon' => 'ti ti-gavel',
                 'route' => '/dashboard/final',
                 'permission' => 'screening.index',
                 'isVisible' => true
             ],
-            [
+            /* [
                 'label' => $l == 'en' ? 'Final screening results' : 'نتائج الفحص النهائي',
                 'icon' => 'ti ti-award',
                 'route' => '/dashboard/final/results',
                 'permission' => 'screening.results_view',
                 'isVisible' => true
-            ]
+            ] */
         ]
     ],
 
@@ -630,9 +730,16 @@
         'label' => $l == 'en' ? 'Services' : 'الخدمات',
         'icon' => 'ti ti-arrows-move',
         'route' => 'services.index',
-        'permission' => ['service_requests.list_all', 'services.create', 'services.index', 'serviceCategories.index'],
-        'isVisible' => !$_user->hasAnyRole("Mentor|Judger") && $_user->ableToAny(["service_requests.list_all", "services.create", "services.index", "serviceCategories.index"], $permissions),
+        'permission' => ['services.index', 'service_requests.list_all', 'services.create', 'services.index', 'serviceCategories.index'],
+        'isVisible' => !$_user->hasAnyRole("Mentor|Judger") && $_user->ableToAny(['services.index', "service_requests.list_all", "services.create", "services.index", "serviceCategories.index"], $permissions),
         'subItems' => [
+            [
+                'label' => $l == 'en' ? 'Services' : 'الخدمات',
+                'icon' => 'ti ti-grid',
+                'route' => 'services.index',
+                'permission' => 'services.index',
+                'isVisible' => $_user->ableTo('services.index', $permissions)
+            ],
             [
                 'label' => $l == 'en' ? 'Services Requests' : 'طلبات الخدمات',
                 'icon' => 'ti ti-mail-opened',
@@ -720,6 +827,16 @@
         'subItems' => []
     ],
 
+    // Application Settings
+    [
+        'label' => __('settings.title'),
+        'icon' => 'ti ti-settings',
+        'route' => 'settings.index',
+        'permission' => 'settings.index',
+        'isVisible' => $_user->ableTo('settings.index', $permissions),
+        'subItems' => []
+    ],
+
     // Organization Settings
     [
         'label' => $l == 'en' ? 'Organization Settings' : 'إعدادات المنظمة',
@@ -747,6 +864,16 @@
         'route' => '/dashboard/documentation',
         'permission' => 'documentation.index',
         'isVisible' => $_user->ableTo("documentation.index", $permissions),
+        'subItems' => []
+    ],
+
+    // Countries
+    [
+        'label' => $l == 'en' ? 'Countries' : 'الدول',
+        'icon' => 'ti ti-world',
+        'route' => 'country-management.index',
+        'permission' => 'country-management.index',
+        'isVisible' => $_user->ableTo("country-management.index", $permissions),
         'subItems' => []
     ],
 
@@ -782,22 +909,22 @@
                 'label' => $l == 'en' ? 'Create Template' : 'إنشاء قالب',
                 'icon' => 'ti ti-plus',
                 'route' => 'notification-templates.create',
-                'permission' => 'notification-templates.create',
-                'isVisible' => true
+                'permission' => $_user->ableTo('notification-templates.create', $permissions),
+                'isVisible' => $_user->ableTo('notification-templates.create', $permissions)
             ],
             [
                 'label' => $l == 'en' ? 'Manage Templates' : 'إدارة القوالب',
                 'icon' => 'ti ti-template',
                 'route' => 'notification-templates.index',
-                'permission' => null,
-                'isVisible' => true
+                'permission' => $_user->ableTo('notification-templates.index', $permissions),
+                'isVisible' => $_user->ableTo('notification-templates.index', $permissions)
             ],
             [
                 'label' => $l == 'en' ? 'Manage Triggers' : 'إدارة المشغلات',
                 'icon' => 'ti ti-bolt',
                 'route' => 'notification-triggers.index',
-                'permission' => null,
-                'isVisible' => true
+                'permission' => $_user->ableTo('notification-triggers.index', $permissions),
+                'isVisible' => $_user->ableTo('notification-triggers.index', $permissions)
             ]
         ]
     ],
@@ -998,8 +1125,6 @@ $menuItems = $menuItems->flatMap(function($item) {
 })->values();
 
 @endphp
-<link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
-
 <!-- Navbar -->
 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
   id="layout-navbar">
@@ -1097,14 +1222,22 @@ $menuItems = $menuItems->flatMap(function($item) {
       <li class="nav-item navbar-dropdown dropdown-user dropdown ms-1">
         <a class="nav-link dropdown-toggle hide-arrow p-1" href="javascript:void(0);" data-bs-toggle="dropdown">
           <div class="avatar avatar-online avatar-sm">
-            @if (auth()->user()->image_url)
+            @if( $_user->hasRole('serviceProvider') )
               <img 
                 class="rounded-circle" 
-                src="{{ auth()->user()->image_url }}"
+                src="{{ $_user->service_provider?->profile_picture ?? '/images/user-placeholder.jpeg' }}"
                 onerror="this.src='/images/user-placeholder.jpeg'"
               />
             @else
-              <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+              @if (auth()->user()->image_url)
+                <img 
+                  class="rounded-circle" 
+                  src="{{ auth()->user()->image_url }}"
+                  onerror="this.src='/images/user-placeholder.jpeg'"
+                />
+              @else
+                <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+              @endif
             @endif
           </div>
         </a>
@@ -1114,14 +1247,22 @@ $menuItems = $menuItems->flatMap(function($item) {
               <div class="d-flex align-items-center">
                 <div class="flex-shrink-0 me-2">
                   <div class="avatar avatar-online">
-                    @if (auth()->user()->image_url)
+                    @if( $_user->hasRole('serviceProvider') )
                       <img 
                         class="rounded-circle" 
-                        src="{{ auth()->user()->image_url }}"
+                        src="{{ $_user->service_provider?->profile_picture ?? '/images/user-placeholder.jpeg' }}"
                         onerror="this.src='/images/user-placeholder.jpeg'"
                       />
                     @else
-                      <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+                      @if (auth()->user()->image_url)
+                        <img 
+                          class="rounded-circle" 
+                          src="{{ auth()->user()->image_url }}"
+                          onerror="this.src='/images/user-placeholder.jpeg'"
+                        />
+                      @else
+                        <img class="rounded-circle" src="/images/user-placeholder.jpeg" alt="avatar" />
+                      @endif
                     @endif
                   </div>
                 </div>
@@ -1311,13 +1452,8 @@ $menuItems = $menuItems->flatMap(function($item) {
   </div>
 </div>
 
-<!-- Mobile Header JavaScript -->
-<script src="/app-assets/plugins/alertify/alertify.min.js"></script>
+@push('scripts')
 <script>
-  alertify.defaults.transition = 'zoom';
-  alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-  alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-  alertify.defaults.theme.input = 'form-control';
 document.addEventListener('DOMContentLoaded', function() {
   // Search functionality
   const searchInput = document.getElementById('menuSearch');
@@ -1390,14 +1526,17 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   $(document).on('click', '#stop-impersonation', function(e) {
     e.preventDefault();
-    alertify.confirm(
-			"{{ __('admin.Confirm Action') }}",
-			"{!! __('admin.ConfirmStopImpersonationMessage') !!}",
-			function() {
-				$("#stop-impersonation-form").submit();
-			},
-			function(){}
-		).set('labels', {ok: "<i class='fa fa-check'></i> {{ __('admin.Yes') }}", cancel: "{{ __('admin.cancel') }}"});
+
+    releaseWarningAlert({
+      title: "{{ __('admin.Confirm Action') }}",
+      message: "{{ __('admin.ConfirmStopImpersonationMessage') }}",
+      confirmButtonText: "{{ __('admin.Yes') }}",
+      cancelButtonText: "{{ __('admin.cancel') }}",
+      onConfirm: function() {
+        $("#stop-impersonation-form").submit();
+      }
+    });
   });
 });
 </script>
+@endpush

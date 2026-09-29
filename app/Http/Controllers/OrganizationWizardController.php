@@ -17,6 +17,7 @@ use App\Services\OrganizationWizardService;
 use App\Services\OrganizationManagerService;
 use App\Services\OrganizationLandingPageService;
 use App\Services\OrganizationCustomSectionService;
+use App\Services\ProgramLandingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,7 +27,8 @@ class OrganizationWizardController extends Controller
         protected OrganizationWizardService $wizardService,
         protected OrganizationManagerService $managerService,
         protected OrganizationLandingPageService $landingPageService,
-        protected OrganizationCustomSectionService $customSectionService
+        protected OrganizationCustomSectionService $customSectionService,
+        protected ProgramLandingService $programLandingService
     ) {}
 
     /**
@@ -54,7 +56,7 @@ class OrganizationWizardController extends Controller
      */
     public function edit($id)
     {
-        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers', 'landingPage', 'customSections'])->findOrFail($id);
+        $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers'])->findOrFail($id);
         $organizationTypes = OrganizationTypes::all();
         $industries = StaticCategory::all();
         $countries = Country::all();
@@ -76,12 +78,6 @@ class OrganizationWizardController extends Controller
             ];
         });
 
-        // Get landing page data for step 4
-        $landingPage = $organization->landingPage;
-
-        // Get custom sections for step 5
-        $customSections = $organization->customSections;
-
         return view('admin.organizations.wizard.create', compact(
             'organization',
             'organizationTypes',
@@ -89,9 +85,7 @@ class OrganizationWizardController extends Controller
             'countries',
             'states',
             'cities',
-            'assignedManagers',
-            'landingPage',
-            'customSections'
+            'assignedManagers'
         ));
     }
 
@@ -247,11 +241,8 @@ class OrganizationWizardController extends Controller
         $result = $this->managerService->assignManagers($id, $request->manager_ids);
 
         if ($result['success']) {
-            $redirectTo = $request->input('redirect_to', 'next');
-            $step = $redirectTo === 'same' ? 3 : 4;
-
             return redirect()
-                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => $step])
+                ->route('organization.wizard.edit', ['id' => $result['data']->id, 'step' => 3])
                 ->with('success', $result['message']);
         }
 
@@ -298,8 +289,8 @@ class OrganizationWizardController extends Controller
 
         // Minimal validation for draft
         $rules = [
-            // Step 1 fields
-            'name_en' => 'nullable|string|max:255',
+            // Step 1 fields - name_en is only required when creating a new draft
+            'name_en' => ($id ? 'nullable' : 'required') . '|string|max:255',
             'name_ar' => 'nullable|string|max:255',
             'organization_type_id' => 'nullable|exists:organization_types,id',
             'status' => 'nullable|boolean',
@@ -308,7 +299,7 @@ class OrganizationWizardController extends Controller
             'industries.*' => 'exists:static_categories,id',
             'img_url' => 'nullable|image|mimes:png,jpg,jpeg|max:5120',
             // Step 2 fields (Contact Information)
-            'contact_email' => 'nullable|email|max:255',
+            'contact_email' => 'nullable|email|max:255|regex:/^[a-zA-Z0-9._%+\-@]+$/',
             'country_code' => 'nullable|string|max:10',
             'contact_phone' => 'nullable|string|max:20',
             'country_id' => 'nullable|exists:countries,id',
@@ -331,11 +322,13 @@ class OrganizationWizardController extends Controller
         $locale = app()->getLocale();
         $messages = $locale === 'ar'
             ? [
+                'name_en.required' => 'اسم المنظمة مطلوب',
                 'img_url.image' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
                 'img_url.mimes' => 'نوع الملف غير صالح، يرجى رفع ملفات من نوع PNG أو JPG فقط',
                 'img_url.max' => 'الملف اكبر من الحد المسموح. الحد الأقصى المسموح به هو 5 ميجابايت',
             ]
             : [
+                'name_en.required' => 'Organization name is required.',
                 'img_url.image' => 'Invalid file format. Please upload PNG or JPG files only.',
                 'img_url.mimes' => 'Invalid file format. Please upload PNG or JPG files only.',
                 'img_url.max' => 'File too large. Maximum size allowed is 5MB.',
@@ -447,6 +440,15 @@ class OrganizationWizardController extends Controller
 
         if ($result['success']) {
             $redirectTo = $request->input('redirect_to', 'next');
+
+            // If coming from standalone landing page, redirect back there
+            if ($redirectTo === 'landing_page') {
+                $activeTab = $request->input('active_tab', 'howItWorks');
+                return redirect()
+                    ->route('organization.wizard.landing', ['id' => $id, 'tab' => $activeTab])
+                    ->with('success', $result['message']);
+            }
+
             $step = $redirectTo === 'same' ? 4 : 5;
 
             return redirect()
@@ -472,6 +474,36 @@ class OrganizationWizardController extends Controller
         }
 
         return $disk->response($path);
+    }
+
+    /**
+     * Show the standalone landing page management view.
+     */
+    public function editLandingPage($id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $organization = Organization::with(['landingPage', 'customSections'])->findOrFail($id);
+        $landingPage = $organization->landingPage;
+        $customSections = $organization->customSections ?? collect();
+
+        $orgPrograms = $organization->cycles()
+            ->whereNull('deleted_at')
+            ->with(['focusAreas', 'benefits'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $focusAreaOptions = StaticCategory::all();
+
+        return view('admin.organizations.landing-page.edit', compact(
+            'organization',
+            'landingPage',
+            'customSections',
+            'orgPrograms',
+            'focusAreaOptions'
+        ));
     }
 
     /**
@@ -562,6 +594,16 @@ class OrganizationWizardController extends Controller
         }
 
         if ($result['success']) {
+            $redirectTo = $request->input('redirect_to', 'next');
+
+            // If coming from standalone landing page, redirect back there
+            if ($redirectTo === 'landing_page') {
+                $activeTab = $request->input('active_tab', 'customSections');
+                return redirect()
+                    ->route('organization.wizard.landing', ['id' => $id, 'tab' => $activeTab])
+                    ->with('success', $result['message']);
+            }
+
             return redirect()
                 ->route('organization.wizard.edit', ['id' => $id, 'step' => 5])
                 ->with('success', $result['message']);
@@ -606,6 +648,65 @@ class OrganizationWizardController extends Controller
         }
 
         $result = $this->customSectionService->delete($id, $sectionId);
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Update a single program's landing page data via AJAX.
+     */
+    public function updateProgramLanding(Request $request, $id, $cycleId)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        // Validate the cycle belongs to this org
+        $cycle = \App\Cycle::where('id', $cycleId)
+            ->where('organization_id', $id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'landing_visible' => 'nullable|boolean',
+            'short_description' => 'nullable|string|max:500',
+            'location' => 'nullable|string|max:255',
+            'landing_sort_order' => 'nullable|integer',
+            'focus_area_ids' => 'nullable|array',
+            'focus_area_ids.*' => 'exists:static_categories,id',
+            'benefits' => 'nullable|array|max:8',
+            'benefits.*.label_en' => 'nullable|string|max:255',
+            'benefits.*.label_ar' => 'nullable|string|max:255',
+            'benefits.*.icon' => 'nullable|string|max:50',
+        ]);
+
+        $result = $this->programLandingService->updateProgramLanding($cycleId, $validated);
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Reorder programs for landing page via AJAX.
+     */
+    public function reorderPrograms(Request $request, $id)
+    {
+        $_user = auth()->user();
+        if (!$_user->ableTo('organization.wizard.edit')) {
+            return abort(401);
+        }
+
+        $request->validate([
+            'ordered_ids' => 'required|array',
+            'ordered_ids.*' => 'integer',
+        ]);
+
+        $result = $this->programLandingService->reorderPrograms($id, $request->ordered_ids);
 
         return response()->json([
             'success' => $result['success'],

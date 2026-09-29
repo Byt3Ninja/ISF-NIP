@@ -4,8 +4,8 @@
 @stop
 @section('content')
 <!-- BEGIN: Content-->
-    <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="">
+    <div class="">
       <div class="content-overlay"></div>
             <div class="content-header row">
                 <div class="content-header-left col-12 mb-2 mt-1">

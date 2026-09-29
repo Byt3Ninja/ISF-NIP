@@ -95,8 +95,18 @@
      <section class="footer-bottom">
         <div class="container">
             <div class="pull-left copy-text">
-                {{--  <p>{{$l=='ar'?"جميع الحقوق محفوظة © ".today()->year." - برمجة ":"Copyrights © ".today()->year." All Rights Reserved - Developed by "}}<a href="http://masterencode.com"> Masterencode</a>.</p>  --}}
-                
+<p class="d-flex justify-content-between align-items-center">
+    <span style="direction: ltr">
+        Incubator Pro
+        {{ config('app.version') ? 'v' . config('app.version') : '' }}
+        {{ config('app.build') ? '(Build ' . config('app.build') . ')' : '' }}
+        - &copy; {{ now()->year }}
+    </span>
+
+    <button class="btn btn-primary btn-icon scroll-top" type="button">
+        <i class="ti ti-arrow-up"></i>
+    </button>
+</p>                
             </div><!-- /.pull-right -->
             <div class="pull-right get-text">
                 <ul>

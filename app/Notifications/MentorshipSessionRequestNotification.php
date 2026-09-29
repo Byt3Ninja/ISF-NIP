@@ -20,19 +20,53 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
     public $requestedMentor;
     public $dateTime;
     public $sessionNotes;
+    public $founder;
+    public $startup;
+    public $sessionType;
+    public $meetingLink;
+    public $passcode;
+    public $locationName;
+    public $locationUrl;
+    public $address;
+    public $attachments;
 
     public WhatsAppService $whatsAppService;
 
-    
+
     /**
      * Create a new notification instance.
+     *
+     * @param  \App\User|null  $founder  the requesting founder, for a profile link
+     * @param  \App\Company|null  $startup  the founder's startup, for a profile link
      */
-    public function __construct($startupName, $requestedMentor, $dateTime, $sessionNotes = null)
-    {
+    public function __construct(
+        $startupName,
+        $requestedMentor,
+        $dateTime,
+        $sessionNotes = null,
+        $founder = null,
+        $startup = null,
+        $sessionType = null,
+        $meetingLink = null,
+        $passcode = null,
+        $locationName = null,
+        $locationUrl = null,
+        $address = null,
+        $attachments = []
+    ) {
         $this->startupName = $startupName;
         $this->requestedMentor = $requestedMentor;
         $this->dateTime = $dateTime;
         $this->sessionNotes = $sessionNotes;
+        $this->founder = $founder;
+        $this->startup = $startup;
+        $this->sessionType = $sessionType;
+        $this->meetingLink = $meetingLink;
+        $this->passcode = $passcode;
+        $this->locationName = $locationName;
+        $this->locationUrl = $locationUrl;
+        $this->address = $address;
+        $this->attachments = $attachments ?? [];
     }
 
     /**
@@ -81,16 +115,38 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
 
         $this->configureSmtp($smtpSettings);
 
+        // The subject and sign-off name the founder / the organization
+        // managing the program -- not the platform default -- per the
+        // "New Mentorship Session Request – [Founder Name]" / "[Organization
+        // Name] Team" template.
+        $founderName = $this->founder->name ?? '';
+        $signOffName = $orgData['org_name'] ?? $platformName;
+
+        $preferredTime = isset($this->dateTime['start_time'], $this->dateTime['end_time'])
+            ? $this->dateTime['start_time'] . ' – ' . $this->dateTime['end_time']
+            : ($this->dateTime['start_time'] ?? '');
+
         return (new MailMessage)
             ->from(config('mail.from.address'), config('mail.from.name'))
-            ->subject( __('email.mentorship_request_email.subject') . ' ' . $this->startupName )
+            ->subject( __('email.mentorship_request_email.subject') . ' ' . $founderName )
             ->view('emails.mentorship_session_request_email', array_merge([
                 'party'             => $notifiable,
                 'startupName'       => $this->startupName,
                 'requestedMentor'   => $this->requestedMentor,
                 'sessionNotes'      => $this->sessionNotes,
-                'sessionDateTime'   => $this->dateTime['message'] ?? '',
-                'platformName'      => $platformName,
+                'preferredDate'     => $this->dateTime['date'] ?? '',
+                'preferredTime'     => $preferredTime,
+                'platformName'      => $signOffName,
+                'founder'           => $this->founder,
+                'startup'           => $this->startup,
+                'sessionType'       => $this->sessionType,
+                'meetingLink'       => $this->meetingLink,
+                'passcode'          => $this->passcode,
+                'locationName'      => $this->locationName,
+                'locationUrl'       => $this->locationUrl,
+                'address'           => $this->address,
+                'attachments'       => $this->attachments,
+                'reviewUrl'         => route('mentorships.sessions_list'),
             ], $orgData));
     }
 

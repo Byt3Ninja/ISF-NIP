@@ -97,7 +97,12 @@
               <tr>
                 <th class="text-center">{{ $index + 1 }}</th>
                 <td class="text-center">{{ $company->{'name_'.$l} }}</td>
-                <td class="text-center">{{ $company->sectoR?->{'name_'.$l} ?? '-' }}</td>
+                <td class="text-center">
+                  {{--  {{ $company->sectoR?->{'name_'.$l} ?? '-' }}  --}}
+                  @foreach( $company->companyRelations->whereNotNull('sector_id')->unique('sector_id')->pluck('sector') as $_sector)
+                    <span class="badge bg-label-primary mx-1">{{ $_sector->{'name_'.$l} }}</span>
+                  @endforeach
+                </td>
                 <td class="text-center">{{ $company->stagE->{'name_'.$l} ?? '-' }}</td>
               </tr>
               @endforeach

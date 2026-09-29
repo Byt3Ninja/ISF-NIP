@@ -1,11 +1,17 @@
 .DS_Store
 /node_modules
 # /public
+/docs/tickets/*
+/docs/superpowers/*
+/tasks/*
 /public/storage
 /public/pitch_decks
 /public/191014
 /public/documents
 /public/images/logo/*
+# User-uploaded team logos now live in storage/app/public/programs/teams;
+# anything left here is a runtime artifact, not source.
+/public/programs/teams
 /storage/*.key
 /vendor
 /docker_volumes
@@ -26,3 +32,5 @@ composer.lock
 .codegpt
 .vscode
 .idea
+# dompdf generated font cache (GV-3340)
+/storage/fonts/

@@ -11,6 +11,13 @@ class ScreeningEvaluation extends Model
 {
 	use HasFactory;
 
+	/**
+	 * Max length of an evaluation criterion / sub-criterion name.
+	 * Single source of truth: the controller validates against it and the
+	 * evaluation-model editor renders its maxlength / client rules from it.
+	 */
+	public const CRITERION_NAME_MAX_LENGTH = 100;
+
 	protected $table = 'screening_evaluation';
 	protected $fillable = ['step_id', 'status', 'screening_guidelines'];
 	protected $casts = [
@@ -65,7 +72,12 @@ class ScreeningEvaluation extends Model
 				$conditions
 		";
 		$evaluationForm = collect(DB::select($evaluationForm_q, $inputs));
-		$evaluationForm = $evaluationForm->groupBy('evaluation_id')->map(function ( $e ) {
+
+		// Batch-fetch steps with cycles to avoid N+1 per evaluation
+		$_batchStepIds = $evaluationForm->pluck('step_id')->unique()->filter()->toArray();
+		$_batchStepsWithCycles = !empty($_batchStepIds) ? Step::with('cycle')->whereIn('id', $_batchStepIds)->get()->keyBy('id') : collect();
+
+		$evaluationForm = $evaluationForm->groupBy('evaluation_id')->map(function ( $e ) use ($_batchStepsWithCycles) {
 			$_e = $e->first();
 			$evaluation = new stdClass;
 			$evaluation->id = $_e->evaluation_id;
@@ -89,8 +101,8 @@ class ScreeningEvaluation extends Model
 			})->filter(function( $category ) { return !is_null( $category->id ); })->values();
 			$evaluation->categories = $categories;
 
-			// Fetch screening guidelines from the associated cycle (fallback if no evaluation-specific guidelines)
-			$step = Step::with('cycle')->find($_e->step_id);
+			// Use pre-fetched step (avoids N+1 per evaluation)
+			$step = $_batchStepsWithCycles->get($_e->step_id);
 			$evaluation->screening_guidelines = $evaluation->screening_guidelines ?: ($step && $step->cycle ? $step->cycle->program_guideline : null);
 			$evaluation->screening_guidelines_file = $step && $step->cycle ? $step->cycle->program_guideline_file : null;
 

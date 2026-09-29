@@ -12,6 +12,7 @@ class Team_member extends Model
     
     protected $casts = [
         'documents' => 'array',
+        'join_date' => 'date',
     ];
 
     public function projects() 
@@ -27,5 +28,10 @@ class Team_member extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function scopeFounders($q)
+    {
+        return $q->where('TeamMember', 'Founder');
     }
 }

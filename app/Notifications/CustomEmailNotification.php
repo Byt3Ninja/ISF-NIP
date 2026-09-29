@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Traits\ConfiguresSmtp;
 use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,7 +14,7 @@ use App\Services\GlobalNotificationSettingsService;
 
 class CustomEmailNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ConfiguresSmtp;
 
     protected $user;
     protected $resetUrl;
@@ -61,12 +62,19 @@ class CustomEmailNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $org = $this->user->organization ?? $notifiable->organization;
+        $smtpSettings = $org?->organizationSettings;
+
+        $this->configureSmtp($smtpSettings);
+        $from = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
             ->subject(__('notifications.custom_email.subject'))
-            ->view('emails.custom-mail', [
+            ->view('emails.custom-mail', array_merge([
                 'user' => $this->user,
                 'resetUrl' => $this->resetUrl,
-            ]);
+            ], $orgData));
     }
 
     public function toDatabase(object $notifiable): array

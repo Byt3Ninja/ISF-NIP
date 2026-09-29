@@ -1,40 +1,49 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Otp;
-use App\User;
-use App\Cycle;
-use App\Almuni;
-use App\Country;
 use App\Activity;
+use App\Almuni;
+use App\City;
+use App\Country;
 use App\Currency;
-use App\Schedule;
-use App\Settings;
-use App\UsersBio;
-use App\Expertise;
-use Carbon\Carbon;
+use App\Cycle;
 use App\CyclesMentors;
-use App\MentorshipTask;
+use App\serviceProviders;
+use App\Expertise;
+use App\Http\Requests\UpdateClientProfilePasswordRequest;
+use App\Http\Requests\UpdateClientProfileRequest;
+use App\InviteMentor;
 use App\MentorshipRequest;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
+use App\MentorshipTask;
+use App\Notifications\ConfirmEmailUpdateNotification;
+use App\Otp;
+use App\Schedule;
+use App\Services\MentorshipAvailabilityService;
+use App\Services\NotificationSettingsService;
 use App\Services\WhatsAppService;
-use PragmaRX\Google2FA\Google2FA;
+use App\Settings;
+use App\State;
+use App\StaticCategory;
+use App\User;
+use App\UsersBio;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
-use App\Services\NotificationSettingsService;
-use App\Http\Requests\UpdateClientProfileRequest;
-use Storage, Hash, Exception, Session, URL, File;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\In;
 use Intervention\Image\ImageManagerStatic as Image;
-use App\Notifications\ConfirmEmailUpdateNotification;
-use App\Http\Requests\UpdateClientProfilePasswordRequest;
-use App\StaticCategory;
+use PragmaRX\Google2FA\Google2FA;
+use Storage, Hash, Exception, Session, URL, File;
 
 class ClientProfileController extends Controller
 {
+    /** How long a staged email-change confirmation link stays valid. */
+    const EMAIL_CONFIRMATION_TTL_HOURS = 24;
+
     protected $whatsAppService;
     /**
      * Create a new controller instance.
@@ -43,10 +52,13 @@ class ClientProfileController extends Controller
      */
     public function __construct(WhatsAppService $whatsAppService, NotificationSettingsService $notificationSettingsService)
     {
-        $this->middleware('auth');
+        // confirmEmailUpdate is reached from a mailed link, which may be opened on a
+        // device with no session; it is protected by a signed URL instead.
+        $this->middleware('auth')->except('confirmEmailUpdate');
         $this->whatsAppService = $whatsAppService;
         $this->notificationSettingsService = $notificationSettingsService;
     }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -67,18 +79,33 @@ class ClientProfileController extends Controller
                 $country['flag'] = URL::to('app-assets/images/flags/' . strtolower($country['iso2']) . '.svg');
                 return $country;
             });
-            $countries = $countries->map(function ($country) use ($_countries) {
-                $getCountry = $_countries->where('iso3', $country->iso3)->first();
-                $flag = null;
-                $emoji = null;
-                if (!empty($getCountry)) {
-                    $flag = $getCountry['flag'];
-                    $emoji = $getCountry['emoji'];
-                }
-                $country->flag = $flag;
-                $country->emoji = $emoji;
-                return $country;
-            });
+            // $countries = $countries->map(function ($country) use ($_countries) {
+            //     $getCountry = $_countries->where('iso3', $country->iso3)->first();
+            //     $flag = null;
+            //     $emoji = null;
+            //     if (!empty($getCountry)) {
+            //         $flag = $getCountry['flag'];
+            //         $emoji = $getCountry['emoji'];
+            //     }
+            //     $country->flag = $flag;
+            //     $country->emoji = $emoji;
+            //     return $country;
+            // });
+
+            $countries = Country::all();
+            
+            // Populate states and cities for Service Provider if data exists
+            if ($client->hasRole('serviceProvider') && $client->service_provider) {
+                $states = $client->service_provider->country_id 
+                    ? State::where('country_id', $client->service_provider->country_id)->get() 
+                    : collect();
+                $cities = $client->service_provider->state_id 
+                    ? City::where('state_id', $client->service_provider->state_id)->get() 
+                    : collect();
+            } else {
+                $states = collect();
+                $cities = collect();
+            }
 
 
             $google2fa_url = "";
@@ -100,23 +127,35 @@ class ClientProfileController extends Controller
                 'google2fa_url' => $google2fa_url
             );
 
+            // In your ProfileController or wherever you return the edit view
 
+            $countriesIso3Map = $countries->pluck('iso3', 'id')
+                ->map(fn($iso3) => strtolower($iso3))
+                ->toArray();
 
-        // Fetch activities
-        $activities = Activity::where('user_id', Auth::user()->id)
-        ->orderBy('activity_time', 'desc')
-        ->get();
-            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'expertises', 'data','activities', 'industries'));
+            // Fetch activities
+            $activities = Activity::where('user_id', $client->id)->orderBy('activity_time', 'desc')->get();
+            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries', 'countriesIso3Map'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
     }
 
-    public function show()
+    public function showClientProfile( $id )
     {
-        $client = Auth::user();
-        $mentors = CyclesMentors::where('user_id', Auth::user()->id ?? 0)->get();
+        return $this->show( $id );
+    }
+
+    public function show( $id = null )
+    {
+        $client = is_null( $id ) ? Auth::user() : User::find($id);
+
+        if (!$client) {
+            abort(404);
+        }
+
+        $mentors = CyclesMentors::where('user_id', $client->id ?? 0)->get();
 
         $globalRoles = ['Admin', 'Organization Manager', 'subadmin'];
 
@@ -130,25 +169,35 @@ class ClientProfileController extends Controller
         } else {
             $mentorshipTasks = collect();
         }
-        $mentrequests = MentorshipRequest::where('mentor_id', Auth::user()->id);
+        $mentrequests = MentorshipRequest::where('mentor_id', $client->id);
         $mentrequests_count = $mentrequests->count();
         $mentrequests_period = $mentrequests->sum('period') / 60;
-        $average_rating = MentorshipRequest::where('mentor_id', Auth::user()->id)
+        $average_rating = MentorshipRequest::where('mentor_id', $client->id)
             ->where('approved', 'Yes')
             ->whereNotNull('rating') // تأكد أن عمود التقييم يحتوي على قيم
             ->avg('rating');
 
         // $almuni = Almuni::where('user_id', $client->id)->get();
+
+        if ($client->hasRole('serviceProvider')) {
+            $provider = $client->service_provider;
+            if (!$provider) {
+                $provider = new serviceProviders;
+				$provider->company_name = $client->name;
+				$provider->contact_name = $client->name;
+				$provider->email = $client->email;
+				$provider->phone = $client->phone;
+				$provider->status = true;
+				$provider->user_id = $client->id;
+				$provider->save();
+            }
+            if ($provider) {
+                return redirect()->route('service_provider.profile', $provider->id);
+            }
+        }
         
         return view('admin/clients/profile', compact('client', 'mentors', 'mentorshipTasks', 'mentrequests_count', 'mentrequests_period', 'average_rating'));
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Type  $Type
-     * @return \Illuminate\Http\Response
-     */
 
     public function Updatebio(Request $request)
     {
@@ -176,6 +225,14 @@ class ClientProfileController extends Controller
         }
         return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
     }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Type  $Type
+     * @return \Illuminate\Http\Response
+     */
     public function update(UpdateClientProfileRequest $request)
     {
         
@@ -201,183 +258,179 @@ class ClientProfileController extends Controller
             //     $user->mentorExpertises()->sync($request->expertises);
             // }
 
-
-            if ($request->hasFile('img_url')) {
-
-                $getemail = User::where('id', $user->id)->first();
-
-                if ($request->email == $getemail->email) {
-                    //store the image
-                    $img_url = $request->file('img_url');
-                    //get the path of the stores image
-                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                    //resize
-                    Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) {
-                        $con->aspectRatio(); })->save();
-                    //update
-
-                    $result = $user->update($request->except(['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar']) + ['img_url' => $img_url]);
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->save();
-                } else {
-                    // if email changed send email verification
-                    //store the image
-                    $img_url = $request->file('img_url');
-                    //get the path of the stores image
-                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
-                    //resize
-                    Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) {
-                        $con->aspectRatio(); })->save();
-                    //update
-                    $result = $user->update($request->except(['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar']) + ['img_url' => $img_url]);
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->new_email = $request->email;
-
-                    $user->save();
-                    // إرسال رابط التحقق
-                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-
-                    Notification::route('mail', $user->new_email)
-                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
-                    return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
-                }
-
-
-
-
-            } else {
-                $getemail = User::where('id', $user->id)->first();
-
-                if ($request->email == $getemail->email) {
-
-                    $result = $user->update($request->except(['password', 'email', 'first_name_ar', 'last_name_ar']));
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->save();
-                } else {
-                    $result = $user->update($request->except(['password', 'email', 'first_name_ar', 'last_name_ar']));
-                    $user->first_name_ar = $first_name_ar;
-                    $user->last_name_ar = $last_name_ar;
-
-                    $user->new_email = $request->email;
-                    $user->save();
-                    // إرسال رابط التحقق
-                    $verificationUrl = route('user.profile_email_confirm', ['token' => encrypt($user->new_email)]);
-
-                    Notification::route('mail', $user->new_email)
-                        ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
-                    return redirect()->route('user.profile_view')->with(['msg' => 'UpdateEmailSent', 'class' => 'success']);
-                }
+            $updateArray = [];
+            $excludeArray = ['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar'];
+            if( $request->hasFile('img_url') )
+            {
+                $img_url = $request->file('img_url');
+                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) { $con->aspectRatio(); })->save();
             }
-
-            // Debug: Dump request data and company info
-            \Log::info('Full request data:', $request->all());
-            \Log::info('Current user ID: ' . $user->id);
-            \Log::info('Tech tags received:', ['tech_tags' => $request->tech_tags]);
-            
-            if ($request->has('tech_tags') && !empty($request->tech_tags)) {                
-                // If it's a string, try to decode it as JSON
-                if (is_string($techTags)) {
-                    $techTags = json_decode($techTags, true);
-                    \Log::info('Tech tags after JSON decode:', ['techTags' => $techTags]);
-                }
-                
-                // If we have a valid array of technologies
-                if (is_array($techTags) && !empty($techTags)) {
-                    \Log::info('Processing tech tags array:', $techTags);
-                    // Filter out any empty values and trim whitespace
-                    $technologies = array_filter(array_map('trim', $techTags));
-                    
-                    // Eager load the company relationship if not already loaded
-                    if (!$user->relationLoaded('company')) {
-                        $user->load('company');
-                    }
-                    
-                    // Update or create company with technologies
-                    if ($user->company) {
-                        // Log before update
-                        \Log::info('Current technologies_used in DB:', [
-                            'before' => $user->company->technologies_used,
-                            'will_update_to' => $technologies
-                        ]);
-                        
-                        // Force update to bypass any model events
-                        $updateResult = \DB::table('companies')
-                            ->where('id', $user->company->id)
-                            ->update(['technologies_used' => implode(',', $technologies)]);
-                            
-                        \Log::info('Direct DB update result:', ['success' => $updateResult]);
-                        
-                        // Refresh the company model
-                        $user->load('company');
-                        \Log::info('After update - technologies_used in DB:', [
-                            'after' => $user->company->technologies_used
-                        ]);
-                        $techString = implode(',', array_unique($technologies));
-                        \Log::info('Updating company with technologies:', ['company_id' => $user->company->id, 'technologies' => $techString]);
-                        $result = $user->company->update([
-                            'technologies_used' => $techString
-                        ]);
-                        \Log::info('Update result:', ['success' => $result]);
-                    } else {
-                        // If company doesn't exist, create it with the user_id
-                        $techString = implode(',', array_unique($technologies));
-                        \Log::info('Creating new company with technologies:', ['user_id' => $user->id, 'technologies' => $techString]);
-                        $company = new \App\Company([
-                            'user_id' => $user->id,
-                            'name_en' => $user->name,
-                            'technologies_used' => $techString
-                        ]);
-                        $result = $user->company()->save($company);
-                        \Log::info('Create company result:', ['success' => (bool)$result, 'company_id' => $company->id ?? null]);
-                    }
-                } else if ($user->company) {
-                    // If technologies_used is empty, clear the field
-                    $user->company->update(['technologies_used' => null]);
-                }
-            }
-
-            if ($result)
-                return redirect()->route('user.profile_view')->with(['msg' => 'StoredSuccessfully', 'class' => 'success']);
             else
-                return back()->withInput()->with(['msg' => 'FailedStore', 'class' => 'danger']);
+            {
+                $img_url = $user->img_url;
+                if( $request->has('should_remove_image') && $request->should_remove_image == 1 ) { $img_url = null; }
+            }
+            $updateArray = $request->except($excludeArray) + ['img_url' => $img_url];
+
+            $user->update($updateArray);
+            $user->first_name_ar = $first_name_ar;
+            $user->last_name_ar = $last_name_ar;
+
+            // The email column is never written directly (it is in $excludeArray above).
+            // A change is staged on new_email and only applied once the owner of the new
+            // address confirms it via the signed link we mail them.
+            $emailChangeRequested = false;
+            $newEmail = strtolower(trim((string) $request->email));
+
+            if ($newEmail !== strtolower((string) $user->email)) {
+                $user->new_email = $newEmail;
+                $user->new_email_requested_at = now();
+                $emailChangeRequested = true;
+            }
+
+            $user->save();
+
+            if ($emailChangeRequested) {
+                $this->sendEmailUpdateConfirmation($user);
+
+                return redirect()->route('user.profile_view')->with([
+                    'msg'   => 'UpdateEmailSent',
+                    'class' => 'success',
+                    'pending_email' => $user->new_email,
+                ]);
+            }
+
+            return redirect()->route('user.profile_view')->with(['msg' => 'ProfileUpdatedSuccessfully', 'class' => 'success']);
         } catch (Exception $e) {
-            //log what happend
-            dd($e);
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
     }
 
-    public function confirmEmailUpdate($token)
+    /**
+     * Mail the signed confirmation link for a staged email change.
+     */
+    private function sendEmailUpdateConfirmation($user)
     {
-        try {
-            $newEmail = decrypt($token);
+        $verificationUrl = URL::temporarySignedRoute(
+            'user.profile_email_confirm',
+            now()->addHours(self::EMAIL_CONFIRMATION_TTL_HOURS),
+            ['user' => $user->id, 'token' => sha1($user->new_email)]
+        );
 
-        } catch (\Exception $e) {
+        // Claim this exact request (new_email_requested_at is its version) so a
+        // retry/duplicate call for it can't send twice, while a fresh request or
+        // an explicit resend -- which bumps new_email_requested_at -- still sends.
+        $version = $user->new_email_requested_at;
+        $claimed = User::where('id', $user->id)
+            ->where(function ($q) use ($version) {
+                $q->whereNull('email_change_notified_at')
+                  ->orWhere('email_change_notified_at', '!=', $version);
+            })
+            ->update(['email_change_notified_at' => $version]);
 
-            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
-
+        if (!$claimed) {
+            return;
         }
 
-        $user = auth()->user();
+        Notification::route('mail', $user->new_email)
+            ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
+    }
 
-        // تحقق من وجود البريد الجديد
-        if ($user->new_email != $newEmail) {
-            return redirect()->route('user.profile_view')->with(['msg' => 'WrongLink', 'class' => 'danger']);
+    /**
+     * Apply a staged email change.
+     *
+     * Public + signed route: the link must work from whatever device the founder reads
+     * their new mailbox on, so it cannot sit behind auth/verified/2fa. The signature
+     * carries the expiry; the token binds the link to the specific staged address so a
+     * link becomes void as soon as the pending change is altered or cancelled.
+     */
+    public function confirmEmailUpdate($userId, $token)
+    {
+        $user = User::find($userId);
+
+        if (!$user || !$user->new_email || !hash_equals(sha1($user->new_email), (string) $token)) {
+            return redirect()->route('login')->with(['msg' => 'WrongLink', 'class' => 'danger']);
         }
 
-        // تحديث البريد الإلكتروني
-        $user->email = $newEmail;
+        if ($user->new_email_requested_at
+            && $user->new_email_requested_at->addHours(self::EMAIL_CONFIRMATION_TTL_HOURS)->isPast()) {
+            $this->clearPendingEmail($user);
+
+            return redirect()->route('login')->with(['msg' => 'EmailConfirmationExpired', 'class' => 'danger']);
+        }
+
+        // The address may have been claimed by another account between staging and
+        // confirming, so re-check uniqueness before committing.
+        $taken = User::where('id', '!=', $user->id)
+            ->where(function ($q) use ($user) {
+                $q->where('email', $user->new_email)->orWhere('new_email', $user->new_email);
+            })
+            ->exists();
+
+        if ($taken) {
+            $this->clearPendingEmail($user);
+
+            return redirect()->route('login')->with(['msg' => 'EmailAlreadyTaken', 'class' => 'danger']);
+        }
+
+        $user->email = $user->new_email;
         $user->new_email = null;
+        $user->new_email_requested_at = null;
+        // The address has just proven it is reachable and owned by this user.
+        $user->email_verified_at = now();
         $user->save();
 
-        return redirect()->route('user.profile_view')->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
+        $route = auth()->check() && auth()->id() === $user->id ? 'user.profile_view' : 'login';
+
+        return redirect()->route($route)->with(['msg' => 'EmailUpdatedSuccessfully', 'class' => 'success']);
+    }
+
+    /**
+     * Re-send the confirmation mail for the currently staged email change.
+     */
+    public function resendEmailConfirmation()
+    {
+        $user = Auth::user();
+
+        if (!$user->new_email) {
+            return redirect()->route('user.profile_view')->with(['msg' => 'NoPendingEmailChange', 'class' => 'danger']);
+        }
+
+        $user->new_email_requested_at = now();
+        $user->save();
+
+        $this->sendEmailUpdateConfirmation($user);
+
+        return redirect()->route('user.profile_view')->with([
+            'msg'   => 'UpdateEmailSent',
+            'class' => 'success',
+            'pending_email' => $user->new_email,
+        ]);
+    }
+
+    /**
+     * Discard a staged email change.
+     */
+    public function cancelEmailUpdate()
+    {
+        $user = Auth::user();
+
+        if (!$user->new_email) {
+            return redirect()->route('user.profile_view')->with(['msg' => 'NoPendingEmailChange', 'class' => 'danger']);
+        }
+
+        $this->clearPendingEmail($user);
+
+        return redirect()->route('user.profile_view')->with(['msg' => 'EmailUpdateCancelled', 'class' => 'success']);
+    }
+
+    private function clearPendingEmail($user)
+    {
+        $user->new_email = null;
+        $user->new_email_requested_at = null;
+        $user->save();
     }
     /**
      * Update the specified resource in storage.
@@ -408,12 +461,10 @@ class ClientProfileController extends Controller
         }
     }
 
-    public function showMintorprofile($id)
+    public function showMentorProfile($id)
     {
-
-
         $client = User::find($id);
-        if (!empty($client)) {
+        if (!empty($client) && $client->hasRole('Mentor') ) {
             // $exp = Expertise::where('parent_id',null)->get();
             // $expertises = Expertise::where('parent_id',null)->get();
             $mentrequests = MentorshipRequest::where('mentor_id', $id);
@@ -458,7 +509,7 @@ class ClientProfileController extends Controller
             ));
 
         } else {
-            return redirect()->route('user.profile_view')->with(['msg' => 'FailedStore', 'class' => 'danger']);
+            return redirect()->route('clients.profile_view', $id);
         }
     }
 
@@ -470,6 +521,25 @@ class ClientProfileController extends Controller
         $expertisesSearch = $request->input('expertises', []);
         $linkedin = $request->input('linkedin');
         $programFilter = $request->input('programFilter');
+        // Default to the user's enrolled cycle when no filter is provided
+        if (empty($programFilter)) {
+            $defaultUser = Auth::user();
+            if (!$defaultUser->hasRole('Admin')) {
+                if ($defaultUser->hasRole('Registered') && $defaultUser->company && !empty($defaultUser->company->cycle)) {
+                    // Registered user: use their company's specific cycle
+                    $programFilter = $defaultUser->company->cycle;
+                } else {
+                    // OrgManager/subadmin/Mentor: use latest cycle from their org
+                    $defaultOrgIds = $defaultUser->organizations_ids;
+                    if (!empty($defaultOrgIds)) {
+                        $programFilter = Cycle::whereIn('organization_id', $defaultOrgIds)
+                            ->orderBy('start', 'DESC')
+                            ->value('id');
+                    }
+                }
+            }
+        }
+        $scopeFilter = $request->input('scopeFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
         if ($settings->mentor_list == 1) {
             if (Auth::user()->hasAnyRole('Mentor|Registered|Admin|OrganizationManager|subadmin')) {
@@ -519,10 +589,17 @@ class ClientProfileController extends Controller
                     }
                     // If linkedin is empty string (''), show all (no filter applied)
                 }
-                // Program filter - filter by specific program/cycle
-                if (!empty($programFilter)) {
-                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
-                        $query->where('cycle_id', $programFilter);
+                /** @var \App\User $user */
+                $user = Auth::user();
+                $orgIds = $user->organizations_ids;
+
+                // Program filter: apply only when explicitly sent by user, or for Registered users (auto-set to their company cycle)
+                $explicitProgramFilter = $request->input('programFilter');
+                $filterCycleId = $explicitProgramFilter
+                    ?: ($user->hasRole('Registered') ? $programFilter : null);
+                if (!empty($filterCycleId)) {
+                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($filterCycleId) {
+                        $query->where('cycle_id', $filterCycleId);
                     });
                 }
                 // Enrolled in program filter - All/Yes/No options
@@ -536,48 +613,104 @@ class ClientProfileController extends Controller
                     }
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
-                if (Auth::user()->company && !empty(Auth::user()->company->cycle)) {
-                    $cycleId = Auth::user()->company->cycle;
-                    $mentorIds = CyclesMentors::where('cycle_id', $cycleId)
-                        ->pluck('user_id')
-                        ->toArray();
-                    $mentors = $mentors->whereIn('id', $mentorIds);
-                }
+
                 if (!empty($scopeFilter) && $scopeFilter !== 'all') {
-
                     if ($scopeFilter === 'public') {
-
-                        $mentors->where(function ($q) {
-                            $q->whereDoesntHave('inviteMentors') // مش موجود في invite
+                        // Public: no invitations OR has an accepted Public-scope invitation
+                        $mentors = $mentors->where(function ($q) {
+                            $q->whereDoesntHave('inviteMentors')
+                              ->orWhereHas('inviteMentors', function ($q2) {
+                                  $q2->where('scope', 'Public')->where('status', 'accepted');
+                              });
+                        });
+                    } else {
+                        // Specific org: must have an accepted invitation with this org in organization_ids
+                        $mentors = $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('status', 'accepted')
+                                  ->whereJsonContains('organization_ids', (string) $scopeFilter);
+                        });
+                    }
+                } else {
+                    // scopeFilter = all (or empty)
+                    // Non-admin with org: show org-cycle mentors + public mentors
+                    if (!$user->hasRole('Admin') && !empty($orgIds)) {
+                        $mentors = $mentors->where(function ($q) use ($orgIds) {
+                            // Public: no invitations at all
+                            $q->whereDoesntHave('inviteMentors')
+                            // Public: has an accepted Public-scope invitation
                             ->orWhereHas('inviteMentors', function ($q2) {
-                                $q2->where('scope', 'public'); // موجود و public
+                                $q2->where('scope', 'Public')->where('status', 'accepted');
+                            })
+                            // Belongs to this org: has an accepted Organization-scope invitation for THIS org
+                            ->orWhereHas('inviteMentors', function ($q2) use ($orgIds) {
+                                $q2->where('scope', 'Organization')->where('status', 'accepted')
+                                   ->where(function ($q3) use ($orgIds) {
+                                       foreach ($orgIds as $orgId) {
+                                           $q3->orWhereJsonContains('organization_ids', (string) $orgId);
+                                       }
+                                   });
                             });
                         });
-
-                    } else {
-
-                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
-                            $query->where('scope', $scopeFilter);
-                        });
-
                     }
+                    // Admin: no restriction — show all mentors
                 }
 
                 $mentors = $mentors->with('mentorExpertises');
                 $mentors = $mentors->get();
 
-                $user = Auth::user();
-                $orgIds = $user->organizations_ids;
-
+              
+              
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
+                    // Dead post-collection filter code commented out (filters run at DB level above)
+                    // if (!empty($scopeFilter) && $scopeFilter !== 'all') {
+                    //     if ($scopeFilter === 'public') {
+                    //         $mentors->where(function ($q) {
+                    //             $q->whereDoesntHave('inviteMentors')
+                    //             ->orWhere(function ($q2) {
+                    //                 $q2->whereHas('inviteMentors', function ($q3) {
+                    //                     $q3->where('scope', 'Public')
+                    //                         ->where('status', 'accepted');
+                    //                 });
+                    //             });
+                    //         });
+                    //     } else {
+                    //         $mentors->filter(function ($mentor) use ($request) {
+                    //             return $mentor->inviteMentors->filter(function ($invite) use ($request) {
+                    //                 if ($invite->status !== 'accepted') {
+                    //                     return false;
+                    //                 }
+                    //                 if ($request->scopeFilter) {
+                    //                     $orgs = json_decode($invite->organization_ids, true) ?? [];
+                    //                     return in_array((string) $request->scopeFilter, $orgs);
+                    //                 }
+                    //                 return true;
+                    //             })->isNotEmpty();
+                    //         });
+                    //     }
+                    // }
                 } else {
                     $cycles = Cycle::all();
                 }
+                
 			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
+                $getOrganization = InviteMentor::where('status', 'accepted')
+                    ->where('scope', 'Organization')
+                    ->pluck('mentor_id')
+                    ->toArray();
 
+                $mentors = $mentors->map(function ($mentor) use ($getOrganization) {
+                    $mentor->is_public = !in_array($mentor->id, $getOrganization);
+                    return $mentor;
+                });
+                
+                    
                 // $mentors = User::role('mentor')->get();
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
+                // GV-3554: founders only see mentor cards once their program has
+                // reached the mentorship stage.
+                $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany($user->company);
+
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter', 'mentorshipActive'));
             }
         } else {
 
@@ -629,12 +762,12 @@ class ClientProfileController extends Controller
                     // If linkedin is empty string (''), show all (no filter applied)
                 }
                 // Program filter - filter by specific program/cycle
-                if (!empty($programFilter)) {
-                   $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($programFilter) {
-                    $query->when(!is_null($programFilter), function ($q) use ($programFilter) {
-                        $q->where('cycle_id', $programFilter);
-                     });
-                });
+                // Only apply programFilter if explicitly sent by the user (not the auto-set value)
+                $explicitProgramFilter = $request->input('programFilter');
+                if (!empty($explicitProgramFilter)) {
+                    $mentors = $mentors->whereHas('mentorCycles', function ($query) use ($explicitProgramFilter) {
+                        $query->where('cycle_id', $explicitProgramFilter);
+                    });
                 }
                 // Enrolled in program filter - All/Yes/No options
                 if ($enrolledInProgramFilter !== null && $enrolledInProgramFilter !== '') {
@@ -647,25 +780,46 @@ class ClientProfileController extends Controller
                     }
                     // If enrolledInProgramFilter is empty string (''), show all (no filter applied)
                 }
+                /** @var \App\User $user */
+                $user = Auth::user();
+                $orgIds = $user->organizations_ids;
+
                 if (!empty($scopeFilter) && $scopeFilter !== 'all') {
                     if ($scopeFilter === 'public') {
-                        $mentors->where(function ($q) {
+                        $mentors = $mentors->where(function ($q) {
                             $q->whereDoesntHave('inviteMentors')
-                            ->orWhereHas('inviteMentors', function ($q2) {
-                                $q2->where('scope', 'public'); 
-                            });
+                              ->orWhereHas('inviteMentors', function ($q2) {
+                                  $q2->where('scope', 'Public')->where('status', 'accepted');
+                              });
                         });
                     } else {
-                        $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
-                            $query->where('scope', $scopeFilter);
+                        $mentors = $mentors->whereHas('inviteMentors', function ($query) use ($scopeFilter) {
+                            $query->where('status', 'accepted')
+                                  ->whereJsonContains('organization_ids', (string) $scopeFilter);
+                        });
+                    }
+                } else {
+                    // scopeFilter = all: show public mentors + mentors belonging to this org
+                    if (!$user->hasRole('Admin') && !empty($orgIds)) {
+                        $mentors = $mentors->where(function ($q) use ($orgIds) {
+                            // Public: no invitations at all, or has accepted public-scope invitation
+                            $q->whereDoesntHave('inviteMentors')
+                              ->orWhereHas('inviteMentors', function ($q2) {
+                                  $q2->where('scope', 'Public')->where('status', 'accepted');
+                              });
+                            // OR belongs to this org
+                            foreach ($orgIds as $orgId) {
+                                $q->orWhereHas('inviteMentors', function ($q2) use ($orgId) {
+                                    $q2->where('scope', 'Organization')
+                                       ->where('status', 'accepted')
+                                       ->whereJsonContains('organization_ids', (string) $orgId);
+                                });
+                            }
                         });
                     }
                 }
                 $mentors = $mentors->with('mentorExpertises');
                 $mentors = $mentors->get();
-
-                $user = Auth::user();
-                $orgIds = $user->organizations_ids;
 
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
@@ -675,8 +829,19 @@ class ClientProfileController extends Controller
 
                 $settings = Settings::where('id', 1)->first();
 			    $offline_allowed = $settings->allow_offline_sessions == 1 ? true : false;
+                $getOrganization = InviteMentor::where('status', 'accepted')
+                    ->where('scope', 'Organization')
+                    ->pluck('mentor_id')
+                    ->toArray();
+
+                $mentors = $mentors->map(function ($mentor) use ($getOrganization) {
+                    $mentor->is_public = !in_array($mentor->id, $getOrganization);
+                    return $mentor;
+                });
                 // $mentors = User::role('mentor')->get();
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed'));
+                $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany(Auth::user()->company);
+
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'mentorshipActive'));
             } else {
                 return redirect()->route('core.dashboard_view');
             }

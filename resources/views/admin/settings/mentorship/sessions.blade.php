@@ -7,30 +7,17 @@
 
 @section('content')
   <!-- BEGIN: Content-->
-  <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <!-- Navigation Tabs -->
-			<nav class="nav-align-top mb-6">
-				@php
-					$tabs = [
-						['title' => __('cycles.All requests'), 'show' => 'all', 'icon' => 'bulb'],
-            ['title' => __('cycles.New requests only'), 'show' => '', 'icon' => 'brand-speedtest'],
-						['title' => __('cycles.approved requests'), 'show' => 'approved', 'icon' => 'circle-check'],
-            ['title' => __('cycles.disapproved requests'), 'show' => 'disapproved', 'icon' => 'playstation-x'],
-					]
-				@endphp
-				<ul class="nav nav-pills flex-column flex-sm-row gap-2 gap-lg-0">
-					@foreach($tabs as $tab)
-						<li class="nav-item">
-							<a href="/dashboard/mentorship/sessions?show={{ $tab['show'] }}" class="nav-link {{ Request::get('show') == $tab['show'] ? 'active' : '' }}">
-								<i class="ti ti-{{ $tab['icon'] }} me-2"></i>
-								{{ $tab['title'] }}
-							</a>
-						</li>
-					@endforeach
-				</ul>
-			</nav>
-			<!--/ Navigation Tabs -->
+  <div class="">
+    <div class="">
+      @php
+        $tabs = [
+          ['title' => __('cycles.All requests'), 'url' => 'dashboard/mentorship/sessions?show=all', 'show' => 'all', 'icon' => 'bulb'],
+          ['title' => __('cycles.New requests only'), 'url' => 'dashboard/mentorship/sessions', 'show' => '', 'icon' => 'brand-speedtest'],
+          ['title' => __('cycles.approved requests'), 'url' => 'dashboard/mentorship/sessions?show=approved', 'show' => 'approved', 'icon' => 'circle-check'],
+          ['title' => __('cycles.disapproved requests'), 'url' => 'dashboard/mentorship/sessions?show=disapproved', 'show' => 'disapproved', 'icon' => 'playstation-x'],
+        ]
+      @endphp
+      <x-navigation-pills :tabs="$tabs" />
 
       <div class="content-body">
         <section id="alerts">
@@ -101,6 +88,7 @@
                       <th>{{ __('cycles.Approved') }}</th>
                       <th>{{ __('cycles.Done') }}</th>
                       <th>{{ __('cycles.Date/Time') }}</th>
+                      <th>{{ __('cycles.Comment') }}</th>
                       <th class="text-nowrap">{{ __('cycles.Created At') }}</th>
                       <th>{{ __('cycles.Actions') }}</th>
                     </tr>
@@ -203,6 +191,13 @@
                           <small>{{ $session->zoom_date ? $session->zoom_date->format('d-m-Y') : '' }}</small>
                           <small class="d-block">{{ $session->zoom_date ? $session->zoom_date->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
                         </td>
+                        <td class="text-nowrap" style="min-width: 150px;">
+                          @if($session->comment)
+                            <p class="small text-muted mb-0">{!! $session->comment !!}</p>
+                          @else
+                            <small class="text-muted">{{ __('admin.No comment provided') }}</small>
+                          @endif
+                        </td>
                         <td class="text-nowrap" style="width: 100px;">
                           <small>{{ $session->created_at ? $session->created_at->format('d-m-Y') : '' }}</small>
                           <small class="d-block">{{ $session->created_at ? $session->created_at->format('H:i:s') : '' }}</small>
@@ -240,7 +235,7 @@
                               @endif
                             @endif
                             @if ($session->fileurl)
-                              <a href="/dashboard/private/{{ $session->fileurl }}" target="_blank" class="btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
+                              <a href="/dashboard/uploads/InviteMentor/{{ $session->fileurl }}" target="_blank" class="btn-icon rounded-circle btn btn-sm btn-light" title="Download attached">
                                 <i class="ti ti-download"></i>
                               </a>
                             @endif
@@ -266,7 +261,7 @@
   <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-md">
       <div class="modal-content">
-        <form id="filterForm" method="GET" action="{{ url()->current() }}">
+        <form id="filterForm" method="GET" action="{{ url()->current() }}" data-ignore-dirty>
           <div class="modal-header">
             <h5 class="modal-title d-flex align-items-center" id="filterModalLabel">
               <i class="ti ti-filter me-2"></i> {{ __('cycles.Filter_Sessions') }}
@@ -288,7 +283,7 @@
               </div>
             
               <!-- Done Filter -->
-              <div class="col-12">
+              <div class="col-12" id="completionFilter" style="display: {{ request()->show == 'all' || request()->show == 'approved' ? 'block' : 'none' }}">
                 <label for="doneValueSelect" class="form-label">{{ __('cycles.Completion_Status') }}</label>
                 <select class="form-select select2" name="done" data-placeholder="{{ __('cycles.Select_Completion_Status') }}" id="doneValueSelect">
                   <option value="all" {{ request()->done == 'all' ? 'selected' : '' }}>{{ __('cycles.All') }}</option>
@@ -552,7 +547,7 @@
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
       <div class="modal-content">
-        <form method="post" action="/dashboard/mentorship/modify" enctype="multipart/form-data">
+        <form id="ModifyRequestForm" method="post" action="/dashboard/mentorship/modify" enctype="multipart/form-data">
           <div class="modal-header">
             <h4 class="modal-title">{{ __('cycles.Modify mentorship session') }} </h4>
           </div>
@@ -593,7 +588,7 @@
               {{-- <i class="ti ti-check"></i> --}}
               <span class="">{{ __('cycles.Close') }}</span>
             </div>
-            <button type="submit" class="btn btn-primary ml-1">
+            <button type="submit" class="btn btn-primary ml-1" id="submitModifyRequest">
               {{-- <i class="ti ti-check"></i> --}}
               <span class="">{{ __('cycles.Submit') }}</span>
             </button>
@@ -610,6 +605,7 @@
 
 @section('pagescripts')
   <script>
+    var is_submitting = false;
     $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
@@ -619,6 +615,17 @@
       alertify.defaults.theme.input = 'form-control';
 
       alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+    });
+
+    $(document).on('click', '#submitModifyRequest', function(e) {
+      e.preventDefault();
+      if (is_submitting) { return; }
+      else
+      {
+        is_submitting = true;
+        $(this).prop('disabled', true).html('<i class="fas fa-fw fa-sm fa-spinner fa-spin"></i> {{ __("cycles.Submitting") }}...');
+        $('#ModifyRequestForm').submit();
+      }
     });
 
     // Helper function to copy text to clipboard
@@ -1237,11 +1244,13 @@
 
     // Handle show filter change
     $('#showSelect').on('change', function() {
-      // Show rating filter if 'show' is 'approved' or 'all'
+      // Show rating and completion filters if 'show' is 'approved' or 'all'
       if (this.value === 'approved' || this.value === 'all') {
         $('#rateFilter').show();
+        $('#completionFilter').show();
       } else {
         $('#rateFilter').hide();
+        $('#completionFilter').hide();
       }
     });
   </script>

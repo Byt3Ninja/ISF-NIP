@@ -30,7 +30,7 @@
               />
             </div>
           </div>
-          <div class="form-group mb-6">
+          {{-- <div class="form-group mb-6">
             <label class="form-label fs-6 fw-bold">
               {{ __('admin.arbio') }}: 
             </label>
@@ -45,10 +45,10 @@
                 oninput="this.value = this.value.trimStart()"
               >{{ $client->bio->bio_ar ?? '' }}</textarea>
             </div>
-          </div>
+          </div> --}}
           <div class="form-group mb-6">
             <label class="form-label fs-6 fw-bold">
-              {{ __('admin.enbio') }}: 
+              {{ __('admin.enbio') }}
             </label>
             <div class="input-group input-group-merge">
               <textarea 

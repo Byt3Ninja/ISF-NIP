@@ -3,8 +3,8 @@
 @section('title', __('notification_templates.notification_templates'))
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
 
     <!-- Navigation Tabs -->
     <nav class="nav-align-top mb-6">

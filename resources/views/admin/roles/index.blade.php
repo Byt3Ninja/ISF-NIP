@@ -7,8 +7,8 @@
 @stop --}}
 
 @section('content')
-<div class="content-wrapper">
-  <div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+  <div class="">
     <div class="row d-flex justify-content-between align-items-center mb-4">
       <div class="col-12 col-md-9">
         <h4 class="mb-1">{{ __('admin.Roles_List') }}</h4>

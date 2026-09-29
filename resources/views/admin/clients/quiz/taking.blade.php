@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('content')
-<div class="content-wrapper">
-	<div class="container-xxl flex-grow-1 container-p-y">
+<div class="">
+	<div class="">
 		<div class="content-body">
 			<section>
 				<div class="container-fluid">
@@ -143,8 +143,13 @@
 													<small>{{ __('admin.Select your answer and click Next to continue') }}</small>
 												</div>
 												<button id="submitBtn" type="submit" class="btn btn-primary btn-lg px-4">
+													@if($current_question >= $total_questions)
+													<i class="fas fa-check me-2"></i>
+													{{ __('admin.quizComplete') }}
+													@else
 													<i class="fas fa-arrow-right me-2"></i>
-													{{__('admin.quizNextQuestion')}}
+													{{ __('admin.quizNextQuestion') }}
+													@endif
 												</button>
 											</div>
 										</div>
@@ -169,21 +174,21 @@
 @if( $question->type == 'tfq' || $question->type == 'mcq' )
 $(document).on('change', '.quiz-option', function(){
     // Remove all selected states
-    $('.quiz-option-label').removeClass('btn-primary btn-success btn-danger');
-    $('.quiz-option-label').addClass('btn-outline-primary');
+    // $('.quiz-option-label').removeClass('btn-primary btn-success btn-danger');
+    // $('.quiz-option-label').addClass('btn-outline-primary');
     
     // Add selected state to current option
     var $label = $(this).next('.quiz-option-label');
-    $label.removeClass('btn-outline-primary btn-outline-success btn-outline-danger');
+    // $label.removeClass('btn-outline-primary btn-outline-success btn-outline-danger');
     
     @if( $question->type == 'tfq' )
     if($(this).val() === 'true') {
-        $label.addClass('btn-success');
+        // $label.addClass('btn-success');
     } else {
-        $label.addClass('btn-danger');
+        // $label.addClass('btn-danger');
     }
     @else
-    $label.addClass('btn-primary');
+    // $label.addClass('btn-primary');
     @endif
     
     answer = $(this).val();

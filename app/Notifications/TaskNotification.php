@@ -9,6 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Broadcasting\WhatsAppChannel;
 use Throwable;
@@ -52,12 +54,22 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
+        $taskId = $this->data['task']->id ?? null;
+        $action = $this->data['action'] ?? 'add';
+        if ($taskId && $action !== 'feedback') {
+            try {
+                $dedupKey = "task_notif_{$taskId}_{$action}_{$notifiable->id}";
+                if (!Cache::add($dedupKey, 1, now()->addHour())) {
+                    return [];
+                }
+            } catch (\Throwable $e) {
+                Log::warning('TaskNotification dedup cache failed', ['error' => $e->getMessage()]);
+            }
+        }
+
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
-        
-        // Configure SMTP if settings exist
-        $this->configureSmtp($smtpSettings);
-        
+
         // Organization channel toggles (default to true when not configured)
         $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
         $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
@@ -99,18 +111,24 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
+        App::setLocale($notifiable->language ?? 'en');
+
+        $org          = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
-        
-        // Get from address and name
-        $from = $this->getFromAddress($smtpSettings);
+
+        $this->configureSmtp($smtpSettings);
+
+        $from    = $this->getFromAddress($smtpSettings);
+        $orgData = $this->buildEmailOrganizationData($org);
+
         return (new MailMessage)
-            ->subject(__('notifications.task.subject'))
-            ->markdown('emails.mentor-task', [
-                'data' => $this->data,
+            ->from($from['address'], $from['name'])
+            ->subject($this->getSubject())
+            ->markdown('emails.mentor-task', array_merge([
+                'data'       => $this->data,
                 'notifiable' => $notifiable,
-                'action' => $this->data['action']
-            ]);
+                'action'     => $this->data['action'],
+            ], $orgData));
     }
 
     /**
@@ -120,6 +138,8 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
+        App::setLocale($notifiable->language ?? 'en');
+
         return [
             // 'task_id' => $this->data['task']->id,
             // 'title' => $this->data['task']->title,
@@ -142,11 +162,87 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
+        App::setLocale($notifiable->language ?? 'en');
+
         return new BroadcastMessage([
-            'subject' => __('notifications.task.subject'),
+            'subject' => $this->getSubject(),
             'message' => __('notifications.task.broadcast', ['message' => $this->data['message'] ?? '']),
             'time' => now()->toDateTimeString(),
         ]);
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        App::setLocale($notifiable->language ?? 'en');
+
+        $mentorName = $this->data['mentor']->name ?? null;
+        $taskTitle  = $this->data['task']->title;
+        $isAr       = app()->getLocale() === 'ar';
+        $action     = $this->data['action'] ?? 'add';
+        $programName = $this->data['program_name'] ?? null;
+
+        $message = $isAr ? "تم تحديث المهمة: {$taskTitle}" : "Task update: {$taskTitle}";
+
+        if ($notifiable->hasRole('registered')) {
+            $message = match($action) {
+                'add'      => $isAr ? "تم إسناد مهمة جديدة إليك في برنامج : {$programName}"  : "You have been assigned a new task in program: {$programName}",
+                'update'   => $isAr ? "تم تحديث مهمة مسندة إليك: {$taskTitle}"      : "A task assigned to you has been updated: {$taskTitle}",
+                'archive'  => $isAr ? "تمت أرشفة مهمة مسندة إليك: {$taskTitle}"     : "A task assigned to you has been archived: {$taskTitle}",
+                'reopen'   => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle}"           : "Task reopened: {$taskTitle}",
+                'feedback' => $isAr
+                    ? ($this->data['decision'] === 'pass'
+                        ? "تم اجتياز {$taskTitle}."
+                        : "مطلوب تعديلات على {$taskTitle}.")
+                    : ($this->data['decision'] === 'pass'
+                        ? "{$taskTitle} passed."
+                        : "Revisions requested for : {$taskTitle}."),
+                default    => $isAr ? "تم تحديث المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
+            };
+        } 
+       // else {
+         //   $startupList = implode('، ', $this->data['startupNames'] ?? []);
+           // $message = match($action) {
+             //   'add'     => $isAr ? "تم إضافة المهمة: {$taskTitle} إلى: {$startupList}"           : "Task added: {$taskTitle} to: {$startupList}",
+               // 'update'  => $isAr ? "تم تحديث المهمة: {$taskTitle} للشركات: {$startupList}"        : "Task updated: {$taskTitle} for: {$startupList}",
+               // 'archive' => $isAr ? "تمت أرشفة المهمة: {$taskTitle} - الشركات: {$startupList}"     : "A task assigned to {$startupList} has been archived: {$taskTitle}",
+               // 'reopen'  => $isAr ? "تمت إعادة فتح المهمة: {$taskTitle} - الشركات: {$startupList}" : "Task reopened: {$taskTitle} - Startups: {$startupList}",
+               // default   => $isAr ? "تحديث على المهمة: {$taskTitle}" : "Task update: {$taskTitle}",
+        //    };
+       // }
+
+        return [
+            'task_id' => $this->data['task']->id,
+            'title'   => $taskTitle,
+            'message' => $message,
+        ];
+    }
+
+    private function getSubject(): string
+    {
+        $action = $this->data['action'] ?? 'add';
+        $title  = $this->data['task']->title ?? '';
+
+        if ($action === 'feedback' && isset($this->data['decision'])) {
+            $isAr = app()->getLocale() === 'ar';
+            if ($this->data['decision'] === 'pass') {
+                return $isAr
+                    ? "تحديث مراجعة المهمة: تم اجتياز {$title}."
+                    : "Task review update: {$title} passed.";
+            }
+            return $isAr
+                ? "تحديث مراجعة المهمة: مطلوب تعديلات على {$title}."
+                : "Task review update: Revisions requested for {$title}.";
+        }
+
+        $key    = "notifications.task.subject_{$action}";
+        $translated = __($key);
+        $base   = $translated !== $key ? $translated : __('notifications.task.subject');
+        return $title ? "{$base}: {$title}" : $base;
     }
 
     /**

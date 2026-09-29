@@ -1,8 +1,20 @@
 @php
   $setting = \App\Settings::where('id', 1)->first();
+  // Display-only: keep this in a local, never on $_user. `users` has no
+  // `organization` column, so assigning it marks the model dirty and makes
+  // any later save() fail with "Unknown column 'organization'".
+  $sidebarOrg = $_user->organization;
   if( $_user->HaveCompany && $_user->company && $_user->company->cycledata && $_user->company->cycledata->organization)
   {
-    $_user->organization = $_user->company->cycledata->organization;
+    $sidebarOrg = $_user->company->cycledata->organization;
+  }
+
+  $spNotApproved = false;
+  if ($_user->hasRole('serviceProvider')) {
+      $spReg = \Illuminate\Support\Facades\DB::table('service_provider_registration')
+          ->where('user_id', $_user->id)
+          ->first(['status']);
+      $spNotApproved = ( /*!$spReg ||*/ ( $spReg && $spReg->status != 1 ) );
   }
 @endphp
 <!-- Menu -->
@@ -10,9 +22,9 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
   <div class="app-brand demo bg-light" style="height: 70px;">
     <a href="/dashboard" class="app-brand-link">
-      @if (!is_null($_user->organization))
+      @if (!is_null($sidebarOrg))
         @php
-          $imageUrl = $_user->organization->imageUrl;
+          $imageUrl = $sidebarOrg->imageUrl;
         @endphp
         <img
           src="{{ $imageUrl }}"
@@ -60,13 +72,23 @@
         <div>{{ __('admin.Dashboard') }}</div>
       </a>
     </li>
-
-    {{-- <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
+    
+    <li class="{{ Request::is('*myProfile') ? 'active' : '' }} menu-item">
       <a href="{{ route('user.profile_view') }}" class="menu-link">
         <i class="ti ti-user me-3 ti-md"></i>
         <div>{{ __('admin.Profile') }}</div>
       </a>
-    </li> --}}
+    </li>
+    
+    @if(!$spNotApproved)
+     @if($_user->hasRole('Judger'))
+      <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/judger/screening" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-gavel"></i>
+          <div>{{ __('admin.Screening') }}</div>
+        </a>
+      </li>
+    @endif
     
     @if ($_user->ableTo('slots.index', $permissions))
       <li class="{{ Request::is('*availability') ? 'active' : '' }} menu-item">
@@ -296,22 +318,40 @@
           <div>{{ __('mentor.enrolled_programs') }}</div>
         </a>
       </li>
-    @endif
-
-    @if($_user->hasRole('Judger'))
-      <li class="{{ Request::is('dashboard/judger/screening*') ? 'active' : '' }} menu-item">
-        <a href="/dashboard/judger/screening" class="menu-link">
-          <i class="menu-icon tf-icons ti ti-gavel"></i>
-          <div>{{ __('admin.Screening') }}</div>
+      @if( $_user->ableTo('mentorships.sessions') )
+      <li class="{{ Request::is('dashboard/mentor/sessions') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/mentor/sessions" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-calendar-event"></i>
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <span>{{ __('admin.Mentorship Sessions') }}</span>
+            {{-- <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countRequest }}</span> --}}
+          </div>
+        </a>
+      </li>
+      @endif
+      @php
+        $countSurvey = 0;
+        $countSurvey = App\SurveyResponses::where('user_id', auth()->id())->whereNull('responses')->count();
+      @endphp
+      <li class="{{ Request::is('dashboard/surveys', 'dashboard/surveys/start/*') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/surveys" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-notes"></i>
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <span>{{ __('admin.surveys') }}</span>
+            @if ($countSurvey > 0)
+              <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $countSurvey }}</span>
+            @endif
+          </div>
         </a>
       </li>
     @endif
 
-    @if( $_user->ableToAny(['users.list', 'audit_logs.list', 'screening.form_view', 'reports.list'], $permissions) )
+
+    {{-- @if( $_user->ableToAny(['users.list', 'audit_logs.list', 'screening.form_view', 'reports.list'], $permissions) )
       <li class="menu-header small">
         <span>{{ __('admin.Portal Settings') }}</span>
       </li>
-    @endif
+    @endif --}}
 
     @if ($_user->hasAnyRole('Admin'))
       <li class="{{ Request::is('*organization-types*') ? 'active' : '' }} menu-item">
@@ -329,7 +369,7 @@
       </li>
     @endif
 
-    @if( $_user->ableTo('projects.index', $permissions) )
+    @if( $_user->ableTo('projects.index', $permissions) && app()->environment(['local', 'dev', 'test']) )
       <li class="{{ Request::is('dashboard/projects*') ? 'active' : '' }} menu-item">
         <a class="menu-link" href="{{ route('projects.index') }}">
           <i class="menu-icon tf-icons ti ti-folder"></i>
@@ -385,7 +425,7 @@
             <div>{{ $l == 'en' ? 'Timesheets' : 'الجداول الزمنية' }}</div>
           </a>
           <ul class="menu-sub">
-            @if ($_user->ableToAny(['TimeSheet.index'], $permissions))
+            @if ($_user->ableToAny(['TimeSheet.index'], $permissions) && app()->environment(['local', 'dev', 'test']))
               <li class="{{ Request::is('dashboard/TimeSheet*') ? 'active' : '' }} menu-item">
                 <a href="{{ route('TimeSheet.index') }}" class="menu-link">
                   <div>{{ $l == 'en' ? 'Timesheets List' : 'قائمة الجداول الزمنية' }}</div>
@@ -491,12 +531,26 @@
 
     @if( !$_user->hasAnyRole('Mentor|Judger') )
       <li
-        class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all') ? 'active' : '' }} menu-item">
+        class="{{ Request::is('*services*', '*serviceCategories*') ? 'active' : '' }} menu-item">
         <a href="/dashboard/services" class="menu-link">
           <i class="menu-icon tf-icons ti ti-arrows-move"></i>
           <div>{{ __('admin.Services') }}</div>
         </a>
       </li>
+      @if( $_user->ableToAny(['service_requests.list_all', 'service_requests.list_archived'], $permissions) )
+      <li
+        class="{{ Request::is('dashboard/requests/all') ? 'active' : '' }} menu-item">
+        <a href="/dashboard/requests/all" class="menu-link">
+          <i class="menu-icon tf-icons ti ti-briefcase"></i>
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <span>{{ __('admin.Services Requests') }}</span>
+             @if ($pendingRequestsCount > 0)
+              <span class="badge badge-center rounded-pill bg-danger ms-2">{{ $pendingRequestsCount }}</span>
+            @endif
+          </div>
+        </a>
+      </li>
+      @endif
       
       {{-- <li
         class="{{ Request::is('*services*', '*serviceCategories*', 'dashboard/requests/all', 'dashboard/services_providers*') ? 'sidebar-group-active open' : '' }} menu-item">
@@ -826,12 +880,12 @@
                     </li>
                   @endif
                 @endif
-
             </ul>
           </li>
         @endif
       @endif
     @endif
+    @endif {{-- end !$spNotApproved --}}
   </ul>
 </aside>
 <!-- / Menu -->

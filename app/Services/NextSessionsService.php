@@ -23,67 +23,45 @@ class NextSessionsService
      */
     public function getUpcomingSessions(int $days = 14, string $l = 'ar', int $user_id = null, int $cycle_id = null)
     {
+        $days = (int) request()->query('days', 14);
+        $start = Carbon::now()->startOfDay();
+        $end = Carbon::now()->addDays($days)->endOfDay();
 
-         $days = request()->query('days', 14);
-        $start = Carbon::now()->startOfDay()->format('Y-m-d H:i:s');
-        $end = Carbon::now()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
-        
-            $nextSessions_q = "SELECT
-                mr.id,
-                mr.mentor_id,
-                mr.user_id,
-                mr.comment,
-                mr.approved,
-                mr.rating,
-                mr.join_url,
-                mr.zoom_date,
-                mr.period,
-                mr.rate_comment,
-                mr.done,
-                mr.cycle_id,
-                u.img_url AS `user_img_url`,
-                u.first_name_en AS `user_first_name_en`,
-                u.first_name_ar AS `user_first_name_ar`,
-                u.last_name_en AS `user_last_name_en`,
-                u.last_name_ar AS `user_last_name_ar`,
-                u.title_en AS `user_title_en`,
-                u.title_ar AS `user_title_ar`,
-                c.id AS `company_id`,
-                c.logo AS `company_logo`,
-                c.name_en AS `company_name_en`,
-                c.name_ar AS `company_name_ar`,
-                m.first_name_en AS `mentor_first_name_en`,
-                m.first_name_ar AS `mentor_first_name_ar`,
-                m.last_name_en AS `mentor_last_name_en`,
-                m.last_name_ar AS `mentor_last_name_ar`,
-                m.img_url AS `mentor_img_url`,
-                msr.rating AS `mentor_rating`
-            FROM
-                mentorship_requests mr
-            LEFT JOIN
-                users m ON m.id = mr.mentor_id
-            LEFT JOIN
-                users u ON u.id = mr.user_id
-            LEFT JOIN
-                companies c ON c.id = u.company_id
-            LEFT JOIN
-               mentorship_requests msr ON msr.mentor_id = m.id
-            WHERE
+        $query = DB::table('mentorship_requests as mr')
+            ->leftJoin('users as m', 'm.id', '=', 'mr.mentor_id')
+            ->leftJoin('users as u', 'u.id', '=', 'mr.user_id')
+            ->leftJoin('companies as c', 'c.id', '=', 'u.company_id')
+            ->leftJoin('mentorship_requests as msr', 'msr.mentor_id', '=', 'm.id')
+            ->select([
+                'mr.id', 'mr.mentor_id', 'mr.user_id', 'mr.comment', 'mr.approved',
+                'mr.rating', 'mr.join_url', 'mr.zoom_date', 'mr.period',
+                'mr.rate_comment', 'mr.done', 'mr.cycle_id',
+                'u.img_url as user_img_url',
+                'u.first_name_en as user_first_name_en', 'u.first_name_ar as user_first_name_ar',
+                'u.last_name_en as user_last_name_en', 'u.last_name_ar as user_last_name_ar',
+                'u.title_en as user_title_en', 'u.title_ar as user_title_ar',
+                'c.id as company_id', 'c.logo as company_logo',
+                'c.name_en as company_name_en', 'c.name_ar as company_name_ar',
+                'm.first_name_en as mentor_first_name_en', 'm.first_name_ar as mentor_first_name_ar',
+                'm.last_name_en as mentor_last_name_en', 'm.last_name_ar as mentor_last_name_ar',
+                'm.img_url as mentor_img_url',
+                'msr.rating as mentor_rating',
+            ])
+            ->where(function ($q) {
+                $q->where('mr.approved', 'Yes')
+                  ->orWhereNull('mr.approved');
+            })
+            ->whereBetween('mr.zoom_date', [$start, $end]);
 
-                 (
-                    mr.approved = 'Yes'
-                    OR mr.approved IS null
-                )
-                AND mr.zoom_date between '$start' AND '$end' ";
-            if($user_id != null){
-                $nextSessions_q .= " AND mr.user_id = $user_id ";
-            }
-             if($cycle_id != null){
-                $nextSessions_q .= " AND mr.cycle_id = $cycle_id ";
-            }
-                $nextSessions_q .= " ORDER BY mr.zoom_date ASC ";
+        if ($user_id !== null) {
+            $query->where('mr.user_id', $user_id);
+        }
 
-        $nextSessions = collect(DB::select($nextSessions_q));
+        if ($cycle_id !== null) {
+            $query->where('mr.cycle_id', $cycle_id);
+        }
+
+        $nextSessions = $query->orderBy('mr.zoom_date', 'asc')->get();
         $nextSessions = $nextSessions->groupBy('id')->map(function ($groupedSession) use ($l) {
             $_session = $groupedSession->first();
             $session = new stdClass;
