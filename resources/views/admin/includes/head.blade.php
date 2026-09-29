@@ -1,10 +1,9 @@
 @php($gtag = $_settings?->url ?? null)
 @php( $platformName = $_settings ? ( $_settings->Platform_Name ?? config('app.name') ) : config('app.name') )
 
-
 <!-- Goggle Tag Manger -->
 @if ($gtag)
-  <script async src="https://www.googletagmanager.com/gtag/js?id={!! (is_string($gtag) ? json_decode($gtag)->url : $gtag->url) !!}"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id={!! is_numeric($gtag) ? $gtag : (is_string($gtag) ? json_decode($gtag)->url : $gtag->url) !!}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
 
@@ -12,7 +11,7 @@
       dataLayer.push(arguments);
     }
     gtag('js', new Date());
-    gtag('config', '{!! $gtag->url !!}');
+    gtag('config', '{!! is_numeric($gtag) ? $gtag : (is_string($gtag) ? json_decode($gtag)->url : $gtag->url) !!}');
   </script>
 @endif
 <!-- End Goggle Tag Manger -->
