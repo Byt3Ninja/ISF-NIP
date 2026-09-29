@@ -2,7 +2,7 @@
 
 return [
     'Edit_landing_page' => 'Edit Landing Page',
-    'Manage_landing_page' => 'Manage tailored landing page for your programs.',
+    'Manage_landing_page' => 'Manage tailored landing page for your programs',
     'Save' => 'Save',
     'Max' => 'Max',
     'Choose_File' => 'Choose File',
@@ -43,7 +43,7 @@ return [
     'No_how_steps_yet' => 'No steps yet.',
     'Add_how_steps_hint' => 'Add steps to walk visitors through how your program works.',
     'Create_Landing_Page' => 'Create Landing Page',
-    'Create_LandingPage_Description' => 'Create tailored landing page for your programs.',
+    'Create_LandingPage_Description' => 'Create tailored landing page for your programs',
     'Programs_Note' => 'Save the "General" tab first to create the page, then come back here to fill in and save this section.',
     'No_Programs_Match' => 'No programs match the selected filters.',
     'Add_Optional_custom_sections' => 'Add optional custom sections to your landing page.',
