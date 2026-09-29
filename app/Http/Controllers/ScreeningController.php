@@ -1538,9 +1538,9 @@ class ScreeningController extends Controller
 			// $company = Company::where('id', $companyId)->first();
 			$company = $getCompanies->where('id', $companyId)->first();
 
-			// can't chage step if company not have step before
+			// now can change step even if company not have step before
 			if (empty($company->step)) {
-				continue;
+				$data['last_step'] = '-';
 			}
 
 			if (!$company) {
