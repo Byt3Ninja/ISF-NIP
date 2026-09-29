@@ -436,7 +436,7 @@
           <div class="card mt-4">
             <div class="card-header">
               <h5 class="mb-0">
-                <i class="ti ti-paperclip me-2"></i>{{ $l == 'ar' ? 'الملفات المشتركة' : 'Shared Files' }} ({{ count($team->shared_files) }})
+                <i class="ti ti-paperclip me-2"></i>{{ $l == 'ar' ? 'الملفات' : 'Files' }} ({{ count($team->shared_files) }})
               </h5>
             </div>
             <div class="card-body">
