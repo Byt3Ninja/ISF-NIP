@@ -3922,7 +3922,7 @@ return [
   'step_form_change_warning_title' => 'Change form for this step?',
   'step_form_change_confirm' => 'This step has :count submission(s). Changing the form will permanently delete them. This cannot be undone. Continue?',
   'no_form_option' => '— No form —',
-  'see_all_startups' => 'See all Startups',
+  'startups_subtitle' => 'Browse and manage every startup on the platform.',
   'sustainability_goals' => 'Sustainability Goals',
   'no_sustainability_goals_listed' => 'No sustainability goals listed',
   'view_all' => 'View all',

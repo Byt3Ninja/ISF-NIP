@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-start mb-5">
       <div>
         <h4 class="card-title mb-1">{{ __('admin.Startups') }}</h4>
-        <p class="mb-0">{{ __('admin.see_all_startups') }}</p>
+        <p class="mb-0">{{ __('admin.startups_subtitle') }}</p>
       </div>
 
       {{-- <button class="btn btn-primary px-4 py-2 shadow-sm">
@@ -30,10 +30,15 @@
 
     {{-- Search & Filter --}}
     <div class="d-flex gap-3 align-items-center mb-5 flex-wrap">
-      <div class="position-relative" style="max-width: 620px; width:100%;">
-        <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-        <input type="text" class="form-control ps-10" id="debounced-search"
-          placeholder="{{ __('admin.Search') }}..." value="{{ request('search') }}">
+      <div class="input-group input-group-merge position-relative" style="max-width: 620px; width:100%;">
+        <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+        <input 
+          type="text"
+          class="form-control"
+          id="debounced-search"
+          placeholder="{{ __('admin.Search') }}..." 
+          value="{{ request('search') }}"
+        />
       </div>
 
       <button type="button" class="btn btn-primary px-4 py-2" data-bs-toggle="offcanvas"
@@ -301,12 +306,14 @@
                   <hr class="my-3">
 
                   {{-- Sector --}}
+                  @if ($company->sectoR)
                   <div class="d-flex align-items-center gap-2">
                     <i class="ti ti-category text-warning"></i>
                     <span class="fw-semibold text-capitalize text-dark small">
                       {{ $company->sectoR ? $company->sectoR->{'name_' . $l} : $company->sector }}
                     </span>
                   </div>
+                  @endif
 
                   {{-- Organization & Cycle --}}
                   <div class="d-flex flex-wrap align-items-center gap-3 mt-2 small">
