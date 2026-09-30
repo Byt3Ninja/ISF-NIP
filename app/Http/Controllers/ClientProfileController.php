@@ -17,6 +17,7 @@ use App\MentorshipRequest;
 use App\MentorshipTask;
 use App\Notifications\ConfirmEmailUpdateNotification;
 use App\Otp;
+use App\Organization;
 use App\Schedule;
 use App\Services\MentorshipAvailabilityService;
 use App\Services\NotificationSettingsService;
@@ -541,6 +542,18 @@ class ClientProfileController extends Controller
         }
         $scopeFilter = $request->input('scopeFilter');
         $enrolledInProgramFilter = $request->input('enrolledInProgramFilter');
+
+        // Option sets the mentor directory needs (expertise tree for the filter,
+        // organizations for the scope dropdown). Computed once and passed to the
+        // view instead of being queried from inside the blade template.
+        $directoryUser = Auth::user();
+        $expertises = Expertise::whereNull('parent_id')->with('children')->get();
+        $organizations = $directoryUser->hasRole('admin')
+            ? Organization::where('is_draft', 0)->get()
+            : Organization::where('is_draft', 0)
+                ->whereIn('id', $directoryUser->organizations_ids)
+                ->get();
+
         if ($settings->mentor_list == 1) {
             if (Auth::user()->hasAnyRole('Mentor|Registered|Admin|OrganizationManager|subadmin')) {
                 $l = app()->getLocale();
@@ -562,11 +575,15 @@ class ClientProfileController extends Controller
                     }], 'rating')
                     ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
                 if ($rateSearch > 0) {
-                    $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
-                        $q->where(function ($q2) {
-                            $q2->where('approved', 'Yes')
-                                ->orWhereNull('approved');
-                        })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
+                    $mentors = $mentors->whereIn('id', function ($query) use ($rateSearch) {
+                        $query->select('mentor_id')
+                            ->from('mentorship_requests')
+                            ->where(function ($q2) {
+                                $q2->where('approved', 'Yes')
+                                    ->orWhereNull('approved');
+                            })
+                            ->groupBy('mentor_id')
+                            ->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
                 if (!empty($expertisesSearch) && is_array($expertisesSearch)) {
@@ -710,7 +727,7 @@ class ClientProfileController extends Controller
                 // reached the mentorship stage.
                 $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany($user->company);
 
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter', 'mentorshipActive'));
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter', 'mentorshipActive', 'expertises', 'organizations'));
             }
         } else {
 
@@ -734,11 +751,15 @@ class ClientProfileController extends Controller
                     }], 'rating')
                     ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
                 if ($rateSearch > 0) {
-                    $mentors = $mentors->whereHas('mentorshipRequests', function ($q) use ($rateSearch) {
-                        $q->where(function ($q2) {
-                            $q2->where('approved', 'Yes')
-                                ->orWhereNull('approved');
-                        })->havingRaw('AVG(rating) >= ?', [$rateSearch]);
+                    $mentors = $mentors->whereIn('id', function ($query) use ($rateSearch) {
+                        $query->select('mentor_id')
+                            ->from('mentorship_requests')
+                            ->where(function ($q2) {
+                                $q2->where('approved', 'Yes')
+                                    ->orWhereNull('approved');
+                            })
+                            ->groupBy('mentor_id')
+                            ->havingRaw('AVG(rating) >= ?', [$rateSearch]);
                     });
                 }
                 if (!empty($expertisesSearch) && is_array($expertisesSearch)) {
@@ -841,7 +862,7 @@ class ClientProfileController extends Controller
                 // $mentors = User::role('mentor')->get();
                 $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany(Auth::user()->company);
 
-                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'mentorshipActive'));
+                return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'mentorshipActive', 'expertises', 'organizations'));
             } else {
                 return redirect()->route('core.dashboard_view');
             }
