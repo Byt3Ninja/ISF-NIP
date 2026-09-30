@@ -1696,7 +1696,11 @@
         programs: ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
       };
 
-      const setSectionRequiredState = function (sectionKey) {
+      // reveal = false only syncs which validators are active, so an enabled
+      // section starts the page clean instead of showing required-field
+      // messages for fields the user has not touched yet. Pass true on toggle
+      // and on submit, when the messages are actually wanted.
+      const setSectionRequiredState = function (sectionKey, reveal) {
         const fv = sectionValidations[sectionKey];
         if (!fv) return;
         const $switch = $('#' + sectionKey + '_is_enabled');
@@ -1708,14 +1712,14 @@
           } else {
             fv.disableValidator(fieldName, 'notEmpty');
           }
-          fv.revalidateField(fieldName);
+          if (reveal) fv.revalidateField(fieldName);
         });
       };
 
-      $('#about_is_enabled').on('change', function () { setSectionRequiredState('about'); });
-      $('#how_is_enabled').on('change', function () { setSectionRequiredState('how'); });
-      $('#programs_is_enabled').on('change', function () { setSectionRequiredState('programs'); });
-      ['about', 'how', 'programs'].forEach(setSectionRequiredState);
+      $('#about_is_enabled').on('change', function () { setSectionRequiredState('about', true); });
+      $('#how_is_enabled').on('change', function () { setSectionRequiredState('how', true); });
+      $('#programs_is_enabled').on('change', function () { setSectionRequiredState('programs', true); });
+      ['about', 'how', 'programs'].forEach(function (sectionKey) { setSectionRequiredState(sectionKey, false); });
 
       // ─────────────────────────────────────────────────────────────
       // How It Works section — process steps repeater (max 3 steps)
@@ -2712,6 +2716,11 @@
         // while disabled: submit straight away so no required-field
         // messages surface for their empty main fields.
         if (sectionRequiredFields[sectionKey]) {
+          // Re-apply the required state from the switch as it stands right
+          // now, so the submit always matches what is on screen: the field
+          // validators are otherwise only kept in sync by the switch's
+          // change event, and a missed event would silently skip them.
+          setSectionRequiredState(sectionKey, true);
           const $sectionSwitch = $('#' + sectionKey + '_is_enabled');
           if ($sectionSwitch.length && !$sectionSwitch.is(':checked')) {
             submitViaAjax();
