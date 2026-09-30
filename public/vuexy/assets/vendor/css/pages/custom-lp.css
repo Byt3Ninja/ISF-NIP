@@ -161,9 +161,9 @@ header[id] {
 }
 
 .hero-primary-cta {
-  min-height: 58px;
-  padding: 0.9rem 3rem;
-  font-size: 1rem;
+  min-height: 52px;
+  padding: 0.8rem 2.5rem;
+  font-size: 0.9rem;
 }
 
 .hero-nav-cta:hover,
@@ -311,7 +311,7 @@ header[id] {
 .gl-hero h1 {
   font-family: "Space Grotesk", "Cairo", var(--bs-font-sans-serif);
   font-weight: 700;
-  font-size: clamp(2.25rem, 4.4vw, 3.5rem);
+  font-size: clamp(1.85rem, 3.6vw, 2.8rem);
   line-height: 1.04;
   letter-spacing: 0;
   color: #ffffff;
