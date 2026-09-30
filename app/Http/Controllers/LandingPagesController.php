@@ -122,7 +122,7 @@ class LandingPagesController extends Controller
 				$statusLabel = $l == 'ar'
 					? 'مفتوح حتى ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.'
 					: 'Open Till ' . ($stepEnd ? $stepEnd->format('Y-m-d') : '') . '.';
-				$btnText = $l == 'ar' ? 'تقدم الآن.' : 'Apply Now.';
+				$btnText = $l == 'ar' ? 'تقدم الآن' : 'Apply Now';
 			} elseif ($isUpcoming) {
 				$statusClass = 'bg-label-warning';
 				$statusIcon = 'hourglass-empty';
@@ -134,7 +134,7 @@ class LandingPagesController extends Controller
 				$statusClass = 'bg-label-danger';
 				$statusIcon = 'lock';
 				$statusLabel = $l == 'ar' ? 'مغلق.' : 'Closed.';
-				$btnText = $l == 'ar' ? 'التقديم مغلق.' : 'Applications Closed.';
+				$btnText = $l == 'ar' ? 'التقديم مغلق' : 'Applications Closed';
 			}
 
 			$program->isOpen = $isOpen;
