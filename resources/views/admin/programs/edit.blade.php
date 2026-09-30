@@ -221,7 +221,7 @@ HTML;
         <div class="row g-6">
           {!! $switchField('programAutoApproveMentorship', 'cycles.Auto_Approve_Mentorship_Requests', 'cycles.Auto_Approve_Helper_Text', (bool) $ccycle->auto_approve_mentorship_requests) !!}
           {!! $switchField('programMentorshipReminders', 'cycles.Enable_Mentorship_Reminders', 'cycles.Send periodic reminder notifications to mentors and mentees.', (bool) $ccycle->is_active_Rminder) !!}
-          <div class="col-12 d-none" id="mentorshipReminderTimes">
+          <div class="col-12{{ $ccycle->is_active_Rminder ? '' : ' d-none' }}" id="mentorshipReminderTimes">
             <small class="text-body d-block ms-2 mb-2">{{ __('cycles.Mentorship_Reminders_Help_Text') }}</small>
             <div class="row g-6 ms-2">
               {{-- name ends with [] so PHP receives ALL ticked values, not just the last one --}}
