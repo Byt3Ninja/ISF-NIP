@@ -49,7 +49,7 @@
   {{-- Header --}}
   <div class="card mb-6">
     <div class="card-header">
-      <h4 class="mb-2">{{ __('landing.Custom_Landing_Page') }}</h4>
+      <h4 class="mb-2">{{ __('admin.Custom Landing Pages') }}</h4>
       <p class="mb-0">{{ __('landing.Custom_Landing_Page_Description') }}</p>
     </div>
     <div class="card-body">
