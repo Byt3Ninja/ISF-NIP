@@ -206,7 +206,16 @@
         </div>
 
         @if(!empty($page->about_cards))
-          <div class="row g-4">
+          @php
+            // Count cards that will actually render (have a title or description)
+            // so a row with only 1-2 items can be centered.
+            $lpVisibleAboutCards = collect($page->about_cards)->filter(function ($card) use ($l) {
+                $title = $l == 'ar' ? ($card['title_ar'] ?? '') : ($card['title'] ?? '');
+                $desc = $l == 'ar' ? ($card['description_ar'] ?? '') : ($card['description'] ?? '');
+                return $title || $desc;
+            });
+          @endphp
+          <div class="row g-4 {{ $lpVisibleAboutCards->count() <= 2 ? 'justify-content-center' : '' }}">
             @foreach($page->about_cards as $index => $card)
               @php
                 $cardTitle = $l == 'ar' ? ($card['title_ar'] ?? '') : ($card['title'] ?? '');
@@ -453,8 +462,10 @@
         @php $howStepsCount = count($page->how_steps ?? []); @endphp
 
         @if($howStepsCount > 0)
-          <div class="row pipeline-wrap">
-            <div class="pipeline-line d-none d-lg-block"></div>
+          <div class="row pipeline-wrap {{ $howStepsCount <= 2 ? 'justify-content-center' : '' }}">
+            @if($howStepsCount > 1)
+              <div class="pipeline-line d-none d-lg-block"></div>
+            @endif
 
             @foreach($page->how_steps ?? [] as $index => $step)
               <div class="col-lg-4 pipeline-step text-center mb-5 mb-lg-0">
