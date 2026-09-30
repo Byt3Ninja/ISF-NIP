@@ -248,7 +248,7 @@
                 <div class="input-group input-group-merge w-auto flex-fill">
                   <span class="input-group-text"><i class="ti ti-search text-muted" aria-hidden="true"></i></span>
                   <input
-                    id="searchMentors"
+                    id="debounced-search"
                     type="search"
                     name="search"
                     value="{{ $search }}"
