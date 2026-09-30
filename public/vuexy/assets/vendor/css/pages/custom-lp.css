@@ -161,9 +161,9 @@ header[id] {
 }
 
 .hero-primary-cta {
-  min-height: 52px;
-  padding: 0.8rem 2.5rem;
-  font-size: 0.9rem;
+  min-height: 46px;
+  padding: 0.6rem 2rem;
+  font-size: 0.85rem;
 }
 
 .hero-nav-cta:hover,
