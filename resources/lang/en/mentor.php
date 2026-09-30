@@ -201,5 +201,8 @@ return [
         'view_profile_aria'   => 'View Profile of :name',
         'out_of_5'            => 'out of 5',
         'no_slots_hint'       => 'This mentor has no available slots right now',
+        'join_program_hint'   => 'You need to join a program first so you can request mentorship sessions.',
+        'no_slots_global_hint' => 'Some mentors currently have no available slots, so they cannot be booked yet.',
+        'booking_hint_title'  => 'Cannot book a session',
     ],
 ];

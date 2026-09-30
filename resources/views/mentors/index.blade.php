@@ -109,7 +109,7 @@
             return $primary ?: (strcasecmp($fullName($a), $fullName($b)) ?: $a->id <=> $b->id);
         })
         ->values()
-        ->map(function ($m) use ($visibleExpertise, $isHttpUrl, $isEmail, $isPhone, $telDigits, $localizedArea, $l) {
+        ->map(function ($m) use ($visibleExpertise, $isHttpUrl, $isEmail, $isPhone, $telDigits, $localizedArea, $l, $canBook) {
             $name   = trim($m->name);
             $bio    = $m->bio;
             $areas  = $m->mentorExpertises->map($localizedArea)->filter(fn ($t) => trim((string) $t) !== '')->values();
@@ -140,6 +140,7 @@
                 'shown_areas'    => $areas->slice(0, $visibleExpertise),
                 'hidden_areas'   => $areas->slice($visibleExpertise),
                 'has_slots'      => $m->schedule->isNotEmpty(),
+                'can_book_now'  => $canBook && $m->schedule->isNotEmpty(),
                 'contacts'       => [
                     ['icon' => 'ti-brand-linkedin', 'href' => $linkedinHref,
                      'label' => $linkedinHref
@@ -458,25 +459,19 @@
                             @endforeach
                           </div>
 
-                          @if ($canBook)
-                            @if ($m['has_slots'])
+                          @if ($user->hasRole('Registered'))
                               <button
                                 type="button"
-                                class="ms-auto btn btn-link d-inline-flex align-items-center gap-1 p-0 border-0 text-primary fw-medium text-nowrap text-decoration-none"
-                                onclick="if (typeof fetchSlots === 'function') { fetchSlots({{ $m['id'] }}, {{ $getCycle->id }}, {{ $getCycle->organization_id ?? 0 }}); }">
+                                class="request-mentorship-btn ms-auto btn btn-link d-inline-flex align-items-center gap-1 p-0 border-0 text-primary fw-medium text-nowrap text-decoration-none"
+                                data-bookable="{{ $m['can_book_now'] ? 1 : 0 }}"
+                                data-mentor-id="{{ $m['id'] }}"
+                                data-cycle-id="{{ $canBook ? $getCycle->id : 0 }}"
+                                data-org-id="{{ $canBook ? ($getCycle->organization_id ?? 0) : 0 }}"
+                                data-alert-title="{{ __('mentor.directory.booking_hint_title') }}"
+                                data-alert-message="{{ $canBook ? __('mentor.directory.no_slots_hint') : __('mentor.directory.join_program_hint') }}">
                                 <span>{{ __('cycles.Request_Mentorship') }}</span>
                                 <i class="ti ti-calendar-plus ti-14px" aria-hidden="true"></i>
                               </button>
-                            @else
-                              <button
-                                type="button"
-                                class="ms-auto btn btn-link d-inline-flex align-items-center gap-1 p-0 border-0 text-primary fw-medium text-nowrap text-decoration-none"
-                                disabled
-                                title="{{ __('mentor.directory.no_slots_hint') }}">
-                                <span>{{ __('cycles.Not_Available_Request_Mentorship') }}</span>
-                                <i class="ti ti-calendar-plus ti-14px" aria-hidden="true"></i>
-                              </button>
-                            @endif
                           @else
                             <a
                               class="ms-auto d-inline-flex align-items-center gap-1 text-primary fw-medium text-nowrap text-decoration-none"
@@ -660,6 +655,24 @@
       },
       true
     );
+
+    // Request Mentorship: open the booking flow when possible, otherwise
+    // explain the reason through the shared releaseAlert() helper.
+    document.querySelectorAll('.request-mentorship-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.dataset.bookable === '1' && typeof fetchSlots === 'function') {
+          fetchSlots(btn.dataset.mentorId, btn.dataset.cycleId, btn.dataset.orgId);
+          return;
+        }
+        if (typeof window.releaseAlert === 'function') {
+          window.releaseAlert({
+            icon: 'info',
+            title: btn.dataset.alertTitle || '',
+            message: btn.dataset.alertMessage || ''
+          });
+        }
+      });
+    });
   })();
 </script>
 @endpush

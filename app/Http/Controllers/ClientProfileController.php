@@ -573,7 +573,23 @@ class ClientProfileController extends Controller
                     ->withAvg(['mentorshipRequests as avg_rating' => function ($q) {
                         $q->where('approved', 'Yes');
                     }], 'rating')
-                    ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
+                    ->when(trim((string) $search) !== '', function ($q) use ($search, $firstNameColumn, $lastNameColumn) {
+                        $like = "%{$search}%";
+                        $q->where(function ($sub) use ($like, $firstNameColumn, $lastNameColumn) {
+                            $sub->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", [$like])
+                                ->orWhere('title_en', 'like', $like)
+                                ->orWhere('title_ar', 'like', $like)
+                                ->orWhere('email', 'like', $like)
+                                ->orWhere('phone', 'like', $like)
+                                ->orWhereHas('bio', function ($bioQ) use ($like) {
+                                    $bioQ->where('linkedin', 'like', $like)
+                                        ->orWhere('bio_en', 'like', $like)
+                                        ->orWhere('bio_ar', 'like', $like)
+                                        ->orWhere('specialization_en', 'like', $like)
+                                        ->orWhere('specialization_ar', 'like', $like);
+                                });
+                        });
+                    });
                 if ($rateSearch > 0) {
                     $mentors = $mentors->whereIn('id', function ($query) use ($rateSearch) {
                         $query->select('mentor_id')
@@ -749,7 +765,23 @@ class ClientProfileController extends Controller
                     ->withAvg(['mentorshipRequests as avg_rating' => function ($q) {
                         $q->where('approved', 'Yes');
                     }], 'rating')
-                    ->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", ["%{$search}%"]);
+                    ->when(trim((string) $search) !== '', function ($q) use ($search, $firstNameColumn, $lastNameColumn) {
+                        $like = "%{$search}%";
+                        $q->where(function ($sub) use ($like, $firstNameColumn, $lastNameColumn) {
+                            $sub->whereRaw("CONCAT($firstNameColumn, ' ', $lastNameColumn) LIKE ?", [$like])
+                                ->orWhere('title_en', 'like', $like)
+                                ->orWhere('title_ar', 'like', $like)
+                                ->orWhere('email', 'like', $like)
+                                ->orWhere('phone', 'like', $like)
+                                ->orWhereHas('bio', function ($bioQ) use ($like) {
+                                    $bioQ->where('linkedin', 'like', $like)
+                                        ->orWhere('bio_en', 'like', $like)
+                                        ->orWhere('bio_ar', 'like', $like)
+                                        ->orWhere('specialization_en', 'like', $like)
+                                        ->orWhere('specialization_ar', 'like', $like);
+                                });
+                        });
+                    });
                 if ($rateSearch > 0) {
                     $mentors = $mentors->whereIn('id', function ($query) use ($rateSearch) {
                         $query->select('mentor_id')
