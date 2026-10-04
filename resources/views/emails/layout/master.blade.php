@@ -58,7 +58,11 @@
                                                 <tr>
                                                     <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                         <div align="center" class="alignment" style="line-height:10px">
-                                                            @if(!empty($setting->Logo))
+                                                            @if(!empty($org_logo_url))
+                                                                <div style="max-width: 280px; padding: 20px 0;">
+                                                                    <img alt="{{ $org_name }}" height="auto" src="{{ $org_logo_url }}" style="display: block; height: auto; border: 0; max-height: 80px; max-width: 100%; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
+                                                                </div>
+                                                            @elseif(!empty($setting->Logo))
                                                                 <div style="max-width: 280px; padding: 20px 0;">
                                                                     <img alt="{{ $setting->Logo }}" height="auto" src="{{ asset('/images/logo/' . $setting->Logo) }}" style="display: block; height: auto; border: 0; max-height: 80px; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
                                                                 </div>
