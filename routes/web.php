@@ -1107,7 +1107,7 @@ Route::get('cycle-custom-pages/{cycle_id}/{filename}', 'CycleCustomPagesControll
 Route::get('screening-guidelines/{step_id}/{filename}', 'FinalscreeningController@serveImage')->name('screening.guidelines.image');
 
 // Organization Logo from Storage
-Route::get('organizations/logo/{filename?}', 'OrganizationWizardController@getLogo')->name('organizations.logo');
+Route::get('organizations/logo/{filename?}', 'OrganizationWizardController@getLogo')->where('filename', '(organizations/)?[^/]+')->name('organizations.logo');
 // Organization Landing Page Assets from Storage
 Route::get('organization/{organizationId}/landing-assets/{type}/{filename?}', 'OrganizationWizardController@getLandingAsset')->name('organization.landing.asset');
 

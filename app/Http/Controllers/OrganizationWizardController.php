@@ -390,9 +390,23 @@ class OrganizationWizardController extends Controller
 
     /**
      * Serve organization logo from storage.
+     *
+     * The wizard stores a bare "<file>" on the organizations disk, while the
+     * Org Settings page stores "organizations/<file>" under public/. Both
+     * formats live in organizations.img_url, so both are served here.
      */
     public function getLogo($filename)
     {
+        if (str_starts_with($filename, 'organizations/')) {
+            $path = public_path('organizations/' . basename($filename));
+
+            if (!is_file($path)) {
+                abort(404);
+            }
+
+            return response()->file($path);
+        }
+
         $disk = Storage::disk('organizations');
 
         if (!$disk->exists($filename)) {
