@@ -533,6 +533,8 @@ header[id] {
 
 .section-head .text-secondary {
   overflow-wrap: anywhere;
+  font-size: 1.08rem;
+  line-height: 1.75;
 }
 
 /* ----- About / value cards ----- */

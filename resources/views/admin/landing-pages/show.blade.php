@@ -65,14 +65,68 @@
         <div class="collapse navbar-collapse justify-content-end" id="navMenu">
           <ul class="navbar-nav align-items-lg-center gap-lg-1">
             @if($page->about_is_enabled)
-              <li class="nav-item"><a class="nav-link" href="#about">{{ __('landing.about') }}</a></li>
+              @php
+                $navAbout = $l == 'ar'
+                  ? ($page->about_nav_title_ar ?? $page->about_title_ar ?? null)
+                  : ($page->about_nav_title ?? $page->about_title ?? null);
+                if (!$navAbout) {
+                    $navAbout = __('landing.about');
+                }
+              @endphp
+              <li class="nav-item"><a class="nav-link" href="#about">{{ \Illuminate\Support\Str::limit($navAbout, 15) }}</a></li>
             @endif
             @if($page->programs_is_enabled)
-              <li class="nav-item"><a class="nav-link" href="#programs">{{ __('landing.programs') }}</a></li>
+              @php
+                $navPrograms = $l == 'ar'
+                  ? ($page->programs_nav_title_ar ?? $page->programs_title_ar ?? null)
+                  : ($page->programs_nav_title ?? $page->programs_title ?? null);
+                if (!$navPrograms) {
+                    $navPrograms = __('landing.programs');
+                }
+              @endphp
+              <li class="nav-item"><a class="nav-link" href="#programs">{{ \Illuminate\Support\Str::limit($navPrograms, 15) }}</a></li>
             @endif
             @if($showHow)
+              @php
+                $navHow = $l == 'ar'
+                  ? ($page->how_nav_title_ar ?? ($page->how_title_ar ?? null))
+                  : ($page->how_nav_title ?? ($page->how_title ?? null));
+                if (!$navHow) {
+                    $navHow = __('landing.how_it_works');
+                }
+              @endphp
               <li class="nav-item"><a class="nav-link"
-                  href="#how-it-works">{{ __('landing.how_it_works') }}</a></li>
+                  href="#how-it-works">{{ \Illuminate\Support\Str::limit($navHow, 15) }}</a></li>
+            @endif
+            @if(!empty($page->custom_sections) && is_array($page->custom_sections))
+              @foreach($page->custom_sections as $index => $section)
+                @php
+                  $sectionVisible = $section['is_enabled'] ?? false;
+                  $slug = $section['slug'] ?? ('custom-section-' . ($index + 1));
+                  $navTitle = $l == 'ar'
+                    ? ($section['nav_title_ar'] ?? ($section['title_ar'] ?? null))
+                    : ($section['nav_title'] ?? ($section['title'] ?? null));
+                @endphp
+                @if($sectionVisible && $navTitle)
+                  <li class="nav-item"><a class="nav-link"
+                      href="#{{ $slug }}">{{ \Illuminate\Support\Str::limit($navTitle, 15) }}</a></li>
+                @endif
+              @endforeach
+            @endif
+            @if(!empty($customSections))
+              @foreach($customSections as $customSection)
+                @php
+                  $sectionVisible = $customSection->is_enabled ?? $customSection->enabled ?? true;
+                  $navTitle = $l == 'ar'
+                    ? ($customSection->nav_title_ar ?? ($customSection->title_ar ?? null))
+                    : ($customSection->nav_title ?? ($customSection->title ?? null));
+                  $slug = $customSection->slug ?? ('custom-' . $customSection->id);
+                @endphp
+                @if($sectionVisible && $navTitle)
+                  <li class="nav-item"><a class="nav-link"
+                      href="#{{ $slug }}">{{ \Illuminate\Support\Str::limit($navTitle, 15) }}</a></li>
+                @endif
+              @endforeach
             @endif
             <li class="nav-item dropdown-language dropdown ms-lg-3">
               <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
