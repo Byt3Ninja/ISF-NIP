@@ -317,6 +317,8 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::put('settings/UpdateimgHome', 'SettingsController@update_settingsImgHome')->name('settings.system_social_home_image_update');
     Route::put('settings/UpdateimgAchiev', 'SettingsController@update_settingsAchievements')->name('settings.system_social_achievements_update');
     Route::put('settings/UpdateWhatsApp', 'SettingsController@update_settingsWhatsapp')->name('settings.system_social_whatsapp_update');
+Route::put('settings/UpdateBranding', 'SettingsController@updatePlatformBranding')->name('settings.system_branding_update');
+    Route::put('settings/ResetBranding', 'SettingsController@resetPlatformBranding')->name('settings.system_branding_reset');
 
     Route::post('whatsapp/session/{sessionId}/start', 'WhatsAppSessionController@start')->where('sessionId', '[0-9]+')->name('whatsapp.session.start');
     Route::post('whatsapp/session/{sessionId}/status', 'WhatsAppSessionController@status')->where('sessionId', '[0-9]+')->name('whatsapp.session.status');

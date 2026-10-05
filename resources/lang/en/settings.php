@@ -126,7 +126,7 @@ return [
 	'ZOOM_CLIENT_SECRET'=>'ZOOM CLIENT SECRET',
 	'ZOOM_ACCOUNT_ID'=>'ZOOM ACCOUNT ID',
 	'Choose'=>'Choose',
-	'SocialMediaLogin'=>'Social Login & Verification.',
+	'SocialMediaLogin'=>'Social Login & Verification',
 	'MentorList'=>'Mentor List',
 	'Assessment'=>'Assessment',
 	'whatsApp_URL_callback' => 'WhatsApp URL Callback',
@@ -519,4 +519,24 @@ return [
 	'email_open_resend' => 'Open Resend domains',
 	'email_close' => 'Close',
 	'email_show_password' => 'Show or hide',
+
+	// Platform Branding (General Settings). The two gradient colors are optional
+	// as a pair; main color and button text color are mandatory.
+	'branding_title' => 'Platform Branding',
+	'branding_description' => 'Set the colors the platform uses for buttons, highlights and gradients.',
+	'branding_gradient_start' => 'Gradient Start Color',
+	'branding_gradient_end' => 'Gradient End Color',
+	'branding_main_color' => 'Main Color',
+	'branding_button_text_color' => 'Button Text Color',
+	'branding_optional' => 'Optional',
+	'branding_use_theme_gradient' => 'Use the theme gradient',
+	'branding_reset' => 'Reset to Default',
+	'branding_reset_confirm' => 'Reset the platform colors to their defaults?',
+	'branding_preview' => 'Preview',
+	'branding_preview_button' => 'Button',
+	'branding_enter_end_color' => 'Please enter an end color',
+	'branding_enter_start_color' => 'Please enter a start color',
+	'branding_valid_main_color' => 'Please enter a valid main color',
+	'branding_valid_button_text_color' => 'Please enter a valid button text color',
+	'branding_valid_color' => 'Please enter a valid color',
 ];

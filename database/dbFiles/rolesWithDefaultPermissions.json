@@ -41,6 +41,24 @@
                 ]
             },
             {
+                "name": "settings.system_branding_update",
+                "description": "Update Platform Branding Colors",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.system_branding_reset",
+                "description": "Reset Platform Branding Colors To Default",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "settings.system_logo_update",
                 "description": "Update Logo",
                 "guard_name": "web",
