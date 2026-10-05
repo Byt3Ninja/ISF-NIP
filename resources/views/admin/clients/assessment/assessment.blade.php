@@ -291,7 +291,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
       dataType: 'json',
       success: function(response) {
         if (!response.success) {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: '{{ __('admin.Error') }}',
             message: response.message ? response.message : '{{ __('admin.unexpected_error') }}',
           });          
@@ -303,7 +303,7 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
       },
       error: function(xhr) {
         let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : '{{ __("admin.unexpected_error") }}';
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: '{{ __('admin.Error') }}',
           message: errorMessage
         })
@@ -481,18 +481,12 @@ const handleAnswerQuestion = (questionId, answer) => {
     success: function(response) {
       // Check if assessment is fully completed
       if (response.message == 1) {
-        Swal.fire({
-          icon: 'success',
+        releaseAlert('success', {
           title: 'Success',
-          text: '{{ __('admin.Assessment_completed_successfully') }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          confirmButtonText: "{{ __('admin.OK') }}",
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
-          timer: 2000,
+          message: '{{ __('admin.Assessment_completed_successfully') }}',
+          confirmText: "{{ __('admin.OK') }}",
+          confirmColor: 'primary',
+          autoClose: 2000
         }).then(() => {
           // Reset to first assessment and category
           localStorage.setItem('activeCategoryTab', 0);
@@ -543,15 +537,11 @@ const handleAnswerQuestion = (questionId, answer) => {
       console.error('Error submitting answer:', error);
       
       // Show error message to user
-      Swal.fire({
-        icon: 'error',
+      releaseAlert('danger', {
         title: 'Error',
-        text: '{{ __('admin.An_error_occurred_please_try_again') }}',
-        confirmButtonText: "{{ __('admin.OK') }}",
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '{{ __('admin.An_error_occurred_please_try_again') }}',
+        confirmText: "{{ __('admin.OK') }}",
+        confirmColor: 'primary'
       });
     }
   });

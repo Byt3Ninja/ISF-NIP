@@ -240,34 +240,23 @@
       // Basic validation
       if (!document.getElementById('termsAndConditions').checked) {
         // Using SweetAlert2 for better UX
-        Swal.fire({
-          icon: 'warning',
+        releaseAlert('warning', {
           title: '{{ $l == 'en' ? 'Terms Required' : 'الشروط مطلوبة' }}',
-          text: '{{ $l == 'en' ? 'Please agree to the terms and conditions.' : 'يرجى الموافقة على الشروط والأحكام.' }}',
-          confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: '{{ $l == 'en' ? 'Please agree to the terms and conditions.' : 'يرجى الموافقة على الشروط والأحكام.' }}',
+          confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+          confirmColor: 'primary',
+          hideCancel: true
         });
         return;
       }
       
       // Show success message
-      Swal.fire({
-        icon: 'success',
+      releaseAlert('success', {
         title: '{{ $l == 'en' ? 'Application Submitted!' : 'تم إرسال الطلب!' }}',
-        text: '{{ $l == 'en' ? 'Your application has been submitted successfully! You will be redirected to the hackathon details page.' : 'تم إرسال طلبك بنجاح! سيتم توجيهك إلى صفحة تفاصيل الهاكثون.' }}',
-        confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
-      }).then((result) => {
+        message: '{{ $l == 'en' ? 'Your application has been submitted successfully! You will be redirected to the hackathon details page.' : 'تم إرسال طلبك بنجاح! سيتم توجيهك إلى صفحة تفاصيل الهاكثون.' }}',
+        confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+        confirmColor: 'primary'
+      }).then((ok) => {
         // Close modal
         $('#applyModal1').modal('hide');
         // Redirect or update UI

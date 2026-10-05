@@ -353,47 +353,35 @@
       const idsToDelete = id && select == 'single' ? [id] : selectedIds; // Use selected IDs or fallback to single ID
 
       if (!idsToDelete || idsToDelete.length === 0) {
-        Swal.fire({
+        releaseAlert('warning', {
           title: "{{ __('admin.No Messages Selected') }}",
-          text: "{{ __('admin.Select at least one message') }}",
-          icon: "warning",
-          confirmButtonText: "{{ __('admin.OK') }}",
-          showCancelButton: false,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: "{{ __('admin.Select at least one message') }}",
+          confirmText: "{{ __('admin.OK') }}",
+          confirmColor: 'primary',
+          hideCancel: true
         });
         return;
       }
 
-      Swal.fire({
-      	title: "{{__('admin.SureDelete')}}",
-        text: "{{__('admin.Recover')}}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
+      releaseAlert('warning', {
+        title: "{{__('admin.SureDelete')}}",
+        message: "{{__('admin.Recover')}}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
       })
-        .then((result) => {
-        if (result.value) {
+        .then((ok) => {
+        if (ok) {
           $.post(url, {
             'id': idsToDelete ,
             '_token': token
           },
           function(response) {
           // console.log('response', response);
-            Swal.fire(
-              '{{ __('admin.Deleted') }}!',
-              '{{ __('admin.FileDeleted') }}.',
-              'success',
-            ).then(() => {
+            releaseAlert('success', {
+              title: '{{ __('admin.Deleted') }}!',
+              message: '{{ __('admin.FileDeleted') }}.'
+            }).then(() => {
               if (response.state === 'success') {
                 // Remove the deleted messages from the UI
                 idsToDelete.forEach(id => {
@@ -406,11 +394,10 @@
           }
           ).fail(
             function(error) {
-              Swal.fire(
-                'Error!',
-                'Delete fail.',
-                'error'
-              );
+              releaseAlert('danger', {
+                title: 'Error!',
+                message: 'Delete fail.'
+              });
             // console.log(error);
             }
           );
@@ -611,11 +598,10 @@
         },
         error: function(xhr) {
           console.error('Error:', xhr.responseText);
-          Swal.fire({
+          releaseAlert('danger', {
             title: 'Error!',
-            text: 'Failed to send the reply message.',
-            icon: 'error',
-            confirmButtonText: 'OK'
+            message: 'Failed to send the reply message.',
+            confirmText: 'OK'
           });
         },
       });

@@ -304,7 +304,7 @@ $(function () {
       table.button(`.buttons-${format}`).trigger();
     } catch (err) {
       console.error('Export error:', err);
-      releaseFailureAlert({ message: 'Failed to export. Please try again.' });
+      releaseAlert('danger', { message: 'Failed to export. Please try again.' });
     }
   };
 
@@ -312,7 +312,8 @@ $(function () {
    * Delete Course
    * ============================================================== */
   window.deleteCourse = function (id) {
-    releaseWarningAlert({
+    releaseAlert('warning', {
+      hideCancel: true,
       title:        '{{ __('admin.SureDelete') }}',
       message:      '{{ __('admin.Recover') }}',
       confirmText:  '{{ __('admin.DYes') }}',
@@ -322,7 +323,7 @@ $(function () {
         $.post(`/dashboard/training/delete/${id}`, { _token: CSRF })
           .done(function (response) {
             if (response.state === 'forbidden') {
-              releaseFailureAlert({ message: '{{ __('admin.dont_have_permission') }}' });
+              releaseAlert('danger', { message: '{{ __('admin.dont_have_permission') }}' });
               return;
             }
 
@@ -335,11 +336,11 @@ $(function () {
               table.draw(false);
             }
 
-            releaseSuccessAlert({ message: '{{ __('admin.Deleted') }}!' });
+            releaseAlert('success', { message: '{{ __('admin.Deleted') }}!' });
           })
           .fail(function (xhr, status, error) {
             console.error('Delete failed:', error);
-            releaseFailureAlert({ message: '{{ __('admin.unexpected_error') }}' });
+            releaseAlert('danger', { message: '{{ __('admin.unexpected_error') }}' });
           });
       },
     });

@@ -665,8 +665,7 @@
           return;
         }
         if (typeof window.releaseAlert === 'function') {
-          window.releaseAlert({
-            icon: 'info',
+          window.releaseAlert('info', {
             title: btn.dataset.alertTitle || '',
             message: btn.dataset.alertMessage || ''
           });

@@ -178,27 +178,24 @@
         url = '/dashboard/training/delete/' + id
       }
       let token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-danger",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
+      releaseAlert('warning', {
+        title: "{{ __('admin.SureDelete') }}",
+        message: "{{ __('admin.Recover') }}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}!",
+        confirmColor: 'danger'
+      })
+        .then((ok) => {
+          if (ok) {
             $.post(url, {
                 '_method': 'POST',
                 '_token': token
               },
               function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Course Deleted') }}.',
-                  'success'
-                );
+                releaseAlert('success', {
+                  title: '{{ __('admin.Deleted') }}!',
+                  message: '{{ __('admin.Course Deleted') }}.'
+                });
                 if (type === 1) {
                   window.location.href = '/dashboard/training/all';
                 } else {

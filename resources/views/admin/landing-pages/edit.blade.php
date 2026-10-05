@@ -1153,7 +1153,7 @@
               lpUrlSlugChecked = true;
               lpUrlSlugAvailable = true;
               lpUrlRenderSavedLink();
-              {{--  releaseSuccessAlert({
+              {{--  releaseAlert('success', {
                 title: "{{ __('admin.success') }}",
                 message: res.message || lpUrlI18n.saved,
               });  --}}
@@ -1165,7 +1165,7 @@
             })
             .fail(function (xhr) {
               const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}",
                 message: message,
               });
@@ -1225,7 +1225,7 @@
 
       $('#lpUrlPreviewBtn').on('click', function () {
         if (!lpUrlSavedSlug) {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: lpUrlI18n.activeStatus,
             message: lpUrlI18n.previewNotSaved,
           });
@@ -1966,7 +1966,7 @@
 
           $switch.prop('checked', false);
           const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '?tab=landing';
-          releaseWarningAlert({
+          releaseAlert('warning', {
             title: "{{ __('admin.Warning') }}",
             message: "{{ __('landing.Program_not_public_hint') }}",
             confirmText: "{{ __('landing.Go_to_program_visibility') }}",
@@ -2041,7 +2041,7 @@
           .fail(function (xhr) {
             if (xhr.statusText === 'abort') return;
             const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || programsReorderErrorText;
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}",
               message: message,
             });
@@ -2474,7 +2474,7 @@
           };
 
           const flashDeleted = function (message) {
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: "{{ __('admin.success') }}",
               message: message || "{{ __('landing.success.custom_deleted') }}",
             });
@@ -2503,14 +2503,14 @@
               .fail(function (xhr) {
                 $btn.prop('disabled', false);
                 const res = xhr.responseJSON || {};
-                releaseFailureAlert({
+                releaseAlert('danger', {
                   title: "{{ __('admin.Error') }}",
                   message: res.message || "{{ __('landing.error.custom_delete_failed') }}",
                 });
               });
           };
 
-          releaseWarningAlert({
+          releaseAlert('warning', {
             title: "{{ __('landing.Delete_Custom_Section') }}",
             message: "{{ __('landing.Delete_Custom_Section_Confirm') }}",
             confirmText: "{{ __('landing.Delete') }}",
@@ -2674,7 +2674,7 @@
               clearBackendFieldErrors();
               $backendErrorsBox.addClass('d-none').empty();
               if (successMessages[sectionKey]) {
-                releaseSuccessAlert({
+                releaseAlert('success', {
                   title: "{{ __('admin.success') }}",
                   message: successMessages[sectionKey],
                 });
@@ -2694,7 +2694,7 @@
               if (res.message) {
                 errorMessage = res.message;
               }
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}",
                 message: errorMessage,
               });

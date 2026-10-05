@@ -206,7 +206,7 @@
 
   function requireProvider() {
     if (PROVIDER_ID) return true;
-    releaseFailureAlert({
+    releaseAlert('danger', {
       title:   @json(__('admin.Error')),
       message: @json(__('admin.save_basics_first')),
     });
@@ -425,7 +425,7 @@
 
       success(res) {
         if (!res.success) {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title:   @json(__('admin.Error')),
             message: res.message || @json(__('admin.unexpected_error')),
           });
@@ -451,7 +451,7 @@
         }
 
         $('#clientModal').modal('hide');
-        releaseSuccessAlert({
+        releaseAlert('success', {
           title:   @json(__('admin.Success')),
           message: isEdit
             ? @json(__('admin.client_updated_successfully'))
@@ -460,7 +460,7 @@
       },
 
       error(xhr) {
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title:   @json(__('admin.Error')),
           message: xhr.responseJSON?.message || @json(__('admin.unexpected_error')),
         });
@@ -473,9 +473,10 @@
   // ── Delete ────────────────────────────────────────────────────────────────
 
   window.confirmDeleteClient = function (id, name) {
-    releaseWarningAlert({
+    releaseAlert('warning', {
+      hideCancel: true,
       title:        `${@json(__('admin.delete_client'))}?`,
-      html:      `${@json(__('admin.you_are_about_to_delete'))} "<strong>${name}</strong>"`,
+      message:      `${@json(__('admin.you_are_about_to_delete'))} "<strong>${name}</strong>"`,
       confirmText:  @json(__('admin.DYes')),
       confirmColor: 'danger',
       onConfirm() {
@@ -489,13 +490,13 @@
               $(this).remove();
               showPlaceholderIfEmpty();
             });
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title:   @json(__('admin.Deleted')),
               message: @json(__('admin.client_deleted_successfully')),
             });
           },
           error(xhr) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title:   @json(__('admin.Error')),
               message: xhr.responseJSON?.message || @json(__('admin.unexpected_error')),
             });

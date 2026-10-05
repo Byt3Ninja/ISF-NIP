@@ -225,7 +225,7 @@ $(function () {
     if ($container.find('.work-item-card:visible').length < MAX_ITEMS) {
       addItem();
     } else {
-      releaseWarningAlert({ message: "{{ __('admin.maximum_work_items_message') }}" });
+      releaseAlert('warning', { hideCancel: true, message: "{{ __('admin.maximum_work_items_message') }}" });
     }
   });
 

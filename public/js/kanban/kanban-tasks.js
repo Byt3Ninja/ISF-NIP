@@ -385,7 +385,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     const actionLabel = isArchived ? lbl.reopenTask : lbl.archiveTask;
     const bodyText = isArchived ? lbl.reopenTaskConfirm : lbl.archiveTaskConfirm;
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: actionLabel + '?', message: bodyText,
       confirmText: lbl.yes, cancelText: lbl.no,
       confirmColor: isArchived ? 'warning' : 'secondary',
@@ -428,7 +428,7 @@ function initKanbanTasks(tasks, program, addDescQ, etDescQ, vtCommentQ, addFv, e
     const attachmentId = $btn.data('attachment-id');
     const attachmentName = $btn.data('attachment-name');
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: lbl.deleteAttachment + '?', message: lbl.recover,
       confirmText: lbl.yes, cancelText: lbl.no, confirmColor: 'danger',
       onConfirm: () => {

@@ -2345,16 +2345,15 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 	<script>
-		// Initialize DataTable with pagination configuration
-		$(document).on('click', '.show-passcode', function(e) {
+	  $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
-      releaseAlert({
-        icon: 'info',
+      releaseAlert('copy', {
         title: '{{ __('dashboard.meeting_passcode') }}',
         message: `{!! __('dashboard.passcode_is', ['code' => '<strong>${passcode}</strong>']) !!}`,
+        copyText: passcode
       });
-		});
+    });
     
 		// Initialize DataTable with pagination configuration
 		$(document).ready(function() {
@@ -2703,20 +2702,15 @@ document.addEventListener('DOMContentLoaded', function() {
 			console.log('Deleting slot ID:', slotId);
 			console.log('rowElement', rowElement);
 
-		  Swal.fire({
-				title: "{{__('mentor.delete_slot_confirm')}}",
-				text: "{{__('admin.Recover')}}",
-				showCancelButton: true,
-				confirmButtonText: "{{ __('admin.DYes') }}",
-				cancelButtonText: "{{ __('admin.No') }}",
-				reverseButtons: true,
-				customClass: {
-					confirmButton: 'btn btn-danger me-2',
-					cancelButton: 'btn btn-label-secondary',
-				},
-				buttonsStyling: false,
-		  }).then((result) => {
-				if (result.isConfirmed) {
+		  releaseAlert('info', {
+		    title: "{{__('mentor.delete_slot_confirm')}}",
+		    message: "{{__('admin.Recover')}}",
+		    confirmText: "{{ __('admin.DYes') }}",
+		    cancelText: "{{ __('admin.No') }}",
+		    confirmColor: 'danger',
+		    hideCancel: false
+		  }).then((ok) => {
+				if (ok) {
 					// Show loading state
 					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
 					
@@ -2731,7 +2725,7 @@ document.addEventListener('DOMContentLoaded', function() {
 							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
 							rowElement.remove(); // Remove the row from the table immediately
 							
-							releaseSuccessAlert({
+							releaseAlert('success', {
 								title: response?.title || "{{ __('admin.Deleted') }}!",
 								message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
 							});
@@ -2739,7 +2733,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						error: function(jqXHR, statusText, error) {
 							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
 
-							releaseFailureAlert({
+							releaseAlert('danger', {
 								title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
 								message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 							});

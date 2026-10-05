@@ -339,32 +339,25 @@ $(function () {
     const id    = $(this).data('id');
     const token = '{{ csrf_token() }}';
 
-    Swal.fire({
-      title:             '{{ __("admin.SureDelete") }}',
-      text:              '{{ __("admin.Recover") }}',
-      icon:              'warning',
-      showCancelButton:  true,
-      confirmButtonText: '{{ __("admin.DYes") }}',
-      cancelButtonText:  '{{ __("admin.No") }}',
-      reverseButtons:    true,
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton:  'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then(result => {
-      if (!result.value) return;
+    releaseAlert('warning', {
+      title: '{{ __("admin.SureDelete") }}',
+      message: '{{ __("admin.Recover") }}',
+      confirmText: '{{ __("admin.DYes") }}',
+      cancelText: '{{ __("admin.No") }}',
+      confirmColor: 'danger'
+    }).then(ok => {
+      if (!ok) return;
 
       $.post(url, { _method: 'DELETE', _token: token })
         .done(() => {
           table.row('#row_' + id).remove().draw();
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title:   '{{ __("admin.Deleted") }}!',
             message: '{{ __("admin.DeletedSuccessfully") }}.',
           });
         })
         .fail(xhr => {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title:   '{{ __("admin.Error") }}!',
             message: xhr.responseJSON?.message
                      || '{{ __("admin.An unexpected error occurred, please try again later") }}',
@@ -378,11 +371,11 @@ $(function () {
 
     let url = $(this).attr('href');
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('admin.Confirm Action') }}",
       message: "{{ __('admin.start_imperonation_message') }}",
-      confirmButtonText: "{{ __('admin.Yes') }}",
-      cancelButtonText: "{{ __('admin.cancel') }}",
+      confirmText: "{{ __('admin.Yes') }}",
+      cancelText: "{{ __('admin.cancel') }}",
       onConfirm: function() {
         window.location.href = url;
       }

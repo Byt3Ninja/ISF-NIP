@@ -561,38 +561,24 @@
     let url = '/dashboard/training/delsession/' + id;
     let token = '{{ csrf_token() }}';
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{__('admin.SureDelete')}}",
-      text: "{{__('admin.Recover')}}",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-      reverseButtons: true,
-      customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-        if (result.isConfirmed) {
+      message: "{{__('admin.Recover')}}",
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+        if (ok) {
             $.post(url, {
                 '_method': 'POST',
                 '_token': token
             }, function(response) {
-                Swal.fire({
+                releaseAlert('success', {
                   title: '{{ __('admin.Deleted') }}!',
-                  text: '{{ __('admin.Course Deleted') }}.',
-                  icon: 'success',
-                  showCancelButton: false,
-                  showConfirmButton: true,
-                  confirmButtonText: "{{ __('admin.OK') }}",
-                  customClass: {
-                      confirmButton: 'btn btn-primary',
-                  },
-                  buttonsStyling: false,
-                  timer: 1500,                    
-                  timerProgressBar: true
+                  message: '{{ __('admin.Course Deleted') }}.',
+                  confirmText: "{{ __('admin.OK') }}",
+                  confirmColor: 'primary',
+                  autoClose: 1500
                 }).then(() => {
                     window.location.href = '/dashboard/training/sessionsReport';
                 });

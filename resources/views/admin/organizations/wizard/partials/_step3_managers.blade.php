@@ -484,7 +484,7 @@ $(function () {
             $('#existing-manager-tab').tab('show');
             loadManagers(0);
 
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title:   '{{ __("admin.success") }}',
               message: '{{ __("admin.Manager created successfully") }}',
             });

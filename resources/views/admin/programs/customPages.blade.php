@@ -210,26 +210,19 @@
                             }
                             else
                             {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                    text: response.message
+                                releaseAlert('danger', {
+                                  title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                  message: response.message
                                 });
                             }
                         },
                         error: function(error) {
                             console.log(error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                text: '{{ $l == 'ar' ? 'خطأ في إعادة ترتيب الصفحات. يرجى المحاولة مرة أخرى.' : 'Error resorting pages. Please try again.' }}',
-                                showCancelButton: false,
-                                showConfirmButton: true,
-                                confirmButtonText: "{{ __('admin.OK') }}",
-                                customClass: {
-                                    confirmButton: 'btn btn-primary',
-                                },
-                                buttonsStyling: false,
+                            releaseAlert('danger', {
+                              title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                              message: '{{ $l == 'ar' ? 'خطأ في إعادة ترتيب الصفحات. يرجى المحاولة مرة أخرى.' : 'Error resorting pages. Please try again.' }}',
+                              confirmText: "{{ __('admin.OK') }}",
+                              confirmColor: 'primary'
                             });
                         }
                     });

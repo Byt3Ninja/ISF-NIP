@@ -419,21 +419,14 @@
     var filePath = $(this).data('file');
     var cardElement = $(this).closest('.file-card');
 
-    Swal.fire({
-     	title: "{{__('admin.SureDelete')}}",
-      text: "{{__('admin.Recover')}}",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-      reverseButtons: true,
-      customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+    releaseAlert('warning', {
+      title: "{{__('admin.SureDelete')}}",
+      message: "{{__('admin.Recover')}}",
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.ajax({
           url: '{{ route("company.profile_documents_delete") }}',
           type: 'POST',
@@ -445,13 +438,22 @@
           success: function (response) {
               if (response.success) {
                   cardElement.remove();
-                  Swal.fire('تم الحذف!', 'تم حذف الملف بنجاح.', 'success');
+                  releaseAlert('success', {
+                    title: 'تم الحذف!',
+                    message: 'تم حذف الملف بنجاح.'
+                  });
               } else {
-                  Swal.fire('خطأ!', 'حدث خطأ أثناء الحذف.', 'error');
+                  releaseAlert('danger', {
+                    title: 'خطأ!',
+                    message: 'حدث خطأ أثناء الحذف.'
+                  });
               }
           },
           error: function () {
-              Swal.fire('خطأ!', 'تعذر الاتصال بالخادم.', 'error');
+              releaseAlert('danger', {
+                title: 'خطأ!',
+                message: 'تعذر الاتصال بالخادم.'
+              });
           },
         });
       }

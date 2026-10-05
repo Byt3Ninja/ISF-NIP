@@ -848,7 +848,7 @@ $(function () {
       table.button(`.buttons-${format}`).trigger();
     } catch (err) {
       console.error('Export error:', err);
-      releaseFailureAlert({ message: 'Failed to export data. Please try again.' });
+      releaseAlert('danger', { message: 'Failed to export data. Please try again.' });
     }
   };
 
@@ -956,7 +956,7 @@ $(function () {
       },
       error(err) {
         console.error(err);
-        releaseFailureAlert({ message: '{{ __('admin.error_fetching_data') }}' });
+        releaseAlert('danger', { message: '{{ __('admin.error_fetching_data') }}' });
         $offcanvas.offcanvas('hide');
       }
     });
@@ -1133,36 +1133,26 @@ $(function () {
    * Delete Session
    * ============================================================== */
   window.deleteme = function (id) {
-    Swal.fire({
-      title:             '{{ __('admin.SureDelete') }}',
-      text:              '{{ __('admin.Recover') }}',
-      icon:              'warning',
-      showCancelButton:  true,
-      confirmButtonText: '{{ __('admin.DYes') }}',
-      cancelButtonText:  '{{ __('admin.No') }}',
-      reverseButtons:    true,
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton:  'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then(({ isConfirmed }) => {
-      if (!isConfirmed) return;
+    releaseAlert('warning', {
+      title: '{{ __('admin.SureDelete') }}',
+      message: '{{ __('admin.Recover') }}',
+      confirmText: '{{ __('admin.DYes') }}',
+      cancelText: '{{ __('admin.No') }}',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (!ok) return;
 
       $.post(ROUTES.delete(id), { _token: CSRF })
         .done(() => {
-          Swal.fire({
-            title:            '{{ __('admin.Deleted') }}!',
-            text:             '{{ __('admin.Course Deleted') }}.',
-            icon:             'success',
-            confirmButtonText:'{{ __('admin.OK') }}',
-            customClass:      { confirmButton: 'btn btn-primary' },
-            buttonsStyling:   false,
-            timer:            1500,
-            timerProgressBar: true,
+          releaseAlert('success', {
+            title: '{{ __('admin.Deleted') }}!',
+            message: '{{ __('admin.Course Deleted') }}.',
+            confirmText: '{{ __('admin.OK') }}',
+            confirmColor: 'primary',
+            autoClose: 1500
           }).then(() => window.location.reload());
         })
-        .fail(() => releaseFailureAlert({ message: '{{ __('admin.unexpected_error') }}' }));
+        .fail(() => releaseAlert('danger', { message: '{{ __('admin.unexpected_error') }}' }));
     });
   };
 
@@ -1175,11 +1165,11 @@ $(function () {
       url:  ROUTES.qr,
       data: { id },
       success(response) {
-        releaseSuccessAlert({ message: response.massege || '{{ __('admin.success') }}' });
+        releaseAlert('success', { message: response.massege || '{{ __('admin.success') }}' });
       },
       error(err) {
         console.error(err);
-        releaseFailureAlert({ message: '{{ __('admin.unexpected_error') }}' });
+        releaseAlert('danger', { message: '{{ __('admin.unexpected_error') }}' });
       }
     });
   };

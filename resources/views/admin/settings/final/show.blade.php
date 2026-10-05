@@ -626,19 +626,14 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         }
       });
 
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{ __('cycles.Are you sure, Delete current step and all its contents?') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary',
-        },
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-      }).then((result) => {
-        if (result.isConfirmed) {
+        message: "{{ __('admin.Recover') }}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
+      }).then((ok) => {
+        if (ok) {
           $.ajax({
             type: "POST",
             url: "/dashboard/cycles/modify",
@@ -648,14 +643,14 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             },
             success: function(response) {
               $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: '{{__('Deleted!')}}',
                 message: '{{  $l == 'en' ? 'The screening step has been deleted successfully.' : 'تم حذف مرحلة التصفية بنجاح.' }}',
               });
               window.location.href = "/dashboard/final";
             },
             error: function(error) {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}!",
                 message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });
@@ -719,12 +714,12 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
           },
           success: function(response) {
            if (response.status) {
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: '{{ __('admin.success') }}',
                 message: response.message ? response.message : 'admin.Screening guidelines saved successfully',
               });
             } else {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: '{{ __('admin.Error') }}',
                 message: response.message ? response.message : '{{ __('admin.unexpected_error') }}',
               });
@@ -732,7 +727,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
           },
           error: function(xhr) {
             const errorMessage = xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}';
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: '{{ __('admin.Error') }}',
               message: errorMessage,
             });
@@ -756,10 +751,10 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             success: function(response) {
               if (response.success) {
                 lastFormSelectValue = formId;
-                releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: response.message });
+                releaseAlert('success', { title: '{{ __("admin.success") }}', message: response.message });
               } else if (response.needs_confirmation) {
                 const count = response.counts ? response.counts.total : 0;
-                releaseWarningAlert({
+                releaseAlert('warning', {
                   title: '{{ __("admin.step_form_change_warning_title") }}',
                   message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', count),
                   confirmText: '{{ __("admin.Yes") }}',
@@ -774,7 +769,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             },
             error: function(xhr) {
               $select.val(lastFormSelectValue).trigger('change.select2');
-              releaseFailureAlert({ title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
+              releaseAlert('danger', { title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
             }
           });
         };
@@ -804,7 +799,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         const submissions = Number('{{ $stepFormSubmissions ?? 0 }}') || 0;
         if (changed && submissions > 0 && $('#confirm_form_change').val() !== '1') {
           e.preventDefault();
-          releaseWarningAlert({
+          releaseAlert('warning', {
             title: '{{ __("admin.step_form_change_warning_title") }}',
             message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', submissions),
             confirmText: '{{ __("admin.Yes") }}',

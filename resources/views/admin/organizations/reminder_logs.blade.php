@@ -263,21 +263,14 @@
       console.log('Deleting log ID:', logId); // Debugging line
       var row = table.row('#row_' + logId);
   
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{__('admin.SureDelete')}}",
-        text: "{{__('admin.Recover')}}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-          confirmButton: 'btn btn-danger',
-          cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-      }).then((result) => {
-        if (!result.isConfirmed) return;
+        message: "{{__('admin.Recover')}}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
+      }).then((ok) => {
+        if (!ok) return;
         
         // Make AJAX request to delete the reminder log
         $.ajax({
@@ -290,24 +283,16 @@
           success: function(response) {
             if (response.success) {
               row.remove().draw(false); // Use false to stay on the same page
-              Swal.fire({
-                text: "{{__('admin.DeletedSuccessfully')}}",
-                icon: "success",
-                confirmButtonText: "{{ __('admin.OK') }}",
-                customClass: {
-                  confirmButton: 'btn btn-primary',
-                },
-                buttonsStyling: false,
+              releaseAlert('success', {
+                message: "{{__('admin.DeletedSuccessfully')}}",
+                confirmText: "{{ __('admin.OK') }}",
+                confirmColor: 'primary'
               });
             } else {
-              Swal.fire({
-                icon: 'error',
+              releaseAlert('danger', {
                 title: response.message || '{{ __("admin.DeleteFailed") }}',
-                confirmButtonText: '{{ __('admin.OK') }}',
-                customClass: {
-                  confirmButton: 'btn btn-primary'
-                },
-                buttonsStyling: false
+                confirmText: '{{ __('admin.OK') }}',
+                confirmColor: 'primary'
               });
             }
           },
@@ -322,26 +307,18 @@
               errorMessage = '{{ __("admin.NotFound") }}';
             }
             
-            Swal.fire({
-              icon: 'error',
+            releaseAlert('danger', {
               title: errorMessage,
-              confirmButtonText: '{{ __('admin.OK') }}',
-              customClass: {
-                confirmButton: 'btn btn-primary'
-              },
-              buttonsStyling: false
+              confirmText: '{{ __('admin.OK') }}',
+              confirmColor: 'primary'
             });
           }
         });
       }).catch((error) => {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: error?.message || '{{ __("admin.DeleteFailed") }}',
-          confirmButtonText: '{{ __('admin.OK') }}',
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          confirmText: '{{ __('admin.OK') }}',
+          confirmColor: 'primary'
         });
       });
     });

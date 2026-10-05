@@ -8,7 +8,7 @@
     padding: 0;
   }
   
-  .swal2-container {
+  .modal {
     z-index: 9999 !important;
   }
 
@@ -578,14 +578,11 @@
           .map(n => `<li class="text-start">${esc(n)}</li>`)
           .join('');
 
-        const { isConfirmed } = await Swal.fire({
-          icon: 'warning',
-          html: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
-          showCancelButton: true,
-          confirmButtonText: '{{ __("admin.Confirm") }}',
-          cancelButtonText: '{{ __("admin.Cancel") }}',
-          customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-          buttonsStyling: false
+        const isConfirmed = await releaseAlert('warning', {
+          message: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
+          confirmText: '{{ __("admin.Confirm") }}',
+          cancelText: '{{ __("admin.Cancel") }}',
+          confirmColor: 'primary'
         });
 
         return isConfirmed ? ids : ids.filter(id => !duplicates.includes(id));
@@ -1039,14 +1036,11 @@
           .map(n => `<li class="text-start">${esc(n)}</li>`)
           .join('');
 
-        const { isConfirmed } = await Swal.fire({
-          icon: 'warning',
-          html: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
-          showCancelButton: true,
-          confirmButtonText: '{{ __("admin.Confirm") }}',
-          cancelButtonText: '{{ __("admin.Cancel") }}',
-          customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-          buttonsStyling: false
+        const isConfirmed = await releaseAlert('warning', {
+          message: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
+          confirmText: '{{ __("admin.Confirm") }}',
+          cancelText: '{{ __("admin.Cancel") }}',
+          confirmColor: 'primary'
         });
 
         if (!isConfirmed) {
@@ -1334,14 +1328,14 @@
 
         const panelIdx = $panel.data('index') + 1; // 1-based index for backend
 
-        const result = await Swal.fire({
-          icon: 'warning', title: '@lang("admin.SureDelete")', showCancelButton: true,
-          confirmButtonText: '@lang("admin.DYes")', cancelButtonText: '@lang("Cancel")',
-          customClass: { confirmButton: 'btn btn-danger me-2', cancelButton: 'btn btn-label-secondary' },
-          buttonsStyling: false
+        const ok = await releaseAlert('warning', {
+          title: '@lang("admin.SureDelete")',
+          confirmText: '@lang("admin.DYes")',
+          cancelText: '@lang("Cancel")',
+          confirmColor: 'danger'
         });
 
-        if (result.isConfirmed) {
+        if (ok) {
           try {
             const response = await fetch('{{ route("screening.delete_judging_panel") }}', {
               method: 'POST',
@@ -1363,12 +1357,12 @@
             if (data.success) {
               $panel.remove();
               renumberPanels();
-              releaseSuccessAlert({ title: '{{ __('admin.success') }}', message: data.message });
+              releaseAlert('success', { title: '{{ __('admin.success') }}', message: data.message });
             } else {
-              releaseFailureAlert({ title: '{{ __('admin.error') }}', message: data.message });
+              releaseAlert('danger', { title: '{{ __('admin.error') }}', message: data.message });
             }
           } catch (e) {
-            releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
+            releaseAlert('danger', { title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
           }
         }
       });
@@ -1564,15 +1558,12 @@
             }
           }[changeKind];
 
-          const { isConfirmed } = await Swal.fire({
-            icon: 'warning',
+          const isConfirmed = await releaseAlert('warning', {
             title: copy.title,
-            text: copy.body,
-            showCancelButton: true,
-            confirmButtonText: '{{ __("admin.Confirm") }}',
-            cancelButtonText: '{{ __("admin.Cancel") }}',
-            customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-            buttonsStyling: false
+            message: copy.body,
+            confirmText: '{{ __("admin.Confirm") }}',
+            cancelText: '{{ __("admin.Cancel") }}',
+            confirmColor: 'primary'
           });
 
           // Cancel leaves the form exactly as the admin left it, so the panel can
@@ -1736,15 +1727,12 @@
             if (!d.success) {
               if (!acknowledged && d.requires_confirmation && Array.isArray(d.judge_conflicts) && d.judge_conflicts.length) {
                 setSubmitBusy(false);
-                const { isConfirmed } = await Swal.fire({
-                  icon: 'warning',
+                const isConfirmed = await releaseAlert('warning', {
                   title: '{{ __("admin.screening.judge_conflict_title") }}',
-                  html: d.judge_conflicts.map(m => `<p class="mb-2 text-start">${esc(m)}</p>`).join(''),
-                  showCancelButton: true,
-                  confirmButtonText: '{{ __("admin.Confirm") }}',
-                  cancelButtonText: '{{ __("admin.Cancel") }}',
-                  customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-                  buttonsStyling: false
+                  message: d.judge_conflicts.map(m => `<p class="mb-2 text-start">${esc(m)}</p>`).join(''),
+                  confirmText: '{{ __("admin.Confirm") }}',
+                  cancelText: '{{ __("admin.Cancel") }}',
+                  confirmColor: 'primary'
                 });
 
                 // Cancel leaves the form exactly as the admin left it, so the
@@ -1755,7 +1743,7 @@
               }
 
               setSubmitBusy(false);
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: '{{ __('admin.error') }}',
                 message: d.message || '{{ __('admin.unexpected_error') }}'
               });
@@ -1766,7 +1754,7 @@
             setSubmitBusy(false);
             rebaselinePanels();
 
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: '{{ __('admin.success') }}',
               message: d?.message || '{{ __('admin.Saved_successfully') }}',
             });
@@ -1790,7 +1778,7 @@
           })
           .catch(e => {
             setSubmitBusy(false);
-            releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
+            releaseAlert('danger', { title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
           });
       };
 
@@ -1885,7 +1873,7 @@
         const text = $(this).closest('.input-group').find('.meeting-link-input').val();
         if (text) {
           navigator.clipboard.writeText(text).then(() => {
-            releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
+            releaseAlert('success', { title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
           });
         }
       });
@@ -1895,7 +1883,7 @@
         const text = $(this).closest('.input-group').find('.meeting-password-input').val();
         if (text) {
           navigator.clipboard.writeText(text).then(() => {
-            releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
+            releaseAlert('success', { title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
           });
         }
       });

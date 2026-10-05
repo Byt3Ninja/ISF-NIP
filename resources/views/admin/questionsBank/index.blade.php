@@ -170,16 +170,13 @@ $(function () {
     const btn = $(this);
     const url = btn.data('url');
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{__('admin.SureDelete')}}",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-      customClass: { confirmButton: 'btn btn-danger me-3', cancelButton: 'btn btn-label-secondary' },
-      buttonsStyling: false
-    }).then((result) => {
-      if (result.value) {
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.ajax({
           url: url,
           type: 'POST',

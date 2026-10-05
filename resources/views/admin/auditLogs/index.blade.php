@@ -100,40 +100,27 @@
       e.preventDefault();
       var url = $(this).data('url');
       var token = '{{ csrf_token() }}';
-      Swal.fire({
+      releaseAlert('warning', {
         title: '{{__('Are you sure?')}}',
-        text: '{{__("You will not be able to recover records again")}}!',
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{__('Yes, delete it')}}",
-        cancelButtonText: "{{__('No')}}!",
-        reverseButtons: true,
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
+        message: '{{__("You will not be able to recover records again")}}!',
+        confirmText: "{{__('Yes, delete it')}}",
+        cancelText: "{{__('No')}}!",
+        confirmColor: 'danger'
       })
-        .then((result) => {
-          if (result.value) {
+        .then((ok) => {
+          if (ok) {
             $.post(url, { '_method': 'DELETE', '_token': token },
               function (response) {
-                Swal.fire({
-                  icon: 'success',
+                releaseAlert('success', {
                   title: '{{__('Deleted!')}}',
-                  html: '{{__('All log records has been deleted.')}}',
-                  showCancelButton: false,
-                  showConfirmButton: true,
-                  confirmButtonText: "{{ __('admin.OK') }}",
-                  customClass: {
-                    confirmButton: 'btn btn-primary',
-                  },
-                  buttonsStyling: false,
+                  message: '{{__('All log records has been deleted.')}}',
+                  confirmText: "{{ __('admin.OK') }}",
+                  confirmColor: 'primary'
                 });
                 location.reload();
               }
             ).fail(function (error) {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}!",
                 message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });

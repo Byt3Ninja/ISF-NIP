@@ -630,7 +630,7 @@ $tabs = [
 				$('#details_rejection_reason').html( request.reason );
 				$("#requestsDetailsModal").modal('show');
 			} else {
-				releaseFailureAlert({title: "{{ __('admin.Error') }}", message: "{{ __('admin.serviceProviderRequestNotFound') }}" });
+				releaseAlert('danger', {title: "{{ __('admin.Error') }}", message: "{{ __('admin.serviceProviderRequestNotFound') }}" });
 			}
 		});
 
@@ -645,7 +645,7 @@ $tabs = [
 			{
 				if( request.status === null )
 				{
-					releaseWarningAlert({
+					releaseAlert('warning', {
 						title: "{{ __('admin.Confirm Action') }}",
 						message: "{!! __('admin.ConfirmApproveMessage') !!}",
 						confirmText: "{{ __('admin.Confirm') }}",
@@ -658,10 +658,10 @@ $tabs = [
 						onCancel: () => {}
 					});
 				} else {
-					releaseFailureAlert({title: "{{ __('admin.Error') }}", message: "{{ __('auth.serviceProviderRequestHaveActionTakenAlready') }}"});
+					releaseAlert('danger', {title: "{{ __('admin.Error') }}", message: "{{ __('auth.serviceProviderRequestHaveActionTakenAlready') }}"});
 				}
 			} else {
-				releaseFailureAlert({title: "{{ __('admin.Error') }}", message: "{{ __('admin.serviceProviderRequestNotFound') }}"});
+				releaseAlert('danger', {title: "{{ __('admin.Error') }}", message: "{{ __('admin.serviceProviderRequestNotFound') }}"});
 			}
 		});
 
@@ -680,10 +680,10 @@ $tabs = [
 					$("#request_action").val('reject');
 					$("#rejectRequestModal").modal('show');
 				} else {
-					releaseFailureAlert({title: "{{ __('admin.Error') }}", message: "{{ __('auth.serviceProviderRequestHaveActionTakenAlready') }}" });
+					releaseAlert('danger', {title: "{{ __('admin.Error') }}", message: "{{ __('auth.serviceProviderRequestHaveActionTakenAlready') }}" });
 				}
 			} else {
-				releaseFailureAlert({title: "{{ __('admin.Error') }}", message: "{{ __('admin.serviceProviderRequestNotFound') }}"});
+				releaseAlert('danger', {title: "{{ __('admin.Error') }}", message: "{{ __('admin.serviceProviderRequestNotFound') }}"});
 			}
 		});
 
@@ -698,7 +698,7 @@ $tabs = [
 				$("#request_reason").val( reason );
 				$("#approve-reject-form").submit();
 			} else {
-				releaseFailureAlert({title: "{{ __('admin.Error') }}", message: "{{ __('admin.ReasonIsRequired') }}" });
+				releaseAlert('danger', {title: "{{ __('admin.Error') }}", message: "{{ __('admin.ReasonIsRequired') }}" });
 			}
 		});
 	</script>

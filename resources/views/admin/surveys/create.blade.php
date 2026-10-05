@@ -432,15 +432,12 @@ $(document).ready(function() {
         if (selectedCheckboxes.length === 0) {
             // Show alert if no questions selected
             if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: "{{ __('admin.NoQuestionsSelected') }}",
-                    text: "{{ __('admin.PleaseSelectQuestions') }}",
-                    icon: "warning",
-                    confirmButtonText: "{{ __('admin.Ok') }}",
-                    customClass: {
-                        confirmButton: 'btn btn-primary'
-                    },
-                    buttonsStyling: false
+                releaseAlert('warning', {
+                  title: "{{ __('admin.NoQuestionsSelected') }}",
+                  message: "{{ __('admin.PleaseSelectQuestions') }}",
+                  confirmText: "{{ __('admin.Ok') }}",
+                  confirmColor: 'primary',
+                  hideCancel: true
                 });
             } else {
                 alert('{{ __('admin.PleaseSelectQuestions') }}');

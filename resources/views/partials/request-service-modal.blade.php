@@ -253,12 +253,12 @@ $(function () {
         $modal.modal('hide');
 
         if (res.state) {
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title: "{{ __('admin.Success') }}!",
             message: res.message || "{{ __('admin.service_request_submitted_successfully') }}",
           });
         } else {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: "{{ __('admin.Error') }}!",
             message: res.message || "{{ __('admin.unexpected_error') }}",
           });
@@ -273,7 +273,7 @@ $(function () {
           errorMsg = Object.values(errors).flat().join('\n');
         }
 
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: "{{ __('admin.Error') }}!",
           message: errorMsg,
         });

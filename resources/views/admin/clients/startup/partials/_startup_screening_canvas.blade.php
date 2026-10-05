@@ -420,8 +420,9 @@
     // Warning icon (shown when the evaluation form isn't ready): explain that
     // the criteria haven't been configured yet, so evaluation can't be done.
     $(document).on('click', '.screening-criteria-warning', function () {
-      if (typeof window.releaseWarningAlert === 'function') {
-        window.releaseWarningAlert({
+      if (typeof releaseAlert === 'function') {
+        window.releaseAlert('warning', {
+          hideCancel: true,
           title: '{{ __('admin.criteria_not_configured_title') }}',
           message: '{{ __('admin.criteria_not_configured_message') }}',
         });

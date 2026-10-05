@@ -403,7 +403,7 @@ $(function () {
   $('#stepForm').on('submit', function (e) {
     e.preventDefault();
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('cycles.sure change step') }}",
       message: "",
       confirmColor: "primary",
@@ -430,7 +430,7 @@ $(function () {
             location.reload();
           },
           error: function (xhr, status, error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}",
               message: xhr.responseJSON.message ? xhr.responseJSON.message : "{{ __('admin.unexpected_error') }}",
             });

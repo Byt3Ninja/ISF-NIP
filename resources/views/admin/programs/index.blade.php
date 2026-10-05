@@ -472,7 +472,7 @@
       document.execCommand("copy");
       document.body.removeChild(tempInput);
 
-      releaseSuccessAlert({
+      releaseAlert('success', {
         title: "{{ __('admin.Copied') }}",
         message: successMsg,
       });

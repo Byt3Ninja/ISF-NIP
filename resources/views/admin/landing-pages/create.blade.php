@@ -1515,7 +1515,7 @@
 
             $switch.prop('checked', false);
             const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '#program-settings-visibility';
-            releaseWarningAlert({
+            releaseAlert('warning', {
               title: "{{ __('admin.Warning') }}",
               message: "{{ __('landing.Program_not_public_hint') }}",
               confirmText: "{{ __('landing.Go_to_program_visibility') }}",
@@ -1575,7 +1575,7 @@
           .fail(function (xhr) {
             if (xhr.statusText === 'abort') return;
             const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || programsReorderErrorText;
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}",
               message: message,
             });
@@ -1992,7 +1992,7 @@
         .on('click', '.remove-custom-section', function () {
           const $card = $(this).closest('.custom-section-card');
 
-          releaseWarningAlert({
+          releaseAlert('warning', {
             title: "{{ __('landing.Delete_Custom_Section') }}",
             message: "{{ __('landing.Delete_Custom_Section_Confirm') }}",
             confirmText: "{{ __('landing.Delete') }}",
@@ -2005,7 +2005,7 @@
               $card.remove();
               updateCustomSectionsEmpty();
               updateCustomSectionLabels();
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: "{{ __('admin.success') }}",
                 message: "{{ __('landing.success.custom_deleted') }}",
               });
@@ -2117,7 +2117,7 @@
               }
               
               if (successMessages[sectionKey]) {
-                releaseSuccessAlert({
+                releaseAlert('success', {
                   title: "{{ __('admin.success') }}",
                   message: (res && res.message) || successMessages[sectionKey],
                 });
@@ -2164,7 +2164,7 @@
               if (res.message) {
                 errorMessage = res.message;
               }
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}",
                 message: errorMessage,
               });

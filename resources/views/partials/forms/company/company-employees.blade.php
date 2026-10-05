@@ -821,13 +821,13 @@ document.addEventListener('DOMContentLoaded', function () {
       populateExistingDocumentsInForm(card);
       const documentsInput = card.querySelector('.employee-documents');
       if (documentsInput) documentsInput.value = '';
-      releaseSuccessAlert({
+      releaseAlert('success', {
         title: '{{ __('admin.Success!') }}',
         message: data.state || (data.employee?.id ? MESSAGES.editSuccess : MESSAGES.addSuccess),
       });
     } catch (error) {
       console.error('Error in handleSuccessfulSubmission:', error);
-      releaseSuccessAlert({
+      releaseAlert('success', {
         title: '{{ __('admin.Success!') }}',
         message: data.state || (data.employee?.id ? MESSAGES.editSuccess : MESSAGES.addSuccess),
       });
@@ -836,16 +836,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function handleEmployeeDelete(card) {
     const isLastCard = document.querySelectorAll('.employee-card').length === 1;
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('Are you sure?') }}",
-      text: MESSAGES.deleteConfirm,
-      icon: 'warning',
-      showCancelButton: true,
-      customClass: { confirmButton: 'btn btn-danger', cancelButton: 'btn btn-label-secondary' },
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('Cancel') }}"
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: MESSAGES.deleteConfirm,
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('Cancel') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         const employeeId = card.dataset.employeeId;
         fetch(`{{ route('company.employees_delete', '') }}/${companyId}`, {
           method: 'DELETE',
@@ -865,13 +863,13 @@ document.addEventListener('DOMContentLoaded', function () {
             card.remove();
             if (isLastCard) createEmployeeCard(true);
             else updateEmployeeNumbers();
-            releaseSuccessAlert({ title: "{{ __('admin.Deleted') }}", message: MESSAGES.deleteSuccess });
+            releaseAlert('success', { title: "{{ __('admin.Deleted') }}", message: MESSAGES.deleteSuccess });
           } else {
             throw new Error(MESSAGES.deleteError);
           }
         })
         .catch(error => {
-          releaseFailureAlert({ title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}', message: error.message || MESSAGES.deleteError });
+          releaseAlert('danger', { title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}', message: error.message || MESSAGES.deleteError });
         });
       }
     });
@@ -907,16 +905,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function handleDocumentRemoval(removeBtn) {
     const documentElement = removeBtn.closest('.existing-document');
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('Are you sure?') }}",
-      text: MESSAGES.documentDeleteConfirm,
-      icon: 'warning',
-      showCancelButton: true,
-      customClass: { confirmButton: 'btn btn-danger', cancelButton: 'btn btn-label-secondary' },
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('Cancel') }}"
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: MESSAGES.documentDeleteConfirm,
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('Cancel') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         documentElement.classList.add('document-to-remove');
         Object.assign(documentElement.style, { opacity: '0.5', textDecoration: 'line-through' });
         removeBtn.innerHTML = '<i class="ti ti-rotate-clockwise"></i>';
@@ -1113,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', function () {
             else if (error.errors.employee?.[0]) errorMessage = error.errors.employee[0];
             else { const firstError = Object.values(error.errors)[0]; errorMessage = Array.isArray(firstError) ? firstError[0] : firstError; }
           }
-          releaseFailureAlert({ title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}', message: errorMessage });
+          releaseAlert('danger', { title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}', message: errorMessage });
         })
         .finally(() => {
           submitBtn.disabled = false;

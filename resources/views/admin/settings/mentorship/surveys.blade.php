@@ -534,21 +534,14 @@
 			var url = $(this).data('url');
 			var token = '{{ csrf_token() }}';
 
-			Swal.fire({
-				title: "{{__('admin.SureDelete')}}",
-				text: "{{__('admin.Recover')}}",
-				icon: "warning",
-				showCancelButton: true,
-				confirmButtonText: "{{ __('admin.DYes') }}",
-				cancelButtonText: "{{ __('admin.No') }}",
-				reverseButtons: true,
-				customClass: {
-					confirmButton: 'btn btn-danger me-2',
-					cancelButton: 'btn btn-label-secondary',
-				},
-				buttonsStyling: false,
-			}).then((result) => {
-				if (result.isConfirmed) {
+			releaseAlert('warning', {
+			  title: "{{__('admin.SureDelete')}}",
+			  message: "{{__('admin.Recover')}}",
+			  confirmText: "{{ __('admin.DYes') }}",
+			  cancelText: "{{ __('admin.No') }}",
+			  confirmColor: 'danger'
+			}).then((ok) => {
+				if (ok) {
 					// Show loading
 					Swal.fire({
 						title: '{{ __('admin.Deleting') }}...',
@@ -562,33 +555,23 @@
 
 					$.post(url, { _method: 'DELETE', _token: token })
 					.done(function (response) {
-						Swal.fire({
-							icon: 'success',
-							title: "{{ __('admin.Deleted') }}!",
-							text: "{{ __('admin.FileDeleted') }}",
-							showCancelButton: false,
-							showConfirmButton: true,
-							confirmButtonText: "{{ __('admin.OK') }}",
-							customClass: {
-								confirmButton: 'btn btn-primary',
-							},
-							buttonsStyling: false,
-							timer: 1500,
+						releaseAlert('success', {
+						  title: "{{ __('admin.Deleted') }}!",
+						  message: "{{ __('admin.FileDeleted') }}",
+						  confirmText: "{{ __('admin.OK') }}",
+						  confirmColor: 'primary',
+						  autoClose: 1500
 						}).then(() => {
 							location.reload();
 						});
 					})
 					.fail(function (xhr, status, error) {
 						console.error('Delete failed:', error);
-						Swal.fire({
-							icon: 'error',
-							title: '{{ __('admin.Error') }}',
-							text: '{{ __('admin.DeleteFailed') }}',
-							confirmButtonText: '{{ __('admin.OK') }}',
-							customClass: {
-								confirmButton: 'btn btn-primary',
-							},
-							buttonsStyling: false,
+						releaseAlert('danger', {
+						  title: '{{ __('admin.Error') }}',
+						  message: '{{ __('admin.DeleteFailed') }}',
+						  confirmText: '{{ __('admin.OK') }}',
+						  confirmColor: 'primary'
 						});
 					});
 				}
@@ -604,31 +587,23 @@
 
 			if (!surveyId || !type) {
 				e.preventDefault();
-				Swal.fire({
-					icon: 'warning',
-					title: '{{ __('admin.ValidationError') }}',
-					text: '{{ __('admin.PleaseFillRequiredFields') }}',
-					confirmButtonText: '{{ __('admin.OK') }}',
-					showCancelButton: false,
-					customClass: {
-						confirmButton: 'btn btn-warning',
-					},
-					buttonsStyling: false,
+				releaseAlert('warning', {
+				  title: '{{ __('admin.ValidationError') }}',
+				  message: '{{ __('admin.PleaseFillRequiredFields') }}',
+				  confirmText: '{{ __('admin.OK') }}',
+				  confirmColor: 'warning',
+				  hideCancel: true
 				});
 				return false;
 			}
 
 			if (!triggerBySession && !triggerByDue) {
 				e.preventDefault();
-				Swal.fire({
-					icon: 'info',
-					title: '{{ __('admin.NoTriggersSelected') }}',
-					text: '{{ __('admin.SelectAtLeastOneTrigger') }}',
-					confirmButtonText: '{{ __('admin.OK') }}',
-					customClass: {
-						confirmButton: 'btn btn-info',
-					},
-					buttonsStyling: false,
+				releaseAlert('info', {
+				  title: '{{ __('admin.NoTriggersSelected') }}',
+				  message: '{{ __('admin.SelectAtLeastOneTrigger') }}',
+				  confirmText: '{{ __('admin.OK') }}',
+				  confirmColor: 'info'
 				});
 				return false;
 			}

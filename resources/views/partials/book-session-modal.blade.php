@@ -861,7 +861,7 @@
         const submitLabel = '<i class="ti ti-send me-2"></i>{{ __('admin.Submit') }}';
 
         if (outcome.status === 'success') {
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title: "{{ __('admin.Success') }}",
             message: outcome.message || "{{ __('mentor.request_sent_success') }}",
           });

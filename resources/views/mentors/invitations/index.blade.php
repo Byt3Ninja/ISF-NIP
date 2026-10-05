@@ -424,7 +424,7 @@ $(function () {
       const totalSize = files.reduce((sum, f) => sum + f.size, 0);
 
       if (totalSize > 10 * 1024 * 1024) {
-        return releaseFailureAlert({
+        return releaseAlert('danger', {
           title:   '{{ __("admin.Error") }}!',
           message: '{{ __("admin.file_exceeds_10_limit") }}'
         });
@@ -484,7 +484,7 @@ $(function () {
 
   function handleUploadError(range, loadingText, message) {
     quill.deleteText(range.index, loadingText.length + 1);
-    releaseFailureAlert({
+    releaseAlert('danger', {
       title:   '{{ __("admin.Error") }}!',
       message: message || '{{ __("admin.unexpected_error") }}'
     });
@@ -523,7 +523,7 @@ $(function () {
               $('#uploadedAttachments').val(JSON.stringify(cur.filter(u => u !== url)));
             },
             error(xhr) {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title:   '{{ __("admin.Error") }}!',
                 message: xhr.responseJSON?.message || '{{ __("admin.File upload failed") }}'
               });
@@ -531,7 +531,7 @@ $(function () {
           });
         });
     } catch (e) {
-      releaseFailureAlert({
+      releaseAlert('danger', {
         title:   '{{ __("admin.Error") }}!',
         message: e?.message || '{{ __("admin.File upload failed") }}'
       });
@@ -795,7 +795,7 @@ $(function () {
         // handled the case where the server returns a non-boolean truthy value.
         // Normalise with a loose truthy check covering both.
         if (response.success) {
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title:   '{{ __("admin.success") }}',
             message: '{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}'
           });
@@ -803,14 +803,14 @@ $(function () {
           resetForm();
           if (response.data?.[0]) addInvitationToTable(response.data[0]);
         } else {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title:   '{{ __("admin.error") }}',
             message: response.message || '{{ __("admin.unexpected_error") }}'
           });
         }
       },
       error(xhr) {
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title:   '{{ __("admin.error") }}',
           message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}'
         });

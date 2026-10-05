@@ -827,19 +827,13 @@
           } else if (type === 2) {
             location.reload();
             } else if (type === 3) {
-              Swal.fire({
-                icon: 'success',
+              releaseAlert('success', {
                 title: "{{ __('admin.Deleted') }}!",
-                html: "{{ __('admin.DeletedSuccessfully') }}.",
-                showCancelButton: false,
-                showConfirmButton: true,
-                confirmButtonText: "{{ __('admin.OK') }}",
-                customClass: {
-                  confirmButton: 'btn btn-primary',
-                },
-                buttonsStyling: false,
-            }).then((result) => {
-              if (result.isConfirmed) {
+                message: "{{ __('admin.DeletedSuccessfully') }}.",
+                confirmText: "{{ __('admin.OK') }}",
+                confirmColor: 'primary'
+              }).then((ok) => {
+              if (ok) {
                 location.reload();
               }
             });

@@ -395,21 +395,14 @@
 
     const form = this;
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('admin.SureDelete') }}",
-      text: "{{ __('admin.Recover') }}",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-      reverseButtons: true,
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton: 'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: "{{ __('admin.Recover') }}",
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         form.submit(); // Submit natively without re-triggering the event
       }
     });
@@ -431,44 +424,30 @@
 
   // Security action functions
   window.forceLogout = function(userId) {
-    Swal.fire({
+    releaseAlert('warning', {
       title: '@lang("admin.Force_Logout_Confirmation")',
-      text: '@lang("admin.This_will_immediately_log_out_the_user")',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '@lang("admin.Yes_Force_Logout")',
-      cancelButtonText: '@lang("admin.Cancel")',
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton: 'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: '@lang("admin.This_will_immediately_log_out_the_user")',
+      confirmText: '@lang("admin.Yes_Force_Logout")',
+      cancelText: '@lang("admin.Cancel")',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.post('{{ route("activities.force-logout") }}', {
           user_id: userId,
           _token: '{{ csrf_token() }}'
         }).done(function(response) {
           if (response.success) {
-            Swal.fire({
+            releaseAlert('success', {
               title: 'Success!',
-              text: response.message,
-              icon: 'success',
-              customClass: {
-                confirmButton: 'btn btn-success',
-              },
-              buttonsStyling: false,
+              message: response.message,
+              confirmColor: 'success'
             });
           }
         }).fail(function() {
-          Swal.fire({
+          releaseAlert('danger', {
             title: 'Error!',
-            text: 'Failed to force logout user',
-            icon: 'error',
-            customClass: {
-              confirmButton: 'btn btn-danger',
-            },
-            buttonsStyling: false,
+            message: 'Failed to force logout user',
+            confirmColor: 'danger'
           });
         });
       }
@@ -476,45 +455,31 @@
   };
 
   window.resetPassword = function(userId) {
-    Swal.fire({
+    releaseAlert('warning', {
       title: '@lang("admin.Reset_Password_Confirmation")',
-      text: '@lang("admin.This_will_generate_a_new_password")',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '@lang("admin.Yes_Reset_Password")',
-      cancelButtonText: '@lang("admin.Cancel")',
-      customClass: {
-        confirmButton: 'btn btn-warning me-2',
-        cancelButton: 'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: '@lang("admin.This_will_generate_a_new_password")',
+      confirmText: '@lang("admin.Yes_Reset_Password")',
+      cancelText: '@lang("admin.Cancel")',
+      confirmColor: 'warning'
+    }).then((ok) => {
+      if (ok) {
         $.post('{{ route("activities.reset-password") }}', {
           user_id: userId,
           _token: '{{ csrf_token() }}'
         }).done(function(response) {
           console.log('response', response)
           if (response.success) {
-            Swal.fire({
+            releaseAlert('success', {
               title: 'Password Reset!',
-              html: `<p>${response.message}</p><p class="mt-3"><strong>@lang('admin.New_Password')</strong>:</p><div class="bg-light p-2 rounded"><code class="text-primary">${response.new_password}</code></div><p class="text-muted small mt-2">@lang('admin.Reset_Password_Caution')</p>`,
-              icon: 'success',
-              customClass: {
-                confirmButton: 'btn btn-success',
-              },
-              buttonsStyling: false,
+              message: `<p>${response.message}</p><p class="mt-3"><strong>@lang('admin.New_Password')</strong>:</p><div class="bg-light p-2 rounded"><code class="text-primary">${response.new_password}</code></div><p class="text-muted small mt-2">@lang('admin.Reset_Password_Caution')</p>`,
+              confirmColor: 'success'
             });
           }
         }).fail(function() {
-          Swal.fire({
+          releaseAlert('danger', {
             title: 'Error!',
-            text: 'Failed to reset password',
-            icon: 'error',
-            customClass: {
-              confirmButton: 'btn btn-danger',
-            },
-            buttonsStyling: false,
+            message: 'Failed to reset password',
+            confirmColor: 'danger'
           });
         });
       }
@@ -522,44 +487,30 @@
   };
 
   window.blockIp = function(ipAddress) {
-    Swal.fire({
+    releaseAlert('warning', {
       title: '@lang("admin.Block_IP_Confirmation")',
-      text: `@lang("admin.This_will_block_IP_address"): ${ipAddress}`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '@lang("admin.Yes_Block_IP")',
-      cancelButtonText: '@lang("admin.Cancel")',
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton: 'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: `@lang("admin.This_will_block_IP_address"): ${ipAddress}`,
+      confirmText: '@lang("admin.Yes_Block_IP")',
+      cancelText: '@lang("admin.Cancel")',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.post('{{ route("activities.block-ip") }}', {
           ip_address: ipAddress,
           _token: '{{ csrf_token() }}'
         }).done(function(response) {
           if (response.success) {
-            Swal.fire({
+            releaseAlert('success', {
               title: 'Blocked!',
-              text: response.message,
-              icon: 'success',
-              customClass: {
-                confirmButton: 'btn btn-success',
-              },
-              buttonsStyling: false,
+              message: response.message,
+              confirmColor: 'success'
             });
           }
         }).fail(function() {
-          Swal.fire({
+          releaseAlert('danger', {
             title: 'Error!',
-            text: 'Failed to block IP address',
-            icon: 'error',
-            customClass: {
-              confirmButton: 'btn btn-danger',
-            },
-            buttonsStyling: false,
+            message: 'Failed to block IP address',
+            confirmColor: 'danger'
           });
         });
       }
@@ -627,14 +578,10 @@
         button.parentElement.style.display = 'none';
       }
     }).fail(function() {
-      Swal.fire({
+      releaseAlert('danger', {
         title: 'Error!',
-        text: 'Failed to load more activities',
-        icon: 'error',
-        customClass: {
-          confirmButton: 'btn btn-danger',
-        },
-        buttonsStyling: false,
+        message: 'Failed to load more activities',
+        confirmColor: 'danger'
       });
     }).always(function() {
       // Restore button state
@@ -648,14 +595,10 @@
     const suspiciousData = @json($suspiciousLogins->values()->toArray());
     
     if (!suspiciousData || suspiciousData.length === 0) {
-      Swal.fire({
+      releaseAlert('info', {
         title: '@lang("admin.No_data_to_export")',
-        text: '@lang("admin.No_suspicious_logins_found")',
-        icon: 'info',
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '@lang("admin.No_suspicious_logins_found")',
+        confirmColor: 'primary'
       });
       return;
     }

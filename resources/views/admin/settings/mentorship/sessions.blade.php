@@ -601,10 +601,10 @@
     $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
-      releaseAlert({
-        icon: 'info',
+      releaseAlert('copy', {
         title: '{{ __('dashboard.meeting_passcode') }}',
         message: `{!! __('dashboard.passcode_is', ['code' => '<strong>${passcode}</strong>']) !!}`,
+        copyText: passcode
       });
     });
 
@@ -1202,7 +1202,7 @@
         ? "{{ __('admin.mentorship_session_approve_failed') }}"
         : "{{ __('admin.mentorship_session_reject_failed') }}";
 
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: isApproving ? "{{ __('admin.Approve') }}" : "{{ __('admin.Disapprove') }}",
         message: (isApproving ? "{{ __('admin.Accepting_request') }}" : "{{ __('admin.Rejecting_request') }}").trim(),
         confirmText: "{{ __('admin.Confirm') }}",

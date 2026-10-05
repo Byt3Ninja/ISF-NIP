@@ -861,7 +861,7 @@ document.getElementById('sendMessageBtn')?.addEventListener('click', function ()
   $.post('/dashboard/sendteammessage', { subject, message, receiver, _token: '{{ csrf_token() }}' })
     .done(r => {
       if (r.success) {
-        releaseSuccessAlert({ message: '{{ $isEn ? 'Message sent successfully' : 'تم إرسال الرسالة بنجاح' }}' });
+        releaseAlert('success', { message: '{{ $isEn ? 'Message sent successfully' : 'تم إرسال الرسالة بنجاح' }}' });
         bootstrap.Modal.getInstance(document.getElementById('sendMessageModal')).hide();
       } else {
         releaseErrorAlert({ message: r.message || '{{ $isEn ? 'Failed to send message' : 'فشل في إرسال الرسالة' }}' });

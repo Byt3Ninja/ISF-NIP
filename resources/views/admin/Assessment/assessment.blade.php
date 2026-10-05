@@ -449,18 +449,14 @@ $(function () {
 
   window.confirmDelete = function (event) {
     event.preventDefault();
-    Swal.fire({
-      title:             "{{__('admin.SureDelete')}}",
-      text:              "{{__('admin.Recover')}}",
-      icon:              'warning',
-      showCancelButton:  true,
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText:  "{{ __('admin.No') }}",
-      reverseButtons:    true,
-      customClass: { confirmButton: 'btn btn-danger me-2', cancelButton: 'btn btn-label-secondary' },
-      buttonsStyling: false,
-    }).then(({ isConfirmed }) => {
-      if (isConfirmed) $(event.target).closest('form').submit();
+    releaseAlert('warning', {
+      title: "{{__('admin.SureDelete')}}",
+      message: "{{__('admin.Recover')}}",
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) $(event.target).closest('form').submit();
     });
     return false;
   };

@@ -1527,11 +1527,11 @@ document.addEventListener('DOMContentLoaded', function() {
   $(document).on('click', '#stop-impersonation', function(e) {
     e.preventDefault();
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('admin.Confirm Action') }}",
       message: "{{ __('admin.ConfirmStopImpersonationMessage') }}",
-      confirmButtonText: "{{ __('admin.Yes') }}",
-      cancelButtonText: "{{ __('admin.cancel') }}",
+      confirmText: "{{ __('admin.Yes') }}",
+      cancelText: "{{ __('admin.cancel') }}",
       onConfirm: function() {
         $("#stop-impersonation-form").submit();
       }

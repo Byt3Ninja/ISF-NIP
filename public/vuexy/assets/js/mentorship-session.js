@@ -202,11 +202,10 @@ function renderSlotsForDate(dateStr) {
 
 function showError(message) {
   if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      icon: 'error',
+    releaseAlert('danger', {
       title: en ? 'Error' : 'خطأ',
-      text: message,
-      confirmButtonText: en ? 'OK' : 'موافق'
+      message: message,
+      confirmText: en ? 'OK' : 'موافق'
     });
   } else {
     alert(message);

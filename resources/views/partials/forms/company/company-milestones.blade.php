@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function () {
       noDocumentsDiv.classList.remove('d-none');
     }
 
-    releaseSuccessAlert({
+    releaseAlert('success', {
       title: '{{ __('admin.Success!') }}',
       message: data.state || MESSAGES.success
     });
@@ -577,19 +577,14 @@ document.addEventListener('DOMContentLoaded', function () {
   function handleMilestoneDelete(card) {
     const isLastCard = document.querySelectorAll('.milestone-card').length === 1;
     
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('Are you sure?') }}",
-      text: MESSAGES.deleteConfirm,
-      icon: 'warning',
-      showCancelButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('Cancel') }}"
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: MESSAGES.deleteConfirm,
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('Cancel') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         const formData = new FormData();
         formData.append('_token', csrfToken);
         formData.append('id', card.dataset.milestoneId);
@@ -614,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isLastCard) createMilestoneCard(true);
             else updateMilestoneNumbers();
             
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: "{{ __('admin.Deleted') }}",
               message: MESSAGES.deleteSuccess
             });
@@ -623,7 +618,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         })
         .catch(error => {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
             message: error.message || MESSAGES.deleteError
           });
@@ -670,19 +665,14 @@ document.addEventListener('DOMContentLoaded', function () {
   function handleDocumentRemoval(removeBtn) {
     const documentElement = removeBtn.closest('.existing-document');
     
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('Are you sure?') }}",
-      text: MESSAGES.documentDeleteConfirm,
-      icon: 'warning',
-      showCancelButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('Cancel') }}"
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: MESSAGES.documentDeleteConfirm,
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('Cancel') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         documentElement.classList.add('document-to-remove');
         Object.assign(documentElement.style, {
           opacity: '0.5',
@@ -944,7 +934,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => {
           console.error('Error:', error);
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
             message: MESSAGES.error
           });

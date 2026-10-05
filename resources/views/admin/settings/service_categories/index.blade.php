@@ -442,9 +442,9 @@ $(function() {
       success: function(response) {
         modal.hide();
         
-        releaseSuccessAlert({
+        releaseAlert('success', {
           title: isEdit ? '{{ __("admin.Updated") }}!' : '{{ __("admin.Created") }}!',
-          html: isEdit ? '{{ __("admin.UpdatedSuccessfully") }}.' : '{{ __("admin.CreatedSuccessfully") }}.'
+          message: isEdit ? '{{ __("admin.UpdatedSuccessfully") }}.' : '{{ __("admin.CreatedSuccessfully") }}.'
         });
         
         // Reload page to refresh table
@@ -477,9 +477,9 @@ $(function() {
           errorMsg = Object.values(errors).flat().join('<br>');
         }
         
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: '{{ __("admin.Error") }}!',
-          html: errorMsg
+          message: errorMsg
         });
       }
     });
@@ -491,7 +491,7 @@ $(function() {
     const row = table.row(button.closest('tr'));
     const { url } = button.data();
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('admin.SureDelete') }}",
       message: "{{ __('admin.Recover') }}",
       confirmText: "{{ __('admin.DYes') }}",
@@ -503,15 +503,15 @@ $(function() {
           _token: '{{ csrf_token() }}' 
         })
         .done(() => {
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title: "{{ __('admin.Deleted') }}!",
-            html: "{{ __('admin.DeletedSuccessfully') }}."
+            message: "{{ __('admin.DeletedSuccessfully') }}."
           });
 
           row.remove().draw();
         })
         .fail(error => {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: "{{ __('admin.Error') }}!",
             message: error?.message || "{{ __('admin.unexpected_error') }}"
           });

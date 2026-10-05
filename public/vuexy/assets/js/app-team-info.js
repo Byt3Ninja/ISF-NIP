@@ -741,7 +741,7 @@
         }
       });
     } else {
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: `${t.delete} ${t[type]}`,
         message: `${t.deleteMsg.replace("${name}", escapeHtml(name))}`,
         confirmText: `${t.yesDelete}`,

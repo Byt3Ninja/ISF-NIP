@@ -681,7 +681,7 @@ if (editStepForm) {
     const formChanged = mFormSelect && editStepOriginalFormId !== null && mFormSelect.value !== editStepOriginalFormId;
 
     if (formChanged && stepHasSubmissions > 0 && $('#confirm_form_change').val() !== '1') {
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: '{{ __("admin.step_form_change_warning_title") }}',
         message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', stepHasSubmissions),
         confirmText: '{{ __("admin.Yes") }}',

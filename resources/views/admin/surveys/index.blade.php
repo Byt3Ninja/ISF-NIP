@@ -367,22 +367,15 @@ if ($_user->hasAnyRole('mentor|Registered')) {
       var token = '{{ csrf_token() }}';
       var id = $(this).data('id');
     
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary'
-        },
-        buttonsStyling: false
+        message: "{{ __('admin.Recover') }}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
       })
-      .then((result) => {
-        if (result.value) {
+      .then((ok) => {
+        if (ok) {
           $.post(url, {
               '_method': 'DELETE',
               '_token': token
@@ -390,13 +383,13 @@ if ($_user->hasAnyRole('mentor|Registered')) {
             function(response) {
               const row = table.row($('#survey-row-' + id));
               row.remove().draw();
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: "{{ __('admin.Deleted') }}!",
                 message: "{{ __('admin.DeletedSuccessfully') }}.",
               });
             }
           ).fail(function(error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}!",
               message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
             });

@@ -257,7 +257,7 @@
         ? "هل أنت متأكد من حذف '" + pageName + "'؟ سيتم حذف صفحة الهبوط نهائيًا ولن يكون رابطها العام متاحًا بعد ذلك."
         : "Are you sure you want to delete '" + pageName + "'? This landing page will be permanently removed, and its public URL will no longer be accessible.";
 
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: "{{ $l == 'ar' ? 'حذف صفحة الهبوط' : 'Delete Landing Page' }}",
         message: warningMessage,
         confirmText: "{{ $l == 'ar' ? 'حذف' : 'Delete' }}",
@@ -270,7 +270,7 @@
           },
             function (response) {
               if (response.success) {
-                releaseSuccessAlert({
+                releaseAlert('success', {
                   title: "{{ __('admin.Deleted') }}!",
                   message: "{{ $l == 'ar' ? 'تم حذف صفحة الهبوط بنجاح.' : 'Landing page deleted successfully.' }}",
                 });
@@ -285,7 +285,7 @@
                 });
 
               } else {
-                releaseFailureAlert({
+                releaseAlert('danger', {
                   title: "{{ __('admin.Error') }}",
                   message: response.message ? response.message : "{{ __('admin.DeleteFailed') }}"
                 });
@@ -296,7 +296,7 @@
             if (xhr.responseJSON && xhr.responseJSON.message) {
               errorMessage = xhr.responseJSON.message;
             }
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}",
               message: errorMessage
             })

@@ -483,8 +483,8 @@ $(function() {
           errorMessage = errors.join(', ');
         }
         
-        if (typeof releaseFailureAlert === 'function') {
-          releaseFailureAlert({
+        if (typeof releaseAlert === 'function') {
+          releaseAlert('danger', {
             title: '{{ $l == "en" ? "Error" : "خطأ" }}',
             message: errorMessage
           });

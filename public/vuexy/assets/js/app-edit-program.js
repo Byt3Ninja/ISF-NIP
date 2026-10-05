@@ -66,11 +66,6 @@
         })[c],
     );
 
-  const swalButtons = {
-    customClass: { confirmButton: "btn btn-primary" },
-    buttonsStyling: false,
-  };
-
   // Keeps FormValidation messages aligned with the column that wraps the field
   const fvRowSelector = (field, ele) => {
     const row =
@@ -536,22 +531,16 @@
       if (idx >= 0 && idx !== activeIndex()) goToStep(idx);
     }
 
-    return Swal.fire({
+    return releaseAlert("danger", {
       title: T("Error", "Error"),
-      icon: "error",
-      ...(messages.length
-        ? {
-            html: `<ul class="text-start mb-0">${messages.map((m) => `<li>${escapeHtml(m)}</li>`).join("")}</ul>`,
-          }
-        : {
-            text:
-              message ||
-              T(
-                "Something went wrong while saving this step. Please try again.",
-                "Something went wrong while saving this step. Please try again.",
-              ),
-          }),
-      ...swalButtons,
+      message: messages.length
+        ? `<ul class="text-start mb-0">${messages.map((m) => `<li>${escapeHtml(m)}</li>`).join("")}</ul>`
+        : message ||
+          T(
+            "Something went wrong while saving this step. Please try again.",
+            "Something went wrong while saving this step. Please try again.",
+          ),
+      confirmColor: "primary",
     });
   };
 

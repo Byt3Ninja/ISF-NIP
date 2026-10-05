@@ -274,29 +274,22 @@ $colors = ['primary', 'info', 'danger', 'warning'];
       $(document).on("click", "#deleteAction", function(e) {
         var url = $(this).data('url');
         var token = '{{ csrf_token() }}';
-        Swal.fire({
-        	title: "{{__('admin.SureDelete')}}",
-					text: "{{__('admin.Recover')}}",
-					icon: "warning",
-					showCancelButton: true,
-					confirmButtonText: "{{ __('admin.DYes') }}",
-					cancelButtonText: "{{ __('admin.No') }}",
-					reverseButtons: true,
-					customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-					},
-					buttonsStyling: false,
-      })
-          .then((result) => {
-            if (result.value) {
+        releaseAlert('warning', {
+          title: "{{__('admin.SureDelete')}}",
+          message: "{{__('admin.Recover')}}",
+          confirmText: "{{ __('admin.DYes') }}",
+          cancelText: "{{ __('admin.No') }}",
+          confirmColor: 'danger'
+        })
+          .then((ok) => {
+            if (ok) {
               $.post(url, {
                   '_method': 'DELETE',
                   '_token': token
                 },
                 function(response) {
                   if (response.success) {
-                    releaseSuccessAlert({
+                    releaseAlert('success', {
                       title: "{{ __('admin.Deleted') }}!",
                       message: "{{ __('admin.DeletedSuccessfully') }}.",
                     });
@@ -310,7 +303,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                     location.reload();
 
                   } else {
-                    releaseFailureAlert({
+                    releaseAlert('danger', {
                       title: "{{ __('admin.Error') }}",
                       message: response.message ? response.message : "{{ __('admin.DeleteFailed') }}"
                     });
@@ -321,7 +314,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                   errorMessage = xhr.responseJSON.message;
                 }
-                releaseFailureAlert({
+                releaseAlert('danger', {
                   title: "{{ __('admin.Error') }}",
                   message: errorMessage
                 })
