@@ -63,11 +63,11 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
     aria-hidden="true" aria-labelledby="alertModal-{{ $type }}-title" aria-describedby="alertModal-{{ $type }}-message">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 rounded-4 shadow-lg">
-        <button type="button" class="btn-close position-absolute top-0 end-0 m-4 z-3" data-bs-dismiss="modal"
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-12 z-3" data-bs-dismiss="modal"
           aria-label="Close"></button>
 
         <div
-          class="modal-body d-flex flex-column justify-content-center align-items-center text-center px-4 px-sm-5 pt-5 pb-4">
+          class="modal-body d-flex flex-column justify-content-center align-items-center text-center px-4 px-sm-12 py-12">
           <div class="avatar avatar-xl mb-4">
             <div class="avatar-initial rounded-circle bg-label-{{ $color }}">
               <i class="ti {{ $modal['icon'] }} fs-2"></i>
@@ -92,9 +92,9 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
 
           <div class="d-flex flex-column-reverse flex-sm-row justify-content-center gap-3">
             <button type="button"
-              class="btn btn-lg btn-outline-secondary px-5 fw-bold @if ($modal['hideCancel'] ?? false) d-none @endif"
+              class="btn btn-outline-secondary w-px-150 fw-bold @if ($modal['hideCancel'] ?? false) d-none @endif"
               data-alert-cancel data-bs-dismiss="modal">{{ __('admin.Cancel') }}</button>
-            <button type="button" class="btn btn-lg btn-{{ $color }} px-5 fw-bold"
+            <button type="button" class="btn btn-{{ $color }} w-px-150 fw-bold"
               data-alert-confirm>{{ $modal['confirm'] ?? __('admin.OK') }}</button>
           </div>
         </div>
