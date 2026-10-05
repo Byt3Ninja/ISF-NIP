@@ -29,25 +29,25 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
     ],
     'danger' => [
       'icon' => 'ti-x',
-      'title' => 'Danger Title',
-      'message' => "This action is permanent and can't be undone. Please confirm you want to continue.",
+      'title' => __('admin.Failure'),
+      'message' => __('admin.alert_default_danger_message'),
       'hideCancel' => true,
     ],
     'info' => [
       'icon' => 'ti-info-circle',
-      'title' => 'Info Title',
-      'message' => "Here's some helpful information about this action before you continue.",
+      'title' => __('admin.Info'),
+      'message' => __('admin.alert_default_info_message'),
       'hideCancel' => true,
     ],
     'warning' => [
       'icon' => 'ti-exclamation-circle',
-      'title' => 'Warning Title',
-      'message' => 'Are you sure you want to proceed? This action may affect your current settings.',
+      'title' => __('admin.Warning'),
+      'message' => __('admin.alert_default_warning_message'),
     ],
     'copy' => [
       'icon' => 'ti-copy',
-      'title' => 'Copy Title',
-      'message' => 'Copy the text below to your clipboard.',
+      'title' => __('admin.Copy'),
+      'message' => __('admin.alert_default_copy_message'),
       'confirm' => __('admin.Done'),
       'hideCancel' => true,
     ],
@@ -82,9 +82,10 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
 
           @if ($type === 'copy')
             <div class="input-group input-group-lg mb-8">
-              <input type="text" class="form-control" value="" readonly data-alert-copy-input aria-label="Text to copy">
-              <button type="button" class="btn btn-primary" data-alert-copy-btn>
-                <i class="ti ti-copy me-1" data-alert-copy-icon></i><span data-alert-copy-label>Copy</span>
+              <input type="text" class="form-control" value="" readonly data-alert-copy-input aria-label="{{ __('admin.alert_copy_input_aria') }}">
+              <button type="button" class="btn btn-primary" data-alert-copy-btn
+                data-alert-copy-idle="{{ __('admin.Copy') }}" data-alert-copy-done="{{ __('admin.Copied') }}">
+                <i class="ti ti-copy me-1" data-alert-copy-icon></i><span data-alert-copy-label>{{ __('admin.Copy') }}</span>
               </button>
             </div>
           @endif
@@ -116,6 +117,9 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
         color: el.dataset.alertColor,
         autoClose: parseInt(el.dataset.alertAutoClose, 10) || 0
       };
+      // Stamp the button with the color it currently carries, so a later call can
+      // drop that class instead of only ever removing the type's default one.
+      el.querySelector('[data-alert-confirm]').dataset.alertColor = el.dataset.alertColor;
     });
 
     // ---- Copy helpers ----
@@ -128,7 +132,7 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
       btn.classList.remove('btn-success');
       btn.classList.add('btn-primary');
       btn.querySelector('[data-alert-copy-icon]').className = 'ti ti-copy me-1';
-      btn.querySelector('[data-alert-copy-label]').textContent = 'Copy';
+      btn.querySelector('[data-alert-copy-label]').textContent = btn.dataset.alertCopyIdle;
     }
 
     function copyText(text, input) {
@@ -153,7 +157,7 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-success');
         btn.querySelector('[data-alert-copy-icon]').className = 'ti ti-check me-1';
-        btn.querySelector('[data-alert-copy-label]').textContent = 'Copied';
+        btn.querySelector('[data-alert-copy-label]').textContent = btn.dataset.alertCopyDone;
         clearTimeout(copyTimers.get(modalEl));
         copyTimers.set(modalEl, setTimeout(function () { resetCopyButton(modalEl); }, 2000));
       }).catch(function () {
@@ -201,8 +205,10 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
       cancelBtn.classList.toggle('d-none', opts.hideCancel !== undefined ? !!opts.hideCancel : d.hideCancel);
 
       var color = opts.confirmColor || d.color;
-      confirmBtn.classList.remove('btn-' + d.color);
+      var applied = confirmBtn.dataset.alertColor;
+      if (applied && applied !== color) confirmBtn.classList.remove('btn-' + applied);
       confirmBtn.classList.add('btn-' + color);
+      confirmBtn.dataset.alertColor = color;
 
       var copyInput = el.querySelector('[data-alert-copy-input]');
       if (copyInput) {

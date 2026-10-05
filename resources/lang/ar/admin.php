@@ -4052,4 +4052,12 @@ return [
   'tabs_locked_until_startup_saved' => 'احفظ معلومات الشركة أولاً. يتم فتح باقي الأقسام بعد إنشاء شركتك الناشئة.',
   'AssessmentCreateFailed' => 'تعذر إنشاء التقييم. حاول مرة أخرى.',
   'Service Requests' => 'طلبات الخدمات',
+  // نصوص التنبيهات الافتراضية (resources/views/partials/alert-modals.blade.php)
+  'Failure' => 'فشل',
+  'Info' => 'معلومات',
+  'alert_default_danger_message' => 'هذا الإجراء دائم ولا يمكن التراجع عنه. يرجى التأكيد للمتابعة.',
+  'alert_default_info_message' => 'إليك بعض المعلومات المفيدة حول هذا الإجراء قبل المتابعة.',
+  'alert_default_warning_message' => 'هل أنت متأكد من المتابعة؟ قد يؤثر هذا الإجراء على إعداداتك الحالية.',
+  'alert_default_copy_message' => 'انسخ النص أدناه إلى الحافظة.',
+  'alert_copy_input_aria' => 'النص المراد نسخه',
 ];

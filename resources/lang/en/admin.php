@@ -4008,4 +4008,12 @@ return [
   'tabs_locked_until_startup_saved' => 'Save your Startup Info first. The remaining sections unlock once your startup has been created.',
   'AssessmentCreateFailed' => 'Could not create the assessment. Try again.',
   'Service Requests' => 'Service Requests',
+  // Alert modal defaults (resources/views/partials/alert-modals.blade.php)
+  'Failure' => 'Failure',
+  'Info' => 'Info',
+  'alert_default_danger_message' => 'This action is permanent and can\'t be undone. Please confirm you want to continue.',
+  'alert_default_info_message' => "Here's some helpful information about this action before you continue.",
+  'alert_default_warning_message' => 'Are you sure you want to proceed? This action may affect your current settings.',
+  'alert_default_copy_message' => 'Copy the text below to your clipboard.',
+  'alert_copy_input_aria' => 'Text to copy',
 ];
