@@ -4,6 +4,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
   <style>
     .ql-toolbar .ql-custom-button {
       width: auto !important;
@@ -98,6 +99,16 @@
     /* Keep the handle in step with the rest of an ended row's dimming */
     .program-row-ended td:first-child .program-drag-handle {
       opacity: 0.6;
+    }
+    /* Branding color swatches (Pickr) — sized to sit flush with the hex
+       field next to them. */
+    .lp-branding-pickr {
+      flex: 0 0 auto;
+    }
+    .lp-branding-pickr .pcr-button {
+      width: 2.4rem;
+      height: 2.35rem;
+      border-radius: 0.375rem;
     }
   </style>
 @endsection
@@ -592,6 +603,70 @@
                   </div>
                 @endif
 
+                @if($section['key'] === 'branding')
+                  @php
+                    // Branding defaults — mirrored by lpBrandingDefaults in the
+                    // script below (section scopes are separate, so the two
+                    // cannot share one definition).
+                    $lpBrandingDefaults = [
+                      'gradient_start'  => '#030014',
+                      'gradient_middle' => '#0b0530',
+                      'gradient_end'    => '#2a1139',
+                      'button_bg'       => '#7367f0',
+                      'button_text'     => '#ffffff',
+                    ];
+                    $lpBrandingValues = $lpBrandingDefaults;
+                  @endphp
+
+                  {{-- Colors only: the inputs post with this section's own form
+                       (action = the branding endpoint). In create mode the tab
+                       sits inside the locked fieldset like every other
+                       non-general section, so nothing here is submittable
+                       until General has been saved. --}}
+                  <p class="text-muted small mb-3">
+                    {{ __('landing.Branding_Hint') }}
+                  </p>
+
+                  <div id="lpBrandingBlock" class="mb-4">
+                    <div class="row g-4">
+                      @foreach ([
+                        'gradient_start'  => __('landing.Gradient_Start_Color'),
+                        'gradient_middle' => __('landing.Gradient_Middle_Color'),
+                        'gradient_end'    => __('landing.Gradient_End_Color'),
+                        'button_bg'       => __('landing.Button_Background_Color'),
+                        'button_text'     => __('landing.Button_Text_Color'),
+                      ] as $brandingKey => $brandingLabel)
+                        <div class="col-md-6">
+                          <label class="form-label" for="branding_{{ $brandingKey }}_text">
+                            {{ $brandingLabel }}
+                            <span class="text-danger">*</span>
+                          </label>
+                          <div class="d-flex align-items-center gap-2">
+                            <div id="branding_{{ $brandingKey }}_picker" class="lp-branding-pickr"></div>
+                            <input
+                              type="text"
+                              class="form-control lp-branding-color-text"
+                              id="branding_{{ $brandingKey }}_text"
+                              name="branding[{{ $brandingKey }}]"
+                              value="{{ old('branding.' . $brandingKey, $lpBrandingValues[$brandingKey]) }}"
+                              maxlength="7"
+                              dir="ltr"
+                              spellcheck="false"
+                            >
+                          </div>
+                        </div>
+                      @endforeach
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                      <button type="button" class="btn btn-outline-secondary" id="lpBrandingReset">
+                        <i class="ti ti-refresh me-1"></i>
+                        {{ __('landing.Reset_to_Default') }}
+                      </button>
+                    </div>
+                  </div>
+                @endif
+
                 @if($section['key'] === 'custom')
                   <hr class="my-4">
                   <div class="d-flex align-items-center justify-content-end mb-3 gap-2">
@@ -681,6 +756,7 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 @endsection
 
@@ -824,6 +900,7 @@
         about:   "{{ __('landing.success.about_saved') }}",
         programs: "{{ __('landing.success.programs_saved') }}",
         how:      "{{ __('landing.success.how_saved') }}",
+        branding: "{{ __('landing.success.branding_saved') }}",
         custom:   "{{ __('landing.success.custom_saved') }}",
       };
 
@@ -851,7 +928,27 @@
         };
       };
 
+      // A Branding color field: required and hex-only (#abc or #aabbcc).
+      const lpHexField = function () {
+        return {
+          validators: {
+            notEmpty: { message: "{{ __('landing.validation.branding_color_required') }}" },
+            regexp: {
+              regexp: /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
+              message: "{{ __('landing.validation.branding_color_invalid') }}",
+            },
+          },
+        };
+      };
+
       const sectionFields = {
+        branding: {
+          'branding[gradient_start]': lpHexField(),
+          'branding[gradient_middle]': lpHexField(),
+          'branding[gradient_end]': lpHexField(),
+          'branding[button_bg]': lpHexField(),
+          'branding[button_text]': lpHexField(),
+        },
         general: {
           'general[title]': {
             validators: {
@@ -1379,6 +1476,125 @@
 
       updateHowStepButtons();
 
+      // ─────────────────────────────────────────────────────────────
+      // Branding tab — Pickr swatches that mirror the hex inputs. The tab's
+      // own section form (action = the branding endpoint) posts them and its
+      // generic Save button submits that form, so only the swatch plumbing
+      // and "Reset to Default" live here; the hex rules themselves are
+      // registered in sectionFields above.
+      // ─────────────────────────────────────────────────────────────
+      const lpBrandingDefaults = {
+        gradient_start: '#030014',
+        gradient_middle: '#0b0530',
+        gradient_end: '#2a1139',
+        button_bg: '#7367f0',
+        button_text: '#ffffff',
+      };
+
+      const lpBrandingKeys = Object.keys(lpBrandingDefaults);
+      const lpBrandingPickrs = {};
+      const lpBrandingHex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+      const lpBrandingNormalize = function (value) {
+        const raw = String(value || '').trim();
+        if (!lpBrandingHex.test(raw)) return '';
+        const hex = raw.replace('#', '').toLowerCase();
+        return '#' + (hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex);
+      };
+
+      // A failed save marks the field through the generic section handler
+      // (.is-invalid + a sibling feedback block); drop both when the color is
+      // corrected so the field stops looking broken before the next save.
+      const lpBrandingClearInvalid = function ($input) {
+        $input.removeClass('is-invalid backend-error-input').next('.backend-error-feedback').remove();
+      };
+
+      // Pushes a color into a Pickr instance without firing its events.
+      // setColor() only changes the picker's internal color; applyColor()
+      // is what updates the visible swatch button and the "previous color"
+      // shown in the popup.
+      const lpBrandingApplyToPicker = function (picker, value) {
+        if (!picker) return;
+        picker.setColor(value, true);
+        picker.applyColor(true);
+      };
+
+      const lpBrandingSetValue = function (key, value) {
+        $('#branding_' + key + '_text').val(value);
+        lpBrandingApplyToPicker(lpBrandingPickrs[key], value);
+      };
+
+      // A swatch next to every hex field; the text input stays authoritative
+      // (it is what gets posted), the swatch just mirrors it.
+      lpBrandingKeys.forEach(function (key) {
+        const el = document.getElementById('branding_' + key + '_picker');
+        const input = document.getElementById('branding_' + key + '_text');
+        const PickrLib = window.Pickr || window.pickr;
+        if (!el || !input || !PickrLib) return;
+
+        const initial = lpBrandingNormalize(input.value) || lpBrandingDefaults[key];
+        input.value = initial;
+
+        const picker = PickrLib.create({
+          el: el,
+          theme: 'classic',
+          default: initial,
+          swatches: ['#030014', '#0b0530', '#2a1139', '#7367f0', '#ffffff'],
+          components: {
+            preview: true,
+            opacity: false,
+            hue: true,
+            interaction: {
+              hex: true,
+              rgba: false,
+              hsla: false,
+              hsva: false,
+              cmyk: false,
+              input: true,
+              clear: false,
+              save: true,
+            },
+          },
+        });
+
+        const sync = function (color) {
+          if (!color) return;
+          input.value = color.toHEXA().toString().slice(0, 7).toLowerCase();
+          lpBrandingClearInvalid($(input));
+        };
+
+        picker
+          .on('change', sync)
+          .on('save', function (color) {
+            sync(color);
+            picker.hide();
+          });
+
+        lpBrandingPickrs[key] = picker;
+      });
+
+      // Typing a hex value straight into the field updates its swatch.
+      $('#lpBrandingBlock').on('input', '.lp-branding-color-text', function () {
+        lpBrandingClearInvalid($(this));
+        const key = this.id.replace(/^branding_/, '').replace(/_text$/, '');
+        const hex = lpBrandingNormalize(this.value);
+        if (hex && lpBrandingPickrs[key]) {
+          lpBrandingApplyToPicker(lpBrandingPickrs[key], hex);
+        }
+      });
+
+      // Reset to Default — puts the original gradient and every default
+      // color back into the form. Nothing is persisted until the tab's
+      // Save button is used.
+      $('#lpBrandingReset').on('click', function (e) {
+        e.preventDefault(); // in case the button sits inside the form without type="button"
+        $('#lpBrandingBlock .backend-error-feedback').remove();
+        $('#lpBrandingBlock .backend-error-input').removeClass('is-invalid backend-error-input');
+        lpBrandingKeys.forEach(function (key) {
+          lpBrandingSetValue(key, lpBrandingDefaults[key]);
+        });
+      });
+      
       // ─────────────────────────────────────────────────────────────
       // Programs selection list — client-side search + filters +
       // pagination (10 rows/page). Filtering only hides/shows rows so

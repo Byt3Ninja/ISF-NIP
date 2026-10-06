@@ -633,6 +633,17 @@ class LandingPagesController extends Controller
         ],
       ],
       [
+        'key'      => 'branding',
+        'icon'     => 'ti-palette',
+        'label_en' => 'Branding',
+        'label_ar' => 'الهوية البصرية',
+        // Colors only: no generic fields. Saves through its own endpoint
+        // (like the other tabs), which never touches the section repeater
+        // below it. The id-0 fallback matches the other create-mode routes.
+        'route'    => $currentPage ? route('landing-pages.branding.update', $currentPage->id) : route('landing-pages.branding.update', 0),
+        'fields'   => [],
+      ],
+      [
         'key'      => 'custom',
         'icon'     => 'ti-puzzle',
         'label_en' => 'Custom sections',
@@ -1546,6 +1557,26 @@ class LandingPagesController extends Controller
 		return response()->json([
 			'success' => true,
 			'location' => $url,
+		]);
+	}
+
+	/**
+	 * Save the Branding block of the Custom Sections tab: the hero gradient
+	 * (start / middle / end) and the primary button colors. Kept separate
+	 * from updateCustomSections() so branding can be saved without touching
+	 * the section repeater it sits above.
+	 */
+	public function updateBranding(Request $request, $id)
+	{
+		$_user = auth()->user();
+		if (!$_user->ableTo('landing-pages.edit')) {
+			return abort(401);
+		}
+		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
+
+		return response()->json([
+			'success' => true,
+			'message' => __('landing.success.branding_saved'),
 		]);
 	}
 

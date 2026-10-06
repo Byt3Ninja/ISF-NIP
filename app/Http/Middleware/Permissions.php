@@ -36,6 +36,7 @@ class Permissions
         'landing-pages.custom-sections.update',
         'landing-pages.custom-sections.destroy',
         'landing-pages.custom-sections.upload-image',
+        'landing-pages.branding.update',
         'landing-pages.url.check',
         'landing-pages.url.save',
         'landing-pages.programs.reorder',

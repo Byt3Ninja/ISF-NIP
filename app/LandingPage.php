@@ -70,6 +70,12 @@ class LandingPage extends Model
         'programs_description',
         'programs_description_ar',
         'programs_order',
+        // Branding
+        'branding_gradient_start',
+        'branding_gradient_middle',
+        'branding_gradient_end',
+        'branding_button_bg',
+        'branding_button_text',
     ];
 
     protected $casts = [

@@ -501,6 +501,7 @@ Route::put('settings/UpdateBranding', 'SettingsController@updatePlatformBranding
     Route::put('/landing-pages/{id}/custom-sections', 'LandingPagesController@updateCustomSections')->name('landing-pages.custom-sections.update');
     Route::delete('/landing-pages/{id}/custom-sections/{sectionId}', 'LandingPagesController@destroyCustomSection')->name('landing-pages.custom-sections.destroy');
     Route::post('/landing-pages/{id}/custom-sections/upload-image', 'LandingPagesController@uploadCustomSectionImage')->name('landing-pages.custom-sections.upload-image');
+    Route::put('/landing-pages/{id}/branding', 'LandingPagesController@updateBranding')->name('landing-pages.branding.update');
 
     Route::post('dashboard/landing-pages/{id}/programs/reorder', 'LandingPagesController@reorderPrograms')
       ->name('landing-pages.programs.reorder');
