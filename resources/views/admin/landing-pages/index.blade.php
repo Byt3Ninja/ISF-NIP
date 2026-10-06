@@ -24,7 +24,7 @@
 
   .landing-card.status-active {
     --status-color: var(--bs-primary);
-    --status-shadow: rgba(115, 103, 240, .22);
+    --status-shadow: rgba(75, 75, 75, 0.22);
   }
 
   .landing-card.status-inactive {
