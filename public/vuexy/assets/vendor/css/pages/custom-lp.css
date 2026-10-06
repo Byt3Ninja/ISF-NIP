@@ -1104,13 +1104,13 @@ header[id] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   flex: 0 0 auto;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 50%;
   color: var(--bs-secondary);
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   transition:
     color 0.2s ease,
     border-color 0.2s ease,
