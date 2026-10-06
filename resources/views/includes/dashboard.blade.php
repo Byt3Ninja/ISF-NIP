@@ -705,7 +705,7 @@
 								</div>
 								@else
 								<div class="text-center">
-									<h3>{{__('dashboard.Your final session will start soon')}}.</h3>
+									<h6 class="text-secondary">{{__('dashboard.Your final session will start soon')}}.</h6>
 								</div>
 								@endif
 							</div>
