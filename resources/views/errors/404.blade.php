@@ -63,6 +63,10 @@
 
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="/vuexy/assets/js/config.js"></script>
+    
+    <!-- BEGIN: Custom CSS-->
+    @include('admin.includes.branding-styles')
+    <!-- END: Custom CSS-->
   </head>
 
   <body>

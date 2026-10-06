@@ -23,7 +23,7 @@
   }
 
   .landing-card.status-active {
-    --status-color: #7367f0;
+    --status-color: var(--bs-primary);
     --status-shadow: rgba(115, 103, 240, .22);
   }
 

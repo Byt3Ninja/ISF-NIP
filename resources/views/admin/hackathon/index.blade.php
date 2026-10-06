@@ -4,8 +4,7 @@
 <div class="">
   <div class="">
     <!-- Header Section -->
-    <div class="col-12 mb-8 text-white text-center p-12 rounded"
-      style="background: linear-gradient(180deg, #7367f0 0%, #6610f2 100%);">
+    <div class="col-12 mb-8 text-white bg-gradient-primary text-center p-12 rounded"">
       <div class="container">
         <h1 class="display-4 fw-bold text-white">
           {{ $l == 'en' ? 'Innovate, Collaborate, and Propel into the Future!' : 'ابتكر، تعاون، وانطلق نحو المستقبل!' }}
