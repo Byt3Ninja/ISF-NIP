@@ -15,7 +15,7 @@ return [
     'Delete' => 'حذف',
     'Custom Form' => 'نموذج مخصص',
   	'NoForm' => 'لم يتم إضافة نموذج قبل مرحلة المراجعة',
-    'Screening' => 'المراجعة',
+    'Screening' => 'المراجعة الأولية',
     'Mentorship' => 'الإرشاد',
     'Training' => 'التدريب',
     'Final evaluation' => 'التقييم النهائي',

@@ -15,7 +15,7 @@ return [
     'Delete' => 'Delete',
     'Custom Form' => 'Custom Form',
   	'NoForm' => 'No form before screening!',
-    'Screening' => 'Screening',
+    'Screening' => 'Initial Screening',
     'Mentorship' => 'Mentorship',
     'Training' => 'Training',
     'Final evaluation' => 'Final Screening',
