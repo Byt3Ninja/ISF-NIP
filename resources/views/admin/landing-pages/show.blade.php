@@ -642,7 +642,7 @@
         {{-- Brand column: keeps a readable width (see .lp-footer-col--brand). --}}
         <div class="col-12 col-lg lp-footer-col lp-footer-col--brand">
           <a class="d-flex align-items-center gap-2 mb-3 gl-footer__brand" href="#hero">
-            <span class="brand-mark">
+            <span class="brand-mark {{ $page->logo_url ? 'brand-mark--bare' : '' }}">
               @if($page->logo_url)
                 <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
               @else
@@ -653,7 +653,7 @@
           </a>
           @php $footerDescription = $l == 'ar' ? $page->description_ar : $page->description; @endphp
           @if($footerDescription)
-            <p class="text-secondary small footer-desc line-clamp-3" title="{{ $footerDescription }}">
+            <p class="text-secondary small footer-desc" title="{{ $footerDescription }}">
               {{ $footerDescription }}
             </p>
           @endif
@@ -708,7 +708,7 @@
         @endif
       </div>
 
-      <hr class="border-secondary my-5">
+      <hr class="border-secondary lp-footer-divider">
       <div class="text-center">
         <p class="text-secondary small mb-0">© {{ date('Y') }} {{ __('landing.footer_rights_reserved') }}</p>
       </div>
