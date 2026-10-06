@@ -3858,7 +3858,7 @@ return [
 	'incubated' => 'حاضنه',
 	'archive' => 'ارشفه',
 	'view_tasks' => 'عرض التاسكات',
-	'Incubated_Startups' =>  'شركة ناشئة محُتضَنة',
+	'Incubated_Startups' =>  'شركة ناشئة نشطه',
 	'Applied_Startups' => ' شركة ناشئة مُتقدمة للانضمام ',
 	'Alumni_Startups' => 'شركات ناشئة متخرجة',
 	'move_task_failed' => 'فشل نقل المهمة. جارٍ التراجع عن التغييرات.',

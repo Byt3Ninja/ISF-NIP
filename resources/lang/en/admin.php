@@ -3809,7 +3809,7 @@ return [
 	'incubated' => 'Incubated',
 	'archive' => 'Archive',
 	'view_tasks'=> 'View Tasks',
-	'Incubated_Startups' => 'Incubated Startups',
+	'Incubated_Startups' => 'Active Startups',
 	'Applied_Startups' => 'Applied Startups',
 	'Alumni_Startups' => 'Alumni Startups',
 	'move_task_failed' => 'Failed to move task. Reverting changes.',
