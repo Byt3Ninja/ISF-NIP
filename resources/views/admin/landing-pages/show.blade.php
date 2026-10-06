@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/custom-lp.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/custom-lp.css?v=20261006" />
 
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
   <script src="/vuexy/assets/js/config.js"></script>
@@ -592,112 +592,119 @@
   </section> --}}
 
   <!-- ===== Footer ===== -->
+  @php
+    // The footer Programs block needs the on-page Programs section to exist
+    // (the "More Programs" link scrolls to it) and at least one program to list.
+    $lpFooterShowPrograms = $page->programs_is_enabled && $lpProgramsCount > 0;
+
+    $lpFooterQuickLinks = collect();
+    if ($page->about_is_enabled) {
+      $lpFooterQuickLinks->push(['label' => __('landing.about'), 'url' => '#about']);
+    }
+    if ($page->programs_is_enabled) {
+      $lpFooterQuickLinks->push(['label' => __('landing.programs'), 'url' => '#programs']);
+    }
+    if ($showHow) {
+      $lpFooterQuickLinks->push(['label' => __('landing.how_it_works'), 'url' => '#how-it-works']);
+    }
+    foreach ($customSections as $lpFooterSection) {
+      $lpFooterSectionLabel = $l == 'ar'
+        ? ($lpFooterSection->title_ar ?: $lpFooterSection->title)
+        : ($lpFooterSection->title ?: $lpFooterSection->title_ar);
+      $lpFooterSectionLabel = trim(strip_tags((string) $lpFooterSectionLabel));
+      if ($lpFooterSectionLabel === '') {
+        $lpFooterSectionLabel = __('landing.custom_section');
+      }
+      $lpFooterQuickLinks->push(['label' => $lpFooterSectionLabel, 'url' => '#custom-' . $lpFooterSection->id]);
+    }
+    $lpFooterQuickLinks = $lpFooterQuickLinks->take(5)->values();
+
+    // Newest first. Ten or fewer programs are all listed; anything beyond
+    // that collapses to the first nine plus a "More Programs" jump link.
+    $lpFooterPrograms = $visiblePrograms->sortByDesc('created_at')->values();
+    $lpFooterProgramsOverflow = $lpFooterPrograms->count() > 10;
+    if ($lpFooterProgramsOverflow) {
+      $lpFooterPrograms = $lpFooterPrograms->take(9)->values();
+    }
+
+    $lpFooterSocials = collect([
+      ['label' => 'LinkedIn', 'icon' => 'ti ti-brand-linkedin', 'url' => $page->linkedin],
+      ['label' => 'Instagram', 'icon' => 'ti ti-brand-instagram', 'url' => $page->instagram],
+      ['label' => 'Facebook', 'icon' => 'ti ti-brand-facebook', 'url' => $page->facebook],
+      ['label' => 'X', 'icon' => 'ti ti-brand-x', 'url' => $page->x],
+      ['label' => 'TikTok', 'icon' => 'ti ti-brand-tiktok', 'url' => $page->tiktok],
+      ['label' => 'YouTube', 'icon' => 'ti ti-brand-youtube', 'url' => $page->youtube],
+    ])->filter(fn ($social) => !empty($social['url']))->values();
+  @endphp
   <footer class="gl-footer py-5">
     <div class="container py-3">
-      <div class="row g-4">
-        <div class="col-lg-4">
-          <a class="d-flex align-items-center gap-2 mb-3" href="#hero">
-            <span class="brand-mark"><img src="{{ $page->logo_url ?? '/images/growthlab.jpeg' }}"
-                alt="Growth Labs logo"></span>
-            <span class="fw-bold text-white fs-5">{{ $page->title ?? 'Growth Labs' }}</span>
+      <div class="row g-4 lp-footer-row">
+        {{-- Brand column: keeps a readable width (see .lp-footer-col--brand). --}}
+        <div class="col-12 col-lg lp-footer-col lp-footer-col--brand">
+          <a class="d-flex align-items-center gap-2 mb-3 gl-footer__brand" href="#hero">
+            <span class="brand-mark">
+              @if($page->logo_url)
+                <img src="{{ $page->logo_url }}" alt="{{ $page->title }}">
+              @else
+                <span class="brand-mark-placeholder"></span>
+              @endif
+            </span>
+            <span class="fw-bold text-white fs-5">{{ $page->title }}</span>
           </a>
           @php $footerDescription = $l == 'ar' ? $page->description_ar : $page->description; @endphp
-          <p class="text-secondary small" style="max-width:280px;">
-            {{ $footerDescription }}
-          </p>
-          <div class="d-flex gap-2 mt-3">
-            @if ($page->x)
-              <a href="{{ $page->x ?: '#' }}" target="_blank" rel="noopener noreferrer"
-                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="X">
-                <i class="ti ti-brand-x"></i>
-              </a>
-            @endif
-            @if ($page->linkedin)
-              <a href="{{ $page->linkedin ?: '#' }}" target="_blank" rel="noopener noreferrer"
-                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="LinkedIn">
-                <i class="ti ti-brand-linkedin"></i>
-              </a>
-            @endif
-            @if ($page->instagram)
-              <a href="{{ $page->instagram ?: '#' }}" target="_blank" rel="noopener noreferrer"
-                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Instagram">
-                <i class="ti ti-brand-instagram"></i>
-              </a>
-            @endif
-            @if ($page->youtube)
-              <a href="{{ $page->youtube ?: '#' }}" target="_blank" rel="noopener noreferrer"
-                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="YouTube">
-                <i class="ti ti-brand-youtube"></i>
-              </a>
-            @endif
-            @if ($page->tiktok)
-              <a href="{{ $page->tiktok ?: '#' }}" target="_blank" rel="noopener noreferrer"
-                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="TikTok">
-                <i class="ti ti-brand-tiktok"></i>
-              </a>
-            @endif
-            @if ($page->facebook)
-              <a href="{{ $page->facebook ?: '#' }}" target="_blank" rel="noopener noreferrer"
-                class="btn btn-icon btn-text-primary waves-effect waves-light rounded-pill" aria-label="Facebook">
-                <i class="ti ti-brand-facebook"></i>
-              </a>
-            @endif
-          </div>
+          @if($footerDescription)
+            <p class="text-secondary small footer-desc line-clamp-3" title="{{ $footerDescription }}">
+              {{ $footerDescription }}
+            </p>
+          @endif
+          @if($lpFooterSocials->isNotEmpty())
+            <div class="footer-socials d-flex flex-wrap align-items-center gap-3 mt-3">
+              @foreach($lpFooterSocials as $lpFooterSocial)
+                <a href="{{ $lpFooterSocial['url'] }}" target="_blank" rel="noopener noreferrer"
+                  class="footer-social" aria-label="{{ $lpFooterSocial['label'] }}"
+                  title="{{ $lpFooterSocial['label'] }}">
+                  <i class="{{ $lpFooterSocial['icon'] }}" aria-hidden="true"></i>
+                </a>
+              @endforeach
+            </div>
+          @endif
         </div>
-        {{-- Without the Programs column the row is only two columns wide, so the
-             offset grows to keep Quick Links aligned to the right as in the design. --}}
-        <div class="col-6 col-lg-3 {{ $page->programs_is_enabled ? 'offset-lg-2' : 'offset-lg-5' }}">
-          <h6 class="mb-3">{{ __('landing.footer_quick_links') }}</h6>
-          <div class="d-flex flex-column gap-2">
-            @php
-              $footerQuickLinks = collect();
-              if ($page->about_is_enabled) {
-                $footerQuickLinks->push(['label' => __('landing.about'), 'url' => '#about']);
-              }
-              if ($page->programs_is_enabled) {
-                $footerQuickLinks->push(['label' => __('landing.programs'), 'url' => '#programs']);
-              }
-              if ($showHow) {
-                $footerQuickLinks->push(['label' => __('landing.how_it_works'), 'url' => '#how-it-works']);
-              }
-              foreach ($customSections as $footerSection) {
-                $footerSectionLabel = $l == 'ar'
-                  ? ($footerSection->title_ar ?: $footerSection->title)
-                  : ($footerSection->title ?: $footerSection->title_ar);
-                $footerSectionLabel = trim(strip_tags((string) $footerSectionLabel));
-                if ($footerSectionLabel === '') {
-                  $footerSectionLabel = __('landing.custom_section');
-                }
-                $footerQuickLinks->push(['label' => $footerSectionLabel, 'url' => '#custom-' . $footerSection->id]);
-              }
-              $footerQuickLinks = $footerQuickLinks->take(5);
-            @endphp
-            @foreach($footerQuickLinks as $footerLink)
-              <a href="{{ $footerLink['url'] }}" class="flink">{{ $footerLink['label'] }}</a>
-            @endforeach
+
+        {{-- The link columns are content-sized (col-lg-auto) and the row uses
+             space-between, so the gap between the brand block, Quick Links and
+             Programs is identical in both LTR and RTL. No manual offsets. --}}
+        @if($lpFooterQuickLinks->isNotEmpty())
+          <div class="col-12 col-md-6 col-lg-auto lp-footer-col">
+            <h6 class="mb-3">{{ __('landing.footer_quick_links') }}</h6>
+            <div class="gl-footer__links">
+              @foreach($lpFooterQuickLinks as $lpFooterLink)
+                <a href="{{ $lpFooterLink['url'] }}" class="flink">{{ $lpFooterLink['label'] }}</a>
+              @endforeach
+            </div>
           </div>
-        </div>
-        @if($page->programs_is_enabled)
-        <div class="col-6 col-lg-3">
-          <h6 class="mb-3">{{ __('landing.footer_program_links') }}</h6>
-          <div class="d-flex flex-column gap-2">
-            @php $footerPrograms = $visiblePrograms->sortByDesc('created_at')->take(5); @endphp
-            @forelse($footerPrograms as $footerProgram)
-              @php
-                $footerProgramTitle = $l == 'ar'
-                  ? ($footerProgram->title_ar ?: $footerProgram->title)
-                  : ($footerProgram->title ?: $footerProgram->title_ar);
-                $footerProgramUrl = ($footerProgram->public_slug && $footerProgram->organization && $footerProgram->organization->short_code)
-                  ? route('public.program_join', ['org_slug' => $footerProgram->organization->short_code, 'program_slug' => $footerProgram->public_slug])
-                  : '#programs';
-              @endphp
-              <a href="{{ $footerProgramUrl }}" class="flink" target="_blank"
-                rel="noopener noreferrer">{{ $footerProgramTitle }}</a>
-            @empty
-              <span class="text-secondary small">{{ __('landing.No_Programs') }}</span>
-            @endforelse
+        @endif
+
+        @if($lpFooterShowPrograms)
+          <div class="col-12 col-md-6 col-lg-auto lp-footer-col">
+            <h6 class="mb-3">{{ __('landing.programs') }}</h6>
+            <div class="gl-footer__links {{ $lpFooterPrograms->count() >= 6 ? 'gl-footer__links--2col' : '' }}">
+              @foreach($lpFooterPrograms as $lpFooterProgram)
+                @php
+                  $lpFooterProgramTitle = $l == 'ar'
+                    ? ($lpFooterProgram->title_ar ?: $lpFooterProgram->title)
+                    : ($lpFooterProgram->title ?: $lpFooterProgram->title_ar);
+                  $lpFooterProgramUrl = ($lpFooterProgram->public_slug && $lpFooterProgram->organization && $lpFooterProgram->organization->short_code)
+                    ? route('public.program_join', ['org_slug' => $lpFooterProgram->organization->short_code, 'program_slug' => $lpFooterProgram->public_slug])
+                    : null;
+                @endphp
+                <a href="{{ $lpFooterProgramUrl ?: '#programs' }}" class="flink"
+                  @if($lpFooterProgramUrl) target="_blank" rel="noopener noreferrer" @endif>{{ $lpFooterProgramTitle }}</a>
+              @endforeach
+              @if($lpFooterProgramsOverflow)
+                <a href="#programs" class="flink flink--more">{{ __('landing.footer_more_programs') }}</a>
+              @endif
+            </div>
           </div>
-        </div>
         @endif
       </div>
 

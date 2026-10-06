@@ -361,7 +361,11 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form id="addStepForm" class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off" 
+        autocomplete="off"
+        {{-- Native validation dies with "invalid form control ... is not focusable"
+             when a required field sits behind a hidden menu; validateStepForm()
+             owns every rule instead. --}}
+        novalidate
         {{-- onsubmit="disableSubmitButton()" --}}
         >
         {!! csrf_field() !!}
@@ -459,7 +463,7 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off" id="editStepForm">
+        autocomplete="off" id="editStepForm" novalidate>
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Modify current step') }}</h4>
@@ -576,7 +580,9 @@
     title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
     description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
     descriptionMaxLength: currentLang == 'en' ? 'Description must not exceed 100 characters.' : 'يجب ألا يتجاوز الوصف 100 حرف.', 
-    teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.'
+    teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.',
+    dateRange: currentLang == 'en' ? 'Start and end dates are required.' : 'تاريخ البداية والنهاية مطلوب.',
+    formSelect: currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار النموذج.'
   };
 
  function validateStepForm(form, mode = 'add') {
@@ -586,6 +592,7 @@
   const teamNumberInput = form.querySelector(`${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`);
   const formSelect = form.querySelector(`${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`);
   const screeningSelect = form.querySelector(`${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`);
+  const dateRange = form.querySelector('[name="date_range"]');
 
   // Remove any previous error messages
   const existingErrors = form.querySelectorAll('.invalid-feedback');
@@ -603,6 +610,10 @@
     element.insertAdjacentElement('afterend', errorSpan);
   };
 
+  // A control behind a hidden menu is not focusable, so the browser can neither
+  // report nor clear an error on it. Only ever validate what is on screen.
+  const isShown = (element) => !!element && element.offsetParent !== null;
+
   // Validation checks
   if (!stepTitle.value.trim()) {
     showError(stepTitle, errors.title);
@@ -619,8 +630,21 @@
     return false;
   }
 
+  if (isShown(dateRange) && !dateRange.value.trim()) {
+    showError(dateRange, errors.dateRange);
+    return false;
+  }
+
+  // The form picker is required only while it is visible (add flow sets the
+  // attribute once #menu1 is shown); the edit flow allows "— No form —".
+  if (isShown(formSelect) && formSelect.required && !formSelect.value) {
+    showError(formSelect, errors.formSelect);
+    return false;
+  }
+
   // Check for conditional required fields based on step type
-  // Form is optional: a step may intentionally have no form ("— No form —").
+  // The edit flow may intentionally have no form ("— No form —"); the add flow
+  // requires one only while its picker is on screen (checked above).
 
   /* if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
     showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
@@ -633,7 +657,7 @@
   }
 
   // Clear any invalid styling
-  [stepTitle, stepDescription, teamNumberInput, formSelect, screeningSelect].forEach(input => {
+  [stepTitle, stepDescription, teamNumberInput, formSelect, screeningSelect, dateRange].forEach(input => {
     if (input) input.classList.remove('is-invalid');
   });
 
@@ -700,40 +724,37 @@ if (editStepForm) {
     editStepForm.submit();
   });
 }
+
+function clearFieldError(input) {
+  if (!input) return;
+  input.classList.remove('is-invalid');
+
+  // Remove the next sibling if it's an error message
+  const next = input.nextElementSibling;
+  if (next && next.classList.contains('invalid-feedback')) {
+    next.remove();
+  }
+}
+
 function clearValidationOnChange(form, mode = 'add') {
   const fields = [
     `${mode === 'add' ? '#title' : '#mtitle'}`,
     `${mode === 'add' ? '#description' : '#mdescription'}`,
     `${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`,
     `${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`,
-    `${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`
+    `${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`,
+    '[name="date_range"]'
   ];
 
   fields.forEach(selector => {
     const input = form.querySelector(selector);
     if (!input) return;
 
-    input.addEventListener('input', () => {
-      input.classList.remove('is-invalid');
-
-      // Remove the next sibling if it's an error message
-      const next = input.nextElementSibling;
-      if (next && next.classList.contains('invalid-feedback')) {
-        next.remove();
-      }
-    });
+    input.addEventListener('input', () => clearFieldError(input));
 
     // Also listen for change events on select elements
     if (input.tagName === 'SELECT') {
-      input.addEventListener('change', () => {
-        input.classList.remove('is-invalid');
-
-        // Remove the next sibling if it's an error message
-        const next = input.nextElementSibling;
-        if (next && next.classList.contains('invalid-feedback')) {
-          next.remove();
-        }
-      });
+      input.addEventListener('change', () => clearFieldError(input));
     }
   });
 }
@@ -783,6 +804,9 @@ if (editStepForm) {
     };
 
     function syncRangeToHiddenFields(picker, fromSelector, toSelector) {
+      // flatpickr writes the visible value itself and never fires an input event,
+      // so drop any "dates required" error the last submit attempt left behind.
+      clearFieldError(picker.input);
       const dates = picker.selectedDates;
       if (dates.length < 2) return;
       $(fromSelector).val(picker.formatDate(dates[0], 'Y-m-d'));
@@ -964,16 +988,20 @@ if (editStepForm) {
           if(step === '6'){
             $('#team_number').show();
           }
-          if (menu !== null) {
+          // jQuery returns an empty set (never null) for #menu2/#menu3/#menu4/#menu6,
+          // which don't exist any more. Only require FormSelect when its picker is
+          // actually on screen, otherwise native validation blocks the submit with
+          // "An invalid form control with name='FormSelect' is not focusable."
+          if (menu.length) {
             $.ajax({
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected").data(
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
                 $('#FormSelect').append(response.appear)
-                // Add required attribute only if this menu is shown
-                $('#FormSelect').attr('required', 'required');
                 menu.show();
+                // Add required attribute only once the picker is visible
+                $('#FormSelect').attr('required', 'required');
               },
               error: function(error) {
                 console.log(error);
@@ -989,9 +1017,9 @@ if (editStepForm) {
               success: function(response) {
                 $('#FormSelect').empty()
                 $('#FormSelect').append(response.appear)
-                // Add required attribute for step 5
-                $('#FormSelect').attr('required', 'required');
                 $('#menu1').show();
+                // Add required attribute for step 5 once the picker is visible
+                $('#FormSelect').attr('required', 'required');
               },
               error: function(error) {
                 console.log(error);

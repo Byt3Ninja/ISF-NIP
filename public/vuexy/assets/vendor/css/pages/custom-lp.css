@@ -1068,6 +1068,83 @@ header[id] {
   overflow-wrap: anywhere;
 }
 
+/* The logo keeps its natural proportions instead of being cropped to the
+   square brand mark, and drops the gradient so transparent logos read well. */
+.gl-footer .brand-mark {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.gl-footer .brand-mark img {
+  object-fit: contain;
+}
+
+/* Description fills the column width and clamps to three comfortable lines;
+   the full copy stays reachable through the native title tooltip. */
+.gl-footer .footer-desc {
+  margin-bottom: 0;
+  line-height: 1.7;
+}
+
+.gl-footer .footer-socials a.footer-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  color: var(--bs-secondary);
+  font-size: 1.05rem;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.gl-footer .footer-socials a.footer-social:hover {
+  color: var(--bs-white);
+  border-color: rgba(var(--bs-primary-rgb), 0.65);
+  background-color: rgba(var(--bs-primary-rgb), 0.18);
+  transform: translateY(-2px);
+}
+
+/* Quick Links and Programs share one stack so both columns read the same. */
+.gl-footer .gl-footer__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Fixed tracks: a content-sized (auto) flex column can't resolve 1fr tracks. */
+.gl-footer .gl-footer__links.gl-footer__links--2col {
+  display: grid;
+  grid-template-columns: repeat(2, 12rem);
+  gap: 0.5rem 1rem;
+}
+
+/* Footer columns: the brand block keeps a readable width while the link
+   columns hug their content. space-between then splits the leftover space
+   into identical gaps between all three blocks. Flex mirrors in RTL. */
+@media (min-width: 992px) {
+  .gl-footer .lp-footer-row {
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .gl-footer .lp-footer-col--brand {
+    flex: 0 1 26rem;
+    max-width: 26rem;
+  }
+
+  .gl-footer .lp-footer-col:not(.lp-footer-col--brand) {
+    flex: 0 0 auto;
+    max-width: 26rem;
+  }
+}
+
 @media (max-width: 991.98px) {
   .gl-nav .navbar-collapse {
     margin-top: 1rem;
@@ -1137,6 +1214,11 @@ header[id] {
   .gl-cta {
     padding: 3rem 1.5rem;
     border-radius: 24px;
+  }
+
+  /* On phones the 2-column Programs grid must shrink to the screen. */
+  .gl-footer .gl-footer__links.gl-footer__links--2col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

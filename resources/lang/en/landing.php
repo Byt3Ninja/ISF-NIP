@@ -228,6 +228,7 @@ return [
     'footer_navigate' => 'Navigate',
     'footer_quick_links' => 'Quick Links',
     'footer_program_links' => 'Program Links',
+    'footer_more_programs' => 'More Programs',
     'footer_process' => 'Process',
     'footer_company' => 'Company',
     'footer_accelerators' => 'Accelerators',
@@ -236,6 +237,6 @@ return [
     'footer_contact' => 'Contact',
     'footer_partners' => 'Partners',
     'footer_privacy' => 'Privacy',
-    'footer_rights_reserved' => 'All rights reserved.',
+    'footer_rights_reserved' => 'All rights reserved',
     'footer_built_for_founders' => 'Built for founders, by founders.',
 ];

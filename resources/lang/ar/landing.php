@@ -228,6 +228,7 @@ return [
     'footer_navigate' => 'تصفح',
     'footer_quick_links' => 'روابط سريعة',
     'footer_program_links' => 'روابط البرامج',
+    'footer_more_programs' => 'المزيد من البرامج',
     'footer_process' => 'كيف يعمل',
     'footer_company' => 'الشركة',
     'footer_accelerators' => 'المسرّعات',
@@ -236,6 +237,6 @@ return [
     'footer_contact' => 'تواصل معنا',
     'footer_partners' => 'الشركاء',
     'footer_privacy' => 'الخصوصية',
-    'footer_rights_reserved' => 'جميع الحقوق محفوظة.',
+    'footer_rights_reserved' => 'جميع الحقوق محفوظة',
     'footer_built_for_founders' => 'صُنع من قبل المؤسسين، للمؤسسين.',
 ];

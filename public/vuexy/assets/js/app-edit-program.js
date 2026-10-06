@@ -909,11 +909,11 @@
     await postStep(stepUrl("landing"), step4);
     await postStep(stepUrl("pages"), step5);
 
-    await Swal.fire({
+    await releaseAlert("success", {
       title: isEditMode
         ? T("Program updated!", "Program updated!")
         : T("Program published!", "Program published!"),
-      text: isEditMode
+      message: isEditMode
         ? T(
             "Your program has been updated successfully.",
             "Your program has been updated successfully.",
@@ -922,8 +922,7 @@
             "Your program has been created successfully.",
             "Your program has been created successfully.",
           ),
-      icon: "success",
-      ...swalButtons,
+      confirmColor: "success",
     });
     window.location.href = LIST_URL;
   };
