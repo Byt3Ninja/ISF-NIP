@@ -1143,7 +1143,7 @@ header[id] {
 /* Breathing room above the divider line that precedes the copyright. */
 .gl-footer .lp-footer-divider {
   margin-top: 4rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.2rem;
 }
 
 /* Footer columns: the brand block keeps a readable width while the link

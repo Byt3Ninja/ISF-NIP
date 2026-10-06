@@ -637,7 +637,7 @@
     ])->filter(fn ($social) => !empty($social['url']))->values();
   @endphp
   <footer class="gl-footer py-5">
-    <div class="container py-3">
+    <div class="container pt-3">
       <div class="row g-4 lp-footer-row">
         {{-- Brand column: keeps a readable width (see .lp-footer-col--brand). --}}
         <div class="col-12 col-lg lp-footer-col lp-footer-col--brand">
