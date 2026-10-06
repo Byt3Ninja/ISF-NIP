@@ -21,6 +21,100 @@
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/custom-lp.css?v=20261006" />
 
+  @php
+    // ── Branding (Custom Sections tab) ────────────────────────────
+    // Saved colors override the hero gradient and the primary buttons.
+    // Fallbacks mirror the field defaults in the admin form; anything
+    // missing or malformed falls back the same way.
+    $lpHex = function ($value, $fallback) {
+      $hex = ltrim(trim((string) $value), '#');
+      if (strlen($hex) === 3) {
+        $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+      }
+      return preg_match('/^[0-9a-fA-F]{6}$/', $hex) ? '#' . strtolower($hex) : $fallback;
+    };
+    $lpRgb = function ($hex) {
+      $h = ltrim($hex, '#');
+      return hexdec(substr($h, 0, 2)) . ', ' . hexdec(substr($h, 2, 2)) . ', ' . hexdec(substr($h, 4, 2));
+    };
+    $lpShade = function ($hex, $factor) {
+      $h = ltrim($hex, '#');
+      $out = '#';
+      for ($i = 0; $i < 6; $i += 2) {
+        $v = (int) round(hexdec(substr($h, $i, 2)) * $factor);
+        $out .= str_pad(dechex(max(0, min(255, $v))), 2, '0', STR_PAD_LEFT);
+      }
+      return $out;
+    };
+
+    $lpGradientStart  = $lpHex($page->branding_gradient_start, '#030014');
+    $lpGradientMiddle = $lpHex($page->branding_gradient_middle, '#0b0530');
+    $lpGradientEnd    = $lpHex($page->branding_gradient_end, '#2a1139');
+    $lpButtonBg       = $lpHex($page->branding_button_bg, '#7367f0');
+    $lpButtonText     = $lpHex($page->branding_button_text, '#ffffff');
+    $lpButtonBgDark   = $lpShade($lpButtonBg, 0.85);
+  @endphp
+
+  {{-- Branding overrides sit after custom-lp.css so they win on equal
+       specificity; the theme's `!important` hover rules are matched here. --}}
+  <style>
+    :root {
+      --lp-branding-gradient-start: {{ $lpGradientStart }};
+      --lp-branding-gradient-middle: {{ $lpGradientMiddle }};
+      --lp-branding-gradient-end: {{ $lpGradientEnd }};
+      --lp-branding-button-bg: {{ $lpButtonBg }};
+      --lp-branding-button-text: {{ $lpButtonText }};
+      --lp-branding-button-bg-dark: {{ $lpButtonBgDark }};
+    }
+
+    /* Hero backdrop: the three saved stops at 0% / 55% / 100%. */
+    .hero-gradient {
+      background: linear-gradient(
+        170deg,
+        var(--lp-branding-gradient-start) 0%,
+        var(--lp-branding-gradient-middle) 55%,
+        var(--lp-branding-gradient-end) 100%
+      ) !important;
+    }
+
+    /* Hero CTAs (nav + hero) and every primary button follow the saved
+       background / text pair. */
+    .hero-nav-cta,
+    .hero-primary-cta {
+      background: var(--lp-branding-button-bg) !important;
+      color: var(--lp-branding-button-text) !important;
+      box-shadow: 0 10px 30px rgba({{ $lpRgb($lpButtonBg) }}, 0.4) !important;
+    }
+
+    .hero-nav-cta:hover,
+    .hero-primary-cta:hover {
+      background: var(--lp-branding-button-bg-dark) !important;
+      color: var(--lp-branding-button-text) !important;
+      box-shadow: 0 18px 46px rgba({{ $lpRgb($lpButtonBg) }}, 0.5) !important;
+    }
+
+    .btn-primary:not(:disabled):not(.disabled) {
+      background-color: var(--lp-branding-button-bg) !important;
+      border-color: var(--lp-branding-button-bg) !important;
+      color: var(--lp-branding-button-text) !important;
+      box-shadow: 0 0.125rem 0.375rem 0 rgba({{ $lpRgb($lpButtonBg) }}, 0.3) !important;
+    }
+
+    .btn-primary:hover,
+    .btn-check:focus + .btn-primary,
+    .btn-primary:focus,
+    .btn-primary.focus,
+    .btn-check:checked + .btn-primary,
+    .btn-primary:active,
+    .btn-primary.active,
+    .btn-primary.show.dropdown-toggle,
+    .show > .btn-primary.active.dropdown-toggle {
+      background-color: var(--lp-branding-button-bg-dark) !important;
+      border-color: var(--lp-branding-button-bg-dark) !important;
+      color: var(--lp-branding-button-text) !important;
+    }
+  </style>
+
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
   <script src="/vuexy/assets/js/config.js"></script>
 </head>
