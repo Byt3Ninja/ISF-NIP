@@ -267,9 +267,18 @@
               {{ $heroDescription }}
             </p>
           @endif
+          {{-- Primary Action: the CTA text comes from the Hero tab's
+               configuration (per language), and an empty CTA Link falls
+               back to jumping to this page's Programs section. --}}
+          @php
+            $heroCtaText = $l == 'ar'
+              ? ($page->hero_cta_text_ar ?: __('landing.browse_open_programs'))
+              : ($page->hero_cta_text ?: __('landing.browse_open_programs'));
+            $heroCtaLink = $page->hero_cta_link ?: '#programs';
+          @endphp
           <div class="d-flex flex-wrap gap-3 mt-5">
-            @if($page->programs_is_enabled)
-              <a href="#programs" class="btn hero-primary-cta btn-lg">{{ __('landing.browse_open_programs') }} <i
+            @if($page->hero_cta_link || $page->programs_is_enabled)
+              <a href="{{ $heroCtaLink }}" class="btn hero-primary-cta btn-lg">{{ $heroCtaText }} <i
                   class="ti ti-arrow-up-right ms-1"></i></a>
             @endif
             {{-- @if($showHow)

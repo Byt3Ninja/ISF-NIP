@@ -452,6 +452,10 @@
                           >
                       @endswitch
 
+                      @if(!empty($field['hint_en']) || !empty($field['hint_ar']))
+                        <div class="form-text">{{ $l == 'ar' ? ($field['hint_ar'] ?? '') : ($field['hint_en'] ?? '') }}</div>
+                      @endif
+
                       @error($fieldName)
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                       @enderror
@@ -1337,6 +1341,9 @@
         heroImageRequired:  "{{ __('landing.validation.hero_image_required') }}",
         heroImageFormat:    "{{ __('landing.validation.image_format_invalid') }}",
         heroImageSize:      "{{ __('landing.validation.hero_image_size_exceeded') }}",
+        heroCtaText:        "{{ __('landing.validation.field_required') }}",
+        heroCtaTextArabic:  "{{ __('landing.validation.field_required') }}",
+        heroCtaLink:        "{{ __('landing.validation.link_invalid') }}",
         aboutTitle:         "{{ __('landing.validation.section_title_required') }}",
         aboutSubtitle:      "{{ __('landing.validation.section_subtitle_required') }}",
         aboutDescription:   "{{ __('landing.validation.section_description_required') }}",
@@ -1481,6 +1488,24 @@
           'hero[description_ar]': {
             validators: {
               notEmpty: { message: validationMessages.descriptionArabic },
+            },
+          },
+          'hero[cta_text]': {
+            validators: {
+              notEmpty: { message: validationMessages.heroCtaText },
+            },
+          },
+          'hero[cta_text_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.heroCtaTextArabic },
+            },
+          },
+          'hero[cta_link]': {
+            validators: {
+              uri: {
+                protocol: 'http, https',
+                message: validationMessages.heroCtaLink,
+              },
             },
           },
           'hero[hero_image]': buildImageField(

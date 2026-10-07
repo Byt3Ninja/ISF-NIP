@@ -180,6 +180,7 @@ return [
         'step_description_required' => 'يرجى إدخال وصف الخطوة.',
         'step_description_ar_required' => 'يرجى إدخال وصف الخطوة باللغة العربيه.',
         'field_required' => 'هذا الحقل مطلوب.',
+        'link_invalid' => 'يرجى إدخال رابط صالح.',
         'custom_section_field_required' => 'هذا الحقل مطلوب.',
         'branding_color_required' => 'يرجى اختيار لون.',
         'branding_color_invalid' => 'يرجى إدخال لون سداسي صالح (مثال: #7367f0).',

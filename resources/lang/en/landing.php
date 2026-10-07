@@ -180,6 +180,7 @@ return [
         'step_description_required' => 'Please enter the step description.',
         'step_description_ar_required' => 'Please enter the step description in Arabic.',
         'field_required' => 'This field is required.',
+        'link_invalid' => 'Please enter a valid link.',
         'custom_section_field_required' => 'This field is required.',
         'branding_color_required' => 'Please choose a color.',
         'branding_color_invalid' => 'Please enter a valid hex color (e.g. #7367f0).',
