@@ -16,8 +16,8 @@
   </div>
 
   <div class="history-card__body">
-    <p class="history-card__recommendation-label">{{ __('admin.Overall_Recommendation') }}</p>
-    <p class="history-card__recommendation">Good progress, but room for scaling</p>
+    {{-- <p class="history-card__recommendation-label">{{ __('admin.Overall_Recommendation') }}</p>
+    <p class="history-card__recommendation">Good progress, but room for scaling</p> --}}
   </div>
 
   <div class="history-card__meta">

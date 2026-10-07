@@ -123,12 +123,12 @@
             <div class="w-100 d-flex flex-column gap-3 card-body">
               <div
                 class="d-flex flex-column flex-md-row gap-2 flex-grow-1 justify-content-between align-items-md-center mb-2">
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+                {{-- <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
                   <h6 class="text-sm text-muted mb-0 text-nowrap">{{ __('admin.Overall_Recommendation') }}</h6>
                   <div class="badge bg-label-secondary text-dark py-2 fs-6">
                       {{ __('admin.Good_progress_but_room_for_scaling') }}
                   </div>
-                </div>
+                </div> --}}
                 <div class="w-100 d-flex flex-grow-1 justify-content-start justify-content-md-end align-items-center">
                   @php
                     // canStartAssessment() ran in the controller; 'reason' tells us
