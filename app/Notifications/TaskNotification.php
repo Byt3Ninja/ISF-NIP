@@ -130,6 +130,9 @@ class TaskNotification extends Notification implements ShouldQueue
         if ($action === 'archive' && $notifiable->hasRole('registered')) {
             return $this->toFounderArchivedMail($notifiable, $from, $orgData);
         }
+        if ($action === 'reopen' && $notifiable->hasRole('registered')) {
+            return $this->toFounderReopenedMail($notifiable, $from, $orgData);
+        }
 
         App::setLocale($notifiable->language ?? 'en');
 
@@ -244,6 +247,54 @@ class TaskNotification extends Notification implements ShouldQueue
                 'taskTitle' => $task->title ?? '',
                 'taskDescription' => trim((string) ($task->description ?? '')),
                 'taskProgramName' => $programName,
+                'taskViewUrl' => $viewUrl,
+            ], $orgData));
+    }
+
+    /**
+     * Founder "task reopened" email: platform default language, and a
+     * View Task link that opens the founder's task board for the task's
+     * type (admin-created ProgramTask vs mentor-created MentorshipTask).
+     */
+    protected function toFounderReopenedMail($notifiable, array $from, array $orgData): MailMessage
+    {
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $task = $this->data['task'];
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $notifiable->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+            $lastName = trim((string) $notifiable->last_name_en);
+        }
+
+        $viewUrl = $task instanceof ProgramTask
+            ? route('tasks.index')
+            : route('startup.mentorship_tasks.dashboard.view');
+
+        $programName = $task instanceof ProgramTask
+            ? ($task->program?->title ?? '')
+            : ($task->mentorshipRequest?->cycle?->title ?? '');
+
+        $dueDate = $task->due_date ? Carbon::parse($task->due_date)->format('Y-m-d') : '';
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
+            ->subject(__('email.task_reopened_email.subject', ['title' => $task->title ?? ''], $locale))
+            ->view('emails.task_reopened_founder', array_merge([
+                'taskLocale' => $locale,
+                'taskRecipientName' => trim($firstName . ' ' . $lastName),
+                'taskOrgName' => $orgName,
+                'taskTitle' => $task->title ?? '',
+                'taskDescription' => trim((string) ($task->description ?? '')),
+                'taskProgramName' => $programName,
+                'taskDueDate' => $dueDate,
                 'taskViewUrl' => $viewUrl,
             ], $orgData));
     }
