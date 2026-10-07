@@ -127,6 +127,9 @@ class TaskNotification extends Notification implements ShouldQueue
         if ($action === 'add' && $notifiable->hasRole('registered')) {
             return $this->toFounderAssignedMail($notifiable, $from, $orgData);
         }
+        if ($action === 'archive' && $notifiable->hasRole('registered')) {
+            return $this->toFounderArchivedMail($notifiable, $from, $orgData);
+        }
 
         App::setLocale($notifiable->language ?? 'en');
 
@@ -197,6 +200,51 @@ class TaskNotification extends Notification implements ShouldQueue
                 'taskDescription' => trim((string) ($task->description ?? '')),
                 'taskViewUrl' => $viewUrl,
                 'taskAttachments' => $attachments,
+            ], $orgData));
+    }
+
+    /**
+     * Founder "task archived" email: platform default language, and a
+     * View Task link that opens the archived-tasks board for the task's
+     * type (admin-created ProgramTask vs mentor-created MentorshipTask).
+     */
+    protected function toFounderArchivedMail($notifiable, array $from, array $orgData): MailMessage
+    {
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $task = $this->data['task'];
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $notifiable->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+            $lastName = trim((string) $notifiable->last_name_en);
+        }
+
+        $viewUrl = $task instanceof ProgramTask
+            ? route('tasks.index')
+            : route('startup.mentorship_tasks.dashboard.view');
+
+        $programName = $task instanceof ProgramTask
+            ? ($task->program?->title ?? '')
+            : ($task->mentorshipRequest?->cycle?->title ?? '');
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
+            ->subject(__('email.task_archived_email.subject', ['title' => $task->title ?? ''], $locale))
+            ->view('emails.task_archived_founder', array_merge([
+                'taskLocale' => $locale,
+                'taskRecipientName' => trim($firstName . ' ' . $lastName),
+                'taskOrgName' => $orgName,
+                'taskTitle' => $task->title ?? '',
+                'taskDescription' => trim((string) ($task->description ?? '')),
+                'taskProgramName' => $programName,
+                'taskViewUrl' => $viewUrl,
             ], $orgData));
     }
 

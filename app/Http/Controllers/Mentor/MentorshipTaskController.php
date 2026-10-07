@@ -738,10 +738,19 @@ class MentorshipTaskController extends Controller
 			$startup = User::find($task->user_id);
 
 			$message = "Task Status Updated: " . $task->title;
+
+			// The founder's own action depends on which transition actually
+			// happened -- archiving/reopening get their own dedicated emails,
+			// any other column move keeps the generic status-update one.
+			$founderAction = match(true) {
+				$status === 'archived'    => 'archive',
+				$old_status === 'archived' => 'reopen',
+				default                   => 'move',
+			};
 			$data = [
 				'task'         => $task,
 				'message'      => $message,
-				'action'       => 'move',
+				'action'       => $founderAction,
 				'mentor'       => $mentor,
 				'startupNames' => [$startup->name ?? ''],
 			];

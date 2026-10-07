@@ -219,6 +219,18 @@ return [
         'regards' => 'مع أطيب التحيات،',
         'team' => 'فريق :organization_name',
     ],
+    'task_archived_email' => [
+        'subject' => 'تمت أرشفة مهمة: :title',
+        'hello' => 'مرحباً',
+        'archived' => 'تمت أرشفة مهمة.',
+        'details_title' => 'تفاصيل المهمة',
+        'task_title' => 'العنوان',
+        'description' => 'الوصف',
+        'program' => 'البرنامج',
+        'button' => 'عرض المهمة',
+        'regards' => 'مع أطيب التحيات،',
+        'team' => 'فريق :organization_name',
+    ],
     'custom_mail'=> [
         'welcome_title'=> 'مرحبا بك في هاكاثونات ومعسكرات نمو السياحة',
         'dear_participant'=> 'عزيزي المشارك',

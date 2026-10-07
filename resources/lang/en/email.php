@@ -211,6 +211,18 @@ return [
         'regards' => 'Best regards,',
         'team' => ':organization_name Team',
     ],
+    'task_archived_email' => [
+        'subject' => 'A Task Has Been Archived: :title',
+        'hello' => 'Hello',
+        'archived' => 'A program task has been archived.',
+        'details_title' => 'Task Details',
+        'task_title' => 'Title',
+        'description' => 'Description',
+        'program' => 'Program',
+        'button' => 'View Task',
+        'regards' => 'Best regards,',
+        'team' => ':organization_name Team',
+    ],
     'custom_mail' => [
         'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
         'dear_participant' => 'Dear Participant',
