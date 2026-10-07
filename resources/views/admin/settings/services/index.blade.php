@@ -144,7 +144,8 @@
                     <img 
                       src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" 
                       alt="{{ $service->name_en }}" 
-                      class="w-100 h-100"
+                      class="w-100 h-100 object-fit-cover"
+                      style="object-position: center;"
                       onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none')"
                     />
                   @endif
