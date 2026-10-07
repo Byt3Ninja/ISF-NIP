@@ -77,12 +77,12 @@
             <ul class="nav nav-pills flex-nowrap px-5 py-4">
               @foreach ($pills as $key => $pill)
                 <li class="nav-item me-1">
-                  @if ($pill == 'question-assessment' && !$assessment_user)
+                  {{-- @if ($pill == 'question-assessment' && !$assessment_user)
                     <span class="nav-link" style="cursor: not-allowed; opacity: 0.5;"
                           title="{{ __('admin.No_Questions_Available') }}">
                       <span class="fs-6">{{ __('admin.Question_assessment') }}</span>
                     </span>
-                  @else
+                  @else --}}
                     <a href="/dashboard/{{ $key == 2 ? 'history-assessment' : $pill }}"
                        class="nav-link {{ $key == 0 ? 'active' : '' }}">
                       <span class="fs-6">
@@ -95,7 +95,7 @@
                         @endif
                       </span>
                     </a>
-                  @endif
+                  {{-- @endif --}}
                 </li>
               @endforeach
             </ul>

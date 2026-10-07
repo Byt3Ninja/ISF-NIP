@@ -56,23 +56,24 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
     </div>
     <!-- / Pills -->
 
-    @if(!$assessment_user)
+    @if(!isset($assessment_user))
       <div class="card">
-        <div class="card-body">
-          <div class="d-flex flex-column align-items-center justify-content-center gap-3">
-            <h4 class="text-center mb-0">{{ __('admin.No_Assessment') }}</h4>
-            <h6 class="text-center text-secondary">{{ __('admin.No_Assessment_right_now') }}</h6>
-
-            <div class="w-px-250">
-              <button 
-                id="startAssessmentBtn"
-                class="btn btn-lg btn-primary w-100"
-                data-loading-text="<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>">
-                <i class="ti ti-plus me-2"></i>
-                {{ __('admin.new_assessment') }}
-              </button>
-            </div>
-          </div>
+        <div class="card-body text-center">
+          <img src="/images/no-assessment.png" class="img-fluid" style="max-width: 400px; height: auto;" alt="No Assessment">
+          <h4 class="mb-2">
+            {{ __('admin.No_Assessment') }}
+          </h4>
+          <p class="text-secondary mb-4">
+            {{ __('admin.No_Assessment_right_now') }}
+          </p>
+          <button 
+            id="startAssessmentBtn"
+            class="btn btn-primary"
+            data-loading-text="<span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>"
+          >
+            <i class="ti ti-plus me-2"></i>
+            {{ __('admin.new_assessment') }}
+          </button>
         </div>
       </div>
     @else
@@ -275,26 +276,32 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
   // Handle assessment creation
   $(document).on('click', '#startAssessmentBtn', function() {
     const $btn = $(this);
+    if ($btn.prop('disabled')) return;
+
     const originalText = $btn.html();
-    
+    const errorMessage = '{{ __("admin.unexpected_error") }}';
+
+    const resetButton = () => $btn.prop('disabled', false).html(originalText);
+    const showError = (message) => {
+      releaseAlert('danger', {
+        title: '{{ __('admin.Error') }}',
+        message: message || errorMessage,
+      });
+      resetButton();
+    };
+
     // Show loading state
     $btn.prop('disabled', true).html($btn.data('loading-text'));
-    
+
     // Make AJAX request to create assessment
     $.ajax({
       url: '{{ route("assessments.assign") }}',
       type: 'POST',
-      data: {
-        _token: '{{ csrf_token() }}',
-        _method: 'POST'
-      },
       dataType: 'json',
+      data: { _token: '{{ csrf_token() }}' },
       success: function(response) {
-        if (!response.success) {
-          releaseAlert('danger', {
-            title: '{{ __('admin.Error') }}',
-            message: response.message ? response.message : '{{ __('admin.unexpected_error') }}',
-          });          
+        if (!response.success || !response.redirect) {
+          showError(response.message);
           return;
         }
 
@@ -302,12 +309,27 @@ $pills = ['analysis-assessment', 'question-assessment', 'history'];
         window.location.href = response.redirect;
       },
       error: function(xhr) {
-        let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : '{{ __("admin.unexpected_error") }}';
-        releaseAlert('danger', {
-          title: '{{ __('admin.Error') }}',
-          message: errorMessage
-        })
-        $btn.prop('disabled', false).html(originalText);
+        const response = xhr.responseJSON || {};
+        const message = response.message;
+
+        if (message === '{{ __('admin.ChooseYourStageFirst') }}') {
+          resetButton();
+          releaseAlert('info', {
+            title: '{{ __('admin.ChooseYourStageFirst') }}',
+            message: '{{ __('admin.CannotStartAssessment_no_stage') }}',
+            confirmText: '{{ __('admin.GoToMyStartup') }}',
+            confirmColor: 'primary',
+            hideCancel: true
+          }).then((confirmed) => {
+            if (confirmed && response.redirect) {
+              window.location.href = response.redirect;
+              localStorage.activeCompanyTab = '4';
+            }
+          });
+          return;
+        }
+
+        showError(message);
       }
     });
   });
@@ -539,7 +561,7 @@ const handleAnswerQuestion = (questionId, answer) => {
       // Show error message to user
       releaseAlert('danger', {
         title: 'Error',
-        message: '{{ __('admin.An_error_occurred_please_try_again') }}',
+        message: '{{ __('admin.unepxected_error') }}',
         confirmText: "{{ __('admin.OK') }}",
         confirmColor: 'primary'
       });

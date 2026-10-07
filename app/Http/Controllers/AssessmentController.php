@@ -281,7 +281,9 @@ class AssessmentController extends Controller
                 $totalQuestions = $countanswered + $countNotanswered;
 
                 $progress = $totalQuestions > 0 ? ($countanswered / $totalQuestions) * 100 : 0;
-            } else { return redirect()->route('assessments.results_analysis_view'); }
+            } else {
+                return view('admin/clients/assessment/assessment');
+              }
             return view('admin/clients/assessment/assessment',compact('user_scores','answers', 'assessment_user'));
         } else { return redirect()->route('core.dashboard_view')->with(['class'=>'danger', 'success'=>__('YouHaveNotCompany')]); }
     }
