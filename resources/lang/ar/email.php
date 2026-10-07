@@ -196,6 +196,18 @@ return [
         'regards' => 'مع أطيب التحيات،',
         'team' => 'فريق :organization_name',
     ],
+    'task_assigned_email' => [
+        'subject' => 'تم تعيين مهمة جديدة لك',
+        'hello' => 'مرحباً',
+        'intro' => 'تم تعيين مهمة جديدة لك بالتفاصيل التالية:',
+        'task_title' => 'عنوان المهمة',
+        'due_date' => 'تاريخ الاستحقاق',
+        'description' => 'وصف المهمة',
+        'button' => 'عرض المهمة',
+        'attachments' => 'المرفقات',
+        'regards' => 'مع أطيب التحيات،',
+        'team' => 'فريق :organization_name',
+    ],
     'custom_mail'=> [
         'welcome_title'=> 'مرحبا بك في هاكاثونات ومعسكرات نمو السياحة',
         'dear_participant'=> 'عزيزي المشارك',

@@ -189,6 +189,18 @@ return [
         'regards' => 'Best regards,',
         'team' => ':organization_name Team',
     ],
+    'task_assigned_email' => [
+        'subject' => 'You Have Been Assigned a New Task',
+        'hello' => 'Hello',
+        'intro' => 'You have been assigned a new task with the details below:',
+        'task_title' => 'Task Title',
+        'due_date' => 'Due Date',
+        'description' => 'Task Description',
+        'button' => 'View Task',
+        'attachments' => 'Attachments',
+        'regards' => 'Best regards,',
+        'team' => ':organization_name Team',
+    ],
     'custom_mail' => [
         'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
         'dear_participant' => 'Dear Participant',

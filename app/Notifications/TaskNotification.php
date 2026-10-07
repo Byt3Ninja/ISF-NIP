@@ -2,7 +2,11 @@
 
 namespace App\Notifications;
 
+use Carbon\Carbon;
+use App\ProgramTask;
+use App\Services\FileManagerService;
 use App\Services\GlobalNotificationSettingsService;
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -111,8 +115,6 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        App::setLocale($notifiable->language ?? 'en');
-
         $org          = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
@@ -121,6 +123,13 @@ class TaskNotification extends Notification implements ShouldQueue
         $from    = $this->getFromAddress($smtpSettings);
         $orgData = $this->buildEmailOrganizationData($org);
 
+        $action = $this->data['action'] ?? 'add';
+        if ($action === 'add' && $notifiable->hasRole('registered')) {
+            return $this->toFounderAssignedMail($notifiable, $from, $orgData);
+        }
+
+        App::setLocale($notifiable->language ?? 'en');
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
             ->subject($this->getSubject())
@@ -128,6 +137,66 @@ class TaskNotification extends Notification implements ShouldQueue
                 'data'       => $this->data,
                 'notifiable' => $notifiable,
                 'action'     => $this->data['action'],
+            ], $orgData));
+    }
+
+    /**
+     * Founder "task assigned" email: platform default language, and a
+     * View Task link that resolves to the right page for the task's type
+     * (admin-created ProgramTask vs mentor-created MentorshipTask).
+     */
+    protected function toFounderAssignedMail($notifiable, array $from, array $orgData): MailMessage
+    {
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $task = $this->data['task'];
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $notifiable->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+            $lastName = trim((string) $notifiable->last_name_en);
+        }
+
+        $viewUrl = $task instanceof ProgramTask
+            ? route('tasks.show', $task->id)
+            : route('startup.startup.mentorshipTasks.show', $task->id);
+
+        $dueDate = $task->due_date ? Carbon::parse($task->due_date)->format('Y-m-d') : '';
+
+        $fileManager = app(FileManagerService::class);
+        if ($task instanceof ProgramTask) {
+            $attachments = collect($task->attachments ?? [])
+                ->filter(fn ($a) => ($a['status'] ?? 'attachment') !== 'submission')
+                ->map(fn ($a) => [
+                    'name' => $a['name'] ?? basename($a['path'] ?? ''),
+                    'url'  => $fileManager->getUrl($a['path'] ?? null, 'public'),
+                ])
+                ->values()->all();
+        } else {
+            $attachments = $task->files()->get()->map(fn ($f) => [
+                'name' => $f->file_name ?: basename($f->file),
+                'url'  => $fileManager->getUrl($f->file, 'mentorship_tasks'),
+            ])->all();
+        }
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
+            ->subject(__('email.task_assigned_email.subject', [], $locale))
+            ->view('emails.task_assigned_founder', array_merge([
+                'taskLocale' => $locale,
+                'taskRecipientName' => trim($firstName . ' ' . $lastName),
+                'taskOrgName' => $orgName,
+                'taskTitle' => $task->title ?? '',
+                'taskDueDate' => $dueDate,
+                'taskDescription' => trim((string) ($task->description ?? '')),
+                'taskViewUrl' => $viewUrl,
+                'taskAttachments' => $attachments,
             ], $orgData));
     }
 
