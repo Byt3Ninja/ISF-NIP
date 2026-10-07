@@ -496,7 +496,9 @@ return [
             'time' => 'Time',
             'meeting_link' => 'Meeting Link',
             'passcode' => 'Passcode',
+            'judges' => 'Judges',
         ],
+        'final_join_button' => 'Join Final Screening Session',
         'judge' => [
             'rescheduled' => [
                 'subject' => 'Your :stage Meeting Has Been Rescheduled',
@@ -525,6 +527,15 @@ return [
                 ],
                 'database' => 'Your :stage meeting for :program has been scheduled for :date, :start – :end.',
             ],
+            'scheduled_final' => [
+                'subject' => 'Your Final Screening Session – :program',
+                'intro' => 'We’re pleased to inform you that your startup has been scheduled for a Final Screening session as part of :program.',
+                'outro' => [
+                    'If you have any questions or need assistance, please feel free to contact us.',
+                    'We wish you the best of luck and look forward to your session!',
+                ],
+                'database' => 'Your Final Screening session for :program has been scheduled for :date, :start – :end.',
+            ],
             'rescheduled' => [
                 'subject' => 'Your :stage Meeting Has Been Rescheduled',
                 'intro' => 'Your :stage meeting for :program has been rescheduled.',
@@ -533,6 +544,15 @@ return [
                     'This updated meeting time replaces your previously scheduled time.',
                 ],
                 'database' => 'Your :stage meeting for :program has been rescheduled to :date, :start – :end.',
+            ],
+            'rescheduled_final' => [
+                'subject' => 'Your Final Screening Session Has Been Rescheduled – :program',
+                'intro' => 'Your Final Screening session as part of :program has been rescheduled.',
+                'outro' => [
+                    'If you have any questions or need assistance, please feel free to contact us.',
+                    'This updated session time replaces your previously scheduled time.',
+                ],
+                'database' => 'Your Final Screening session for :program has been rescheduled to :date, :start – :end.',
             ],
             'cancelled' => [
                 'subject' => ':stage Meeting Cancelled – :program',

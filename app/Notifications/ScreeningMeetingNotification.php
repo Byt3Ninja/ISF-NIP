@@ -124,6 +124,17 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
 
     abstract protected function dashboardPath(): string;
 
+    /**
+     * An optional call-to-action button, label => url. Null (the default)
+     * renders no button; a subclass overrides this to add one.
+     *
+     * @return array{label: string, url: string}|null
+     */
+    protected function cta(object $notifiable): ?array
+    {
+        return null;
+    }
+
     public function via(object $notifiable): array
     {
         $smtpSettings = $this->organization($notifiable)?->organizationSettings;
@@ -193,6 +204,7 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
                 'detailsTitle'  => __('email.screening_meeting_email.' . ($this->variant === 'rescheduled' ? 'updated_details' : 'details')),
                 'details'       => array_filter($this->details($notifiable), 'filled'),
                 'outro'         => (array) __($this->key('outro'), $params),
+                'cta'           => $this->cta($notifiable),
             ], $orgData));
     }
 

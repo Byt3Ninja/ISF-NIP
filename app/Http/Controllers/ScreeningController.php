@@ -1384,6 +1384,7 @@ class ScreeningController extends Controller
 			'end'        => $slot['end'],
 			'link'       => $panel['meeting_link'],
 			'passcode'   => $panel['meeting_password'],
+			'judges'     => $panel['judges'] ?? [],
 			'send_email' => $sendEmail,
 		];
 	}
@@ -1419,7 +1420,8 @@ class ScreeningController extends Controller
 					$stepId, (int) $companyId, $change['start'], $variant, $change['end'],
 					$variant === 'cancelled' ? null : $change['link'],
 					$variant === 'cancelled' ? null : $change['passcode'],
-					$change['send_email']
+					$change['send_email'],
+					$variant === 'cancelled' ? null : ($change['judges'] ?? [])
 				),
 				['step_id' => $stepId, 'company_id' => $companyId, 'variant' => 'founder ' . $variant]
 			);

@@ -50,6 +50,15 @@
     @foreach ($outro as $line)
         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $line }}</p>
     @endforeach
+    @if (!empty($cta))
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+            <tr>
+                <td align="center">
+                    <a href="{{ $cta['url'] }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: {{ $mainColor }}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ $cta['label'] }}</a>
+                </td>
+            </tr>
+        </table>
+    @endif
     <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
         {{ __('email.screening_meeting_email.thanks') }}<br>
         <strong>{{ $org_name }}</strong>
