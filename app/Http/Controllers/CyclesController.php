@@ -55,6 +55,7 @@ use App\Notifications\StartupJoiningNotification;
 
 class CyclesController extends Controller
 {
+
     use \App\Traits\ValidatesUrlDomains;
     use \App\Traits\ManagesStepForm;
 
@@ -1006,24 +1007,10 @@ class CyclesController extends Controller
                             'message2' => __('missing_mail_settings', ['fields' => implode(', ', $missing)]),
                             'class' => 'danger'
                         ]);
-                    }  
-
-                    $admin = User::role('Admin')->orderBy('id')->first();
-
-                    if ($admin) {
-
-                        \Illuminate\Support\Facades\Notification::route('mail', $admin->email)
-                            ->notify(new \App\Notifications\ProgramCreatedNotification($cycle, $admin));
-
-                        $messenger = new Messenger();
-                        $messenger->sender = auth()->id();
-                        $messenger->receiver = $admin->id;
-                        $messenger->subject = 'New Program Created';
-                        $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
-                        $messenger->read = 0;
-                        $messenger->save();
                     }
                 }
+
+                app(\App\Services\ProgramCreatedNotifier::class)->notify($cycle);
             });
             // return redirect()->route('programs.edit', ['id' => $cycle->id])->with('message', 'Saved');
             return redirect()->route('programlist.index')->with('message', 'Saved');

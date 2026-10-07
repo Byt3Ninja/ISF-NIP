@@ -201,6 +201,16 @@ return [
         'regards' => 'Best regards,',
         'team' => ':organization_name Team',
     ],
+    'program_created_email' => [
+        'subject' => 'New Program Created – :title',
+        'dear' => 'Dear',
+        'created' => 'A new program, :title, has been successfully created on the platform.',
+        'cta_intro' => 'You can log in to view the program details and manage the program as needed.',
+        'button' => 'View Program',
+        'help' => 'If you have any questions or need assistance, please feel free to contact us.',
+        'regards' => 'Best regards,',
+        'team' => ':organization_name Team',
+    ],
     'custom_mail' => [
         'welcome_title' => 'Welcome to Tourism Growth Hachathons & Bootcamps',
         'dear_participant' => 'Dear Participant',

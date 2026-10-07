@@ -225,6 +225,8 @@ class ProgramController extends Controller
             return $this->jsonError('You are not allowed to use this organization.', 403);
         }
 
+        $isNewProgram = !$cycle;
+
         $extra = [];
         DB::transaction(function () use ($request, &$cycle, $organizationId, $scheduleProvided, $contentProvided, &$extra) {
             $general = [
@@ -258,6 +260,10 @@ class ProgramController extends Controller
                     ->update(['organization_id' => $organizationId, 'updated_at' => now()]);
             }
         });
+
+        if ($isNewProgram) {
+            app(\App\Services\ProgramCreatedNotifier::class)->notify($cycle);
+        }
 
         return response()->json(array_merge([
             'success' => true,

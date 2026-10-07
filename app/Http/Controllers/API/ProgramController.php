@@ -177,26 +177,13 @@ class ProgramController extends Controller
             if ($request->hasFile('imgUrl')) {
                 $cycle->img_url = $fileManager->upload($request->file('imgUrl'), 'programs', 'public_uploads');
             }
-            if (auth()->user()->hasRole('OrganizationManager')) {
-
-                    $admin = User::role('Admin')->orderBy('id')->first();
-
-                    if ($admin) {
-
-                        \Illuminate\Support\Facades\Notification::route('mail', $admin->email)
-                            ->notify(new \App\Notifications\ProgramCreatedNotification($cycle, $admin));
-
-                        $messenger = new Messenger();
-                        $messenger->sender = auth()->id();
-                        $messenger->receiver = $admin->id;
-                        $messenger->subject = 'New Program Created';
-                        $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
-                        $messenger->read = 0;
-                        $messenger->save();
-                    }
-            }
-
             $cycle->save();
+
+            // Only after the program is actually persisted -- notifying
+            // before save() would email people about a program that might
+            // never have been created if save() failed.
+            app(\App\Services\ProgramCreatedNotifier::class)->notify($cycle);
+
             return $this->created(new ProgramResource($cycle),__('api.programCreated'),[], 201);
         });
         return $response;
