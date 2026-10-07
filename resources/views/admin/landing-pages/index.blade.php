@@ -97,7 +97,7 @@
       <div class="col-12">
         <div class="card">
           <div class="card-body text-center">
-            <img src="/icons/empty-state.svg" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
+            <img src="/images/empty-state.png" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
             <h4 class="mb-2">
               {{ __('landing.No_LandingPages') }}
             </h4>

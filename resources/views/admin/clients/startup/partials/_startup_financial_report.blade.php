@@ -71,7 +71,7 @@
       <div class="card border-0 shadow-sm text-center py-5">
         <div class="card-body py-5">
           <div class="mb-4">
-            <img src="/icons/empty-state.svg" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
+            <img src="/images/empty-state.png" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
           </div>
           <h4 class="card-title text-dark fw-bold mb-2">{{ __('startup.financial.no_financial_data_title') }}</h4>
           <p class="text-muted mx-auto mb-4" style="max-width: 500px;">
