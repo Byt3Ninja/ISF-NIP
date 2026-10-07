@@ -416,7 +416,7 @@ class LandingPagesController extends Controller
             'value'     => $currentPage?->hero_cta_link,
             'required'  => false,
             'maxlength' => 255,
-            'col'       => 6,
+            'col'       => 12,
             'hint_en'   => 'Leave empty to navigate to the Programs section on this landing page.',
             'hint_ar'   => 'اتركه فارغاً للانتقال إلى قسم البرامج في صفحة الهبوط هذه.',
           ],
