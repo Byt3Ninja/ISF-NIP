@@ -4016,4 +4016,9 @@ return [
   'alert_default_warning_message' => 'Are you sure you want to proceed? This action may affect your current settings.',
   'alert_default_copy_message' => 'Copy the text below to your clipboard.',
   'alert_copy_input_aria' => 'Text to copy',
+  // Service request card — founder note (resources/views/admin/settings/services/requests.blade.php)
+  'note_from_founder' => 'NOTE FROM FOUNDER',
+  'no_notes_provided' => 'No notes are provided',
+  'see_more' => 'See more',
+  'see_less' => 'See less',
 ];

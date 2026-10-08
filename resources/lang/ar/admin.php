@@ -4060,4 +4060,9 @@ return [
   'alert_default_warning_message' => 'هل أنت متأكد من المتابعة؟ قد يؤثر هذا الإجراء على إعداداتك الحالية.',
   'alert_default_copy_message' => 'انسخ النص أدناه إلى الحافظة.',
   'alert_copy_input_aria' => 'النص المراد نسخه',
+  // بطاقة طلب الخدمة — ملاحظة المؤسس (resources/views/admin/settings/services/requests.blade.php)
+  'note_from_founder' => 'ملاحظة من المؤسس',
+  'no_notes_provided' => 'لا توجد ملاحظات',
+  'see_more' => 'عرض المزيد',
+  'see_less' => 'عرض أقل',
 ];
