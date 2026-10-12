@@ -26,6 +26,14 @@
   div.note-modal-footer input[type="button"] {
     margin-top: -20px !important;
   }
+  
+  /* Summernote-lite dialogs (link/picture/video) must sit above a Bootstrap modal (z-index 1055) */
+.note-modal { z-index: 1065 !important; }
+.note-modal-backdrop { z-index: 1060 !important; }
+
+/* Editor inside the modal-lg */
+#guidelines-modal .note-editor.note-frame { margin-bottom: 0; }
+#guidelines-modal .note-editor .note-editing-area .note-editable { height: 60vh !important; }
 </style>
 @stop
 
@@ -441,6 +449,19 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 </div>
 @endif
 @endif
+
+<!-- Guidelines Editor Modal -->
+<div class="modal fade" id="guidelines-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title mb-6">{{ __('admin.screening_guidelines') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0" id="guidelines-modal-body"></div>
+    </div>
+  </div>
+</div>
 @stop
 
 @section('scripts')
@@ -457,13 +478,27 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 @section('pagescripts')
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const $editorTextarea = $('#screening-guidelines-editor');
+      
       // Get initial content before initializing Summernote
       const initialContent = $('#screening-guidelines-editor').val() || '';
 
       // Initialize Summernote editor
       const locale = '{{ app()->getLocale() }}';
       
-      $('#screening-guidelines-editor').summernote({
+       // Custom "expand" button that replaces the built-in fullscreen
+      const ExpandButton = function (context) {
+        const ui = $.summernote.ui;
+        return ui.button({
+          contents: '<i class="ti ti-arrows-maximize"></i>',
+          tooltip: '{{ __('admin.fullscreen') }}',
+          click: function () {
+            guidelinesModal.show();
+          }
+        }).render();
+      };
+      
+      $editorTextarea.summernote({
         lang: locale === 'ar' ? 'ar-AR' : 'en-US',
         placeholder: '{{ __('admin.screening_guidelines_placeholder') }}',
         tabsize: 2,
@@ -475,14 +510,29 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
           ['para', ['ul', 'ol', 'paragraph']],
           ['table', ['table']],
           ['insert', ['link', 'picture', 'video']],
-          ['view', ['fullscreen', 'codeview', 'help']]
+          ['view', ['expand', 'codeview', 'help']]   // 'fullscreen' swapped for 'expand'
         ],
+        buttons: { expand: ExpandButton },
         dialogsInBody: true,
         callbacks: {
           onImageUpload: function(files) {
             uploadSummernoteImage(files[0], $('#screening-guidelines-editor'));
           }
         }
+      });
+      
+      // Move the editor into the modal and back
+      const guidelinesModalEl = document.getElementById('guidelines-modal');
+      // focus:false so Bootstrap's focus trap doesn't block Summernote's link/picture dialogs
+      const guidelinesModal = new bootstrap.Modal(guidelinesModalEl, { focus: false });
+
+      guidelinesModalEl.addEventListener('show.bs.modal', function () {
+        $('#guidelines-modal-body').append($editorTextarea.next('.note-editor.note-frame'));
+      });
+
+      guidelinesModalEl.addEventListener('hidden.bs.modal', function () {
+        // the editor now lives in the modal body, so find it there and put it back after the textarea
+        $editorTextarea.after($('#guidelines-modal-body > .note-editor.note-frame'));
       });
 
       // Image upload handler function

@@ -4065,4 +4065,5 @@ return [
   'no_notes_provided' => 'لا توجد ملاحظات',
   'see_more' => 'عرض المزيد',
   'see_less' => 'عرض أقل',
+  'fullscreen' => 'ملء الشاشة',
 ];

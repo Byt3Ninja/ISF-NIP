@@ -4021,4 +4021,5 @@ return [
   'no_notes_provided' => 'No notes are provided',
   'see_more' => 'See more',
   'see_less' => 'See less',
+  'fullscreen' => 'Full Screen',
 ];
