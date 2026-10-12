@@ -7,8 +7,8 @@
 				min-height: 45vh !important;
 		} */
 		.program-overview {
-				background: linear-gradient(135deg, #9e95f5 0%, #7367f0 100%);
-				box-shadow: 0 4px 10px rgba(115, 103, 240, 0.4);
+				background: linear-gradient(135deg, color-mix(in srgb, var(--bs-primary) 70%, #fff) 0%, var(--bs-primary) 100%);
+				box-shadow: 0 4px 10px rgba(var(--bs-primary-rgb), 0.4);
 		}
 		.step-timeline {
 				position: relative;

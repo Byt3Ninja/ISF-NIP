@@ -310,7 +310,7 @@
                 labels: topDevicesData.map(d => d.device),
                 datasets: [{
                     data: topDevicesData.map(d => d.count),
-                    backgroundColor: ['#7367f0', '#ff9f43', '#28c76f', '#00bad1', '#ff4c51'],
+                    backgroundColor: [config.colors.primary, '#ff9f43', '#28c76f', '#00bad1', '#ff4c51'],
                 }]
             },
             options: {
@@ -328,7 +328,7 @@
                 labels: topBrowsersData.map(b => b.browser),
                 datasets: [{
                     data: topBrowsersData.map(b => b.count),
-                    backgroundColor: ['#00bad1', '#28c76f', '#ff9f43', '#ff4c51', '#7367f0'],
+                    backgroundColor: ['#00bad1', '#28c76f', '#ff9f43', '#ff4c51', config.colors.primary],
                 }]
             },
             options: {

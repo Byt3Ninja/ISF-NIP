@@ -882,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: '{{ $isEn ? 'New Registrations Monthly' : 'المسجلون الجدد شهرياً' }}',
           data: @json($regCounts),
-          borderColor: '#7367f0',
+          borderColor: config.colors.primary,
           tension: 0.1,
           fill: false,
         }],
@@ -896,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: @json($data['submissionLabels']),
         datasets: [{
           data: @json($data['submissionCounts']),
-          backgroundColor: ['#7367f0', '#99e3ed', '#ffb7b9'],
+          backgroundColor: [config.colors.primary, '#99e3ed', '#ffb7b9'],
         }],
       },
       titleText: '{{ $isEn ? 'Projects by Track' : 'المشاريع حسب المحور' }}',
@@ -909,7 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: '{{ $isEn ? 'Teams Status' : 'حالة الفرق' }}',
           data: @json($pieData),
-          backgroundColor: ['#dfdfe3', '#7367f0'],
+          backgroundColor: ['#dfdfe3', config.colors.primary],
         }],
       },
       titleText: '{{ $isEn ? 'Team Formation Status' : 'حالة تكوين الفرق' }}',

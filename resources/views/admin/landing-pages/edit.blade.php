@@ -714,7 +714,10 @@
                   @php
                     // Branding defaults — mirrored by lpBrandingDefaults in the
                     // script below (section scopes are separate, so the two
-                    // cannot share one definition).
+                    // cannot share one definition). Exception: the script's
+                    // button colors are Platform Branding (Reset to Default),
+                    // while these stay what /lp renders for a page that never
+                    // saved its own colors.
                     $lpBrandingDefaults = [
                       'gradient_start'  => '#030014',
                       'gradient_middle' => '#0b0530',
@@ -2713,8 +2716,9 @@
         gradient_start: '#030014',
         gradient_middle: '#0b0530',
         gradient_end: '#2a1139',
-        button_bg: '#7367f0',
-        button_text: '#ffffff',
+        // Reset to Default = Platform Branding (GV-9673).
+        button_bg: @json($_branding['main']),
+        button_text: @json($_branding['button_text']),
       };
 
       const lpBrandingKeys = Object.keys(lpBrandingDefaults);

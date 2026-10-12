@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use App\Services\WhatsAppService;
 use App\Services\TimezoneService;
+use App\Services\PlatformBrandingService;
 use App\Services\FormSectionStructurer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -556,9 +557,12 @@ class ExternalCyclesController extends Controller
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
 			$program->ranges = date_ranges( $start, $end );
 
-			$program->start_color = preg_replace('/^#+/', '#', $program->start_color ?: '#6366f114');
-			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: '#0891b214');
-			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: '#6366f1');
+			// A program's own colors win; platform branding is the fallback (GV-9673).
+			$brandDefaults = PlatformBrandingService::programDefaults();
+			$program->start_color = preg_replace('/^#+/', '#', $program->start_color ?: $brandDefaults['start_color']);
+			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: $brandDefaults['end_color']);
+			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: $brandDefaults['main_color']);
+			$program->main_rgb = PlatformBrandingService::rgbOf($program->main_color);
 		}
 		return $program;
 	}

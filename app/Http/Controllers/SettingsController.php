@@ -33,8 +33,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Requests\UpdateSocialLoginRequest;
+use App\Http\Requests\UpdatePlatformBrandingRequest;
 use App\Notifications\UserInvitationNotification;
 use App\Services\EmailSettingsStore;
+use App\Services\PlatformBrandingService;
 
 class SettingsController extends Controller
 {
@@ -99,7 +101,9 @@ class SettingsController extends Controller
 				->with('Img2',$Img2)->with('Img3',$Img3)->with('Counters',$Counters)
 				->with('countries', $countries)->with('states', $states)->with('currencies',$currencies)
 				->with('settings', $settings)
-				->with('emailConfig', EmailSettingsStore::platform()->viewData());
+				->with('emailConfig', EmailSettingsStore::platform()->viewData())
+				// Re-open the tab that was just saved (or failed validation) instead of always "General".
+				->with('activeTab', session('settings_tab', old('settings_tab', 'general')));
 	}
 
 	public function update_settings(Request $request)
@@ -760,6 +764,34 @@ class SettingsController extends Controller
 
 
         return redirect()->back()->with('message', 'StoredSuccessfully');
+    }
+
+    /**
+     * Platform Branding (GV-9674). Validation and "#abc" -> "#aabbcc"
+     * normalization live in UpdatePlatformBrandingRequest; an empty gradient
+     * pair is stored as NULL, which renders the theme gradient.
+     */
+    public function updatePlatformBranding(UpdatePlatformBrandingRequest $request)
+    {
+        $settings = Settings::findOrFail(1);
+        foreach (PlatformBrandingService::FIELDS as $field => $column) {
+            $settings->{$column} = $request->input('branding_' . $field);
+        }
+        $settings->save();
+
+        return redirect()->back()->with('message', 'StoredSuccessfully')->with('settings_tab', 'branding');
+    }
+
+    /** Reset to Default: NULL every color so the stock theme applies again. */
+    public function resetPlatformBranding()
+    {
+        $settings = Settings::findOrFail(1);
+        foreach (PlatformBrandingService::FIELDS as $column) {
+            $settings->{$column} = null;
+        }
+        $settings->save();
+
+        return redirect()->back()->with('message', 'StoredSuccessfully')->with('settings_tab', 'branding');
     }
 
     public function showSettings()

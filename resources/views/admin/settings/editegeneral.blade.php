@@ -71,7 +71,7 @@ $tabs = collect([
       <ul class="nav nav-pills flex-nowrap" role="tablist">
         @foreach ($tabs as $key => $tab)
         <li class="nav-item d-flex justify-content-center align-items-center">
-          <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }}"
+          <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $tab['target'] === $activeTab ? 'active' : '' }}"
             data-bs-toggle="tab" role="tab">
             <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
             {{ $tab['label'] }}
@@ -88,7 +88,7 @@ $tabs = collect([
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
             <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
-              <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+              <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $tab['target'] === $activeTab ? 'active' : '' }} py-3"
                 data-bs-toggle="tab" role="tab">
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                 {{ $tab['label'] }}
@@ -103,7 +103,7 @@ $tabs = collect([
       <div class="col-lg-9">
         <div class="tab-content p-0 overflow-y-auto mb-6">
           @foreach ($tabs as $index => $tab)
-          <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
+          <div class="tab-pane fade {{ $tab['target'] === $activeTab ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
             <div class="card mb-6">
             <div class="card-header">
               {{-- Keyed on the target, not the index: the WhatsApp header has a subtitle,

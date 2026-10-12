@@ -276,7 +276,8 @@ HTML;
             </div>
           @endforeach
           <div class="col-12">
-            <button type="button" class="btn btn-label-secondary btn-sm" id="btnResetBrandingColors">
+            <button type="button" class="btn btn-label-secondary btn-sm" id="btnResetBrandingColors"
+              data-defaults='@json(['start' => $_programBrandDefaults['start_color'], 'end' => $_programBrandDefaults['end_color'], 'main' => $_programBrandDefaults['main_color']])'>
               <i class="ti ti-refresh ti-14px me-1"></i>{{ __('cycles.Reset_To_Default') }}
             </button>
           </div>

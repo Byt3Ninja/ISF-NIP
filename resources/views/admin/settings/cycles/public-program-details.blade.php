@@ -12,6 +12,12 @@
 	<style>
 		:root {
 			--primary: {{ $program->main_color }};
+			/* The program's own color wins over Platform Branding: re-point the branding variables
+			   (admin/includes/branding-styles) so every themed element follows the program. */
+			--theme-main: var(--primary);
+			@if ($program->main_rgb)
+			--theme-main-rgb: {{ $program->main_rgb }};
+			@endif
 			--on-primary: #ffffff;
 			--background: #f8fafc;
 			--surface: #ffffff;

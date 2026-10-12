@@ -616,8 +616,8 @@
                       'gradient_start'  => '#030014',
                       'gradient_middle' => '#0b0530',
                       'gradient_end'    => '#2a1139',
-                      'button_bg'       => '#7367f0',
-                      'button_text'     => '#ffffff',
+                      'button_bg'       => $_branding['main'],
+                      'button_text'     => $_branding['button_text'],
                     ];
                     $lpBrandingValues = $lpBrandingDefaults;
                   @endphp
@@ -1512,8 +1512,8 @@
         gradient_start: '#030014',
         gradient_middle: '#0b0530',
         gradient_end: '#2a1139',
-        button_bg: '#7367f0',
-        button_text: '#ffffff',
+        button_bg: @json($_branding['main']),
+        button_text: @json($_branding['button_text']),
       };
 
       const lpBrandingKeys = Object.keys(lpBrandingDefaults);

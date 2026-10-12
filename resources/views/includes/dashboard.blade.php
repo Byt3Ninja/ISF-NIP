@@ -1907,18 +1907,18 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 	.hxi-head {
 		position: relative; text-align: center; padding: 30px 28px 0;
-		background: radial-gradient(120% 120% at 50% -20%, rgba(115,103,240,.16), transparent 62%);
+		background: radial-gradient(120% 120% at 50% -20%, rgba(var(--bs-primary-rgb), .16), transparent 62%);
 	}
 	.hxi-medallion {
 		position: relative; width: 76px; height: 76px; margin: 0 auto;
 		border-radius: 22px; display: grid; place-items: center;
-		background: linear-gradient(145deg, #7367f0, #5a4fd6);
+		background: linear-gradient(145deg, var(--bs-primary), color-mix(in srgb, var(--bs-primary) 80%, #000));
 		color: #fff; font-size: 30px; font-weight: 800;
-		box-shadow: 0 10px 22px -6px rgba(115,103,240,.55);
+		box-shadow: 0 10px 22px -6px rgba(var(--bs-primary-rgb), .55);
 	}
 	.hxi-medallion::after {
 		content: ""; position: absolute; inset: -5px; border-radius: 26px;
-		border: 2px solid #7367f0; opacity: .22;
+		border: 2px solid var(--bs-primary); opacity: .22;
 	}
 	.hxi-initial { position: relative; z-index: 0; }
 	/* An uploaded image overlays the initial; a broken one is caught by onerror. */
@@ -1937,7 +1937,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 	.hxi-eyebrow {
 		margin: 16px 0 0; font-size: 11.5px; font-weight: 700;
-		letter-spacing: .12em; text-transform: uppercase; color: #7367f0;
+		letter-spacing: .12em; text-transform: uppercase; color: var(--bs-primary);
 	}
 	.hxi-team {
 		margin: 5px 0 0; font-size: 23px; font-weight: 800; line-height: 1.2;
@@ -1954,7 +1954,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 	}
 	.hxi-who {
 		width: 24px; height: 24px; border-radius: 50%;
-		background: rgba(115,103,240,.14); color: #7367f0;
+		background: rgba(var(--bs-primary-rgb), .14); color: var(--bs-primary);
 		display: grid; place-items: center; font-weight: 800; font-size: 12px;
 	}
 	.hxi-inviter strong { color: var(--bs-heading-color, #2f2b3d); font-weight: 700; }
@@ -1998,7 +1998,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 		box-shadow: inset 0 0 0 1px rgba(234,84,85,.24);
 	}
 	.hxi-btn-reject:hover { transform: translateY(-1px); background: rgba(234,84,85,.16); }
-	.hxi-btn:focus-visible { outline: 3px solid #7367f0; outline-offset: 2px; }
+	.hxi-btn:focus-visible { outline: 3px solid var(--bs-primary); outline-offset: 2px; }
 
 	.hxi-expiry {
 		margin: 16px 0 0; font-size: 12px; color: var(--bs-tertiary-color, #a5a3ae);

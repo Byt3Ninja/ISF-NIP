@@ -17,6 +17,7 @@ use Namu\WireChat\Models\Message;
 use App\Services\BreadcrumbService;
 use Illuminate\Support\Facades\Mail;
 use App\Services\TenantMailer;
+use App\Services\PlatformBrandingService;
 use Resend;
 use Resend\Laravel\Transport\ResendTransportFactory;
 use App\Repositories\SettingRepository;
@@ -157,6 +158,20 @@ class AppServiceProvider extends ServiceProvider
                 $platformName = $platformName ?? config('app.name');
             }
             $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'platformName' => $platformName, 'is_profile_completed' => $profile_completed, 'is_company_completed' => $company_completed]);
+        });
+
+        // Platform Branding (GV-9673): the theme overrides on every layout, the settings form, and the
+        // landing page editors (their button colors start from / reset to the platform's).
+        view()->composer(['admin.includes.branding-styles', 'partials.forms.platform-branding-form', 'admin.landing-pages.create', 'admin.landing-pages.edit'], function ($view) use (&$settings) {
+            $view->with([
+                '_branding' => PlatformBrandingService::palette($settings),
+                '_brandingSaved' => PlatformBrandingService::saved($settings),
+            ]);
+        });
+
+        // New programs (and the wizard's "Reset to Default") start from the platform colors.
+        view()->composer(['admin.programs.create', 'admin.programs.edit'], function ($view) use (&$settings) {
+            $view->with('_programBrandDefaults', PlatformBrandingService::programDefaults($settings));
         });
 
         view()->composer('partials.menu', function ($view) {

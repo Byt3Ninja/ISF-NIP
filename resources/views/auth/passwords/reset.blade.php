@@ -56,6 +56,9 @@
       }
     }
   </style>
+  <!-- BEGIN: Custom CSS-->
+  @include('admin.includes.branding-styles')
+  <!-- END: Custom CSS-->
 </head>
 @php
     $heading = $l == 'en' ? 'Reset Password' : 'اعادة تعيين كلمة المرور';

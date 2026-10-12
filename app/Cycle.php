@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Traits\Auditable;
 use App\Traits\HasFileCleanup;
 use App\Services\TimezoneService;
+use App\Services\PlatformBrandingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
@@ -200,16 +201,16 @@ class Cycle extends Model
 
     public function getStartColorAttribute($value)
     {
-        return $value ?: '#6366f114';
+        return $value ?: PlatformBrandingService::programDefaults()['start_color'];
     }
 
     public function getEndColorAttribute($value)
     {
-        return $value ?: '#0891b214';
+        return $value ?: PlatformBrandingService::programDefaults()['end_color'];
     }
 
     public function getMainColorAttribute($value)
     {
-        return $value ?: '#6366f1';
+        return $value ?: PlatformBrandingService::programDefaults()['main_color'];
     }
 }

@@ -1,62 +1,39 @@
-{{-- resources/views/admin/includes/branding-styles.blade.php --}}
-@php
-$normalize = function ($hex, $fallback) {
-  $hex = ltrim(trim((string) $hex), '#');
-  if (strlen($hex) === 3) {
-    $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-  }
-  return preg_match('/^[0-9a-fA-F]{6}$/', $hex) ? '#' . strtolower($hex) : $fallback;
-};
-
-$main = $normalize($_settings->main_color ?? null, '#00bad1');
-$gradStart = $normalize($_settings->gradient_start_color ?? null, '#00bad1');
-$gradEnd = $normalize($_settings->gradient_end_color ?? null, '#80e5ed');
-$btnText = $normalize($_settings->button_text_color ?? null, '#ffffff');
-
-$hexToRgb = function ($hex) {
-  $hex = ltrim($hex, '#');
-  return [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))];
-};
-$mix = function ($hex, $pct) use ($hexToRgb) {
-  [$r, $g, $b] = $hexToRgb($hex);
-  $r = (int) round($r * $pct + 255 * (1 - $pct));
-  $g = (int) round($g * $pct + 255 * (1 - $pct));
-  $b = (int) round($b * $pct + 255 * (1 - $pct));
-  return sprintf('#%02x%02x%02x', $r, $g, $b);
-};
-
-$mainLabel = $mix($main, 0.14);
-$mainLabelHover = $mix($main, 0.20);
-$mainLighter = $mix($main, 0.07);
-$mainBorderSoft = $mix($main, 0.30);
-
-sscanf(ltrim($main, '#'), '%02x%02x%02x', $r, $g, $b);
-$mainRgb = "$r, $g, $b";
-@endphp
-
+{{-- Platform Branding (GV-9673). $_branding comes from the view composer (PlatformBrandingService).
+     Unconfigured platform = stock theme: every derived shade below reproduces the Vuexy value for
+     #7367f0 exactly (label #e9e7fd, hover #685dd8, ...), in light AND dark mode.
+     Buttons are solid main color. Gradients only where the stock theme has one, with the same
+     structure/opacity; with no custom gradient the stops fall back to the main color. --}}
 <style id="dynamic-branding">
 :root,
 [data-bs-theme=light] {
-  --theme-main: {{ $main }};
-  --theme-main-rgb: {{ $mainRgb }};
-  --theme-grad-start: {{ $gradStart }};
-  --theme-grad-end: {{ $gradEnd }};
-  --theme-btn-text: {{ $btnText }};
-  --theme-main-hover: color-mix(in srgb, var(--theme-main) 88%, #000);
-  --theme-main-link-hover: color-mix(in srgb, var(--theme-main) 92%, #fff);
-  --theme-main-label: {{ $mainLabel }};
-  --theme-main-label-hover: {{ $mainLabelHover }};
-  --theme-main-lighter: {{ $mainLighter }};
-  --theme-main-border-soft: {{ $mainBorderSoft }};
+  --theme-main: {{ $_branding['main'] }};
+  --theme-main-rgb: {{ $_branding['main_rgb'] }};
+  --theme-btn-text: {{ $_branding['button_text'] }};
+  --theme-grad-start-rgb: {{ $_branding['gradient_start_rgb'] }};
+  --theme-grad-end-rgb: {{ $_branding['gradient_end_rgb'] }};
+  /* Card surface the label tints are mixed onto: #fff light, #2f3349 dark (see below). */
+  --theme-surface: #fff;
+  --theme-main-hover: color-mix(in srgb, var(--theme-main) 90%, #000);
+  --theme-main-link-hover: var(--theme-main-hover);
+  --theme-main-label: color-mix(in srgb, var(--theme-main) 16%, var(--theme-surface));
+  --theme-main-label-hover: color-mix(in srgb, var(--theme-main) 24%, var(--theme-surface));
+  --theme-main-lighter: color-mix(in srgb, var(--theme-main) 8%, var(--theme-surface));
+  --theme-main-border-soft: color-mix(in srgb, var(--theme-main) 40%, var(--theme-surface));
   --theme-main-text-emphasis: color-mix(in srgb, var(--theme-main) 40%, #000);
   --theme-main-shadow: rgba(var(--theme-main-rgb), .3);
   --theme-main-16: rgba(var(--theme-main-rgb), .16);
   --theme-main-12: rgba(var(--theme-main-rgb), .12);
-  --theme-gradient: linear-gradient(270deg, var(--theme-grad-start) 0%, var(--theme-grad-end) 100%);
-  --theme-gradient-45: linear-gradient(45deg, var(--theme-grad-start), var(--theme-grad-end));
+  /* .bg-gradient-primary: stock is 45deg main -> main mixed 50% with white (#7367f0 -> #b9b3f8). */
+@if ($_branding['has_gradient'])
+  --theme-gradient-45: linear-gradient(45deg, {{ $_branding['gradient_start'] }}, {{ $_branding['gradient_end'] }});
+@else
+  --theme-gradient-45: linear-gradient(45deg, var(--theme-main), color-mix(in srgb, var(--theme-main) 50%, #fff));
+@endif
+  /* Active menu item: stock is 270deg main@.7 -> main (mirrored in RTL). */
+  --theme-gradient-menu: linear-gradient(270deg, rgba(var(--theme-grad-start-rgb), .7) 0%, rgb(var(--theme-grad-end-rgb)) 100%);
+  --theme-gradient-menu-rtl: linear-gradient(-270deg, rgba(var(--theme-grad-start-rgb), .7) 0%, rgb(var(--theme-grad-end-rgb)) 100%);
   --bs-primary: var(--theme-main);
   --bs-primary-rgb: var(--theme-main-rgb);
-  --bs-purple: var(--theme-main);
   --bs-link-color: var(--theme-main);
   --bs-link-color-rgb: var(--theme-main-rgb);
   --bs-link-hover-color: var(--theme-main-hover);
@@ -64,18 +41,24 @@ $mainRgb = "$r, $g, $b";
   --bs-primary-border-subtle: var(--theme-main-border-soft);
   --bs-primary-text-emphasis: var(--theme-main-text-emphasis);
 }
+/* Dark mode: the template customizer sets data-style="dark" (or "system" + OS preference). */
+[data-style=dark] { --theme-surface: #2f3349; }
+@media (prefers-color-scheme: dark) {
+  [data-style=system] { --theme-surface: #2f3349; }
+}
 
 a { color: var(--theme-main); }
 a:hover { color: var(--theme-main-link-hover); }
 
-.text-primary,
+.text-primary { color: var(--theme-main) !important; }
 .breadcrumb-item,
 .breadcrumb-item a,
 .breadcrumb-item.active a:hover,
 .breadcrumb-item.active a:focus,
 .bg-footer-theme,
 .bg-footer-theme .footer-link,
-.bg-footer-theme .footer-text { color: var(--theme-main) !important; }
+.bg-footer-theme .footer-link:hover,
+.bg-footer-theme .footer-link:focus { color: var(--theme-main); }
 
 .text-body[href]:hover,
 .text-heading[href]:hover { color: var(--theme-main-hover) !important; }
@@ -93,23 +76,22 @@ a.bg-primary:focus { background-color: var(--theme-main-hover) !important; }
 .list-group-item.bg-label-primary,
 span.bg-label-primary,
 div.bg-label-primary {
-  background-color: {{ $mainLabel }} !important;
-  color: {{ $main }} !important;
+  background-color: var(--theme-main-label) !important;
+  color: var(--theme-main) !important;
 }
 
 .bg-label-hover-primary,
 .badge.bg-label-hover-primary,
 .btn.bg-label-hover-primary {
-  background-color: {{ $mainLabel }} !important;
-  color: {{ $main }} !important;
+  background-color: var(--theme-main-label) !important;
+  color: var(--theme-main) !important;
 }
 .bg-label-hover-primary:hover,
 .bg-label-hover-primary:focus,
 .badge.bg-label-hover-primary:hover,
 .btn.bg-label-hover-primary:hover {
-  background-color: {{ $main }} !important;
-  background-image: var(--theme-gradient) !important;
-  color: {{ $btnText }} !important;
+  background-color: var(--theme-main) !important;
+  color: var(--theme-btn-text) !important;
 }
 
 html:not([dir=rtl]) .border-primary,
@@ -119,6 +101,7 @@ html[dir=rtl] .border-primary,
 .fill-primary,
 .svg-illustration svg { fill: var(--theme-main); }
 .text-bg-primary { color: var(--theme-btn-text) !important; }
+.btn-primary .text-white { color: var(--theme-btn-text) !important; }
 .link-primary { color: var(--theme-main) !important; }
 .link-primary:hover,
 .link-primary:focus { color: var(--theme-main-hover) !important; }
@@ -127,7 +110,6 @@ html[dir=rtl] .border-primary,
 .btn-primary {
   color: var(--theme-btn-text) !important;
   background-color: var(--theme-main) !important;
-  background-image: var(--theme-gradient) !important;
   border-color: var(--theme-main) !important;
 }
 .btn-primary.btn[class*=btn-]:not([class*=btn-label-]):not([class*=btn-outline-]):not([class*=btn-text-]):not(.btn-icon):not(:disabled):not(.disabled) {
@@ -145,15 +127,12 @@ html[dir=rtl] .border-primary,
 .show > .btn-primary.dropdown-toggle {
   color: var(--theme-btn-text) !important;
   background-color: var(--theme-main-hover) !important;
-  background-image: var(--theme-gradient) !important;
   border-color: var(--theme-main-hover) !important;
-  filter: brightness(.92);
 }
 .btn-primary.disabled,
 .btn-primary:disabled {
   color: var(--theme-btn-text) !important;
   background-color: var(--theme-main) !important;
-  background-image: var(--theme-gradient) !important;
   border-color: var(--theme-main) !important;
 }
 .btn-group .btn-primary,
@@ -169,7 +148,6 @@ html[dir=rtl] .border-primary,
 .shepherd-element .shepherd-button:not(:disabled).btn-primary {
   color: var(--theme-btn-text) !important;
   background-color: var(--theme-main) !important;
-  background-image: var(--theme-gradient) !important;
   border-color: var(--theme-main) !important;
 }
 .shepherd-element .shepherd-button:not(:disabled).btn-primary:hover,
@@ -184,7 +162,6 @@ html[dir=rtl] .border-primary,
 .show > .shepherd-element .shepherd-button:not(:disabled).btn-primary.dropdown-toggle {
   color: var(--theme-btn-text) !important;
   background-color: var(--theme-main-hover) !important;
-  background-image: var(--theme-gradient) !important;
   border-color: var(--theme-main-hover) !important;
 }
 
@@ -292,7 +269,7 @@ html[dir=rtl] .border-primary,
 .menu.bg-primary.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
 .bg-menu-theme.menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle,
 .menu.bg-primary.menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle {
-  background: var(--theme-gradient);
+  background: var(--theme-gradient-menu);
   color: var(--theme-btn-text) !important;
   box-shadow: 0 2px 6px 0 var(--theme-main-shadow);
 }
@@ -318,7 +295,7 @@ html[dir=rtl] .border-primary,
 
 .menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
 .bg-menu-theme.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle) {
-  background: var(--theme-gradient) !important;
+  background: var(--theme-gradient-menu) !important;
   color: var(--theme-btn-text) !important;
   box-shadow: 0 2px 6px 0 var(--theme-main-shadow);
 }
@@ -331,18 +308,6 @@ html[dir=rtl] .border-primary,
   color: var(--theme-btn-text) !important;
 }
 
-.bg-menu-theme .menu-inner .menu-item.open > .menu-link.menu-toggle,
-.bg-menu-theme .menu-inner .menu-item.active > .menu-link.menu-toggle,
-.layout-menu-hover.layout-menu-collapsed .bg-menu-theme .menu-inner .menu-item.open > .menu-link.menu-toggle,
-.layout-menu-hover.layout-menu-collapsed .bg-menu-theme .menu-inner .menu-item.active > .menu-link.menu-toggle {
-  background: rgba(var(--theme-main-rgb), .10);
-  color: var(--theme-main);
-}
-.bg-menu-theme .menu-inner .menu-item.active > .menu-link.menu-toggle .menu-icon,
-.bg-menu-theme .menu-inner .menu-item.open > .menu-link.menu-toggle .menu-icon {
-  color: var(--theme-main);
-}
-
 .layout-wrapper:not(.layout-horizontal) .bg-menu-theme .menu-inner > .menu-item.active:before {
   background: var(--theme-main);
 }
@@ -351,13 +316,10 @@ html[dir=rtl] .border-primary,
 .menu-light .menu-inner > .menu-item.open .menu-item.active > .menu-link::before {
   color: var(--theme-btn-text) !important;
 }
-.bg-menu-theme .menu-inner .menu-sub .menu-item:not(.active) > .menu-link::before {
-  color: #6d6b77 !important;
-}
 
 .bg-menu-theme.menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle,
 .menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle {
-  background: var(--theme-gradient) !important;
+  background: var(--theme-gradient-menu) !important;
   color: var(--theme-btn-text) !important;
   box-shadow: 0 2px 6px 0 var(--theme-main-shadow);
 }
@@ -371,8 +333,17 @@ html[dir=rtl] .border-primary,
 
 .menu.bg-primary.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
 .menu.bg-primary.menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle {
-  background: var(--theme-gradient) !important;
+  background: var(--theme-gradient-menu) !important;
   color: var(--theme-btn-text) !important;
+}
+/* RTL: the stock theme mirrors the gradient with its own [dir=rtl] !important rules. */
+[dir=rtl] .menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
+[dir=rtl] .bg-menu-theme.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
+[dir=rtl] .menu.bg-primary.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
+[dir=rtl] .menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle,
+[dir=rtl] .bg-menu-theme.menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle,
+[dir=rtl] .menu.bg-primary.menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle {
+  background: var(--theme-gradient-menu-rtl) !important;
 }
 
 .form-control:focus,
@@ -425,7 +396,6 @@ html[dir=rtl] .border-primary,
 .nav-pills .nav-link.active:hover,
 .nav-pills .nav-link.active:focus {
   background-color: var(--theme-main);
-  background-image: var(--theme-gradient);
   color: var(--theme-btn-text);
   box-shadow: 0 .125rem .375rem 0 var(--theme-main-shadow);
 }
@@ -456,7 +426,6 @@ html:not([dir=rtl]) .nav-align-right .nav-tabs .nav-link:not(.active):hover { co
 .pagination li.active > a:not(.page-link) {
   border-color: var(--theme-main);
   background-color: var(--theme-main);
-  background-image: var(--theme-gradient);
   color: var(--theme-btn-text);
   box-shadow: 0 .125rem .375rem 0 var(--theme-main-shadow);
 }
@@ -477,7 +446,6 @@ html:not([dir=rtl]) .nav-align-right .nav-tabs .nav-link:not(.active):hover { co
 .progress-stacked { --bs-progress-bar-bg: var(--theme-main); }
 .progress-bar {
   background-color: var(--theme-main);
-  background-image: var(--theme-gradient);
   color: var(--theme-btn-text);
   box-shadow: 0 .125rem .375rem 0 var(--theme-main-shadow);
 }
@@ -496,7 +464,7 @@ html:not([dir=rtl]) .nav-align-right .nav-tabs .nav-link:not(.active):hover { co
 .alert-outline-primary .alert-link,
 .alert-outline-primary hr { color: var(--theme-main) !important; }
 .alert-outline-primary .alert-icon { color: var(--theme-main) !important; background-color: var(--theme-main-label) !important; }
-.alert-solid-primary { background-color: var(--theme-main); background-image: var(--theme-gradient); color: var(--theme-btn-text); }
+.alert-solid-primary { background-color: var(--theme-main); color: var(--theme-btn-text); }
 .alert-solid-primary .alert-icon { color: var(--theme-main) !important; }
 
 .list-group-item-primary { border-color: var(--theme-main); background-color: var(--theme-main-label); color: var(--theme-main) !important; }
@@ -554,7 +522,7 @@ table.dataTable.dtr-column > tbody > tr > th.control:before { background-color: 
 .timeline .timeline-point-primary,
 .timeline .timeline-point { background-color: var(--theme-main) !important; outline: 3px solid var(--theme-main-12); }
 .timeline.timeline-outline .timeline-point-primary,
-.timeline.timeline-outline .timeline-point { border: 2px solid var(--theme-main) !important; background-color: #fff !important; }
+.timeline.timeline-outline .timeline-point { border: 2px solid var(--theme-main) !important; }
 .timeline .timeline-indicator-primary { background-color: var(--theme-main-label); }
 .timeline .timeline-indicator-primary i { color: var(--theme-main) !important; }
 .divider.divider-primary.divider-vertical:before,
@@ -650,7 +618,7 @@ li.ui-timepicker-selected,
 .swal2-progress-steps[class] .swal2-progress-step { background: var(--theme-main); color: var(--theme-btn-text); }
 .swal2-progress-steps[class] .swal2-progress-step.swal2-active-progress-step ~ .swal2-progress-step,
 .swal2-progress-steps[class] .swal2-progress-step.swal2-active-progress-step ~ .swal2-progress-step-line { background: var(--theme-main-label); }
-.swal2-styled.swal2-confirm { background-color: var(--theme-main) !important; background-image: var(--theme-gradient) !important; color: var(--theme-btn-text) !important; box-shadow: 0 .125rem .375rem 0 var(--theme-main-shadow); }
+.swal2-styled.swal2-confirm { background-color: var(--theme-main) !important; color: var(--theme-btn-text) !important; box-shadow: 0 .125rem .375rem 0 var(--theme-main-shadow); }
 .dropzone.dz-drag-hover { border-color: var(--theme-main) !important; }
 .swiper-pagination-bullet.swiper-pagination-bullet-active,
 .swiper-pagination.swiper-pagination-progressbar .swiper-pagination-progressbar-fill { background: var(--theme-main) !important; }
@@ -725,7 +693,6 @@ li.ui-timepicker-selected,
 /* Template Customizer btn */
 .template-customizer-open-btn {
   background-color: var(--theme-main) !important;
-  background-image: var(--theme-gradient) !important;
   border-color: var(--theme-main) !important;
   color: var(--theme-btn-text) !important;
   box-shadow: 0 2px 6px 0 var(--theme-main-shadow) !important;
@@ -733,44 +700,31 @@ li.ui-timepicker-selected,
 .template-customizer-open-btn:hover,
 .template-customizer-open-btn:focus {
   background-color: var(--theme-main-hover) !important;
-  background-image: var(--theme-gradient) !important;
   border-color: var(--theme-main-hover) !important;
   color: var(--theme-btn-text) !important;
-  filter: brightness(.92);
 }
 
 
-/* Auth pages */
+/* Auth cover (login, sign up, forgot password): public/css/auth-pages.css paints this with the main
+   color at .92 / 1 / .78 (dark .80 / .92 / .66). Same stops and opacity; the outer stops take the
+   gradient colors, which fall back to the main color. */
 .authentication-wrapper.authentication-cover .authentication-inner .auth-cover-bg {
   background-color: var(--theme-main) !important;
   background-image:
-    radial-gradient(circle at 14% 14%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0) 55%),
-    radial-gradient(circle at 88% 86%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 48%),
-    linear-gradient(155deg,
-      var(--theme-grad-start) 0%,
-      var(--theme-main) 45%,
-      var(--theme-grad-end) 100%) !important;
+    radial-gradient(circle at 14% 14%, rgba(255, 255, 255, .20) 0%, rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 88% 86%, rgba(255, 255, 255, .14) 0%, rgba(255, 255, 255, 0) 48%),
+    linear-gradient(155deg, rgba(var(--theme-grad-start-rgb), .92) 0%, var(--theme-main) 45%, rgba(var(--theme-grad-end-rgb), .78) 100%) !important;
 }
-
 [data-style='dark'] .authentication-cover .authentication-inner .auth-cover-bg,
 html.dark-style .authentication-cover .authentication-inner .auth-cover-bg {
   background-image:
-    radial-gradient(circle at 14% 14%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 55%),
-    linear-gradient(155deg,
-      color-mix(in srgb, var(--theme-grad-start) 80%, transparent) 0%,
-      color-mix(in srgb, var(--theme-main) 92%, transparent) 48%,
-      color-mix(in srgb, var(--theme-grad-end) 66%, transparent) 100%) !important;
-}
-
-.auth-cover-btn {
-  border-color: rgba(255, 255, 255, 0.75) !important;
-  background: transparent !important;
-  color: #fff !important;
-}
-.auth-cover-btn:hover,
-.auth-cover-btn:focus {
-  background-color: rgba(255, 255, 255, 0.12) !important;
-  border-color: #fff !important;
-  color: #fff !important;
+    radial-gradient(circle at 14% 14%, rgba(255, 255, 255, .10) 0%, rgba(255, 255, 255, 0) 55%),
+    linear-gradient(155deg, rgba(var(--theme-grad-start-rgb), .80) 0%, rgba(var(--theme-main-rgb), .92) 48%, rgba(var(--theme-grad-end-rgb), .66) 100%) !important;
 }
 </style>
+<script>
+  if (window.config && window.config.colors) {
+    window.config.colors.primary = @json($_branding['main']);
+    window.config.colors_label.primary = @json($_branding['main'] . '29');
+  }
+</script>

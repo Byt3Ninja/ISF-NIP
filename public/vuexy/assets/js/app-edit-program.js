@@ -959,13 +959,12 @@
   const PickrLib = window.Pickr || window.pickr;
   if (!PickrLib) return;
 
-  // Canonical brand defaults, shared with the rest of the app. Start/end carry the
-  // 8% alpha the .hero-gradient CSS uses; main is a solid color.
-  const BRAND_DEFAULTS = {
-    start: "#6366f114",
-    end: "#0891b214",
-    main: "#6366f1",
-  };
+  // Defaults = Platform Branding (PlatformBrandingService::programDefaults), passed on the
+  // reset button. Start/end carry the 8% alpha the .hero-gradient CSS uses; main is solid.
+  const BRAND_DEFAULTS = Object.assign(
+    { start: "#7367f014", end: "#b9b3f814", main: "#7367f0" },
+    JSON.parse(document.getElementById("btnResetBrandingColors")?.dataset.defaults || "{}")
+  );
 
   const brandingDefaults = [
     { containerId: "#programColorGradientStart", hiddenId: "#programColorGradientStartVal", key: "start" },
