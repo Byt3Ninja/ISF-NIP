@@ -995,16 +995,19 @@
         "#82868B",
       ],
       components: {
+        // Main components
         preview: true,
-        opacity: false,
+        opacity: true,
         hue: true,
+
+        // Input / output Options
         interaction: {
           hex: true,
-          rgba: false,
-          hsla: false,
-          hsva: false,
-          cmyk: false,
-          input: false,
+          rgba: true,
+          hsla: true,
+          hsva: true,
+          cmyk: true,
+          input: true,
           clear: true,
           save: true,
         },
