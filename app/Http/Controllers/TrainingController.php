@@ -30,6 +30,7 @@ use Illuminate\Http\Request;
 use App\Jobs\ExportTresultData;
 use App\Traits\ZoomMeetingTrait;
 use App\Services\WhatsAppService;
+use App\Services\HtmlSanitizer;
 use App\AttendanceTrainingOffline;
 use App\Notifications\ChangeCycle;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,7 @@ use App\TrainingDuration;
 use App\Services\MeetingWindowService;
 use App\Services\TimezoneService;
 use Intervention\Image\ImageManagerStatic as Image;
+use App\Services\FileManagerService;
 
 class TrainingController extends Controller
 {
@@ -284,7 +286,7 @@ class TrainingController extends Controller
 			if ($request->hasFile('image'))
 			{
 				$img_url = $request->file('image');
-				$img_url = $img_url->store('training', ['disk' => 'public_uploads']);
+				$img_url = app(FileManagerService::class)->upload($img_url, 'training', 'public_uploads', 'image');
 				Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 350, function ($con) {
 					$con->aspectRatio();
 				})->save();
@@ -426,6 +428,8 @@ class TrainingController extends Controller
 		try {
 			if ($request->tcontent) {
 				$id = $request->id ?? null;
+				// Strip any JavaScript/XSS vectors while keeping safe HTML.
+				$content = HtmlSanitizer::clean($request->tcontent);
 				$arr = $i = 1;
 				if ($request->arr) {
 					$arr = $request->arr;
@@ -437,7 +441,7 @@ class TrainingController extends Controller
 						TrainingContent::where('id', $item->id)->update(['arr' => $i++]);
 					}
 				}
-				TrainingContent::updateOrCreate(['id' => $id], ['title' => $request->title, 'content' => $request->tcontent, 'training_id' => $request->training_id, 'user_id' => Auth::id(), 'arr' => $arr]);
+				TrainingContent::updateOrCreate(['id' => $id], ['title' => $request->title, 'content' => $content, 'training_id' => $request->training_id, 'user_id' => Auth::id(), 'arr' => $arr]);
 				return redirect()->route('trainings.course_view', ['id' => $request->training_id])->with(['class' => 'success', 'message' => 'Saved']);
 				// return redirect('/dashboard/training/all/' . $request->training_id)->with(['class' => 'success', 'message' => 'Saved']);
 			}
@@ -470,7 +474,7 @@ class TrainingController extends Controller
 	public function upload(Request $request)
 	{
 		$fileName = $request->file('file');
-		$fileName = $fileName->store('photos', ['disk' => 'TrainingDisk']);
+		$fileName = app(FileManagerService::class)->upload($fileName, 'photos', 'TrainingDisk', 'image');
 		return response()->json(['location' => '/dashboard/training/' . $fileName]); //env('APP_URL'). full URL
 	}
 
@@ -1625,6 +1629,16 @@ class TrainingController extends Controller
 				->find($sessionId);
 
 			if (!$session) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.session_not_found')
+				], 404);
+			}
+
+			// Same ownership rule as the API endpoint: the session must belong to the caller's organizations.
+			$authUser = auth()->user();
+			if (!$authUser->hasRole('admin')
+				&& !$authUser->ownsOrganization($session->step?->cycle?->organization_id)) {
 				return response()->json([
 					'success' => false,
 					'message' => __('admin.session_not_found')

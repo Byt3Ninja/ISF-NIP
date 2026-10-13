@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Startup;
 
+use App\Cycle;
 use App\Schedule;
 use Carbon\Carbon;
 use App\MentorshipRequest;
@@ -120,6 +121,28 @@ class MentorshipSessionController extends Controller
           return $this->forbidden(__('api.forbidden'));
       }
 
+        // Derive the tenant from the caller, never from the request body: the
+        // validation rules only assert the ids EXIST, so trusting them lets a
+        // startup plant sessions into another tenant's organization/cycle.
+        // Checked here, before any online meeting is created for the request.
+        $callerOrganizationId = $startup->organizations_ids[0] ?? null;
+        if ($request->organization_id !== null
+            && !$startup->ownsOrganization($request->organization_id)) {
+            return $this->forbidden(__('api.forbidden'));
+        }
+
+        if ($request->cycle_id !== null) {
+            $cycle = Cycle::find($request->cycle_id);
+            if (!$cycle || !$startup->ownsOrganization($cycle->organization_id)) {
+                return $this->forbidden(__('api.forbidden'));
+            }
+
+            // mentor_id is only validated as an existing user: it must be a mentor of this program.
+            if (!$cycle->mentors()->whereKey($request->mentor_id)->exists()) {
+                return $this->forbidden(__('api.forbidden'));
+            }
+        }
+
         $mentorId = $request->mentor_id;
         $userId = $startup->id;
         // GV-9566: read in the organization's platform zone (an explicit client offset
@@ -182,7 +205,7 @@ class MentorshipSessionController extends Controller
         $mentorship->mentor_id = $mentorId;
         $mentorship->user_id = $userId;
         // organization_id first: the zoom_date cast resolves the zone from it.
-        $mentorship->organization_id = $request->organization_id;
+        $mentorship->organization_id = $request->organization_id ?? $callerOrganizationId;
         $mentorship->zoom_date = $date;
         $mentorship->period = $duration;
         $mentorship->comment = $request->notes;

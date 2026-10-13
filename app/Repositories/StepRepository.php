@@ -8,12 +8,32 @@ class StepRepository
 {
     public function create(array $data)
     {
-        return Step::create($data);
+        // cycle_id is a foreign key excluded from mass-assignment ($fillable).
+        // Set it explicitly so it is persisted from the trusted server-side value.
+        $cycleId = $data['cycle_id'] ?? null;
+        unset($data['cycle_id']);
+
+        $step = new Step($data);
+        if ($cycleId !== null) {
+            $step->cycle_id = $cycleId;
+        }
+        $step->save();
+
+        return $step;
     }
 
     public function update(Step $step, array $data)
    {
-      $step->update($data);
+      // cycle_id is a foreign key excluded from mass-assignment ($fillable).
+      $cycleId = $data['cycle_id'] ?? null;
+      unset($data['cycle_id']);
+
+      $step->fill($data);
+      if ($cycleId !== null) {
+          $step->cycle_id = $cycleId;
+      }
+      $step->save();
+
       return $step;
    }
 

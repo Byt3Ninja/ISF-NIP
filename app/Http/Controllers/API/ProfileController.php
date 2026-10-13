@@ -19,6 +19,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManagerStatic as Image;
+use App\Services\FileManagerService;
 
 class ProfileController extends Controller
 {
@@ -207,7 +208,7 @@ class ProfileController extends Controller
     
     if ($request->hasFile('imgUrl')) {
         $img = $request->file('imgUrl');
-        $imgPath = $img->store('users', ['disk' => 'public_uploads']);
+        $imgPath = app(FileManagerService::class)->upload($img, 'users', 'public_uploads', 'image');
 
         // Resize image
         Image::make(Storage::disk('public_uploads')->path($imgPath))

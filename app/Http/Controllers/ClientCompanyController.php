@@ -63,6 +63,7 @@ use App\Http\Requests\StoreUpdateClientCompanyRequest;
 use URL, File, DB, Exception, Session, Storage, stdClass;
 
 use function Psy\debug;
+use App\Services\FileManagerService;
 
 class ClientCompanyController extends Controller
 {
@@ -1485,15 +1486,20 @@ class ClientCompanyController extends Controller
                     $Commercial_Register = '';
                     $Tax_Card = '';
                 } else {
+                    // Validate both documents before replacing either of them.
+                    app(\App\Services\FileManagerService::class)->assertAllAllowed([
+                        [$request->file('Commercial_Register'), 'common'],
+                        [$request->file('Tax_Card'), 'common'],
+                    ]);
                     if ($request->hasFile('Commercial_Register')) {
                         $file = $request->file('Commercial_Register');
-                        $Commercial_Register = app(\App\Services\FileManagerService::class)->update($file, $company->Commercial_Register, $companyId . '/documents', 'document');
+                        $Commercial_Register = app(\App\Services\FileManagerService::class)->update($file, $company->Commercial_Register, $companyId . '/documents', 'document', 'common');
                     } else {
                         $Commercial_Register = $company->Commercial_Register ?? 'null';
                     }
                     if ($request->hasFile('Tax_Card')) {
                         $file = $request->file('Tax_Card');
-                        $Tax_Card = app(\App\Services\FileManagerService::class)->update($file, $company->Tax_Card, $companyId . '/documents', 'document');
+                        $Tax_Card = app(\App\Services\FileManagerService::class)->update($file, $company->Tax_Card, $companyId . '/documents', 'document', 'common');
                     } else {
                         $Tax_Card = $company->Tax_Card ?? 'null';
                     }
@@ -1560,7 +1566,7 @@ class ClientCompanyController extends Controller
                     // الحصول على الصورة
                     $image = $request->file('img_url');
                     // حفظ الصورة داخل القرص 'public_uploads'
-                    $img_path = $image->store('images/logo', 'public_uploads');
+                    $img_path = app(FileManagerService::class)->upload($image, 'images/logo', 'public_uploads', 'image');
 
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
@@ -1660,7 +1666,7 @@ class ClientCompanyController extends Controller
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company?->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
+                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company?->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck', 'document');
                     }
                 } else {
                     $uploadedFile = $company?->financial_plan;
@@ -1738,7 +1744,7 @@ class ClientCompanyController extends Controller
                     // الحصول على الصورة
                     $image = $request->file('img_url');
                     // حفظ الصورة داخل القرص 'public_uploads'
-                    $img_path = $image->store('images/logo', 'public_uploads');
+                    $img_path = app(FileManagerService::class)->upload($image, 'images/logo', 'public_uploads', 'image');
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
                 } else {
@@ -1765,7 +1771,7 @@ class ClientCompanyController extends Controller
 
                 if ($request->hasFile('pitch_deck')) {
                     $file = $request->file('pitch_deck');
-                    $pitch_deck = app(\App\Services\FileManagerService::class)->update($file, $company->pitch_deck, $companyId . '/pitch_decks', 'pitch_deck');
+                    $pitch_deck = app(\App\Services\FileManagerService::class)->update($file, $company->pitch_deck, $companyId . '/pitch_decks', 'pitch_deck', 'document');
                 } else {
                     return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                 }
@@ -1786,7 +1792,7 @@ class ClientCompanyController extends Controller
                 if ($request->hasFile('documents')) {
                     $files = $request->file('documents');
                     $oldDocs = json_decode($company->documents ?? '[]', true) ?? [];
-                    $uploadedFiles = app(\App\Services\FileManagerService::class)->updateMultiple($files, $oldDocs, $companyId . '/pitch_decks', 'pitch_deck');
+                    $uploadedFiles = app(\App\Services\FileManagerService::class)->updateMultiple($files, $oldDocs, $companyId . '/pitch_decks', 'pitch_deck', 'common');
                 } else {
                     return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                 }
@@ -1842,7 +1848,7 @@ class ClientCompanyController extends Controller
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->business_plan, $companyId . '/business_plan/' . $folder, 'pitch_deck');
+                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->business_plan, $companyId . '/business_plan/' . $folder, 'pitch_deck', 'document');
                     }
                 } else {
                     $uploadedFile = $result->business_plan;
@@ -3017,7 +3023,7 @@ class ClientCompanyController extends Controller
             $documents = [];
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $index => $file) {
-                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public');
+                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public', 'common');
 
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
@@ -3205,7 +3211,7 @@ class ClientCompanyController extends Controller
                 ]);
 
                 foreach ($request->file('documents') as $index => $file) {
-                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public');
+                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public', 'common');
 
                     \Log::info('EditMileStone: File uploaded', [
                         'original_name' => $file->getClientOriginalName(),
@@ -3919,7 +3925,7 @@ class ClientCompanyController extends Controller
             if ($request->hasFile('documents')) {
                 $documents = [];
                 foreach ($request->file('documents') as $index => $file) {
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public', 'common');
 
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
@@ -4026,7 +4032,7 @@ class ClientCompanyController extends Controller
             if ($request->hasFile('documents')) {
                 $newDocuments = [];
                 foreach ($request->file('documents') as $index => $file) {
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public', 'common');
 
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),

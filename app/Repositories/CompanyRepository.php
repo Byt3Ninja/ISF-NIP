@@ -345,7 +345,6 @@ public function findCompanyRelation($companyId)
             ->first();
 
         $attrs = [
-            'user_id'            => $userId,
             'Name'               => trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')),
             'Email'              => $data['email']  ?? null,
             'phone'              => $data['phone']  ?? null,
@@ -358,11 +357,17 @@ public function findCompanyRelation($companyId)
             'TeamMember'         => 'Founder',
         ];
 
+        // user_id is not mass-assignable ($fillable); it is the server-resolved account, set explicitly.
         if ($existing) {
-            $existing->update($attrs);
+            $existing->fill($attrs);
+            $existing->user_id = $userId;
+            $existing->save();
             return $existing->fresh();
         }
-        return $company->teamMembers()->create($attrs);
+        $founder = $company->teamMembers()->make($attrs);
+        $founder->user_id = $userId;
+        $founder->save();
+        return $founder;
     }
 
     /**

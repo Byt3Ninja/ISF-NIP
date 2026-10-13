@@ -6,6 +6,7 @@ use App\User;
 use App\serviceProviders;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\FileManagerService;
 
 class ServiceProviderService
 {
@@ -15,7 +16,7 @@ class ServiceProviderService
 
             // Handle Image Upload
             if ($file) {
-                $data['img_url'] = $file->store('service_providers_logos', ['disk' => 'public_uploads']);
+                $data['img_url'] = app(FileManagerService::class)->upload($file, 'service_providers_logos', 'public_uploads', 'image');
             }
 
             $dbData = [
@@ -75,7 +76,7 @@ class ServiceProviderService
         return DB::transaction(function () use ($user, $data, $file, $provider) {
 
             if ($file) {
-                $data['hero_image'] = $file->store('service_providers_hero', ['disk' => 'public_uploads']);
+                $data['hero_image'] = app(FileManagerService::class)->upload($file, 'service_providers_hero', 'public_uploads', 'image');
             }
 
             $dbData = [
@@ -173,7 +174,7 @@ class ServiceProviderService
 
                 // Handle Media Upload
                 if (isset($item['media']) && $item['media'] instanceof \Illuminate\Http\UploadedFile) {
-                    $storedPath = $item['media']->store('service_providers_portfolio', 'public');
+                    $storedPath = app(FileManagerService::class)->upload($item['media'], 'service_providers_portfolio', 'public', 'media');
                     if ($storedPath) {
                         $itemData['media_url'] = $storedPath;
                         $itemData['media_type'] = str_starts_with($item['media']->getMimeType(), 'video') ? 'video' : 'image';

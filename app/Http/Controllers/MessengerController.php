@@ -945,13 +945,21 @@ class MessengerController extends Controller
     public function deleteDraft(Request $request){
 
         
-        $draft = DB::table('message_drafts')->where('id',$request->draftsNumber)->first();
-        $drafts = $draft->drafts;
-        
+        // Only the caller's own draft may be looked up, and only their own rows removed
+        // (the group number in `drafts` is not unique across users).
+        $draft = DB::table('message_drafts')
+            ->where('id', $request->draftsNumber)
+            ->where('sender', auth()->id())
+            ->first();
+
         if (!$draft) {
             return response()->json(['error' => __('admin.MessageError')]);
         }
-        $delete = DB::table('message_drafts')->where('drafts', $drafts)->delete();
+        $drafts = $draft->drafts;
+        $delete = DB::table('message_drafts')
+            ->where('drafts', $drafts)
+            ->where('sender', auth()->id())
+            ->delete();
         
         return response()->json(['success' => __('admin.MessageDraftDeletedSuccessfully')]);
     }
@@ -1061,7 +1069,17 @@ class MessengerController extends Controller
             'message_receiver' => 'required|exists:users,id',
             'message_id' => 'nullable|exists:messenger,id',
         ]);
-        
+
+        // A reply may only be attached to a conversation the caller takes part in.
+        if ($request->filled('message_id')) {
+            $original = Messenger::find($request->message_id);
+            abort_unless(
+                $original
+                && ((int) $original->sender === (int) auth()->id() || (int) $original->receiver === (int) auth()->id()),
+                403
+            );
+        }
+
         $message = Messenger::create([
             'subject' => $request->message_subject,
             'message' => $request->message_message,

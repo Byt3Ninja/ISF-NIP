@@ -13,6 +13,7 @@ use Spatie\Permission\PermissionRegistrar;
 class Permissions
 {
     public $exceptNames = [
+        'l5-swagger.*', // API docs: gated by the `admin` middleware (see config/l5-swagger.php)
         'auth.magic-login',
         'core.dashboard_view',
         'clients.profile_view',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Documentation;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +33,11 @@ class DocumentationController extends Controller
             'role' => 'required|string',
             'content_ar' => 'required|string',
             'content_en' => 'required|string',
+        ]);
+        // Strip any JavaScript/XSS vectors; content is rendered raw on the documentation page.
+        $request->merge([
+            'content_ar' => HtmlSanitizer::clean($request->content_ar),
+            'content_en' => HtmlSanitizer::clean($request->content_en),
         ]);
         $user = Auth::id();
         $result = Documentation::create($request->except(['user_id']) + ['user_id' => $user]);
@@ -64,6 +70,11 @@ class DocumentationController extends Controller
             'role' => 'required|string',
             'content_ar' => 'required|string',
             'content_en' => 'required|string',
+        ]);
+        // Strip any JavaScript/XSS vectors; content is rendered raw on the documentation page.
+        $request->merge([
+            'content_ar' => HtmlSanitizer::clean($request->content_ar),
+            'content_en' => HtmlSanitizer::clean($request->content_en),
         ]);
         $user =auth()->id();
         $result = $documentation->update($request->except(['user_id'])+ ['user_id'=>$user]);

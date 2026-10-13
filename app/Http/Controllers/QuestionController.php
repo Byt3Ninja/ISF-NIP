@@ -34,6 +34,7 @@ class QuestionController extends Controller
      */
     public function store(Request $request)
     {   
+        abort_unless(auth()->user()->ableTo('questions.store'), 403);
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'required|exists:sub_categories,id',
@@ -76,6 +77,7 @@ class QuestionController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        abort_unless(auth()->user()->ableTo('questions.update'), 403);
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'nullable|exists:sub_categories,id',

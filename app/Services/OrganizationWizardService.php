@@ -466,12 +466,16 @@ class OrganizationWizardService
      */
     protected function handleLogoUpload(Organization $organization, $file): string
     {
+        // Validate the replacement first (image whitelist + real content type): a rejected
+        // upload must never cost the existing logo, and the extension is never the client's.
+        $extension = app(FileManagerService::class)->assertAllowed($file, 'image');
+
         // Delete old image if exists
         if ($organization->img_url && Storage::disk('organizations')->exists($organization->img_url)) {
             Storage::disk('organizations')->delete($organization->img_url);
         }
 
-        $imageName = time() . '.' . $file->getClientOriginalExtension();
+        $imageName = time() . '.' . $extension;
         Storage::disk('organizations')->put($imageName, file_get_contents($file));
 
         return $imageName;

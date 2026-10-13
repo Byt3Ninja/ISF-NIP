@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use stdClass;
+use App\Services\FileManagerService;
 
 class serviceProviderController extends Controller
 {
@@ -595,7 +596,7 @@ class serviceProviderController extends Controller
 		$request->validate([
 			'client_name' => 'required|string|max:100',
 			'client_url' => ['nullable', 'url:http,https', 'max:500', 'regex:/^https?:\/\/([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/.*)?$/'],
-			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
+			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
 		]);
 
 		$data = [
@@ -605,7 +606,7 @@ class serviceProviderController extends Controller
 		];
 
 		if ($request->hasFile('client_logo')) {
-			$data['logo_url'] = $request->file('client_logo')->store('service_providers_clients', ['disk' => 'public_uploads']);
+			$data['logo_url'] = app(FileManagerService::class)->upload($request->file('client_logo'), 'service_providers_clients', 'public_uploads', 'image');
 		}
 
 		$client = $provider->clients()->create($data);
@@ -620,7 +621,7 @@ class serviceProviderController extends Controller
 		$request->validate([
 			'client_name' => 'required|string|max:100',
 			'client_url' => ['nullable', 'url:http,https', 'max:500', 'regex:/^https?:\/\/([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(\/.*)?$/'],
-			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:5120',
+			'client_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
 		]);
 
 		$client = $provider->clients()->findOrFail($clientId);
@@ -629,7 +630,7 @@ class serviceProviderController extends Controller
 		$client->external_link = $request->client_url;
 
 		if ($request->hasFile('client_logo')) {
-			$client->logo_url = $request->file('client_logo')->store('service_providers_clients', ['disk' => 'public_uploads']);
+			$client->logo_url = app(FileManagerService::class)->upload($request->file('client_logo'), 'service_providers_clients', 'public_uploads', 'image');
 		}
 
 		$client->save();

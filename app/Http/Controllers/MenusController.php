@@ -15,6 +15,7 @@ class MenusController extends Controller
 
     public function store_Menu(Request $request)
     {
+        abort_unless(Auth::user()->ableTo('menus.store'), 403);
         $newMenu = new Menu();
         $newMenu->menu_type = $request->input('menu_type');
         $newMenu->parent_id = $request->input('parent_id');
@@ -36,12 +37,14 @@ class MenusController extends Controller
 
     public function editMenu($id,Request $request)
     {
+        abort_unless(Auth::user()->ableTo('menus.edit'), 403);
         $getMenu = Menu::findOrFail($id);
         return view('admin.settings.menus.edit_menu')->with('getMenu',$getMenu);
     }
 
     public function updatemenu($id,Request $request)
     {
+        abort_unless(Auth::user()->ableTo('menus.update'), 403);
         $updateMenu = Menu::findOrfail($id);
         $updateMenu->menu_type = $request->input('menu_type');
         $updateMenu->parent_id = $request->input('parent_id');
@@ -57,6 +60,7 @@ class MenusController extends Controller
 
     public function deleteMenu($id)
     {
+        abort_unless(Auth::user()->ableTo('menus.delete'), 403);
         Menu::Destroy($id);
         return redirect()->back()->with('message', 'DeletedSuccessfully');
     }

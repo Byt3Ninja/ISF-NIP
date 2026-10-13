@@ -8,6 +8,7 @@ use DB;
 use Log;
 use Exception;
 use Session;
+use App\Services\FileManagerService;
 
 class PressController extends Controller
 {
@@ -56,7 +57,7 @@ class PressController extends Controller
 			//store the image
 			$img_url = $request->file('img_url');
 			//get the path of the stores image
-			$img_url = $img_url->store('press', ['disk' => 'public_uploads']);
+			$img_url = app(FileManagerService::class)->upload($img_url, 'press', 'public_uploads', 'image');
 		} else { $img_url = ''; }
 		$user =auth()->user()->id;
 		$result = Press::create($request->except(['img_url','user_added']) + ['img_url' => $img_url,'user_added' => $user]);
@@ -102,7 +103,7 @@ class PressController extends Controller
 			//store the image
 			$img_url = $request->file('img_url');
 			//get the path of the stores image
-			$img_url = $img_url->store('press', ['disk' => 'public_uploads']);
+			$img_url = app(FileManagerService::class)->upload($img_url, 'press', 'public_uploads', 'image');
 			//update
 
 			$result = $press->update($request->except(['img_url','user_added']) + ['img_url' => $img_url,'user_added'=>$user]);

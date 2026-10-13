@@ -33,7 +33,7 @@ class UpdateCurrencyRequest extends FormRequest
             'currency_symbol' => 'nullable|string|max:10',
             'exchange_rate_to_usd' => 'nullable|numeric|min:0|regex:/^\d+(\.\d{1,6})?$/',
             'enabled' => 'nullable|boolean',
-            'flag' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+            'flag' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ];
     }
 }

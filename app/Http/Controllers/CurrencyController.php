@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\StoreCurrencyRequest;
 use App\Http\Requests\UpdateCurrencyRequest;
+use App\Services\FileManagerService;
 
 class CurrencyController extends Controller
 {
@@ -34,6 +35,7 @@ class CurrencyController extends Controller
      */
     public function store(StoreCurrencyRequest $request)
     {
+        abort_unless(auth()->user()->ableTo('currencies.store'), 403);
 
         $currency = new Currency();
         $currency->currency_code = $request->currency_code;
@@ -56,7 +58,8 @@ class CurrencyController extends Controller
         // Handle file upload
         if ($request->hasFile('flag')) {
             $file = $request->file('flag');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            // Never keep the client's filename: validate, then use a server-generated name.
+            $filename = app(FileManagerService::class)->validatedSafeName($file, 'image');
             $file->move(public_path('icons/flags'), $filename);
             $currency->flag = 'icons/flags/' . $filename;
         }
@@ -81,6 +84,7 @@ class CurrencyController extends Controller
      */
     public function update(UpdateCurrencyRequest $request, Currency $currency)
     {
+        abort_unless(auth()->user()->ableTo('currencies.update'), 403);
         $currency->currency_code = $request->currency_code;
         $currency->currency_name = $request->currency_name;
         $currency->currency_name_ar = $request->currency_name_ar;
@@ -92,7 +96,8 @@ class CurrencyController extends Controller
         if ($request->hasFile('flag')) {
            
             $file = $request->file('flag');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            // Never keep the client's filename: validate, then use a server-generated name.
+            $filename = app(FileManagerService::class)->validatedSafeName($file, 'image');
             $file->move(public_path('icons/flags'), $filename);
             $currency->flag = 'icons/flags/' . $filename;
         }
@@ -107,12 +112,14 @@ class CurrencyController extends Controller
      */
     public function destroy(Currency $currency)
     {
+        abort_unless(auth()->user()->ableTo('currencies.destroy'), 403);
         $currency->delete();
         return redirect()->route('currencies.index')->with('msg', 'currencyDeleted');
     }
 
     public function UpdateAllCurrency(Request $request)
     {
+        abort_unless(auth()->user()->ableTo('currencies.rates_update_all'), 403);
         try {
             $response = Http::timeout(10)->get('https://www.floatrates.com/daily/usd.json');
     

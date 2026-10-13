@@ -7,6 +7,7 @@ use App\Posts;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Redirect;
+use App\Services\FileManagerService;
 
 class PostsController extends Controller
 {
@@ -24,10 +25,10 @@ class PostsController extends Controller
 			{
 				$file = $request->file('image');
 				$path = 'images/blog/';
-				$fileExtension = $request->file('image')->getClientOriginalExtension();
-				$filename = Str::random(5). Str::limit(Carbon::today().Carbon::now(),10);
-				$filename2 =$filename.'.'.$fileExtension;
-				$file->move($path, $filename.'.'.$fileExtension);
+				// Whitelist + real-content check; the stored name is generated server-side,
+				// never taken from the client (a GIF-headered shell.php passes a MIME check).
+				$filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+				$file->move($path, $filename2);
 			}
 		}
 		$newpost = new posts();
@@ -63,10 +64,10 @@ class PostsController extends Controller
 			{
 				$file = $request->file('image');
 				$path = 'images/blog/';
-				$fileExtension = $request->file('image')->getClientOriginalExtension();
-				$filename = Str::random(5). Str::limit(Carbon::today().Carbon::now(),10,'post');
-				$filename2 =$filename.'.'.$fileExtension;
-				$file->move($path, $filename.'.'.$fileExtension);
+				// Whitelist + real-content check; the stored name is generated server-side,
+				// never taken from the client (a GIF-headered shell.php passes a MIME check).
+				$filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+				$file->move($path, $filename2);
 				$updatepost->image = $filename2;
 			}
 		}

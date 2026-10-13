@@ -63,7 +63,7 @@ class OrganizationStep4Request extends FormRequest
             'articles.*.title' => 'nullable|string|max:255',
             'articles.*.summary' => 'nullable|string|max:1000',
             'articles.*.link' => 'nullable|url|max:500',
-            'articles.*.image' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:5120',
+            'articles.*.image' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:5120',
             'articles.*.existing_image' => 'nullable|string',
 
             // Partners Section
@@ -73,7 +73,7 @@ class OrganizationStep4Request extends FormRequest
             'partners_description' => 'nullable|string|max:1000',
             'partners_list' => 'nullable|array|max:20',
             'partners_list.*.name' => 'nullable|string|max:255',
-            'partners_list.*.logo' => 'nullable|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+            'partners_list.*.logo' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
             'partners_list.*.existing_logo' => 'nullable|string',
 
             // Section Type (for tab-isolated saves)

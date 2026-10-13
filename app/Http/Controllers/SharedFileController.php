@@ -63,7 +63,7 @@ class SharedFileController extends Controller
 
         // File Upload — store on the private disk via the hardened service (server-generated name + blacklist)
         $file         = $request->file('file');
-        $relativePath = app(FileManagerService::class)->upload($file, 'sharedfiles', 'hackathon_shared');
+        $relativePath = app(FileManagerService::class)->upload($file, 'sharedfiles', 'hackathon_shared', 'attachment');
         // Sanitize the client-supplied display name at the write boundary (defense in depth):
         // neutralizes stored XSS and path injection before it ever reaches the database.
         $originalName = $this->sanitizeFileName($file->getClientOriginalName(), basename($relativePath));

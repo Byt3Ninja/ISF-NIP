@@ -14,6 +14,7 @@ class PermissionsController extends Controller
 {
     public function index()
     {
+        $this->authorizePermissionAccess('permissions.index');
         // $_permissions = Permission::all();
         $permission_q = "SELECT
                 p.id,
@@ -49,12 +50,14 @@ class PermissionsController extends Controller
 
     public function create()
     {
+        $this->authorizePermissionAccess('permissions.create', true);
         $groups = collect( DB::select("SELECT pg.id, pg.name FROM permission_groups pg") );
         return view('admin.permissions.create', compact('groups'));
     }
 
     public function store(StorePermissionRequest $request)
     {
+        $this->authorizePermissionAccess('permissions.store', true);
         $permission = new Permission;
         $permission->name = $request->input('name', null);
         $permission->description = $request->input('description', null);
@@ -67,12 +70,14 @@ class PermissionsController extends Controller
 
     public function edit(Permission $permission)
     {
+        $this->authorizePermissionAccess('permissions.edit', true);
         $groups = collect( DB::select("SELECT pg.id, pg.name FROM permission_groups pg") );
         return view('admin.permissions.edit', compact('permission', 'groups'));
     }
 
     public function update(UpdatePermissionRequest $request, $id)
     {
+        $this->authorizePermissionAccess('permissions.update', true);
         $permission = Permission::find($id);
         $permission->name = $request->input('name', null);
         $permission->description = $request->input('description', null);
@@ -85,11 +90,13 @@ class PermissionsController extends Controller
 
     public function show(Permission $permission)
     {
+        $this->authorizePermissionAccess('permissions.show');
         return view('admin.permissions.show', compact('permission'));
     }
 
     public function destroy(Permission $permission)
     {
+        $this->authorizePermissionAccess('permissions.destroy', true);
         $permission->delete();
         app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         return back();
@@ -100,6 +107,9 @@ class PermissionsController extends Controller
         $user = auth()->user();
         if( $user->ableToAny(['roles.edit', 'roles.update', 'permissions.edit', 'permissions.update']) )
         {
+            // Roles and permissions are global records: changing them needs platform-wide admin scope.
+            if (!$user->hasRole('admin')) { abort(403); }
+
             $permissionId = $request->input('permission', null);
             $roleId = $request->input('role', null);
 
@@ -124,5 +134,24 @@ class PermissionsController extends Controller
                 'data' => $getPermissionRoles
             ]);
         } else { return abort( 401 ); }
+    }
+
+    /**
+     * Permissions and permission groups are global, platform-wide RBAC records
+     * with no tenant column, so no per-record owner exists. Reads require the
+     * matching permissions.* permission; mutations additionally require global
+     * admin scope so a tenant admin cannot alter shared RBAC definitions.
+     */
+    protected function authorizePermissionAccess(string $permission, bool $mutating = false): void
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->ableTo($permission)) {
+            abort(401);
+        }
+
+        if ($mutating && !$user->hasRole('admin')) {
+            abort(403);
+        }
     }
 }

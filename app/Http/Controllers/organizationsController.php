@@ -132,7 +132,7 @@ class organizationsController extends Controller
 		// Store the image using Storage disk
 		if ($request->hasFile('img_url')) {
 			$image = $request->file('img_url');
-			$organization->img_url = app(\App\Services\FileManagerService::class)->upload($image, '', 'organizations');
+			$organization->img_url = app(\App\Services\FileManagerService::class)->upload($image, '', 'organizations', 'image');
 		} else {
 			$organization->img_url = null;
 		}
@@ -202,7 +202,7 @@ class organizationsController extends Controller
 		// Store the image using Storage disk
 		if ($request->hasFile('img_url')) {
 			$image = $request->file('img_url');
-			$organization->img_url = app(\App\Services\FileManagerService::class)->update($image, $organization->img_url, '', 'organizations');
+			$organization->img_url = app(\App\Services\FileManagerService::class)->update($image, $organization->img_url, '', 'organizations', 'image');
 		}
 
 		$organization->save();

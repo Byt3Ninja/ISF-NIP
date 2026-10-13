@@ -15,6 +15,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use App\{User, Settings, Currency, Service, Organization, ServiceCategory, serviceProviders, ServicesRequests};
 use App\Services\ServiceRequestStatusLogger;
 use Carbon\Carbon;
+use App\Services\FileManagerService;
 
 class ServiceController extends Controller
 {
@@ -232,7 +233,7 @@ class ServiceController extends Controller
 			//store the image
 			$img_url = $request->file('img_url');
 			//get the path of the stores image
-			$img_url = $img_url->store('services', ['disk' => 'public_uploads']);
+			$img_url = app(FileManagerService::class)->upload($img_url, 'services', 'public_uploads', 'image');
 		} else { $img_url = '';  }
 		$inputs = $request->except(['img_url']) + [
 			'img_url' => $img_url,
@@ -386,7 +387,7 @@ class ServiceController extends Controller
 
 		// Handle Image Upload
 		if ($request->hasFile('img_url')) {
-			$img_url = $request->file('img_url')->store('services', ['disk' => 'public_uploads']);
+			$img_url = app(FileManagerService::class)->upload($request->file('img_url'), 'services', 'public_uploads', 'image');
 			$inputs['img_url'] = $img_url;
 		}
 
@@ -928,7 +929,7 @@ class ServiceController extends Controller
 
 		if ($file && $file->isValid()) {
 			$attachmentName = $file->getClientOriginalName();
-			$attachmentPath = $file->store('', ['disk' => 'service_messages']);
+			$attachmentPath = app(FileManagerService::class)->upload($file, '', 'service_messages', 'attachment');
 		}
 
 		$now = now();

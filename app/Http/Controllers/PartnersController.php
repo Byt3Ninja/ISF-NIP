@@ -8,6 +8,7 @@ use DB;
 use Log;
 use Exception;
 use Session;
+use App\Services\FileManagerService;
 
 
 class PartnersController extends Controller
@@ -60,7 +61,7 @@ class PartnersController extends Controller
             //store the image
             $img_url = $request->file('img_url');
             //get the path of the stores image
-            $img_url = $img_url->store('partners', ['disk' => 'public_uploads']);
+            $img_url = app(FileManagerService::class)->upload($img_url, 'partners', 'public_uploads', 'image');
         } else { $img_url = ''; }
         $user =auth()->user()->id;
         $result = Partner::create($request->except(['img_url','user_added']) + ['img_url' => $img_url,'user_added' => $user]);
@@ -108,7 +109,7 @@ class PartnersController extends Controller
             //store the image
             $img_url = $request->file('img_url');
             //get the path of the stores image
-            $img_url = $img_url->store('partners', ['disk' => 'public_uploads']);
+            $img_url = app(FileManagerService::class)->upload($img_url, 'partners', 'public_uploads', 'image');
             //update
             $result = $partner->update($request->except(['img_url','user_added']) + ['img_url' => $img_url,'user_added'=>$user]);
         } else { $result = $partner->update($request->except(['user_added'])+ ['user_added'=>$user]); }

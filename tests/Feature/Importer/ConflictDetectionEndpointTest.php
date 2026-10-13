@@ -34,7 +34,7 @@ class ConflictDetectionEndpointTest extends TestCase
         ]);
 
         // Seed an existing program in the org matching row 4's name+type but with different dates
-        Cycle::create([
+        Cycle::forceCreate([
             'title'           => 'OldProgram',
             'type'            => 'General_Program',
             'start'           => '2024-01-01',
@@ -43,7 +43,7 @@ class ConflictDetectionEndpointTest extends TestCase
         ]);
 
         // Seed an existing enrolled founder matching row 2's email
-        $cycleEnrolled = Cycle::create([
+        $cycleEnrolled = Cycle::forceCreate([
             'title'           => 'Other Program',
             'type'            => 'General_Program',
             'start'           => '2024-01-01',

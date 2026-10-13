@@ -31,7 +31,7 @@ class OrganizationService
     public function createOrganization(array $data,?UploadedFile $file, $countryCode): Organization
     {
         $img_url = $file 
-            ? $this->fileManager->upload($file, 'organizations', 'organizations')
+            ? $this->fileManager->upload($file, 'organizations', 'organizations', 'image')
             : '/images/background/logo.png';
         return DB::transaction(function () use ($data, $img_url, $countryCode) {
             $password = $data['password'];
@@ -76,7 +76,7 @@ class OrganizationService
     public function updateOrganization(Organization $organization, array $data,?UploadedFile $file): Organization
     {
         $img_url = $file 
-            ? $this->fileManager->update($file, $organization->img_url, 'organizations', 'organizations') 
+            ? $this->fileManager->update($file, $organization->img_url, 'organizations', 'organizations', 'image') 
             : $organization->img_url;
 
         return DB::transaction(function () use ($organization, $data, $img_url) {
@@ -144,6 +144,6 @@ class OrganizationService
         if (!$file) {
             return '/images/background/logo.png';
         }
-        return $this->fileManager->upload($file, 'organizations', 'organizations');
+        return $this->fileManager->upload($file, 'organizations', 'organizations', 'image');
     }
 }

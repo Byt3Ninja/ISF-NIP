@@ -39,6 +39,7 @@ use Illuminate\Validation\Rules\In;
 use Intervention\Image\ImageManagerStatic as Image;
 use PragmaRX\Google2FA\Google2FA;
 use Storage, Hash, Exception, Session, URL, File;
+use App\Services\FileManagerService;
 
 class ClientProfileController extends Controller
 {
@@ -264,7 +265,7 @@ class ClientProfileController extends Controller
             if( $request->hasFile('img_url') )
             {
                 $img_url = $request->file('img_url');
-                $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                $img_url = app(FileManagerService::class)->upload($img_url, 'users', 'public_uploads', 'image');
                 Image::make(Storage::disk('public_uploads')->path($img_url))->resize(null, 200, function ($con) { $con->aspectRatio(); })->save();
             }
             else

@@ -37,10 +37,16 @@ class CompanyService
             return [ 'type' => 'not_found' ];
         }
 
-        if (
-            $user->hasAnyRole(['Admin', 'organizationManager', 'subadmin']) ||
-            ($user->hasRole('Registered') && $user->company_id == $company->id)
-        ) {
+        $companyOrgId = $company->cycleRelation?->organization_id;
+
+        // Organization staff are limited to their own organizations; a founder still sees only
+        // their own company (a founder "owns" their program's organization for scoping purposes,
+        // which must not open every other startup of that organization to them).
+        $allowed = $user->hasRole('admin')
+            || ($user->hasRole('Registered') && (int) $user->company_id === (int) $company->id)
+            || ($user->hasAnyRole(['organizationManager', 'subadmin']) && $user->ownsOrganization($companyOrgId));
+
+        if ($allowed) {
             return [
                 'type' => 'success',
                 'data' => new CompanyProfileResource($company)
@@ -83,7 +89,7 @@ class CompanyService
 
             // Logo
             if (!empty($data['logo'])) {
-                $company->logo = $this->fileManager->update($data['logo'], $company->logo, 'images/logo', 'public_uploads');
+                $company->logo = $this->fileManager->update($data['logo'], $company->logo, 'images/logo', 'public_uploads', 'image');
             }
 
             // Social Links
@@ -167,13 +173,24 @@ class CompanyService
 
     protected function handleFileUploads(Company $company, array $data, $user): void
     {
+        // Validate every uploaded file before replacing any of them.
+        $this->fileManager->assertAllAllowed(array_merge(
+            [
+                [$data['pitchDeckFile'] ?? null, 'common'],
+                [$data['financialPlanAttachment'] ?? null, 'common'],
+                [$data['businessPlanAttachment'] ?? null, 'common'],
+            ],
+            array_map(fn ($document) => [$document, 'document'], (array) ($data['documents'] ?? []))
+        ));
+
         if (!empty($data['pitchDeckFile'])) {
             $file = $data['pitchDeckFile'];
             $company->pitch_deck = $this->fileManager->update(
                 $file, 
                 $company->pitch_deck, 
                 $user->company_id . '/pitch_decks/documents', 
-                'pitch_deck'
+                'pitch_deck',
+                'common'
             );
         }
 
@@ -183,7 +200,8 @@ class CompanyService
                 $file, 
                 $company->financial_plan, 
                 $user->company_id . '/financial_plan/documents', 
-                'pitch_deck'
+                'pitch_deck',
+                'common'
             );
         }
 
@@ -192,7 +210,7 @@ class CompanyService
             if (!is_array($existing)) {
                 $existing = [];
             }
-            $newPaths = $this->fileManager->uploadMultiple($data['documents'], $user->company_id . '/pitch_decks/documents', 'pitch_deck');
+            $newPaths = $this->fileManager->uploadMultiple($data['documents'], $user->company_id . '/pitch_decks/documents', 'pitch_deck', 'document');
             $existing = array_merge($existing, $newPaths);
             $company->documents = json_encode($existing);
         }
@@ -210,7 +228,8 @@ class CompanyService
                 $file, 
                 $company->business_plan, 
                 $user->company_id . '/business_plan/' . $folder, 
-                'pitch_deck'
+                'pitch_deck',
+                'common'
             );
         }
 

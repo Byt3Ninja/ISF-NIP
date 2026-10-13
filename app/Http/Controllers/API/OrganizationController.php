@@ -18,6 +18,7 @@ use App\Http\Resources\OrganizationResource;
 use App\Repositories\OrganizationRepository;
 use App\Http\Requests\StoreOrganizationRequest;
 use App\Http\Requests\UpdateOrganizationRequest;
+use App\Services\FileManagerService;
 /**
  * @OA\Schema(
  *     schema="OrganizationResource",
@@ -151,9 +152,10 @@ class OrganizationController extends Controller
     $img_url = '/images/background/logo.png';
         if ($request->hasFile('imgUrl')) {
             $file = $request->file('imgUrl');
-            $filename = 'organizations/' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('organizations'), basename($filename));
-            $img_url = $filename;
+            // Stored name is derived server-side from validated content, never from the client extension.
+            $safeName = app(FileManagerService::class)->validatedSafeName($file, 'image');
+            $file->move(public_path('organizations'), $safeName);
+            $img_url = 'organizations/' . $safeName;
         }
         $org = $this->organizationService->createOrganization(
             $request->validated(),

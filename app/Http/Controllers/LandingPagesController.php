@@ -858,7 +858,7 @@ class LandingPagesController extends Controller
     $page->title = $general['title'];
     $page->slug = LandingPage::generateSlug($general['title']);
     $page->status = true;
-    $page->logo = app(FileManagerService::class)->upload($request->file('general.logo'), 'landing-pages', 'public_uploads');
+    $page->logo = app(FileManagerService::class)->upload($request->file('general.logo'), 'landing-pages', 'public_uploads', 'image');
     $page->description = $general['description'];
     $page->description_ar = $general['description_ar'];
     $page->linkedin = $general['linkedin'] ?? null;
@@ -977,7 +977,8 @@ class LandingPagesController extends Controller
 				$request->file('general.logo'),
 				$page->logo,
 				'landing-pages',
-				'public_uploads'
+				'public_uploads',
+				'image'
 			);
 		}
 
@@ -1052,7 +1053,8 @@ class LandingPagesController extends Controller
 				$request->file('hero.hero_image'),
 				$page->hero_image,
 				'landing-pages',
-				'public_uploads'
+				'public_uploads',
+				'image'
 			);
 		}
 
@@ -1583,7 +1585,7 @@ class LandingPagesController extends Controller
 			], 422);
 		}
 
-		$path = app(FileManagerService::class)->upload($request->file('image'), 'landing-pages/custom-sections', 'public_uploads');
+		$path = app(FileManagerService::class)->upload($request->file('image'), 'landing-pages/custom-sections', 'public_uploads', 'image');
 		$url = app(FileManagerService::class)->getUrl($path, 'public_uploads');
 
 		return response()->json([

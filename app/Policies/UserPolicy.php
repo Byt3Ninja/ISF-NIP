@@ -25,9 +25,28 @@ class UserPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user): bool
+    public function view(User $user, ?User $model = null): bool
     {
-        return $user->ableTo('users.show');
+        if (!$user->ableTo('users.show')) {
+            return false;
+        }
+
+        // Without a target this is only the permission check (kept for existing callers).
+        return $model === null
+            || $user->id === $model->id
+            || $this->inScope($user, $model);
+    }
+
+    /**
+     * The target account belongs to the acting user's tenant scope: platform admins
+     * reach everyone, others only users of an organization they own (directly, or
+     * through the user's company program).
+     */
+    private function inScope(User $user, User $model): bool
+    {
+        return $user->hasRole('admin')
+            || $user->ownsOrganization($model->organization_id)
+            || $user->ownsOrganization($model->company?->cycledata?->organization_id);
     }
 
     /**
@@ -53,7 +72,15 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->ableToAny(['users.edit', 'users.update']);
+        if (!$user->ableToAny(['users.edit', 'users.update'])) {
+            return false;
+        }
+
+        // Self-service edits, admins, or managers acting within their org scope.
+        return $user->id === $model->id
+            || $user->hasRole('admin')
+            || $user->ownsOrganization($model->organization_id)
+            || $user->ownsOrganization($model->company?->cycledata?->organization_id);
     }
 
     /**
@@ -61,7 +88,14 @@ class UserPolicy
      */
     public function deactivate(User $user, User $model): bool
     {
-        return $user->ableToAny(['users.edit', 'users.update']);
+        if (!$user->ableToAny(['users.edit', 'users.update'])) {
+            return false;
+        }
+
+        // No self-service clause: a user must not deactivate their own account here.
+        return $user->hasRole('admin')
+            || $user->ownsOrganization($model->organization_id)
+            || $user->ownsOrganization($model->company?->cycledata?->organization_id);
     }
     /**
      * Determine whether the user can update the model.
@@ -71,7 +105,8 @@ class UserPolicy
      */
     public function updatePassword(User $user, User $model): bool
     {
-        return $user->ableTo('users.update');
+        return $user->ableTo('users.update')
+            && ($user->id === $model->id || $this->inScope($user, $model));
     }
     /**
      * Determine whether the user can update his own password.
@@ -89,7 +124,7 @@ class UserPolicy
      */
     public function destroy(User $user, User $model): bool
     {
-         return $user->ableTo('users.destroy');
+         return $user->ableTo('users.destroy') && $this->inScope($user, $model);
     }
 
     /**
