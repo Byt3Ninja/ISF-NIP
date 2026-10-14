@@ -62,7 +62,7 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sendingOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -111,7 +111,7 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $notifiable->organization;
+        $org = $this->sendingOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
@@ -180,5 +180,16 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
             'trace' => $exception->getTraceAsString(),
             'message' => $this->Message,
         ]);
+    }
+
+    /**
+     * The organization running the session, not the founder's own
+     * organization_id (often null for founders in several organizations).
+     */
+    protected function sendingOrganization($notifiable)
+    {
+        return $this->mentorship_session?->organization
+            ?? $this->mentorship_session?->cycle?->organization
+            ?? $notifiable->organization;
     }
 }
