@@ -81,6 +81,15 @@ class StartupMeetingTimeChangedNotification extends ScreeningMeetingNotification
         return (int) ($this->step()?->stype) === 5;
     }
 
+    /**
+     * A founder's first booking on an Initial Screening (stype 2) panel, which
+     * has its own literal "Screening Session" template.
+     */
+    protected function isInitialScheduled(): bool
+    {
+        return !$this->isFinalStage() && $this->variant === 'scheduled';
+    }
+
     protected function judgeNames(): string
     {
         if (empty($this->judgeIds)) {
@@ -117,6 +126,16 @@ class StartupMeetingTimeChangedNotification extends ScreeningMeetingNotification
             ];
         }
 
+        if ($this->isInitialScheduled()) {
+            return [
+                $label('judges')       => $this->judgeNames() ?: '-',
+                // Isolated left-to-right so the digits and AM/PM keep their order in an RTL email.
+                $label('date_time')    => "\u{2066}" . $this->formatDate($notifiable) . ', ' . $this->timeRange($notifiable) . "\u{2069}",
+                $label('session_link') => $this->meetingLink ?: '-',
+                $label('passcode')     => $this->passcode,
+            ];
+        }
+
         $rows = [$label('step') => $this->stepName()];
 
         // Judges are only meaningful (and only populated by the caller) for
@@ -143,11 +162,22 @@ class StartupMeetingTimeChangedNotification extends ScreeningMeetingNotification
             return 'email.screening_meeting_email.founder.' . $this->variant . '_final.' . $part;
         }
 
+        if ($this->isInitialScheduled()) {
+            return 'email.screening_meeting_email.founder.scheduled_initial.' . $part;
+        }
+
         return parent::key($part);
     }
 
     protected function cta(object $notifiable): ?array
     {
+        if ($this->isInitialScheduled()) {
+            return empty($this->meetingLink) ? null : [
+                'label' => __('email.screening_meeting_email.screening_join_button'),
+                'url'   => $this->meetingLink,
+            ];
+        }
+
         if (!$this->isFinalStage() || $this->variant === 'cancelled' || empty($this->meetingLink)) {
             return null;
         }

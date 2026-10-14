@@ -512,8 +512,11 @@ return [
             'meeting_link' => 'Meeting Link',
             'passcode' => 'Passcode',
             'judges' => 'Judges',
+            'date_time' => 'Date & Time',
+            'session_link' => 'Session Link',
         ],
         'final_join_button' => 'Join Final Screening Session',
+        'screening_join_button' => 'Join Screening Session',
         'judge' => [
             'rescheduled' => [
                 'subject' => 'Your :stage Meeting Has Been Rescheduled',
@@ -541,6 +544,20 @@ return [
                     'Please use the meeting link above or refer to your dashboard for the meeting details.',
                 ],
                 'database' => 'Your :stage meeting for :program has been scheduled for :date, :start – :end.',
+            ],
+            'scheduled_initial' => [
+                'subject' => 'Your Screening Session – :program',
+                'intro' => 'We’re pleased to inform you that your startup has been scheduled for a Screening session as part of :program.',
+                'outro' => [
+                    'Please log in to :platform to review the session details and join the session at the scheduled time.',
+                ],
+                'after_cta' => [
+                    'If you have any questions or need assistance, please feel free to contact us.',
+                    'We wish you the best of luck and look forward to your session!',
+                ],
+                'signoff' => 'Kind regards,',
+                'signoff_team' => ':org Team',
+                'database' => 'Your Screening session for :program has been scheduled for :date, :start – :end.',
             ],
             'scheduled_final' => [
                 'subject' => 'Your Final Screening Session – :program',

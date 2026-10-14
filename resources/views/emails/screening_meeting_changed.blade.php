@@ -1,18 +1,12 @@
 @extends('emails.layout.master')
 
 @section('content')
-@php
-    // Screening / final screening meeting scheduled, rescheduled or cancelled,
-    // for judges and founders alike (GV-3295). The notification class supplies
-    // every string already translated; this view only lays them out.
-    //
-    // A cancellation is an alert, a first booking good news, a reschedule
-    // informational: only the accent colour changes.
-    $mainColor = ['cancelled' => '#DC2626', 'scheduled' => '#059669'][$variant] ?? '#4F46E5';
-    $isRtl = app()->getLocale() === 'ar';
-    $dirAttr = $isRtl ? 'rtl' : 'ltr';
-    $alignStart = $isRtl ? 'right' : 'left';
-@endphp
+{{--
+    Screening / final screening meeting scheduled, rescheduled or cancelled,
+    for judges and founders alike (GV-3295). The notification class supplies
+    every string already translated, plus the accent colour and direction;
+    this view only lays them out.
+--}}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F3F4F6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px 0;">
     <tr>
         <td align="center" style="padding: 0 16px;">
@@ -59,9 +53,12 @@
             </tr>
         </table>
     @endif
+    @foreach ($afterCta ?? [] as $line)
+        <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $line }}</p>
+    @endforeach
     <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
-        {{ __('email.screening_meeting_email.thanks') }}<br>
-        <strong>{{ $org_name }}</strong>
+        {{ $signoff ?? __('email.screening_meeting_email.thanks') }}<br>
+        <strong>{{ $signoffTeam ?? $org_name }}</strong>
     </p>
                     </td>
                 </tr>

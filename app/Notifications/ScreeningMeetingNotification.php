@@ -16,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 use WeakMap;
@@ -182,7 +183,6 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
 
         $this->configureSmtp($smtpSettings);
 
@@ -192,7 +192,11 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
         // blade and the layout read app()->getLocale() at render time.
         app()->setLocale($this->resolveLocale($setting, $notifiable));
 
+        // After the locale switch, so the organization name is in that language.
+        $orgData = $this->buildEmailOrganizationData($org);
+
         $params = $this->params($notifiable);
+        $isRtl = app()->getLocale() === 'ar';
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])
@@ -200,11 +204,21 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
             ->view('emails.screening_meeting_changed', array_merge([
                 'recipientName' => trim((string) ($notifiable->name ?? '')),
                 'variant'       => $this->variant,
+                // A cancellation is an alert, a first booking good news, a
+                // reschedule informational: only the accent colour changes.
+                'mainColor'     => ['cancelled' => '#DC2626', 'scheduled' => '#059669'][$this->variant] ?? '#4F46E5',
+                'dirAttr'       => $isRtl ? 'rtl' : 'ltr',
+                'alignStart'    => $isRtl ? 'right' : 'left',
                 'intro'         => $this->text('intro', $params),
                 'detailsTitle'  => __('email.screening_meeting_email.' . ($this->variant === 'rescheduled' ? 'updated_details' : 'details')),
                 'details'       => array_filter($this->details($notifiable), 'filled'),
                 'outro'         => (array) __($this->key('outro'), $params),
                 'cta'           => $this->cta($notifiable),
+                // Optional per-message keys: lines after the button and a custom
+                // sign-off. Messages without them keep the default closing.
+                'afterCta'      => Lang::has($this->key('after_cta')) ? (array) __($this->key('after_cta'), $params) : [],
+                'signoff'       => Lang::has($this->key('signoff')) ? $this->text('signoff', $params) : null,
+                'signoffTeam'   => Lang::has($this->key('signoff_team')) ? $this->text('signoff_team', ['org' => $orgData['org_name']]) : null,
             ], $orgData));
     }
 
@@ -255,6 +269,7 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
             'date'    => $this->formatDate($notifiable),
             'start'   => $this->formatClock($this->slotStart, $notifiable),
             'end'     => $this->formatClock($this->slotEnd, $notifiable),
+            'platform' => $this->platformName(),
         ], $this->extraParams());
     }
 
@@ -315,6 +330,11 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
             return $title;
         }
 
+        return $this->platformName();
+    }
+
+    protected function platformName(): string
+    {
         $setting = Settings::first();
 
         return $setting?->Platform_Name ?? config('app.name');
