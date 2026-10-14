@@ -57,6 +57,18 @@
                                                 <td style="{{ $valueStyle }}">{{ $trainingAddress !== '' ? $trainingAddress : '-' }}</td>
                                             </tr>
                                         @endif
+                                        @if($trainingTrainerName !== '')
+                                            <tr>
+                                                <td style="{{ $labelStyle }}">{{ $t('trainer_name') }}:</td>
+                                                <td style="{{ $valueStyle }}">{{ $trainingTrainerName }}</td>
+                                            </tr>
+                                        @endif
+                                        @if($trainingTrainerEmail !== '')
+                                            <tr>
+                                                <td style="{{ $labelStyle }}">{{ $t('trainer_email') }}:</td>
+                                                <td style="{{ $valueStyle }}"><a href="mailto:{{ $trainingTrainerEmail }}" style="{{ $linkStyle }}">{{ $trainingTrainerEmail }}</a></td>
+                                            </tr>
+                                        @endif
                                     </table>
                                 </td>
                             </tr>

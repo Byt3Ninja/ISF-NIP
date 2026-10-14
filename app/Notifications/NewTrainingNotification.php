@@ -141,6 +141,8 @@ class NewTrainingNotification extends Notification implements ShouldQueue
                 'trainingLink' => $this->data['join_url'] ?? '',
                 'trainingMapLink' => $this->data['join_url'] ?? '',
                 'trainingAddress' => $this->data['Address'] ?? '',
+                'trainingTrainerName' => trim((string) ($this->data['trainer_name'] ?? '')),
+                'trainingTrainerEmail' => trim((string) ($this->data['trainer_email'] ?? '')),
             ], $orgData));
     }
 

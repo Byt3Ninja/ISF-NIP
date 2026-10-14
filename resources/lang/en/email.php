@@ -157,6 +157,8 @@ return [
         'online_link' => 'Link',
         'map_link' => 'Google Map Link',
         'address' => 'Address',
+        'trainer_name' => 'Trainer Name',
+        'trainer_email' => 'Trainer Email',
         'regards' => 'Best regards,',
         'team' => ':organization_name Team',
     ],

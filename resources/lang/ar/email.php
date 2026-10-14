@@ -163,6 +163,8 @@ return [
         'online_link' => 'الرابط',
         'map_link' => 'رابط خرائط Google',
         'address' => 'العنوان',
+        'trainer_name' => 'اسم المدرب',
+        'trainer_email' => 'البريد الإلكتروني للمدرب',
         'regards' => 'مع أطيب التحيات،',
         'team' => 'فريق :organization_name',
     ],

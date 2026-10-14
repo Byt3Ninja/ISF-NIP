@@ -232,6 +232,8 @@ class SendTrainingNotificationJob implements ShouldQueue
             $this->notifyFoundersOfNewTraining($step, $companies, [
                 'Address' => $this->address ?? '',
                 'join_url' => $this->join_url ?? '',
+                'trainer_name' => $this->trainer_name ?? '',
+                'trainer_email' => $this->trainer_email ?? '',
             ]);
 
             foreach ($companies as $company) {
@@ -300,6 +302,8 @@ class SendTrainingNotificationJob implements ShouldQueue
 
             $this->notifyFoundersOfNewTraining($step, $companies, [
                 'join_url' => $this->join_url ?? '',
+                'trainer_name' => $this->trainer_name ?? '',
+                'trainer_email' => $this->trainer_email ?? '',
             ], true);
 
             foreach ($companies as $company) {
