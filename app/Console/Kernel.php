@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('mentorshipReminder')->everyFiveMinutes();
+        $schedule->command('mentorshipReminder')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('cycle:change-step')->hourly();
         $schedule->command('service-messages:send-email-reminders')->everyFifteenMinutes();
         $schedule->command('importer:purge-expired')->hourly()->withoutOverlapping();
