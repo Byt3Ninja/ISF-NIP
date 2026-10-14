@@ -235,7 +235,8 @@ class MentorshipReminderService
             'locationName' => $request->organization->name ?? '-',
             'address' => $request->cycle->offline_location_address ?: ($request->organization->address ?? '-'),
             'locationLink' => $this->mapLink($request),
-            'notes' => $request->comment ?: null,
+            // Staff notes (admin / org manager / subadmin) first, else the founder's booking comment.
+            'notes' => $request->admin_comment ?: ($request->comment ?: null),
             'attachments' => $attachments,
             'orgName' => $orgName,
             // Only a real logo: the placeholder path renders broken in mail clients (GV-8625).
@@ -326,20 +327,12 @@ class MentorshipReminderService
             return false;
         }
 
-        $mentorName = $payload['mentorName'];
-        $subject = ($locale === 'ar')
-            ? "تذكير: جلسة إرشاد قادمة مع {$mentorName}"
-            : "Reminder: Upcoming Mentorship Session with {$mentorName}";
-
-        $payload['subject'] = $subject;
+        $payload['subject'] = __('email.founder_session_reminder.subject', ['mentor' => $payload['mentorName']], $locale);
         $payload = array_merge($payload, $this->sessionTimes($request, $locale, $request->user));
 
-        $oldLocale = app()->getLocale();
-        app()->setLocale($locale);
-
-        $request->user->notify(new FounderUpcomingSessionReminderNotification($payload));
-
-        app()->setLocale($oldLocale);
+        $request->user->notify(
+            (new FounderUpcomingSessionReminderNotification($payload, $request->organization))->locale($locale)
+        );
 
         $logRows[] = $this->logRow($request->user_id, 'User', $request, $schedule, ReminderLogStatus::SENT);
 
