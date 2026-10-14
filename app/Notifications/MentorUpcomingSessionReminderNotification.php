@@ -62,7 +62,7 @@ class MentorUpcomingSessionReminderNotification extends Notification implements 
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->organization ?? $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
         // Configure SMTP settings if they exist

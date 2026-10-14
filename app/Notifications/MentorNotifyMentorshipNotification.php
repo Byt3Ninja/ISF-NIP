@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Settings;
 use Carbon\Carbon;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -19,7 +20,7 @@ use App\Services\TimezoneService;
 
 class MentorNotifyMentorshipNotification extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
 
     /**
      * The number of times the job may be attempted.
@@ -65,7 +66,7 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -114,7 +115,7 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);

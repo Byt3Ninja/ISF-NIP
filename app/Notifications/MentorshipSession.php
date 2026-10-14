@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Organization;
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +20,7 @@ use App\Services\TimezoneService;
 
 class MentorshipSession extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
 
     /**
      * The number of times the job may be attempted.
@@ -71,7 +72,7 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -122,7 +123,7 @@ class MentorshipSession extends Notification implements ShouldQueue
             return $this->toFounderUpdatedMail($notifiable);
         }
 
-        // $org = $notifiable->organization;
+        // $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         // $smtpSettings = $org?->organizationSettings;
         
         // // Get from address and name
@@ -136,9 +137,9 @@ class MentorshipSession extends Notification implements ShouldQueue
 
             $mail = (new MailMessage)
                 ->subject($this->data['subject'])
-                ->view('emails.mentorship_request_status', [
+                ->view('emails.mentorship_request_status', array_merge([
                     'data' => $this->data
-                ]);
+                ], $this->buildEmailOrganizationData($this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null))));
 
 
 foreach ($this->data['attachments'] ?? [] as $attachment) {

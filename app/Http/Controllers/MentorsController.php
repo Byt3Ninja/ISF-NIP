@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\AttendanceTrainingOffline;
 use App\Company;
 use App\Cycle;
+use App\Organization;
 use App\CyclesMentors;
 use App\Events\MentorshipSessionUpdated;
 use App\Events\RequestMentorship;
@@ -40,6 +41,7 @@ use Illuminate\Support\Str;
 use stdClass;
 use App\Notifications\MentorshipSessionRequestNotification;
 use App\Notifications\MentorshipSessionMentorBookingNotification;
+use App\Notifications\MentorshipSessionFounderNotification;
 
 class MentorsController extends Controller
 {
@@ -956,7 +958,8 @@ class MentorsController extends Controller
 										!$isOnlineRequest ? ($cycle->offline_location_address ?? optional($cycle->organization)->address) : null,
 										!$isOnlineRequest ? ($cycle->offline_location_map ?? optional($cycle->organization)->google_map_url) : null,
 										!$isOnlineRequest ? (optional($cycle->organization)->address) : null,
-										$requestAttachments
+										$requestAttachments,
+										$cycle?->organization
 									))->delay($sendAt)
 								);
 							}
@@ -1049,7 +1052,8 @@ class MentorsController extends Controller
 			$mentor = User::find($request->mentorid);
 			$founder = User::find($request->userid);
 			if ($mentor && $founder && !empty($bookedSessions)) {
-				$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions));
+				$organization = Organization::find($request->organization_id) ?? $cycle?->organization;
+				$mentor->notify(new MentorshipSessionMentorBookingNotification($founder, $bookedSessions, $organization));
 			}
 
 			return back()->with([
@@ -1888,7 +1892,7 @@ class MentorsController extends Controller
 						'meeting_link' => $mentorshipRequest->join_url ?? null,
 					];
 
-					$founder->notify(new \App\Notifications\MentorshipSessionFounderNotification($sessionData));
+					$founder->notify(new MentorshipSessionFounderNotification($sessionData, $mentorshipRequest->organization ?? $mentorshipRequest->cycle?->organization));
 				}
 			}
 		} catch (\Exception $e) {

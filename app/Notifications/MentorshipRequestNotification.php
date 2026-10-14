@@ -11,13 +11,14 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Throwable;
 use App\Services\TimezoneService;
 use Carbon\Carbon;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
 
     /**
      * The number of times the job may be attempted.
@@ -62,7 +63,7 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -109,7 +110,7 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         $smtpSettings = $org?->organizationSettings;
         
         // Get from address and name

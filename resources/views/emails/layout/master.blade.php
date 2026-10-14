@@ -3,6 +3,7 @@
 @php
     $setting = \App\Settings::find(1);
     $org_logo_url = $org_logo_url ?? null;
+    $org_logo_path = $org_logo_path ?? null;
     $org_address = $org_address ?? null;
     $org_website = $org_website ?? null;
     $org_linkedin = $org_linkedin ?? null;
@@ -60,11 +61,11 @@
                                                         <div align="center" class="alignment" style="line-height:10px">
                                                             @if(!empty($org_logo_url))
                                                                 <div style="max-width: 280px; padding: 20px 0;">
-                                                                    <img alt="{{ $org_name }}" height="auto" src="{{ $org_logo_url }}" style="display: block; height: auto; border: 0; max-height: 80px; max-width: 100%; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
+                                                                    <img alt="{{ $org_name }}" src="{{ !empty($org_logo_path) && isset($message) ? $message->embed($org_logo_path) : $org_logo_url }}" style="display: block; height: auto !important; width: auto !important; max-height: 80px !important; max-width: 100% !important; object-fit: contain !important; border: 0; margin: 0 auto;" title="{{ $org_name }}"/>
                                                                 </div>
                                                             @elseif(!empty($setting->Logo))
                                                                 <div style="max-width: 280px; padding: 20px 0;">
-                                                                    <img alt="{{ $setting->Logo }}" height="auto" src="{{ asset('/images/logo/' . $setting->Logo) }}" style="display: block; height: auto; border: 0; max-height: 80px; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
+                                                                    <img alt="{{ $setting->Logo }}" src="{{ config('mail.embed_logos') && isset($message) && is_file(public_path('images/logo/' . $setting->Logo)) ? $message->embed(public_path('images/logo/' . $setting->Logo)) : asset('/images/logo/' . $setting->Logo) }}" style="display: block; height: auto !important; width: auto !important; max-height: 80px !important; max-width: 100% !important; object-fit: contain !important; border: 0; margin: 0 auto;" title="{{ $org_name }}"/>
                                                                 </div>
                                                             @endif
                                                         </div>

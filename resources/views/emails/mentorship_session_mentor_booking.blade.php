@@ -116,7 +116,7 @@
 
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
                             {{ $locale == 'ar' ? 'تحياتنا،' : 'Best regards,' }}<br>
-                            <strong>{{ env('APP_NAME') }}</strong>
+                            <strong>{{ $org_name ?? config('app.name') }}</strong>
                         </p>
                     </td>
                 </tr>

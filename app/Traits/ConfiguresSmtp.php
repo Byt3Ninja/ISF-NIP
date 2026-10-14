@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Services\TenantMailer;
 use App\Settings;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Applies the correct SMTP account for the organization involved in an email,
@@ -88,6 +89,7 @@ trait ConfiguresSmtp
             // mail client. Only a real logo is passed, so the layout falls back
             // to the platform logo instead (GV-8625).
             'org_logo_url'  => filled($organization?->img_url) ? $organization->image_url : null,
+            'org_logo_path' => $this->embeddableLogoPath($organization),
             'org_address'   => $organization?->address ?? null,
             'org_website'   => $organization?->website_url ?? null,
             'org_linkedin'  => $organization?->linkedin_company_url ?? null,
@@ -115,5 +117,24 @@ trait ConfiguresSmtp
             'address' => $config['from_address'] ?? config('mail.from.address'),
             'name'    => $config['from_name'] ?? config('mail.from.name'),
         ];
+    }
+
+    /**
+     * Local file path of the organization logo, so the layout can embed it
+     * (CID) when mail.embed_logos is on; null otherwise.
+     */
+    protected function embeddableLogoPath($organization): ?string
+    {
+        if (!config('mail.embed_logos') || blank($organization?->img_url)) {
+            return null;
+        }
+
+        try {
+            $disk = Storage::disk('organizations');
+
+            return $disk->exists($organization->img_url) ? $disk->path($organization->img_url) : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }

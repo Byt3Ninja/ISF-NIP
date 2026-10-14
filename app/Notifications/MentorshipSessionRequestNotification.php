@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Organization;
 use App\Settings;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\WhatsAppService;
@@ -16,6 +17,13 @@ use App\Services\TimezoneService;
 class MentorshipSessionRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable, ConfiguresSmtp;
+
+    /**
+     * The organization running the session; brands the email.
+     *
+     * @var Organization|null
+     */
+    public $organization;
 
     public $startupName;
     public $requestedMentor;
@@ -53,8 +61,10 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
         $locationName = null,
         $locationUrl = null,
         $address = null,
-        $attachments = []
+        $attachments = [],
+        ?Organization $organization = null
     ) {
+        $this->organization = $organization;
         $this->startupName = $startupName;
         $this->requestedMentor = $requestedMentor;
         $this->dateTime = $dateTime;
@@ -108,7 +118,7 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $notifiable->organization;
+        $org = $this->organization ?? $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);

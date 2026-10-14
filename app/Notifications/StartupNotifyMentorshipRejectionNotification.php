@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -16,7 +17,7 @@ use Throwable;
 
 class StartupNotifyMentorshipRejectionNotification extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
 
     /**
      * The number of times the job may be attempted.
@@ -62,7 +63,7 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
      */
     public function via(object $notifiable): array
     {
-        $org = $this->sendingOrganization($notifiable);
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -111,7 +112,7 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $this->sendingOrganization($notifiable);
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
@@ -182,14 +183,4 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
         ]);
     }
 
-    /**
-     * The organization running the session, not the founder's own
-     * organization_id (often null for founders in several organizations).
-     */
-    protected function sendingOrganization($notifiable)
-    {
-        return $this->mentorship_session?->organization
-            ?? $this->mentorship_session?->cycle?->organization
-            ?? $notifiable->organization;
-    }
 }

@@ -68,6 +68,18 @@ return [
         'name'    => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Embed Logos
+    |--------------------------------------------------------------------------
+    |
+    | Attach email logos inline (CID) instead of linking them by URL. Enable on
+    | local/staging hosts that mail clients such as Gmail cannot reach.
+    |
+    */
+
+    'embed_logos' => env('MAIL_EMBED_LOGOS', false),
+
     'markdown' => [
         'theme' => 'default',
         'paths' => [

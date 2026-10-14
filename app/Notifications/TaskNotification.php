@@ -3,11 +3,14 @@
 namespace App\Notifications;
 
 use Carbon\Carbon;
+use App\MentorshipTask;
 use App\ProgramTask;
 use App\Services\FileManagerService;
 use App\Services\GlobalNotificationSettingsService;
 use App\Settings;
+use App\TodoList;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -23,7 +26,7 @@ use App\Enums\ProtectedFileSet;
 
 class TaskNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
 
     /**
      * The number of times the job may be attempted.
@@ -73,7 +76,7 @@ class TaskNotification extends Notification implements ShouldQueue
             }
         }
 
-        $org = $notifiable->organization;
+        $org = $this->taskOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
 
         // Organization channel toggles (default to true when not configured)
@@ -117,7 +120,7 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org          = $notifiable->organization;
+        $org          = $this->taskOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
 
         $this->configureSmtp($smtpSettings);
@@ -429,5 +432,22 @@ class TaskNotification extends Notification implements ShouldQueue
             'trace' => $exception->getTraceAsString(),
             'data' => $this->data,
         ]);
+    }
+
+    /**
+     * The organization the task belongs to (through its mentorship session or
+     * cycle), not the recipient's own organization_id.
+     */
+    protected function taskOrganization($notifiable)
+    {
+        $task = $this->data['task'] ?? null;
+        $session = $task instanceof MentorshipTask ? $task->mentorshipRequest : null;
+        $cycle = match (true) {
+            $task instanceof MentorshipTask => $task->company?->cycledata,
+            $task instanceof TodoList => $task->cycle,
+            default => null,
+        };
+
+        return $this->sessionOrganization($notifiable, $session, $cycle?->organization_id);
     }
 }

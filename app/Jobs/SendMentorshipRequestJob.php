@@ -180,6 +180,7 @@ class SendMentorshipRequestJob implements ShouldQueue
 
             $mentorSubject = $mentorLocale === 'ar' ? "جلسة إرشاد مع {$startup_owner_name}." : "Mentorship Session with {$startup_owner_name}.";
             $mentorMessage = [
+                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
                 'subject' => $mentorSubject,
                 'title' => $mentorSubject,
                 'mentorName' => $mentor_name,
@@ -228,6 +229,7 @@ class SendMentorshipRequestJob implements ShouldQueue
 
             $userSubject = $startupLocale === 'ar' ? "جلسة إرشاد مع {$mentor_name}." : "Mentorship Session with {$mentor_name}.";
             $userMessage = [
+                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
                 'subject' => $userSubject,
                 'title' => $userSubject,
                 'mentorName' => $mentor_name,
@@ -293,6 +295,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             [$sessionDate, $sessionTime] = $this->sessionWindowFor($session->zoom_date, $session->period ?? 60, $session->organization_id, $rName, $mentorLocale, ' (AM/PM)');
 
             $mentorMessage =[
+                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
                 'subject' => $mentorSubject,
                 'title' => $mentorSubject,
                 'mentorName' => $rFullName,
