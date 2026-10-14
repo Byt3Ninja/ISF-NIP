@@ -1553,7 +1553,7 @@
     releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Are you sure?' : 'هل أنت متأكد؟' }}',
       message: '{{ $l == 'en' ? 'Are you sure you want to leave this team?' : 'هل أنت متأكد أنك تريد مغادرة هذا الفريق؟' }}',
-      confirmText: '{{ $l == 'en' ? 'Yes,
+      confirmText: '{{ $l == 'en' ? 'Yes, leave team' : 'نعم، مغادرة الفريق' }}',
       cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
       confirmColor: 'danger'
     }).then((ok) => {
@@ -1577,7 +1577,7 @@
     releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Remove Team Member?' : 'إزالة عضو الفريق؟' }}',
       message: `{{ $l == 'en' ? 'Are you sure you want to remove' : 'هل أنت متأكد أنك تريد إزالة' }} ${memberName} {{ $l == 'en' ? 'from the team?' : 'من الفريق؟' }}`,
-      confirmText: '{{ $l == 'en' ? 'Yes,
+      confirmText: '{{ $l == 'en' ? 'Yes, remove member' : 'نعم، إزالة العضو' }}',
       cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
       confirmColor: 'danger'
     }).then((ok) => {
@@ -1668,7 +1668,7 @@
     releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Cancel Invitation?' : 'إلغاء الدعوة؟' }}',
       message: `{{ $l == 'en' ? 'Are you sure you want to cancel the invitation sent to' : 'هل أنت متأكد أنك تريد إلغاء الدعوة المرسلة إلى' }} ${email}{{ $l == 'en' ? '?' : '؟' }}`,
-      confirmText: '{{ $l == 'en' ? 'Yes,
+      confirmText: '{{ $l == 'en' ? 'Yes, cancel invitation' : 'نعم، إلغاء الدعوة' }}',
       cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
       confirmColor: 'warning'
     }).then((ok) => {
@@ -1708,7 +1708,7 @@
     releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Are you sure?' : 'هل أنت متأكد؟' }}',
       message: '{{ $l == 'en' ? 'Are you sure you want to disband this team? This action cannot be undone and will remove all members.' : 'هل أنت متأكد أنك تريد حل هذا الفريق؟ هذا الإجراء لا يمكن التراجع عنه وسيؤدي إلى إزالة جميع الأعضاء.' }}',
-      confirmText: '{{ $l == 'en' ? 'Yes,
+      confirmText: '{{ $l == 'en' ? 'Yes, disband team' : 'نعم، حل الفريق' }}',
       cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
       confirmColor: 'danger'
     }).then((ok) => {
@@ -1830,7 +1830,7 @@
     releaseAlert('info', {
       title: '{{ $l == 'en' ? 'Send Invitation?' : 'إرسال دعوة؟' }}',
       message: `{{ $l == 'en' ? 'Send invitation to' : 'إرسال دعوة إلى' }} ${name} (${email}){{ $l == 'en' ? '?' : '؟' }}`,
-      confirmText: '{{ $l == 'en' ? 'Yes,
+      confirmText: '{{ $l == 'en' ? 'Yes, send invitation' : 'نعم، إرسال دعوة' }}',
       cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
       confirmColor: 'primary',
       hideCancel: false
