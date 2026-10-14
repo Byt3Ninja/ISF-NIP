@@ -33,6 +33,7 @@ use App\Services\WhatsAppService;
 use App\Services\HtmlSanitizer;
 use App\AttendanceTrainingOffline;
 use App\Notifications\ChangeCycle;
+use App\Jobs\SendChangeCycleNotificationJob;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\TrainerEmail;
 use Illuminate\Support\Facades\Log;
@@ -180,31 +181,10 @@ class TrainingController extends Controller
 				}
 				$update = $company->update(['step' => $checkget, 'approved' => $approved, 'approved_by' => $by]);
 				// if ($checkget != 0) {
-					/// notify Company Owner via Mail
-
-					$start_date = '-';
-					if( $cstep && $cstep->from ) { $start_date = Carbon::parse($cstep->from)->format('Y-m-d'); }
-					$company_owner = $company->user;
-					$data['owner_name_en'] = $company_owner->first_name_en . " " . $company_owner->last_name_en;
-					$data['owner_name_ar'] = $company_owner->first_name_ar . " " . $company_owner->last_name_ar;
-					$data['company_name_ar'] = $company_owner->company->name_ar;
-					$data['company_name_en'] = $company_owner->company->name_en;
-					$data['organization_name_ar'] = $cstep->cycle->organization->name_ar;
-					$data['organization_name_en'] = $cstep->cycle->organization->name_en;
-					$data['start_date'] = $start_date;
-					$data['preferred_language'] = $company_owner->language;
-					$data['program'] = $cstep->cycle;
-					$data['status'] = $status;
-
-					$mail = new ChangeCycle($data);
-					// $MSG = new TemplateEmail;
-					// $MSG->Message=["Step changed - VI portal","Dear ".$rfullname.",","Your step into Cycle changed, check your account now.","/dashboard"];
+					/// notify Company Owner via Mail (same job the single-move
+					/// flow uses, so dedupe/claim and content stay in one place)
 					if (!in_array(env('APP_ENV', 'local'), ['local']) || env('APP_NAME', 'incubator') != "BIAC") {
-						try {
-							$company_owner->notify($mail);
-						} catch (\Throwable $th) {
-							// throw $th;
-						}
+						SendChangeCycleNotificationJob::dispatch($company->id, $checkget, $data['last_step'], $data['new_step'], $cstep->cycle ?? null);
 					}
 				// }
 			}
