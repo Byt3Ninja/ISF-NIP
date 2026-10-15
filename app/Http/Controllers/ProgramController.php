@@ -20,6 +20,7 @@ use App\MentorshipRequest;
 use App\SessionReport;
 use App\ScreeningEvaluation;
 use App\Enums\CycleModifyAction;
+use App\Services\HtmlSanitizer;
 use App\Services\TimezoneService;
 use App\Jobs\ExportCycleData;
 use App\Notifications\TemplateEmail;
@@ -727,7 +728,7 @@ class ProgramController extends Controller
 
         if ($request->hasFile('programLogo')) {
             $fileManager = app(\App\Services\FileManagerService::class);
-            $cycle->img_url = $fileManager->update($request->file('programLogo'), $cycle->img_url, 'programs', 'public_uploads');
+            $cycle->img_url = $fileManager->update($request->file('programLogo'), $cycle->img_url, 'programs', 'public_uploads', 'image');
             $extra['logo_url'] = Storage::disk('public_uploads')->url($cycle->img_url);
         }
 
@@ -964,7 +965,8 @@ class ProgramController extends Controller
             $rows[] = [
                 'cycle_id' => $cycle->id,
                 'title' => $title,
-                'content' => $content,
+                // Strip any JavaScript/XSS vectors; content is rendered raw on the public program page.
+                'content' => HtmlSanitizer::clean($content),
                 'visibility' => $visibilityMap[$page['programPageVisibility'] ?? 'public'] ?? 'public',
                 'is_active' => !empty($page['programPageStatus']) ? 1 : 0,
                 'row_no' => $rowNo++,
@@ -977,7 +979,6 @@ class ProgramController extends Controller
             throw ValidationException::withMessages($errors);
         }
 
-        // TODO: sanitize page HTML (e.g. mews/purifier) before it is rendered on public program pages.
         // TODO: this step never flags the program as published; add that here if a status column exists.
         DB::table('cycle_custom_pages')->where('cycle_id', $cycle->id)->delete();
         if ($rows) {

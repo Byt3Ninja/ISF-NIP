@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use App\Services\HtmlSanitizer;
 use stdClass;
 
 class QuestionsBankController extends Controller
@@ -226,7 +227,8 @@ class QuestionsBankController extends Controller
 			}
 
 			$question->category_id = $request->category_id;
-			$question->question = $request->question;
+			// Strip any JavaScript/XSS vectors; question is rendered raw in quiz views.
+			$question->question = HtmlSanitizer::clean($request->question);
 			$question->type = $type;
 			$question->survey_type = $surveyType;
 			$question->correct = $correct;
@@ -273,7 +275,8 @@ class QuestionsBankController extends Controller
 			$question->group = $request->question_group;
 			$question->ascategory_id = $request->ascategory_id;
 			$question->subcategory_id = $request->subcategory_id;
-			$question->question = $request->question;
+			// Strip any JavaScript/XSS vectors; question is rendered raw in quiz views.
+			$question->question = HtmlSanitizer::clean($request->question);
 			$question->answers = $answers;
 			$question->explanation_QA_ar = $request->explanation_QA_ar;
 			$question->explanation_QA_en = $request->explanation_QA_en;
@@ -412,7 +415,8 @@ class QuestionsBankController extends Controller
 				}
 				$question->category_id = $request->category_id;
 				$question->group = $request->question_group;
-				$question->question = $request->question;
+				// Strip any JavaScript/XSS vectors; question is rendered raw in quiz views.
+				$question->question = HtmlSanitizer::clean($request->question);
 				$question->type = $type;
 				$question->survey_type = $surveyType;
 				$question->correct = $correct;
@@ -458,7 +462,8 @@ class QuestionsBankController extends Controller
 				$question->group = $request->question_group;
 				$question->ascategory_id = $request->ascategory_id;
 				$question->subcategory_id = $request->subcategory_id;
-				$question->question = $request->question;
+				// Strip any JavaScript/XSS vectors; question is rendered raw in quiz views.
+				$question->question = HtmlSanitizer::clean($request->question);
 				$question->answers = $answers;
 				$question->explanation_QA_ar = $request->explanation_QA_ar;
 				$question->explanation_QA_en = $request->explanation_QA_en;

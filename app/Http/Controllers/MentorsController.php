@@ -669,7 +669,7 @@ class MentorsController extends Controller
 					$fileName = '';
 					if ($request->hasFile('file_url')) {
 						$file = $request->file('file_url');
-						$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor');
+						$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor', 'common');
 					}
 
 					$autoApprove = $cycle->auto_approve_mentorship_requests;
@@ -872,7 +872,7 @@ class MentorsController extends Controller
 				// }
 				if ($request->hasFile('file_url')) {
 					$file = $request->file('file_url');
-					$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor');
+					$fileName = app(\App\Services\FileManagerService::class)->upload($file, '', 'UsersDiskInviteMentor', 'common');
 				}
 
 				$autoApprove = $cycle->auto_approve_mentorship_requests;
@@ -1373,6 +1373,18 @@ class MentorsController extends Controller
 				->find($sessionId);
 
 			if (!$session) {
+				return response()->json([
+					'success' => false,
+					'message' => __('admin.session_not_found')
+				], 404);
+			}
+
+			// Same ownership rule as the API endpoint: the session must belong to the
+			// caller's organizations, or the caller must be the session's own mentor.
+			$authUser = auth()->user();
+			if (!$authUser->hasRole('admin')
+				&& !$authUser->ownsOrganization($session->organization_id ?? $session->cycle?->organization_id)
+				&& (int) $session->mentor_id !== (int) $authUser->id) {
 				return response()->json([
 					'success' => false,
 					'message' => __('admin.session_not_found')

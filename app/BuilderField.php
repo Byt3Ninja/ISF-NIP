@@ -8,7 +8,11 @@ class BuilderField extends Model
 {
     public $timestamps = false;
 
-    protected $guarded = [];
+    // builder_form_id and field_id are owner foreign keys: never mass-assignable, set them explicitly.
+    protected $fillable = [
+        'options',
+        'sort_order',
+    ];
 
     /**
      * Get the field's option.

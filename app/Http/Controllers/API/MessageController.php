@@ -108,12 +108,18 @@ class MessageController extends Controller
         $recipients = User::whereIn('id', $request->userId ?? [])->get();
 
       } elseif ($request->userTypeValue == 3) {
-        $recipients = User::whereIn('organization_id', $request->userId ?? [])->get();
+        // "Whole organization" sends: a non-admin may only address organizations in their scope.
+        $targetOrgIds = $request->userId ?? [];
+        if (!$sender->hasRole('admin')) {
+            $targetOrgIds = array_values(array_filter($targetOrgIds, fn ($orgId) => $sender->ownsOrganization($orgId)));
+        }
+        $recipients = User::whereIn('organization_id', $targetOrgIds)->get();
 
       } else {
+        // A non-admin with no organizations reaches nobody (this used to fall through to every user).
         $user = auth()->user();
         $orgIds = $user->organizations_ids;
-        $recipients = User::when(!$user->hasRole('admin') && !empty($orgIds), function ($q) use ($orgIds) {
+        $recipients = User::when(!$user->hasRole('admin'), function ($q) use ($orgIds) {
             return $q->whereIn('organization_id', $orgIds);
         })->get();
       }
@@ -203,6 +209,13 @@ class MessageController extends Controller
         return $this->error(__('api.Message_not_found'), 404);
       }
 
+      // Only a participant of the original thread may reply into it; otherwise
+      // any user could inject a message into an arbitrary conversation.
+      if ((int) $originalMessage->sender !== (int) $user->id
+          && (int) $originalMessage->receiver !== (int) $user->id) {
+        return $this->error(__('api.Message_not_found'), 404);
+      }
+
       DB::table('messenger')->insert([
         'sender'   => auth()->id(),
         'receiver' => $originalMessage->sender,
@@ -268,7 +281,13 @@ class MessageController extends Controller
      $ids = array_map('trim', $ids);
 
      $statusValue = $request->status === 'read' ? 1 : 0;
-     Messenger::whereIn('id', $ids)->update(['read' => $statusValue]);
+     // Scope to the caller's own conversations: without this, client-supplied
+     // ids flip the read flag on other users' messages (same guard toggleStar uses).
+     Messenger::whereIn('id', $ids)
+        ->where(function ($q) use ($user) {
+            $q->where('receiver', $user->id)->orWhere('sender', $user->id);
+        })
+        ->update(['read' => $statusValue]);
 
       return $this->success(null, [], __('api.message_status_updated'));
     }
@@ -695,6 +714,14 @@ public function moveToTrash(MoveToTrashRequest $request)
         $message = Messenger::find($id);
 
         if (!$message) {
+            $failedIds[] = $id;
+            $errors[$id] = __('api.Message_not_found');
+            continue;
+        }
+
+        // Only a participant may trash a message. Reported as not-found so the
+        // endpoint does not confirm the existence of other users' messages.
+        if ((int) $message->sender !== (int) $user->id && (int) $message->receiver !== (int) $user->id) {
             $failedIds[] = $id;
             $errors[$id] = __('api.Message_not_found');
             continue;

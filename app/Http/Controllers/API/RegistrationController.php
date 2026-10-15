@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\SanctumApiAuth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -180,6 +181,11 @@ class RegistrationController extends Controller
 		$user = null;
 		if (!empty($token)) {
 			$accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+			// Same expiry rule as the API middleware: a stale token is revoked, not honoured.
+			if ($accessToken && SanctumApiAuth::tokenHasExpired($accessToken)) {
+				$accessToken->delete();
+				$accessToken = null;
+			}
 			$user = $accessToken?->tokenable;
 		} else {
 			$user = auth('api')->user();

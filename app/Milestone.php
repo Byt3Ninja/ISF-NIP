@@ -10,7 +10,20 @@ class Milestone extends Model
 {
     use HasFactory, SoftDeletes;
     
-    protected $guarded = [];
+    // Company_id is the owner foreign key: never mass-assignable (the company relation sets it).
+    protected $fillable = [
+        'name',
+        'description',
+        'completion_percentage',
+        'documents',
+        'category',
+        'status',
+        'completed',
+        'milestone_date',
+        'visibility',
+        'cohort',
+        'attachment',
+    ];
     
     protected $casts = [
         'documents' => 'array',

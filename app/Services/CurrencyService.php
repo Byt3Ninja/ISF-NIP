@@ -84,7 +84,8 @@ class CurrencyService
 
     protected function uploadFlag(UploadedFile $file): string
     {
-        $filename = time() . '_' . $file->getClientOriginalName();
+        // Never keep the client's filename: validate, then use a server-generated name.
+        $filename = app(FileManagerService::class)->validatedSafeName($file, 'image');
         $file->move(public_path('icons/flags'), $filename);
         return 'icons/flags/' . $filename;
     }

@@ -50,7 +50,7 @@ class StoreServiceProviderStep1Request extends FormRequest
             'zip' => 'nullable|string|max:9',
             'about' => 'required|string|max:500',
             
-            'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'service_provider_id' => 'nullable|integer|exists:service_providers,id',
         ];
     }

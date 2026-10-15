@@ -3,28 +3,21 @@ namespace App\Http\Controllers;
 use App;
 use Closure;
 use App\User;
-use App\Company;
 use App\Messages;
 use App\Settings;
-use App\ReminderLog;
 use GuzzleHttp\Client;
 use App\Mail\CustomEmail;
 use App\Events\WebMessage;
-use App\MentorshipRequest;
-use App\MentorshipSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWhatsAppMessageJob;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Client\RequestException;
 use App\Http\Controllers\WhatsAppSessionController;
-use App\Notifications\MentorshipRequestNotification;
 
 class IndexController extends Controller
 {
@@ -53,57 +46,6 @@ class IndexController extends Controller
         //     // depending on your application's needs.
         //      Log::error('WhatsApp API Base URL or API Key is not configured.');
         // }
-    }
-
-    public function dbMigrate(Request $request)
-    {
-        if ($request->has('token')) {
-            $token = $request->input('token', null);
-            if ($token == 'dbMigrate@PreForm!@NoW') {
-                try {
-                    Artisan::call('migrate', [
-                        '--force' => true, // Avoid confirmation prompt
-                    ]);
-                    $output = Artisan::output();
-                    return response()->json([
-                        'status' => 'success',
-                        'output' => $output,
-                    ]);
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => $e->getMessage(),
-                    ], 500);
-                }
-            }
-        }
-    }
-
-    public function seedPermissions(Request $request)
-    {
-        if( $request->has('token') )
-        {
-            $token = $request->input('token', null);
-            if( $token == 'seedPermissions@PreForm!@NoW' )
-            {
-                try {
-                    Artisan::call('db:seed', [
-                        '--class' => 'defaultRolesPermissionSeeder',
-                        '--force' => true,
-                    ]);
-                    $output = Artisan::output();
-                    return response()->json([
-                        'status' => 'success',
-                        'output' => $output,
-                    ]);
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => $e->getMessage(),
-                    ], 500);
-                }
-            }
-        }
     }
 
     public function lang($locale)
@@ -358,139 +300,4 @@ class IndexController extends Controller
         //     ], 500);
         // }
     }
-
-
-    // public function mineRate()
-    // {
-    // 	$requests_q = "SELECT *
-    //            FROM mentorship_requests 
-    //            WHERE mentorship_requests.done IS NULL
-    //            AND mentorship_requests.zoom_date <= ?";
-    //    $now = date('Y-m-d 23:59:59');
-    //     $result = DB::select($requests_q, [$now]);
-    //     $result = collect($result);
-
-    //         foreach ($result as $request) {
-    //         if($request->approved == 'Yes'){
-    //             MentorshipRequest::where('id', $request->id)->update(['done' => 1]);
-    //         }else{
-    //             MentorshipRequest::where('id', $request->id)->update(['done' => 0,'approved'=> 'No']);
-    //         }
-    //             }
-
-    // }
-
-    public function sendCustomerEmail($id = 0){
-        $companies = Company::where('cycle', $id)->get();
-        $users = User::whereIn('company_id', $companies->pluck('id')->toArray())->get();
-
-            // $users = User::where('email', 'ehabtarek86@gmail.com')->get(); 
-        // dd($users);
-            foreach ($users as $user) {
-                \Illuminate\Support\Facades\Notification::route('mail', $user->email)
-                    ->notify(new \App\Notifications\CustomEmailNotification($user));
-        }
-            return response()->json([
-                            'success' => true,
-                            'message' => 'Email sent successfully.']);
-
-    }
-
-    public function reminderMentorShipRequest()
-    {
-        $l = app()->getLocale();
-        $mentorshipRequests = MentorshipRequest::with(['user.company', 'mentor', 'cycle'])->where('approved', 'Yes')->get();
-        $cycleIds = $mentorshipRequests->pluck('cycle.id')->filter()->unique();
-        $schedulesByCycle = MentorshipSchedule::whereIn('cycle_id', $cycleIds)->get()->groupBy('cycle_id');
-
-        foreach ($mentorshipRequests as $request) {
-            if (!$request->cycle) {
-                continue;
-            }
-            $schedules = $schedulesByCycle->get($request->cycle->id, collect());
-            foreach ($schedules as $schedule) {
-                $hours = $schedule->value; 
-                
-                $diffInHours = now()->diffInHours($request->zoom_date, false);
-               
-                if ($diffInHours > 0 && $diffInHours == $hours) {
-                    $data['date']         = $request->zoom_date->format('Y-m-d H:i:s');
-                    $data['company_name'] = $request->user->company->{'name_' . $l} ?? '';
-                    $data['Mentorname']   = $request->mentor?->first_name_en . " " . $request->mentor?->last_name_en;
-                    $data['period']       = $request->period;
-                    $data['title']        = $request->title;
-                    $data['join_url']     = $request->join_url;
-                    $data['start_url']    = $request->start_url;
-                    if ($request->approved == 'No') {
-                        $data['status'] = 'Rejected';
-                    } elseif ($request->approved == 'Yes') {
-                        $data['status'] = 'Approved';
-                    } else {
-                        $data['status'] = 'Pending';
-                    }
-                    if ($request->mentor) {
-                        $request->mentor->notify(
-                            new MentorshipRequestNotification($data, 'Reminder')
-                        );
-                    }
-                    if ($request->user) {
-                        $startupLocale = $request->user->preferredLocale() ?? 'en';
-                        $mentorFullName = $request->mentor ? ($request->mentor->first_name_en . " " . $request->mentor->last_name_en) : '';
-                        $startupFullName_user = $request->user->first_name_en . " " . $request->user->last_name_en;
-
-                        $userMessage = [
-                            __("messages.mentorship_session_subject", [], $startupLocale),
-                            __("messages.dear", ['name' => $startupFullName_user], $startupLocale),
-                            $request->approved == 'Yes'
-                                ? __("messages.approved_message", ['other_party' => $mentorFullName], $startupLocale)
-                                : __("messages.denied_message", ['other_party' => $mentorFullName], $startupLocale),
-                            "/dashboard",
-                            $request->approved == 'Yes'
-                                ? __("messages.mentorship_session_action", ['action' => __('messages.Approved', [], $startupLocale), 'name' => $mentorFullName], $startupLocale)
-                                : __("messages.mentorship_session_action", ['action' => __('messages.Rejected', [], $startupLocale), 'name' => $mentorFullName], $startupLocale),
-                        ];
-
-                        if ($request->approved == 'Yes') {
-                            $request->user->notify(
-                                new \App\Notifications\StartupNotifyMentorshipApprovalNotification($userMessage, $request)
-                            );
-                        } else {
-                            $request->user->notify(
-                                new \App\Notifications\StartupNotifyMentorshipNotification($userMessage, $request)
-                            );
-                        }
-                    }
-                    $status = ($request->cycle && $request->cycle->is_active_Rminder == 1) ? 'sent' : 'failed';
-                    $mentor = User::find($request->mentor_id);
-                    $channels = [];
-                    if ($mentor && $mentor->accept_whatsapp == 1) $channels[] = 'whatsapp';
-                    if ($mentor && $mentor->accept_email == 1) $channels[] = 'email';
-                    if ($mentor && $mentor->accept_pusher == 1) $channels[] = 'in-app';
-                    $channel = implode(',', $channels);
-                    if ($request->mentor) {
-                        ReminderLog::create([
-                            'user_id'  => $mentor->id,
-                            'type'     => 'Mentor',
-                            'cycle_id' => $request->cycle->id,
-                            'channel'  => $channel,
-                            'status'   => $status
-                        ]);
-                    }
-                    if ($request->user) {
-                        ReminderLog::create([
-                            'user_id'  => $request->user->id,
-                            'type'     => 'User',
-                            'cycle_id' => $request->cycle->id,
-                            'channel'  => $channel,
-                            'status'   => $status
-                        ]);
-                    }
-                }
-            }
-        }
-
-
-        return response()->json(['state' => 'success'], 200);
-    }
-
 }
