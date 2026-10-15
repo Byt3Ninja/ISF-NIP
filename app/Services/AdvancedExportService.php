@@ -9,6 +9,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use App\FileAccessLog;
+use App\Enums\ProtectedFileSet;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Services\ProtectedFiles\FileAccess;
 
 class AdvancedExportService
 {
@@ -99,18 +103,34 @@ class AdvancedExportService
 
 
 
-                        $sourcePath = public_path($val['path']); // Try public path first
-                        if (!File::exists($sourcePath)) {
-                            $sourcePath = storage_path('app/' . $val['path']); // Try storage path
-                        }
+                        // An uploaded answer is read only through the startup's own file record
+                        // (never from a path built out of the answer text), the exporting user
+                        // must be allowed to open it, and every exported file is logged.
+                        $files = app(ProtectedFiles::class);
+                        $pin = ['company_id' => $submission->company_id];
+                        $record = $files->find(ProtectedFileSet::FORM_ANSWER, $val['path'], $pin);
+                        $sourcePath = $record && !app(FileAccess::class)->canView(auth()->user(), $record)
+                            ? null
+                            : $files->localPath(ProtectedFileSet::FORM_ANSWER, $val['path'], $pin);
 
-                        if (File::exists($sourcePath)) {
-                            $destPath = $startupDir . '/' . $val['file_name'];
+                        if ($sourcePath) {
+                            // keep letters (any script), digits and the extension dot; nothing that could leave the folder
+                            $fileName = trim(preg_replace('/[^\p{L}\p{N}._ -]+/u', '_', basename($val['file_name'])), '. ') ?: 'file';
+                            $destPath = $startupDir . '/' . $fileName;
                             // Avoid overwrite if multiple files have same name
                             if (File::exists($destPath)) {
-                                $destPath = $startupDir . '/' . uniqid() . '_' . $val['file_name'];
+                                $destPath = $startupDir . '/' . uniqid() . '_' . $fileName;
                             }
                             File::copy($sourcePath, $destPath);
+                            FileAccessLog::create([
+                                'user_id' => auth()->id(),
+                                'protected_file_id' => optional($record)->id,
+                                'action' => 'export',
+                                'set' => ProtectedFileSet::FORM_ANSWER,
+                                'requested' => $record ? null : $val['path'],
+                                'ip' => request()->ip(),
+                                'user_agent' => mb_substr((string) request()->userAgent(), 0, 255),
+                            ]);
                         } else {
                             $content .= " (File not found during export)\n";
                         }

@@ -472,7 +472,7 @@
                                       <span class="text-muted small">
                                         <i class="ti ti-paperclip me-1"></i>{{ $l == 'ar' ? 'الملف الحالي:' : 'Current file:' }}
                                       </span>
-                                      <a href="{{ URL::to($existingFile) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                      <a href="{{ \App\Formdata::fileAnswer($existingFile, optional(auth()->user())->company_id)['file_url'] ?? '#' }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                         <i class="ti ti-download me-1"></i>{{ __('admin.Download') }}
                                       </a>
                                     </div>

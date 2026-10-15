@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\DB;
 use App\Repositories\CompanyRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\CompanyProfileResource;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
+use Illuminate\Http\UploadedFile;
 
 class CompanyService
 {
@@ -151,8 +154,9 @@ class CompanyService
             if (isset($data['haveStartup'])) {
                 if ($data['haveStartup'] === 'Yes') {
                     $company->CreatedTax = $data['createdTax'] ?? 0;
-                    $company->Commercial_Register = $data['commercialRegister'] ?? null;
-                    $company->Tax_Card = $data['taxCard'] ?? null;
+                    // Commercial_Register / Tax_Card hold uploaded files (stored paths). The API's
+                    // `commercialRegister` / `taxCard` are free-text strings, so they are no longer
+                    // written into those columns: a typed value must never be read back as a file path.
                     $company->Country_Register_id = $data['country_Register_id'] ?? null;
                 } else {
                     $company->CreatedTax = 0;
@@ -183,24 +187,30 @@ class CompanyService
             array_map(fn ($document) => [$document, 'document'], (array) ($data['documents'] ?? []))
         ));
 
+        // Stored privately and recorded against this company (see ProtectedFiles).
+        $protectedFiles = app(ProtectedFiles::class);
+        $owner = ['owner_type' => 'company', 'owner_id' => $company->id, 'company_id' => $company->id];
+
         if (!empty($data['pitchDeckFile'])) {
             $file = $data['pitchDeckFile'];
-            $company->pitch_deck = $this->fileManager->update(
-                $file, 
-                $company->pitch_deck, 
-                $user->company_id . '/pitch_decks/documents', 
-                'pitch_deck',
+            $company->pitch_deck = $protectedFiles->replace(
+                $file,
+                $company->pitch_deck,
+                ProtectedFileSet::COMPANY_PITCH,
+                $company->id . '/pitch_decks/documents',
+                $owner + ['field' => 'pitch_deck'],
                 'common'
             );
         }
 
         if (!empty($data['financialPlanAttachment'])) {
             $file = $data['financialPlanAttachment'];
-            $company->financial_plan = $this->fileManager->update(
-                $file, 
-                $company->financial_plan, 
-                $user->company_id . '/financial_plan/documents', 
-                'pitch_deck',
+            $company->financial_plan = $protectedFiles->replace(
+                $file,
+                $company->financial_plan,
+                ProtectedFileSet::COMPANY_PITCH,
+                $company->id . '/financial_plan/documents',
+                $owner + ['field' => 'financial_plan'],
                 'common'
             );
         }
@@ -210,7 +220,12 @@ class CompanyService
             if (!is_array($existing)) {
                 $existing = [];
             }
-            $newPaths = $this->fileManager->uploadMultiple($data['documents'], $user->company_id . '/pitch_decks/documents', 'pitch_deck', 'document');
+            $newPaths = [];
+            foreach ($data['documents'] as $document) {
+                if ($document instanceof UploadedFile) {
+                    $newPaths[] = $protectedFiles->store($document, ProtectedFileSet::COMPANY_PITCH, $company->id . '/pitch_decks/documents', $owner + ['field' => 'documents'], 'document')->path;
+                }
+            }
             $existing = array_merge($existing, $newPaths);
             $company->documents = json_encode($existing);
         }
@@ -224,11 +239,12 @@ class CompanyService
                 default => 'others',
             };
 
-            $company->business_plan = $this->fileManager->update(
-                $file, 
-                $company->business_plan, 
-                $user->company_id . '/business_plan/' . $folder, 
-                'pitch_deck',
+            $company->business_plan = $protectedFiles->replace(
+                $file,
+                $company->business_plan,
+                ProtectedFileSet::COMPANY_PITCH,
+                $company->id . '/business_plan/' . $folder,
+                $owner + ['field' => 'business_plan'],
                 'common'
             );
         }

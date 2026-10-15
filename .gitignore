@@ -34,3 +34,6 @@ composer.lock
 .idea
 # dompdf generated font cache (GV-3340)
 /storage/fonts/
+
+# Confidential uploads (private disks) must never be committed
+/storage/protected

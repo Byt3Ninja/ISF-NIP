@@ -11,12 +11,9 @@ class Programs extends Model
 {
     use HasFactory, HasFileCleanup;
 
+    // The guideline documents are confidential and handled through protected_files (see App\Cycle).
     protected array $fileFields = [
         'img_url' => 'public_uploads',
-        'program_guideline_file' => 'public_uploads',
-        'financial_guideline_file' => 'public_uploads',
-        'legal_guideline_file' => 'public_uploads',
-        'delegation_file' => 'public_uploads',
     ];
 
     public function getImgUrlUrlAttribute()

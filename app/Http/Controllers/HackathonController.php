@@ -2428,16 +2428,7 @@ class HackathonController extends Controller
             // answers
             $submission->answers = $group->map(function ($item) use ($l) {
                 $value = $item->FD_answer;
-                if (is_string($value) && (strpos($value, '/') !== false || strpos($value, '\\') !== false)) {
-                    // Extract filename from path
-                    $filename = basename($value);
-                    $value = [
-                        'type' => 'file',
-                        'path' => $value,
-                        'file_name' => $filename,
-                        'file_url' => asset($value) // Generate accessible URL
-                    ];
-                }
+                $value = Formdata::fileAnswer($value, $item->FD_company_id) ?? $value;
                 return (object) [
                     'user_id' => $item->FD_user_id,
                     'name' => $item->{'user_name_' . $l},

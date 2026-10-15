@@ -52,6 +52,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Notifications\StartupJoiningNotification;
 use App\Services\FileManagerService;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
 
 class CyclesController extends Controller
 {
@@ -465,20 +467,20 @@ class CyclesController extends Controller
             ]);
             $cycle->program_guideline = $request->program_guideline;
             if ($request->hasFile('program-guideline-pdf')) {
-                $cycle->program_guideline_file = $fileManager->update($request->file('program-guideline-pdf'), $cycle->program_guideline_file, 'programs', 'public_uploads', 'document');
+                $cycle->program_guideline_file = app(ProtectedFiles::class)->replace($request->file('program-guideline-pdf'), $cycle->program_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('program_guideline_file'), 'document');
             }
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
             if ($request->hasFile('financial_policy_pdf')) {
-                $cycle->financial_guideline_file = $fileManager->update($request->file('financial_policy_pdf'), $cycle->financial_guideline_file, 'programs', 'public_uploads', 'document');
+                $cycle->financial_guideline_file = app(ProtectedFiles::class)->replace($request->file('financial_policy_pdf'), $cycle->financial_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('financial_guideline_file'), 'document');
             }
             $cycle->legal_guideline = $request->legal_policy;
             if ($request->hasFile('legal_policy_pdf')) {
-                $cycle->legal_guideline_file = $fileManager->update($request->file('legal_policy_pdf'), $cycle->legal_guideline_file, 'programs', 'public_uploads', 'document');
+                $cycle->legal_guideline_file = app(ProtectedFiles::class)->replace($request->file('legal_policy_pdf'), $cycle->legal_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('legal_guideline_file'), 'document');
             }
             if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
-                $cycle->delegation_file = $fileManager->update($request->file('delegation_pdf'), $cycle->delegation_file, 'programs', 'public_uploads', 'document');
+                $cycle->delegation_file = app(ProtectedFiles::class)->replace($request->file('delegation_pdf'), $cycle->delegation_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('delegation_file'), 'document');
             }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
@@ -956,7 +958,7 @@ class CyclesController extends Controller
                 $fileManager = app(\App\Services\FileManagerService::class);
                 $cycle->program_guideline = $request->program_guideline;
                 if ($request->hasFile('program-guideline-pdf')) {
-                    $cycle->program_guideline_file = $fileManager->upload($request->file('program-guideline-pdf'), 'programs', 'public_uploads', 'document');
+                    $cycle->program_guideline_file = $fileManager->upload($request->file('program-guideline-pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
 
 
@@ -964,16 +966,16 @@ class CyclesController extends Controller
                 $cycle->currency_type = $request->currency_type;
                 $cycle->financial_guideline = $request->financial_policy;
                 if ($request->hasFile('financial_policy_pdf')) {
-                    $cycle->financial_guideline_file = $fileManager->upload($request->file('financial_policy_pdf'), 'programs', 'public_uploads', 'document');
+                    $cycle->financial_guideline_file = $fileManager->upload($request->file('financial_policy_pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
 
                 $cycle->legal_guideline = $request->legal_policy;
                 if ($request->hasFile('legal_policy_pdf')) {
-                    $cycle->legal_guideline_file = $fileManager->upload($request->file('legal_policy_pdf'), 'programs', 'public_uploads', 'document');
+                    $cycle->legal_guideline_file = $fileManager->upload($request->file('legal_policy_pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
 
                 if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
-                    $cycle->delegation_file = $fileManager->upload($request->file('delegation_pdf'), 'programs', 'public_uploads', 'document');
+                    $cycle->delegation_file = $fileManager->upload($request->file('delegation_pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
                 if ($request->hasFile('img_url')) {
                     $image = $request->file('img_url');
@@ -1770,18 +1772,23 @@ class CyclesController extends Controller
             $field_name = 'field_' . $field['id'];
             if( $field['type'] == 'file' )
             {
+                $previousAnswer = $my_submissions->where('field_id', $field['id'])->first()?->answer ?? null;
                 if ($request->hasFile($field_name))
                 {
-                    $file = $request->file($field_name);
-                    // Whitelist + real-content check; server-generated name (the client name could
-                    // carry any extension and silently overwrote an earlier file of the same name).
-                    $imageName = app(FileManagerService::class)->validatedSafeName($file, 'common');
-                    $file->move(public_path('formsubmissions/'), $imageName);
-                    $request->{$field_name} = 'formsubmissions/' . $imageName;
+                    // Whitelist + real-content check, server-generated name, stored privately and
+                    // recorded against this startup and the program the form belongs to.
+                    $protectedFiles = app(ProtectedFiles::class);
+                    $record = $protectedFiles->store($request->file($field_name), ProtectedFileSet::FORM_ANSWER, '', [
+                        'owner_type' => 'company', 'owner_id' => $cid, 'company_id' => $cid,
+                        'cycle_id' => Step::whereKey($id)->value('cycle_id'), 'field' => $field_name,
+                    ], 'common');
+                    $request->{$field_name} = 'formsubmissions/' . $record->path;
+                    $protectedFiles->retireValue(ProtectedFileSet::FORM_ANSWER, $previousAnswer, ['company_id' => $cid]);
                 }
                 else
                 {
-                    $request->{$field_name} = $my_submissions->where('field_id', $field['id'])->first()?->answer ?? null;
+                    // No new upload: keep the saved file (taken from the database, never from the request).
+                    $request->{$field_name} = $previousAnswer;
                 }
             }
             if( $field['type'] == 'checkboxes' && is_array($request->{$field_name}) )

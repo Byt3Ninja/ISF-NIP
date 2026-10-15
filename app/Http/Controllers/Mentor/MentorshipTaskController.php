@@ -208,7 +208,7 @@ class MentorshipTaskController extends Controller
 				'attachments' => $attachments->map(fn($a, $i) => [
 					'id'          => $i + 1,
 					'name'        => $a['name'] ?? basename($a['path'] ?? ''),
-					'url'         => isset($a['path']) ? Storage::url($a['path']) : null,
+					'url'         => $a['url'] ?? null,
 					'mime_type'   => null,
 					'size_bytes'  => null,
 					'uploaded_at' => null,
@@ -271,7 +271,7 @@ class MentorshipTaskController extends Controller
 						'note'  => $group->first()['note'] ?? null,
 						'files' => $group->map(fn($a) => [
 							'name'       => $a['name'],
-							'url'        => Storage::url($a['path']),
+							'url'        => $a['url'] ?? null,
 							'size_bytes' => $a['size'] ?? null,
 							'created_at' => $a['created_at'] ?? null,
 						])->values()->toArray(),

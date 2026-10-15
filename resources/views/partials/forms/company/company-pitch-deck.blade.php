@@ -38,9 +38,9 @@
                 class="d-flex h-100 flex-column justify-content-between align-items-center"
               >
                 @if($client->company)
-                @if ($client->company->pitch_deck != null)
+                @if ($client->company->viewerFileUrl('pitch_deck'))
                 <iframe
-                  src="/pitch_decks/{{ $client->company->pitch_deck }}"
+                  src="{{ $client->company->viewerFileUrl('pitch_deck') }}"
                   class="mb-2 border rouned"
                   target="_blank"
                   width="100%"
@@ -209,7 +209,7 @@
                       <div class="d-flex align-items-center gap-1">
                         <a
                           class="btn btn-sm btn-icon rounded-circle btn-transparent"
-                          href="{{ asset($document) }}"
+                          href="{{ $client->company->protectedPathUrl('documents', $document) }}"
                           target="_blank"
                           download="{{ $fileNames[$index] }}"
                         >

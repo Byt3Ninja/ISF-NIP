@@ -17,6 +17,8 @@ use App\Notifications\StartupJoiningNotification;
 use App\Notifications\WelcomeUserNotification;
 use URL, Str, stdClass, Hash;
 use App\Services\FileManagerService;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
 
 class ExternalCyclesController extends Controller
 {
@@ -261,6 +263,12 @@ class ExternalCyclesController extends Controller
 					$rules = [$required ? 'required' : 'nullable'];
 					$type = $field_options->type ?? null;
 
+					// A file field takes an uploaded file and nothing else (a posted string
+					// would otherwise be stored as if it were the path of a file).
+					if ($type == 'file') {
+						$rules[] = 'file';
+					}
+
 					if ($type == 'email') {
 						// email:rfc catches malformed addresses; the regex additionally
 						// requires a dotted domain (e.g. rejects "user@example") without
@@ -403,13 +411,21 @@ class ExternalCyclesController extends Controller
 					{
 						$field_options = $fields->where('id', $fid)->first()->options;
 						$field_name = 'field_' . $fid;
-						if( $request->hasFile($field_name) )
+						if( ($field_options->type ?? null) == 'file' )
 						{
-							$file = $request->file($field_name);
-							// Unauthenticated upload: whitelist + real-content check, server-generated name.
-							$fileName = app(FileManagerService::class)->validatedSafeName($file, 'common');
-             				$file->move(public_path('formsubmissions/'), $fileName);
-			 				$request->{$field_name} = 'formsubmissions/' . $fileName;
+							// The answer of a file field is the stored upload or nothing; whatever
+							// was posted as text for it is discarded.
+							$request->{$field_name} = null;
+							if( $request->hasFile($field_name) )
+							{
+								// Unauthenticated upload: whitelist + real-content check, server-generated
+								// name, stored privately and recorded against this startup and program.
+								$record = app(ProtectedFiles::class)->store($request->file($field_name), ProtectedFileSet::FORM_ANSWER, '', [
+									'owner_type' => 'company', 'owner_id' => $company_id, 'company_id' => $company_id,
+									'cycle_id' => $step->cycle_id, 'field' => $field_name,
+								], 'common');
+								$request->{$field_name} = 'formsubmissions/' . $record->path;
+							}
 						}
             			Formdata::where('field_id', $fid)->where('company_id', $company_id)->delete();
             			Formdata::updateOrInsert([

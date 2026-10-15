@@ -543,6 +543,11 @@ class ScreeningController extends Controller
 			return redirect()->back()->with('message2', 'startup not complete the form');
 		}
 		$company = Company::where('id', $answers->pluck(['company_id'])->first())->first();
+		// Uploaded answers get their authorized link here (null when this viewer may not open them).
+		$answers->each(function ($answer) {
+			$answer->file_url = Formdata::fileAnswer($answer->answer, $answer->company_id)['file_url'] ?? null;
+			$answer->is_file = Formdata::fileAnswer($answer->answer, $answer->company_id) !== null;
+		});
 		return view('admin.settings.screening.form', compact('answers', 'company'));
 	}
 

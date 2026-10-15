@@ -140,6 +140,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
     Route::delete('hackathon/deleteSharedFile/{id}', 'SharedFileController@destroy')->name('hackathon.deleteSharedFile');
     Route::get('hackathon/sharedFile/{id}/download', 'SharedFileController@download')->name('hackathon.downloadSharedFile');
+
+    // Confidential uploads: addressed by file record, authorized per record, logged.
+    Route::get('files/{uuid}', 'ProtectedFileController@show')->whereUuid('uuid')->name('protected_files.show');
     Route::post('hackathon/AddtodoList', 'TodoListController@store')->name('hackathon.AddtodoList');
     Route::post('hackathon/EdittodoList', 'TodoListController@update')->name('hackathon.EdittodoList');
     Route::post('hackathon/EdittodoListStatus', 'TodoListController@changeTodoStatus')->name('hackathon.EdittodoListStatus');
@@ -598,7 +601,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('tasks/titles', [TasksController::class, 'getTaskTitles'])->name('tasks.get_titles');
     Route::patch('tasks/{taskId}/move-task/{status}', [TasksController::class, 'moveTask'])->name('tasks.move');
     Route::post('tasks/{taskId}/add-feedback', [TasksController::class, 'addFeedback'])->name('tasks.add_feedback');
-    Route::get('tasks/{taskId}/download/{filename}', [TasksController::class, 'downloadAttachment'])->name('tasks.download_attachment')->where('filename', '.*');
     Route::delete('tasks/{taskId}/attachments/{filename}', [TasksController::class, 'deleteAttachment'])->name('tasks.delete_attachment')->where('filename', '.*');
     Route::post('tasks/{taskId}/attachments', [TasksController::class, 'uploadAttachment'])->name('tasks.upload_attachment');
     Route::post('tasks/{taskId}/add-comment', [TasksController::class, 'addComment'])->name('tasks.add_comment');
@@ -1064,3 +1066,10 @@ Route::post('/{org_slug}/program/{program_slug}/register', 'ExternalCyclesContro
 if (request()->secure()) {
     URL::forceScheme("https");
 }
+
+// Old public URLs of confidential uploads. After the public copies are retired these requests
+// reach the app; the visitor must log in and pass the same per-file check (see ProtectedFileController).
+Route::get('{legacyFile}', 'ProtectedFileController@legacy')
+    ->where('legacyFile', '(pitch_decks/\\d+/.+|documents/\\d+/.+|formsubmissions/[^/]+|storage/(milestones|employees|employee_documents|tasks/attachments)/.+|(191014/)?programs/[^/]+\\.(pdf|docx?|xlsx?|pptx?|csv|txt))')
+    ->middleware('auth')
+    ->name('protected_files.legacy');

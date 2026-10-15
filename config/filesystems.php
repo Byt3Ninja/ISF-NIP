@@ -1,5 +1,8 @@
 <?php
 
+// Base directory of the private disks for confidential uploads (see config/protected_files.php).
+$protectedFilesRoot = rtrim(env('PROTECTED_FILES_ROOT', storage_path('protected')), '/');
+
 return [
 
     /*
@@ -207,6 +210,48 @@ return [
         'importer' => [
             'driver' => 'local',
             'root' => storage_path('app/private/importer'),
+            'throw' => false,
+        ],
+
+        /*
+         * Confidential uploads. Private on purpose: no `url`, never web-served.
+         * Files are reached only through ProtectedFileController, which
+         * authorizes each request against the file's protected_files record.
+         */
+        'protected_legal' => [           // commercial register, tax card
+            'driver' => 'local',
+            'root' => $protectedFilesRoot . '/documents',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+        'protected_pitch' => [           // pitch deck, financial/business plan, supporting documents
+            'driver' => 'local',
+            'root' => $protectedFilesRoot . '/pitch_decks',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+        'protected_submissions' => [     // files attached to program applications
+            'driver' => 'local',
+            'root' => $protectedFilesRoot . '/formsubmissions',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+        'protected_files' => [           // milestones/, employees/, tasks/attachments/
+            'driver' => 'local',
+            'root' => $protectedFilesRoot . '/files',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+        'protected_guidelines' => [      // program guideline, policy and delegation PDFs
+            'driver' => 'local',
+            'root' => $protectedFilesRoot . '/guidelines',
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+        'protected_trash' => [           // replaced or deleted files are moved here, never unlinked
+            'driver' => 'local',
+            'root' => $protectedFilesRoot . '/_trash',
+            'visibility' => 'private',
             'throw' => false,
         ],
     ],
