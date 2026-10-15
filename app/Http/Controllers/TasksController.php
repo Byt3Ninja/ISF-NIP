@@ -15,6 +15,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Services\ProtectedFiles\FileAccess;
+use App\Enums\ProtectedFileSet;
 
 class TasksController extends Controller
 {
@@ -113,7 +116,7 @@ class TasksController extends Controller
                         'note' => $group->first()['note'] ?? null,
                         'files' => $group->map(fn($a) => [
                             'name'       => $a['name'],
-                            'url'        => app(\App\Services\FileManagerService::class)->getUrl($a['path'], 'public'),
+                            'url'        => $a['url'] ?? null,
                             'size_bytes' => $a['size'] ?? null,
                         ])->values()->toArray(),
                     ])->values()->toArray(),
@@ -249,8 +252,8 @@ class TasksController extends Controller
                         ], 422);
                     }
 
-                    // Store the file
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public', 'attachment');
+                    // Store the file privately; it is recorded against the task once the task exists (below).
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', app(ProtectedFiles::class)->disk(ProtectedFileSet::TASK_ATTACHMENT), 'attachment');
                     $attachments[] = [
                         'name'       => $file->getClientOriginalName(),
                         'path'       => $path,
@@ -305,6 +308,11 @@ class TasksController extends Controller
                 'attachments' => $attachments,
                 'created_by' => auth()->id(),
             ]);
+
+            // Record the uploaded files against the task: the record, not the path, is what serves them.
+            foreach ($attachments as $entry) {
+                $this->recordTaskFile($task, $entry['path'], $entry['name'], $entry['status'], $entry['status'] === 'submission' ? $entry['company_id'] : null);
+            }
 
             // Attach assignees (companies/startups) - use sync to prevent duplicates
             $assigneeData = [];
@@ -408,7 +416,7 @@ class TasksController extends Controller
             ->map(fn($a) => [
                 'id'   => md5($a['path']),
                 'name' => $a['name'],
-                'url'  => app(\App\Services\FileManagerService::class)->getUrl($a['path'], 'public'),
+                'url'  => $a['url'] ?? null,
                 'size' => $a['size'] ?? null,
                 'created_at' => $a['created_at'] ?? '',
             ])->values();
@@ -432,7 +440,7 @@ class TasksController extends Controller
                 'note' => $group->first()['note'] ?? null,
                 'files' => $group->map(fn($a) => [
                     'name'       => $a['name'],
-                    'url'        => app(\App\Services\FileManagerService::class)->getUrl($a['path'], 'public'),
+                    'url'        => $a['url'] ?? null,
                     'size_bytes' => $a['size'] ?? null,
                 ])->values()->toArray(),
             ])->values();
@@ -652,14 +660,15 @@ class TasksController extends Controller
                     // Validate file size (10 MB)
                     if ($file->getSize() > 10485760) continue;
 
-                    // Store the file
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public', 'attachment');
+                    // Store the file privately, recorded against this task
+                    $status = $uploader->hasRole('registered') ? 'submission' : 'attachment';
+                    $path = app(ProtectedFiles::class)->store($file, ProtectedFileSet::TASK_ATTACHMENT, 'tasks/attachments', $this->taskFileOwner($task, $status, $status === 'submission' ? $uploader->company_id : null), 'attachment')->path;
                     $attachments[] = [
                         'name'       => $file->getClientOriginalName(),
                         'path'       => $path,
                         'size'       => $file->getSize(),
                         'type'       => $file->getMimeType(),
-                        'status'     => $uploader->hasRole('registered') ? 'submission' : 'attachment',
+                        'status'     => $status,
                         'company_id' => $uploader->company_id,
                         'user_id'    => $uploader->id,
                         'created_at' => now()->toDateTimeString(),
@@ -753,20 +762,21 @@ class TasksController extends Controller
                 ], 404);
             }
 
-            $fileManager = app(\App\Services\FileManagerService::class);
+            // Files are retired through their records (kept in the trash area), never unlinked by a stored path.
+            $protectedFiles = app(ProtectedFiles::class);
 
             // Delete task-level attachments
             foreach ($task->attachments ?? [] as $attachment) {
                 if (isset($attachment['path'])) {
-                    $fileManager->delete($attachment['path'], 'public');
+                    $protectedFiles->retireValue(ProtectedFileSet::TASK_ATTACHMENT, $attachment['path'], ['owner_type' => 'task', 'owner_id' => $task->id]);
                 }
             }
 
             // Delete assignee-level attachments (submissions)
-            ProgramTaskAssignee::where('program_task_id', $task->id)->each(function ($assignee) use ($fileManager) {
+            ProgramTaskAssignee::where('program_task_id', $task->id)->each(function ($assignee) use ($protectedFiles) {
                 foreach ($assignee->attachment ?? [] as $att) {
                     if (isset($att['path'])) {
-                        $fileManager->delete($att['path'], 'public');
+                        $protectedFiles->retireValue(ProtectedFileSet::TASK_ATTACHMENT, $att['path'], ['owner_type' => 'task_assignee', 'owner_id' => $assignee->id]);
                     }
                 }
             });
@@ -858,8 +868,23 @@ class TasksController extends Controller
                 return response()->json(['success' => false, 'message' => 'Task is already completed.'], 422);
             }
             $file = $request->file('attachment');
-            $fileManager = app(\App\Services\FileManagerService::class);
-            $path = $fileManager->upload($file, 'tasks/attachments', 'public', 'attachment');
+
+            // A startup's upload belongs to its own assignment row; anyone else's to the task.
+            $assignee = null;
+            if ($uploader->hasRole('registered')) {
+                $assignee = ProgramTaskAssignee::where('program_task_id', $taskId)
+                    ->where('company_id', $uploader->company_id)
+                    ->first();
+
+                if (!$assignee) {
+                    return response()->json(['success' => false, 'message' => 'Not assigned to this task.'], 403);
+                }
+            }
+            $owner = $assignee
+                ? ['owner_type' => 'task_assignee', 'owner_id' => $assignee->id, 'company_id' => $assignee->company_id, 'cycle_id' => $task->program_id, 'field' => 'submission']
+                : $this->taskFileOwner($task, 'attachment', null);
+            $record = app(ProtectedFiles::class)->store($file, ProtectedFileSet::TASK_ATTACHMENT, 'tasks/attachments', $owner, 'attachment');
+            $path = $record->path;
 
             $newAtt = [
                 'name'       => $file->getClientOriginalName(),
@@ -875,15 +900,7 @@ class TasksController extends Controller
 
             $activityData = null;
 
-            if ($uploader->hasRole('registered')) {
-                $assignee = ProgramTaskAssignee::where('program_task_id', $taskId)
-                    ->where('company_id', $uploader->company_id)
-                    ->first();
-
-                if (!$assignee) {
-                    return response()->json(['success' => false, 'message' => 'Not assigned to this task.'], 403);
-                }
-
+            if ($assignee) {
                 $assigneeAtts   = $assignee->attachment ?? [];
                 $assigneeAtts[] = $newAtt;
                 $assignee->update(['attachment' => $assigneeAtts]);
@@ -912,7 +929,7 @@ class TasksController extends Controller
 
             return response()->json([
                 'success'    => true,
-                'attachment' => array_merge($newAtt, ['url' => $fileManager->getUrl($path, 'public')]),
+                'attachment' => array_merge($newAtt, ['url' => app(ProtectedFiles::class)->url($record)]),
                 'activity'   => $activityData,
             ]);
 
@@ -931,7 +948,13 @@ class TasksController extends Controller
                 return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
             }
 
-            $fileManager = app(\App\Services\FileManagerService::class);
+            $protectedFiles = app(ProtectedFiles::class);
+            $user = auth()->user();
+            // Staff of the task's program, its creator or an admin may remove any file of the task;
+            // a startup only its own submissions. (The route permission alone used to decide.)
+            $managesTask = $user->hasRole('admin')
+                || (int) $task->created_by === (int) $user->id
+                || app(FileAccess::class)->isProgramStaff($user, $task->program_id ? (int) $task->program_id : null);
 
             // Search task-level attachments first
             $taskAtts  = $task->attachments ?? [];
@@ -945,7 +968,11 @@ class TasksController extends Controller
                 }
             }
             if ($target) {
-                $fileManager->delete($target['path'], 'public');
+                $ownSubmission = ($target['status'] ?? null) === 'submission' && app(FileAccess::class)->isMember($user, isset($target['company_id']) ? (int) $target['company_id'] : null);
+                if (!$managesTask && !$ownSubmission) {
+                    return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
+                }
+                $protectedFiles->retireValue(ProtectedFileSet::TASK_ATTACHMENT, $target['path'], ['owner_type' => 'task', 'owner_id' => $task->id]);
                 $task->update(['attachments' => $remaining]);
                 return response()->json([
                     'success'     => true,
@@ -968,7 +995,10 @@ class TasksController extends Controller
                     }
                 }
                 if ($found) {
-                    $fileManager->delete($found['path'], 'public');
+                    if (!$managesTask && !app(FileAccess::class)->isMember($user, (int) $assignee->company_id)) {
+                        return response()->json(['success' => false, 'message' => 'Task not found.'], 404);
+                    }
+                    $protectedFiles->retireValue(ProtectedFileSet::TASK_ATTACHMENT, $found['path'], ['owner_type' => 'task_assignee', 'owner_id' => $assignee->id]);
                     $assignee->update(['attachment' => $remaining]);
                     return response()->json([
                         'success'     => true,
@@ -983,89 +1013,6 @@ class TasksController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error deleting attachment: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
-        }
-    }
-
-    /**
-     * Download task attachment.
-     */
-    public function downloadAttachment($taskId, $filename)
-    {
-        try {
-            $task = ProgramTask::find($taskId);
-            
-            if (!$task) {
-                return response()->json([
-                    'success' => false,
-                    'message' => app()->getLocale() == 'ar'
-                        ? 'المهمة غير موجودة'
-                        : 'Task not found.'
-                ], 404);
-            }
-
-            // Search task-level attachments
-            $attachment = null;
-            foreach ($task->attachments ?? [] as $att) {
-                if ($att['name'] === $filename) {
-                    $attachment = $att;
-                    break;
-                }
-            }
-
-            // If not found, search assignee-level attachments (submissions)
-            if (!$attachment) {
-                $assignees = ProgramTaskAssignee::where('program_task_id', $taskId)->get();
-                foreach ($assignees as $assignee) {
-                    foreach ($assignee->attachment ?? [] as $att) {
-                        if ($att['name'] === $filename) {
-                            $attachment = $att;
-                            break 2;
-                        }
-                    }
-                }
-            }
-
-            if (!$attachment) {
-                return response()->json([
-                    'success' => false,
-                    'message' => app()->getLocale() == 'ar'
-                        ? 'المرفق غير موجود'
-                        : 'Attachment not found.'
-                ], 404);
-            }
-
-            $filePath = $attachment['path'];
-            $fileManager = app(\App\Services\FileManagerService::class);
-            $relativePath = $fileManager->getRelativePath($filePath, 'public');
-            
-            // Check if file exists in storage
-            if (!Storage::disk('public')->exists($relativePath)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => app()->getLocale() == 'ar'
-                        ? 'الملف غير موجود على الخادم'
-                        : 'File not found on server.'
-                ], 404);
-            }
-
-            // Get file information
-            $mimeType = $attachment['type'] ?? Storage::disk('public')->mimeType($relativePath);
-            $originalName = $attachment['name'];
-
-            // Return file download response
-            return Storage::disk('public')->download($relativePath, $originalName, [
-                'Content-Type' => $mimeType,
-                'Content-Disposition' => 'attachment; filename="' . $originalName . '"'
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Error downloading attachment: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => app()->getLocale() == 'ar'
-                    ? 'حدث خطأ أثناء تحميل المرفق'
-                    : 'An error occurred while downloading the attachment.'
-            ], 500);
         }
     }
 
@@ -1330,7 +1277,7 @@ class TasksController extends Controller
                     ], 422);
                 }
                 foreach ($files as $file) {
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public', 'attachment');
+                    $path = app(ProtectedFiles::class)->store($file, ProtectedFileSet::TASK_ATTACHMENT, 'tasks/attachments', $this->taskFileOwner($task, 'feedback', null), 'attachment')->path;
                     $newAtt = [
                         'name'       => $file->getClientOriginalName(),
                         'path'       => $path,
@@ -1417,5 +1364,26 @@ class TasksController extends Controller
                 'message' => __('admin.feedback_failed')
             ], 500);
         }
+    }
+
+    /** Owner attributes of a file attached to the task itself (attachment, feedback, or a submission stored at task level). */
+    private function taskFileOwner(ProgramTask $task, string $kind, $companyId): array
+    {
+        return [
+            'owner_type' => 'task',
+            'owner_id' => $task->id,
+            'cycle_id' => $task->program_id,
+            'field' => $kind,
+            'company_id' => $companyId ?: null,
+        ];
+    }
+
+    /** Record a file that was uploaded to the private disk before its task existed. */
+    private function recordTaskFile(ProgramTask $task, string $path, ?string $name, string $kind, $companyId): void
+    {
+        app(ProtectedFiles::class)->register(ProtectedFileSet::TASK_ATTACHMENT, $path, $this->taskFileOwner($task, $kind, $companyId) + [
+            'original_name' => $name,
+            'uploaded_by' => auth()->id(),
+        ]);
     }
 }

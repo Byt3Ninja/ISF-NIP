@@ -20,6 +20,8 @@ use App\Http\Requests\UpdateProgramRequest;
 use App\Http\Requests\GetProgramMentorsRequest;
 use App\Http\Requests\GetProgramStartupsRequest;
 use App\{Cycle, Sector, Stage, ScreeningEvaluationResults, SurveyResponses};
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
 
 /**
  * @OA\Schema(
@@ -165,19 +167,19 @@ class ProgramController extends Controller
             $fileManager = app(\App\Services\FileManagerService::class);
 
             if ($request->hasFile('programGuidelineFile')) {
-                $cycle->program_guideline_file = $fileManager->upload($request->file('programGuidelineFile'), 'programs', 'public_uploads', 'document');
+                $cycle->program_guideline_file = $fileManager->upload($request->file('programGuidelineFile'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('financialPolicyPdf')) {
-                $cycle->financial_guideline_file = $fileManager->upload($request->file('financialPolicyPdf'), 'programs', 'public_uploads', 'document');
+                $cycle->financial_guideline_file = $fileManager->upload($request->file('financialPolicyPdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('legalPolicyPdf')) {
-                $cycle->legal_guideline_file = $fileManager->upload($request->file('legalPolicyPdf'), 'programs', 'public_uploads', 'document');
+                $cycle->legal_guideline_file = $fileManager->upload($request->file('legalPolicyPdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('delegationPdf')) {
-                $cycle->delegation_file = $fileManager->upload($request->file('delegationPdf'), 'programs', 'public_uploads', 'document');
+                $cycle->delegation_file = $fileManager->upload($request->file('delegationPdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('imgUrl')) {
@@ -354,19 +356,19 @@ class ProgramController extends Controller
     }
 
     if (isset($validated['programGuidelineFile'])) {
-        $cycle->program_guideline_file = $fileManager->update($validated['programGuidelineFile'], $cycle->program_guideline_file, 'programs', 'public_uploads', 'document');
+        $cycle->program_guideline_file = app(ProtectedFiles::class)->replace($validated['programGuidelineFile'], $cycle->program_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('program_guideline_file'), 'document');
     }
 
     if (isset($validated['financialPolicyPdf'])) {
-        $cycle->financial_guideline_file = $fileManager->update($validated['financialPolicyPdf'], $cycle->financial_guideline_file, 'programs', 'public_uploads', 'document');
+        $cycle->financial_guideline_file = app(ProtectedFiles::class)->replace($validated['financialPolicyPdf'], $cycle->financial_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('financial_guideline_file'), 'document');
     }
 
     if (isset($validated['legalPolicyPdf'])) {
-        $cycle->legal_guideline_file = $fileManager->update($validated['legalPolicyPdf'], $cycle->legal_guideline_file, 'programs', 'public_uploads', 'document');
+        $cycle->legal_guideline_file = app(ProtectedFiles::class)->replace($validated['legalPolicyPdf'], $cycle->legal_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('legal_guideline_file'), 'document');
     }
 
     if (isset($validated['delegationPdf'])) {
-        $cycle->delegation_file = $fileManager->update($validated['delegationPdf'], $cycle->delegation_file, 'programs', 'public_uploads', 'document');
+        $cycle->delegation_file = app(ProtectedFiles::class)->replace($validated['delegationPdf'], $cycle->delegation_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('delegation_file'), 'document');
     }
 
     $cycle->save();

@@ -108,7 +108,7 @@
                         name="{{ $field_name }}" accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" {{ !$isOpen ? 'disabled' : '' }}>
                       @if($answer)
                       <div class="mt-4">
-                        <a href="/{{ $answer }} " target="_blank" class="btn btn-sm btn-outline-primary">
+                        <a href="{{ \App\Formdata::fileAnswer($answer, optional(auth()->user())->company_id)['file_url'] ?? '#' }}" target="_blank" class="btn btn-sm btn-outline-primary">
                           <i class="ti ti-file me-2"></i> {{ __('admin.View File') }}
                         </a>
                       </div>

@@ -14,6 +14,7 @@ use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\ProtectedFileController;
 use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\CurrencyController;
 use App\Http\Controllers\API\DashboardController;
@@ -135,6 +136,9 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
+
+    // Confidential uploads for API clients (same record-level check as the web route).
+    Route::get('/v1/files/{uuid}', [ProtectedFileController::class, 'show'])->whereUuid('uuid')->name('api.protected_files.show');
     Route::post('/v1/programs/{programId}/steps', [StepController::class, 'createStep']);
     Route::put('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'updateStep']);
     Route::delete('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'deleteStep']);

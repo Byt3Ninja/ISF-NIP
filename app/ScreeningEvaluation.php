@@ -104,7 +104,8 @@ class ScreeningEvaluation extends Model
 			// Use pre-fetched step (avoids N+1 per evaluation)
 			$step = $_batchStepsWithCycles->get($_e->step_id);
 			$evaluation->screening_guidelines = $evaluation->screening_guidelines ?: ($step && $step->cycle ? $step->cycle->program_guideline : null);
-			$evaluation->screening_guidelines_file = $step && $step->cycle ? $step->cycle->program_guideline_file : null;
+			// the authorized link for this viewer (null when there is no file or they may not open it)
+			$evaluation->screening_guidelines_file = $step && $step->cycle ? $step->cycle->guidelineFileUrl('program_guideline_file') : null;
 
 			return $evaluation;
 		})->values();

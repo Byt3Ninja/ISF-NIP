@@ -880,7 +880,7 @@
         <table class="table table-hover">
           <tbody>
             @foreach (['business_plan', 'financial_plan', 'Commercial_Register', 'Tax_Card'] as $field)
-              @if (!empty($co->$field))
+              @if ($co->viewerFileUrl($field))
                 <tr>
                   <td>
                     <div class="d-flex align-items-center">
@@ -895,13 +895,7 @@
                   </td>
                   <td class="text-end">
                     <a
-                      @if( in_array($field, ['financial_plan', 'business_plan']) )
-                      href="{{ app(\App\Services\FileManagerService::class)->getUrl( $co->$field,  'pitch_deck') }}"
-                      @elseif( in_array($field, ['Commercial_Register', 'Tax_Card']) )
-                      href="{{ app(\App\Services\FileManagerService::class)->getUrl( $co->$field,  'document') }}"
-                      @else
-                      href="{{ $co->$field }}"
-                      @endif
+                      href="{{ $co->viewerFileUrl($field) }}"
                       target="_blank"
                       rel="noopener noreferrer"
                       class="btn btn-sm btn-icon rounded-pill btn-label-secondary"

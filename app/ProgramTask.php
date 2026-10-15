@@ -5,10 +5,12 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasProtectedDocuments;
+use App\Enums\ProtectedFileSet;
 
 class ProgramTask extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasProtectedDocuments;
 
     protected $fillable = [
         'title',
@@ -27,6 +29,15 @@ class ProgramTask extends Model
         'attachments' => 'array',
         'due_date' => 'date',
     ];
+
+    /**
+     * Attachments as [{name, path, url, status, …}], with `url` recomputed from each
+     * file's record (authorized route, or null for a viewer who may not open it).
+     */
+    public function getAttachmentsAttribute($value)
+    {
+        return $this->protectedDocumentList($value, ProtectedFileSet::TASK_ATTACHMENT, 'task');
+    }
 
     /**
      * Get the program that this task belongs to

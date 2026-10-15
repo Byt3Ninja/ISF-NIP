@@ -242,10 +242,10 @@
             @enderror
           </div>
 
-          @if(optional($client->company)->financial_plan != null)
+          @if(optional($client->company)->viewerFileUrl('financial_plan'))
           <div class="col-12 mb-3">
             <a
-              href="{{ app(\App\Services\FileManagerService::class)->getUrl( $client->company->financial_plan,  'pitch_deck') }}"
+              href="{{ $client->company->viewerFileUrl('financial_plan') }}"
               target="_blank"
               download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">

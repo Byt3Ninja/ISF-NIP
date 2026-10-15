@@ -64,6 +64,8 @@
                           @php
                             $documents = is_string($milestone->documents) ? json_decode($milestone->documents, true) : $milestone->documents;
                             $documents = is_array($documents) ? $documents : [];
+                            // only documents this viewer may open (their link is null otherwise)
+                            $documents = array_values(array_filter($documents, fn ($doc) => !empty($doc['url'])));
                           @endphp
                           @if(count($documents) > 0)
                           <div class="mt-auto">
