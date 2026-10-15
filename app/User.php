@@ -362,6 +362,25 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     }
 
     /**
+     * Determine whether the given organization id falls within this user's
+     * tenant scope. Admins own all organizations, so they always pass.
+     * Used by policies and scoped lookups to enforce resource-level ownership.
+     *
+     * @param  int|string|null  $organizationId
+     * @return bool
+     */
+    public function ownsOrganization($organizationId): bool
+    {
+        if ($organizationId === null || $organizationId === '') {
+            return false;
+        }
+
+        $ids = array_map('intval', $this->organizations_ids);
+
+        return in_array((int) $organizationId, $ids, true);
+    }
+
+    /**
      * Check if user is a Sub-Admin.
      *
      * @return bool

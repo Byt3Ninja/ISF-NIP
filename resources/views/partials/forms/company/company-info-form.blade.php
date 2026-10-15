@@ -193,11 +193,11 @@
               placeholder="{{ __('admin.Commercial_Register') }} *" />
             <input type="hidden" name="Commercial_Register_value" value="{{ $client->company ? $client->company->Commercial_Register : '' }}">
 
-            @if ($client->company && $client->company->Commercial_Register)
+            @if ($client->company && $client->company->viewerFileUrl('Commercial_Register'))
               <div class="mt-2 d-flex align-items-center gap-2">
                 @php
-                  $fileUrl   = $client->company->Commercial_Register;
-                  $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                  $fileUrl   = $client->company->viewerFileUrl('Commercial_Register');
+                  $extension = strtolower(pathinfo($client->company->Commercial_Register, PATHINFO_EXTENSION));
                 @endphp
                 @if (in_array($extension, ['jpg','jpeg','png']))
                   <a href="{{ $fileUrl }}" target="_blank"><i class="ti ti-photo text-secondary fs-5"></i></a>
@@ -206,7 +206,7 @@
                 @else
                   <a href="{{ $fileUrl }}" target="_blank" class="d-flex align-items-center"><i class="ti ti-file text-secondary fs-5"></i></a>
                 @endif
-                <a class="badge bg-label-secondary" href="{{ $fileUrl }}" target="_blank">{{ basename($fileUrl) }}</a>
+                <a class="badge bg-label-secondary" href="{{ $fileUrl }}" target="_blank">{{ basename($client->company->Commercial_Register) }}</a>
               </div>
             @endif
           </div>
@@ -218,11 +218,11 @@
               placeholder="{{ __('admin.Tax_Card') }} *" />
             <input type="hidden" name="Tax_Card_value" value="{{ $client->company ? $client->company->Tax_Card : '' }}">
 
-            @if ($client->company && $client->company->Tax_Card)
+            @if ($client->company && $client->company->viewerFileUrl('Tax_Card'))
               <div class="mt-2 d-flex align-items-center gap-2">
                 @php
-                  $fileUrl   = $client->company->Tax_Card;
-                  $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                  $fileUrl   = $client->company->viewerFileUrl('Tax_Card');
+                  $extension = strtolower(pathinfo($client->company->Tax_Card, PATHINFO_EXTENSION));
                 @endphp
                 @if (in_array($extension, ['jpg','jpeg','png']))
                   <a href="{{ $fileUrl }}" target="_blank"><i class="ti ti-photo text-secondary fs-5"></i></a>
@@ -231,7 +231,7 @@
                 @else
                   <a href="{{ $fileUrl }}" target="_blank" class="d-flex align-items-center"><i class="ti ti-file text-secondary fs-5"></i></a>
                 @endif
-                <a class="badge bg-label-secondary" href="{{ $fileUrl }}" target="_blank">{{ basename($fileUrl) }}</a>
+                <a class="badge bg-label-secondary" href="{{ $fileUrl }}" target="_blank">{{ basename($client->company->Tax_Card) }}</a>
               </div>
             @endif
           </div>

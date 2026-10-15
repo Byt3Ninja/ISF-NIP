@@ -71,7 +71,11 @@ class RoleController extends Controller
  */
     public function index()
 {
-    $this->authorize('deactivate', Auth::user());
+    // Listing roles is governed by its own permission (it used to borrow the
+    // user-deactivation policy, authorizing the caller against themself).
+    if (!auth()->user()->ableTo('roles.index')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
 
     $roles = $this->userService->roleList();
 
@@ -123,6 +127,13 @@ class RoleController extends Controller
 public function destroy($id)
 {
     if (!auth()->user()->ableTo('roles.destroy')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    // Roles are global, shared records (no tenant column on `roles`), so a
+    // per-role owner cannot be expressed. Restrict deletion to platform-wide
+    // admin scope: a tenant admin must not delete a role used by other tenants.
+    if (!auth()->user()->hasRole('admin')) {
         return $this->forbidden(__('api.forbidden'));
     }
     $role = Role::find($id);
@@ -198,6 +209,11 @@ public function destroy($id)
 public function store(StoreRoleRequest $request)
 {
     if (!auth()->user()->ableToAny(['roles.create','roles.store'])) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    // New roles are global records visible to every tenant.
+    if (!auth()->user()->hasRole('admin')) {
         return $this->forbidden(__('api.forbidden'));
     }
 
@@ -285,6 +301,14 @@ public function store(StoreRoleRequest $request)
 public function updatePermissions(UpdateRoleRequest $request, $roleId)
 {
     if (!auth()->user()->ableToAny(['roles.update', 'roles.edit'])) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    // Roles are global, shared records (no tenant column on `roles`), so a
+    // per-role owner cannot be expressed. Restrict mutation to platform-wide
+    // admin scope: this is what stops a tenant admin from rewriting the
+    // permissions of a role owned by the platform or by another tenant.
+    if (!auth()->user()->hasRole('admin')) {
         return $this->forbidden(__('api.forbidden'));
     }
 

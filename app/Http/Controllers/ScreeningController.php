@@ -543,6 +543,11 @@ class ScreeningController extends Controller
 			return redirect()->back()->with('message2', 'startup not complete the form');
 		}
 		$company = Company::where('id', $answers->pluck(['company_id'])->first())->first();
+		// Uploaded answers get their authorized link here (null when this viewer may not open them).
+		$answers->each(function ($answer) {
+			$answer->file_url = Formdata::fileAnswer($answer->answer, $answer->company_id)['file_url'] ?? null;
+			$answer->is_file = Formdata::fileAnswer($answer->answer, $answer->company_id) !== null;
+		});
 		return view('admin.settings.screening.form', compact('answers', 'company'));
 	}
 
@@ -1592,6 +1597,10 @@ class ScreeningController extends Controller
 	{
 		// تحقق من أن البريد الإلكتروني موجود
 
+		// This route has no name, so the route-permission middleware never sees it:
+		// the export must at least be limited to the caller's own programs.
+		$this->authorizeStepOrganization($request->input('step'));
+
 		$data1 = [
 			'step' => $request->input('step'),
 			'formid' => $request->input('formid'),
@@ -2142,5 +2151,20 @@ class ScreeningController extends Controller
 
 		$_companies = $companies;
 		return view('admin.settings.screening.resultsReport', compact('cstep', 'judges', 'form', 'steps', '_steps', 'id', 'svgs', '_companies', 'evaluation', 'results'));
+	}
+
+	/**
+	 * Abort unless the step belongs to one of the current user's organizations
+	 * (platform admins pass). A permission allows the action, not on whose data.
+	 */
+	private function authorizeStepOrganization($stepId): void
+	{
+		$user = auth()->user();
+		if ($user->hasRole('admin')) {
+			return;
+		}
+
+		$step = Step::with('cycle')->find($stepId);
+		abort_unless($step && $step->cycle && $user->ownsOrganization($step->cycle->organization_id), 403);
 	}
 }

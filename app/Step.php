@@ -23,7 +23,22 @@ class Step extends Model
 	// use Auditable;
 	public static $module = 'Program Step';
 	protected $casts = ['from'  => 'date:Y-m-d', 'to' => 'date:Y-m-d',];
-    protected $guarded = [];
+    // cycle_id is the owner foreign key: never mass-assignable, set it explicitly.
+    protected $fillable = [
+        'title',
+        'description',
+        'stype',
+        'data',
+        'list',
+        'arr',
+        'from',
+        'to',
+        'is_public',
+        'public_slug',
+        'count_team_number',
+        // form_id mirrors `data` (the selected form), it is not the step's owner
+        'form_id',
+    ];
 	public function cycle()
 	{
 		return $this->belongsTo(Cycle::class,'cycle_id');

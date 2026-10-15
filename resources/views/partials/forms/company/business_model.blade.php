@@ -96,10 +96,10 @@
             <div class="invalid-feedback d-block">{{ $message }}</div>
           @enderror
           <div class="position-relative mt-2">
-            @if (optional($client->company)->business_plan != null)
+            @if (optional($client->company)->viewerFileUrl('business_plan'))
             <a
               id="business_plan_card"
-              href="{{ app(\App\Services\FileManagerService::class)->getUrl($client->company->business_plan, 'pitch_deck') }}"
+              href="{{ $client->company->viewerFileUrl('business_plan') }}"
               target="_blank"
               download
               class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2">

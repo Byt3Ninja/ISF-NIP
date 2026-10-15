@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class BuilderForm extends Model
 {
     use Auditable;
-    protected $guarded = [];
+    // organization_id is the tenant key: never mass-assignable, set it explicitly.
+    protected $fillable = [
+        'form_name',
+    ];
     public static $module = 'Builder Form';
 
     public function fields()

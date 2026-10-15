@@ -51,6 +51,9 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Notifications\StartupJoiningNotification;
+use App\Services\FileManagerService;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
 
 class CyclesController extends Controller
 {
@@ -454,28 +457,36 @@ class CyclesController extends Controller
 
 
             $fileManager = app(\App\Services\FileManagerService::class);
+            // Validate every uploaded file before replacing any of them.
+            $fileManager->assertAllAllowed([
+                [$request->file('program-guideline-pdf'), 'document'],
+                [$request->file('financial_policy_pdf'), 'document'],
+                [$request->file('legal_policy_pdf'), 'document'],
+                [$request->file('delegation_pdf'), 'document'],
+                [$request->file('img_url'), 'image'],
+            ]);
             $cycle->program_guideline = $request->program_guideline;
             if ($request->hasFile('program-guideline-pdf')) {
-                $cycle->program_guideline_file = $fileManager->update($request->file('program-guideline-pdf'), $cycle->program_guideline_file, 'programs', 'public_uploads');
+                $cycle->program_guideline_file = app(ProtectedFiles::class)->replace($request->file('program-guideline-pdf'), $cycle->program_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('program_guideline_file'), 'document');
             }
             $cycle->budget_allocation = $request->budget_allocation;
             $cycle->currency_type = $request->currency_type;
             $cycle->financial_guideline = $request->financial_policy;
             if ($request->hasFile('financial_policy_pdf')) {
-                $cycle->financial_guideline_file = $fileManager->update($request->file('financial_policy_pdf'), $cycle->financial_guideline_file, 'programs', 'public_uploads');
+                $cycle->financial_guideline_file = app(ProtectedFiles::class)->replace($request->file('financial_policy_pdf'), $cycle->financial_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('financial_guideline_file'), 'document');
             }
             $cycle->legal_guideline = $request->legal_policy;
             if ($request->hasFile('legal_policy_pdf')) {
-                $cycle->legal_guideline_file = $fileManager->update($request->file('legal_policy_pdf'), $cycle->legal_guideline_file, 'programs', 'public_uploads');
+                $cycle->legal_guideline_file = app(ProtectedFiles::class)->replace($request->file('legal_policy_pdf'), $cycle->legal_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('legal_guideline_file'), 'document');
             }
             if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
-                $cycle->delegation_file = $fileManager->update($request->file('delegation_pdf'), $cycle->delegation_file, 'programs', 'public_uploads');
+                $cycle->delegation_file = app(ProtectedFiles::class)->replace($request->file('delegation_pdf'), $cycle->delegation_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('delegation_file'), 'document');
             }
             $cycle->auto_approve_mentorship_requests = $request->has('auto_approve_mentorship_requests') ? 1 : 0;
 
             if ($request->hasFile('img_url')) {
                 $image = $request->file('img_url');
-                $cycle->img_url = app(\App\Services\FileManagerService::class)->update($image, $cycle->img_url, 'programs', 'public_uploads');
+                $cycle->img_url = app(\App\Services\FileManagerService::class)->update($image, $cycle->img_url, 'programs', 'public_uploads', 'image');
             }
                     $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
                     // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
@@ -947,7 +958,7 @@ class CyclesController extends Controller
                 $fileManager = app(\App\Services\FileManagerService::class);
                 $cycle->program_guideline = $request->program_guideline;
                 if ($request->hasFile('program-guideline-pdf')) {
-                    $cycle->program_guideline_file = $fileManager->upload($request->file('program-guideline-pdf'), 'programs', 'public_uploads');
+                    $cycle->program_guideline_file = $fileManager->upload($request->file('program-guideline-pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
 
 
@@ -955,20 +966,20 @@ class CyclesController extends Controller
                 $cycle->currency_type = $request->currency_type;
                 $cycle->financial_guideline = $request->financial_policy;
                 if ($request->hasFile('financial_policy_pdf')) {
-                    $cycle->financial_guideline_file = $fileManager->upload($request->file('financial_policy_pdf'), 'programs', 'public_uploads');
+                    $cycle->financial_guideline_file = $fileManager->upload($request->file('financial_policy_pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
 
                 $cycle->legal_guideline = $request->legal_policy;
                 if ($request->hasFile('legal_policy_pdf')) {
-                    $cycle->legal_guideline_file = $fileManager->upload($request->file('legal_policy_pdf'), 'programs', 'public_uploads');
+                    $cycle->legal_guideline_file = $fileManager->upload($request->file('legal_policy_pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
 
                 if ($request->delegation_option == 'yes' && $request->hasFile('delegation_pdf')) {
-                    $cycle->delegation_file = $fileManager->upload($request->file('delegation_pdf'), 'programs', 'public_uploads');
+                    $cycle->delegation_file = $fileManager->upload($request->file('delegation_pdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
                 }
                 if ($request->hasFile('img_url')) {
                     $image = $request->file('img_url');
-                    $cycle->img_url = $fileManager->upload($image, 'programs', 'public_uploads');
+                    $cycle->img_url = $fileManager->upload($image, 'programs', 'public_uploads', 'image');
                 }
                 $cycle->is_active_Rminder = $request->reminder_enabled == 'on' ? 1 : 0;
                 // $cycle->hours_Rminder = $request->reminder_enabled == 'on' ? $request->hours_reminder : 0;
@@ -1723,10 +1734,9 @@ class CyclesController extends Controller
                 if ($request->hasFile($field_name))
                 {
                     $file = $request->file($field_name);
-                    // $originalName = $file->getClientOriginalName();
-                    // $file->storeAs('formsubmissions', $originalName, 'public_uploads');
-                    // $request->{$field_name} = 'formsubmissions/' . $originalName;
-                    $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+                    // Whitelist + real-content check; server-generated name (the client name could
+                    // carry any extension and silently overwrote an earlier file of the same name).
+                    $imageName = app(FileManagerService::class)->validatedSafeName($file, 'common');
                     $file->move(public_path('formsubmissions/'), $imageName);
                     $request->{$field_name} = 'formsubmissions/' . $imageName;
                 }
@@ -1762,16 +1772,23 @@ class CyclesController extends Controller
             $field_name = 'field_' . $field['id'];
             if( $field['type'] == 'file' )
             {
+                $previousAnswer = $my_submissions->where('field_id', $field['id'])->first()?->answer ?? null;
                 if ($request->hasFile($field_name))
                 {
-                    $file = $request->file($field_name);
-                    $imageName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
-                    $file->move(public_path('formsubmissions/'), $imageName);
-                    $request->{$field_name} = 'formsubmissions/' . $imageName;
+                    // Whitelist + real-content check, server-generated name, stored privately and
+                    // recorded against this startup and the program the form belongs to.
+                    $protectedFiles = app(ProtectedFiles::class);
+                    $record = $protectedFiles->store($request->file($field_name), ProtectedFileSet::FORM_ANSWER, '', [
+                        'owner_type' => 'company', 'owner_id' => $cid, 'company_id' => $cid,
+                        'cycle_id' => Step::whereKey($id)->value('cycle_id'), 'field' => $field_name,
+                    ], 'common');
+                    $request->{$field_name} = 'formsubmissions/' . $record->path;
+                    $protectedFiles->retireValue(ProtectedFileSet::FORM_ANSWER, $previousAnswer, ['company_id' => $cid]);
                 }
                 else
                 {
-                    $request->{$field_name} = $my_submissions->where('field_id', $field['id'])->first()?->answer ?? null;
+                    // No new upload: keep the saved file (taken from the database, never from the request).
+                    $request->{$field_name} = $previousAnswer;
                 }
             }
             if( $field['type'] == 'checkboxes' && is_array($request->{$field_name}) )
@@ -1924,19 +1941,4 @@ class CyclesController extends Controller
             return false;
         }
     }
-
-    // private function storeUploadedFile(Request $request, string $inputName, string $subfolder = '')
-    // {
-    //     if( !$request->hasFile( $inputName ) ) { return null; }
-    //     $file = $request->file( $inputName );
-    //     abort_unless($file->isValid(), 400);
-
-    //     $raw_name = str_replace('.' . $file->getClientOriginalExtension(), '', $file->getClientOriginalName()) . '-' . $file->getClientOriginalExtension();
-    //     $filename = time() . '_' . $raw_name . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-
-    //     $path = $subfolder ? "$subfolder/$filename" : $filename;
-    //     Storage::disk('public_uploads')->put($path, file_get_contents($file->getRealPath()));
-
-    //     return $path;
-    // }
 }

@@ -12,6 +12,7 @@ use App\ProductCategory;
 use DB;
 use Log;
 use Session;
+use App\Services\FileManagerService;
 
 class ProductController extends Controller
 {
@@ -68,7 +69,7 @@ class ProductController extends Controller
 			//store the image
 			$img = $request->file('img');
 			//get the path of the stores image
-			$img = $img->store('products', ['disk' => 'public_uploads']);
+			$img = app(FileManagerService::class)->upload($img, 'products', 'public_uploads', 'image');
 		} else {$img ='';}
 		$products= new Product();
 		$products->name_en=$request->name_en;
@@ -129,7 +130,7 @@ class ProductController extends Controller
 			//store the image
 			$img = $request->file('img');
 			//get the path of the stores image
-			$img = $img->store('products', ['disk' => 'public_uploads']);
+			$img = app(FileManagerService::class)->upload($img, 'products', 'public_uploads', 'image');
 			//update
 			if (Auth()->user()->hasRole('Admin')) {
 				$result = $product->update($request->except(['img', 'approvedby']) + ['img' => $img, 'approvedby' => $aby]);

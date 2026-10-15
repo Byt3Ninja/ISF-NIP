@@ -62,11 +62,22 @@ class MentorController extends Controller
             return $this->forbidden(__('api.forbidden'));
         }
         
-        $mentor = User::with([
+        $query = User::with([
             'bio:id,user_id,bio_en,bio_ar,linkedin,specialization_en,specialization_ar',
             'mentorExpertises:id,title,title_ar',
             'roles:name'
-        ])->find($mentorId);
+        ])->whereHas('roles', function ($q) {
+            $q->where('default_for', 'LIKE', '%mentor%');
+        });
+
+        if (!$user->hasRole('admin')) {
+            $orgIds = $user->organizations_ids;
+            $query->whereHas('mentorCycles', function ($q) use ($orgIds) {
+                $q->whereIn('organization_id', $orgIds);
+            });
+        }
+
+        $mentor = $query->find($mentorId);
 
           if (!$mentor) {
             return $this->notFound(__('api.mentorNotFound'));

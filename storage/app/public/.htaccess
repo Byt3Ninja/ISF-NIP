@@ -1,0 +1,29 @@
+# Defense-in-depth: never execute scripts from the public upload root.
+# Inherited by all nested upload directories.
+
+# Disable the PHP engine if mod_php is active.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# Strip any handler/type that could execute uploaded content.
+<FilesMatch "\.(php|php3|php4|php5|php7|php8|phtml|pht|phps|phar|cgi|pl|py|rb|sh|bash|asp|aspx|jsp|jspx)$">
+    RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar .cgi .pl .py .rb .sh .asp .aspx .jsp
+    RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar .cgi .pl .py .rb .sh .asp .aspx .jsp
+    SetHandler none
+    ForceType text/plain
+    # Apache 2.4
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    # Apache 2.2 fallback
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>

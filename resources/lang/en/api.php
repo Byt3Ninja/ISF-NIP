@@ -7,6 +7,7 @@ return [
 	'registered_successfully' => 'Registration Successfully',
 	'logged_out' => 'Logged out Successfully',
 	'unauthenticated' => 'Unauthenticated',
+	'token_expired' => 'Your session has expired. Please log in again.',
 	'title_required' => 'Title is required For Mentors',
 	'forbidden' => 'Access forbidden',
 	'user_not_found' => 'User not found',

@@ -72,6 +72,7 @@ class Kernel extends HttpKernel
         'locale' => \App\Http\Middleware\LocaleMiddleware::class,
         '2fa' => \App\Http\Middleware\LoginSecurityMiddleware::class,
         'sanctum.custom' => \App\Http\Middleware\SanctumApiAuth::class,
+        'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
     ];
 
     /**

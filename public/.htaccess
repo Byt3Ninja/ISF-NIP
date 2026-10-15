@@ -1,3 +1,12 @@
+# Defense in depth (pentest finding 4.1): never serve or run server-side scripts from
+# an upload location. Covers directories created after deploy and /storage, which
+# points at storage/app/public. The per-directory .htaccess files do the same job;
+# this rule still applies if one of them is missing.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(191014|storage|formsubmissions|organizations|orgnizations|pitch_decks|documents|qrcodes|icons/flags|images/(logo|resource|slider|blog)|programs|hackathon/sharedfiles|csv)/.*\.(php|php[3-8]|phtml|pht|phps|phar|cgi|pl|py|rb|sh|bash|asp|aspx|jsp|jspx)(/.*)?$ - [F,L,NC]
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

@@ -108,7 +108,19 @@ class StepController extends Controller
       if (!$request->has('cycle_id')) {
         return $this->notFound(__('api.stepsNotFound'));
        }
-        
+
+      // cycle_id arrives from the query string, so the tenant must be verified
+      // before listing. Every other action in this controller already does this;
+      // index() was the remaining cross-tenant read.
+      $cycle = Cycle::find($request->cycle_id);
+      if (empty($cycle)) {
+        return $this->notFound(__('api.stepsNotFound'));
+      }
+
+      if (!$user->hasRole('admin') && !$user->ownsOrganization($cycle->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+      }
+
       $steps = Step::with(['cycle', 'form'])->where('cycle_id', $request->cycle_id)->orderBy('arr')->paginate(10);
 
       return $this->success(StepResource::collection($steps->items()),
@@ -189,6 +201,11 @@ class StepController extends Controller
           return $this->notFound(__('api.program_not_found'));
       }
 
+      $authUser = auth()->user();
+      if (!$authUser->hasRole('admin') && !$authUser->ownsOrganization($program->organization_id)) {
+          return $this->forbidden(__('api.forbidden'));
+      }
+
       $step = $this->stepService->createStep(array_merge($request->validated(),['programId' => $programId]));
       return $this->created(new StepResource($step),__('api.step_created'));
     }
@@ -256,6 +273,12 @@ class StepController extends Controller
     if (empty($program)) {
         return $this->notFound(__('api.program_not_found'));
     }
+
+    $authUser = auth()->user();
+    if (!$authUser->hasRole('admin') && !$authUser->ownsOrganization($program->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
     $step = $this->stepService->updateStep(array_merge($request->validated(),['programId' => $programId]), $stepId);
 
     return $this->success(new StepResource($step),[], __('api.step_updated'));
@@ -305,7 +328,12 @@ class StepController extends Controller
         return $this->notFound(__('api.program_not_found'));
     }
 
-    $this->stepService->deleteStep($stepId);
+    $authUser = auth()->user();
+    if (!$authUser->hasRole('admin') && !$authUser->ownsOrganization($program->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
+    $this->stepService->deleteStep($stepId, $programId);
     return $this->success(null, [], __('api.step_deleted'));
  }
 
@@ -357,6 +385,16 @@ class StepController extends Controller
     if(!auth()->user()->ableTo('cycles.list')) {
      return $this->forbidden(__('api.forbidden'));
     }
+    $program = Cycle::find($programId);
+    if (empty($program)) {
+        return $this->notFound(__('api.program_not_found'));
+    }
+
+    $authUser = auth()->user();
+    if (!$authUser->hasRole('admin') && !$authUser->ownsOrganization($program->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
     $steps = $this->stepService->reorderSteps($programId, $request->validated()['steps']);
     return $this->success($steps, [], __('api.steps_reordered_successfully'));
   }
@@ -417,6 +455,16 @@ class StepController extends Controller
   if(!auth()->user()->ableTo('cycles.list')) {
     return $this->forbidden(__('api.forbidden'));
   }
+  $program = Cycle::find($programId);
+  if (empty($program)) {
+      return $this->notFound(__('api.program_not_found'));
+  }
+
+  $authUser = auth()->user();
+  if (!$authUser->hasRole('admin') && !$authUser->ownsOrganization($program->organization_id)) {
+      return $this->forbidden(__('api.forbidden'));
+  }
+
   $data = $request->validated();
   $result = $this->stepService->changeStepOrder($programId, $stepId, $data);
 

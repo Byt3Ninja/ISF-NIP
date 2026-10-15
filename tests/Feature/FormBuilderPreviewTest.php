@@ -75,7 +75,7 @@ class FormBuilderPreviewTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $form = BuilderForm::create([
+        $form = BuilderForm::forceCreate([
             'form_name' => 'Test Preview Form',
             'organization_id' => $org->id,
         ]);

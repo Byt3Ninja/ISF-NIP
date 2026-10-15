@@ -70,12 +70,16 @@ class StepService
         if ($formId && in_array($stype, [1, 5])) {
             $fields = BuilderField::where('builder_form_id', $formId)->orderBy('id')->get();
             foreach ($fields as $field) {
-                Formfield::create([
-                    'step_id' => $step->id,
-                    'field_id' => $field->field_id,
+                // step_id, field_id and builder_forms_id are foreign keys excluded
+                // from mass-assignment ($fillable); set them explicitly from the
+                // trusted server-side context.
+                $formField = new Formfield([
                     'options' => json_encode($field->options),
-                    'builder_forms_id' => $field->builder_form_id,
                 ]);
+                $formField->step_id = $step->id;
+                $formField->field_id = $field->field_id;
+                $formField->builder_forms_id = $field->builder_form_id;
+                $formField->save();
             }
         }
 
@@ -84,7 +88,11 @@ class StepService
 
     public function updateStep(array $data, $stepId)
 {
-    $step = $this->stepRepo->find($stepId);
+    // When the caller names a program, the step must belong to it; otherwise an
+    // owned programId could be used to edit (and re-parent) another program's step.
+    $step = isset($data['programId'])
+        ? $this->stepRepo->findInProgram($data['programId'], $stepId)
+        : $this->stepRepo->find($stepId);
 
      if (!$step) {
         throw new HttpResponseException(
@@ -144,9 +152,12 @@ class StepService
     return $step;
 }
 
-public function deleteStep($stepId)
+public function deleteStep($stepId, $programId = null)
 {
-    $step = $this->stepRepo->find($stepId);
+    // Same rule as updateStep: scope the lookup to the program when one is given.
+    $step = $programId !== null
+        ? $this->stepRepo->findInProgram($programId, $stepId)
+        : $this->stepRepo->find($stepId);
 
     if (!$step) {
         throw new HttpResponseException(

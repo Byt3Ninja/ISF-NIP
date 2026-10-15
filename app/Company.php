@@ -10,6 +10,10 @@ use App\Traits\HasFileCleanup;
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\ProtectedFileSet;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Services\ProtectedFiles\LegacyReferences;
+use App\Services\ProtectedFiles\FileAccess;
 
 class Company extends Model
 {
@@ -125,16 +129,19 @@ class Company extends Model
     ];
 
 
+    // Confidential files (PROTECTED_FILE_FIELDS) are not listed here: they are retired
+    // through their protected_files records when the company is deleted (see booted()),
+    // never unlinked by a path taken from a column. `business_model` is text, not a file.
     protected array $fileFields = [
         'logo' => 'companies',
-        'pitch_deck' => 'pitch_deck',
-        'business_plan' => 'pitch_deck',
-        'financial_plan' => 'pitch_deck',
-        'business_model' => 'pitch_deck',
-        'documents' => 'pitch_deck',
-        'Commercial_Register' => 'document',
-        'Tax_Card' => 'document',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Company $company) {
+            app(ProtectedFiles::class)->retireWhere(['company_id' => $company->id]);
+        });
+    }
 
     protected $casts = [
         'business_categories' => 'array',
@@ -153,58 +160,81 @@ class Company extends Model
     {
         return self::logo_handler($this->logo);
     }
-    public function getBusinessModelUrlAttribute()
+    /**
+     * Confidential file columns and the protected set each belongs to
+     * (`documents` is a JSON list of paths in the pitch set).
+     */
+    public const PROTECTED_FILE_FIELDS = [
+        'Commercial_Register' => ProtectedFileSet::COMPANY_LEGAL,
+        'Tax_Card' => ProtectedFileSet::COMPANY_LEGAL,
+        'pitch_deck' => ProtectedFileSet::COMPANY_PITCH,
+        'financial_plan' => ProtectedFileSet::COMPANY_PITCH,
+        'business_plan' => ProtectedFileSet::COMPANY_PITCH,
+        'documents' => ProtectedFileSet::COMPANY_PITCH,
+    ];
+
+    /**
+     * Link to one of this company's confidential files, or null when the column
+     * holds no file. Always goes through the authorized file route; the stored
+     * value is only used to find this company's own file record.
+     */
+    public function protectedFileUrl(string $field, bool $api = false): ?string
     {
-        if (!$this->business_model) {
-            return '/app-assets/images/logo_placeholder.png';
-        }
-        return app(\App\Services\FileManagerService::class)->getUrl($this->business_model, 'pitch_deck');
-    }
-    public function getBusinessPlanUrlAttribute()
-    {
-        if (!$this->business_plan) {
-            return '/app-assets/images/logo_placeholder.png';
-        }
-        return app(\App\Services\FileManagerService::class)->getUrl($this->business_plan, 'pitch_deck');
-    }
-    public function getPitchDeckUrlAttribute()
-    {
-        if (!$this->pitch_deck) {
-            return '/app-assets/images/logo_placeholder.png';
-        }
-        return app(\App\Services\FileManagerService::class)->getUrl($this->pitch_deck, 'pitch_deck');
-    }
-    public function getFinancialPlanUrlAttribute()
-    {
-        if (!$this->financial_plan) {
-            return '/app-assets/images/logo_placeholder.png';
-        }
-        return app(\App\Services\FileManagerService::class)->getUrl($this->financial_plan, 'pitch_deck');
-    }
-    public function getDocumentsUrlsAttribute()
-    {
-        $docs = json_decode($this->documents ?? '[]', true);
-        if (empty($docs) || !is_array($docs)) {
-            return [];
-        }
-        $fileManager = app(\App\Services\FileManagerService::class);
-        return array_map(fn($doc) => $fileManager->getUrl($doc, 'pitch_deck'), $docs);
+        return $this->protectedPathUrl($field, $this->getRawOriginal($field), $api);
     }
 
-    public function getCommercialRegisterUrlAttribute()
+    /** Same, for one entry of the `documents` list (or any stored path of a known field). */
+    public function protectedPathUrl(string $field, $path, bool $api = false): ?string
     {
-        if (!$this->Commercial_Register || $this->Commercial_Register === 'null') {
-            return null;
-        }
-        return app(\App\Services\FileManagerService::class)->getUrl($this->Commercial_Register, 'document');
+        return app(ProtectedFiles::class)->urlFor(self::PROTECTED_FILE_FIELDS[$field], $path, ['company_id' => $this->id], $api);
     }
 
-    public function getTaxCardUrlAttribute()
+    /**
+     * The link to show the CURRENT viewer, or null when there is no file or the viewer
+     * would be refused by the file route. Views use this so that a link is never offered
+     * to someone who cannot open it; it asks the same FileAccess the route asks.
+     */
+    public function viewerFileUrl(string $field): ?string
     {
-        if (!$this->Tax_Card || $this->Tax_Card === 'null') {
+        if (!app(FileAccess::class)->canViewCompanySet(auth()->user(), $this->id, self::PROTECTED_FILE_FIELDS[$field])) {
             return null;
         }
-        return app(\App\Services\FileManagerService::class)->getUrl($this->Tax_Card, 'document');
+
+        return $this->protectedFileUrl($field);
+    }
+
+    /** protectedDocuments() for the current viewer (empty when they may not open them). */
+    public function viewerDocuments(): array
+    {
+        return app(FileAccess::class)->canViewCompanySet(auth()->user(), $this->id, ProtectedFileSet::COMPANY_PITCH)
+            ? $this->protectedDocuments()
+            : [];
+    }
+
+    /** True when the column refers to an actual file (not empty, "null" or free text). */
+    public function hasProtectedFile(string $field): bool
+    {
+        return app(ProtectedFiles::class)->normalize(self::PROTECTED_FILE_FIELDS[$field], $this->getRawOriginal($field)) !== null;
+    }
+
+    /** The supporting documents as [['path' => stored value, 'name' => display name, 'url' => link|null], …]. */
+    public function protectedDocuments(bool $api = false): array
+    {
+        $files = app(ProtectedFiles::class);
+        $list = [];
+        foreach (app(LegacyReferences::class)->entries($this->getRawOriginal('documents')) as $path) {
+            if (!is_string($path)) {
+                continue;
+            }
+            $record = $files->find(ProtectedFileSet::COMPANY_PITCH, $path, ['company_id' => $this->id]);
+            $list[] = [
+                'path' => $path,
+                'name' => $record->original_name ?? basename($path),
+                'url' => $files->urlFor(ProtectedFileSet::COMPANY_PITCH, $path, ['company_id' => $this->id], $api),
+            ];
+        }
+
+        return $list;
     }
 
     public function getNameAttribute()
@@ -446,6 +476,8 @@ class Company extends Model
                 $field_type = '';
                 if( isset( $field?->options?->type ) ) { $field_type = $field?->options?->type; }
                 $item->field_type = $field_type;
+                // Link to an uploaded answer, built here once so every view gets the authorized URL.
+                $item->file_url = Formdata::fileAnswer($item->answer, $item->company_id)['file_url'] ?? null;
                 $item->comment = '';
                 return $item;
             });

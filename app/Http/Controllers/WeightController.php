@@ -49,6 +49,7 @@ class WeightController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->ableTo('weights.store'), 403);
         $request->validate([
             'stage_id' => 'required|exists:stages,id',
             'category_id' => 'required|exists:categories,id',
@@ -90,6 +91,7 @@ class WeightController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        abort_unless(auth()->user()->ableTo('weights.update'), 403);
         $request->validate([
             'stage_id' => 'required|exists:stages,id',
             'category_id' => 'required|exists:categories,id',
@@ -114,6 +116,7 @@ class WeightController extends Controller
      */
     public function destroy(string $id)
     {   
+        abort_unless(auth()->user()->ableTo('weights.destroy'), 403);
         $Weights = Weight::findOrFail($id);
         $Weights->delete();
         return redirect()->route('weights.index')->with(['class'=>'success', 'message'=>__('DeletedSuccessfully')]);

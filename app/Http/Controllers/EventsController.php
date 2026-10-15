@@ -7,6 +7,7 @@ use DB;
 use App\Event;
 use Carbon\Carbon;
 use Redirect;
+use App\Services\FileManagerService;
 
 class EventsController extends Controller
 {
@@ -30,10 +31,10 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 		{{
             $file = $request->file('image');
             $path = 'images/resource/';
-            $fileExtension = $request->file('image')->getClientOriginalExtension();
-            $filename = \Illuminate\Support\Str::random(5).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10);
-            $filename2 =$filename.'.'.$fileExtension;
-            $file->move($path, $filename.'.'.$fileExtension);
+            // Whitelist + real-content check; the stored name is generated server-side,
+            // never taken from the client (a GIF-headered shell.php passes a MIME check).
+            $filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+            $file->move($path, $filename2);
 
 		}}
         if($request->input('showtimer') =='on') {$showtimer=1;} else {$showtimer=null;}
@@ -78,10 +79,10 @@ if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpe
 	if(in_array($request->file('image')->getClientMimeType(),["image/png","image/jpeg","image/gif"])){
             $file = $request->file('image');
             $path = 'images/resource/';
-            $fileExtension = $request->file('image')->getClientOriginalExtension();
-            $filename = \Illuminate\Support\Str::random(20).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10,'event');
-            $filename2 =$filename.'.'.$fileExtension;
-            $file->move($path, $filename.'.'.$fileExtension);
+            // Whitelist + real-content check; the stored name is generated server-side,
+            // never taken from the client (a GIF-headered shell.php passes a MIME check).
+            $filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+            $file->move($path, $filename2);
  			$updateevent->image = $filename2;
 			}}
         if($request->input('showtimer') =='on') {$showtimer=1;} else {$showtimer=null;}

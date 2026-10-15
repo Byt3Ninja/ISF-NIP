@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\UploadScreeningGuidelinesImageRequest;
+use App\Services\FileManagerService;
 
 class FinalscreeningController extends Controller
 {
@@ -421,7 +422,9 @@ class FinalscreeningController extends Controller
 
 	public function update(Request $request)
 	{
+		abort_unless(auth()->user()->ableTo('screening.update'), 403);
 		if ($request->step) {
+			$this->authorizeStepOrganization($request->step);
 			$list = $request->judges;
 		   // dd();
 			$companies = $request->users;
@@ -548,6 +551,7 @@ class FinalscreeningController extends Controller
 			'period.min' => __('admin.Period_must_be_at_least_30_minutes'),
 		]);
 		if ($request->period) {
+			$this->authorizeStepOrganization($request->step);
 			$topic = "Final Screening (C" . $request->company . ')';
 			$data = ['topic' => $topic,
 			 "start_time" => $request->date,
@@ -675,7 +679,8 @@ class FinalscreeningController extends Controller
 			$stepId = $request->step_id;
 
 			// Generate unique filename: timestamp_cycleId_randomString.ext
-			$filename = time() . '_' . $stepId . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+			$extension = app(FileManagerService::class)->assertAllowed($image, 'image');
+			$filename = time() . '_' . $stepId . '_' . uniqid() . '.' . $extension;
 
 			// Store in cycle-specific subfolder
 			$path = "{$stepId}/{$filename}";
@@ -762,6 +767,10 @@ class FinalscreeningController extends Controller
 		} else {
 			$cstep = Step::where('stype', 5)->where('id', $id)->first();
 		}
+		// A step id from the URL must be one of the caller's own programs.
+		if ($id) {
+			$this->authorizeStepOrganization($id);
+		}
 		$companies = Company::where('step',$id)->get();
 		$c =  $cj = null;
 		if ($request->c) {
@@ -807,6 +816,7 @@ class FinalscreeningController extends Controller
 
 	public function delsession($id, Request $request)
 	{
+		abort_unless(auth()->user()->ableTo('screening.sessions_delete'), 403);
 		// $zoomid = TrainingSession::findOrFail($id)->zoom_id;
 		if($request)
 		{
@@ -815,7 +825,9 @@ class FinalscreeningController extends Controller
 			//	 $zoom = $this->delete($zoomid);
 			//	 if (!$zoom['success']) { return response()->json(['state' => 'failed'], 500); }
 			// }
-			Finalscreening::findOrFail($id)->delete();
+			$session = Finalscreening::findOrFail($id);
+			$this->authorizeStepOrganization($session->step_id);
+			$session->delete();
 			return response()->json(['state' => 'success'], 200);
 		} else {
 			return response()->json(['state' => 'failed'], 500);
@@ -909,5 +921,20 @@ class FinalscreeningController extends Controller
 		$filename = "final_screening_{$companyName}_" . now()->format('Y-m-d_His') . ".xlsx";
 
 		return Excel::download($export, $filename);
+	}
+
+	/**
+	 * Abort unless the step belongs to one of the current user's organizations
+	 * (platform admins pass). A permission allows the action, not on whose data.
+	 */
+	private function authorizeStepOrganization($stepId): void
+	{
+		$user = auth()->user();
+		if ($user->hasRole('admin')) {
+			return;
+		}
+
+		$step = Step::with('cycle')->find($stepId);
+		abort_unless($step && $step->cycle && $user->ownsOrganization($step->cycle->organization_id), 403);
 	}
 }

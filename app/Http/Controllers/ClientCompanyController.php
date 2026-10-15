@@ -62,6 +62,10 @@ use App\Http\Requests\StoreUpdateClientCompanyRequest;
 use URL, File, DB, Exception, Session, Storage, stdClass;
 
 use function Psy\debug;
+use App\Services\FileManagerService;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Services\ProtectedFiles\FileAccess;
+use App\Enums\ProtectedFileSet;
 
 class ClientCompanyController extends Controller
 {
@@ -1306,8 +1310,8 @@ class ClientCompanyController extends Controller
                         LEFT JOIN
                             organizations o ON o.id = cy.organization_id
                         WHERE
-                            c.id = $id 
-                            AND o.user_id = " . $user->id);
+                            c.id = ?
+                            AND o.user_id = ?", [$id, $user->id]);
 
                     $check = collect($check)->first();
                    
@@ -1321,12 +1325,21 @@ class ClientCompanyController extends Controller
                     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 }
                 $companyId = intval($id);
+                // Admins and organization managers were checked above. Everyone else may only
+                // save a company they belong to (or, for sub-admins, one in their organization's
+                // program): the id comes from the URL and used to be trusted as is.
+                if (!$user->hasanyRole('Admin|organizationManager') && !app(FileAccess::class)->canManageCompany($user, $companyId)) {
+                    return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
+                }
                 $company = Company::find($companyId);
             } else {
                 $companyId = intval($user->company_id);
                 $company = Company::find($companyId);
             }
             $data = $request->all();
+            // Confidential uploads are stored privately and recorded against this company.
+            $protectedFiles = app(ProtectedFiles::class);
+            $fileOwner = ['owner_type' => 'company', 'owner_id' => $companyId, 'company_id' => $companyId];
 
             // Update $data with decoded values if they were decoded in validation
             if ($request->has('tech_tags') && is_array($request->tech_tags)) {
@@ -1483,15 +1496,20 @@ class ClientCompanyController extends Controller
                     $Commercial_Register = '';
                     $Tax_Card = '';
                 } else {
+                    // Validate both documents before replacing either of them.
+                    app(\App\Services\FileManagerService::class)->assertAllAllowed([
+                        [$request->file('Commercial_Register'), 'common'],
+                        [$request->file('Tax_Card'), 'common'],
+                    ]);
                     if ($request->hasFile('Commercial_Register')) {
                         $file = $request->file('Commercial_Register');
-                        $Commercial_Register = app(\App\Services\FileManagerService::class)->update($file, $company->Commercial_Register, $companyId . '/documents', 'document');
+                        $Commercial_Register = $protectedFiles->replace($file, $company->Commercial_Register, ProtectedFileSet::COMPANY_LEGAL, $companyId . '/documents', $fileOwner + ['field' => 'Commercial_Register'], 'common');
                     } else {
                         $Commercial_Register = $company->Commercial_Register ?? 'null';
                     }
                     if ($request->hasFile('Tax_Card')) {
                         $file = $request->file('Tax_Card');
-                        $Tax_Card = app(\App\Services\FileManagerService::class)->update($file, $company->Tax_Card, $companyId . '/documents', 'document');
+                        $Tax_Card = $protectedFiles->replace($file, $company->Tax_Card, ProtectedFileSet::COMPANY_LEGAL, $companyId . '/documents', $fileOwner + ['field' => 'Tax_Card'], 'common');
                     } else {
                         $Tax_Card = $company->Tax_Card ?? 'null';
                     }
@@ -1558,7 +1576,7 @@ class ClientCompanyController extends Controller
                     // الحصول على الصورة
                     $image = $request->file('img_url');
                     // حفظ الصورة داخل القرص 'public_uploads'
-                    $img_path = $image->store('images/logo', 'public_uploads');
+                    $img_path = app(FileManagerService::class)->upload($image, 'images/logo', 'public_uploads', 'image');
 
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
@@ -1658,7 +1676,7 @@ class ClientCompanyController extends Controller
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company?->financial_plan, $companyId . '/financial_plan/' . $folder, 'pitch_deck');
+                        $uploadedFile = $protectedFiles->replace($file, $company?->financial_plan, ProtectedFileSet::COMPANY_PITCH, $companyId . '/financial_plan/' . $folder, $fileOwner + ['field' => 'financial_plan'], 'document');
                     }
                 } else {
                     $uploadedFile = $company?->financial_plan;
@@ -1736,7 +1754,7 @@ class ClientCompanyController extends Controller
                     // الحصول على الصورة
                     $image = $request->file('img_url');
                     // حفظ الصورة داخل القرص 'public_uploads'
-                    $img_path = $image->store('images/logo', 'public_uploads');
+                    $img_path = app(FileManagerService::class)->upload($image, 'images/logo', 'public_uploads', 'image');
                     // إنشاء رابط الصورة
                     $img_url = Storage::disk('public_uploads')->url($img_path);
                 } else {
@@ -1763,7 +1781,7 @@ class ClientCompanyController extends Controller
 
                 if ($request->hasFile('pitch_deck')) {
                     $file = $request->file('pitch_deck');
-                    $pitch_deck = app(\App\Services\FileManagerService::class)->update($file, $company->pitch_deck, $companyId . '/pitch_decks', 'pitch_deck');
+                    $pitch_deck = $protectedFiles->replace($file, $company->pitch_deck, ProtectedFileSet::COMPANY_PITCH, $companyId . '/pitch_decks', $fileOwner + ['field' => 'pitch_deck'], 'document');
                 } else {
                     return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                 }
@@ -1782,9 +1800,17 @@ class ClientCompanyController extends Controller
             }
             if ($data['CompanyN'] == CompanyFormStep::SupplementaryDocuments->value) {
                 if ($request->hasFile('documents')) {
-                    $files = $request->file('documents');
+                    $files = array_filter((array) $request->file('documents'));
                     $oldDocs = json_decode($company->documents ?? '[]', true) ?? [];
-                    $uploadedFiles = app(\App\Services\FileManagerService::class)->updateMultiple($files, $oldDocs, $companyId . '/pitch_decks', 'pitch_deck');
+                    // Validate every file before storing any; retire the old list only once all are in.
+                    app(\App\Services\FileManagerService::class)->assertAllAllowed(array_map(fn ($file) => [$file, 'common'], $files));
+                    $uploadedFiles = [];
+                    foreach ($files as $file) {
+                        $uploadedFiles[] = $protectedFiles->store($file, ProtectedFileSet::COMPANY_PITCH, $companyId . '/pitch_decks', $fileOwner + ['field' => 'documents'], 'common')->path;
+                    }
+                    foreach ((array) $oldDocs as $oldDoc) {
+                        $protectedFiles->retireValue(ProtectedFileSet::COMPANY_PITCH, $oldDoc, ['company_id' => $companyId]);
+                    }
                 } else {
                     return redirect()->back()->with(['msg' => 'No_Document_Found', 'class' => 'danger'])->withInput();
                 }
@@ -1840,7 +1866,7 @@ class ClientCompanyController extends Controller
                             in_array($file->getClientOriginalExtension(), ['pdf', 'doc', 'docx', 'ppt', 'pptx']) => 'documents',
                             default => 'others',
                         };
-                        $uploadedFile = app(\App\Services\FileManagerService::class)->update($file, $company->business_plan, $companyId . '/business_plan/' . $folder, 'pitch_deck');
+                        $uploadedFile = $protectedFiles->replace($file, $company->business_plan, ProtectedFileSet::COMPANY_PITCH, $companyId . '/business_plan/' . $folder, $fileOwner + ['field' => 'business_plan'], 'document');
                     }
                 } else {
                     $uploadedFile = $result->business_plan;
@@ -2961,6 +2987,14 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
 
+            // The company id comes from the URL: only this startup's members, its program's
+            // staff or an admin may change its milestones.
+            if (!app(FileAccess::class)->canManageCompany(Auth::user(), (int) $id)) {
+                return response()->json([
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
+                ], 403);
+            }
+
             // Validate the request
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:300',
@@ -3015,11 +3049,11 @@ class ClientCompanyController extends Controller
             $documents = [];
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $index => $file) {
-                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public');
+                    $filePath = app(ProtectedFiles::class)->store($file, ProtectedFileSet::MILESTONE_DOCUMENT, 'milestones/' . $id, ['owner_type' => 'milestone', 'owner_id' => $milestone->id, 'company_id' => (int) $id], 'common')->path;
 
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => app(\App\Services\FileManagerService::class)->getUrl($filePath, 'public'),
+                        'url' => app(ProtectedFiles::class)->urlFor(ProtectedFileSet::MILESTONE_DOCUMENT, $filePath, ['owner_type' => 'milestone', 'owner_id' => $milestone->id]),
                         'path' => $filePath,
                     ];
                 }
@@ -3061,6 +3095,14 @@ class ClientCompanyController extends Controller
                 return response()->json([
                     'errors' => ['company' => [__('startup.startup_not_found')]],
                 ], 422);
+            }
+
+            // The company id comes from the URL: only this startup's members, its program's
+            // staff or an admin may change its milestones.
+            if (!app(FileAccess::class)->canManageCompany(Auth::user(), (int) $id)) {
+                return response()->json([
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
+                ], 403);
             }
 
             // Validate the request
@@ -3178,7 +3220,8 @@ class ClientCompanyController extends Controller
 
                             // Delete physical file if it exists
                             if (isset($document['path'])) {
-                                app(\App\Services\FileManagerService::class)->delete($document['path'], 'public');
+                                // retired through its record (kept in the trash area), never unlinked by a stored path
+                                app(ProtectedFiles::class)->retireValue(ProtectedFileSet::MILESTONE_DOCUMENT, $document['path'], ['owner_type' => 'milestone', 'owner_id' => $milestone->id]);
                                 \Log::info('EditMileStone: Physical file deleted', [
                                     'path' => $document['path'],
                                     'milestone_id' => $milestone->id
@@ -3203,7 +3246,7 @@ class ClientCompanyController extends Controller
                 ]);
 
                 foreach ($request->file('documents') as $index => $file) {
-                    $filePath = app(\App\Services\FileManagerService::class)->upload($file, 'milestones/' . $id, 'public');
+                    $filePath = app(ProtectedFiles::class)->store($file, ProtectedFileSet::MILESTONE_DOCUMENT, 'milestones/' . $id, ['owner_type' => 'milestone', 'owner_id' => $milestone->id, 'company_id' => (int) $id], 'common')->path;
 
                     \Log::info('EditMileStone: File uploaded', [
                         'original_name' => $file->getClientOriginalName(),
@@ -3213,7 +3256,7 @@ class ClientCompanyController extends Controller
 
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => app(\App\Services\FileManagerService::class)->getUrl($filePath, 'public'),
+                        'url' => app(ProtectedFiles::class)->urlFor(ProtectedFileSet::MILESTONE_DOCUMENT, $filePath, ['owner_type' => 'milestone', 'owner_id' => $milestone->id]),
                         'path' => $filePath,
                     ];
                 }
@@ -3276,6 +3319,14 @@ class ClientCompanyController extends Controller
                 ], 422);
             }
 
+            // The company id comes from the URL: only this startup's members, its program's
+            // staff or an admin may change its milestones.
+            if (!app(FileAccess::class)->canManageCompany(Auth::user(), (int) $id)) {
+                return response()->json([
+                    'errors' => ['company' => [__('startup.startup_not_found')]],
+                ], 403);
+            }
+
             // Validate the request
             $validator = Validator::make($request->all(), [
                 'id' => 'required|integer|exists:milestones,id',
@@ -3305,8 +3356,8 @@ class ClientCompanyController extends Controller
             if ($milestone->documents && is_array($milestone->documents)) {
                 $documents = $milestone->documents;
                 foreach ($documents as $document) {
-                    if (is_array($document) && isset($document['path']) && \Storage::disk('public')->exists($document['path'])) {
-                        \Storage::disk('public')->delete($document['path']);
+                    if (is_array($document) && isset($document['path'])) {
+                        app(ProtectedFiles::class)->retireValue(ProtectedFileSet::MILESTONE_DOCUMENT, $document['path'], ['owner_type' => 'milestone', 'owner_id' => $milestone->id]);
                     }
                 }
             }
@@ -3351,8 +3402,9 @@ class ClientCompanyController extends Controller
             $company->documents = json_encode($documents);
             $company->save();
 
-            // حذف الملف من التخزين
-            Storage::disk('pitch_deck')->delete($document);
+            // The file is retired through its record (kept in the trash area, never unlinked by a
+            // path read from the column); an old public copy without a record is left for the migration.
+            app(ProtectedFiles::class)->retireValue(ProtectedFileSet::COMPANY_PITCH, $document, ['company_id' => $company->id]);
 
             return response()->json(['success' => true]);
         }
@@ -3480,6 +3532,22 @@ class ClientCompanyController extends Controller
         $leaderInfo  = $almuni?->startup_leader_information ?? [];
         $legal_information = $almuni?->legal_information ?? [];
         $pitch_deck  = $almuni?->pitch_deck ?? [];
+
+        // The snapshot keeps the stored paths of the startup's files. Turn them into the
+        // authorized link for this viewer here, once, so the page, its JSON and its CSV
+        // export all carry the same thing (or nothing, if the viewer may not open them).
+        $fileLink = function (string $set, $value) use ($id) {
+            return app(FileAccess::class)->canViewCompanySet(auth()->user(), (int) $id, $set)
+                ? (app(ProtectedFiles::class)->urlFor($set, $value, ['company_id' => (int) $id]) ?? '')
+                : '';
+        };
+        if (isset($legal_information[0])) {
+            $legal_information[0]['Commercial_Register'] = $fileLink(ProtectedFileSet::COMPANY_LEGAL, $legal_information[0]['Commercial_Register'] ?? null);
+            $legal_information[0]['Tax_Card'] = $fileLink(ProtectedFileSet::COMPANY_LEGAL, $legal_information[0]['Tax_Card'] ?? null);
+        }
+        if (isset($pitch_deck[0])) {
+            $pitch_deck[0]['pitch_deck'] = $fileLink(ProtectedFileSet::COMPANY_PITCH, $pitch_deck[0]['pitch_deck'] ?? null);
+        }
         $founders    = $almuni?->founders ?? [];
         $employees   = $almuni?->employees ?? [];
         $shareholders= $almuni?->shareholders ?? [];
@@ -3697,7 +3765,7 @@ class ClientCompanyController extends Controller
             ];
         })->values()->toArray();
     
-        $milestones = collect($milestones)->map(function ($milestone) {
+        $milestones = collect($milestones)->map(function ($milestone) use ($fileLink) {
             $download = $milestone['download'] ?? null;
             $deliverables = [];
 
@@ -3707,13 +3775,18 @@ class ClientCompanyController extends Controller
 
                 if (is_array($files)) {
                     foreach ($files as $file) {
-
-                        $pathInfo = pathinfo($file['url']);
+                        // The snapshot holds the stored path (older ones also a frozen public URL):
+                        // name and type come from the path, the link from the file's record.
+                        $stored = $file['path'] ?? ($file['url'] ?? null);
+                        if (!is_string($stored) || $stored === '') {
+                            continue;
+                        }
+                        $pathInfo = pathinfo((string) (parse_url($stored, PHP_URL_PATH) ?: $stored));
 
                         $deliverables[] = [
-                            'name' => $pathInfo['filename'],           
-                            'type' => $pathInfo['extension'] ?? null,  
-                            'link' => $file['url'],                    
+                            'name' => $file['name'] ?? $pathInfo['filename'],
+                            'type' => $pathInfo['extension'] ?? null,
+                            'link' => $fileLink(ProtectedFileSet::MILESTONE_DOCUMENT, $stored),
                         ];
                     }
                 }
@@ -3806,12 +3879,19 @@ class ClientCompanyController extends Controller
                         'submission_date' => $first['Submission_Date'],
                         'modal_id'        => 'formModal' . $formId,
 
-                        'fields' => $group->map(function ($form) {
+                        'fields' => $group->map(function ($form) use ($id) {
+                            // Older snapshots froze an absolute public URL, newer ones keep the stored
+                            // path; both are resolved to the authorized link for this viewer (or none).
+                            $attachment = $form['Attachment_Link'] ?? null;
+                            if (is_string($attachment) && $attachment !== '') {
+                                $path = ltrim((string) (parse_url($attachment, PHP_URL_PATH) ?: $attachment), '/');
+                                $attachment = Formdata::fileAnswer(rawurldecode($path), (int) $id)['file_url'] ?? null;
+                            }
                             return [
                                 'name' => $form['Field_Name'] ?? null,
                                 'type' => $form['Field_Type'] ?? null,
                                 'value' => $form['Submitted_Value'] ?? null,
-                                'attachment' => $form['Attachment_Link'] ?? null,
+                                'attachment' => $attachment,
                             ];
                         })->values()->toArray(),
                     ];
@@ -3873,7 +3953,9 @@ class ClientCompanyController extends Controller
                 $companyId = $id;
 
                 // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
+                // Members of this startup, staff of its program's organization, or an admin.
+                // (The old test let every founder through for any company id.)
+                if (!app(FileAccess::class)->canManageCompany(Auth::user(), (int) $companyId)) {
                     return response()->json([
                         'errors' => ['permission' => [__('You do not have permission to access this company.')]],
                     ], 403);
@@ -3915,13 +3997,18 @@ class ClientCompanyController extends Controller
 
             // Handle document uploads
             if ($request->hasFile('documents')) {
+                // Validate every file, then save the employee so the files can be recorded against it.
+                app(\App\Services\FileManagerService::class)->assertAllAllowed(array_map(fn ($file) => [$file, 'common'], (array) $request->file('documents')));
+                $employee->save();
+
                 $documents = [];
                 foreach ($request->file('documents') as $index => $file) {
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public');
+                    $owner = ['owner_type' => 'employee', 'owner_id' => $employee->id, 'company_id' => (int) $companyId];
+                    $path = app(ProtectedFiles::class)->store($file, ProtectedFileSet::EMPLOYEE_DOCUMENT, 'employees/' . $companyId . '/documents', $owner, 'common')->path;
 
                     $documents[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => app(\App\Services\FileManagerService::class)->getUrl($path, 'public'),
+                        'url' => app(ProtectedFiles::class)->urlFor(ProtectedFileSet::EMPLOYEE_DOCUMENT, $path, ['owner_type' => 'employee', 'owner_id' => $employee->id]),
                         'path' => $path
                     ];
                 }
@@ -3950,7 +4037,9 @@ class ClientCompanyController extends Controller
                 $companyId = $id;
 
                 // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
+                // Members of this startup, staff of its program's organization, or an admin.
+                // (The old test let every founder through for any company id.)
+                if (!app(FileAccess::class)->canManageCompany(Auth::user(), (int) $companyId)) {
                     return response()->json([
                         'errors' => ['permission' => [__('You do not have permission to access this company.')]],
                     ], 403);
@@ -4009,7 +4098,7 @@ class ClientCompanyController extends Controller
                             $document = $existingDocs[$index];
                             // Delete physical file
                             if (isset($document['path'])) {
-                                app(\App\Services\FileManagerService::class)->delete($document['path'], 'public');
+                                app(ProtectedFiles::class)->retireValue(ProtectedFileSet::EMPLOYEE_DOCUMENT, $document['path'], ['owner_type' => 'employee', 'owner_id' => $employee->id]);
                             }
                         }
                     }
@@ -4024,11 +4113,11 @@ class ClientCompanyController extends Controller
             if ($request->hasFile('documents')) {
                 $newDocuments = [];
                 foreach ($request->file('documents') as $index => $file) {
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'employees/' . $id . '/documents', 'public');
+                    $path = app(ProtectedFiles::class)->store($file, ProtectedFileSet::EMPLOYEE_DOCUMENT, 'employees/' . $companyId . '/documents', ['owner_type' => 'employee', 'owner_id' => $employee->id, 'company_id' => (int) $companyId], 'common')->path;
 
                     $newDocuments[] = [
                         'name' => $file->getClientOriginalName(),
-                        'url' => app(\App\Services\FileManagerService::class)->getUrl($path, 'public'),
+                        'url' => app(ProtectedFiles::class)->urlFor(ProtectedFileSet::EMPLOYEE_DOCUMENT, $path, ['owner_type' => 'employee', 'owner_id' => $employee->id]),
                         'path' => $path
                     ];
                 }
@@ -4059,7 +4148,9 @@ class ClientCompanyController extends Controller
                 $companyId = $id;
 
                 // Verify that current user has access to this company (allow admins)
-                if (Auth::user()->company_id !== $companyId && !Auth::user()->hasanyRole('Admin|organizationManager|registered')) {
+                // Members of this startup, staff of its program's organization, or an admin.
+                // (The old test let every founder through for any company id.)
+                if (!app(FileAccess::class)->canManageCompany(Auth::user(), (int) $companyId)) {
                     return response()->json([
                         'errors' => ['permission' => [__('You do not have permission to access this company.')]],
                     ], 403);
@@ -4112,8 +4203,8 @@ class ClientCompanyController extends Controller
             // Delete associated documents
             if ($employee->documents && is_array($employee->documents)) {
                 foreach ($employee->documents as $document) {
-                    if (isset($document['path']) && Storage::disk('public')->exists($document['path'])) {
-                        Storage::disk('public')->delete($document['path']);
+                    if (isset($document['path'])) {
+                        app(ProtectedFiles::class)->retireValue(ProtectedFileSet::EMPLOYEE_DOCUMENT, $document['path'], ['owner_type' => 'employee', 'owner_id' => $employee->id]);
                     }
                 }
             }
@@ -4915,19 +5006,10 @@ class ClientCompanyController extends Controller
                     $item->program_name = $first->CYC_title;
                     $item->organization_name = $first->O_name_en;
                     $item->created_at = $first->FD_created_at;
-                    $item->answers = $group->map(function ($item) use ($l) {
+                    $item->answers = $group->map(function ($item) use ($l, $company) {
                         $value = $item->FD_answer;
 
-                        if( is_string( $value ) && (strpos($value, '/') !== false || strpos($value, '\\') !== false) )
-                        {
-                            $filename = basename($value);
-                            $value = [
-                                'type' => 'file',
-                                'path' => $value,
-                                'file_name' => $filename,
-                                'file_url' => asset($value),
-                            ];
-                        }
+                        $value = Formdata::fileAnswer($value, $company->id) ?? $value;
 
                         $submission = new stdClass;
                         $submission->user_id = $item->FD_user_id;
@@ -4956,13 +5038,14 @@ class ClientCompanyController extends Controller
                             'Field_Name'      => $answer->label,
                             'Field_Type'      => $fieldType,
                             'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
-                            'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+                            // the stored path; it is turned into an authorized link when the alumni page is built
+                            'Attachment_Link' => is_array($answer->value) ? $answer->value['path'] : null,
 
                             'Form_Inputs' => [
                                 'Field_Name'      => $answer->label,
                                 'Field_Type'      => $fieldType,
                                 'Submitted_Value' => is_array($answer->value) ? $answer->value['file_name'] : $answer->value,
-                                'Attachment_Link' => is_array($answer->value) ? $answer->value['file_url'] : null,
+                                'Attachment_Link' => is_array($answer->value) ? $answer->value['path'] : null,
                             ],
                         ];
                     }

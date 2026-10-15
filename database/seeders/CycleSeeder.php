@@ -81,7 +81,8 @@ class CycleSeeder extends Seeder
         ];
 
         foreach ($cycles as $cycleData) {
-            Cycle::create($cycleData);
+            // organization_id is not mass-assignable; this is trusted seed data.
+            Cycle::forceCreate($cycleData);
         }
 
         $this->command->info('Fake cycles/programs created successfully!');

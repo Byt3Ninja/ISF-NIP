@@ -14,6 +14,7 @@ use App\Http\Controllers\API\CompanyController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\MessageController;
 use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\ProtectedFileController;
 use App\Http\Controllers\API\ProgramController;
 use App\Http\Controllers\API\CurrencyController;
 use App\Http\Controllers\API\DashboardController;
@@ -21,7 +22,6 @@ use App\Http\Controllers\API\ExpertiseController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
-use App\Http\Controllers\TestNotificationController;
 use App\Http\Controllers\API\Mentors\MentorController;
 use App\Http\Controllers\API\TrainingReportController;
 use App\Http\Controllers\API\PermissionGroupController;
@@ -132,18 +132,13 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::put('/notification-settings', [NotificationSettingsController::class, 'updateNotificationSettings']);
     Route::get('/users/{userId}/notification-settings', [NotificationSettingsController::class, 'getUserNotificationSettings']);
     
-    // Test Notification Routes
-    Route::get('/test/notifications/settings', [TestNotificationController::class, 'getUserNotificationSettings']);
-    Route::post('/test/notifications/task', [TestNotificationController::class, 'testTaskNotification']);
-    Route::post('/test/notifications/welcome', [TestNotificationController::class, 'testWelcomeNotification']);
-    Route::post('/test/notifications/training', [TestNotificationController::class, 'testTrainingNotification']);
-    Route::post('/test/notifications/mentorship', [TestNotificationController::class, 'testMentorshipRequestNotification']);
-    Route::post('/test/notifications/bulk', [TestNotificationController::class, 'testBulkNotification']);
-    Route::post('/test/notifications/channels', [TestNotificationController::class, 'testSpecificChannels']);
     
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);
     Route::get('/profile/{id}', [ProfileController::class, 'showProfile']);
+
+    // Confidential uploads for API clients (same record-level check as the web route).
+    Route::get('/v1/files/{uuid}', [ProtectedFileController::class, 'show'])->whereUuid('uuid')->name('api.protected_files.show');
     Route::post('/v1/programs/{programId}/steps', [StepController::class, 'createStep']);
     Route::put('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'updateStep']);
     Route::delete('/v1/programs/{programId}/steps/{stepId}', [StepController::class, 'deleteStep']);

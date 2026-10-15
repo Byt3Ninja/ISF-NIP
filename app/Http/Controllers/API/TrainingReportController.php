@@ -542,7 +542,16 @@ class TrainingReportController extends Controller
         if (!$session) {
             return $this->error(__('admin.session_not_found'), 404);
         }
-        
+
+        // Resource-level ownership: the permission alone does not bind the
+        // caller to this session's tenant. Without it, any holder of
+        // trainings.session_reports_data reads (and, below, writes) another
+        // organization's attendee PII and recording URLs.
+        $authUser = auth()->user();
+        if (!$authUser->hasRole('admin')
+            && !$authUser->ownsOrganization($session->step?->cycle?->organization_id)) {
+            return $this->error(__('admin.session_not_found'), 404);
+        }
 
         $originalReportsCount = $session->reports->count();
         $originalRecordingsCount = $session->recordings->count();

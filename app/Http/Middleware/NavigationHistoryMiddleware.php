@@ -411,6 +411,7 @@ private function finalizeTitle($title, $ignoredTitles, $ignoredContains): ?strin
             '_debugbar/*',
             'livewire/*',
             'dashboard/notifications/*',
+            'dashboard/files/*', // confidential file downloads are not pages
             // Static files and images
             '*/logo/*',
             'organizations/logo/*',

@@ -254,7 +254,7 @@ class InvitationController extends Controller
     {
          $extension = $file->guessExtension();
          $fileManager = app(\App\Services\FileManagerService::class);
-         $fileName = $fileManager->upload($file, '', 'UsersDiskInviteMentor');
+         $fileName = $fileManager->upload($file, '', 'UsersDiskInviteMentor', 'common');
          return [
              'file_name' => $fileName,
              'file_url'  => $fileManager->getUrl($fileName, 'UsersDiskInviteMentor'),

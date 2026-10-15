@@ -5,6 +5,7 @@ namespace App\Repositories\Employee;
 use App\Employee;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
+use App\Services\FileManagerService;
 
 class EmployeeRepository implements EmployeeRepositoryInterface
 {
@@ -21,7 +22,7 @@ class EmployeeRepository implements EmployeeRepositoryInterface
         if (!empty($documents)) {
             foreach ($documents as $document) {
                 if ($document && $document->isValid()) {
-                    $path = $document->store('employee_documents', 'public');
+                    $path = app(FileManagerService::class)->upload($document, 'employee_documents', 'public', 'common');
                     $documentPaths[] = $path;
                 }
             }

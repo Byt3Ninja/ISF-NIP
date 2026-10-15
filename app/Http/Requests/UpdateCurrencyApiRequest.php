@@ -30,7 +30,7 @@ class UpdateCurrencyApiRequest extends FormRequest
             'currencySymbol' => 'nullable|string|max:10',
             'exchangeRateToUsd' => 'nullable|numeric|min:0',
             'enabled' => 'nullable|boolean',
-            'flag' => 'nullable|image|max:2048',
+            'flag' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
         ];
     }
 

@@ -19,6 +19,8 @@ use App\Http\Requests\UpdateProgramRequest;
 use App\Http\Requests\GetProgramMentorsRequest;
 use App\Http\Requests\GetProgramStartupsRequest;
 use App\{Cycle, Sector, Stage, ScreeningEvaluationResults, SurveyResponses};
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
 
 /**
  * @OA\Schema(
@@ -138,6 +140,12 @@ class ProgramController extends Controller
         }
         
        $validated = $request->validated();
+
+       // organizationId comes from the request body: `exists:` proves it is real, not that it is the caller's.
+       if (!$user->hasRole('admin') && !$user->ownsOrganization($validated['organizationId'])) {
+           return $this->forbidden(__('api.forbidden'));
+       }
+
        $response = DB::transaction(function () use ($request, $validated) {
             $cycle = new Cycle();
             $cycle->organization_id = $validated['organizationId'];
@@ -158,23 +166,23 @@ class ProgramController extends Controller
             $fileManager = app(\App\Services\FileManagerService::class);
 
             if ($request->hasFile('programGuidelineFile')) {
-                $cycle->program_guideline_file = $fileManager->upload($request->file('programGuidelineFile'), 'programs', 'public_uploads');
+                $cycle->program_guideline_file = $fileManager->upload($request->file('programGuidelineFile'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('financialPolicyPdf')) {
-                $cycle->financial_guideline_file = $fileManager->upload($request->file('financialPolicyPdf'), 'programs', 'public_uploads');
+                $cycle->financial_guideline_file = $fileManager->upload($request->file('financialPolicyPdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('legalPolicyPdf')) {
-                $cycle->legal_guideline_file = $fileManager->upload($request->file('legalPolicyPdf'), 'programs', 'public_uploads');
+                $cycle->legal_guideline_file = $fileManager->upload($request->file('legalPolicyPdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('delegationPdf')) {
-                $cycle->delegation_file = $fileManager->upload($request->file('delegationPdf'), 'programs', 'public_uploads');
+                $cycle->delegation_file = $fileManager->upload($request->file('delegationPdf'), 'programs', app(ProtectedFiles::class)->disk(ProtectedFileSet::PROGRAM_GUIDELINE), 'document');
             }
 
             if ($request->hasFile('imgUrl')) {
-                $cycle->img_url = $fileManager->upload($request->file('imgUrl'), 'programs', 'public_uploads');
+                $cycle->img_url = $fileManager->upload($request->file('imgUrl'), 'programs', 'public_uploads', 'image');
             }
             if (auth()->user()->hasRole('OrganizationManager')) {
 
@@ -284,7 +292,15 @@ class ProgramController extends Controller
         return $this->notFound(__('api.program_not_found'));
     }
 
+    // The program must be the caller's, and so must the organization it is moved to.
+    if (!$user->hasRole('admin') && !$user->ownsOrganization($cycle->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
      if (isset($validated['organizationId'])) {
+        if (!$user->hasRole('admin') && !$user->ownsOrganization($validated['organizationId'])) {
+            return $this->forbidden(__('api.forbidden'));
+        }
         $cycle->organization_id = $validated['organizationId'];
     }
 
@@ -338,24 +354,33 @@ class ProgramController extends Controller
 
     $fileManager = app(\App\Services\FileManagerService::class);
 
+    // Validate every uploaded file before replacing any of them.
+    $fileManager->assertAllAllowed([
+        [$validated['imgUrl'] ?? null, 'image'],
+        [$validated['programGuidelineFile'] ?? null, 'document'],
+        [$validated['financialPolicyPdf'] ?? null, 'document'],
+        [$validated['legalPolicyPdf'] ?? null, 'document'],
+        [$validated['delegationPdf'] ?? null, 'document'],
+    ]);
+
     if (isset($validated['imgUrl'])) {
-        $cycle->img_url = $fileManager->update($validated['imgUrl'], $cycle->img_url, 'programs', 'public_uploads');
+        $cycle->img_url = $fileManager->update($validated['imgUrl'], $cycle->img_url, 'programs', 'public_uploads', 'image');
     }
 
     if (isset($validated['programGuidelineFile'])) {
-        $cycle->program_guideline_file = $fileManager->update($validated['programGuidelineFile'], $cycle->program_guideline_file, 'programs', 'public_uploads');
+        $cycle->program_guideline_file = app(ProtectedFiles::class)->replace($validated['programGuidelineFile'], $cycle->program_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('program_guideline_file'), 'document');
     }
 
     if (isset($validated['financialPolicyPdf'])) {
-        $cycle->financial_guideline_file = $fileManager->update($validated['financialPolicyPdf'], $cycle->financial_guideline_file, 'programs', 'public_uploads');
+        $cycle->financial_guideline_file = app(ProtectedFiles::class)->replace($validated['financialPolicyPdf'], $cycle->financial_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('financial_guideline_file'), 'document');
     }
 
     if (isset($validated['legalPolicyPdf'])) {
-        $cycle->legal_guideline_file = $fileManager->update($validated['legalPolicyPdf'], $cycle->legal_guideline_file, 'programs', 'public_uploads');
+        $cycle->legal_guideline_file = app(ProtectedFiles::class)->replace($validated['legalPolicyPdf'], $cycle->legal_guideline_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('legal_guideline_file'), 'document');
     }
 
     if (isset($validated['delegationPdf'])) {
-        $cycle->delegation_file = $fileManager->update($validated['delegationPdf'], $cycle->delegation_file, 'programs', 'public_uploads');
+        $cycle->delegation_file = app(ProtectedFiles::class)->replace($validated['delegationPdf'], $cycle->delegation_file, ProtectedFileSet::PROGRAM_GUIDELINE, 'programs', $cycle->guidelineFileOwner('delegation_file'), 'document');
     }
 
     $cycle->save();
@@ -435,8 +460,9 @@ public function index(Request $request)
       $locale = app()->getLocale();
       $query = Cycle::with(['organization', 'steps', 'mentors', 'companies']);
 
+      // A non-admin with no organizations sees nothing (this used to fall through to every program).
       $orgIds = $user->organizations_ids;
-      if (!$user->hasRole('admin') && !empty($orgIds)) {
+      if (!$user->hasRole('admin')) {
           $query->whereIn('organization_id', $orgIds);
        }
 
@@ -539,6 +565,10 @@ public function show($id)
         return $this->notFound(__('api.program_not_found'));
     }
 
+    if (!$user->hasRole('admin') && !$user->ownsOrganization($program->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
     return $this->success(new ProgramResource($program));
 }
 
@@ -584,6 +614,10 @@ public function summary(string $programId)
         ->find($programId);
     if(!$cycle) {
         return $this->notFound(__('api.program_not_found'));
+    }
+
+    if (!$user->hasRole('admin') && !$user->ownsOrganization($cycle->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
     }
 
     $finalStepIds = $cycle->steps->where('stype', 5)->pluck('id');
@@ -733,6 +767,13 @@ public function performance(string $programId, Request $request)
         return $this->forbidden(__('api.forbidden'));
     }
     $cycle = Cycle::find($programId);
+    if (!$cycle) {
+        return $this->notFound(__('api.program_not_found'));
+    }
+
+    if (!$user->hasRole('admin') && !$user->ownsOrganization($cycle->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
 
     $locale = app()->getLocale();
 
@@ -816,6 +857,10 @@ public function mentorship(string $programId, Request $request)
     $cycle = Cycle::find($programId);
     if(!$cycle) {
         return $this->notFound(__('api.program_not_found'));
+    }
+
+    if (!$user->hasRole('admin') && !$user->ownsOrganization($cycle->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
     }
 
     $query = $cycle->mentorshipRequests()->with(['mentor', 'user.company']);
@@ -926,6 +971,10 @@ public function workshops(string $programId, Request $request)
     $cycle = Cycle::find($programId);
     if(!$cycle) {
         return $this->notFound(__('api.program_not_found'));
+    }
+
+    if (!$user->hasRole('admin') && !$user->ownsOrganization($cycle->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
     }
 
     $query = $cycle->trainingSessions();
@@ -1100,6 +1149,10 @@ public function finalEvaluation(string $programId, Request $request)
     $cycle = Cycle::with('steps')->find($programId);
     if (!$cycle) {
         return $this->notFound(__('api.program_not_found'));
+    }
+
+    if (!$user->hasRole('admin') && !$user->ownsOrganization($cycle->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
     }
 
     $statusFilter = $request->get('status');
