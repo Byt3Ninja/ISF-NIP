@@ -250,7 +250,7 @@ class TasksController extends Controller
                     }
 
                     // Store the file
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public', 'attachment');
                     $attachments[] = [
                         'name'       => $file->getClientOriginalName(),
                         'path'       => $path,
@@ -653,7 +653,7 @@ class TasksController extends Controller
                     if ($file->getSize() > 10485760) continue;
 
                     // Store the file
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public', 'attachment');
                     $attachments[] = [
                         'name'       => $file->getClientOriginalName(),
                         'path'       => $path,
@@ -848,7 +848,7 @@ class TasksController extends Controller
             }
 
             $request->validate([
-                'attachment' => 'required|file|max:5120|mimes:jpeg,jpg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,txt,csv',
+                'attachment' => 'required|file|max:5120|mimes:jpeg,jpg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,txt,csv',
             ]);
 
             /** @var \App\User $uploader */
@@ -859,7 +859,7 @@ class TasksController extends Controller
             }
             $file = $request->file('attachment');
             $fileManager = app(\App\Services\FileManagerService::class);
-            $path = $fileManager->upload($file, 'tasks/attachments', 'public');
+            $path = $fileManager->upload($file, 'tasks/attachments', 'public', 'attachment');
 
             $newAtt = [
                 'name'       => $file->getClientOriginalName(),
@@ -1299,7 +1299,7 @@ class TasksController extends Controller
                 'decision'    => 'required|in:pass,revision',
                 'note'        => 'required|string',
                 'attachments' => 'nullable|array',
-                'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,svg,pdf,zip,rar,doc,docx,xls,xlsx,ppt,pptx',
+                'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,pdf,zip,rar,doc,docx,xls,xlsx,ppt,pptx',
             ]);
 
             if ($validator->fails()) {
@@ -1330,7 +1330,7 @@ class TasksController extends Controller
                     ], 422);
                 }
                 foreach ($files as $file) {
-                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public');
+                    $path = app(\App\Services\FileManagerService::class)->upload($file, 'tasks/attachments', 'public', 'attachment');
                     $newAtt = [
                         'name'       => $file->getClientOriginalName(),
                         'path'       => $path,

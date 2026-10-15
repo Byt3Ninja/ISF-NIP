@@ -15,6 +15,7 @@ class PermissionGroupsController extends Controller
 {
 	public function index()
 	{
+		$this->authorizePermissionAccess('permission-groups.index');
 		$groups_q = "SELECT
 				pg.id,
 				pg.name,
@@ -53,11 +54,13 @@ class PermissionGroupsController extends Controller
 
 	public function create()
 	{
+		$this->authorizePermissionAccess('permission-groups.create', true);
 		return view('admin.permissionGroups.create');
 	}
 
 	public function store(StorePermissionGroupRequest $request, permissionsGroup $permission_group)
 	{
+		$this->authorizePermissionAccess('permission-groups.store', true);
 		$permission_group->name = $request->input('name', null);
 		$permission_group->description = $request->input('description', null);
 		$permission_group->save();
@@ -66,11 +69,13 @@ class PermissionGroupsController extends Controller
 
 	public function edit( permissionsGroup $permission_group )
 	{
+		$this->authorizePermissionAccess('permission-groups.edit', true);
 		return view('admin.permissionGroups.edit', compact('permission_group'));
 	}
 
 	public function update(UpdatePermissionGroupRequest $request, permissionsGroup $permission_group)
 	{
+		$this->authorizePermissionAccess('permission-groups.update', true);
 		$permission_group->name = $request->input('name', null);
 		$permission_group->description = $request->input('description', null);
 		$permission_group->save();
@@ -79,12 +84,33 @@ class PermissionGroupsController extends Controller
 
 	public function show(permissionsGroup $permission_group)
 	{
+		$this->authorizePermissionAccess('permission-groups.show');
 		return view('admin.permissionGroups.show', compact('permission_group'));
 	}
 
 	public function destroy(permissionsGroup $permission_group)
 	{
+		$this->authorizePermissionAccess('permission-groups.destroy', true);
 		$permission_group->delete();
 		return back();
+	}
+
+	/**
+	 * Permissions and permission groups are global, platform-wide RBAC records
+	 * with no tenant column, so no per-record owner exists. Reads require the
+	 * matching permission-groups.* permission; mutations additionally require global
+	 * admin scope so a tenant admin cannot alter shared RBAC definitions.
+	 */
+	protected function authorizePermissionAccess(string $permission, bool $mutating = false): void
+	{
+		$user = auth()->user();
+
+		if (!$user || !$user->ableTo($permission)) {
+			abort(401);
+		}
+
+		if ($mutating && !$user->hasRole('admin')) {
+			abort(403);
+		}
 	}
 }

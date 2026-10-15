@@ -21,7 +21,6 @@ use App\Http\Controllers\API\ExpertiseController;
 use App\Http\Controllers\API\PermissionController;
 use App\Http\Controllers\API\OrganizationController;
 use App\Http\Controllers\API\RegistrationController;
-use App\Http\Controllers\TestNotificationController;
 use App\Http\Controllers\API\Mentors\MentorController;
 use App\Http\Controllers\API\TrainingReportController;
 use App\Http\Controllers\API\PermissionGroupController;
@@ -132,14 +131,6 @@ Route::middleware('sanctum.custom')->group(function () {
     Route::put('/notification-settings', [NotificationSettingsController::class, 'updateNotificationSettings']);
     Route::get('/users/{userId}/notification-settings', [NotificationSettingsController::class, 'getUserNotificationSettings']);
     
-    // Test Notification Routes
-    Route::get('/test/notifications/settings', [TestNotificationController::class, 'getUserNotificationSettings']);
-    Route::post('/test/notifications/task', [TestNotificationController::class, 'testTaskNotification']);
-    Route::post('/test/notifications/welcome', [TestNotificationController::class, 'testWelcomeNotification']);
-    Route::post('/test/notifications/training', [TestNotificationController::class, 'testTrainingNotification']);
-    Route::post('/test/notifications/mentorship', [TestNotificationController::class, 'testMentorshipRequestNotification']);
-    Route::post('/test/notifications/bulk', [TestNotificationController::class, 'testBulkNotification']);
-    Route::post('/test/notifications/channels', [TestNotificationController::class, 'testSpecificChannels']);
     
     Route::post('/mentorship-sessions/submit-feedback', [MentorshipSessionController::class, 'submitFeedback']);
     Route::get('/mentorship-sessions/completed', [MentorshipSessionController::class, 'myCompletedSessions']);

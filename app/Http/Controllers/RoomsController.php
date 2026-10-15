@@ -19,6 +19,7 @@ use Exception;
 use Session;
 use Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Services\FileManagerService;
 
 class RoomsController extends Controller
 {
@@ -50,7 +51,7 @@ class RoomsController extends Controller
 				$files = $request->file('image');
 				foreach($files as $file){
 					//get the path of the stores image
-					$file = $file->store('rooms', ['disk' => 'public_uploads']);
+					$file = app(FileManagerService::class)->upload($file, 'rooms', 'public_uploads', 'image');
 					Rooms_img::create([
 						'room_id' => $room,
 						'img_url' => $file,
@@ -113,7 +114,7 @@ class RoomsController extends Controller
 				$files = $request->file('image');
 				foreach($files as $file){
 					 //get the path of the stores image
-					$file = $file->store('rooms', ['disk' => 'public_uploads']);
+					$file = app(FileManagerService::class)->upload($file, 'rooms', 'public_uploads', 'image');
 					Rooms_img::create([
 						'room_id' => $id,
 						'img_url' => $file,

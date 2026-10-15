@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Notifications\StartupJoiningNotification;
 use App\Notifications\WelcomeUserNotification;
 use URL, Str, stdClass, Hash;
+use App\Services\FileManagerService;
 
 class ExternalCyclesController extends Controller
 {
@@ -405,7 +406,8 @@ class ExternalCyclesController extends Controller
 						if( $request->hasFile($field_name) )
 						{
 							$file = $request->file($field_name);
-							$fileName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+							// Unauthenticated upload: whitelist + real-content check, server-generated name.
+							$fileName = app(FileManagerService::class)->validatedSafeName($file, 'common');
              				$file->move(public_path('formsubmissions/'), $fileName);
 			 				$request->{$field_name} = 'formsubmissions/' . $fileName;
 						}

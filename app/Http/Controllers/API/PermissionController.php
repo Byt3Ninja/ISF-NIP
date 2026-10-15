@@ -178,6 +178,11 @@ public function store(StorePermissionRequest $request)
     if (!$user->ableToAny(['permissions.create', 'permissions.store'])) {
             return $this->forbidden(__('api.forbidden'));
     }
+    // Permissions and their groups are global, platform-wide records: changing them
+    // needs platform admin scope, not just the permission.
+    if (!$user->hasRole('admin')) {
+        return $this->forbidden(__('api.forbidden'));
+    }
     $permission = Permission::create([
         'name' => $request->name,
         'description' => $request->description,
@@ -212,6 +217,11 @@ public function update(UpdatePermissionRequest $request,$id)
      $user = auth()->user();
      if (!$user->ableToAny(['permissions.edit', 'permissions.update'])) {
             return $this->forbidden(__('api.forbidden'));
+     }
+     // Permissions and their groups are global, platform-wide records: changing them
+     // needs platform admin scope, not just the permission.
+     if (!$user->hasRole('admin')) {
+         return $this->forbidden(__('api.forbidden'));
      }
      $permission = Permission::find($id);
      if(!$permission){
@@ -276,6 +286,11 @@ public function destroy($id)
 {
         $user = auth()->user();
         if (!$user->ableTo('permissions.destroy')) {
+            return $this->forbidden(__('api.forbidden'));
+        }
+        // Permissions and their groups are global, platform-wide records: changing them
+        // needs platform admin scope, not just the permission.
+        if (!$user->hasRole('admin')) {
             return $this->forbidden(__('api.forbidden'));
         }
         $permission = Permission::find($id);

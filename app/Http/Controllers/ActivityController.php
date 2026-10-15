@@ -15,6 +15,7 @@ class ActivityController extends Controller
 {
    public function index(Request $request)
     {
+        abort_unless(auth()->user()->ableTo('activities.index'), 403);
         $authUser = auth()->user();
         $isAdmin = $authUser->hasRole('admin');
 
@@ -175,7 +176,12 @@ class ActivityController extends Controller
 
     public function destroy($id)
     {
+        abort_unless(auth()->user()->ableTo('activities.index'), 403);
         $activity = Activity::findOrFail($id);
+        // A non-admin may only remove log entries of users in their own organizations.
+        if (!auth()->user()->hasRole('admin')) {
+            $this->authorizeTargetUser($activity->user_id);
+        }
         $activity->delete();
 
         return to_route('activities.index')->with('success', __('admin.activity_deleted'));
@@ -183,6 +189,7 @@ class ActivityController extends Controller
 
     public function forceLogout(Request $request)
     {
+        abort_unless(auth()->user()->ableTo('activities.index'), 403);
         $userId = $request->user_id;
         
         // In a real application, you would invalidate user sessions here
@@ -192,10 +199,11 @@ class ActivityController extends Controller
 
     public function resetPassword(Request $request)
     {
+        abort_unless(auth()->user()->ableTo('activities.index'), 403);
         $l = app()->getLocale();
 
         $userId = $request->user_id;
-        $user = \App\User::findOrFail($userId);
+        $user = $this->authorizeTargetUser($userId);
         
         // Generate a random password
         $newPassword = Str::random(12);
@@ -209,6 +217,7 @@ class ActivityController extends Controller
 
     public function blockIp(Request $request)
     {
+        abort_unless(auth()->user()->ableTo('activities.index'), 403);
         $ipAddress = $request->ip_address;
         
         // In a real application, you would add this IP to a blacklist table
@@ -219,7 +228,9 @@ class ActivityController extends Controller
 
     public function loadMoreActivities(Request $request)
     {
+        abort_unless(auth()->user()->ableTo('activities.index'), 403);
         $userId = $request->user_id;
+        $this->authorizeTargetUser($userId);
         $offset = $request->offset ?? 0;
         $limit = 10;
         
@@ -251,4 +262,22 @@ class ActivityController extends Controller
         ]);
     }
 
+    /**
+     * Resolve the account an activity action targets and make sure the caller may act on it:
+     * platform admins on anyone, everyone else only on users of their own organizations and
+     * never on a platform admin (a reset password is returned to the caller in plain text).
+     */
+    private function authorizeTargetUser($userId): User
+    {
+        $target = User::findOrFail($userId);
+        $actor = auth()->user();
+
+        if (!$actor->hasRole('admin')) {
+            $inScope = $actor->ownsOrganization($target->organization_id)
+                || $actor->ownsOrganization($target->company?->cycledata?->organization_id);
+            abort_if($target->hasRole('admin') || !$inScope, 403);
+        }
+
+        return $target;
+    }
 }

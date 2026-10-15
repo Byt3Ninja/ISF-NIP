@@ -24,7 +24,7 @@ class HackathonEnrollmentServiceTest extends TestCase
             'name_ar' => 'م',
             'user_id' => $admin->id,
         ]);
-        $cycle = Cycle::create([
+        $cycle = Cycle::forceCreate([
             'title' => 'Hack1',
             'type' => 'Hackathon',
             'start' => '2026-05-01',

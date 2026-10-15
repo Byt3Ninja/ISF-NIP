@@ -13,12 +13,14 @@ class RolesController extends Controller
 {
 	public function index()
 	{
+		$this->authorizeRoleAccess('roles.index');
 		$roles = Role::with(['permissions'])->get();
 		return view('admin.roles.index', compact('roles'));
 	}
 
 	public function create()
 	{
+		$this->authorizeRoleAccess('roles.create', true);
 		$permissions = DB::select("SELECT
 				p.id,
 				p.name,
@@ -38,6 +40,7 @@ class RolesController extends Controller
 
 	public function store(StoreRoleRequest $request)
 	{
+		$this->authorizeRoleAccess('roles.store', true);
 		$role = Role::create($request->all());
 		$permissionNames = $request->input('permissions_flat');
     	$permissionIds = Permission::whereIn('name', $permissionNames)->pluck('id');
@@ -48,6 +51,7 @@ class RolesController extends Controller
 
 	public function edit(Role $role)
 	{
+		$this->authorizeRoleAccess('roles.edit', true);
 		// $_permissions = Permission::pluck('name', 'id');
 		$permissions = DB::select("SELECT
 				p.id,
@@ -73,6 +77,7 @@ class RolesController extends Controller
 
 	public function update(UpdateRoleRequest $request, Role $role)
 	{
+		$this->authorizeRoleAccess('roles.update', true);
 		$role->update($request->all());
 		$permissionNames = $request->input('permissions_flat', []);
     	$permissionIds = Permission::whereIn('name', $permissionNames)->pluck('id')->toArray();
@@ -83,15 +88,43 @@ class RolesController extends Controller
 
 	public function show(Role $role)
 	{
+		$this->authorizeRoleAccess('roles.show');
 		$role->load('permissions');
 		return view('admin.roles.show', compact('role'));
 	}
 
 	public function destroy(Role $role)
 	{
+		$this->authorizeRoleAccess('roles.destroy', true);
 		$role->delete();
 		app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 		return back();
 	}
 
+	/**
+	 * Roles are global, platform-wide records: the `roles` table carries no
+	 * organization/tenant column, and every role is shared by all tenants.
+	 *
+	 * A resource-level "owner" check is therefore not expressible, and scoping a
+	 * shared role to one tenant would break every other tenant using it. So
+	 * reads require the matching roles.* permission, and any MUTATION
+	 * additionally requires platform-wide (global admin) scope — which stops a
+	 * tenant admin from editing or deleting a role belonging to the platform or
+	 * to another tenant.
+	 *
+	 * @param  string  $permission  the roles.* permission for this action
+	 * @param  bool    $mutating    true for actions that create/modify/delete a role
+	 */
+	protected function authorizeRoleAccess(string $permission, bool $mutating = false): void
+	{
+		$user = auth()->user();
+
+		if (!$user || !$user->ableTo($permission)) {
+			abort(401);
+		}
+
+		if ($mutating && !$user->hasRole('admin')) {
+			abort(403);
+		}
+	}
 }

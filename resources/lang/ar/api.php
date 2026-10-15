@@ -7,6 +7,7 @@ return [
 	'registered_successfully' => 'تم التسجيل بنجاح',
 	'logged_out' => 'تم تسجيل الخروج بنجاح',
 	'unauthenticated' => 'غير مصرح لك',
+	'token_expired' => 'انتهت صلاحية الجلسة. الرجاء تسجيل الدخول مرة أخرى.',
 	'title_required' => 'العنوان مطلوب للمرشدين',
 	'forbidden' => 'غير مصرح لك',
 	'user_not_found' => 'المستخدم غير موجود',

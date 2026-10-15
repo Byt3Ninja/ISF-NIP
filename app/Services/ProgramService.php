@@ -28,6 +28,11 @@ class ProgramService
         return $this->notFound(__('api.program_not_found'));
     }
 
+    $authUser = auth()->user();
+    if (!$authUser->hasRole('admin') && !$authUser->ownsOrganization($program->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
     $query = DB::table('cycles_mentors as cm')
         ->join('users', 'users.id', '=', 'cm.user_id')
         ->leftJoin('users_bio', 'users.id', '=', 'users_bio.user_id')
@@ -132,6 +137,11 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
         return $this->notFound(__('api.program_not_found'));
     }
 
+    $authUser = auth()->user();
+    if (!$authUser->hasRole('admin') && !$authUser->ownsOrganization($program->organization_id)) {
+        return $this->forbidden(__('api.forbidden'));
+    }
+
     $query = Company::with([
         'sectoR:id,name_en,name_ar',
         'state:id,name_en,name_ar',
@@ -210,13 +220,16 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
         // No exact match → create new cycle in the fallback (dropdown-selected) org.
         // Different-dates matches in other orgs are treated as different cohorts,
         // not as anchors for org resolution (they're a different program family).
-        $cycle = Cycle::create([
-            'title'           => $title,
-            'type'            => $type,
-            'start'           => $start,
-            'end'             => $end,
-            'organization_id' => $fallbackOrgId,
+        $cycle = new Cycle([
+            'title' => $title,
+            'type'  => $type,
+            'start' => $start,
+            'end'   => $end,
         ]);
+        // organization_id is not mass-assignable ($fillable); the importer has already
+        // verified the caller may write to this organization.
+        $cycle->organization_id = $fallbackOrgId;
+        $cycle->save();
 
         // Hackathon enrollment (HackathonEnrollmentService::resolveStepId) requires
         // a step on the cycle. The UI cycle-builder asks the admin to create a

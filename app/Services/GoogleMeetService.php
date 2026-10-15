@@ -15,15 +15,26 @@ class GoogleMeetService
     public function __construct()
     {
         $this->keyPath = public_path('google-service-account.json');
+    }
 
-        $this->client = new Google_Client();
-        $this->client->setAuthConfigFile($this->keyPath);
-        $this->client->addScope(Google_Service_Calendar::CALENDAR);
-//        $this->client->useApplicationDefaultCredentials();
+    /**
+     * Build the Google client on first use. The key file is no longer shipped in the
+     * web root, so loading it in the constructor would break every route of the
+     * controllers that merely inject this service.
+     */
+    protected function client(): Google_Client
+    {
+        if (!$this->client) {
+            $this->client = new Google_Client();
+            $this->client->setAuthConfigFile($this->keyPath);
+            $this->client->addScope(Google_Service_Calendar::CALENDAR);
+        }
+
+        return $this->client;
     }
 
     public function creatMeeting(){
-        $service = new Google_Service_Calendar($this->client);
+        $service = new Google_Service_Calendar($this->client());
 
         $event = new Google_Service_Calendar_Event([
             'summary' => 'Google Meet Test Event',

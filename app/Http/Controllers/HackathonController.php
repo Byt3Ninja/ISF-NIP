@@ -1585,13 +1585,13 @@ class HackathonController extends Controller
 
         if ($request->hasFile('team_image')) {
             // Store on the `programTeams` disk (storage/, outside the web root)
-            // via FileManagerService, which enforces the extension/MIME
-            // blacklist and generates the filename server-side. The old code
+            // via FileManagerService, which enforces the image whitelist (extension
+            // + real content type) and generates the filename server-side. The old code
             // move()d the file into public/ using the CLIENT-supplied
             // extension, so an uploaded .phtml landed in a web-served,
             // executable directory.
             $imageName = app(FileManagerService::class)
-                ->upload($request->file('team_image'), '', 'programTeams');
+                ->upload($request->file('team_image'), '', 'programTeams', 'image');
             $teamformation->img_team = 'programs/teams/' . basename($imageName);
         }
 
@@ -1706,6 +1706,10 @@ class HackathonController extends Controller
         $newImageUrl = null;
 
         if ($request->hasFile('team_image')) {
+            // Validate the replacement before touching the current logo: a rejected
+            // upload must never cost the team its existing image.
+            app(FileManagerService::class)->assertAllowed($request->file('team_image'), 'image');
+
             // Delete old image if exists
             if ($teamFormation->img_team) {
                 /* $oldImagePath = public_path($teamFormation->img_team);
@@ -1719,11 +1723,11 @@ class HackathonController extends Controller
                 }
             }
             
-            // Upload new image through FileManagerService (extension/MIME
-            // blacklist + server-generated filename), same as createTeam().
+            // Upload new image through FileManagerService (image whitelist +
+            // server-generated filename), same as createTeam().
             $imageName = basename(
                 app(FileManagerService::class)
-                    ->upload($request->file('team_image'), '', 'programTeams')
+                    ->upload($request->file('team_image'), '', 'programTeams', 'image')
             );
 
             $teamFormation->img_team = 'programs/teams/' . $imageName;

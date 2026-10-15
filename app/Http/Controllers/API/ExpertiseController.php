@@ -64,6 +64,9 @@ class ExpertiseController extends Controller
 
     public function store(Request $request)
     {
+        if (!auth()->user()->ableToAny(['expertises.create', 'expertises.store'])) {
+            return $this->forbidden(__('api.forbidden'));
+        }
       if($request->has('expertise_id') == null){
       $request->validate([
         'name' => 'required|string',
@@ -102,6 +105,9 @@ class ExpertiseController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (!auth()->user()->ableToAny(['expertises.edit', 'expertises.update'])) {
+            return $this->forbidden(__('api.forbidden'));
+        }
          if($request->has('expertise_id') == null){
             $request->validate([
               'name' => 'required|string',
@@ -139,6 +145,9 @@ class ExpertiseController extends Controller
     }
     public function destroy($id)
     {
+        if (!auth()->user()->ableTo('expertises.destroy')) {
+            return $this->forbidden(__('api.forbidden'));
+        }
         $deleteExpertise = Expertise::findOrFail($id);
         if($deleteExpertise->children->count() > 0){
             $deleteExpertise->children()->delete();
@@ -150,6 +159,9 @@ class ExpertiseController extends Controller
 
     public function import(Request $request)
     {
+        if (!auth()->user()->ableToAny(['expertises.create', 'expertises.store'])) {
+            return $this->forbidden(__('api.forbidden'));
+        }
       $request->validate([
           'items' => 'required|array',
       ]);
@@ -184,6 +196,9 @@ class ExpertiseController extends Controller
     }
     public function importSpecialization(Request $request)
     {
+        if (!auth()->user()->ableToAny(['expertises.create', 'expertises.store'])) {
+            return $this->forbidden(__('api.forbidden'));
+        }
       $request->validate([
           'items' => 'required|array',
       ]);

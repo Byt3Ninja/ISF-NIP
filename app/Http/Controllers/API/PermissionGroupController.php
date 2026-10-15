@@ -125,6 +125,11 @@ class PermissionGroupController extends Controller
         if (!$user->ableToAny(['permission-groups.create', 'permission-groups.store'])) {
             return $this->forbidden(__('api.forbidden'));
         }
+        // Permissions and their groups are global, platform-wide records: changing them
+        // needs platform admin scope, not just the permission.
+        if (!$user->hasRole('admin')) {
+            return $this->forbidden(__('api.forbidden'));
+        }
         $group = permissionsGroup::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -163,6 +168,11 @@ class PermissionGroupController extends Controller
     {
         $user = auth()->user();
         if (!$user->ableToAny(['permission-groups.edit', 'permission-groups.update'])) {
+            return $this->forbidden(__('api.forbidden'));
+        }
+        // Permissions and their groups are global, platform-wide records: changing them
+        // needs platform admin scope, not just the permission.
+        if (!$user->hasRole('admin')) {
             return $this->forbidden(__('api.forbidden'));
         }
         $permission_group = permissionsGroup::find($id);
@@ -223,6 +233,11 @@ class PermissionGroupController extends Controller
     {
         $user = auth()->user();
         if (!$user->ableTo('permission-groups.destroy')) {
+            return $this->forbidden(__('api.forbidden'));
+        }
+        // Permissions and their groups are global, platform-wide records: changing them
+        // needs platform admin scope, not just the permission.
+        if (!$user->hasRole('admin')) {
             return $this->forbidden(__('api.forbidden'));
         }
         $permission_group = permissionsGroup::find($id);

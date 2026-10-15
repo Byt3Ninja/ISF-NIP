@@ -16,6 +16,19 @@ class FormBuilderController extends Controller
     /**
      * show the builder
      */
+    /**
+     * Abort unless the current user is a platform admin or the organization is
+     * within their tenant scope. A permission says which action is allowed, not
+     * on whose records it may be performed.
+     */
+    private function authorizeOrganization($organizationId): void
+    {
+        $actor = auth()->user();
+        if (!$actor->hasRole('admin') && !$actor->ownsOrganization($organizationId)) {
+            abort(403);
+        }
+    }
+
     public function showBuilder(Request $request, $id = null)
     {
         $user = auth()->user();
@@ -23,6 +36,11 @@ class FormBuilderController extends Controller
         
         // Get organization_id from request or user's organization
         $organization_id = $request->org_id ?? ($user->organization_id ?? null);
+
+        // org_id comes from the query string: it may only name an organization in the caller's scope.
+        if ($request->filled('org_id')) {
+            $this->authorizeOrganization($request->org_id);
+        }
 
         // Check if there are no organizations
         if (empty($orgIds) && Organization::count() == 0) {
@@ -114,16 +132,28 @@ class FormBuilderController extends Controller
                 })
                 ->first();
 
+            if ($title) {
+                $this->authorizeOrganization($title->organization_id);
+            }
+
             if (!$title) {
-                $title = BuilderForm::when(!is_null($organization_id), function ($q) use ($organization_id) {
-                    return $q->where('organization_id', $organization_id);
-                })->first();
+                // Fall back to a form of the caller's organization (never another tenant's).
+                $fallbackOrgId = $organization_id
+                    ?? ($user->hasRole('admin') ? Organization::first()->id : ($orgIds[0] ?? null));
+                abort_if(is_null($fallbackOrgId), 403);
+
+                $title = BuilderForm::where('organization_id', $fallbackOrgId)->first();
 
                 if (!$title) {
-                    $title = BuilderForm::firstOrCreate([
+                    $title = BuilderForm::firstOrNew([
                         'form_name' => 'New Empty Form',
-                        'organization_id' => $organization_id ?? Organization::first()->id
+                        'organization_id' => $fallbackOrgId,
                     ]);
+                    if (!$title->exists) {
+                        // organization_id is not mass-assignable ($fillable); set it explicitly.
+                        $title->organization_id = $fallbackOrgId;
+                        $title->save();
+                    }
                 }
 
                 $id = $title->id;
@@ -229,10 +259,10 @@ class FormBuilderController extends Controller
         }
 
         // Load builder forms list
-        if (!$user->hasRole('admin') && !empty($orgIds)) {
-            $builderForms = BuilderForm::whereIn('organization_id', $orgIds)->get();
-        } else {
+        if ($user->hasRole('admin')) {
             $builderForms = BuilderForm::all();
+        } else {
+            $builderForms = BuilderForm::whereIn('organization_id', $orgIds)->get();
         }
 
         if ($request->org_id) {
@@ -260,6 +290,7 @@ class FormBuilderController extends Controller
       
         $form_id_toshow = $id;
         $the_form = BuilderForm::findOrFail($form_id_toshow);
+        $this->authorizeOrganization($the_form->organization_id);
 
         $fields = $the_form->fields()
             ->withPivot('options')
@@ -474,6 +505,11 @@ class FormBuilderController extends Controller
 
         $form_data = $request->form_fields_data;
 
+        $actor = auth()->user();
+        if (!$actor->hasRole('admin') && !$actor->ownsOrganization($form_data['organization_id'])) {
+            abort(403);
+        }
+
         // Backend validation: Do not allow saving empty sections
         if (isset($form_data['items']) && is_array($form_data['items'])) {
             foreach ($form_data['items'] as $item) {
@@ -503,6 +539,9 @@ class FormBuilderController extends Controller
         if ($id && (int) $id > 0) {
             $form = BuilderForm::find($id);
             if ($form) {
+                if (!$actor->hasRole('admin') && !$actor->ownsOrganization($form->organization_id)) {
+                    abort(403);
+                }
                 $is_edit = true;
                 $form->form_name = $form_data['title'];
                 $form->organization_id = $form_data['organization_id'];
@@ -693,8 +732,11 @@ class FormBuilderController extends Controller
         $error_message = null;
 
         try {
-            DB::transaction(function () use ($config, $id) {
+            DB::transaction(function () use ($config, $id, $actor) {
                 $builderForm = BuilderForm::findOrFail($id);
+                if (!$actor->hasRole('admin') && !$actor->ownsOrganization($builderForm->organization_id)) {
+                    abort(403);
+                }
                 $builderForm->fields()->detach();
 
                 $config->values()->each(function ($item, $index) use ($builderForm) {
@@ -722,9 +764,20 @@ class FormBuilderController extends Controller
 
     public function modifyForm($set, Request $request)
     {
+        $actor = auth()->user();
+
+        // This route has no name, so the route-permission middleware never sees it.
+        abort_unless($actor->ableToAny(['forms.design_save', 'forms.builder_view']), 403);
 
         if ($set==1) {
             // make a copy
+            $source = BuilderForm::findOrFail($request->id);
+            if (!$actor->hasRole('admin') && !$actor->ownsOrganization($source->organization_id)) {
+                abort(403);
+            }
+            if (!$actor->hasRole('admin') && !$actor->ownsOrganization($request->organization_id)) {
+                abort(403);
+            }
             $form = new BuilderForm;
             $form->form_name = $request->title;
             $form->organization_id = $request->organization_id;
@@ -740,6 +793,9 @@ class FormBuilderController extends Controller
             return response()->json($form->id);
         } elseif ($set==2) {
             // create new
+            if (!$actor->hasRole('admin') && !$actor->ownsOrganization($request->organization_id)) {
+                abort(403);
+            }
             $new = new BuilderForm;
             $new->form_name = $request->title;
             $new->organization_id = $request->organization_id;
@@ -747,11 +803,23 @@ class FormBuilderController extends Controller
             return response()->json($new->id);
         } elseif ($set==3) {
             // delete
-            BuilderForm::findOrFail($request->id)->fields()->detach();
+            $form = BuilderForm::findOrFail($request->id);
+            if (!$actor->hasRole('admin') && !$actor->ownsOrganization($form->organization_id)) {
+                abort(403);
+            }
+            $form->fields()->detach();
             BuilderForm::destroy($request->id);
             return response()->json();
         } else {
             //rename
+            $form = BuilderForm::findOrFail($request->id);
+            if (!$actor->hasRole('admin') && !$actor->ownsOrganization($form->organization_id)) {
+                abort(403);
+            }
+            // The rename also writes organization_id: the destination must be owned too.
+            if (!$actor->hasRole('admin') && !$actor->ownsOrganization($request->organization_id)) {
+                abort(403);
+            }
             BuilderForm::where('id',$request->id)->update(['form_name'=>$request->title,'organization_id'=>$request->organization_id]);
             return response()->json($request->id);
         }
@@ -759,6 +827,11 @@ class FormBuilderController extends Controller
     }
 
     public function builderByOrganization($organization_id=0){
+        // No organization selected yet -> nothing to list (the page calls this before a choice is made).
+        if (!is_numeric($organization_id) || (int) $organization_id <= 0) {
+            return response()->json(['data' => [], 'appear' => '']);
+        }
+        $this->authorizeOrganization($organization_id);
         $builders = BuilderForm::where('organization_id',$organization_id)->get();
         $output = [];
         $appear = '';
@@ -784,7 +857,17 @@ class FormBuilderController extends Controller
     {
         try {
             $form = BuilderForm::findOrFail($id);
-            
+
+            $actor = auth()->user();
+            if (!$actor->hasRole('admin') && !$actor->ownsOrganization($form->organization_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'forbidden',
+                    'message_en' => 'You are not allowed to delete this form.',
+                    'message_ar' => 'غير مسموح لك بحذف هذا النموذج'
+                ], 403);
+            }
+
             // Check if form is used in any program steps
             $usedInSteps = $form->steps()->count();
             if ($usedInSteps > 0) {
@@ -865,6 +948,8 @@ class FormBuilderController extends Controller
             'sections.*.question_ids' => 'required|array',
         ]);
 
+        $this->authorizeOrganization(BuilderForm::findOrFail($id)->organization_id);
+
         $sectionsPayload = $request->input('sections');
 
         try {
@@ -920,6 +1005,8 @@ class FormBuilderController extends Controller
             'question_ids.*' => 'nullable',
             'section_title'  => 'nullable|string',
         ]);
+
+        $this->authorizeOrganization(BuilderForm::findOrFail($id)->organization_id);
 
         $questionIds  = array_values(array_filter(
             $request->input('question_ids'),

@@ -55,9 +55,12 @@ class UserController extends Controller
      */
         public function show(UserIdRequest $request, )
         {   
-            $this->authorize('view', Auth::user());
-
             $user = $this->userService->show($request->user);
+            if (!$user) {
+                return $this->error(__('api.user_not_found'), 404);
+            }
+
+            $this->authorize('view', $user);
 
             return $this->success(new UserResource($user));
         }
@@ -92,7 +95,7 @@ class UserController extends Controller
          */
         public function update(UpdateUserApiRequest $request, User $user)
         {   
-            $this->authorize('update', Auth::user());
+            $this->authorize('update', $user);
 
             $data = $request->except(['role', 'organization_id', 'api_token']);
             $result = $this->userService->update($user, $data);
@@ -111,9 +114,14 @@ class UserController extends Controller
          */
         public function deactivate(UserIdRequest $request)
         {
-            $this->authorize('deactivate', Auth::user());
-            $user=$this->userService->show($request->user);
-            $result = $this->userService->deactivateUser( $user,Auth::id());
+            $target = $this->userService->show($request->user);
+            if (!$target) {
+                return $this->error(__('api.user_not_found'), 404);
+            }
+
+            $this->authorize('deactivate', $target);
+
+            $result = $this->userService->deactivateUser($target, Auth::id());
 
             if (!$result['success']) {
                 return $this->error($result['message'], $result['status'] ?? 403);

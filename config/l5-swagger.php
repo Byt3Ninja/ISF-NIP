@@ -62,13 +62,15 @@ return [
             'oauth2_callback' => 'api/oauth2-callback',
 
             /*
-             * Middleware allows to prevent unexpected access to API documentation
+             * Middleware allows to prevent unexpected access to API documentation.
+             * The docs UI and JSON/YAML are gated behind session auth + admin role
+             * so the API surface is never exposed to anonymous or non-admin users.
              */
             'middleware' => [
-                'api' => [],
-                'asset' => [],
-                'docs' => [],
-                'oauth2_callback' => [],
+                'api' => ['web', 'admin'],
+                'asset' => ['web', 'admin'],
+                'docs' => ['web', 'admin'],
+                'oauth2_callback' => ['web', 'admin'],
             ],
 
             /*

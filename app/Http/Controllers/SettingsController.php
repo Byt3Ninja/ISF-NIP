@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Requests\UpdateSocialLoginRequest;
 use App\Notifications\UserInvitationNotification;
+use App\Services\FileManagerService;
 
 class SettingsController extends Controller
 {
@@ -414,19 +415,26 @@ class SettingsController extends Controller
 		$updateSittings = Settings::where('id', $id)->first();
 		$fileManager = app(\App\Services\FileManagerService::class);
 
+		// Validate every uploaded image before replacing any of them.
+		$fileManager->assertAllAllowed([
+			[$request->file('logo'), 'image'],
+			[$request->file('header'), 'image'],
+			[$request->file('footer'), 'image'],
+		]);
+
 		if( $request->hasFile('logo') )
 		{
-			$logo = $fileManager->update($request->file('logo'), $updateSittings->Logo, '', 'logo_uploads');
+			$logo = $fileManager->update($request->file('logo'), $updateSittings->Logo, '', 'logo_uploads', 'image');
 		} else { $logo = $updateSittings->Logo; }
 
 		if ($request->hasFile('header'))
 		{
-			$header = $fileManager->update($request->file('header'), $updateSittings->header, '', 'logo_uploads');
+			$header = $fileManager->update($request->file('header'), $updateSittings->header, '', 'logo_uploads', 'image');
 		} else { $header = $updateSittings->header; }
 
 		if ($request->hasFile('footer'))
 		{
-			$footer = $fileManager->update($request->file('footer'), $updateSittings->footer, '', 'logo_uploads');
+			$footer = $fileManager->update($request->file('footer'), $updateSittings->footer, '', 'logo_uploads', 'image');
 		} else { $footer = $updateSittings->footer; }
 
 		$updateSittings->Logo = $logo;
@@ -629,11 +637,18 @@ class SettingsController extends Controller
 		$Img2 =  Settings::findOrfail('8');
 		$Img3 =  Settings::findOrfail('9');
 		$fileManager = app(\App\Services\FileManagerService::class);
+
+		// Validate every uploaded image before replacing any of them.
+		$fileManager->assertAllAllowed([
+			[$request->file('img1'), 'image'],
+			[$request->file('img2'), 'image'],
+			[$request->file('img3'), 'image'],
+		]);
 	
 		//Image 1 =======================================
 		if ($request->hasFile('img1'))
 		{
-			$img1 = $fileManager->update($request->file('img1'), $Img1->img_url, '', 'Home_upload');
+			$img1 = $fileManager->update($request->file('img1'), $Img1->img_url, '', 'Home_upload', 'image');
 		} else { $img1 = $Img1->img_url; }
 
 		$ar_img1title = $request->input('ar_img1title');
@@ -658,7 +673,7 @@ class SettingsController extends Controller
 		// Image 2 =======================================
 		if ($request->hasFile('img2'))
 		{
-			$img2 = $fileManager->update($request->file('img2'), $Img2->img_url, '', 'Home_upload');
+			$img2 = $fileManager->update($request->file('img2'), $Img2->img_url, '', 'Home_upload', 'image');
 		} else { $img2 = $Img2->img_url; }
 
 		$ar_img2title = $request->input('ar_img2title');
@@ -683,7 +698,7 @@ class SettingsController extends Controller
 		// Image 3 =======================================
 		if ($request->hasFile('img3'))
 		{
-			$img3 = $fileManager->update($request->file('img3'), $Img3->img_url, '', 'Home_upload');
+			$img3 = $fileManager->update($request->file('img3'), $Img3->img_url, '', 'Home_upload', 'image');
 		} else { $img3 = $Img3->img_url; }
 	
 		$ar_img3title = $request->input('ar_img3title');
@@ -883,7 +898,7 @@ class SettingsController extends Controller
     {
          $request->validate([
             'name_en' => 'nullable|string|max:255',
-            'img_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+            'img_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
@@ -907,7 +922,8 @@ class SettingsController extends Controller
 
         if ($request->hasFile('img_url')) {
             $image = $request->file('img_url');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            // Stored name is derived server-side from validated content, never from the client extension.
+            $imageName = app(FileManagerService::class)->validatedSafeName($image, 'image');
 
              $image->move(public_path('organizations/'), $imageName);
              $organization->img_url = 'organizations/' . $imageName;

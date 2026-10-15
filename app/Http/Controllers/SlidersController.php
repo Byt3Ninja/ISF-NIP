@@ -6,6 +6,7 @@ use DB;
 use App\Slider;
 use Carbon\Carbon;
 use Redirect;
+use App\Services\FileManagerService;
 
 class SlidersController extends Controller
 {
@@ -20,10 +21,10 @@ class SlidersController extends Controller
 		{
 			$file = $request->file('image');
 			$path = 'images/slider/';
-			$fileExtension = $request->file('image')->getClientOriginalExtension();
-			$filename = \Illuminate\Support\Str::random(10).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10,'slide');
-			$filename2 =$filename.'.'.$fileExtension;
-			$file->move($path, $filename.'.'.$fileExtension);
+			// Whitelist + real-content check; the stored name is generated server-side,
+			// never taken from the client (a GIF-headered shell.php passes a MIME check).
+			$filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+			$file->move($path, $filename2);
 			$newslider = new Slider();
 			$newslider->img_path = $filename2;
 			$newslider->title = $request->input('title');
@@ -61,10 +62,10 @@ class SlidersController extends Controller
 			{
 				$file = $request->file('image');
 				$path = 'images/slider/';
-				$fileExtension = $request->file('image')->getClientOriginalExtension();
-				$filename = \Illuminate\Support\Str::random(10).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10,'slide');
-				$filename2 =$filename.'.'.$fileExtension;
-				$file->move($path, $filename.'.'.$fileExtension);
+				// Whitelist + real-content check; the stored name is generated server-side,
+				// never taken from the client (a GIF-headered shell.php passes a MIME check).
+				$filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+				$file->move($path, $filename2);
 				$updateslider->img_path = $filename2;
 			}
 		}

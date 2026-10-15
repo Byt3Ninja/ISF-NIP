@@ -1127,7 +1127,7 @@ class MentorshipTaskController extends Controller
 
 			$filesToAdd = [];
 			foreach ($request->attachments as $attachment) {
-				$path = $fileManager->upload($attachment, $targetDir, 'mentorship_tasks');
+				$path = $fileManager->upload($attachment, $targetDir, 'mentorship_tasks', 'common');
 				$filesToAdd[] = [
 					'mentorship_request_id' => $task->mentorship_request_id,
 					'mentorship_task_id' => $task->id,

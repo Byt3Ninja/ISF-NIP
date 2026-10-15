@@ -8,7 +8,32 @@ use Illuminate\Database\Eloquent\Model;
 class Team_member extends Model
 {
     protected $table = 'team_members';
-    protected $guarded = [];
+    // Company_id, user_id and team_formation_id are owner foreign keys: never mass-assignable, set them explicitly.
+    protected $fillable = [
+        'TeamMember',
+        'Name',
+        'Email',
+        'LinkedIn',
+        'RoleShereholder',
+        'PresentagShereholder',
+        'investorType',
+        'acceptInvition',
+        'isTeamLeader',
+        'code',
+        'expire_at',
+        'region',
+        'gender',
+        'employment_type',
+        'hiring_date',
+        'documents',
+        'phone',
+        'join_date',
+        'founder_type',
+        'working_commitment',
+        'national_id',
+        'educational_status',
+        'date_of_birth',
+    ];
     
     protected $casts = [
         'documents' => 'array',

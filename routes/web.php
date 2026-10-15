@@ -1,7 +1,5 @@
 <?php
 
-use App\Notifications\WelcomeUserNotification;
-use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
@@ -18,59 +16,6 @@ use App\Http\Controllers\Judger\JudgerScreeningController;
 use App\Http\Controllers\AdvancedExportController;
 use App\Http\Controllers\TasksController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
-Route::get('def-permission', function () {
-    $jsonRole = File::get(base_path('database/dbFiles/rolesWithDefaultPermissions.json'));
-    $dataRole = json_decode($jsonRole, true);
-    $dataRole = collect($dataRole)->flatMap(function ($role) {
-        return $role['permissions'];
-    });
-    $judges = $dataRole->filter(function ($permission) {
-        return in_array('judger', $permission['default_for']);
-    })->values();
-    dd($judges->pluck('name')->toArray());
-});
-Route::get('test', function () {
-    $user = User::find(1);
-    $user->notify(new WelcomeUserNotification($user, '12345'));
-});
-
-Route::get('default-permissions', function () {
-    App\Permission::default_permissions();
-});
-Route::get('mineRate', 'IndexController@mineRate')->name('mineRate');
-
-Route::get('sendCustomerEmail/{id?}', 'IndexController@sendCustomerEmail')->name('sendCustomerEmail');
-Route::get('/reminderMentorShipRequest', 'IndexController@reminderMentorShipRequest')->name('mentors.reminderMentorShipRequest');
-
-// routes/web.php
-//Route::get('create-meeting', 'MicrosoftController@createMeeting');
-//Route::get('test', function () {
-//    event(new App\Events\WebMessage('NewMent','sss'));
-//    return "Event has been sent!";
-//});
-//Route::get('test',function (){
-//    function prime_or_not($no1)
-//    {
-//        //Insert your code here
-//        $sum = 0;
-//        if ($no1 < 2) {
-//            return 0;
-//        }
-//        for ($i = 2; $i <= sqrt($no1); $i++) {
-//            if ($no1 % $i == 0) {
-//                return -1;
-//            }
-//        }
-//        for ($i = 1; $i <= $no1; $i++) {
-//            $sum += $i;
-//        }
-//        return $sum;
-//    }
-//    return view('admin.reports.company');
-//});
-// Route::view('upload_page', 'upload_test');
-
-
 /// Frontend routes ///
 Route::get('lang/{locale}', 'IndexController@lang');
 Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
@@ -94,25 +39,10 @@ Route::get('/provider-registration', 'serviceProviderController@registration');
 Route::post('/provider-registration', 'serviceProviderController@registration_request')->name('provider-registration');
 Route::get('/provider-registration/files/{files?}', 'serviceProviderController@get_media')->where('files', '.*');
 
-// test middleware
-Route::get('/testting', function () {
-    $stamp = '1746024780';
-    $format = 'Y-m-d';
-    try {
-        $parser = 'carbon';
-        $date = Carbon\Carbon::parse($stamp)->format($format);
-    } catch (\Exception $e) {
-        $parser = 'date';
-        $date = date($format, $stamp);
-    }
-    dd($date, $parser);
-});
 Route::get('/2otp', function () {
     return redirect('/dashboard');
 })->middleware(['auth', '2fa']);
 
-Route::get('/db-migrate', 'IndexController@dbMigrate');
-Route::get('/seed-permissions', 'IndexController@seedPermissions');
 Auth::routes(['verify' => true]);
 
 Route::get('/magic-login/{user}/{token}', 'Auth\MagicLoginController@login')->middleware(['signed', 'throttle:6,1'])->name('auth.magic-login');

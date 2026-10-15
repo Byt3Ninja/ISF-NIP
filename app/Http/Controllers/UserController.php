@@ -72,6 +72,18 @@ class UserController extends Controller
 			Flash::error("User not found");
 			return back()->withInput()->with(['msg' => 'FailedStore']);
 		}
+
+		// Logging in as someone else is the strongest action in the panel: require the
+		// permission here too, and keep a non-admin inside their own organizations
+		// (never onto a platform admin).
+		$actor = auth()->user();
+		abort_unless($actor->ableTo('users.login_as'), 403);
+		if (!$actor->hasRole('admin')) {
+			$inScope = $actor->ownsOrganization($user->organization_id)
+				|| $actor->ownsOrganization($user->company?->cycledata?->organization_id);
+			abort_if($user->hasRole('admin') || !$inScope, 403);
+		}
+
 		session([
 			'impersonator_id' => auth()->id(),
 		]);
@@ -170,7 +182,7 @@ class UserController extends Controller
 	 */
 	public function updateOrganizations(Request $request, User $user)
 	{
-		$this->authorize('update', Auth::user());
+		$this->authorize('update', $user);
 
 		// Validate that user is Sub-Admin
 		if (!$user->isSubAdmin()) {
@@ -185,6 +197,15 @@ class UserController extends Controller
 
 		// Sync organizations
 		$organizationIds = $validated['organization_ids'] ?? [];
+
+		// A non-admin may only hand out organizations that are in their own scope.
+		$actor = Auth::user();
+		if (!$actor->hasRole('admin')) {
+			foreach ($organizationIds as $organizationId) {
+				abort_unless($actor->ownsOrganization($organizationId), 403);
+			}
+		}
+
 		$user->organizations()->sync($organizationIds);
 
 		return redirect()->route('users.edit', $user->id)
@@ -201,7 +222,7 @@ class UserController extends Controller
 	public function update(UpdateUserApiRequest $request, User $user)
 	{
 
-			$this->authorize('update', Auth::user());
+			$this->authorize('update', $user);
 		
 			$result=$this->userService->update($user,$request->all());
 
@@ -223,8 +244,8 @@ class UserController extends Controller
 	 */
 	public function updatePassword(UpdateUserPasswordRequest $request /*,User $user*/)
 	{
-		$this->authorize('updatePassword', Auth::user());
-		$user = User::find($request->id);
+		$user = User::findOrFail($request->id);
+		$this->authorize('updatePassword', $user);
 	
 		$result= $this->userService->updatePassword($user, $request->all());
 
@@ -264,7 +285,7 @@ class UserController extends Controller
 	 */
 	public function destroy(User $user)
 	{
-		$this->authorize('destroy', Auth::user());
+		$this->authorize('destroy', $user);
 		$result = $this->userService->destroy($user);
 
 		if ($result) {

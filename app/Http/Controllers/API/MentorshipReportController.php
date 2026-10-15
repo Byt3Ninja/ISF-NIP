@@ -404,6 +404,19 @@ class MentorshipReportController extends Controller
             return $this->error(__('admin.session_not_found'), 404);
         }
 
+        // Resource-level ownership: the permission alone does not bind the
+        // caller to this session's tenant. Without it, any holder of
+        // mentorships.sessions_reports_data reads (and, below, writes) another
+        // organization's participant PII and recording URLs.
+        // Mentors hold this permission but carry no organization scope, so the
+        // session's own mentor is allowed explicitly; nobody else's session is.
+        $authUser = auth()->user();
+        if (!$authUser->hasRole('admin')
+            && !$authUser->ownsOrganization($session->organization_id ?? $session->cycle?->organization_id)
+            && (int) $session->mentor_id !== (int) $authUser->id) {
+            return $this->error(__('admin.session_not_found'), 404);
+        }
+
         $originalReportsCount = $session->reports->count();
         $originalRecordingsCount = $session->recordings->count();
 

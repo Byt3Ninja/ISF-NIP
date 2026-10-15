@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Cycle;
 use App\CycleCustomPages;
 use App\Http\Requests\UploadCycleCustomPageImageRequest;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use URL;
+use App\Services\FileManagerService;
 
 class CycleCustomPagesController extends Controller
 {
@@ -32,7 +34,8 @@ class CycleCustomPagesController extends Controller
 			$custom_pages = $cycle->custom_pages;
 			$cycle->custom_pages()->create([
 				'title' => $request->title,
-				'content' => $request->content,
+				// Strip any JavaScript/XSS vectors; content is rendered raw on the public program page.
+				'content' => HtmlSanitizer::clean($request->content),
 				'is_active' => 1,
 				'visibility' => $request->visibility,
 				'row_no' => $custom_pages->count() + 1
@@ -79,7 +82,8 @@ class CycleCustomPagesController extends Controller
 			]);
 			$page = CycleCustomPages::where('cycle_id', $request->cycleId)->find($request->page_id);
 			$page->title = $request->title;
-			$page->content = $request->content;
+			// Strip any JavaScript/XSS vectors; content is rendered raw on the public program page.
+			$page->content = HtmlSanitizer::clean($request->content);
 			$page->visibility = $request->visibility;
 			$page->save();
 			$custom_pages = Cycle::find($request->cycleId)->custom_pages;
@@ -224,7 +228,8 @@ class CycleCustomPagesController extends Controller
 			$cycleId = $request->cycle_id;
 
 			// Generate unique filename: timestamp_cycleId_randomString.ext
-			$filename = time() . '_' . $cycleId . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+			$extension = app(FileManagerService::class)->assertAllowed($image, 'image');
+			$filename = time() . '_' . $cycleId . '_' . uniqid() . '.' . $extension;
 
 			// Store in cycle-specific subfolder
 			$path = "{$cycleId}/{$filename}";

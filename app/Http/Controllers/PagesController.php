@@ -7,6 +7,7 @@ use DB;
 use App\Pages;
 use Carbon\Carbon;
 use Redirect;
+use App\Services\FileManagerService;
 
 class PagesController extends Controller
 {
@@ -24,10 +25,10 @@ class PagesController extends Controller
 			{
 				$file = $request->file('image');
 				$path = 'images/resource/';
-				$fileExtension = $request->file('image')->getClientOriginalExtension();
-				$filename = \Illuminate\Support\Str::random(5).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10);
-				$filename2 =$filename.'.'.$fileExtension;
-				$file->move($path, $filename.'.'.$fileExtension);
+				// Whitelist + real-content check; the stored name is generated server-side,
+				// never taken from the client (a GIF-headered shell.php passes a MIME check).
+				$filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+				$file->move($path, $filename2);
 			}
 		}
 		$newpage = new Pages();
@@ -71,10 +72,10 @@ class PagesController extends Controller
 			{
 				$file = $request->file('image');
 				$path = 'images/resource/';
-				$fileExtension = $request->file('image')->getClientOriginalExtension();
-				$filename = \Illuminate\Support\Str::random(20).\Illuminate\Support\Str::limit(Carbon::today().Carbon::now(),10,'page');
-				$filename2 =$filename.'.'.$fileExtension;
-				$file->move($path, $filename.'.'.$fileExtension);
+				// Whitelist + real-content check; the stored name is generated server-side,
+				// never taken from the client (a GIF-headered shell.php passes a MIME check).
+				$filename2 = app(FileManagerService::class)->validatedSafeName($file, 'image');
+				$file->move($path, $filename2);
 				$updatepage->image = $filename2;
 			}
 		}

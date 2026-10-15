@@ -345,13 +345,17 @@ class OrganizationLandingPageService
 
             // Handle new image upload
             if (isset($files[$index]['image']) && $files[$index]['image'] instanceof \Illuminate\Http\UploadedFile) {
+                // Validate the replacement first (image whitelist + real content type): a rejected
+                // upload must never cost the existing image, and the extension is never the client's.
+                $extension = app(FileManagerService::class)->assertAllowed($files[$index]['image'], 'image');
+
                 // Delete old image
                 if ($processedArticle['image']) {
                     Storage::disk('organization_landing')->delete("{$organizationId}/articles/{$processedArticle['image']}");
                 }
 
                 $file = $files[$index]['image'];
-                $filename = time() . '_' . $index . '.' . $file->getClientOriginalExtension();
+                $filename = time() . '_' . $index . '.' . $extension;
                 Storage::disk('organization_landing')->put("{$organizationId}/articles/{$filename}", file_get_contents($file));
                 $processedArticle['image'] = $filename;
             }
@@ -385,13 +389,16 @@ class OrganizationLandingPageService
 
             // Handle new logo upload
             if (isset($files[$index]['logo']) && $files[$index]['logo'] instanceof \Illuminate\Http\UploadedFile) {
+                // Validate the replacement first (see the article image above).
+                $extension = app(FileManagerService::class)->assertAllowed($files[$index]['logo'], 'image');
+
                 // Delete old logo
                 if ($processedPartner['logo']) {
                     Storage::disk('organization_landing')->delete("{$organizationId}/partners/{$processedPartner['logo']}");
                 }
 
                 $file = $files[$index]['logo'];
-                $filename = time() . '_' . $index . '.' . $file->getClientOriginalExtension();
+                $filename = time() . '_' . $index . '.' . $extension;
                 Storage::disk('organization_landing')->put("{$organizationId}/partners/{$filename}", file_get_contents($file));
                 $processedPartner['logo'] = $filename;
             }

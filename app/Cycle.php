@@ -34,7 +34,47 @@ class Cycle extends Model
         'landing_visible' => 'boolean',
         'landing_sort_order' => 'integer',
     ];
-    protected $guarded = [];
+    // organization_id is the tenant key: never mass-assignable, set it explicitly.
+    protected $fillable = [
+        'incubator_id',
+        'title',
+        'description',
+        'start',
+        'end',
+        'private',
+        'allow_non_company',
+        'program_guideline',
+        'program_guideline_file',
+        'financial_guideline',
+        'financial_guideline_file',
+        'legal_guideline',
+        'legal_guideline_file',
+        'delegation_file',
+        'budget_allocation',
+        'currency_type',
+        'auto_approve_mentorship_requests',
+        'img_url',
+        'type',
+        'is_public',
+        'public_slug',
+        'step_type',
+        'winners_announcement',
+        'winners_visibility',
+        'hours_Rminder',
+        'is_active_Rminder',
+        'cohort',
+        'short_description',
+        'location',
+        'landing_visible',
+        'landing_sort_order',
+        'offline_location_address',
+        'offline_location_map',
+        'title_ar',
+        'description_ar',
+        'start_color',
+        'end_color',
+        'main_color',
+    ];
 
     // =============> Attributes <======================
 

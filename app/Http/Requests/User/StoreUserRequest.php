@@ -47,7 +47,7 @@ class StoreUserRequest extends FormRequest
                 }
             ],
             'gender'=>'nullable|in:Male,Female',
-            'img_url' => 'nullable|image|mimes:jpeg,bmp,png,jpg,gif',
+            'img_url' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'country_code' => 'required',
             'bio_en'       => 'nullable|string',
             'Linkedin'     => 'nullable|url',

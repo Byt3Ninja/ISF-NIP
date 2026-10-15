@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use App\Mail\serviceProviderRegistrationMail;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Services\FileManagerService;
 
 class UserRepository
 {
@@ -121,7 +122,7 @@ class UserRepository
 
                 if (isset($data['img_url']) && $data['img_url']) {
                     $img_url = $data['img_url'];
-                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                    $img_url = app(FileManagerService::class)->upload($img_url, 'users', 'public_uploads', 'image');
                     $user->img_url = $img_url;
                 }
 
@@ -270,7 +271,7 @@ class UserRepository
                 if (isset($data['img_url']) && $data['img_url'])
                 {
                     $img_url = $data['img_url'];
-                    $img_url = $img_url->store('users', ['disk' => 'public_uploads']);
+                    $img_url = app(FileManagerService::class)->upload($img_url, 'users', 'public_uploads', 'image');
                     $user->img_url = $img_url;
                 }
 
