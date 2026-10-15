@@ -113,7 +113,7 @@ return [
 	'registeringAs' => 'I\'m registering as',
 	'area_of_expertise' => 'Area of expertise',
 	'linkedin_profile' => 'LinkedIn Profile',
-	'create_account' => 'Create your account',
+	'create_account' => 'Create account',
 	'sign_up_subheading' => 'Sign up to unlock your dashboard, community and more.',
 	'welcome_community' => 'Welcome to the community',
 	'connect_text' => 'Connect with founders, mentors and service providers who are shaping the future of work.',
