@@ -5,6 +5,9 @@ namespace App;
 use stdClass;
 use Illuminate\Support\Facades\{DB};
 use Illuminate\Database\Eloquent\Model;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
+use App\Services\ProtectedFiles\FileAccess;
 
 class Formdata extends Model
 {
@@ -101,16 +104,7 @@ class Formdata extends Model
             $item->answers = $group->map(function ($item) use ($l) {
                 $value = $item->FD_answer;
 
-                if( is_string( $value ) && (strpos($value, '/') !== false || strpos($value, '\\') !== false) )
-                {
-                    $filename = basename($value);
-                    $value = [
-                        'type' => 'file',
-                        'path' => $value,
-                        'file_name' => $filename,
-                        'file_url' => asset($value),
-                    ];
-                }
+                $value = self::fileAnswer($value, $item->FD_company_id) ?? $value;
 
                 $submission = new stdClass;
                 $submission->user_id = $item->FD_user_id;
@@ -138,5 +132,38 @@ class Formdata extends Model
         });
 
         return $data;
+    }
+
+    /**
+     * If a stored answer is an uploaded file, describe it for display; otherwise null.
+     *
+     * A file answer is a path in the application-uploads folder. (It used to be
+     * "any answer containing a slash", which turned URLs and ordinary text into
+     * file links.) The link is resolved through the startup's own file record, so
+     * an answer that merely names somebody else's file gets a name and no link.
+     */
+    public static function fileAnswer($value, $companyId): ?array
+    {
+        if (!is_string($value) || !str_starts_with($value, 'formsubmissions/')) {
+            return null;
+        }
+        $files = app(ProtectedFiles::class);
+        if ($files->normalize(ProtectedFileSet::FORM_ANSWER, $value) === null) {
+            return null;
+        }
+        $pin = ['company_id' => $companyId];
+        $record = $files->find(ProtectedFileSet::FORM_ANSWER, $value, $pin);
+
+        // Offer the link only to someone the file route would let through.
+        $url = $record && !app(FileAccess::class)->canView(auth()->user(), $record)
+            ? null
+            : $files->urlFor(ProtectedFileSet::FORM_ANSWER, $value, $pin);
+
+        return [
+            'type' => 'file',
+            'path' => $value,
+            'file_name' => $record->original_name ?? basename($value),
+            'file_url' => $url,
+        ];
     }
 }

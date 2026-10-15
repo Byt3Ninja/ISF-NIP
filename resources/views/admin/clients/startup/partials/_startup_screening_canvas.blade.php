@@ -153,7 +153,11 @@
                               <div id="collapse{{ $index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" data-bs-parent="#formSubmissionAccordion">
                                 <div class="accordion-body pt-4">
                                   @if( $dataEntry->field_type == 'file' )
-                                    <a target="_blank" href="{{ URL::to('/'. $dataEntry->answer) }}"> {{ __('admin.Download File') }} </a>
+                                    @if( $dataEntry->file_url )
+                                      <a target="_blank" href="{{ $dataEntry->file_url }}"> {{ __('admin.Download File') }} </a>
+                                    @else
+                                      --
+                                    @endif
                                   @else
                                     {{ $dataEntry->answer }}
                                   @endif

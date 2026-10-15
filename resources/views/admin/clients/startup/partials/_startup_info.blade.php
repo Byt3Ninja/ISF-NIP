@@ -157,15 +157,16 @@
                 @endif
                 
                 <!-- Attachments -->
-                @if ($_user->hasAnyRole("Registered|Admin|organizationManager"))
-                  @if($company->CreatedTax == '1' && ($company->Commercial_Register || $company->Tax_Card))
+                {{-- Shown only to people the file route would let through (FileAccess), not by role name. --}}
+                @if ($company->viewerFileUrl('Commercial_Register') || $company->viewerFileUrl('Tax_Card'))
+                  @if($company->CreatedTax == '1')
                     <div class="mb-4">
                       <h6 class="mb-2">{{ $l == 'en' ? 'Attachments' : 'المرفقات' }}</h6>
                       <div class="d-flex flex-wrap gap-3">
-                        @if($company->Commercial_Register)
+                        @if($company->viewerFileUrl('Commercial_Register'))
                           @php
-                            $fileUrl = $company->Commercial_Register;
-                            $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                            $fileUrl = $company->viewerFileUrl('Commercial_Register');
+                            $extension = strtolower(pathinfo($company->Commercial_Register, PATHINFO_EXTENSION));
                           @endphp
                           <div class="d-flex align-items-center gap-2">
                             @if(in_array($extension, ['jpg','jpeg','png']))
@@ -180,10 +181,10 @@
                             </a>
                           </div>
                         @endif
-                        @if($company->Tax_Card)
+                        @if($company->viewerFileUrl('Tax_Card'))
                           @php
-                            $fileUrl = $company->Tax_Card;
-                            $extension = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                            $fileUrl = $company->viewerFileUrl('Tax_Card');
+                            $extension = strtolower(pathinfo($company->Tax_Card, PATHINFO_EXTENSION));
                           @endphp
                           <div class="d-flex align-items-center gap-2">
                             @if(in_array($extension, ['jpg','jpeg','png']))

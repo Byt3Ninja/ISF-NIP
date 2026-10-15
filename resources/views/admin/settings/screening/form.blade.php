@@ -88,7 +88,13 @@
                                                             <button onclick="showcom({{$answer->field_id}})" type="button" title="{{__('admin.Add comment')}}" class="btn btn-sm btn-label-success float-right"><i class="ti ti-message"></i> </button>
                                                         </dt>
                                                         <dd class="col-sm-7">
-                                                        @if(substr($answer->answer,0,4)=='http')
+                                                        @if($answer->is_file)
+                                                          @if($answer->file_url)
+                                                          <a target="_blank" href="{{ $answer->file_url }}">{{__('admin.Download File')}}</a>
+                                                          @else
+                                                          --
+                                                          @endif
+                                                        @elseif(substr($answer->answer,0,4)=='http')
                                                         <a target="_blank" href="{{$answer->answer}}">{{__('admin.Download File')}}</a>
                                                         @else
                                                                 {{$answer->answer}}

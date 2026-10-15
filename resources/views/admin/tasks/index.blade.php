@@ -550,7 +550,7 @@ $(function () {
                      <span class="text-truncate flex-grow-1 small fw-medium" title="${file.name}">${file.name}</span>
                      <span class="badge bg-label-${attColor}" style="font-size:.65rem;">${attLabel}</span>
                      ${uploadDate ? `<small class="text-muted flex-shrink-0">${uploadDate}</small>` : ''}
-                     <a href="/storage/${file.path}" download="${file.name}"
+                     <a href="${file.url || '#'}" download="${file.name}"
                         class="btn btn-icon btn-sm btn-text-secondary rounded-circle flex-shrink-0"
                         title="{{ __('admin.Download') }}">
                        <i class="ti ti-download ti-xs"></i>
@@ -846,7 +846,7 @@ $(function () {
         $existingList.append(`
           <div class="d-flex align-items-center gap-1 border rounded-2 px-2 py-1 bg-light-subtle" data-filename="${file.name}">
             <i class="ti ${iconClass} ti-sm"></i>
-            <a href="/storage/${file.path}" target="_blank" class="small text-body text-decoration-none text-truncate" style="max-width:140px;">${file.name}</a>
+            <a href="${file.url || '#'}" target="_blank" class="small text-body text-decoration-none text-truncate" style="max-width:140px;">${file.name}</a>
             ${sizeKb ? `<small class="text-muted">(${sizeKb})</small>` : ''}
             <button type="button" class="btn btn-xs btn-icon text-danger ms-1 remove-existing-attachment p-0"
               data-filename="${file.name}" data-task-id="${data.id}">
@@ -1157,7 +1157,7 @@ $(function () {
         $existingList.append(`
           <div class="d-flex align-items-center gap-1 border rounded-2 px-2 py-1 bg-light-subtle" data-filename="${file.name}">
             <i class="ti ${iconClass} ti-sm"></i>
-            <a href="/storage/${file.path}" target="_blank" class="small text-body text-decoration-none text-truncate" style="max-width:140px;">${file.name}</a>
+            <a href="${file.url || '#'}" target="_blank" class="small text-body text-decoration-none text-truncate" style="max-width:140px;">${file.name}</a>
             ${sizeKb ? `<small class="text-muted">(${sizeKb})</small>` : ''}
             <button type="button" class="btn btn-xs btn-icon text-danger ms-1 remove-existing-attachment p-0"
               data-filename="${file.name}" data-task-id="${data.id}">

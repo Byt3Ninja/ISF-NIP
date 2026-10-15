@@ -537,7 +537,9 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
   
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      var url = "{{ $company->pitch_deck }}";
+      // The pitch deck is shown by the iframe in the pitch-deck tab; this viewer has no canvas
+      // on the page, so it is given no URL (it used to request the file for nothing).
+      var url = "";
       
       // Check if URL exists and is valid
       if (!url || url.trim() === '' || url === 'null' || url === 'undefined') {

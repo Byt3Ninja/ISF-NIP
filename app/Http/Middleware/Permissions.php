@@ -66,6 +66,7 @@ class Permissions
         'provider-registration',
         'hackathon.trackShare',
         'hackathon.teamLogo',
+        'protected_files.*', // confidential uploads: decided per file record by FileAccess, not per role
         'filemanager*',
         'dashboard',
         'dashboard/dashboard',

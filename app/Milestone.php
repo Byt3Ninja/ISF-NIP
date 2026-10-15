@@ -5,10 +5,12 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasProtectedDocuments;
+use App\Enums\ProtectedFileSet;
 
 class Milestone extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasProtectedDocuments;
     
     // Company_id is the owner foreign key: never mass-assignable (the company relation sets it).
     protected $fillable = [
@@ -29,6 +31,16 @@ class Milestone extends Model
         'documents' => 'array',
         'completion_percentage' => 'integer',
     ];
+
+    /**
+     * Supporting documents as [{name, path, url}], with `url` recomputed from each
+     * file's record (authorized route, or null for a viewer who may not open it).
+     * Also unwraps the double-encoded JSON older rows contain.
+     */
+    public function getDocumentsAttribute($value)
+    {
+        return $this->protectedDocumentList($value, ProtectedFileSet::MILESTONE_DOCUMENT, 'milestone');
+    }
 
     /**
      * Append cohort to JSON serialization

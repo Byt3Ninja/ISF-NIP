@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Broadcasting\WhatsAppChannel;
 use Throwable;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
 
 class TaskNotification extends Notification implements ShouldQueue
 {
@@ -179,7 +181,8 @@ class TaskNotification extends Notification implements ShouldQueue
                 ->filter(fn ($a) => ($a['status'] ?? 'attachment') !== 'submission')
                 ->map(fn ($a) => [
                     'name' => $a['name'] ?? basename($a['path'] ?? ''),
-                    'url'  => $fileManager->getUrl($a['path'] ?? null, 'public'),
+                    // the authorized file route (the recipient logs in and must be allowed to open it)
+                    'url'  => app(ProtectedFiles::class)->urlFor(ProtectedFileSet::TASK_ATTACHMENT, $a['path'] ?? null),
                 ])
                 ->values()->all();
         } else {

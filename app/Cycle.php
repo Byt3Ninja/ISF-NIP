@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use stdClass;
+use App\Enums\ProtectedFileSet;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Services\ProtectedFiles\FileAccess;
 
 class Cycle extends Model
 {
@@ -21,13 +24,51 @@ class Cycle extends Model
 
     use HasFactory, Auditable, HasFileCleanup;
     public static $module = 'Program';
+    // Guideline documents (GUIDELINE_FILE_FIELDS) are confidential: they are recorded and
+    // retired through protected_files (see booted()), not cleaned up by column path.
     protected array $fileFields = [
         'img_url' => 'public_uploads',
-        'program_guideline_file' => 'public_uploads',
-        'financial_guideline_file' => 'public_uploads',
-        'legal_guideline_file' => 'public_uploads',
-        'delegation_file' => 'public_uploads',
     ];
+
+    /** Program documents kept privately: guideline, financial and legal policy, delegation letter. */
+    public const GUIDELINE_FILE_FIELDS = ['program_guideline_file', 'financial_guideline_file', 'legal_guideline_file', 'delegation_file'];
+
+    protected static function booted(): void
+    {
+        // A new program is saved after its documents are uploaded, so their records are
+        // created here, once the program has an id.
+        static::saved(function (Cycle $cycle) {
+            foreach (self::GUIDELINE_FILE_FIELDS as $field) {
+                if ($cycle->{$field}) {
+                    app(ProtectedFiles::class)->ensureRecorded(ProtectedFileSet::PROGRAM_GUIDELINE, $cycle->{$field}, $cycle->guidelineFileOwner($field));
+                }
+            }
+        });
+        static::deleting(function (Cycle $cycle) {
+            app(ProtectedFiles::class)->retireWhere(['set' => ProtectedFileSet::PROGRAM_GUIDELINE, 'owner_type' => 'cycle', 'owner_id' => $cycle->id]);
+        });
+    }
+
+    public function guidelineFileOwner(string $field): array
+    {
+        return ['owner_type' => 'cycle', 'owner_id' => $this->id, 'cycle_id' => $this->id, 'field' => $field];
+    }
+
+    /**
+     * Link to one of the program's documents: the authorized file route, or null when
+     * there is none. For the web it is also null for a viewer who may not open it.
+     */
+    public function guidelineFileUrl(string $field, bool $api = false): ?string
+    {
+        $files = app(ProtectedFiles::class);
+        $pin = ['owner_type' => 'cycle', 'owner_id' => $this->id];
+        $record = $files->find(ProtectedFileSet::PROGRAM_GUIDELINE, $this->{$field}, $pin);
+        if (!$api && $record && !app(FileAccess::class)->canView(auth()->user(), $record)) {
+            return null;
+        }
+
+        return $files->urlFor(ProtectedFileSet::PROGRAM_GUIDELINE, $this->{$field}, $pin, $api);
+    }
 
     protected $casts = [
         'start'  => 'date:Y-m-d',
