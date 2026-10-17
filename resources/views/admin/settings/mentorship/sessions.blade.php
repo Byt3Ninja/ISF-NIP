@@ -188,8 +188,19 @@
                           <small class="d-block">{{ $shownAt ? $shownAt->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
                         </td>
                         <td class="text-nowrap" style="min-width: 150px;">
-                          @if($session->comment)
-                            <p class="small text-muted mb-0">{!! $session->comment !!}</p>
+                          @if($session->comment || $session->admin_comment)
+                            @if($session->comment)
+                              <div>
+                                <span class="badge bg-label-primary">{{ __('cycles.Founder_Comment') }}</span>
+                                <p class="small text-muted mb-0 mt-1">{!! $session->comment !!}</p>
+                              </div>
+                            @endif
+                            @if($session->admin_comment)
+                              <div class="{{ $session->comment ? 'mt-2' : '' }}">
+                                <span class="badge bg-label-warning">{{ __('cycles.Admin_Comment') }}</span>
+                                <p class="small text-muted mb-0 mt-1">{{ $session->admin_comment }}</p>
+                              </div>
+                            @endif
                           @else
                             <small class="text-muted">{{ __('admin.No comment provided') }}</small>
                           @endif
@@ -1067,7 +1078,7 @@
             }
           });
           $('#period').val(response.period);
-          $('#notes').val(response.notes);
+          $('#notes').val(response.admin_comment);
           $('#ModifyRequest').modal('show');
         },
         error: function(error) {

@@ -646,6 +646,8 @@ return [
     'Export All Evaluations' => 'Export All Evaluations',
     'Expertise' => 'Expertise',
     'Comment' => 'Comment',
+    'Founder_Comment' => 'Founder Comment',
+    'Admin_Comment' => 'Admin Comment',
     'No saved training courses' => 'No saved training courses',
     'Passcode' => 'Passcode',
     'Meeting_Passcode' => 'Meeting Passcode',

@@ -275,7 +275,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'location' => $session->cycle->offline_location_address ?? '',
                 'address' => $session->orgnization->address ?? '',
                 'mapLink' => $session->cycle->offline_location_map ?? $session->orgnization->google_map_url ?? '',
-                'notes' => $session->comment ?? '',
+                'notes' => $session->admin_comment ?: ($session->comment ?? ''),
                 'attachments' => $session->fileurl ? [['url' => env('APP_URL').'/dashboard/uploads/InviteMentor/'.$session->fileurl, 'name' => basename($session->fileurl), 'path' => $session->fileurl]] : [],
                 'status' => $session->approved ?? '',
                 'action' => 'modifySession',

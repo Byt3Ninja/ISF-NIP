@@ -639,6 +639,8 @@ return [
     'Export All Evaluations' => 'تصدير جميع التقييمات',
     'Expertise' => 'التخصص',
     'Comment' => 'التعليق',
+    'Founder_Comment' => 'تعليق المؤسس',
+    'Admin_Comment' => 'تعليق المسؤول',
     'No saved training courses' => 'لا يوجد دورات تدريبية محفوظة',
     'Passcode' => 'كود الدخول',
     'Meeting_Passcode' => 'كود الجلسة',

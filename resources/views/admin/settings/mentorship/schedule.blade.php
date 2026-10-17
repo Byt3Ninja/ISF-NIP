@@ -273,7 +273,7 @@
             }
           });
           $('#period').val(response.period);
-          $('#notes').val(response.notes);
+          $('#notes').val(response.admin_comment);
           $('#ModifyRequest').modal('show');
         },
         error: function(error) {
