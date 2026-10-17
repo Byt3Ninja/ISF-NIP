@@ -170,6 +170,7 @@ return [
         'session_date' => 'Session Date',
         'session_time' => 'Session Time',
         'link' => 'Link',
+        'start_meeting' => 'Start Meeting',
         'map_link' => 'Google Map Link',
         'address' => 'Address',
         'button' => 'View Training',

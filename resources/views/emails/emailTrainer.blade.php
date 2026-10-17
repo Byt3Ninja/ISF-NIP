@@ -44,7 +44,8 @@
                                             <tr>
                                                 <td style="{{ $labelStyle }}">{{ $t('link') }}:</td>
                                                 <td style="{{ $valueStyle }}">
-                                                    @if($trainerLink !== '')<a href="{{ $trainerLink }}" target="_blank" style="{{ $linkStyle }}">{{ $trainerLink }}</a>@else - @endif
+                                                    {{-- The host (start) link carries a long token, so it is shown as a label instead of the raw URL. --}}
+                                                    @if($trainerLink !== '')<a href="{{ $trainerLink }}" target="_blank" style="{{ $linkStyle }}">{{ $t('start_meeting') }}</a>@else - @endif
                                                 </td>
                                             </tr>
                                         @else

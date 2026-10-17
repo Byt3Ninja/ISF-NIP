@@ -176,6 +176,7 @@ return [
         'session_date' => 'تاريخ الجلسة',
         'session_time' => 'وقت الجلسة',
         'link' => 'الرابط',
+        'start_meeting' => 'ابدأ الاجتماع',
         'map_link' => 'رابط خرائط Google',
         'address' => 'العنوان',
         'button' => 'عرض التدريب',
