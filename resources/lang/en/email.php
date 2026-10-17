@@ -372,7 +372,7 @@ return [
         'support_offer' => 'If you need any additional information or assistance, please feel free to reach out.',
     ],
     'mentor_notify_email' => [
-        'subject' => 'Upcoming Mentorship Session with',
+        'subject' => 'Mentorship Session with :name.',
         'informing' => 'A mentorship session has been scheduled with the following founder and startup.',
         'session_details' => 'Session Details',
         'founder' => 'Founder',

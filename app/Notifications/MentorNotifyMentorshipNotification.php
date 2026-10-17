@@ -157,10 +157,13 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
 
         $founder = $mentorship_session?->user;
         $startup = $founder?->company;
-        $founderName = $founder?->name ?? '';
-        $subject = app()->getLocale() === 'ar'
-            ? "جلسة إرشاد مع {$founderName}."
-            : "Upcoming Mentorship Session with {$founderName}";
+        // The founder's name in the email's language, falling back to the
+        // English name so the subject never ends up with a blank name.
+        $founderName = trim(($founder?->{'first_name_' . app()->getLocale()} ?? '') . ' ' . ($founder?->{'last_name_' . app()->getLocale()} ?? ''));
+        if ($founderName === '') {
+            $founderName = trim(($founder?->first_name_en ?? '') . ' ' . ($founder?->last_name_en ?? ''));
+        }
+        $subject = __('email.mentor_notify_email.subject', ['name' => $founderName]);
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])
