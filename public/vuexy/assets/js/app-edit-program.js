@@ -805,6 +805,37 @@
           ),
         },
       },
+      // Branding colors are stored in hidden inputs driven by the Pickr widgets.
+      programColorGradientStartVal: {
+        validators: {
+          notEmpty: {
+            message: T(
+              "Please enter a valid start color.",
+              "Please enter a valid start color.",
+            ),
+          },
+        },
+      },
+      programColorGradientEndVal: {
+        validators: {
+          notEmpty: {
+            message: T(
+              "Please enter a valid end color.",
+              "Please enter a valid end color.",
+            ),
+          },
+        },
+      },
+      programColorMainVal: {
+        validators: {
+          notEmpty: {
+            message: T(
+              "Please enter a valid button color.",
+              "Please enter a valid button color.",
+            ),
+          },
+        },
+      },
     },
     (instance) => {
       // Move the error message out of the `input-group` element
@@ -853,6 +884,10 @@
   });
 
   const validators = [fv1, fv2, fv3, fv4, fv5];
+
+  // The branding Pickr widgets live in a separate IIFE below. Expose a hook so
+  // they can refresh the matching color field's validation state on change/clear.
+  window.programBrandingColorRevalidate = (name) => fv4.revalidateField(name);
 
   // ------------------------------------------------------------
   // Saving
@@ -967,12 +1002,12 @@
   );
 
   const brandingDefaults = [
-    { containerId: "#programColorGradientStart", hiddenId: "#programColorGradientStartVal", key: "start" },
-    { containerId: "#programColorGradientEnd", hiddenId: "#programColorGradientEndVal", key: "end" },
-    { containerId: "#programColorMain", hiddenId: "#programColorMainVal", key: "main" },
+    { containerId: "#programColorGradientStart", hiddenId: "#programColorGradientStartVal", field: "programColorGradientStartVal", key: "start" },
+    { containerId: "#programColorGradientEnd", hiddenId: "#programColorGradientEndVal", field: "programColorGradientEndVal", key: "end" },
+    { containerId: "#programColorMain", hiddenId: "#programColorMainVal", field: "programColorMainVal", key: "main" },
   ];
 
-  const initColorPicker = ({ containerId, hiddenId, key }) => {
+  const initColorPicker = ({ containerId, hiddenId, field, key }) => {
     const el = document.querySelector(containerId);
     const hidden = document.querySelector(hiddenId);
     if (!el || !hidden) return null;
@@ -1017,11 +1052,15 @@
     // Pickr 1.x has no onChange/onSave options: values must be read from events
     const sync = (picked) => {
       hidden.value = picked ? picked.toHEXA().toString() : "";
+      window.programBrandingColorRevalidate?.(field);
     };
     picker
       .on("change", sync)
       .on("save", sync)
-      .on("clear", () => (hidden.value = ""));
+      .on("clear", () => {
+        hidden.value = "";
+        window.programBrandingColorRevalidate?.(field);
+      });
     return picker;
   };
 
@@ -1035,6 +1074,7 @@
         pickers[i]?.applyColor(true);
         const hidden = document.querySelector(cfg.hiddenId);
         if (hidden) hidden.value = BRAND_DEFAULTS[cfg.key];
+        window.programBrandingColorRevalidate?.(cfg.field);
       });
     });
 })();

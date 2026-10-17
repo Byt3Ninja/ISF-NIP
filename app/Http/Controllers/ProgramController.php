@@ -869,11 +869,17 @@ class ProgramController extends Controller
             'programVisibility' => 'required|in:public,private',
             'programPublicUrl' => ['nullable', 'string', 'max:250', Rule::requiredIf($isPublic)],
             // strict hex: these values end up in inline CSS on public pages
-            'programColorGradientStartVal' => ['nullable', 'string', self::HEX_COLOR_RULE],
-            'programColorGradientEndVal' => ['nullable', 'string', self::HEX_COLOR_RULE],
-            'programColorMainVal' => ['nullable', 'string', self::HEX_COLOR_RULE],
+            'programColorGradientStartVal' => ['required', 'string', self::HEX_COLOR_RULE],
+            'programColorGradientEndVal' => ['required', 'string', self::HEX_COLOR_RULE],
+            'programColorMainVal' => ['required', 'string', self::HEX_COLOR_RULE],
         ], [
             'programPublicUrl.required' => 'Public URL is required for a public program.',
+            'programColorGradientStartVal.required' => 'Please enter a valid start color.',
+            'programColorGradientStartVal.regex' => 'Please enter a valid start color.',
+            'programColorGradientEndVal.required' => 'Please enter a valid end color.',
+            'programColorGradientEndVal.regex' => 'Please enter a valid end color.',
+            'programColorMainVal.required' => 'Please enter a valid button color.',
+            'programColorMainVal.regex' => 'Please enter a valid button color.',
         ]);
 
         $extra = [];
