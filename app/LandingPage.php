@@ -178,6 +178,34 @@ class LandingPage extends Model
     }
 
     /**
+     * Whether the Programs section should render on the public landing page
+     * for the given language. It must be enabled and have all mandatory
+     * fields (title, title tag, description) filled for that language.
+     * Callers must also make sure there is at least one program to list.
+     *
+     * @param bool $isAr Render language is Arabic
+     * @return bool
+     */
+    public function isProgramsRenderable($isAr = false)
+    {
+        if (!$this->programs_is_enabled) {
+            return false;
+        }
+
+        $mandatory = $isAr
+            ? [$this->programs_title_ar, $this->programs_title_tag_ar, $this->programs_description_ar]
+            : [$this->programs_title, $this->programs_title_tag, $this->programs_description];
+
+        foreach ($mandatory as $value) {
+            if (trim((string) $value) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Generate a unique slug from a landing page title.
      *
      * @param string $title

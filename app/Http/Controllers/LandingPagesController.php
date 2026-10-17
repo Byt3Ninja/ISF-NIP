@@ -169,7 +169,13 @@ class LandingPagesController extends Controller
 		// nav / CTA / footer links and hero stat).
 		$showHow = $page->isHowRenderable($l == 'ar');
 
-		return view('admin.landing-pages.show', compact('page', 'colors', 'visiblePrograms', 'customSections', 'showHow'));
+		// Same for About Us and Programs: an enabled section without its
+		// content (or, for Programs, without any program to list) is hidden
+		// together with its nav / CTA / footer links and hero stat.
+		$showAbout = $page->isAboutRenderable($l == 'ar');
+		$showPrograms = $page->isProgramsRenderable($l == 'ar') && $visiblePrograms->isNotEmpty();
+
+		return view('admin.landing-pages.show', compact('page', 'colors', 'visiblePrograms', 'customSections', 'showHow', 'showAbout', 'showPrograms'));
 	}
 
   public function create(Request $request)
@@ -445,7 +451,7 @@ class LandingPagesController extends Controller
             'type'      => 'checkbox',
             'label_en'  => 'Enable Section',
             'label_ar'  => 'تفعيل القسم',
-            'value'     => $currentPage ? (bool) $currentPage->about_is_enabled : 1,
+            'value'     => $currentPage ? (bool) $currentPage->about_is_enabled : 0,
             'col'       => 12,
           ],
           [
@@ -522,7 +528,7 @@ class LandingPagesController extends Controller
             'type'      => 'checkbox',
             'label_en'  => 'Enable Section',
             'label_ar'  => 'تفعيل القسم',
-            'value'     => $currentPage ? (bool) $currentPage->programs_is_enabled : 1,
+            'value'     => $currentPage ? (bool) $currentPage->programs_is_enabled : 0,
             'col'       => 12,
           ],
           [

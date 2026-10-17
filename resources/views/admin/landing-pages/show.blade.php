@@ -130,7 +130,7 @@
 
     // Stats belong to a section only while that section is enabled: a disabled
     // Programs / How It Works section must not leak its numbers into the hero.
-    $lpShowProgramStats = $page->programs_is_enabled && $lpProgramsCount > 0;
+    $lpShowProgramStats = $showPrograms;
     $lpShowStepStat = $showHow && $lpStepCount > 0;
   @endphp
 
@@ -158,7 +158,7 @@
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navMenu">
           <ul class="navbar-nav align-items-lg-center gap-lg-1">
-            @if($page->about_is_enabled)
+            @if($showAbout)
               @php
                 $navAbout = $l == 'ar'
                   ? ($page->about_nav_title_ar ?? $page->about_title_ar ?? null)
@@ -169,7 +169,7 @@
               @endphp
               <li class="nav-item"><a class="nav-link" href="#about">{{ \Illuminate\Support\Str::limit($navAbout, 15) }}</a></li>
             @endif
-            @if($page->programs_is_enabled)
+            @if($showPrograms)
               @php
                 $navPrograms = $l == 'ar'
                   ? ($page->programs_nav_title_ar ?? $page->programs_title_ar ?? null)
@@ -240,7 +240,7 @@
                 </li>
               </ul>
             </li>
-            @if ($page->programs_is_enabled)
+            @if($showPrograms)
               <li class="nav-item mt-2 mt-lg-0">
                 <a href="#programs" class="btn hero-nav-cta">{{ __('landing.apply_now') }} </a>
               </li>
@@ -277,7 +277,7 @@
             $heroCtaLink = $page->hero_cta_link ?: '#programs';
           @endphp
           <div class="d-flex flex-wrap gap-3 mt-5">
-            @if($page->hero_cta_link || $page->programs_is_enabled)
+            @if($page->hero_cta_link || $showPrograms)
               <a href="{{ $heroCtaLink }}" class="btn hero-primary-cta btn-lg">{{ $heroCtaText }} <i
                   class="ti ti-arrow-up-right ms-1"></i></a>
             @endif
@@ -339,7 +339,7 @@
   @php $landingBg = false; @endphp
 
   <!-- ===== About / Value props ===== -->
-  @if($page->about_is_enabled)
+  @if($showAbout)
     <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="about">
       @php $landingBg = !$landingBg; @endphp
       <div class="container py-4">
@@ -406,7 +406,7 @@
   @endif
 
   <!-- ===== Programs ===== -->
-  @if($page->programs_is_enabled)
+  @if($showPrograms)
     <section class="section-py {{ $landingBg ? 'bg-body' : 'bg-card' }}" id="programs">
       @php $landingBg = !$landingBg; @endphp
       <div class="container py-4">
@@ -681,7 +681,7 @@
           <p class="text-secondary mt-3 position-relative mx-auto" style="max-width:480px;">{{ $ctaDescription }}</p>
         @endif
         <div class="d-flex flex-wrap gap-3 justify-content-center mt-4 position-relative">
-          @if($page->programs_is_enabled)
+          @if($showPrograms)
             <a href="#programs" class="btn btn-primary rounded-pill btn-lg">{{ __('landing.find_my_program') }} <i
                 class="ti ti-arrow-up-right ms-1"></i></a>
           @endif
@@ -698,13 +698,13 @@
   @php
     // The footer Programs block needs the on-page Programs section to exist
     // (the "More Programs" link scrolls to it) and at least one program to list.
-    $lpFooterShowPrograms = $page->programs_is_enabled && $lpProgramsCount > 0;
+    $lpFooterShowPrograms = $showPrograms;
 
     $lpFooterQuickLinks = collect();
-    if ($page->about_is_enabled) {
+    if ($showAbout) {
       $lpFooterQuickLinks->push(['label' => __('landing.about'), 'url' => '#about']);
     }
-    if ($page->programs_is_enabled) {
+    if ($showPrograms) {
       $lpFooterQuickLinks->push(['label' => __('landing.programs'), 'url' => '#programs']);
     }
     if ($showHow) {
