@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Broadcasting\WhatsAppChannel;
+use App\Settings;
 use App\Services\WhatsAppService;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
@@ -30,6 +31,13 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
     {
         $this->user = $user;
         $this->password = $password;
+
+        // The user's own profile language; a new user has none yet, so they
+        // get the platform default language chosen in the settings. Laravel
+        // renders the whole notification (subject, view, layout) in it.
+        $setting = Settings::first();
+        $platformLocale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $this->locale = in_array($user->language, ['en', 'ar'], true) ? $user->language : $platformLocale;
     }
 
     /**
@@ -77,12 +85,20 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
         $this->configureSmtp($smtpSettings);
         $magicLoginUrl = $notifiable->generateMagicLoginUrl();
 
+        $firstName = $this->locale === 'ar' ? trim((string) $this->user->first_name_ar) : '';
+        $lastName = $this->locale === 'ar' ? trim((string) $this->user->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $this->user->first_name_en);
+            $lastName = trim((string) $this->user->last_name_en);
+        }
+
         return (new MailMessage)
             ->from(config('mail.from.address'), config('mail.from.name'))
             ->subject(__('email.welcome_email.subject'))
             ->view('emails.welcome-email', array_merge([
                 'user'          => $this->user,
                 'magicLoginUrl' => $magicLoginUrl,
+                'welcomeRecipientName' => trim($firstName . ' ' . $lastName),
             ], $orgData));
     }
 
