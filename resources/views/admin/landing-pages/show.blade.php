@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
   <link rel="stylesheet" href="/vuexy/assets/css/demo.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/custom-lp.css?v=20261006" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/custom-lp.css?v=20261019" />
 
   @php
     // ── Branding (Custom Sections tab) ────────────────────────────

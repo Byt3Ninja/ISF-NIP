@@ -883,11 +883,42 @@ header[id] {
 
 .lp-rich ul,
 .lp-rich ol {
-  padding-inline-start: 1.4rem;
+  padding-inline-start: 1.6rem;
+  /* The wrapping section is centered (Bootstrap `.text-center`); without this
+     an outside marker is pinned to the list's left edge while the item text is
+     centered, so bullets/numbers detach from their text and the items look
+     misaligned. Force lists (and their items) back to the start edge. */
+  text-align: start;
+  list-style-position: outside;
+  /* The wrapper uses `white-space: pre-wrap`; inside a list that preserved
+     whitespace/newlines would break markers away from their item text. */
+  white-space: normal;
+}
+
+.lp-rich ul {
+  list-style-type: disc;
+}
+
+.lp-rich ol {
+  list-style-type: decimal;
 }
 
 .lp-rich li {
   margin-bottom: 0.45rem;
+  text-align: start;
+}
+
+/* Nested lists keep their own marker style and a smaller indent. */
+.lp-rich ul ul,
+.lp-rich ul ol,
+.lp-rich ol ul,
+.lp-rich ol ol {
+  padding-inline-start: 1.4rem;
+  margin-top: 0.45rem;
+}
+
+.lp-rich ul ul {
+  list-style-type: circle;
 }
 
 /* .lp-rich a {
