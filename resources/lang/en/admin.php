@@ -1626,6 +1626,7 @@ return [
 	'Thursday' => 'Thursday',
 	'Friday' => 'Friday',
 	'Cant_add_request_date_is_Exist' => 'Can\'t add request date is exist',
+	'Mentorship_Notes_Too_Long' => 'Notes are too long. Please shorten them and try again.',
 	'No Messages Selected' => 'No Messages Selected',
 	'Select at least one message' => 'Please select at least one message to delete',
 	'OK' => 'OK',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\AttendanceTrainingOffline;
+use App\Enums\MentorshipTextLimit;
 use App\Company;
 use App\Cycle;
 use App\Organization;
@@ -522,10 +523,11 @@ class MentorsController extends Controller
 		$settings = Settings::where('id', 1)->first();
 		
 		$request->validate([
-			'notes' => 'nullable|string|max:1000',
+			'notes' => 'nullable|string|max:' . MentorshipTextLimit::NOTES->value,
 			'file_url' => 'nullable|file|max:10240|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,png,jpeg,jpg',
 			'selected_dates' => 'nullable|array',
 		], [
+			'notes.max' => __('mentor.notes_max_length', ['max' => MentorshipTextLimit::NOTES->value]),
 			'file_url.mimes' => __('mentor.unsupported_slot_attachment_format'),
 			'file_url.max'   => __('mentor.file_excced_10'),
 		]);
@@ -978,6 +980,9 @@ class MentorsController extends Controller
 
 	public function add(Request $request)
 	{
+		if (mb_strlen((string) $request->notes) > MentorshipTextLimit::NOTES->value) {
+			return back()->with(['message2' => 'Mentorship_Notes_Too_Long']);
+		}
 
 		if ($request->userid) {
 			$dates = explode(',', $request->date);
@@ -1180,6 +1185,9 @@ class MentorsController extends Controller
 
 	public function modifySession(Request $request)
 	{
+		if (mb_strlen((string) $request->notes) > MentorshipTextLimit::NOTES->value) {
+			return back()->with(['message2' => 'Mentorship_Notes_Too_Long']);
+		}
 
 		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
 		

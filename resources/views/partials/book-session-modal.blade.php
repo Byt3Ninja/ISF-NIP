@@ -89,7 +89,7 @@
             {{ __('mentor.additional_notes') }}
             <span class="text-muted fw-normal">({{ __('mentor.optional') }})</span>
           </label>
-          <textarea class="form-control" id="additionalNotes" rows="3" maxlength="1000"
+          <textarea class="form-control" id="additionalNotes" rows="3" maxlength="{{ $mentorshipNotesMaxLength }}"
             placeholder="{{ __('mentor.slot_notes_placeholder') }}..."></textarea>
         </div>
       </div>

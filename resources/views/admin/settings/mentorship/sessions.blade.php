@@ -582,7 +582,7 @@
             </div>
             <div class="form-group mt-4">
               <label class="mb-2">{{ __('cycles.Add a session note') }}:</label>
-              <textarea class="form-control" id="notes" name='notes' rows="4"
+              <textarea class="form-control" id="notes" name='notes' rows="4" maxlength="{{ $mentorshipNotesMaxLength }}"
                 placeholder="{{ __('cycles.Write your note here') }}"></textarea>
             </div>
             <div class="checkbox mt-4">

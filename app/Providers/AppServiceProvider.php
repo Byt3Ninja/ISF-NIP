@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Settings;
+use App\Enums\MentorshipTextLimit;
 use App\SurveyResponses;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
@@ -172,6 +173,16 @@ class AppServiceProvider extends ServiceProvider
         // New programs (and the wizard's "Reset to Default") start from the platform colors.
         view()->composer(['admin.programs.create', 'admin.programs.edit'], function ($view) use (&$settings) {
             $view->with('_programBrandDefaults', PlatformBrandingService::programDefaults($settings));
+        });
+
+        // Mentorship note fields share one limit with their server-side validation.
+        view()->composer([
+            'partials.book-session-modal',
+            'admin.clients.startup.partials._session_modal',
+            'admin.clients.startup.partials._mutiple_session_modal',
+            'admin.settings.mentorship.sessions',
+        ], function ($view) {
+            $view->with('mentorshipNotesMaxLength', MentorshipTextLimit::NOTES->value);
         });
 
         view()->composer('partials.menu', function ($view) {

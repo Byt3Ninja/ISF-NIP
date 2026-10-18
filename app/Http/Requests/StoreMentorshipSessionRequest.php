@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\MentorshipTextLimit;
 use App\Services\TimezoneService;
 use App\Traits\ApiResponder;
 use Carbon\Carbon;
@@ -45,9 +46,16 @@ class StoreMentorshipSessionRequest extends FormRequest
             'duration_minutes' => 'required|integer|in:30,45,60',
             'override_availability' => 'boolean',
             'override_reason' => 'required_if:override_availability,true|string|max:100',
-            'notes' => 'nullable|string',
+            'notes' => 'nullable|string|max:' . MentorshipTextLimit::NOTES->value,
             'cycle_id' => 'required|exists:cycles,id', 
             'organization_id' => 'required|exists:organizations,id', 
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'notes.max' => __('mentor.notes_max_length', ['max' => MentorshipTextLimit::NOTES->value]),
         ];
     }
 

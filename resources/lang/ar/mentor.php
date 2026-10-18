@@ -126,6 +126,7 @@ return [
     'no_sessions_booked' => 'تعذّر حجز أي من الجلسات المختارة.',
     'some_sessions_booked' => 'تم حجز :booked من :total جلسات. تعذّر جدولة ما يلي:',
     'file_excced_10' => 'يتجاوز حجم الملف الحد الأقصى 10 ميجابايت',
+    'notes_max_length' => 'يجب ألا تتجاوز الملاحظات :max حرفاً.',
     'unsupported_slot_attachment_format' => 'صيغة الملف غير مدعومة. الصيغ المسموح بها: PDF, DOC, DOCX, PPT, XLS, PNG, JPEG',
     'slot_notes_placeholder' => 'شارك اي مواضيع او استفسارات للمساعدة',
     'session_location' => 'مكان الجلسة',

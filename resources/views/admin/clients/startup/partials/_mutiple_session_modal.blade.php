@@ -100,7 +100,7 @@
                 <i class="ti ti-notes me-2 text-primary"></i>
                 {{__('dashboard.Add note')}}:
               </label>
-              <textarea class="form-control form-control-lg border-2" id="notes" name="notes" rows="4"
+              <textarea class="form-control form-control-lg border-2" id="notes" name="notes" rows="4" maxlength="{{ $mentorshipNotesMaxLength }}"
                 placeholder="{{__('dashboard.Write your note here')}}"></textarea>
             </div>
           </div>
