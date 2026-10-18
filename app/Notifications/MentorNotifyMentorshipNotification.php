@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\MentorshipApproval;
 use App\Settings;
 use Carbon\Carbon;
 use App\Traits\ConfiguresSmtp;
@@ -184,6 +185,8 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
                 'mapLink'           => $mapLink,
                 'address'           => $address,
                 'attachments'       => $attachments,
+                // A declined session has no meeting: hide its link / location.
+                'isRejected'        => $mentorship_session?->approved === MentorshipApproval::REJECTED->value,
                 'viewSessionUrl'    => route('mentorships.sessions_list_detailed'),
             ], $orgData));
 
