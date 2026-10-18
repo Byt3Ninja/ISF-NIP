@@ -700,15 +700,26 @@
     // (the "More Programs" link scrolls to it) and at least one program to list.
     $lpFooterShowPrograms = $showPrograms;
 
+    // Labels mirror the dynamic section titles used in the top nav (with the
+    // translation keys only as a fallback when a section has no title set).
     $lpFooterQuickLinks = collect();
     if ($showAbout) {
-      $lpFooterQuickLinks->push(['label' => __('landing.about'), 'url' => '#about']);
+      $lpFooterAboutLabel = $l == 'ar'
+        ? ($page->about_nav_title_ar ?? ($page->about_title_ar ?? null))
+        : ($page->about_nav_title ?? ($page->about_title ?? null));
+      $lpFooterQuickLinks->push(['label' => $lpFooterAboutLabel ?: __('landing.about'), 'url' => '#about']);
     }
     if ($showPrograms) {
-      $lpFooterQuickLinks->push(['label' => __('landing.programs'), 'url' => '#programs']);
+      $lpFooterProgramsLabel = $l == 'ar'
+        ? ($page->programs_nav_title_ar ?? ($page->programs_title_ar ?? null))
+        : ($page->programs_nav_title ?? ($page->programs_title ?? null));
+      $lpFooterQuickLinks->push(['label' => $lpFooterProgramsLabel ?: __('landing.programs'), 'url' => '#programs']);
     }
     if ($showHow) {
-      $lpFooterQuickLinks->push(['label' => __('landing.how_it_works'), 'url' => '#how-it-works']);
+      $lpFooterHowLabel = $l == 'ar'
+        ? ($page->how_nav_title_ar ?? ($page->how_title_ar ?? null))
+        : ($page->how_nav_title ?? ($page->how_title ?? null));
+      $lpFooterQuickLinks->push(['label' => $lpFooterHowLabel ?: __('landing.how_it_works'), 'url' => '#how-it-works']);
     }
     foreach ($customSections as $lpFooterSection) {
       $lpFooterSectionLabel = $l == 'ar'
