@@ -19,7 +19,8 @@
                     </h2>
 
                     @if(!empty($messageBody))
-                        <p style="margin: 0 0 16px;">{{ $messageBody }}</p>
+                        {{-- Sanitized rich-text HTML (RichTextSanitizer) from the invitation editor. --}}
+                        <div style="margin: 0 0 16px;">{!! $messageBody !!}</div>
                     @else
                         <p style="margin: 0 0 16px;">{{ $isRtl ? 'تمت دعوتك للانضمام كمرشد.' : 'You have been invited to join as a mentor.' }}</p>
                     @endif

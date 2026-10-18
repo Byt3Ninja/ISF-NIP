@@ -6,6 +6,7 @@ use App\Traits\RoutesTenantMail;
 use App\InviteMentor;
 use App\Organization;
 use App\Settings;
+use App\Services\RichTextSanitizer;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -56,7 +57,7 @@ class InviteMentorMail extends Mailable implements ShouldQueue
                      ->view('emails.invite_mentor')
                      ->with(array_merge([
                          'name'          => $this->invitation->name,
-                         'messageBody'   => $this->invitation->message_content,
+                         'messageBody'   => app(RichTextSanitizer::class)->clean($this->invitation->message_content),
                          'scope'         => $this->invitation->scope,
                          'organizations' => $organizations,
                          // Named distinctly from 'platformName': a global view
