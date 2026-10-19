@@ -165,53 +165,14 @@ class SendMentorshipRequestJob implements ShouldQueue
             $startup_owner = User::findOrFail($this->userId);
             $startup_owner_name = $startup_owner->name;
 
-            $mentorLocale = $mentor->preferredLocale();
             $startupLocale = $startup_owner->preferredLocale();
 
             $session = MentorshipRequest::with('cycle', 'orgnization')->find($this->id);
-            $is_hackathon = $session && $session->cycle ? (strtolower($session->cycle->type) === 'hackathon') : false;
-
             $sessionOrganizationId = $session->organization_id ?? null;
-            [$sessionDate, $sessionTime] = $this->sessionWindowFor($this->date, $this->period ?? 60, $sessionOrganizationId, $mentor, $mentorLocale, ' (AM/PM)');
 
-            $user = new User();
-            $user->email = $mentor->email;
-            $user->id = $mentor->id;
-
-            $mentorSubject = $mentorLocale === 'ar' ? "جلسة إرشاد مع {$startup_owner_name}." : "Mentorship Session with {$startup_owner_name}.";
-            $mentorMessage = [
-                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
-                'subject' => $mentorSubject,
-                'title' => $mentorSubject,
-                'mentorName' => $mentor_name,
-                'mentorGender' => $mentor->gender ?? '',
-                'startupOwnerName' => $startup_owner_name,
-                'startupName' => $startup_owner->company->name_en ?? '',
-                'sessionDate' => $sessionDate,
-                'sessionTime' => $sessionTime,
-                'is_hackathon' => $is_hackathon,
-                'duration' => $this->period ?? '60 min',
-                'sessionType' => $this->onlineMeeting ? 'Online' : 'Offline',
-                'meetingLink' => $this->onlineMeeting['data']['join_url'] ?? '',
-                'meetingPass' => $this->onlineMeeting['data']['password'] ?? '',
-                'location' => $session->orgnization->address ?? '',
-                'mapLink' => $session->orgnization->google_map_url ?? '',
-                'notes' => '',
-                'attachments' => [],
-                'status' => 'Yes',
-                'action' => 'add',
-                'user' => 'mentor',
-                'lang' => $mentorLocale,
-            ];
-            $MSG = new MentorshipSessionMentor($mentorMessage);
-
+            // The mentor's "new session" email is sent by MentorsController@add
+            // (MentorshipSessionMentorBookingNotification); only WhatsApp here.
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-                try {
-                    $user->notify($MSG);
-                } catch (\Throwable $th) {
-                    // throw $th;
-                    Log::error('add Notification Error 1: ' . $th->getMessage());
-                }
                 $phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
                 $Massage = "Dear " . $mentor_name . ", 
                 This Is notification new mentorship session with '" . $startup_owner_name . "',
