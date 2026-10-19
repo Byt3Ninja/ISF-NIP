@@ -1047,6 +1047,7 @@ class MentorsController extends Controller
 					'type' => $sessionType,
 					'location' => null,
 					'link' => $joinUrl,
+					'passcode' => $onlineMeeting['data']['passcode'] ?? null,
 					'is_hackathon' => $cycle ? (strtolower($cycle->type) === 'hackathon') : false
 				];
 
@@ -1898,6 +1899,7 @@ class MentorsController extends Controller
 						'session_type' => $mentorshipRequest->session_type ?? 'Online',
 						'location' => $mentorshipRequest->orgnization->address ?? ($mentorshipRequest->orgnization->google_map_url ?? null),
 						'meeting_link' => $mentorshipRequest->join_url ?? null,
+						'passcode' => $mentorshipRequest->zoom_passcode ?? null,
 					];
 
 					$founder->notify(new MentorshipSessionFounderNotification($sessionData, $mentorshipRequest->organization ?? $mentorshipRequest->cycle?->organization));

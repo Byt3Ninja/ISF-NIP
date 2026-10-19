@@ -109,6 +109,7 @@ class MentorshipSessionFounderNotification extends Notification implements Shoul
                 'sessionType' => $this->sessionData['session_type'],
                 'location' => $this->sessionData['location'] ?? null,
                 'meetingLink' => $this->sessionData['meeting_link'] ?? null,
+                'passcode' => $this->sessionData['passcode'] ?? null,
             ], $orgData));
     }
 

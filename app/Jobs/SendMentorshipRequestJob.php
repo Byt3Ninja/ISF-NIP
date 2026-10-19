@@ -200,7 +200,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'duration' => $this->period ?? '60 min',
                 'sessionType' => $this->onlineMeeting ? 'Online' : 'Offline',
                 'meetingLink' => $this->onlineMeeting['data']['join_url'] ?? '',
-                'meetingPass' => $this->onlineMeeting['data']['password'] ?? '',
+                'meetingPass' => $this->onlineMeeting['data']['passcode'] ?? '',
                 'location' => '',
                 'notes' => '',
                 'attachments' => [],
