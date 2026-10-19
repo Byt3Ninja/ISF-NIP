@@ -789,13 +789,23 @@ class LandingPagesController extends Controller
   }
 
   /**
-   * Programs available to the current user for attaching to a landing
-   * page: Super Admin sees every program, Sub Admin / Tenant Admin see
-   * only programs belonging to their organizations.
+   * Programs available for attaching to a landing page: Super Admin sees
+   * every program, Sub Admin / Tenant Admin see only programs belonging to
+   * their organizations. For an existing page the scope is the page
+   * creator's, not the editor's, so whoever edits it (e.g. an Admin, or a
+   * Sub Admin with more organizations) works on the creator's programs only
+   * -- the same scope accessibleCycles() applies on the public page.
    */
-  protected function scopedCycles()
+  protected function scopedCycles(?LandingPage $page = null)
   {
     $user = auth()->user();
+
+    // Fall back to the editor when the creator is gone or has no
+    // organizations left, rather than leaving the page with no programs.
+    $creator = $page?->createdBy;
+    if ($creator && ($creator->hasRole('admin') || !empty($creator->organizations_ids))) {
+      $user = $creator;
+    }
 
     $query = Cycle::with('organization')->withCount('steps');
 
@@ -887,8 +897,8 @@ class LandingPagesController extends Controller
 
   public function edit(Request $request, $id)
   {
-    $cycles = $this->scopedCycles();
-    $currentPage = $this->scopedLandingPagesQuery()->with('cycles', 'customSections')->findOrFail($id);
+    $currentPage = $this->scopedLandingPagesQuery()->with('cycles', 'customSections', 'createdBy')->findOrFail($id);
+    $cycles = $this->scopedCycles($currentPage);
     $cycles = $this->applyProgramsOrder($cycles, $currentPage->programs_order ?? []);
 
     $programOrganizations = $this->programOrganizations($cycles);
@@ -1080,8 +1090,8 @@ class LandingPagesController extends Controller
 
 	/**
 	 * Save the Programs section for a custom landing page: which programs
-	 * (cycles) are featured. Only programs the current user is allowed to
-	 * see (per scopedCycles()) may be attached, regardless of what IDs are
+	 * (cycles) are featured. Only programs within the page creator's scope
+	 * (per scopedCycles()) may be attached, regardless of what IDs are
 	 * submitted.
 	 */
 	public function updatePrograms(Request $request, $id)
@@ -1136,7 +1146,7 @@ class LandingPagesController extends Controller
 		// Ended programs can never be attached, no matter what the request
 		// says: reject.is_expired mirrors the same accessor used to hide
 		// expired programs from the public landing page (see show()).
-		$allowedIds = $this->scopedCycles()->reject->is_expired->pluck('id')->toArray();
+		$allowedIds = $this->scopedCycles($page)->reject->is_expired->pluck('id')->toArray();
 		$cycleIds = array_values(array_intersect($requestedIds, $allowedIds));
 
 		$page->cycles()->sync($cycleIds);
@@ -1178,8 +1188,8 @@ class LandingPagesController extends Controller
 		// landing_page_cycles pivot — that only tracks selected/featured
 		// programs, and a page with nothing selected yet would have no
 		// pivot rows to update. Persist it on the page itself instead,
-		// scoped to programs the current user is actually allowed to see.
-		$allowedIds = $this->scopedCycles()->pluck('id')->toArray();
+		// scoped to the programs this page's editor is shown (see scopedCycles()).
+		$allowedIds = $this->scopedCycles($page)->pluck('id')->toArray();
 		$orderedIds = array_values(array_intersect($request->input('order'), $allowedIds));
 
 		$page->programs_order = $orderedIds;
