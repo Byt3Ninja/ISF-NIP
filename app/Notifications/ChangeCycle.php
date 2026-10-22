@@ -129,7 +129,7 @@ class ChangeCycle extends Notification implements ShouldQueue
             $programOrg = $data['organization'] ?? $notifiable->organization;
             $smtpSettings = $programOrg?->organizationSettings;
             $from = $this->getFromAddress($smtpSettings);
-            $orgData = $this->buildEmailOrganizationData($programOrg);
+            $orgData = $this->emailBrandingData();
             $orgName = $orgData['org_name'] ?? ($setting?->Platform_Name ?: config('app.name'));
 
             $data['preferred_language'] = $lang;
@@ -145,11 +145,13 @@ class ChangeCycle extends Notification implements ShouldQueue
         }
         else
         {
-            $org = $notifiable->organization;
-            $smtpSettings = $org?->organizationSettings;
+            // Branded with the organization running the program, as above.
+            $programOrg = $data['organization'] ?? $notifiable->organization;
+            $smtpSettings = $programOrg?->organizationSettings;
 
             // Get from address and name
             $from = $this->getFromAddress($smtpSettings);
+            $orgData = $this->emailBrandingData();
 
             $data['program_title'] = $data['program']->{'name_' . $lang} ?? '';
             $subject = $lang === 'en' ? "Update on Your {$data['program_title']} Application" : "تحديث بخصوص طلب انضمامكم إلى {$data['program_title']}";
@@ -157,9 +159,9 @@ class ChangeCycle extends Notification implements ShouldQueue
             return (new MailMessage)
                 ->from($from['address'], $from['name'])
                 ->subject( $subject )
-                ->view('emails.disapprove-startup', [
+                ->view('emails.disapprove-startup', array_merge([
                     'data' => $data,
-                ]);
+                ], $orgData));
         }
     }
 

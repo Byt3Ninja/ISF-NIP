@@ -115,10 +115,7 @@ class StartupJoiningNotification extends Notification implements ShouldQueue
         // when the program has none.
         $cycle = ! empty($this->data['cycle_id']) ? Cycle::with('organization')->find($this->data['cycle_id']) : null;
         $programOrg = $cycle?->organization;
-        $orgData = $this->buildEmailOrganizationData($programOrg);
-        if ($programOrg && empty($programOrg->img_url)) {
-            $orgData['org_logo_url'] = null;
-        }
+        $orgData = $this->emailBrandingData();
 
         $programName = $locale === 'ar'
             ? (trim((string) $cycle?->title_ar) ?: ($cycle?->title ?? ($this->data['cycle'] ?? '')))

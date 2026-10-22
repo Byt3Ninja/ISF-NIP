@@ -12,6 +12,7 @@ use App\Notifications\MentorUpcomingSessionReminderNotification;
 use App\Repositories\MentorshipRequestRepository;
 use App\Repositories\ReminderLogRepository;
 use App\Repositories\SettingRepository;
+use App\Services\EmailBranding;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -213,7 +214,8 @@ class MentorshipReminderService
             ];
         }
 
-        $orgName = $request->organization ? $request->organization->name : $platformName;
+        // The organization running the session (its own, else its program's), as in the logo.
+        $orgName = EmailBranding::organizationFor($request)?->name ?? $platformName;
         $company = $request->user ? $request->user->company : null;
         $isOnline = $request->session_type !== MentorshipSessionType::OFFLINE->value;
 
@@ -239,8 +241,6 @@ class MentorshipReminderService
             'notes' => $request->admin_comment ?: ($request->comment ?: null),
             'attachments' => $attachments,
             'orgName' => $orgName,
-            // Only a real logo: the placeholder path renders broken in mail clients (GV-8625).
-            'org_logo_url' => filled($request->organization?->img_url) ? $request->organization->image_url : null,
         ];
     }
 
@@ -299,7 +299,7 @@ class MentorshipReminderService
         $payload = array_merge($payload, $this->sessionTimes($request, $locale, $request->mentor));
 
         $request->mentor->notify(
-            (new MentorUpcomingSessionReminderNotification($payload, $request->organization))->locale($locale)
+            (new MentorUpcomingSessionReminderNotification($payload, EmailBranding::organizationFor($request)))->locale($locale)
         );
 
         $logRows[] = $this->logRow($request->mentor_id, 'Mentor', $request, $schedule, ReminderLogStatus::SENT);
@@ -331,7 +331,7 @@ class MentorshipReminderService
         $payload = array_merge($payload, $this->sessionTimes($request, $locale, $request->user));
 
         $request->user->notify(
-            (new FounderUpcomingSessionReminderNotification($payload, $request->organization))->locale($locale)
+            (new FounderUpcomingSessionReminderNotification($payload, EmailBranding::organizationFor($request)))->locale($locale)
         );
 
         $logRows[] = $this->logRow($request->user_id, 'User', $request, $schedule, ReminderLogStatus::SENT);

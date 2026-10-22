@@ -116,8 +116,7 @@ class MentorshipSessionMentor extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
         $this->data['orgName'] = $orgData['org_name'] ?? config('app.name');
 
             $mail = (new MailMessage)

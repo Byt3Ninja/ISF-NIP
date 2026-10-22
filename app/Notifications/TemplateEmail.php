@@ -60,6 +60,15 @@ class TemplateEmail extends Notification implements ShouldQueue
     public $preferredLocale = null;
 
     /**
+     * The program (Cycle or Step) the message is about, if any. It brands the
+     * email with the organization running it (EmailBranding); the platform
+     * brand otherwise.
+     *
+     * @var \App\Cycle|\App\Step|null
+     */
+    public $program = null;
+
+    /**
      * Create a new notification instance.
      *
      * @return void

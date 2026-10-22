@@ -115,7 +115,7 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         // GV-9566: the session's platform wall-clock, shown in the recipient's own timezone.
         $session = TimezoneService::forViewer(

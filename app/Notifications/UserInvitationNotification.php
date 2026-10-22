@@ -47,7 +47,7 @@ class UserInvitationNotification extends Notification implements ShouldQueue
 
         $this->configureSmtp($smtpSettings);
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         return (new MailMessage)
             ->subject(__('notifications.user_invitation.subject'))

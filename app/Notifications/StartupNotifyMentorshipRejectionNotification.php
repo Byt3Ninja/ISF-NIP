@@ -116,7 +116,7 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 

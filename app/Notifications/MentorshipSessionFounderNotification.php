@@ -84,7 +84,7 @@ class MentorshipSessionFounderNotification extends Notification implements Shoul
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
 

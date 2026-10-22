@@ -2,9 +2,9 @@
 
 namespace App\Traits;
 
+use App\Organization;
+use App\Services\EmailBranding;
 use App\Services\TenantMailer;
-use App\Settings;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Applies the correct SMTP account for the organization involved in an email,
@@ -70,33 +70,33 @@ trait ConfiguresSmtp
     /**
      * Build the organization data array for email template branding.
      *
+     * During a send the email layout is branded by {@see EmailBranding}
+     * whatever is passed here. Emails use emailBrandingData() instead, so
+     * their own text (sign-off, organization name) matches the logo.
+     *
      * @param  mixed  $organization
      */
     protected function buildEmailOrganizationData($organization): array
     {
-        try {
-            $setting = Settings::first();
-        } catch (\Throwable $e) {
-            $setting = null;
-        }
+        return EmailBranding::data($organization instanceof Organization ? $organization : null);
+    }
 
-        $defaultName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
+    /**
+     * The organization this email is branded with: the one running the
+     * program it is about, never the recipient's own (see EmailBranding).
+     */
+    protected function brandingOrganization(): ?Organization
+    {
+        return EmailBranding::forMail($this);
+    }
 
-        return [
-            'org_name'      => $organization?->name ?? $defaultName,
-            // image_url falls back to a RELATIVE placeholder path when the
-            // organization has no logo, which renders as a broken image in a
-            // mail client. Only a real logo is passed, so the layout falls back
-            // to the platform logo instead (GV-8625).
-            'org_logo_url'  => filled($organization?->img_url) ? $organization->image_url : null,
-            'org_logo_path' => $this->embeddableLogoPath($organization),
-            'org_address'   => $organization?->address ?? null,
-            'org_website'   => $organization?->website_url ?? null,
-            'org_linkedin'  => $organization?->linkedin_company_url ?? null,
-            'org_twitter'   => $organization?->twitter_handle ?? null,
-            'org_facebook'  => $organization?->facebook_page_url ?? null,
-            'org_instagram' => $organization?->instagram_profile_url ?? null,
-        ];
+    /**
+     * The email layout variables (logo, org_name, footer links) for this
+     * email, the same ones the layout itself is branded with during a send.
+     */
+    protected function emailBrandingData(): array
+    {
+        return EmailBranding::data($this->brandingOrganization());
     }
 
     /**
@@ -117,24 +117,5 @@ trait ConfiguresSmtp
             'address' => $config['from_address'] ?? config('mail.from.address'),
             'name'    => $config['from_name'] ?? config('mail.from.name'),
         ];
-    }
-
-    /**
-     * Local file path of the organization logo, so the layout can embed it
-     * (CID) when mail.embed_logos is on; null otherwise.
-     */
-    protected function embeddableLogoPath($organization): ?string
-    {
-        if (!config('mail.embed_logos') || blank($organization?->img_url)) {
-            return null;
-        }
-
-        try {
-            $disk = Storage::disk('organizations');
-
-            return $disk->exists($organization->img_url) ? $disk->path($organization->img_url) : null;
-        } catch (\Throwable $e) {
-            return null;
-        }
     }
 }

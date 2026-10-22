@@ -67,7 +67,8 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $data['phase_description'] = $cstep?->description ?? null;
         $data['program_name'] = $cstep?->cycle?->title ?? null;
         $data['program_id'] = $cstep?->cycle?->id ?? null;
-        $data['organization'] = $cstep?->cycle?->organization ?? null;
+        // A disapproval has no step, so fall back to the program it came from.
+        $data['organization'] = $cstep?->cycle?->organization ?? $program?->organization;
         $data['preferred_language'] = $company_owner->language;
         $data['program'] = $program ?? $cstep?->cycle;
 

@@ -33,7 +33,7 @@ class OrganizationCreatedMail extends Mailable implements ShouldQueue
 
      public function build()
     {
-        $orgData = $this->buildEmailOrganizationData($this->organization);
+        $orgData = $this->emailBrandingData();
 
         return $this->subject('New Organization Created')
                     ->view('emails.organization_created')
