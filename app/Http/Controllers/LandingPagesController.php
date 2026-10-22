@@ -170,10 +170,12 @@ class LandingPagesController extends Controller
 		$showHow = $page->isHowRenderable($l == 'ar');
 
 		// Same for About Us and Programs: an enabled section without its
-		// content (or, for Programs, without any program to list) is hidden
-		// together with its nav / CTA / footer links and hero stat.
+		// mandatory content is hidden together with its nav / CTA / footer
+		// links and hero stat. Programs is kept when the section is enabled
+		// even if there is nothing to list, so the section (and its nav link)
+		// still renders the "no programs" empty state.
 		$showAbout = $page->isAboutRenderable($l == 'ar');
-		$showPrograms = $page->isProgramsRenderable($l == 'ar') && $visiblePrograms->isNotEmpty();
+		$showPrograms = $page->isProgramsRenderable($l == 'ar');
 
 		return view('admin.landing-pages.show', compact('page', 'colors', 'visiblePrograms', 'customSections', 'showHow', 'showAbout', 'showPrograms'));
 	}

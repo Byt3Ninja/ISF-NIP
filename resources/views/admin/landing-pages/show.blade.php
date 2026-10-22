@@ -129,8 +129,9 @@
     $lpStepCount = count($page->how_steps ?? []);
 
     // Stats belong to a section only while that section is enabled: a disabled
-    // Programs / How It Works section must not leak its numbers into the hero.
-    $lpShowProgramStats = $showPrograms;
+    // (or empty) Programs / How It Works section must not leak its numbers into
+    // the hero.
+    $lpShowProgramStats = $showPrograms && $lpProgramsCount > 0;
     $lpShowStepStat = $showHow && $lpStepCount > 0;
   @endphp
 
@@ -697,8 +698,9 @@
   <!-- ===== Footer ===== -->
   @php
     // The footer Programs block needs the on-page Programs section to exist
-    // (the "More Programs" link scrolls to it) and at least one program to list.
-    $lpFooterShowPrograms = $showPrograms;
+    // (the "More Programs" link scrolls to it) and at least one program to list;
+    // unlike the section itself, an empty list must not leave an empty column.
+    $lpFooterShowPrograms = $showPrograms && $visiblePrograms->isNotEmpty();
 
     // Labels mirror the dynamic section titles used in the top nav (with the
     // translation keys only as a fallback when a section has no title set).
