@@ -181,20 +181,11 @@
            below then fix the remaining Bootstrap-3 assumptions:
            1. .note-modal-footer is height:40px with a floated .note-btn, so the CTA
               escapes the dialog border.
-           2. Summernote's z-index (dialog 1050, backdrop 1040) sits under this theme's
-              modal (--bs-modal-zindex: 1090, backdrop 1089), so the dialog and its
-              backdrop would render behind the page modal.
-           3. The dismiss button needs to stay visible and clickable. */
+           2. The dismiss button needs to stay visible and clickable.
+           Stacking above the page modal and focus inside the dialog are handled
+           globally (admin.includes.head + /js/editor-dialogs-in-modal.js). */
         .note-modal {
-            /* Above the theme's .modal (1090) and its in-modal tooltip/popover
-               layers (1091/1092) so the dialog is on top. */
-            z-index: 1094;
             overflow-y: auto;
-        }
-
-        .note-modal-backdrop {
-            /* Above those same layers, but below .note-modal itself. */
-            z-index: 1093;
         }
 
         .note-modal .note-modal-content {
