@@ -4,9 +4,10 @@ use App;
 use Closure;
 use App\User;
 use App\Messages;
+use App\Cycle;
+use App\Company;
 use App\Settings;
 use GuzzleHttp\Client;
-use App\Mail\CustomEmail;
 use App\Events\WebMessage;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -323,6 +324,7 @@ class IndexController extends Controller
     // }
 
     public function sendCustomerEmail($id = 0){
+        $cycle = Cycle::find($id);
         $companies = Company::where('cycle', $id)->get();
         $users = User::whereIn('company_id', $companies->pluck('id')->toArray())->get();
 
@@ -330,7 +332,7 @@ class IndexController extends Controller
         // dd($users);
             foreach ($users as $user) {
                 \Illuminate\Support\Facades\Notification::route('mail', $user->email)
-                    ->notify(new \App\Notifications\CustomEmailNotification($user));
+                    ->notify(new \App\Notifications\CustomEmailNotification($user, $cycle));
         }
             return response()->json([
                             'success' => true,

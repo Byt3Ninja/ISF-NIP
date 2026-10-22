@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Services\EmailBranding;
 use App\Services\TenantMailer;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Notifications\Events\NotificationSending;
@@ -33,6 +34,10 @@ class ConfigureTenantMailTransport
         TenantMailer::applyFor(
             $this->organizationFor($event->notification, $event->notifiable)
         );
+
+        // Brand the email (logo, name, footer) with the organization it is
+        // about, before toMail() builds and the layout renders it.
+        EmailBranding::begin($event->notification);
     }
 
     /**
@@ -46,6 +51,7 @@ class ConfigureTenantMailTransport
         }
 
         TenantMailer::restore();
+        EmailBranding::end();
     }
 
     /**
@@ -55,6 +61,11 @@ class ConfigureTenantMailTransport
      */
     public function messageSending(MessageSending $event): void
     {
+        // The message is fully rendered by now: stop branding, so nothing
+        // rendered later in the same worker inherits this email's brand, even
+        // if the send itself fails.
+        EmailBranding::end();
+
         $from = config('mail.from.address');
         $name = config('mail.from.name');
 

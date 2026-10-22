@@ -90,7 +90,7 @@ class FounderUpcomingSessionReminderNotification extends Notification implements
             ->subject($this->data['subject'])
             ->view(
                 'emails.founder_upcoming_session_reminder',
-                array_merge($this->data, $this->buildEmailOrganizationData($this->organization))
+                array_merge($this->data, $this->emailBrandingData())
             );
 
         // Handle attachment attachment

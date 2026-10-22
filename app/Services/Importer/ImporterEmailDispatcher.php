@@ -37,6 +37,8 @@ class ImporterEmailDispatcher
             $payload = array_merge([
                 'founder_name'   => trim(($user->first_name_en ?? '') . ' ' . ($user->last_name_en ?? '')),
                 'founder_gender' => strtolower(trim((string) $user->gender)),
+                // Brands the email with the program's organization (EmailBranding).
+                'program_id'     => $cycle->id,
                 'program_name'   => $cycle->title,
                 'program_type'   => __('cycles.' . $cycle->type, [], $locale),
                 'start_date'     => $cycle->start ? Carbon::parse($cycle->start)->format('Y-m-d') : null,

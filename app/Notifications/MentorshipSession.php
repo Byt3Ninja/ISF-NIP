@@ -139,7 +139,7 @@ class MentorshipSession extends Notification implements ShouldQueue
                 ->subject($this->data['subject'])
                 ->view('emails.mentorship_request_status', array_merge([
                     'data' => $this->data
-                ], $this->buildEmailOrganizationData($this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null))));
+                ], $this->emailBrandingData()));
 
 
 foreach ($this->data['attachments'] ?? [] as $attachment) {
@@ -172,10 +172,7 @@ foreach ($this->data['attachments'] ?? [] as $attachment) {
         $platformName = $setting?->Platform_Name ?: config('app.name');
 
         $organization = ! empty($d['organizationId']) ? Organization::find($d['organizationId']) : null;
-        $orgData = $this->buildEmailOrganizationData($organization);
-        if ($organization && empty($organization->img_url)) {
-            $orgData['org_logo_url'] = null;
-        }
+        $orgData = $this->emailBrandingData();
         $orgName = $organization
             ? (trim((string) $organization->getAttribute('name_' . $locale)) ?: $organization->getAttribute('name_en'))
             : $platformName;

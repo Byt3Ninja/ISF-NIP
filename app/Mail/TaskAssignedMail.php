@@ -40,7 +40,7 @@ class TaskAssignedMail extends Mailable implements ShouldQueue
      public function build()
     {
         $org = $this->assignedUser->organization ?? null;
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         app()->setLocale($this->assignedUser->language ?? 'en');
         $subject = app()->getLocale() === 'ar'

@@ -118,7 +118,7 @@ class StartupNotifyMentorshipNotification extends Notification implements Should
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 

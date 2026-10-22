@@ -98,8 +98,7 @@ class ProgramCreatedNotification extends Notification implements ShouldQueue
 
         // Branded with the organization that owns the program, not the
         // recipient's own organization relation.
-        $programOrg = $this->cycle->organization;
-        $orgData = $this->buildEmailOrganizationData($programOrg);
+        $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';

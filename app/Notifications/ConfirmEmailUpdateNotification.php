@@ -55,6 +55,15 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail($notifiable)
@@ -64,7 +73,7 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
 
         // Platform-branded email (platform logo/name); the org only routes SMTP.
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData(null);
+        $orgData = $this->emailBrandingData();
 
         // Follow the platform's default language (General Settings).
         $setting = Settings::first();

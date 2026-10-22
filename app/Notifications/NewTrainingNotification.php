@@ -109,8 +109,7 @@ class NewTrainingNotification extends Notification implements ShouldQueue
 
         // Branded with the organization running the training (its cycle's
         // organization), not the recipient's own organization relation.
-        $trainingOrg = $this->data['organization'] ?? $org;
-        $orgData = $this->buildEmailOrganizationData($trainingOrg);
+        $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';

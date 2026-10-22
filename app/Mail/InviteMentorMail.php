@@ -28,6 +28,15 @@ class InviteMentorMail extends Mailable implements ShouldQueue
         $this->invitation = $invitation;
     }
 
+    /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
     public function build()
     {
         $orgIds = $this->invitation->organization_ids ?? [];
@@ -35,7 +44,7 @@ class InviteMentorMail extends Mailable implements ShouldQueue
         // The invitation email always carries the platform's own branding
         // (logo, name) -- never an organization's -- regardless of which
         // organizations the invite is scoped to.
-        $orgData = $this->buildEmailOrganizationData(null);
+        $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';

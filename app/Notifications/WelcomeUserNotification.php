@@ -70,6 +70,15 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
@@ -80,7 +89,7 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
         $from = $this->getFromAddress($smtpSettings);
         // Always the platform's own branding (logo/name), never the user's
         // organization -- SMTP routing still uses the org, above.
-        $orgData = $this->buildEmailOrganizationData(null);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
         $magicLoginUrl = $notifiable->generateMagicLoginUrl();

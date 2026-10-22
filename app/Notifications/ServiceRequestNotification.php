@@ -47,7 +47,7 @@ class ServiceRequestNotification extends Mailable implements ShouldQueue
         $service = $this->request->service;
         $requester = $this->request->user;
         $org = $requester->organization;
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $adminEmail = User::role('Admin')->orderBy('id')->value('email');
         $orgManagerEmail = User::role('organizationManager')->orderBy('id')->value('email');
