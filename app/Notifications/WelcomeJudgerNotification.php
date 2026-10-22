@@ -101,6 +101,15 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
@@ -110,7 +119,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
 
         $this->configureSmtp($smtpSettings);
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $platformName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
@@ -132,12 +141,6 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
                     'user'          => $notifiable,
                     'magicLoginUrl' => $notifiable->generateMagicLoginUrl(),
                 ], $orgData));
-
-            if (!empty($fromAddress)) {
-                $mail->from($fromAddress, $fromName);
-            }
-
-            return $mail;
         }
 
         $judgerName = $this->data['name'] ?? null;
@@ -153,9 +156,13 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
 
         // Platform-branded email: platform logo/name, never the organization's.
         // (SMTP routing above still uses the organization.)
-        $platformOrgData = $this->buildEmailOrganizationData(null);
+        $platformOrgData = $this->emailBrandingData();
 
-        $mail = (new MailMessage)
+        // One-time sign-in link for the judge (GV-7312); lost in the GV-7182 merge.
+        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
             ->subject(Lang::get('email.judge_account_welcome_email.subject', [], $locale))
             ->view('emails.welcome_judger', array_merge([
                 'data'          => $this->data,
@@ -170,12 +177,6 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
                 'assignedBy'    => $this->data['assigned_by'] ?? null,
                 'magicLoginUrl' => $magicLoginUrl,
             ], $platformOrgData));
-
-        if (!empty($fromAddress)) {
-            $mail->from($fromAddress, $fromName);
-        }
-
-        return $mail;
     }
 
     /**

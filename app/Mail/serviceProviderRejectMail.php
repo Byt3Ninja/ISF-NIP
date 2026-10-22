@@ -32,9 +32,18 @@ class serviceProviderRejectMail extends Mailable implements ShouldQueue
 		$this->locale = $locale;
 	}
 
+	/**
+	 * Platform-branded email: the platform logo and name, never an
+	 * organization's (EmailBranding).
+	 */
+	public function emailBranding()
+	{
+		return null;
+	}
+
 	public function build()
 	{
-		$orgData = $this->buildEmailOrganizationData(null);
+		$orgData = $this->emailBrandingData();
 		$subject = $this->locale === 'ar' ? 'تحديث بخصوص طلبكم' : 'Update on Your Request';
 
 		return $this->subject($subject)->view('emails.service-providers.reject', array_merge([

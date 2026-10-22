@@ -126,7 +126,7 @@ class TaskNotification extends Notification implements ShouldQueue
         $this->configureSmtp($smtpSettings);
 
         $from    = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $action = $this->data['action'] ?? 'add';
         if ($action === 'add' && $notifiable->hasRole('registered')) {
@@ -445,6 +445,7 @@ class TaskNotification extends Notification implements ShouldQueue
         $cycle = match (true) {
             $task instanceof MentorshipTask => $task->company?->cycledata,
             $task instanceof TodoList => $task->cycle,
+            $task instanceof ProgramTask => $task->program,
             default => null,
         };
 

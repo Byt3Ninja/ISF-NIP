@@ -110,7 +110,7 @@ class MentorshipSessionMentorBookingNotification extends Notification implements
                 'founderName' => $founderName,
                 'sessions' => $mappedSessions,
                 'locale' => $locale,
-            ], $this->buildEmailOrganizationData($this->organization ?? $notifiable->organization)));
+            ], $this->emailBrandingData()));
     }
 
     /**

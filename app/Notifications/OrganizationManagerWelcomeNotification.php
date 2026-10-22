@@ -68,7 +68,7 @@ class OrganizationManagerWelcomeNotification extends Notification implements Sho
         $smtpSettings = $this->organization?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($this->organization);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 

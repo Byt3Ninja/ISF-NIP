@@ -124,6 +124,8 @@ class SendServiceMessageEmailReminders extends Command
                 'body'       => __('admin.service_message_email_body', $params, $recipientLang),
                 'cta_text'   => __('admin.service_message_view_cta', [], $recipientLang),
                 'action_url' => $actionUrl,
+                // Brands the email with the requesting startup's program (EmailBranding).
+                'service_request_id' => $thread->service_request_id,
             ]));
         } catch (\Throwable $th) {
             Log::error('Service message email reminder failed', [

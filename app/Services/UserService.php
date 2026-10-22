@@ -6,7 +6,6 @@ use Log;
 use App\User;
 use App\Cycle;
 use App\InviteMentor;
-use App\Mail\WelcomeUserMail;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;

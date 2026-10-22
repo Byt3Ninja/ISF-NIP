@@ -193,7 +193,7 @@ abstract class ScreeningMeetingNotification extends Notification implements Shou
         app()->setLocale($this->resolveLocale($setting, $notifiable));
 
         // After the locale switch, so the organization name is in that language.
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $params = $this->params($notifiable);
         $isRtl = app()->getLocale() === 'ar';

@@ -98,7 +98,7 @@ class OrganizationCreatedNotification extends Notification implements ShouldQueu
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         return (new MailMessage)
             ->subject(__('notifications.organization_created.subject'))

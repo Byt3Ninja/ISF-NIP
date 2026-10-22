@@ -16,7 +16,6 @@ use App\Role as R;
 use App\Team_member;
 use App\TeamFormation;
 use Illuminate\Http\Request;
-use App\Mail\WelcomeJudgerMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;

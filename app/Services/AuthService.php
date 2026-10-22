@@ -7,7 +7,6 @@ use App\Settings;
 use App\UsersBio;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
-use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;

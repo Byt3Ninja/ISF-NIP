@@ -45,7 +45,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
 use App\Notifications\ServiceRequestNotification;
 
 class HomeController extends Controller
@@ -4049,8 +4048,8 @@ class HomeController extends Controller
 
             if( $service && $service->vendor_email && !in_array(env('APP_ENV', 'local'), ['local']) )
             {
-                // Create anonymous notifiable for vendor email
-                Notification::route('mail', $service->vendor_email)->notify(new ServiceRequestNotification($serviceRequest));
+                // ServiceRequestNotification is a Mailable, not a Notification.
+                Mail::to($service->vendor_email)->queue(new ServiceRequestNotification($serviceRequest));
             }
 
             return response()->json(['state' => 'success']);

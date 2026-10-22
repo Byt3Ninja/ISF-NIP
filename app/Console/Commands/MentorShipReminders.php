@@ -53,6 +53,8 @@ class MentorShipReminders extends Command
                     $data['title']        = $request->title;
                     $data['join_url']     = $request->join_url;
                     $data['start_url']    = $request->start_url;
+                    // The organization running the session brands the email and routes SMTP.
+                    $data['organizationId'] = $request->organization_id ?: $request->cycle->organization_id;
                     if ($request->approved == 'No') {
                         $data['status'] = 'Rejected';
                     } elseif ($request->approved == 'Yes') {

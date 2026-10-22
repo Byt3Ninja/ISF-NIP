@@ -110,11 +110,14 @@ class JudgeAssignedToScreeningNotification extends Notification implements Shoul
     {
         $setting = Settings::first();
         $platformName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
-        $org = $notifiable->organization;
+        $step = Step::with('cycle.organization')->find($this->stepId);
+
+        // Sent through the organization running the program, not the judge's
+        // own organization (judges often have none).
+        $org = $step?->cycle?->organization ?? $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
 
         $this->configureSmtp($smtpSettings);
 
@@ -127,7 +130,8 @@ class JudgeAssignedToScreeningNotification extends Notification implements Shoul
         // app()->getLocale() lazily at render time.
         app()->setLocale($this->resolveLocale($setting, $notifiable));
 
-        $step = Step::with('cycle')->find($this->stepId);
+        // After the locale switch, so the organization name is in that language.
+        $orgData = $this->emailBrandingData();
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])

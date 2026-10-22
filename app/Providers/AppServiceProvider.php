@@ -18,6 +18,8 @@ use Namu\WireChat\Models\Message;
 use App\Services\BreadcrumbService;
 use Illuminate\Support\Facades\Mail;
 use App\Services\TenantMailer;
+use App\Services\EmailBranding;
+use Illuminate\Mail\Mailable;
 use App\Services\PlatformBrandingService;
 use Resend;
 use Resend\Laravel\Transport\ResendTransportFactory;
@@ -173,6 +175,20 @@ class AppServiceProvider extends ServiceProvider
         // New programs (and the wizard's "Reset to Default") start from the platform colors.
         view()->composer(['admin.programs.create', 'admin.programs.edit'], function ($view) use (&$settings) {
             $view->with('_programBrandDefaults', PlatformBrandingService::programDefaults($settings));
+        });
+
+        // Email branding (logo, name, footer links) follows the organization
+        // the email is about, decided in one place: EmailBranding. Mailables
+        // are branded here as they render; notifications by
+        // ConfigureTenantMailTransport. 'mail::header' is the header of
+        // Laravel's default notification template.
+        Mailable::buildViewDataUsing(function (Mailable $mailable) {
+            EmailBranding::begin($mailable);
+
+            return [];
+        });
+        view()->composer(['emails.*', 'admin.emails.updateEmail', 'mail::header'], function ($view) {
+            EmailBranding::compose($view);
         });
 
         // Mentorship note fields share one limit with their server-side validation.
