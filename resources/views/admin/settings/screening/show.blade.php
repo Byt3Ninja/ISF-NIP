@@ -27,10 +27,6 @@
     margin-top: -20px !important;
   }
   
-  /* Summernote-lite dialogs (link/picture/video) must sit above a Bootstrap modal (z-index 1055) */
-.note-modal { z-index: 1065 !important; }
-.note-modal-backdrop { z-index: 1060 !important; }
-
 /* Editor inside the modal-lg */
 #guidelines-modal .note-editor.note-frame { margin-bottom: 0; }
 #guidelines-modal .note-editor .note-editing-area .note-editable { height: 60vh !important; }
