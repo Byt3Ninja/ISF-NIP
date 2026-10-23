@@ -648,6 +648,9 @@
     <!-- Keeps bootstrap-daterangepicker dropdowns inside modals/offcanvas on screen -->
     <script src="/js/daterangepicker-viewport.js"></script>
 
+    <!-- Lets rich-text editor dialogs (link/image/video) take focus over a modal/offcanvas -->
+    <script src="/js/editor-dialogs-in-modal.js"></script>
+
     <!-- BEGIN: Page JS-->
     @yield('pagescripts')
 

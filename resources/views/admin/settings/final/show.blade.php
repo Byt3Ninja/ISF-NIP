@@ -26,6 +26,10 @@
   div.note-modal-footer input[type="button"] {
     margin-top: -20px !important;
   }
+  
+/* Editor inside the modal-lg */
+#guidelines-modal .note-editor.note-frame { margin-bottom: 0; }
+#guidelines-modal .note-editor .note-editing-area .note-editable { height: 60vh !important; }
 </style>
 @stop
 

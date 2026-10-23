@@ -114,6 +114,19 @@
     position: fixed !important;
     z-index: 1080;
   }
+
+  /* Summernote-lite Link/Picture/Video dialogs opened from an editor inside a
+     modal render in <body> (dialogsInBody). Their stock z-index (dialog 1050,
+     backdrop 1040) sits under this theme's modal (1090) and its in-modal
+     tooltip/popover layers (1091/1092), so lift them above. Focus inside them is
+     released from the modal's focus trap by /js/editor-dialogs-in-modal.js. */
+  .note-modal {
+    z-index: 1094;
+  }
+
+  .note-modal-backdrop {
+    z-index: 1093;
+  }
 </style>
 <!-- END: Page CSS-->
 
