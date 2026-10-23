@@ -740,11 +740,12 @@ class TrainingController extends Controller
 			}
 
 			$step = $request->step_id;
+			$getStep = Step::find($step);
 
 			// A cleared/never-selected Step or Program must fail with a clear
 			// message here -- not as a raw "step_id cannot be null" SQL error
 			// once addorcreat*Session() tries to insert the training row.
-			if (empty($step) || empty($request->cycle_id)) {
+			if (empty($step) || empty( $getStep ) || empty( $getStep?->cycle_id )) {
 				return back()->with(['message' => __('cycles.Step_Required'), 'class' => 'danger']);
 			}
 
