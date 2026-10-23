@@ -123,7 +123,7 @@ return [
 	'register_as_founder_mentor' => 'سجّل كمؤسس أو موجه',
 
 	'reset_password_subheading' => 'أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.',
-	'reset_password_cover_title' => 'بضعة نقرات وستعود',
-	'reset_password_cover_text' => 'لا تقلق. أكّد بريدك الإلكتروني وستعود إلى لوحة التحكم في وقت قصير.',
+	'reset_password_cover_title' => 'هل تذكرت كلمة مرورك؟',
+	'reset_password_cover_text' => 'لا حاجة لإعادة تعيينه. سجّل الدخول باستخدام كلمة مرورك الحالية وتابع من حيث توقفت.',
 	'Back to login' => 'العودة لتسجيل الدخول',
 ];

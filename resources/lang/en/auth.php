@@ -124,7 +124,7 @@ return [
 	'register_as_founder_mentor' => 'Register as founder or mentor',
 
 	'reset_password_subheading' => 'Enter your email and we will send you a link to reset your password.',
-	'reset_password_cover_title' => 'Back in a few clicks',
-	'reset_password_cover_text' => 'No worries about it. Confirm your email and you will be back on your dashboard in no time.',
+	'reset_password_cover_title' => 'Remembered your password?',
+	'reset_password_cover_text' => 'No need to reset it. Sign in with your current password and continue where you left off.',
 	'Back to login' => 'Back to login',
 ];
