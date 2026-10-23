@@ -200,6 +200,7 @@ HTML;
               </div>
               <div class="fallback"><input name="file" type="file" /></div>
             </div>
+            <div id="programLogoError" class="invalid-feedback d-none"></div>
             <div class="mt-3 {{ $logoUrl ? '' : 'd-none' }}" id="currentLogoWrap">
               <small class="text-body d-block mb-2">{{ __('cycles.Current logo') }}</small>
               <img id="currentLogoImg" src="{{ $logoUrl }}" class="rounded img-thumbnail" style="max-height: 90px; max-width: 180px;" alt="{{ __('cycles.Current logo') }}" />

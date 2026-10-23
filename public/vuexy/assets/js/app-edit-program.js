@@ -141,10 +141,37 @@
 </div>`,
       init() {
         const dz = this;
+        const logoErrorEl = document.getElementById("programLogoError");
         // Replace the current file instead of silently keeping a rejected second one
         dz.on("maxfilesexceeded", (file) => {
           dz.removeAllFiles();
           dz.addFile(file);
+          if (logoErrorEl) {
+            logoErrorEl.textContent = "";
+            logoErrorEl.classList.add("d-none");
+          }
+        });
+        dz.on("addedfile", () => {
+          if (logoErrorEl) {
+            logoErrorEl.textContent = "";
+            logoErrorEl.classList.add("d-none");
+          }
+        });
+        dz.on("error", () => {
+          if (logoErrorEl) {
+            const msg = T(
+              "Please upload a valid image file (jpg, jpeg, png, gif, webp) with maximum size of 2MB.",
+              "Please upload a valid image file (jpg, jpeg, png, gif, webp) with maximum size of 2MB.",
+            );
+            logoErrorEl.textContent = msg;
+            logoErrorEl.classList.remove("d-none");
+          }
+        });
+        dz.on("removedfile", () => {
+          if (logoErrorEl) {
+            logoErrorEl.textContent = "";
+            logoErrorEl.classList.add("d-none");
+          }
         });
       },
     });
@@ -912,6 +939,59 @@
   const goNext = (index) =>
     run(async () => {
       if (index === STEPS.length - 1) return publishFlow(false);
+      // Validate logo upload in Schedule & Media step before proceeding
+      if (index === 1 && logoDropzone) {
+        const logoErrorEl = document.getElementById("programLogoError");
+        if (logoErrorEl) {
+          logoErrorEl.textContent = "";
+          logoErrorEl.classList.add("d-none");
+        }
+        const rejectedFiles = typeof logoDropzone.getRejectedFiles === "function"
+          ? logoDropzone.getRejectedFiles()
+          : (logoDropzone.files || []).filter((f) => f.status === Dropzone.ERROR);
+        if (rejectedFiles && rejectedFiles.length > 0) {
+          const errMsg = T(
+            "Please upload a valid image file (jpg, jpeg, png, gif, webp) with maximum size of 2MB.",
+            "Please upload a valid image file (jpg, jpeg, png, gif, webp) with maximum size of 2MB.",
+          );
+          if (logoErrorEl) {
+            logoErrorEl.textContent = errMsg;
+            logoErrorEl.classList.remove("d-none");
+          }
+          return;
+        }
+        const acceptedFiles = typeof logoDropzone.getAcceptedFiles === "function"
+          ? logoDropzone.getAcceptedFiles()
+          : (logoDropzone.files || []).filter((f) => f.accepted);
+        if (acceptedFiles && acceptedFiles.length > 0) {
+          for (let i = 0; i < acceptedFiles.length; i++) {
+            const file = acceptedFiles[i];
+            if (file.size && file.size > 2 * 1024 * 1024) {
+              const errMsg = T(
+                "The uploaded file is too large. Maximum size is 2MB.",
+                "The uploaded file is too large. Maximum size is 2MB.",
+              );
+              if (logoErrorEl) {
+                logoErrorEl.textContent = errMsg;
+                logoErrorEl.classList.remove("d-none");
+              }
+              return;
+            }
+            const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+            if (file.type && validTypes.indexOf(file.type.toLowerCase()) === -1) {
+              const errMsg = T(
+                "Please upload a valid image file (jpg, jpeg, png, gif, webp).",
+                "Please upload a valid image file (jpg, jpeg, png, gif, webp).",
+              );
+              if (logoErrorEl) {
+                logoErrorEl.textContent = errMsg;
+                logoErrorEl.classList.remove("d-none");
+              }
+              return;
+            }
+          }
+        }
+      }
       if (!(await isValid(validators[index]))) return;
       await saveStep(index);
       stepper.next();

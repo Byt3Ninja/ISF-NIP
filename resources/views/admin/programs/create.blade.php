@@ -184,6 +184,7 @@ HTML;
               </div>
               <div class="fallback"><input name="file" type="file" /></div>
             </div>
+            <div id="programLogoError" class="invalid-feedback d-none"></div>
             {{-- Revealed by JS once a logo has been saved --}}
             <div class="mt-3 d-none" id="currentLogoWrap">
               <small class="text-body d-block mb-2">{{ __('cycles.Current logo') }}</small>
