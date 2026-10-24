@@ -3,7 +3,10 @@
 namespace App\Notifications;
 
 use App\Services\GlobalNotificationSettingsService;
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -141,33 +144,71 @@ class InviteToHackathon extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
+        // Follow the platform's default language (General Settings). Switched
+        // before anything else: the view, the layout, displayName() and
+        // Organization::getNameAttribute() all read app()->getLocale().
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        app()->setLocale($locale);
+
         $org = $this->resolveOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
 
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        // return (new MailMessage)
-        //     ->subject('Invitation to Join a Hackathon Team')
-        //     ->greeting('Hello ' . $notifiable->first_name)
-        //     ->line("You have been invited to join the team: {$this->teamName}")
-        //     ->line("Invited by: {$this->teamLeader->first_name} {$this->teamLeader->last_name}")
-        //     ->action('Accept Invitation', url('/invitations/accept')) // عدّل الرابط حسب مشروعك
-        //     ->line('Thank you for using our platform!');
 
         $orgData = $this->emailBrandingData();
 
-            return (new MailMessage)
-            ->subject(__('admin.Invitation_to_Join_a_Hackathon_Team'))
+        $cycle = $this->team_q?->cycle;
+        $hackathonTitle = $locale === 'ar'
+            ? (trim((string) $cycle?->title_ar) ?: $cycle?->title)
+            : $cycle?->title;
+
+        // An AnonymousNotifiable is an email with no account yet: it gets the
+        // register CTA instead of the hackathon details page.
+        $isNewUser = ! ($notifiable instanceof \App\User);
+        $inviteUrl = $isNewUser
+            ? url('/register')
+            : ($this->team_q?->cycle_id ? url("dashboard/hackathon/details/{$this->team_q->cycle_id}") : url('dashboard'));
+
+        return (new MailMessage)
+            ->subject(__('email.hackathon_invite_email.subject'))
             ->markdown('emails.hackathon_inviteTeam', array_merge([
                 'data' => $this->teamLeader,
                 'teamName' => $this->team_q,
+                'teamTitle' => $this->team_q?->name ?? '',
+                'hackathonTitle' => $hackathonTitle ?: __('admin.Hackathon'),
                 'teamMember' => $this->teamMember,
+                'isNewUser' => $isNewUser,
                 // The recipient can be an AnonymousNotifiable (email-only invite
                 // with no registered user), so these may legitimately be blank.
                 'recipientName' => $this->displayName($notifiable),
                 'recipientGender' => $notifiable->gender ?? null,
                 'leaderName' => $this->displayName($this->teamLeader),
+                'expiryDuration' => $this->expiryDuration(),
+                'inviteUrl' => $inviteUrl,
             ], $orgData));
+    }
+
+    /**
+     * Time left on the invite link, e.g. "23 hours 59 minutes", in the current
+     * locale. Falls back to the 24h the controller sets on expire_at.
+     */
+    private function expiryDuration(): string
+    {
+        $expireAt = $this->teamMember?->expire_at;
+
+        if ($expireAt) {
+            $expireAt = Carbon::parse($expireAt);
+            if ($expireAt->isFuture()) {
+                return $expireAt->locale(app()->getLocale())->diffForHumans(now(), [
+                    'syntax' => CarbonInterface::DIFF_ABSOLUTE,
+                    'parts' => 2,
+                ]);
+            }
+        }
+
+        return app()->getLocale() === 'ar' ? '24 ساعة' : '24 hours';
     }
 
     /**

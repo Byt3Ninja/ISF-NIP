@@ -24,7 +24,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 40px 40px 20px 40px; text-align: {{ $alignStart }}; direction: {{ $dirAttr }};">
-                        <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ $isRtl ? 'مرحباً' : 'Hello' }} {{ $greetingName }}{{ $isRtl ? '،' : ',' }}</h1>
+                        <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ $isRtl ? 'مرحباً' : 'Hello' }}{{ $greetingName !== '' ? ' ' . $greetingName : '' }}{{ $isRtl ? '،' : ',' }}</h1>
 
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $t('body', ['team' => $teamTitle, 'hackathon' => $hackathonTitle]) }}</p>
 
@@ -53,7 +53,7 @@
                         </table>
 
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
-                            {{ $t('regards', ['org_name' => $org_name ?? $platformName]) }}
+                            {{ $t('regards') }}<br>{{ $org_name ?? $platformName }}
                         </p>
                     </td>
                 </tr>

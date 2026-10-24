@@ -277,12 +277,19 @@ return [
     ],
 
     'hackathon_invite_email' => [
+        'subject' => 'You’re invited to join a hackathon team',
         'invited' => 'You have been invited to join the hackathon team ":team".',
         'invited_by' => 'Invited by:',
         'team' => 'Team:',
         'expires' => 'This invitation link will expire in 24 hours.',
         'cta_hint' => 'Please use the button below to accept or reject the invitation.',
         'cta' => 'View Invitation',
+        'cta_new_user' => 'Respond to Invitation',
+        'body' => 'You have been invited to join :team in :hackathon.',
+        'review_hint' => 'Please review the invitation and choose whether to accept or reject it before the link expires.',
+        'new_user_hint' => 'To accept or reject this invitation, please create an account or sign in using the button below.',
+        'expires_in' => 'Invitation expires in: :duration',
+        'regards' => 'Best regards,',
     ],
 
     'hackathon_email' => [
