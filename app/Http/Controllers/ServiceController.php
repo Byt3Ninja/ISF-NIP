@@ -285,6 +285,7 @@ class ServiceController extends Controller
 	 */
 	public function edit(Service $service)
 	{
+		$this->authorizeService($service);
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
 		$serviceCategories = ServiceCategory::with(['organization', 'creator', 'creator.roles', 'creator.organizations'])
@@ -340,6 +341,7 @@ class ServiceController extends Controller
 	
 	public function update(UpdateServiceRequest $request, Service $service)
 	{
+		$this->authorizeService($service);
 		
 		$request->merge([
 			'status' => $request->has('status') ? 1 : 0
@@ -428,6 +430,7 @@ class ServiceController extends Controller
 	 */
 	public function destroy(Service $service)
 	{
+		$this->authorizeService($service);
 		$service->delete();
 		return response()->json(['state' => 'success'], 200);
 	}
@@ -1650,5 +1653,26 @@ class ServiceController extends Controller
 			];
 		}
 		return $stats;
+	}
+
+	/**
+	 * H8: an existing service may be changed only by an admin, the provider that owns it,
+	 * or staff managing an organization the service is offered in.
+	 */
+	private function authorizeService(Service $service): void
+	{
+		$user = auth()->user();
+		if ($user->hasRole('admin')) {
+			return;
+		}
+
+		if ($user->hasRole('serviceProvider')) {
+			$providerId = $user->service_provider?->id;
+			abort_unless($providerId && (int) $service->service_provider_id === (int) $providerId, 403);
+			return;
+		}
+
+		$organizationIds = $service->organizations()->pluck('organizations.id')->push($service->organization_id)->filter();
+		abort_unless($organizationIds->contains(fn ($id) => $user->managesOrganization($id)), 403);
 	}
 }

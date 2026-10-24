@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('mentorshipReminder')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('cycle:change-step')->hourly();
-        $schedule->command('service-messages:send-email-reminders')->everyFifteenMinutes();
+        $schedule->command('service-messages:send-email-reminders')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('importer:purge-expired')->hourly()->withoutOverlapping();
         // After the upload cutover: warn if confidential files reappear in a web-served folder.
         $schedule->command('files:protect:watch')->dailyAt('03:30');

@@ -107,12 +107,7 @@
                               <i class="ti ti-eye"></i>
                             </button>
 
-                            <a onclick="return confirm('{{ __('Are you sure?') }}');"
-                              href="{{ URL::to('/dashboard/deletemsg/' . $getmsg->id ?? null) }}"
-                              class="btn btn-icon btn-sm btn-label-danger rounded-circle"
-                              data-bs-toggle="tooltip" title="{{ __('Delete message') }}">
-                              <i class="ti ti-trash text-danger"></i>
-                            </a>
+                            @include('partials.forms.confirm-action', ['formId' => 'delete-msg-' . $getmsg->id, 'action' => route('contact_messages.delete', $getmsg->id), 'message' => __('Are you sure?'), 'label' => '<i class="ti ti-trash text-danger"></i>', 'class' => 'btn btn-icon btn-sm btn-label-danger rounded-circle'])
                           </div>
                         </div>
                       </li>
@@ -231,7 +226,6 @@
             } else {
               $('#replyby').html('');
             }
-            $('#DelMe').attr('href', '/dashboard/deletemsg/' + id)
           },
           error: function(error) {
             console.log(error);

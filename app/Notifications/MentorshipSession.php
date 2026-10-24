@@ -7,6 +7,7 @@ use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use App\Traits\ResolvesMentorshipOrganization;
 use Carbon\Carbon;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -20,7 +21,7 @@ use App\Services\TimezoneService;
 
 class MentorshipSession extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -305,6 +306,7 @@ foreach ($this->data['attachments'] ?? [] as $attachment) {
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('MentorshipSessionMentor notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Cycle;
 use App\Finalscreening;
 use App\Events\ChangeStep;
 use App\Events\JudgeAssigned;
@@ -28,6 +29,7 @@ use App\Services\JudgeScheduleConflictService;
 use App\Services\PanelWindowService;
 use App\Services\ScreeningSlotService;
 use App\Services\TimezoneService;
+use App\Services\ProtectedFiles\FileAccess;
 use App\Services\WhatsAppService;
 use App\Step;
 use App\User;
@@ -428,6 +430,8 @@ class ScreeningController extends Controller
 
 		if( empty( $judges ) ) { return Redirect::back()->with('message2', __('admin.Please_Choose_Judges')); }
 
+		$this->authorizeStepStaff($request->step, 'screening.add_judging_panels');
+
 		if( $request->step )
 		{
 			$type = Step::where('id', $request->step)->pluck('data')->first();
@@ -547,6 +551,15 @@ class ScreeningController extends Controller
 			return redirect()->back()->with('message2', 'startup not complete the form');
 		}
 		$company = Company::where('id', $answers->pluck(['company_id'])->first())->first();
+
+		// H7: only admins, staff managing the program's organization, or a judge assigned to this startup.
+		$user = auth()->user();
+		$programOrgId = Cycle::whereKey(Step::whereKey($answers->first()->step_id)->value('cycle_id'))->value('organization_id');
+		abort_unless(
+			$user->managesOrganization($programOrgId) || app(FileAccess::class)->isAssignedJudge($user, (int) $cid),
+			403
+		);
+
 		// Uploaded answers get their authorized link here (null when this viewer may not open them).
 		$answers->each(function ($answer) {
 			$answer->file_url = Formdata::fileAnswer($answer->answer, $answer->company_id)['file_url'] ?? null;
@@ -567,6 +580,15 @@ class ScreeningController extends Controller
 	 *
 	 * @return array the panels array with history entries replaced
 	 */
+	/** Staff route guard: the permission plus management of the step's program organization. */
+	private function authorizeStepStaff($stepId, string $permission): void
+	{
+		$user = Auth::user();
+		$organizationId = Cycle::whereKey(Step::whereKey($stepId)->value('cycle_id'))->value('organization_id');
+
+		abort_unless($user->ableTo($permission) && $organizationId && $user->managesOrganization($organizationId), 403);
+	}
+
 	private function restoreHistoryPanels(int $stepId, array $panels): array
 	{
 		if (!$stepId || empty($panels)) {
@@ -812,9 +834,6 @@ class ScreeningController extends Controller
 		// asking for confirmation notifies nobody.
 		$panelsBefore = $this->snapshotPanels((int) $stepId);
 
-		// Clear existing screenings for this step
-		Screening::where('step_id', $stepId)->delete();
-
 		// Accumulate the full set of judges assigned to each company across ALL
 		// panels. A company may appear in more than one panel (e.g. its own panel
 		// plus a shared "all startups" panel), so each company's Finalscreening
@@ -825,6 +844,10 @@ class ScreeningController extends Controller
 		// once, after the loop.
 		$judgesByCompany = [];
 		$meetingByCompany = [];
+		// The rebuilt rows. Collected first and written in ONE transaction after the loop,
+		// so every panel's meeting exists before anything is deleted and a failure part-way
+		// can't leave the step with some panels (or none).
+		$screeningRows = [];
 
 		// Create new screenings if panels exist
 		foreach ($panels as $index => $panel) {
@@ -912,7 +935,7 @@ class ScreeningController extends Controller
 			}
 
 			foreach ($judgeIds as $judgeId) {
-				Screening::create([
+				$screeningRows[] = [
 					'step_id' => $stepId,
 					'user_id' => $judgeId,
 					'panel' => $panelNumber,
@@ -925,7 +948,7 @@ class ScreeningController extends Controller
 					'start_time' => $panel['start_time'] ?? null,
 					'end_time' => $endTime ?: null,
 					'interval' => $interval,
-				]);
+				];
 			}
 
 			// Add meeting data to panels response
@@ -968,25 +991,33 @@ class ScreeningController extends Controller
 			}
 		}
 
-		// Persist the Final Screening judge assignments. Mirror the screenings
-		// rebuild above: clear the step's existing rows, then write one row per
-		// company holding the merged (unique) judge list. The clear removes stale
-		// rows for companies/panels no longer present in this submission.
-		if ($step && $step->stype == 5) {
-			\App\Finalscreening::where('step_id', $stepId)->delete();
-			foreach ($judgesByCompany as $companyId => $judgeIds) {
-				// The Finalscreening model casts `judges` to array, so it json_encodes on save.
-				// Pass the array directly — passing a pre-encoded string causes double-encoding.
-				\App\Finalscreening::create([
-					'step_id' => $stepId,
-					'company_id' => $companyId,
-					'judges' => array_values(array_unique(array_map('intval', $judgeIds))),
-					'join_url' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['meeting_link'] ? ( $meetingByCompany[$companyId]['meeting_link'] ?? null ) : null,
-					'datetime' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['datetime'] ? ( $meetingByCompany[$companyId]['datetime'] ?? null ) : null,
-					'duration' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['duration'] ? ( $meetingByCompany[$companyId]['duration'] ?? null ) : null,
-				]);
+		DB::transaction(function () use ($stepId, $step, $screeningRows, $judgesByCompany, $meetingByCompany) {
+			// Clear existing screenings for this step, then write the rebuilt panels.
+			Screening::where('step_id', $stepId)->delete();
+			foreach ($screeningRows as $row) {
+				Screening::create($row);
 			}
-		}
+
+			// Persist the Final Screening judge assignments. Mirror the screenings
+			// rebuild above: clear the step's existing rows, then write one row per
+			// company holding the merged (unique) judge list. The clear removes stale
+			// rows for companies/panels no longer present in this submission.
+			if ($step && $step->stype == 5) {
+				\App\Finalscreening::where('step_id', $stepId)->delete();
+				foreach ($judgesByCompany as $companyId => $judgeIds) {
+					// The Finalscreening model casts `judges` to array, so it json_encodes on save.
+					// Pass the array directly — passing a pre-encoded string causes double-encoding.
+					\App\Finalscreening::create([
+						'step_id' => $stepId,
+						'company_id' => $companyId,
+						'judges' => array_values(array_unique(array_map('intval', $judgeIds))),
+						'join_url' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['meeting_link'] ? ( $meetingByCompany[$companyId]['meeting_link'] ?? null ) : null,
+						'datetime' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['datetime'] ? ( $meetingByCompany[$companyId]['datetime'] ?? null ) : null,
+						'duration' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['duration'] ? ( $meetingByCompany[$companyId]['duration'] ?? null ) : null,
+					]);
+				}
+			}
+		});
 
 		$this->notifyNewlyAssignedJudges($stepId, $panels, $judgesBefore);
 		$this->notifyScheduleChanges((int) $stepId, $panels, $panelsBefore);
@@ -1471,6 +1502,7 @@ class ScreeningController extends Controller
         ]);
 
         $stepId = $request->step;
+        $this->authorizeStepStaff($stepId, 'screening.delete_judging_panel');
         $panelIdx = (int)$request->panel; // 1-based index from UI usually, or 0-based. Let's assume 1-based to match 'panel' column.
 
         // A finished panel is a record of a screening that took place; it cannot be
@@ -1502,16 +1534,20 @@ class ScreeningController extends Controller
             foreach ($list as $oldIdx => $data) {
                 $newList[$i++] = $data;
             }
-            $step->update(['list' => !empty($newList) ? json_encode($newList) : null]);
-            
-            // Delete screenings for the target panel
-            Screening::where('step_id', $stepId)->where('panel', $panelIdx)->delete();
-            
-            // Shift subsequent screenings down if needed to maintain panel alignment
-            $screeningsToShift = Screening::where('step_id', $stepId)->where('panel', '>', $panelIdx)->get();
-            foreach ($screeningsToShift as $sc) {
-                $sc->update(['panel' => $sc->panel - 1]);
-            }
+            // All-or-nothing: the panel list, the deleted panel and the renumbered
+            // ones must change together or the panels drift out of alignment.
+            DB::transaction(function () use ($step, $newList, $stepId, $panelIdx) {
+                $step->update(['list' => !empty($newList) ? json_encode($newList) : null]);
+
+                // Delete screenings for the target panel
+                Screening::where('step_id', $stepId)->where('panel', $panelIdx)->delete();
+
+                // Shift subsequent screenings down if needed to maintain panel alignment
+                $screeningsToShift = Screening::where('step_id', $stepId)->where('panel', '>', $panelIdx)->get();
+                foreach ($screeningsToShift as $sc) {
+                    $sc->update(['panel' => $sc->panel - 1]);
+                }
+            });
 
             if ($panelBefore) {
                 $this->notifyPanelDeleted((int) $stepId, $panelBefore, $request->boolean('notify'));
@@ -1531,6 +1567,18 @@ class ScreeningController extends Controller
 
 	public function save(Request $request)
 	{
+		// H1: only a judge assigned to this startup, or staff of the program, may score it.
+		$actor = Auth::user();
+		$companyId = (int) $request->company_id;
+		$cycleId = Step::whereKey($request->form_id)->value('cycle_id');
+		$fileAccess = app(FileAccess::class);
+		abort_unless(
+			$companyId && $cycleId
+			&& (int) Company::whereKey($companyId)->value('cycle') === (int) $cycleId
+			&& ($fileAccess->isAssignedJudge($actor, $companyId) || $actor->managesOrganization(Cycle::whereKey($cycleId)->value('organization_id'))),
+			403
+		);
+
 		$answers = Formdata::where('form_id', $request->form_id)->where('company_id', $request->company_id)->orderBy('field_id', 'ASC')->get(['field_id']);
 
 		$user = Auth::id();
@@ -1545,6 +1593,8 @@ class ScreeningController extends Controller
 
 	public function add(Request $request)
 	{
+		$this->authorizeStepStaff($request->sid, 'screening.add_judging_panels');
+
 		$list = json_encode($request->panelusers);
 		if ($list) {
 			Screening::where('step_id', $request->sid)->where('panel', $request->pid)->update(['users' => $list]);
@@ -1556,6 +1606,8 @@ class ScreeningController extends Controller
 
 	public function getusers($fid, $sid, $pid)
 	{
+		$this->authorizeStepStaff($sid, 'screening.manage');
+
 		$list = Screening::where('step_id', $sid)->where('panel', $pid)->first(['users']);
 		$outlist = Screening::where('step_id', $sid)->where('panel', '<>', $pid)->pluck('users');
 		$outlist ? $outlist = ('[' . str_replace(['[', ']'], '', json_encode($outlist)) . ']') : $outlist = [];
@@ -1876,6 +1928,8 @@ class ScreeningController extends Controller
 		]);
 
 		$id = $request->stepId;
+		// Only staff managing the step's program may build or publish its evaluation.
+		$this->authorizeStepStaff($id, $status == 'publish' ? 'screening.evaluation_publish' : 'screening.evaluation_save_draft');
 		$criteria = collect( $request->criteria );
 
 		// Precise, named field-level check: reports the exact criterion / sub-criterion at fault.
@@ -1904,7 +1958,7 @@ class ScreeningController extends Controller
 						if( $total != 1 )
 						{
 							$name = $criteriaItem['name'];
-							if( $criteria->sum('weight') > 1 ) { return response()->json(['status' => false, 'message' => __('admin.category_weight_not_exceed_100', ['category' => $name])], 200); }
+							if( $total > 1 ) { return response()->json(['status' => false, 'message' => __('admin.category_weight_not_exceed_100', ['category' => $name])], 200); }
 							else { return response()->json(['status' => false, 'message' => __('admin.category_weight_be_100', ['category' => $name])], 200); }
 						}
 					}
@@ -2013,82 +2067,86 @@ class ScreeningController extends Controller
 					$toRemove['criteria'][] = $savedCriterion;
 				}
 			}
-			foreach( $toCreate['criteria'] as $value )
-			{
-				$criteria = new ScreeningEvaluationCriteria;
-				$criteria->title = $value['name'];
-				$criteria->weight = $value['weight'] * 100;
-				$criteria->evaluation_id = $evaluation->id;
-				$criteria->save();
-				if( array_key_exists('subCriteria', $value) )
+			// All-or-nothing: a failure part-way (e.g. a delete) must not leave the
+			// evaluation with half of the new criteria tree.
+			DB::transaction(function () use ($toCreate, $toUpdate, $toRemove, $evaluation, $status) {
+				foreach( $toCreate['criteria'] as $value )
 				{
-					foreach( $value['subCriteria'] as $sub )
+					$criteria = new ScreeningEvaluationCriteria;
+					$criteria->title = $value['name'];
+					$criteria->weight = $value['weight'] * 100;
+					$criteria->evaluation_id = $evaluation->id;
+					$criteria->save();
+					if( array_key_exists('subCriteria', $value) )
+					{
+						foreach( $value['subCriteria'] as $sub )
+						{
+							$subCriteria = new ScreeningEvaluationCriteria;
+							$subCriteria->title = $sub['name'];
+							$subCriteria->weight = $sub['weight'] * 100;
+							$subCriteria->parent_id = $criteria->id;
+							$subCriteria->evaluation_id = null;
+							$subCriteria->save();
+						}
+					}
+				}
+				if( array_key_exists('subCriteria', $toCreate) )
+				{
+					foreach( $toCreate['subCriteria'] as $sub )
 					{
 						$subCriteria = new ScreeningEvaluationCriteria;
 						$subCriteria->title = $sub['name'];
 						$subCriteria->weight = $sub['weight'] * 100;
-						$subCriteria->parent_id = $criteria->id;
+						$subCriteria->parent_id = $sub['parent_id'];
 						$subCriteria->evaluation_id = null;
 						$subCriteria->save();
 					}
 				}
-			}
-			if( array_key_exists('subCriteria', $toCreate) )
-			{
-				foreach( $toCreate['subCriteria'] as $sub )
+				if( array_key_exists('criteria', $toUpdate) )
 				{
-					$subCriteria = new ScreeningEvaluationCriteria;
-					$subCriteria->title = $sub['name'];
-					$subCriteria->weight = $sub['weight'] * 100;
-					$subCriteria->parent_id = $sub['parent_id'];
-					$subCriteria->evaluation_id = null;
-					$subCriteria->save();
+					foreach( $toUpdate['criteria'] as $value )
+					{
+						$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
+						$criteria->title = $value['name'];
+						$criteria->weight = $value['weight'] * 100;
+						$criteria->save();
+					}
 				}
-			}
-			if( array_key_exists('criteria', $toUpdate) )
-			{
-				foreach( $toUpdate['criteria'] as $value )
+				if( array_key_exists('subCriteria', $toUpdate) )
 				{
-					$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
-					$criteria->title = $value['name'];
-					$criteria->weight = $value['weight'] * 100;
-					$criteria->save();
+					foreach( $toUpdate['subCriteria'] as $sub )
+					{
+						$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
+						$subCriteria->title = $sub['name'];
+						$subCriteria->weight = $sub['weight'] * 100;
+						$subCriteria->save();
+					}
 				}
-			}
-			if( array_key_exists('subCriteria', $toUpdate) )
-			{
-				foreach( $toUpdate['subCriteria'] as $sub )
-				{
-					$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
-					$subCriteria->title = $sub['name'];
-					$subCriteria->weight = $sub['weight'] * 100;
-					$subCriteria->save();
-				}
-			}
 
-			if( array_key_exists('subCriteria', $toRemove) )
-			{
-				foreach( $toRemove['subCriteria'] as $sub )
+				if( array_key_exists('subCriteria', $toRemove) )
 				{
-					$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
-					if( $subCriteria ) { $subCriteria->delete(); }
+					foreach( $toRemove['subCriteria'] as $sub )
+					{
+						$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
+						if( $subCriteria ) { $subCriteria->delete(); }
+					}
 				}
-			}
 
-			if( array_key_exists('criteria', $toRemove) )
-			{
-				foreach( $toRemove['criteria'] as $value )
+				if( array_key_exists('criteria', $toRemove) )
 				{
-					$criteria = ScreeningEvaluationCriteria::find ( $value->id );
-					if( $criteria ) { $criteria->delete(); }
+					foreach( $toRemove['criteria'] as $value )
+					{
+						$criteria = ScreeningEvaluationCriteria::find ( $value->id );
+						if( $criteria ) { $criteria->delete(); }
+					}
 				}
-			}
 
-			if( $status == 'publish' )
-			{
-				$evaluation->status = true;
-				$evaluation->save();
-			}
+				if( $status == 'publish' )
+				{
+					$evaluation->status = true;
+					$evaluation->save();
+				}
+			});
 
 			$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 			return response()->json([
@@ -2286,6 +2344,7 @@ class ScreeningController extends Controller
 		}
 
 		$step = Step::with('cycle')->find($stepId);
-		abort_unless($step && $step->cycle && $user->ownsOrganization($step->cycle->organization_id), 403);
+		// managesOrganization, not ownsOrganization: a founder "owns" their own program's organization.
+		abort_unless($step && $step->cycle && $user->managesOrganization($step->cycle->organization_id), 403);
 	}
 }

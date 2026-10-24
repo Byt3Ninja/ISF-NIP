@@ -13,6 +13,7 @@ return [
 	'myinterests' => 'إهتماماتي',
 	'InvitationSent' => 'تم ارسال الدعوة بنجاح',
 	'invitationExpired' => 'انتهت صلاحية الدعوة',
+	'invitationAlreadyUsed' => 'تم استخدام هذه الدعوة بالفعل. يرجى تسجيل الدخول، أو طلب دعوة جديدة.',
 	'user_exists' => 'هذا الحساب موجود',
 	'manage_currencies' => 'إدارة العملات',
 	'Currencies' => 'العملات',

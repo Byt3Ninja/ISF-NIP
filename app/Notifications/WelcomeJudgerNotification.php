@@ -4,7 +4,9 @@ namespace App\Notifications;
 
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
+use Throwable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -15,7 +17,7 @@ use App\Broadcasting\WhatsAppChannel;
 
 class WelcomeJudgerNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
 
     public $tries = 3;
     public $backoff = 60;
@@ -246,5 +248,12 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
             'message' => Lang::get("notifications.{$group}.broadcast", [], $locale),
             'time' => now()->toDateTimeString(),
         ]);
+    }
+
+    /** Queued: when the worker gives up, free the welcome slot so it can be sent again. */
+    public function failed(Throwable $exception): void
+    {
+        $this->releaseClaim();
+        report($exception);
     }
 }

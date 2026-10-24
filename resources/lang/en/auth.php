@@ -79,6 +79,7 @@ return [
 	'validate_phone_format' => 'The phone number is not a valid E164 format.',
 	'validate_terms_agreement_required' => 'You must agree to the terms and conditions',
 	'validate_terms_agreement_in' => 'You must agree to the terms and conditions',
+	'provider_registration_rejected' => 'Your service provider application was not approved, so this account cannot sign in. Please contact the platform team for details.',
 	'provider_registration_recorded' => 'Your registration has been recorded. Please wait for admin approval. You will receive an email when approved.',
 	'submittedAt' => 'Submitted At',
 	'ActionTaken' => 'Action Taken',

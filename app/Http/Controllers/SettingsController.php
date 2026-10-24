@@ -130,14 +130,22 @@ class SettingsController extends Controller
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
 
+	/** H1: the platform About / Contact pages are global settings rows, editable by admins only. */
+	private function authorizeAboutContactPages(): void
+	{
+		abort_unless(auth()->user()->hasRole('admin') && auth()->user()->ableTo('settings.system_general_update'), 403);
+	}
+
 	public function get_aboutus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allabout = Settings::findorfail('10');
 		return view('admin.settings.editaboutus')->with('allabout',$allabout);
 	}
 
 	public function update_aboutus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allabout = Settings::findorfail('10');
 		$allabout->title = $request->input('title');
 		$allabout->ar_title = $request->input('ar_title');
@@ -154,12 +162,14 @@ class SettingsController extends Controller
 
 	public function get_contactus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allcontact = Settings::findorfail('11');
 		return view('admin.settings.editcontactus')->with('allcontact',$allcontact);
 	}
 
 	public function update_contactus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allcontact = Settings::findorfail('11');
 		$allcontact->title = $request->input('title');
 		$allcontact->ar_title = $request->input('ar_title');
@@ -904,6 +914,7 @@ class SettingsController extends Controller
         if (!$organization) {
           return redirect()->back()->with('error', 'Organization not found.');
         }
+        abort_unless(auth()->user()->managesOrganization($organization->id), 403);
 
         $organization->name_en = $request->input('organization_name', $organization->name_en);
         $organization->contact_email = $request->input('contact_email', $organization->contact_email);
@@ -946,6 +957,7 @@ class SettingsController extends Controller
         if (!$organization) {
             return redirect()->back()->with('error', 'Organization not found.');
         }
+        abort_unless(auth()->user()->managesOrganization($organization->id), 403);
 
         $organization->meeting_platform = $request->input('meeting_platform');
         $organization->max_concurrent_sessions = $request->input('max_concurrent_sessions');
@@ -987,6 +999,7 @@ class SettingsController extends Controller
         if (!$organization) {
             return redirect()->back()->with('error', 'Organization not found.');
         }
+        abort_unless(auth()->user()->managesOrganization($organization->id), 403);
 
         $organization->website_url = $request->input('website_url');
         $organization->facebook_page_url = $request->input('facebook_url');
@@ -1010,7 +1023,8 @@ class SettingsController extends Controller
 			'first_name' => 'required|string',
 			'last_name' => 'required|string',
 			'email' => 'required|email|unique:users,email',
-			'role' => 'required|string|exists:roles,name',
+			// Only organization-manager invitations exist (team-members form); never admin/sub-admin.
+			'role' => ['required', 'string', Rule::exists('roles', 'name')->where('default_for', 'organizationmanager')],
 		]);
 	
 		if ($validator->fails()) {
@@ -1061,6 +1075,10 @@ class SettingsController extends Controller
 	{
 		$invitation = Invitation::findOrFail($invitationId);
 
+		if ($invitation->status !== 'pending') {
+			return redirect()->route('login')->with('message2', __('admin.invitationAlreadyUsed'));
+		}
+
 		if ($invitation->expires_at < now()) {
 			return redirect()->route('login')->with('message2', __('admin.invitationExpired'));
 		}
@@ -1074,7 +1092,12 @@ class SettingsController extends Controller
 			'password' => 'required|min:8|confirmed',
 		]);
 
-		$invitation = Invitation::find($invitationId);
+		$invitation = Invitation::findOrFail($invitationId);
+
+		// Single use: an accepted or cancelled invitation cannot create another account.
+		if ($invitation->status !== 'pending') {
+			return redirect()->route('login')->with('message2', __('admin.invitationAlreadyUsed'));
+		}
 
 		// If the invitation has expired
 		if ($invitation->expires_at < now()) {
@@ -1090,9 +1113,11 @@ class SettingsController extends Controller
 			'first_name_en' => $invitation->first_name,
 			'last_name_en' => $invitation->last_name,
 			'email' => $invitation->email,
-			'organization_id' => $invitation->organization_id,
 			'password' => bcrypt($request->password),
 		]);
+		// organization_id is not mass-assignable on User (GV-2017), so create() silently dropped it.
+		$user->organization_id = $invitation->organization_id;
+		$user->save();
 
 		 $role = Role::where('name', $invitation->role)->first();
 		 if ($role) {
@@ -1105,7 +1130,7 @@ class SettingsController extends Controller
 
 		$user->assignRole($invitation->role);
 
-		$uniqueCode = rand(100000, 999999); 
+		$uniqueCode = random_int(100000, 999999);
 
 		$invitation->update([
 			'user_id' => $user->id,
@@ -1119,6 +1144,7 @@ class SettingsController extends Controller
 	public function resendInvitation($invitationId)
 	{
 		$invitation = Invitation::findOrFail($invitationId);
+		abort_unless(auth()->user()->managesOrganization($invitation->organization_id), 403);
 
 		// Prevent resending if invitation is expired
 		if ($invitation->expires_at < now()) {
@@ -1142,6 +1168,7 @@ class SettingsController extends Controller
 	public function cancelInvitation($invitationId)
 	{
 		$invitation = Invitation::findOrFail($invitationId);
+		abort_unless(auth()->user()->managesOrganization($invitation->organization_id), 403);
 		$invitation->delete();
 
 		return back()->with('message', 'InvitationCanceled');

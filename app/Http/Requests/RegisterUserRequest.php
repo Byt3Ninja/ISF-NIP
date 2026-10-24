@@ -31,7 +31,7 @@ class RegisterUserRequest extends FormRequest
             'phone'         => ['required', 'unique:users,phone'],
             'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password'      => ['required', 'string', 'min:8', 'confirmed'],
-            'role'          => ['required', 'in:Mentor,Registered,Judger'],
+            'role'          => ['required', 'in:Mentor,Registered'],
             'title'      => ['nullable', 'string'],
             'userbio'       => ['nullable', 'string'],
             'linkedin'      => ['nullable', 'string'],

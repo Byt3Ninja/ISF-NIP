@@ -18,7 +18,6 @@ class EnsurePasswordChanged
         'user.profile_update_my_password',
         'user.notification_settings_update',
         'logout',
-        'js.translations',
     ];
 
     private const ALLOWED_PATH_PREFIXES = [

@@ -32,6 +32,42 @@
                 ]
             },
             {
+                "name": "settings.about_us_edit",
+                "description": "Edit About Us Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.about_us_update",
+                "description": "Update About Us Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.contact_us_edit",
+                "description": "Edit Contact Us Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "settings.contact_us_update",
+                "description": "Update Contact Us Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
                 "name": "settings.system_section_one_update",
                 "description": "Update Setting Section One",
                 "guard_name": "web",
@@ -3550,6 +3586,39 @@
                 ]
             },
             {
+                "name": "hackathon.winners_view",
+                "description": "View Hackathon Winners",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "hackathon.winners_export",
+                "description": "Export Hackathon Winners",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "hackathon.winners_publish",
+                "description": "Publish Hackathon Winners",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "hackathon.addSharedFile",
                 "description": "Add Shared File Hackathon ",
                 "guard_name": "web",
@@ -4202,6 +4271,94 @@
                 ]
             },
             {
+                "name": "cycle.custom_pages.add",
+                "description": "Add Program Custom Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycle.custom_pages.show",
+                "description": "View Program Custom Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycle.custom_pages.update",
+                "description": "Update Program Custom Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycle.custom_pages.reorder",
+                "description": "Reorder Program Custom Pages",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycle.custom_pages.toggle_status",
+                "description": "Toggle Program Custom Page Status",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycle.custom_pages.toggle_visibility",
+                "description": "Toggle Program Custom Page Visibility",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycle.custom_pages.delete",
+                "description": "Delete Program Custom Page",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycle.custom_pages.upload_image",
+                "description": "Upload Program Custom Page Image",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "programs.general",
                 "description": "Allow user to create the program",
                 "guard_name": "web",
@@ -4713,18 +4870,6 @@
                     "organizationmanager",
                     "subadmin"
                 ]
-            },
-            {
-                "name": "user.profile.interests_manage",
-                "description": "View\/Manage My Interests",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "admin",
-                    "registered",
-                    "organizationmanager",
-                    "subadmin"
-                ]
             }
         ]
     },
@@ -5016,6 +5161,54 @@
                     "admin",
                     "mentor",
                     "judger",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.customer_growth_add",
+                "description": "Add Startup Customer Growth Record",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.customer_growth_update",
+                "description": "Update Startup Customer Growth Record",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.customer_growth_delete",
+                "description": "Delete Startup Customer Growth Record",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "company.customer_growth_export",
+                "description": "Export Startup Customer Growth Records",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
                     "registered",
                     "organizationmanager",
                     "subadmin"
@@ -5417,6 +5610,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5428,6 +5624,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5439,6 +5638,8 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
                     "registered"
                 ]
             },
@@ -5449,6 +5650,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5460,6 +5664,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5471,6 +5678,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5482,6 +5692,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5493,6 +5706,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5504,6 +5720,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5515,6 +5734,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5526,6 +5748,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5537,6 +5762,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5548,6 +5776,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5559,6 +5790,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5570,6 +5804,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5581,6 +5818,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5592,6 +5832,9 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5603,8 +5846,93 @@
                 "is_core": 0,
                 "default_for": [
                     "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
+                ]
+            },
+            {
+                "name": "messages.send_direct",
+                "description": "Send Direct Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "judger",
+                    "registered"
+                ]
+            },
+            {
+                "name": "messages.open",
+                "description": "Open Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin",
+                    "mentor",
+                    "judger",
+                    "registered"
+                ]
+            },
+            {
+                "name": "contact_messages.list",
+                "description": "Contact Us Inbox",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "contact_messages.view",
+                "description": "View Contact Us Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "contact_messages.reply",
+                "description": "Reply To Contact Us Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "contact_messages.delete",
+                "description": "Delete Contact Us Message",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "contact_messages.mark_read",
+                "description": "Mark Contact Us Message Read",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "contact_messages.mark_unread",
+                "description": "Mark Contact Us Message Unread",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
                 ]
             },
             {
@@ -5616,6 +5944,7 @@
                     "admin",
                     "organizationmanager",
                     "subadmin",
+                    "mentor",
                     "judger",
                     "registered"
                 ]
@@ -5860,7 +6189,7 @@
                 ]
             },
             {
-                "name": "reorder_questions",
+                "name": "forms.reorder_questions",
                 "description": "Reorder Form Questions",
                 "guard_name": "web",
                 "is_core": 0,
@@ -5900,6 +6229,18 @@
                 ]
             },
             {
+                "name": "cycles.application_save",
+                "description": "Submit A Program Application / Step Form",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
                 "name": "cycles.modify",
                 "description": "Modify Cycle Settings",
                 "guard_name": "web",
@@ -5913,6 +6254,17 @@
             {
                 "name": "cycles.users_manage",
                 "description": "Manage Users in Cycle",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "cycles.companies_change_step",
+                "description": "Move Startups To A Program Step",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -5942,6 +6294,18 @@
             {
                 "name": "screening.view",
                 "description": "View Screening Details",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "judger",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.form_scores_save",
+                "description": "Save Screening Scores For A Startup",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6011,6 +6375,17 @@
             {
                 "name": "screening.manage",
                 "description": "manage Specific Screening Session\/Entry",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.panel_startups_options",
+                "description": "List Startups Available For A Judging Panel",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6113,6 +6488,28 @@
             {
                 "name": "screening.add_judging_panels",
                 "description": "Add Judging Panels",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.panels_update",
+                "description": "Rebuild Judging Panels",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "screening.panel_startups_assign",
+                "description": "Assign Startups To A Judging Panel",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -6290,6 +6687,28 @@
             {
                 "name": "screening.export_results",
                 "description": "Export Screening Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "final.export_results",
+                "description": "Export Final Screening Results",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "organizationmanager",
+                    "subadmin"
+                ]
+            },
+            {
+                "name": "final.export_company_results",
+                "description": "Export Final Screening Results of a Startup",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -7443,6 +7862,17 @@
             {
                 "name": "my_files.view_file",
                 "description": "Show\/Download File",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin",
+                    "registered",
+                    "judger"
+                ]
+            },
+            {
+                "name": "my_files.view_private",
+                "description": "View Private User Files",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [
@@ -8713,17 +9143,6 @@
             {
                 "name": "activities.index",
                 "description": "View Activity Log Page",
-                "guard_name": "web",
-                "is_core": 0,
-                "default_for": [
-                    "admin",
-                    "organizationmanager",
-                    "subadmin"
-                ]
-            },
-            {
-                "name": "activity.log",
-                "description": "Create Activity Log",
                 "guard_name": "web",
                 "is_core": 0,
                 "default_for": [

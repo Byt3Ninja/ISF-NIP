@@ -938,6 +938,8 @@ class FinalscreeningController extends Controller
 		}
 
 		$step = Step::with('cycle')->find($stepId);
-		abort_unless($step && $step->cycle && $user->ownsOrganization($step->cycle->organization_id), 403);
+		// managesOrganization, not ownsOrganization: judges hold screening.update, and a judge with an
+		// organization_id (or a founder) "owns" that organization without being its staff.
+		abort_unless($step && $step->cycle && $user->managesOrganization($step->cycle->organization_id), 403);
 	}
 }

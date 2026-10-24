@@ -30,7 +30,7 @@
                                                             <p style="margin: 0;">Welcome in Our Platform</p>
                                                             <p style="margin: 0;">You've been invited to join the Organization {{ $invitation->organization->name }}.</p>
                                                             <p style="margin: 0;">Click the Link below to set your Password and complete your Registration:</p>
-                                                            <a href="{{ route('invitations.set_password_view_form', $invitation->id) }}">Set Your Password</a>
+                                                            <a href="{{ $invitation->setPasswordUrl() }}">Set Your Password</a>
                                                             <p>This invitation will expire in 2 days.</p>
                                                             {{-- <p style="margin: 0;">Session will start at: {{ $date }}</p> --}}
                                                             <p style="margin: 0;">Best regards,</p>
@@ -51,7 +51,7 @@
                                                             <p style="margin: 0;">مرحباً بك فى منصتنا</p>
                                                             <p style="margin: 0;">لقد تمت دعوتك للانضمام إلى المنظمة {{ $invitation->organization->name }}.</p>
                                                             <p style="margin: 0;">اضغط فوق الرابط أدناه لتعيين كلمة المرور الخاصة بك وإكمال التسجيل الخاص بك:</p>
-                                                            <a href="{{ route('invitations.set_password_view_form', $invitation->id) }}">قم بتعيين كلمة المرور الخاصة بك</a>
+                                                            <a href="{{ $invitation->setPasswordUrl() }}">قم بتعيين كلمة المرور الخاصة بك</a>
                                                             <p style="margin: 0;">ستنتهي صلاحية هذه الدعوة خلال يومين.</p>
                                                             <p style="margin: 0;">أطيب التحيات،</p>
                                                             {{-- <p style="margin: 0;">{{ $organization_name_ar }}</p> --}}

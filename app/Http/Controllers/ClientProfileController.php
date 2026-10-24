@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use App\Support\NotificationClaim;
 use Illuminate\Validation\Rules\In;
 use Intervention\Image\ImageManagerStatic as Image;
 use PragmaRX\Google2FA\Google2FA;
@@ -325,19 +326,9 @@ class ClientProfileController extends Controller
         // retry/duplicate call for it can't send twice, while a fresh request or
         // an explicit resend -- which bumps new_email_requested_at -- still sends.
         $version = $user->new_email_requested_at;
-        $claimed = User::where('id', $user->id)
-            ->where(function ($q) use ($version) {
-                $q->whereNull('email_change_notified_at')
-                  ->orWhere('email_change_notified_at', '!=', $version);
-            })
-            ->update(['email_change_notified_at' => $version]);
-
-        if (!$claimed) {
-            return;
-        }
-
-        Notification::route('mail', $user->new_email)
-            ->notify(new ConfirmEmailUpdateNotification($verificationUrl, $user));
+        NotificationClaim::on('users', ['id' => $user->id], 'email_change_notified_at', $version, true)
+            ->run(fn (NotificationClaim $claim) => Notification::route('mail', $user->new_email)
+                ->notify((new ConfirmEmailUpdateNotification($verificationUrl, $user))->withClaim($claim)));
     }
 
     /**

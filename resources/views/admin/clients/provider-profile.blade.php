@@ -243,7 +243,7 @@
                   @endif
 
                   <p class="card-text line-clamp-3 mb-4">
-                    {!! $service->description !!}
+                    {!! nl2br(e($service->description)) !!}
                   </p>
                   
                   <!-- Price -->

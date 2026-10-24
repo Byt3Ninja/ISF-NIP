@@ -23,9 +23,9 @@ class CompanyService
         $this->fileManager = $fileManager ?? app(FileManagerService::class);
     }
 
-    public function getCompanies(array $filters, bool $isApi = true)
+    public function getCompanies(array $filters, bool $isApi = true, bool $paginate = true)
     {
-        return $this->companyRepository->getCompanies($filters, $isApi);
+        return $this->companyRepository->getCompanies($filters, $isApi, $paginate);
     }
 
     public function getCompanyProfile($id, $user)

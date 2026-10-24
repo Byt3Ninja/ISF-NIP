@@ -6,7 +6,9 @@ use App\Settings;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\WhatsAppService;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
+use Throwable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -14,10 +16,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class WelcomeMentorNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
 
     public $user;
-    public $password;
 
     public WhatsAppService $whatsAppService;
 
@@ -27,10 +28,11 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct($user, $password)
+    public function __construct($user)
     {
+        // No password: the mail only links to the login page (the mentor chose the
+        // password), and a queued notification must not serialize it into the jobs table.
         $this->user = $user;
-        $this->password = $password;
     }
 
     /**
@@ -145,5 +147,11 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
         'time'    => now()->toDateTimeString(),
     ]);
     }
-    
+
+    /** Queued: when the worker gives up, free the welcome slot so it can be sent again. */
+    public function failed(Throwable $exception): void
+    {
+        $this->releaseClaim();
+        report($exception);
+    }
 }

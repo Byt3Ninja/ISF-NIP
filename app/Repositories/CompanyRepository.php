@@ -13,7 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class CompanyRepository
 {
-    public function getCompanies(array $filters, bool $isApi = true): LengthAwarePaginator|Collection
+    public function getCompanies(array $filters, bool $isApi = true, bool $paginate = true): LengthAwarePaginator|Collection
     {
         $locale = app()->getLocale();
         $nameField = $locale == 'ar' ? 'name_ar' : 'name_en';
@@ -163,6 +163,11 @@ class CompanyRepository
                     ->orWhereHas('city', fn($q) => $q->where("name_{$locale}", 'like', "%{$search}%"))
                     ->orWhereHas('teamMembers', fn($q) => $q->where('Name', 'like', "%{$search}%"));
             });
+        }
+
+        // Exports need every matching row, not the 9-per-page listing (C5).
+        if (!$paginate) {
+            return $query->get();
         }
 
         return $isApi

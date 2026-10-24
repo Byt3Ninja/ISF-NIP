@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Notifications\WelcomeUserNotification;
 use App\Notifications\WelcomeMentorNotification;
 use App\Notifications\WelcomeJudgerNotification;
+use App\Support\NotificationClaim;
+
 
 
 class UserService
@@ -127,20 +129,18 @@ class UserService
 					|| $user->hasRole('judge')
 					|| in_array(strtolower($data['role'] ?? ''), ['judger', 'judge']);
 
+				// Once per account; a failed send frees the slot again (NotificationClaim).
 				if($isJudge) {
-					if ($user->claimEmailSlot('judge_welcome_sent_at')) {
-						$user->notify(new WelcomeJudgerNotification($user));
-					}
+					NotificationClaim::on('users', ['id' => $user->id], 'judge_welcome_sent_at')
+						->run(fn (NotificationClaim $claim) => $user->notify((new WelcomeJudgerNotification($user))->withClaim($claim)));
 				}
 				elseif($user->hasRole('mentor') || strtolower($data['role'] ?? '') === 'mentor') {
-					if ($user->claimEmailSlot('mentor_welcome_sent_at')) {
-						$user->notify(new WelcomeMentorNotification($user, $data['password']));
-					}
+					NotificationClaim::on('users', ['id' => $user->id], 'mentor_welcome_sent_at')
+						->run(fn (NotificationClaim $claim) => $user->notify((new WelcomeMentorNotification($user))->withClaim($claim)));
 				}
 				else {
-					if ($user->claimEmailSlot('user_welcome_sent_at')) {
-						$user->notify(new WelcomeUserNotification($user, $data['password']));
-					}
+					NotificationClaim::on('users', ['id' => $user->id], 'user_welcome_sent_at')
+						->run(fn (NotificationClaim $claim) => $user->notify((new WelcomeUserNotification($user))->withClaim($claim)));
 				}
 			}
 			return $result;

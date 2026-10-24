@@ -219,7 +219,7 @@
                     <div></div>
                   @endif
 
-                  <p class="mt-1">{!! Str::limit($service->description ?? 'No description available', 100) !!}</p>
+                  <p class="mt-1">{{ Str::limit($service->description ?? 'No description available', 100) }}</p>
                   @if($_user->hasAnyRole(['admin', 'serviceProvider', 'organizationManager', 'subadmin']))
                   @php
                     $visibleOrgs = $_user->hasAnyRole(['admin', 'serviceProvider'])

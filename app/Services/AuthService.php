@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Notifications\WelcomeUserNotification;
 use App\Notifications\WelcomeMentorNotification;
+use App\Support\NotificationClaim;
+
 
 class AuthService
 {
@@ -89,20 +91,20 @@ class AuthService
 
                 $sendMentorWelcome = true;
             }
-            else {
-                if ($user->claimEmailSlot('user_welcome_sent_at')) {
-                    $user->notify(new WelcomeUserNotification($user, $data['password']));
-                }
-            }
             DB::commit();
 
-            // Only once the account is committed, and once per account.
-            if (! empty($sendMentorWelcome) && $user->claimEmailSlot('mentor_welcome_sent_at')) {
-                try {
-                    $user->notify(new WelcomeMentorNotification($user, $data['password']));
-                } catch (\Throwable $e) {
-                    report($e);
+            // Only once the account is committed, and once per account; a failed send
+            // frees the slot again (NotificationClaim).
+            try {
+                if (! empty($sendMentorWelcome)) {
+                    NotificationClaim::on('users', ['id' => $user->id], 'mentor_welcome_sent_at')
+                        ->run(fn (NotificationClaim $claim) => $user->notify((new WelcomeMentorNotification($user))->withClaim($claim)));
+                } else {
+                    NotificationClaim::on('users', ['id' => $user->id], 'user_welcome_sent_at')
+                        ->run(fn (NotificationClaim $claim) => $user->notify((new WelcomeUserNotification($user))->withClaim($claim)));
                 }
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             $token = $user->createToken('auth-register')->plainTextToken;

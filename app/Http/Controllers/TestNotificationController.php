@@ -75,7 +75,7 @@ class TestNotificationController extends Controller
                 ], 401);
             }
 
-            $user->notify(new WelcomeUserNotification($user, 'test123'));
+            $user->notify(new WelcomeUserNotification($user));
 
             return response()->json([
                 'success' => true,

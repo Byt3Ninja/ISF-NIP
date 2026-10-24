@@ -11,6 +11,7 @@ use App\Services\TimezoneService;
 use App\Services\PlatformBrandingService;
 use App\Services\FormSectionStructurer;
 use Illuminate\Support\Facades\DB;
+use App\Support\NotificationClaim;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -362,7 +363,8 @@ class ExternalCyclesController extends Controller
 
 				DB::beginTransaction();
 				try {
-					$password = Str::random(6);
+					// Never shown or mailed: the welcome email signs the founder in with a magic link.
+					$password = Str::random(40);
 					$request_token = Str::random(48);
 					$user = new User();
 					$user->fill([
@@ -389,9 +391,6 @@ class ExternalCyclesController extends Controller
 					$user->save();
 					$user->allotRole('registered');
 					// $user->sendEmailVerificationNotification();
-					if ($user->claimEmailSlot('user_welcome_sent_at')) {
-						$user->notify(new WelcomeUserNotification($user, $password));
-					}
 					$company = new Company();
 
                 	$company->name_en = $user->first_name_en . " " . $user->last_name_en;
@@ -475,20 +474,38 @@ class ExternalCyclesController extends Controller
                 			throw $th;
             			}
 
+        			}
+					DB::commit();
+
+					// Outbound messages leave only once the account and the join are committed:
+					// a failure above must not have emailed or messaged a user who doesn't exist.
+					// Nothing after the commit may throw into the catch below (its rollBack is
+					// for the open transaction), so failures here are reported, not rethrown.
+					try {
+						NotificationClaim::on('users', ['id' => $user->id], 'user_welcome_sent_at')
+							->run(fn (NotificationClaim $claim) => $user->notify((new WelcomeUserNotification($user))->withClaim($claim)));
+					} catch (\Throwable $th) {
+						report($th);
+					}
+
+					if( !in_array(env('APP_ENV', 'local'), ['local']) )
+					{
             			$phoneNumber = $user->country_code_w_a . $user->whatsapp;
             			$Massage = "Dear " . $user->name . ",
             				Congratulations! You have successfully joined the" . $data['cycle'] . ", 
             				We are excited to have you on board and look forward to supporting your journey.
             				Thanks from " . env('APP_NAME');
-						
+
 						if( $phoneNumber )
 						{
-							$whatsAppService = new WhatsAppService();
-							$result = $whatsAppService->sendMessage($phoneNumber, $Massage);
-							Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+							try {
+								$result = app(WhatsAppService::class)->sendMessage($phoneNumber, $Massage);
+								Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+							} catch (\Throwable $th) {
+								report($th);
+							}
 						}
-        			}
-					DB::commit();
+					}
 
 					// Sent only once the join is committed, and once per program.
 					if( !in_array(env('APP_ENV', 'local'), ['local']) && $user->claimProgramJoinSlot((int) $program->id) )

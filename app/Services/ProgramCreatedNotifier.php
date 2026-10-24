@@ -6,6 +6,7 @@ use App\Cycle;
 use App\Messenger;
 use App\Notifications\ProgramCreatedNotification;
 use App\Role;
+use App\Support\NotificationClaim;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -22,11 +23,8 @@ class ProgramCreatedNotifier
     {
         // Claims the cycle atomically so a retried request never
         // double-emails everyone.
-        $claimed = Cycle::where('id', $cycle->id)
-            ->whereNull('program_created_notified_at')
-            ->update(['program_created_notified_at' => now()]);
-
-        if (!$claimed) {
+        $claim = NotificationClaim::on('cycles', ['id' => $cycle->id], 'program_created_notified_at');
+        if (!$claim->take()) {
             return;
         }
 
@@ -36,6 +34,7 @@ class ProgramCreatedNotifier
         $subAdmins = $cycle->organization?->assignedUsers ?? collect();
         $recipients = $orgManagers->merge($subAdmins)->merge($superAdmins)->unique('id');
 
+        $notified = 0;
         foreach ($recipients as $recipient) {
             try {
                 Notification::send([$recipient], new ProgramCreatedNotification($cycle));
@@ -47,12 +46,19 @@ class ProgramCreatedNotifier
                 $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
                 $messenger->read = 0;
                 $messenger->save();
+                $notified++;
             } catch (\Throwable $e) {
                 Log::error('ProgramCreatedNotification dispatch failed: ' . $e->getMessage(), [
                     'cycle_id' => $cycle->id,
                     'recipient_id' => $recipient->id,
                 ]);
             }
+        }
+
+        // Nobody was reached (e.g. mail down): give the claim back so a retry can notify.
+        // After a partial send it is kept -- retrying would duplicate for the others.
+        if ($notified === 0 && $recipients->isNotEmpty()) {
+            $claim->release();
         }
     }
 }

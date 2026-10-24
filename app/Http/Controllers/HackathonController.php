@@ -1541,101 +1541,107 @@ class HackathonController extends Controller
         ]);
         
         $user = Auth::user();
-        if($user->company != null){
-            $company = Company::find($user->company->id);
-            if (!$company) {
-                $company->name_en = $request->team_name;
-                $company->name_ar = $request->team_name;
-                $company->save();
-            }
-        }else{
-            $company = new Company();
-            $company->name_en = $request->team_name;
-            $company->name_ar = $request->team_name;
-            $company->state_id = $user->state_id;
-            $company->address_en = $user->address;
-            $company->address_ar = $user->address;
-            $company->save();
-
-            $user_update = User::find($user->id);
-            $user_update->company_id = $company->id;
-            $user_update->save();
-
-        }
-
-
-
-            $team_q = Team_member::where('user_id', $user->id)->where('acceptInvition', 'accepted')->get();
+        // Checked before any write: this used to run after a new company had been saved.
+        $team_q = Team_member::where('user_id', $user->id)->where('acceptInvition', 'accepted')->get();
         if ($team_q->count() > 0) {
             return redirect()->back()->with('error', 'You already have a team.');
         }
 
+        // C24: company, team, leader seat, invite cleanup and team chat are one unit;
+        // a failure part-way used to leave a half-created team behind.
+        DB::transaction(function () use ($request, $user) {
+            if($user->company != null){
+                $company = Company::find($user->company->id);
+                if (!$company) {
+                    $company->name_en = $request->team_name;
+                    $company->name_ar = $request->team_name;
+                    $company->save();
+                }
+            }else{
+                $company = new Company();
+                $company->name_en = $request->team_name;
+                $company->name_ar = $request->team_name;
+                $company->state_id = $user->state_id;
+                $company->address_en = $user->address;
+                $company->address_ar = $user->address;
+                $company->save();
+
+                $user_update = User::find($user->id);
+                $user_update->company_id = $company->id;
+                $user_update->save();
+
+            }
+
+
+
+
          
 
-        $teamformation = new TeamFormation();
-        $teamformation->name = $request->team_name;
-        $teamformation->description = $request->team_description;
-        $teamformation->cycle_id = $request->cycle_id;
-        $teamformation->step_id = $request->step_id;
-        $teamformation->user_id = $user->id;
-        $teamformation->project_name_ar = $request->Project_Name_ar;
-        $teamformation->project_name_en = $request->Project_Name_en;
-        $teamformation->project_description_ar = $request->Project_Description_ar;
-        $teamformation->project_description_en = $request->Project_Description_en;
-        $teamformation->target_track = $request->Target_Track ?? 0;
-        $teamformation->project_status = $request->Project_Status ?? 0;
-        $teamformation->region = $request->Region ?? '';
+            $teamformation = new TeamFormation();
+            $teamformation->name = $request->team_name;
+            $teamformation->description = $request->team_description;
+            $teamformation->cycle_id = $request->cycle_id;
+            $teamformation->step_id = $request->step_id;
+            $teamformation->user_id = $user->id;
+            $teamformation->project_name_ar = $request->Project_Name_ar;
+            $teamformation->project_name_en = $request->Project_Name_en;
+            $teamformation->project_description_ar = $request->Project_Description_ar;
+            $teamformation->project_description_en = $request->Project_Description_en;
+            $teamformation->target_track = $request->Target_Track ?? 0;
+            $teamformation->project_status = $request->Project_Status ?? 0;
+            $teamformation->region = $request->Region ?? '';
 
-        if ($request->hasFile('team_image')) {
-            // Store on the `programTeams` disk (storage/, outside the web root)
-            // via FileManagerService, which enforces the image whitelist (extension
-            // + real content type) and generates the filename server-side. The old code
-            // move()d the file into public/ using the CLIENT-supplied
-            // extension, so an uploaded .phtml landed in a web-served,
-            // executable directory.
-            $imageName = app(FileManagerService::class)
-                ->upload($request->file('team_image'), '', 'programTeams', 'image');
-            $teamformation->img_team = 'programs/teams/' . basename($imageName);
-        }
+            if ($request->hasFile('team_image')) {
+                // Store on the `programTeams` disk (storage/, outside the web root)
+                // via FileManagerService, which enforces the image whitelist (extension
+                // + real content type) and generates the filename server-side. The old code
+                // move()d the file into public/ using the CLIENT-supplied
+                // extension, so an uploaded .phtml landed in a web-served,
+                // executable directory.
+                $imageName = app(FileManagerService::class)
+                    ->upload($request->file('team_image'), '', 'programTeams', 'image');
+                $teamformation->img_team = 'programs/teams/' . basename($imageName);
+            }
 
-        $teamformation->save();
-
-        if($teamformation){
-            $getAllTeams = Team_member::where('user_id', $user->id)->whereIn('acceptInvition', ['join', 'pending'])->delete();
-        }
-
-        
-        $team_member = new Team_member();
-        $team_member->user_id = $user->id; // Assuming the user creating the team is the authenticated user
-        $team_member->team_formation_id = $teamformation->id;
-        $team_member->TeamMember = 'hackathon';
-        $team_member->Name = $user->first_name . ' ' . $user->last_name;
-        $team_member->email = $user->email;
-        $team_member->acceptInvition = 'accepted';
-        $team_member->isTeamLeader = 1;
-        $team_member->company_id = $user->company_id; 
-        $team_member->team_formation_id = $teamformation->id;
-        $team_member->save();
-
-
-        if($teamformation){
-            $createChatGroup = Conversation::create([
-                'type' => 'group',
-                'name' => $request->team_name,
-                'description' => $request->team_description
-            ]);
-
-            // Add current user as admin
-            $createChatGroup->participants()->create([
-                'participantable_id' => auth()->id(),
-                'participantable_type' => get_class(auth()->user()),
-                'role' => 'admin'
-            ]);
-
-            $teamformation->group_id_chat = $createChatGroup->id;
             $teamformation->save();
 
-        }
+            if($teamformation){
+                $getAllTeams = Team_member::where('user_id', $user->id)->whereIn('acceptInvition', ['join', 'pending'])->delete();
+            }
+
+        
+            $team_member = new Team_member();
+            $team_member->user_id = $user->id; // Assuming the user creating the team is the authenticated user
+            $team_member->team_formation_id = $teamformation->id;
+            $team_member->TeamMember = 'hackathon';
+            $team_member->Name = $user->first_name . ' ' . $user->last_name;
+            $team_member->email = $user->email;
+            $team_member->acceptInvition = 'accepted';
+            $team_member->isTeamLeader = 1;
+            $team_member->company_id = $company->id; // $user is the pre-request instance; a new founder's company_id is only on $company
+            $team_member->team_formation_id = $teamformation->id;
+            $team_member->save();
+
+
+            if($teamformation){
+                $createChatGroup = Conversation::create([
+                    'type' => 'group',
+                    'name' => $request->team_name,
+                    'description' => $request->team_description
+                ]);
+
+                // Add current user as admin
+                $createChatGroup->participants()->create([
+                    'participantable_id' => auth()->id(),
+                    'participantable_type' => get_class(auth()->user()),
+                    'role' => 'admin'
+                ]);
+
+                $teamformation->group_id_chat = $createChatGroup->id;
+                $teamformation->save();
+
+            }
+        });
 
         return redirect()->back()->with('success', 'Team created successfully.');
     }
@@ -2008,8 +2014,9 @@ class HackathonController extends Controller
     {
       
         $user = Auth::user();
-        $isExpired = Team_member::where('id', $id)
-            ->where('acceptInvition', 'pending')
+        // H8: only an invitation addressed to this user, and only while pending. A 'join'
+        // row is the user's own request to join; the team leader approves it, not the requester.
+        $isExpired = $this->ownInvitation($id, $user, ['pending'])
             ->where('created_at', '<', now()->subHours(24))
             ->first();
 
@@ -2022,9 +2029,7 @@ class HackathonController extends Controller
                 $isExpired->save();
                 return redirect()->back()->with('error', 'Invitation_has_expired.');
             }
-            $teamMember = Team_member::where('id', $id)
-                    ->whereIn('acceptInvition', ['pending', 'join'])
-                    ->first();
+            $teamMember = $this->ownInvitation($id, $user, ['pending'])->first();
             
             if (!$teamMember) {
                 return redirect()->back()->with('error', 'Invitation_not_found.');
@@ -2077,15 +2082,21 @@ class HackathonController extends Controller
             $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
             $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
            
-            if($step->count_team_number <= $count_team){
+            if($step && $step->count_team_number <= $count_team){
                 foreach ($count_team_q->whereIn('acceptInvition', ['join', 'pending']) as $member){
                     $member->acceptInvition = 'rejected';
                     $member->save();
                 }
             }
             
+                // C12: decline the user's other invites to THIS hackathon only; invites to other
+                // hackathons stay open (one seat per hackathon, not one seat overall).
                 $allteamMembers = Team_member::where('Email', $teamMember->Email)
                 ->where('acceptInvition', 'pending')
+                ->where('id', '!=', $teamMember->id)
+                ->whereHas('teamFormation', function ($query) use ($teams) {
+                    $query->where('cycle_id', $teams->cycle_id);
+                })
                 ->get();
             
                 foreach ($allteamMembers as $allteamMember) {
@@ -2132,8 +2143,8 @@ class HackathonController extends Controller
     public function rejectInvitation($id)
     {
         $user = Auth::user();
-        $isExpired = Team_member::where('id', $id)
-            ->where('acceptInvition', 'pending')
+        // H8: decline only an invitation addressed to this user, or withdraw their own join request.
+        $isExpired = $this->ownInvitation($id, $user, ['pending'])
             ->where('created_at', '<', now()->subHours(24))
             ->first();
            
@@ -2147,29 +2158,26 @@ class HackathonController extends Controller
                 return redirect()->back()->with('error', 'Invitation has expired.');
             }
                 
-                $teamMember = Team_member::where('id', $id)
-                ->whereIn('acceptInvition', ['pending', 'join'])
-                ->first();
+                $teamMember = $this->ownInvitation($id, $user, ['pending', 'join'])->first();
 
-              
+            // C1: check before the first dereference (was after it, so a missing row crashed).
+            if (!$teamMember) {
+                return redirect()->back()->with('error', 'Invitation not found.');
+            }
 
             $teams = TeamFormation::where('id', $teamMember->team_formation_id)->first();
             $count_team_q = Team_member::where('team_formation_id', $teams->id)
                 ->get();
             $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
                 $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
-            if($step->count_team_number <= $count_team){
-                foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+            if($step && $step->count_team_number <= $count_team){
+                foreach ($count_team_q->whereIn('acceptInvition', ['join', 'pending']) as $member){
                     $member->acceptInvition = 'rejected';
                     $member->save();
                 }
                 return response()->json(['success' => false, 'message' => __("admin.Team_is_full.")]);
             }
 
-
-            if (!$teamMember) {
-                return redirect()->back()->with('error', 'Invitation not found.');
-            }
                 $teamMember->acceptInvition = 'rejected';
                 $teamMember->Name = $user->first_name . ' ' . $user->last_name;
                 $teamMember->TeamMember = 'hackathon';
@@ -2183,6 +2191,14 @@ class HackathonController extends Controller
                  $leader->notify(new StatusHackathonInvitation($user, $userteam, $teams, 'Reject'));
 
         return redirect()->back()->with('success', 'Invitation rejected successfully.');
+    }
+
+    /** Team_member rows with this id that are addressed to $user (email, case-insensitive) in one of $statuses. */
+    private function ownInvitation($id, $user, array $statuses)
+    {
+        return Team_member::where('id', $id)
+            ->whereIn('acceptInvition', $statuses)
+            ->whereRaw('LOWER(Email) = ?', [strtolower((string) $user->email)]);
     }
 
     public function getOutTeam(Request $request)
@@ -2281,8 +2297,8 @@ class HackathonController extends Controller
         $count_team = $count_team_q->where('acceptInvition', 'accepted')->count();
 
         $step = Step::where('cycle_id', $teams->cycle_id)->where('stype', '6')->first();
-        if($step->count_team_number < $count_team){
-            foreach ($count_team_q->where('acceptInvition', ['join', 'pending'])->get() as $member){
+        if($step && $step->count_team_number < $count_team){
+            foreach ($count_team_q->whereIn('acceptInvition', ['join', 'pending']) as $member){
                 $member->acceptInvition = 'rejected';
                 $member->save();
             }
@@ -2296,6 +2312,10 @@ class HackathonController extends Controller
                 $teamMember->save();
                 $allteamMembers = Team_member::where('Email', $teamMember->Email)
                 ->where('acceptInvition', 'join')
+                ->where('id', '!=', $teamMember->id)
+                ->whereHas('teamFormation', function ($query) use ($teams) {
+                    $query->where('cycle_id', $teams->cycle_id);
+                })
                 ->get();
                 foreach ($allteamMembers as $allteamMember) {
                     $allteamMember->acceptInvition = 'rejected';
@@ -3121,8 +3141,16 @@ class HackathonController extends Controller
         return $today < $start ? 'Upcoming' : ($today <= $end ? 'Ongoing' : 'Finished');
     }
 
+    /** H1: winners pages are for staff of the organization that runs the hackathon. */
+    private function authorizeWinners($id): void
+    {
+        $user = auth()->user();
+        abort_unless($user->ableTo('hackathon.viewAdminHackaton') && $user->managesOrganization(Cycle::whereKey($id)->value('organization_id')), 403);
+    }
+
     public function viewHackathonWinners( $id )
     {
+        $this->authorizeWinners($id);
         $l = app()->getLocale();
         $cycle = Cycle::getHackathon( $id );
 
@@ -3159,14 +3187,8 @@ class HackathonController extends Controller
 
     public function exportHackathonWinners( $id )
     {
-        $user = auth()->user();
-        if (!$user->hasRole('Admin')) {
-            $orgIds = $user->organizations_ids;
-            $cycleCheck = \App\Cycle::find($id);
-            if (!$cycleCheck || !in_array($cycleCheck->organization_id, $orgIds)) {
-                abort(403, 'Unauthorized access to this hackathon.');
-            }
-        }
+        // organizations_ids also holds a founder's own program org, so it is not a staff check.
+        $this->authorizeWinners($id);
 
         $tail = 'xlsx';
         $request = request();
@@ -3184,6 +3206,7 @@ class HackathonController extends Controller
 
     public function publishHackathonWinners( Request $request, $id )
     {
+        $this->authorizeWinners($id);
         $cycle = DB::table('cycles as c')
             ->select([
                 'c.id',
@@ -3282,14 +3305,15 @@ class HackathonController extends Controller
             // Prepare Email
             $rfullname = $rname->first_name_en . " " . $rname->last_name_en;
             $sfullname = $cuser->first_name_en . " " . $cuser->last_name_en;
-            $MSG = new TemplateEmail(
-                [
-                    "subject" => "New message received - VI portal",
-                    "greeting" => "Dear " . $rfullname . ",",
-                    "body" => "You have a new message from " . $sfullname . ", Needs your review.",
-                    "action_url" => "/dashboard/inbox"
-                ]
-            );
+            // TemplateEmail reads [subject, greeting, body, action path, database text] by position.
+            $body = "You have a new message from " . $sfullname . ", Needs your review.";
+            $MSG = new TemplateEmail([
+                "New message received - VI portal",
+                "Dear " . $rfullname . ",",
+                $body,
+                "/dashboard/inbox",
+                $body,
+            ]);
 
             // Send Notification (only in production)
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {

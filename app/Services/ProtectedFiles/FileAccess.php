@@ -90,6 +90,25 @@ class FileAccess
             || $this->isCurrentProgramStaff($user, $companyId);
     }
 
+    /**
+     * May this user open the startup's profile page? (H3) Anyone who may manage it, plus
+     * the people the startup works with: judges assigned to it, mentors of its program
+     * or of one of its founders' mentorship requests, and service providers that one of
+     * its founders requested a service from. Mentors have no organization scope, so they
+     * are matched by relationship, never by organization.
+     */
+    public function canViewCompanyProfile(?User $user, ?int $companyId): bool
+    {
+        if (!$user || !$companyId) {
+            return false;
+        }
+
+        return $this->canManageCompany($user, $companyId)
+            || $this->isAssignedJudge($user, $companyId)
+            || $this->isStartupMentor($user, $companyId)
+            || $this->isStartupServiceProvider($user, $companyId);
+    }
+
     /** Would this user be allowed to open files of the given set for this startup? (for showing/hiding links) */
     public function canViewCompanySet(?User $user, ?int $companyId, string $set): bool
     {
@@ -135,6 +154,45 @@ class FileAccess
     public function isAssignedJudge(User $user, ?int $companyId): bool
     {
         return $user->hasRole('judger') && $this->judges->everAssigned($user, $companyId);
+    }
+
+    /** A mentor of the startup's program, or the mentor of a request one of its founders made. */
+    public function isStartupMentor(User $user, ?int $companyId): bool
+    {
+        if (!$companyId || !$user->hasRole('mentor')) {
+            return false;
+        }
+
+        $cycleId = Company::whereKey($companyId)->value('cycle');
+        if ($cycleId && DB::table('cycles_mentors')->where('user_id', $user->id)->where('cycle_id', $cycleId)->whereNull('deleted_at')->exists()) {
+            return true;
+        }
+
+        return DB::table('mentorship_requests')
+            ->where('mentor_id', $user->id)
+            ->whereNull('deleted_at')
+            ->whereIn('user_id', User::where('company_id', $companyId)->select('id'))
+            ->exists();
+    }
+
+    /** A service provider owning a service that one of the startup's founders requested. */
+    public function isStartupServiceProvider(User $user, ?int $companyId): bool
+    {
+        if (!$companyId || !$user->hasRole('serviceProvider')) {
+            return false;
+        }
+
+        $providerId = $user->service_provider?->id;
+        if (!$providerId) {
+            return false;
+        }
+
+        return DB::table('services_requests')
+            ->join('services', 'services.id', '=', 'services_requests.service_id')
+            ->where('services.service_provider_id', $providerId)
+            ->whereNull('services_requests.deleted_at')
+            ->whereIn('services_requests.user_id', User::where('company_id', $companyId)->select('id'))
+            ->exists();
     }
 
     protected function ownsProgram(User $user, ?int $cycleId): bool

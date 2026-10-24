@@ -6,6 +6,7 @@ use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
 use App\Traits\ResolvesMentorshipOrganization;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -17,7 +18,7 @@ use Throwable;
 
 class MentorshipSessionMentor extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -228,6 +229,7 @@ if (!empty($attachments)) {
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('MentorshipSessionMentor notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

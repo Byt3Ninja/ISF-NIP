@@ -8,6 +8,7 @@ use App\InviteMentor;
 use App\Organization;
 use App\Services\RichTextSanitizer;
 use Illuminate\Support\Str;
+use App\Support\NotificationClaim;
 use App\Mail\InviteMentorMail;
 use Illuminate\Http\UploadedFile;
 use App\Jobs\SendInviteMentorEmail;
@@ -197,15 +198,10 @@ class InvitationController extends Controller
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
 
-        // Atomically claim the "send invitation email" step so a retry/duplicate
-        // call for this same invitation can never send the email twice.
-        $claimedInviteNotify = InviteMentor::where('id', $invitation->id)
-            ->whereNull('email_sent_at')
-            ->update(['email_sent_at' => now()]);
-
-        if ($claimedInviteNotify) {
-            dispatch(new SendInviteMentorEmail($invitation, auth()->user()->email));
-        }
+        // Claim the "send invitation email" step so a retry/duplicate call for this
+        // invitation can never send it twice; a failed send gives the claim back.
+        NotificationClaim::on('invite_mentors', ['id' => $invitation->id], 'email_sent_at')
+            ->run(fn (NotificationClaim $claim) => dispatch((new SendInviteMentorEmail($invitation, auth()->user()->email))->withClaim($claim)));
         if($data['invitation_scope'] == 'Organization'){
             $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
             $organizationMap = collect($allOrganizations)->keyBy('id');

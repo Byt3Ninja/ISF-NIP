@@ -844,7 +844,7 @@
               <span class="badge bg-label-primary">{{ $customSection->title }}</span>
             </div>
             <div class="w-50 d-flex justify-content-center">
-              <p>{!! $customSection->content !!}</p>
+              <p>{!! $customSection->safe_content !!}</p>
             </div>
           </div>
         </section>

@@ -52,6 +52,14 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
+        if ($user->isRejectedProviderApplicant()) {
+            $this->guard()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with('error', __('auth.provider_registration_rejected'));
+        }
+
         // Initialize Agent for device/browser detection
         $agent = new Agent();
         $browser = $agent->browser();

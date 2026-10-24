@@ -12,8 +12,12 @@ class Role extends Model
 	protected $fillable = [
 		'name',
 		'default_for',
-		'created_at',
-		'updated_at',
+	];
+
+	/** Role types offered by the admin roles form (create/edit). */
+	public const DEFAULT_FOR_VALUES = [
+		'admin', 'editor', 'coordinator', 'page', 'manager', 'mentor', 'judger', 'registered',
+		'pages', 'organizationmanager', 'subadmin', 'serviceProvider', 'other',
 	];
 	public static $module = 'Roles';
 	public function permissions()

@@ -41,7 +41,7 @@ class RolesController extends Controller
 	public function store(StoreRoleRequest $request)
 	{
 		$this->authorizeRoleAccess('roles.store', true);
-		$role = Role::create($request->all());
+		$role = Role::create($request->only(['name', 'default_for']));
 		$permissionNames = $request->input('permissions_flat');
     	$permissionIds = Permission::whereIn('name', $permissionNames)->pluck('id');
 		$role->permissions()->sync($permissionIds);
@@ -78,7 +78,7 @@ class RolesController extends Controller
 	public function update(UpdateRoleRequest $request, Role $role)
 	{
 		$this->authorizeRoleAccess('roles.update', true);
-		$role->update($request->all());
+		$role->update($request->only(['name', 'default_for']));
 		$permissionNames = $request->input('permissions_flat', []);
     	$permissionIds = Permission::whereIn('name', $permissionNames)->pluck('id')->toArray();
 		$role->permissions()->sync($permissionIds);

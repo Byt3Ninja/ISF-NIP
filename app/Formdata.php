@@ -100,6 +100,7 @@ class Formdata extends Model
             $item->step_name = $first->S_title;
             $item->program_name = $first->CYC_title;
             $item->organization_name = $first->O_name_en;
+            $item->organization_id = $first->CYC_organization_id;
             $item->created_at = $first->FD_created_at;
             $item->answers = $group->map(function ($item) use ($l) {
                 $value = $item->FD_answer;

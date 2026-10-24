@@ -6,7 +6,9 @@ use App\Broadcasting\WhatsAppChannel;
 use App\Settings;
 use App\Services\WhatsAppService;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
+use Throwable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -14,10 +16,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class WelcomeUserNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
  
     public $user;
-    public $password;
 
     public WhatsAppService $whatsAppService;
 
@@ -27,10 +28,11 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct($user, $password)
+    public function __construct($user)
     {
+        // No password: the mail signs the user in with a magic link, and a queued
+        // notification must not serialize a plaintext password into the jobs table.
         $this->user = $user;
-        $this->password = $password;
 
         // The user's own profile language; a new user has none yet, so they
         // get the platform default language chosen in the settings. Laravel
@@ -154,5 +156,12 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
         return [
             'message' => __('notifications.welcome.database')
         ];
+    }
+
+    /** Queued: when the worker gives up, free the welcome slot so it can be sent again. */
+    public function failed(Throwable $exception): void
+    {
+        $this->releaseClaim();
+        report($exception);
     }
 }

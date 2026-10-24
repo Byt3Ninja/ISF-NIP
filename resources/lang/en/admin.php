@@ -160,6 +160,7 @@ return [
 	'Code' => 'Code',
 	'InvitationSent' => 'Invitation Sent Successfully',
 	'invitationExpired' => 'Invitation Expired',
+	'invitationAlreadyUsed' => 'This invitation has already been used. Please sign in, or ask for a new invitation.',
 	'user_exists' => 'Your Account already Exists',
 	'user_already_registered' => 'User Already Registered',
 	'send_invitation' => 'Send Invitation',

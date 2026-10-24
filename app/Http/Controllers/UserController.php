@@ -78,8 +78,9 @@ class UserController extends Controller
 		$actor = auth()->user();
 		abort_unless($actor->ableTo('users.login_as'), 403);
 		if (!$actor->hasRole('admin')) {
-			$inScope = $actor->ownsOrganization($user->organization_id)
-				|| $actor->ownsOrganization($user->company?->cycledata?->organization_id);
+			// managesOrganization: a founder "owns" their program's org but must never log in as its staff.
+			$inScope = $actor->managesOrganization($user->organization_id)
+				|| $actor->managesOrganization($user->company?->cycledata?->organization_id);
 			abort_if($user->hasRole('admin') || !$inScope, 403);
 		}
 
@@ -97,6 +98,14 @@ class UserController extends Controller
 			abort(403);
 		}
 		$originalUser = User::find(session('impersonator_id'));
+		// C40: the impersonating account no longer exists -- end the session instead of crashing.
+		if( !$originalUser ) {
+			session()->forget('impersonator_id');
+			Auth::logout();
+			request()->session()->invalidate();
+			request()->session()->regenerateToken();
+			abort(403);
+		}
 		if( !$originalUser->ableTo('users.login_as') ) {
 			abort(401);
 		}

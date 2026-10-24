@@ -134,7 +134,7 @@
                           </div>
 
                           @if($session->rate_comment)
-                            <p class="small text-muted d-block">{!! $session->rate_comment !!}</p>
+                            <p class="small text-muted d-block">{!! nl2br(e($session->rate_comment)) !!}</p>
                           @else
                             <small class="text-muted block">{{ __('admin.No comment provided') }}</small>
                           @endif
@@ -192,7 +192,7 @@
                             @if($session->comment)
                               <div>
                                 <span class="badge bg-label-primary">{{ __('cycles.Founder_Comment') }}</span>
-                                <p class="small text-muted mb-0 mt-1">{!! $session->comment !!}</p>
+                                <p class="small text-muted mb-0 mt-1">{!! nl2br(e($session->comment)) !!}</p>
                               </div>
                             @endif
                             @if($session->admin_comment)

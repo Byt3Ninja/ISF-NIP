@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Broadcasting\BroadcastException;
 
@@ -42,6 +43,12 @@ class RegisterController extends Controller
     protected $redirectTo = '/dashboard';
 
     /**
+     * Roles a visitor may pick on the public registration form => the role they receive.
+     * Service providers register through /provider-registration, not here.
+     */
+    private const SELF_REGISTER_ROLES = ['Founder' => 'registered', 'Mentor' => 'mentor'];
+
+    /**
 	 * UserController constructor.
 	 * @param \App\Services\UserService $userService
 	 */
@@ -66,19 +73,12 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        if($data['role'] == 'Service Provider')
-        {
-            $data['role'] = 'serviceProvider';
-            $parse_name = explode(' ', $data['contact_name']);
-			$first_name = $parse_name[0];
-            $last_name = isset($parse_name[1]) ? $parse_name[1] : '';
-			$data['first_name'] = $first_name;
-			$data['last_name'] = $last_name;
-        }
-        if( $data['role'] == 'Founder' ) { $data['role'] = 'registered'; }
-        if( $data['role'] == 'Mentor' ) { $data['role'] = 'mentor'; }
-                    
-        return Validator::make($data, (new StoreUserRequest())->rules());
+        // StoreUserRequest is shared with admin user-creation, which may assign any role;
+        // self-registration may only pick one of SELF_REGISTER_ROLES.
+        $rules = (new StoreUserRequest())->rules();
+        $rules['role'] = ['required', Rule::in(array_keys(self::SELF_REGISTER_ROLES))];
+
+        return Validator::make($data, $rules);
     }
     /**
      * Create a new user instance after a valid registration.
@@ -88,17 +88,8 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        if($data['role'] == 'Service Provider')
-        {
-            $data['role'] = 'serviceProvider';
-            $parse_name = explode(' ', $data['contact_name']);
-			$first_name = $parse_name[0];
-            $last_name = isset($parse_name[1]) ? $parse_name[1] : '';
-			$data['first_name'] = $first_name;
-			$data['last_name'] = $last_name;
-        }
-        if( $data['role'] == 'Founder' ) { $data['role'] = 'registered'; }
-        if( $data['role'] == 'Mentor' ) { $data['role'] = 'mentor'; }
+        abort_unless(isset(self::SELF_REGISTER_ROLES[$data['role'] ?? '']), 422);
+        $data['role'] = self::SELF_REGISTER_ROLES[$data['role']];
 
         $hasMentorPayload = !empty($data['title_en'])
             || !empty($data['bio_en'])

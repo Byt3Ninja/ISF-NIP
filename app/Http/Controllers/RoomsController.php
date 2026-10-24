@@ -129,7 +129,7 @@ class RoomsController extends Controller
 				foreach ($inclusives as $inclusive) {
 					Rooms_inclusive::create(
 						[
-							'room_id' => $room,
+							'room_id' => $id, // C19: $room is update()'s boolean result, not the room
 							'inclusive_id' => $inclusive,
 							'user_added' => $user,
 						]

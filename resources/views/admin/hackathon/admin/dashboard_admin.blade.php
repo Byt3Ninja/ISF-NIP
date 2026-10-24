@@ -630,8 +630,8 @@
                 @if ($_user->hasRole('Admin'))
                 <td>
                   <small>{!! $session->rate_comment
-                    ? str_repeat('<i class="bx bxs-star" style="color:#fc960f"></i>', $session->rating).'<br>'.$session->rate_comment
-                    : $session->comment !!}</small>
+                    ? str_repeat('<i class="bx bxs-star" style="color:#fc960f"></i>', $session->rating).'<br>'.e($session->rate_comment)
+                    : e($session->comment) !!}</small>
                 </td>
                 @endif
                 <td>{{ $session->zoom_date }}<br>({{ $session->period }}M)</td>

@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Support\NotificationClaim;
 use stdClass;
 use App\Notifications\MentorshipSessionRequestNotification;
 use App\Notifications\MentorshipSessionMentorBookingNotification;
@@ -921,13 +922,12 @@ class MentorsController extends Controller
 				if (!in_array(env('APP_ENV', 'local'), ['local'])) {
 					// SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, null, 'addwait');
 
-					// Atomically claim the "notify org manager" step so a retry/duplicate
-					// call for this same request can never send the email twice.
-					$claimedNotify = MentorshipRequest::where('id', $createMentorshipRequest->id)
-						->whereNull('manager_notified_at')
-						->update(['manager_notified_at' => now()]);
-
-					if ($claimedNotify) {
+					// Claim the "notify org manager" step so a retry/duplicate call for this
+					// request can never send it twice. If queuing the fan-out fails, the claim is
+					// given back; a single recipient failing later on the worker is not, because
+					// releasing would re-send to every other recipient.
+					$claim = NotificationClaim::on('mentorship_requests', ['id' => $createMentorshipRequest->id], 'manager_notified_at');
+					$claim->run(function () use ($request, $fileName, $parties, $startupName, $requestedMentor, $dateTimePayload, $requestNotes, $user, $joinUrl, $passcode, $cycle) {
 						$isOnlineRequest = strtolower($request->session_type ?? '') == 'online';
 						$requestAttachments = $fileName ? [[
 							'url'  => app(\App\Services\FileManagerService::class)->getUrl($fileName, 'UsersDiskInviteMentor'),
@@ -966,7 +966,7 @@ class MentorsController extends Controller
 								);
 							}
 						}
-					}
+					});
 				}
 
 				return back()->with(['msg' => 'Request_successfully_added_Startup', 'class' => 'success']);

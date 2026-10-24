@@ -18,7 +18,6 @@ use App\Http\Controllers\TasksController;
 /* Disable frontend */ // Route::get('/', 'HomeController@index')->name('admin'); ///
 /// Frontend routes ///
 Route::get('lang/{locale}', 'IndexController@lang');
-Route::get('js-translations/{locale?}', 'IndexController@getJsTranslations')->name('js.translations');
 Route::get('/', 'IndexController@home');
 Route::get('home', 'IndexController@home');
 Route::get('about', 'IndexController@home');
@@ -53,8 +52,13 @@ Route::get('/confirm-email/{user}/{token}', 'ClientProfileController@confirmEmai
     ->middleware(['signed', 'throttle:6,1'])
     ->name('user.profile_email_confirm');
 
-Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')->name('invitations.set_password_view_form');
-Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')->name('invitations.accept');
+// Invitation links are signed (Invitation::setPasswordUrl / acceptUrl) and single-use (status must be pending).
+Route::get('organizations/set-password/{invitationId}', 'SettingsController@showSetPasswordForm')
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('invitations.set_password_view_form');
+Route::post('organizations/settings/accept/{invitationId}', 'SettingsController@acceptInvitation')
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('invitations.accept');
 
 // Public share tracking routes (no authentication required)
 Route::post('hackathon/track-share', [App\Http\Controllers\HackathonController::class, 'trackShare'])->name('hackathon.trackShare');
@@ -132,9 +136,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('hackathon/viewSubmission/{step_id}/{user_id}', 'HackathonController@ViewSubmission')->name('hackathon.ViewSubmission');
     Route::get('hackathon/dashboard/{id}', 'HackathonController@viewAdminHackaton')->name('hackathon.viewAdminHackaton');
     // Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.viewHackathonWinners');
-    Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners');
-    Route::get('hackathon/dashboard/winners/{id}/export', 'HackathonController@exportHackathonWinners');
-    Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners');
+    Route::get('hackathon/dashboard/winners/{id}', 'HackathonController@viewHackathonWinners')->name('hackathon.winners_view');
+    Route::get('hackathon/dashboard/winners/{id}/export', 'HackathonController@exportHackathonWinners')->name('hackathon.winners_export');
+    Route::post('hackathon/dashboard/winners/{id}', 'HackathonController@publishHackathonWinners')->name('hackathon.winners_publish');
     Route::get('hackathon/team/{id}', 'HackathonController@viewHackathonTeam')->name('hackathon.viewTeam');
 
     Route::post('hackathon/addSharedFile', 'SharedFileController@store')->name('hackathon.addSharedFile');
@@ -186,7 +190,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     Route::get('calendar/{id}/edit', 'SettingsController@editcal')->name('calendar.events_edit');
     Route::post('calendar/{id}/update', 'SettingsController@updatecal')->name('calendar.events_update');
-    Route::get('calendar/{id}/delete', 'SettingsController@delcal')->name('calendar.events_delete');
+    Route::delete('calendar/{id}/delete', 'SettingsController@delcal')->name('calendar.events_delete');
     Route::post('calendar/view', 'SettingsController@viewcal')->name('calendar.events_view');
     // Sliders Routes
     Route::get('add_slide', 'SlidersController@add_slide')->name('slides.create');
@@ -194,28 +198,28 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::any('slides', 'SlidersController@slides')->name('slides.list');
     Route::get('edit_slide/{id}', 'SlidersController@editslide')->name('slides.edit');
     Route::post('update_slide/{id}', 'SlidersController@updateslide')->name('slides.update');
-    Route::get('delete_slide/{id}', 'SlidersController@deleteslide')->name('slides.delete');
+    Route::delete('delete_slide/{id}', 'SlidersController@deleteslide')->name('slides.delete');
     // Menus Routes
     Route::get('add_menu', 'MenusController@add_menu')->name('menus.create');
     Route::post('store_menu', 'MenusController@store_menu')->name('menus.store');
     Route::any('menus', 'MenusController@myMenus')->name('menus.list');
     Route::get('edit_menu/{id}', 'MenusController@editMenu')->name('menus.edit');
     Route::post('update_menu/{id}', 'MenusController@updatemenu')->name('menus.update');
-    Route::get('delete_menu/{id}', 'MenusController@deleteMenu')->name('menus.delete');
+    Route::delete('delete_menu/{id}', 'MenusController@deleteMenu')->name('menus.delete');
     // Posts Routes
     Route::get('addpost', 'PostsController@add_post')->name('posts.create');
     Route::post('storepost', 'PostsController@store_post')->name('posts.store');
     Route::any('posts', 'PostsController@myposts')->name('posts.list');
     Route::get('editpost/{id}', 'PostsController@editpost')->name('posts.edit');
     Route::post('updatepost/{id}', 'PostsController@updatepost')->name('posts.update');
-    Route::get('deletepost/{id}', 'PostsController@deletepost')->name('posts.delete');
+    Route::delete('deletepost/{id}', 'PostsController@deletepost')->name('posts.delete');
     // Pages Routes
     Route::get('addpage', 'PagesController@add_page')->name('pages.create');
     Route::post('storepage', 'PagesController@store_page')->name('pages.store');
     Route::any('pages', 'PagesController@mypages')->name('pages.list');
     Route::get('editpage/{id}', 'PagesController@editpage')->name('pages.edit');
     Route::post('updatepage/{id}', 'PagesController@updatepage')->name('pages.update');
-    Route::get('deletepage/{id}', 'PagesController@deletepage')->name('pages.delete');
+    Route::delete('deletepage/{id}', 'PagesController@deletepage')->name('pages.delete');
     Route::get('editmypage', 'PagesController@editmypage')->name('pages.update_mine');
     // Pages Events
     Route::get('addevent', 'EventsController@add_event')->name('events.create');
@@ -223,7 +227,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::any('allevents', 'EventsController@myevent')->name('events.list');
     Route::get('editevent/{id}', 'EventsController@editevent')->name('events.edit');
     Route::post('updateevent/{id}', 'EventsController@updateevent')->name('events.update');
-    Route::get('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
+    Route::delete('deleteevent/{id}', 'EventsController@deleteevent')->name('events.delete');
     // Settings Routes
     Route::any('settings', 'SettingsController@index')->name('settings.index');
     Route::any('settings/general', 'SettingsController@get_settings')->name('settings.system_general_view');
@@ -232,10 +236,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('notification-settings', 'SettingsController@notificationSettings')->name('settings.notification_view');
     Route::put('notification-settings', 'SettingsController@updateNotificationSettings')->name('settings.notification_update');
     Route::post('update_settings', 'SettingsController@update_settings')->name('settings.system_general_update');
-    Route::any('setaboutus', 'SettingsController@get_aboutus');
-    Route::post('updateaboutus', 'SettingsController@update_aboutus');
-    Route::any('setcontactus', 'SettingsController@get_contactus');
-    Route::post('updatecontactus', 'SettingsController@update_contactus');
+    Route::any('setaboutus', 'SettingsController@get_aboutus')->name('settings.about_us_edit');
+    Route::post('updateaboutus', 'SettingsController@update_aboutus')->name('settings.about_us_update');
+    Route::any('setcontactus', 'SettingsController@get_contactus')->name('settings.contact_us_edit');
+    Route::post('updatecontactus', 'SettingsController@update_contactus')->name('settings.contact_us_update');
     Route::put('settings/Updateone', 'SettingsController@update_settingsone')->name('settings.system_section_one_update');
     Route::put('settings/Updatelogo', 'SettingsController@update_settinglogo')->name('settings.system_logo_update');
     Route::put('settings/Updatetwo', 'SettingsController@update_settingstwo')->name('settings.system_section_two_update');
@@ -467,10 +471,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     // startup growth
 
-    Route::post('/startupGrowth/add', 'startupCustomerGrowthController@addRecord');
-    Route::post('/startupGrowth/update', 'startupCustomerGrowthController@updateRecord');
-    Route::delete('/startupGrowth/delete/{id}', 'startupCustomerGrowthController@deleteRecord');
-    Route::get('/startupGrowth/export/{company_id}', 'startupCustomerGrowthController@exportRecords');
+    Route::post('/startupGrowth/add', 'startupCustomerGrowthController@addRecord')->name('company.customer_growth_add');
+    Route::post('/startupGrowth/update', 'startupCustomerGrowthController@updateRecord')->name('company.customer_growth_update');
+    Route::delete('/startupGrowth/delete/{id}', 'startupCustomerGrowthController@deleteRecord')->name('company.customer_growth_delete');
+    Route::get('/startupGrowth/export/{company_id}', 'startupCustomerGrowthController@exportRecords')->name('company.customer_growth_export');
 
     // Company Alumni
     Route::get('/companyProfile/{id}/alumni/{cycle_id}', [ClientCompanyController::class, 'companyAlumni'])->name('company.alumni_view');
@@ -551,13 +555,13 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('/uploads/photos/{id}/{path}', 'FilemanagerController@showimage')->where('path', '.*')->name('my_files.view_image');
     Route::get('/uploads/tasks/{id}/cards/{card_id}/{path}', [MentorshipTaskController::class, 'attachments'])->where('path', '.*');
     //Explore private files
-    Route::get('/private/{id}/{path}', 'FilemanagerController@showprivate')->where('path', '.*');
+    Route::get('/private/{id}/{path}', 'FilemanagerController@showprivate')->where('path', '.*')->name('my_files.view_private');
     //FileManager for training
     Route::get('/training/allfiles', 'FilemanagerController@allfiles');
     Route::get('/training/files/{path}', 'FilemanagerController@trainingfile')->where('path', '.*');
     Route::get('/training/photos/{path}', 'FilemanagerController@trainingimage')->where('path', '.*');
     //SendMessage
-    Route::post('/send_message', 'MessengerController@sendmsg');
+    Route::post('/send_message', 'MessengerController@sendmsg')->name('messages.send_direct');
     Route::get('/sendmessage', 'MessengerController@sendmessage')->name('messages.send');
     Route::post('/sendmessage', 'MessengerController@savemessage')->name('messages.save');
     Route::post('/sendteammessage', 'HackathonController@sendTeamMessage')->name('messages.send_team_message');
@@ -571,20 +575,19 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('/deleteDraft', 'MessengerController@deleteDraft')->name('messages.drafts_delete');
     Route::get('/getAllDraft', 'MessengerController@getAllDrafts')->name('messages.drafts_list');
     Route::get('/outbox', 'MessengerController@outbox')->name('messages.folders_outbox');
-    Route::get('/openmsg', 'MessengerController@openmsg');
-    Route::post('/mread', 'MessengerController@makeread');
+    Route::get('/openmsg', 'MessengerController@openmsg')->name('messages.open');
     Route::post('/messages/delete', 'MessengerController@destroy')->name('messages.delete');
     Route::get('/messages/trash', 'MessengerController@MessengerTrash')->name('messages.folders_trash');
     Route::post('/messages/toggleStarredStatus', 'MessengerController@toggleStarredStatus')->name('messages.star_toggle');
     Route::get('/messages/getAllStarred', 'MessengerController@getAllStarred')->name('messages.folders_starred');
     Route::post('/messages/toggleMarkReadStatus', 'MessengerController@toggleMarkReadStatus')->name('messages.read_status_toggle');
-    //Contact US Messages
-    Route::get('mymsg', 'SettingsController@mymsg')->name('messages.view');
-    Route::post('msgreply', 'SettingsController@msgreply')->name('messages.reply');
-    Route::get('deletemsg/{id}', 'SettingsController@deletemsg')->name('messages.delete');
-    Route::post('makeread/{id}', 'SettingsController@makeread')->name('messages.read_status_mark_read');
-    Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('messages.read_status_mark_unread');
-    Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('messages.view');
+    //Contact US Messages (platform inbox, admin only; distinct from the Messenger's messages.*)
+    Route::get('mymsg', 'SettingsController@mymsg')->name('contact_messages.list');
+    Route::post('msgreply', 'SettingsController@msgreply')->name('contact_messages.reply');
+    Route::delete('deletemsg/{id}', 'SettingsController@deletemsg')->name('contact_messages.delete');
+    Route::post('makeread/{id}', 'SettingsController@makeread')->name('contact_messages.mark_read');
+    Route::post('makeunread/{id}', 'SettingsController@makeunread')->name('contact_messages.mark_unread');
+    Route::get('openonemsg/{id}', 'SettingsController@openonemsg')->name('contact_messages.view');
 
     //products categories Manager routes
     Route::resource('productsCategories', 'ProductCategoryController');
@@ -594,7 +597,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //publish
     Route::any('products/publish/{id}', 'ProductController@publish');
     //Interests
-    Route::any('interests', 'HomeController@myinterests')->name('user.profile.interests_manage');
     //Audit Logs
     Route::resource('audit-logs', 'AuditLogsController', ['except' => ['create', 'store', 'edit', 'update']]);
     //Permissions
@@ -645,21 +647,21 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');
 
-    Route::post('cycles/{id}/add_page', 'CycleCustomPagesController@add');
-    Route::post('cycles/{id}/show_page', 'CycleCustomPagesController@view');
-    Route::post('cycles/{id}/update_page', 'CycleCustomPagesController@update');
-    Route::post('cycles/{id}/pages_resort', 'CycleCustomPagesController@reorder');
-    Route::post('cycles/{id}/toggle_status', 'CycleCustomPagesController@toggle_status');
-    Route::post('cycles/{id}/toggle_visibility', 'CycleCustomPagesController@toggle_visibility');
-    Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete');
+    Route::post('cycles/{id}/add_page', 'CycleCustomPagesController@add')->name('cycle.custom_pages.add');
+    Route::post('cycles/{id}/show_page', 'CycleCustomPagesController@view')->name('cycle.custom_pages.show');
+    Route::post('cycles/{id}/update_page', 'CycleCustomPagesController@update')->name('cycle.custom_pages.update');
+    Route::post('cycles/{id}/pages_resort', 'CycleCustomPagesController@reorder')->name('cycle.custom_pages.reorder');
+    Route::post('cycles/{id}/toggle_status', 'CycleCustomPagesController@toggle_status')->name('cycle.custom_pages.toggle_status');
+    Route::post('cycles/{id}/toggle_visibility', 'CycleCustomPagesController@toggle_visibility')->name('cycle.custom_pages.toggle_visibility');
+    Route::post('cycles/{id}/delete_page', 'CycleCustomPagesController@delete')->name('cycle.custom_pages.delete');
     Route::post('cycles/{id}/upload_image', 'CycleCustomPagesController@uploadImage')->name('cycle.custom_pages.upload_image');
 
     Route::post('cycles/modify', 'CyclesController@modify')->name('cycles.modify');
     Route::post('cycles/validate-url', 'CyclesController@validateURL');
     Route::get('cycles/view/{c?}/{s?}', 'CyclesController@view')->name('cycles.view');
-    Route::post('cycles/save', 'CyclesController@saveForm');
+    Route::post('cycles/save', 'CyclesController@saveForm')->name('cycles.application_save');
     Route::get('cycles/my/{id}', 'CyclesController@my')->name('cycles.list_mine');
-    Route::post('change/cyc', 'CyclesController@changAll');
+    Route::post('change/cyc', 'CyclesController@changAll')->name('cycles.companies_change_step');
     Route::get('/export-cyclesComp', 'CyclesController@exportcyclesComp');
 
     Route::get('/queue-jobs', 'QueueJobController@index')->name('queue.jobs');
@@ -676,17 +678,17 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::get('screening', 'ScreeningController@index')->name('screening.index');
     Route::get('screening/{id?}', 'ScreeningController@show')->name('screening.manage');
     Route::get('/dashboard/screening/get/{formId}/{stepId}/{panel}', 'ScreeningController@get')->name('screening.get');
-    Route::post('screening/update', 'ScreeningController@update');
+    Route::post('screening/update', 'ScreeningController@update')->name('screening.panels_update');
     Route::post('screening/add-judging-panels', 'ScreeningController@addJudgingPanels')->name('screening.add_judging_panels');
     Route::post('screening/delete-judging-panel', 'ScreeningController@deleteJudgingPanel')->name('screening.delete_judging_panel');
     Route::post('screening/update-step-form', 'ScreeningController@updateStepForm')->name('screening.update_step_form');
-    Route::post('screening/save', 'ScreeningController@save');
-    Route::post('screening/add', 'ScreeningController@add');
+    Route::post('screening/save', 'ScreeningController@save')->name('screening.form_scores_save');
+    Route::post('screening/add', 'ScreeningController@add')->name('screening.panel_startups_assign');
     Route::get('screening/results/{id?}', 'ScreeningController@results')->name('screening.results');
     Route::get('screening/resultsReport', 'ScreeningController@resultsReport')->name('screening.results_report');
     Route::get('{id?}/screening', 'ScreeningController@index');
     Route::get('screening/{fid}/{cid}', 'ScreeningController@view')->name('screening.view');
-    Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers');
+    Route::get('screening/get/{fid}/{sid}/{pid}', 'ScreeningController@getusers')->name('screening.panel_startups_options');
     Route::post('screening/changestep', 'ScreeningController@changestep')->name('screening.change_step');
     Route::get('/export-Result', 'ScreeningController@exportresultScreen');
     Route::post('screening/evaluation/save_draft', 'ScreeningController@save_evaluation_draft')->name('screening.evaluation_save_draft');
@@ -819,10 +821,10 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     //Rooms routes
     Route::resource('rooms', 'RoomsController');
     Route::get('/roomImages/{id}', 'RoomsController@roomImages')->name('rooms.images_manage');
-    Route::get('/deleteImages/{id}', 'RoomsController@deleteImages')->name('rooms.images_delete');
+    Route::delete('/deleteImages/{id}', 'RoomsController@deleteImages')->name('rooms.images_delete');
     Route::resource('booking', 'BookingController');
     Route::get('/bookingreview', 'BookingController@review')->name('bookings.review_pending');
-    Route::get('/bookingApprove/{id}/{action}', 'BookingController@approve')->name('bookings.approve');
+    Route::post('/bookingApprove/{id}/{action}', 'BookingController@approve')->name('bookings.approve');
     Route::get('/upcomingApprovedReview', 'BookingController@upcomingApprovedReview')->name('bookings.review_upcoming_approved');
     Route::get('/upcomingBusyReview', 'BookingController@upcomingBusyReview')->name('bookings.review_upcoming_busy');
     Route::get('/oldReview', 'BookingController@oldReview')->name('bookings.review_past');
@@ -969,7 +971,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     /* Start of Activities Routes */
     Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
-    Route::post('/log-activity', [ActivityController::class, 'logActivity'])->name('activity.log');
     Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
 
     // Security actions for suspicious logins

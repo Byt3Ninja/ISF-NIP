@@ -219,7 +219,7 @@ class UserRepository
                 {
                     if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
                     {
-                        Mail::to($registration->email)->queue(new serviceProviderRegistrationMail($contact_name, $data['email'], $data['password'] ?? null, route('login'), app()->getLocale()));
+                        Mail::to($registration->email)->queue(new serviceProviderRegistrationMail($contact_name, $data['email'], $user->generateMagicLoginUrl(), app()->getLocale()));
                     }
                 }
             }

@@ -60,15 +60,13 @@ class AdvancedExportService
             File::makeDirectory($tempDir, 0755, true);
         }
 
-        // Fetch Data
-        $request = new Request();
+        // Fetch Data. formsData() already limits staff to their own organizations; an export
+        // generated for one organization must contain only that organization (C32) -- a
+        // sub-admin of several organizations used to get all of them in every org's export.
+        $submissions = Formdata::formsData(new Request());
         if ($organizationId) {
-
+            $submissions = $submissions->where('organization_id', (int) $organizationId)->values();
         }
-
-
-
-        $submissions = Formdata::formsData($request);
         $totalSubmissions = $submissions->count();
 
         $count = 0;

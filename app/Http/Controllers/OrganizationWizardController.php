@@ -56,6 +56,7 @@ class OrganizationWizardController extends Controller
      */
     public function edit($id)
     {
+        $this->authorizeOrganization($id);
         $organization = Organization::with(['organizationType', 'industries', 'country', 'state', 'city', 'assignedUsers'])->findOrFail($id);
         $organizationTypes = OrganizationTypes::all();
         $industries = StaticCategory::all();
@@ -128,6 +129,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $data = $request->validated();
 
@@ -166,6 +168,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $result = $this->wizardService->updateStep2($id, $request->validated());
 
@@ -192,6 +195,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $filters = [
             'search_term' => $request->input('search_term'),
@@ -228,6 +232,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         // Validate at least one manager
         $request->validate([
@@ -260,6 +265,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $result = $this->managerService->createManager($id, $request->validated());
 
@@ -286,6 +292,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        if ($id !== null) { $this->authorizeOrganization($id); }
 
         // Minimal validation for draft
         $rules = [
@@ -376,6 +383,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $result = $this->wizardService->publish($id);
 
@@ -425,6 +433,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $data = $request->validated();
 
@@ -499,6 +508,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $organization = Organization::with(['landingPage', 'customSections'])->findOrFail($id);
         $landingPage = $organization->landingPage;
@@ -529,6 +539,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $result = $this->landingPageService->getPreviewUrl($id);
 
@@ -548,6 +559,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        if ($id !== null) { $this->authorizeOrganization($id); }
 
         $name = $request->input('name', null);
         $result = $this->wizardService->generateSlug($id, $name);
@@ -575,6 +587,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        if ($id !== null) { $this->authorizeOrganization($id); }
 
         $slug = $request->input('slug');
         $result = $this->wizardService->checkSlugAvailability($slug, $id);
@@ -594,6 +607,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $sections = $request->input('custom_sections', []);
 
@@ -637,6 +651,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $request->validate([
             'ordered_ids' => 'required|array',
@@ -660,6 +675,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $result = $this->customSectionService->delete($id, $sectionId);
 
@@ -678,6 +694,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         // Validate the cycle belongs to this org
         $cycle = \App\Cycle::where('id', $cycleId)
@@ -714,6 +731,7 @@ class OrganizationWizardController extends Controller
         if (!$_user->ableTo('organization.wizard.edit')) {
             return abort(401);
         }
+        $this->authorizeOrganization($id);
 
         $request->validate([
             'ordered_ids' => 'required|array',
@@ -726,5 +744,11 @@ class OrganizationWizardController extends Controller
             'success' => $result['success'],
             'message' => $result['message'],
         ]);
+    }
+
+    /** H2: wizard actions on an existing organization are limited to admins and the staff who manage it. */
+    private function authorizeOrganization($id): void
+    {
+        abort_unless(auth()->user()->managesOrganization($id), 403);
     }
 }

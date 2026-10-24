@@ -69,6 +69,7 @@ class WhatsAppSessionController extends Controller
      */
     public function start(string $sessionId): JsonResponse
     {
+        $this->authorizeSession($sessionId);
         $organization = auth()->user()->organization;
 
         
@@ -141,6 +142,7 @@ class WhatsAppSessionController extends Controller
      */
     public function status(string $sessionId): JsonResponse
     {
+        $this->authorizeSession($sessionId);
         $endpoint = "/session/status/{$sessionId}";
 
         try {
@@ -212,6 +214,7 @@ class WhatsAppSessionController extends Controller
      */
     public function getQrData(string $sessionId): JsonResponse
     {
+        $this->authorizeSession($sessionId);
         $endpoint = "/session/qr/{$sessionId}";
 
         try {
@@ -274,6 +277,7 @@ class WhatsAppSessionController extends Controller
      */
     public function getQrImage(string $sessionId) // Return type is broader here
     {
+        $this->authorizeSession($sessionId);
         $endpoint = "/session/qr/{$sessionId}/image";
       
         
@@ -364,6 +368,7 @@ class WhatsAppSessionController extends Controller
      */
     public function terminate(string $sessionId)
     {
+        $this->authorizeSession($sessionId);
         $endpoint = "/session/terminate/{$sessionId}";
 
         try {
@@ -477,4 +482,22 @@ class WhatsAppSessionController extends Controller
         }
     }
 
+
+    /**
+     * H2: a session id belongs to the organization whose org_whatsApp_SESSION_ID it is, or to the
+     * platform (settings). The caller may only act on an unclaimed id or one owned by its own
+     * owner (its organization, or the platform when it has none), never another tenant's.
+     */
+    private function authorizeSession(string $sessionId): void
+    {
+        $organizationId = auth()->user()->organization?->id;
+        $ownerOrganizationId = Organization::where('org_whatsApp_SESSION_ID', $sessionId)->value('id');
+        $platformOwned = (string) Settings::where('id', 1)->value('whatsApp_SESSION_ID') === $sessionId;
+
+        $foreign = $organizationId
+            ? ($platformOwned || ($ownerOrganizationId && (int) $ownerOrganizationId !== (int) $organizationId))
+            : (bool) $ownerOrganizationId;
+
+        abort_if($foreign, 403);
+    }
 }

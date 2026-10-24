@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Judger;
 
 use App\Company;
 use App\ScreeningEvaluation;
+use App\ScreeningEvaluationCriteria;
 use App\FormDataJudgesComments;
 use App\ScreeningEvaluationResults;
 use App\ScreeningEvaluationCustomFields;
@@ -148,6 +149,9 @@ class JudgerScreeningController extends Controller
         if( $type == $request->type )
         {
             $company = Company::find( $request->program );
+            abort_unless( $company, 404 );
+            // H7: a judge may only evaluate startups assigned to them at their current step.
+            abort_unless( $user->hasRole('admin') || $this->assignedCompanies( $user_id )->contains('id', $company->id), 403 );
             $form = Company::form( $company );
             $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
             if( $evaluationForm->id == $request->id )
@@ -158,6 +162,7 @@ class JudgerScreeningController extends Controller
                     $toCreate = [];
                     $commentToCreate = [];
                     $myComments = collect([]);
+                    $ids = [];
                     $myResponses = ScreeningEvaluationResults::where('company_id', $company->id)->where('evaluation_id', $evaluation_id)->where('user_id', $user_id)->get();
                     if( !empty( $form ) )
                     {
@@ -185,6 +190,8 @@ class JudgerScreeningController extends Controller
                         $comments = collect( $request->comments );
                         foreach( $comments as $oneComment )
                         {
+                            // Only answers of this startup's form can be commented on.
+                            if( !in_array( (int) ( $oneComment['id'] ?? 0 ), array_map('intval', $ids), true ) ) { continue; }
                             $checkCommentResponse = $myComments->where('form_data_id', $oneComment['id'])->where('user_id', $user_id)->first();
                             if( empty( $checkCommentResponse ) )
                             {
@@ -201,7 +208,13 @@ class JudgerScreeningController extends Controller
                                 $checkCommentResponse->save();
                             }
                         }
-                        $evaluations = collect( $request->evaluation );
+                        // Judges score sub-criteria only (see _startup_screening_canvas). A posted id
+                        // that is a category, belongs to another evaluation or is missing would be
+                        // stored as a result the report cannot place (C37), so it is skipped.
+                        $subCriteriaIds = ScreeningEvaluationCriteria::where('evaluation_id', $evaluation_id)
+                            ->whereNotNull('parent_id')->pluck('id')->map(fn($id) => (int) $id)->all();
+                        $evaluations = collect( $request->evaluation )
+                            ->filter(fn($element) => in_array((int) ($element['id'] ?? 0), $subCriteriaIds, true));
                         foreach( $evaluations as $element )
                         {
                             $checkResponse = $myResponses->where('criteria_id', $element['id'])->where('user_id', $user_id)->first();

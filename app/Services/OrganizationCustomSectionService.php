@@ -50,7 +50,7 @@ class OrganizationCustomSectionService
                 $data = [
                     'organization_id' => $orgId,
                     'title' => $sectionData['title'] ?? '',
-                    'content' => $sectionData['content'] ?? '',
+                    'content' => HtmlSanitizer::clean($sectionData['content'] ?? ''),
                     'visibility' => $sectionData['visibility'] ?? 'public',
                     'bg_type' => $sectionData['bg_type'] ?? 'solid',
                     'bg_color' => $sectionData['bg_color'] ?? null,

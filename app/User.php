@@ -42,15 +42,15 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
      */
     protected $fillable = [
         'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','national_id','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'google2fa_secret', 'accept_email', 'accept_whatsapp', 'accept_pusher',
-        'magic_login_token', 'magic_login_sent_at', 'must_change_password'];
+        'PageId','dob','academic_stat','national_id','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'accept_email', 'accept_whatsapp', 'accept_pusher',
+        'magic_login_sent_at', 'must_change_password'];
     /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'google2fa_secret', 'magic_login_token',
     ];
 
 	public function sendPasswordResetNotification($token)
@@ -381,6 +381,40 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     }
 
     /**
+     * C39: a service-provider applicant whose registration was rejected (status 0 with an
+     * action date) and who holds no other role. Such an account may no longer sign in.
+     */
+    public function isRejectedProviderApplicant(): bool
+    {
+        if ($this->roles->isNotEmpty()) {
+            return false;
+        }
+
+        return DB::table('service_provider_registration')
+            ->where('user_id', $this->id)
+            ->where('status', 0)
+            ->whereNotNull('action_at')
+            ->exists();
+    }
+
+    /**
+     * Staff-side ownership: admin, or an organization manager / sub-admin whose
+     * scope includes the organization. Unlike ownsOrganization(), a founder,
+     * judge or mentor never passes, even for their own program's organization.
+     *
+     * @param  int|string|null  $organizationId
+     * @return bool
+     */
+    public function managesOrganization($organizationId): bool
+    {
+        if ($this->hasRole('admin')) {
+            return true;
+        }
+
+        return $this->hasAnyRole(['organizationManager', 'subadmin']) && $this->ownsOrganization($organizationId);
+    }
+
+    /**
      * Check if user is a Sub-Admin.
      *
      * @return bool
@@ -423,8 +457,10 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     }
     public function deAllotRole( $role )
     {
+        // Exact match: a LIKE '%x%' gave the first role for an empty value and 'subadmin' for 'admin'.
+        if( !is_string( $role ) || trim( $role ) === '' ) { return; }
         $user_id = $this->id;
-        $_role = Role::where('default_for', 'LIKE', '%' . $role . '%')->first();
+        $_role = Role::where('default_for', trim( $role ))->first();
         if( !empty( $_role ) )
         {
             $id = $_role->id;
@@ -433,8 +469,10 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     }
     public function allotRole( $role )
     {
+        // Exact match: a LIKE '%x%' gave the first role for an empty value and 'subadmin' for 'admin'.
+        if( !is_string( $role ) || trim( $role ) === '' ) { return; }
         $user_id = $this->id;
-        $_role = Role::where('default_for', 'LIKE', '%' . $role . '%')->first();
+        $_role = Role::where('default_for', trim( $role ))->first();
         if( !empty( $_role ) )
         {
             $id = $_role->id;

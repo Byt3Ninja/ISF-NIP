@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -16,7 +17,7 @@ use Throwable;
 
 class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -132,6 +133,7 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('ConfirmEmailUpdateNotification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
