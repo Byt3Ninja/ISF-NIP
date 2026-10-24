@@ -23,11 +23,11 @@
           id="branding_gradient_start_value" name="branding_gradient_start" maxlength="7" dir="ltr"
           placeholder="{{ __('settings.branding_use_theme_gradient') }}"
           value="{{ old('branding_gradient_start', $_brandingSaved['gradient_start']) }}">
-        <button type="button" class="btn btn-outline-secondary branding-gradient-clear"
+        {{--  <button type="button" class="btn btn-outline-secondary branding-gradient-clear"
           title="{{ __('settings.branding_use_theme_gradient') }}"
           aria-label="{{ __('settings.branding_use_theme_gradient') }}">
           <i class="ti ti-restore"></i>
-        </button>
+        </button>  --}}
       </div>
       <div class="invalid-feedback d-block" data-error-for="gradient_start">@error('branding_gradient_start'){{ $message }}@enderror</div>
     </div>
@@ -46,11 +46,11 @@
           id="branding_gradient_end_value" name="branding_gradient_end" maxlength="7" dir="ltr"
           placeholder="{{ __('settings.branding_use_theme_gradient') }}"
           value="{{ old('branding_gradient_end', $_brandingSaved['gradient_end']) }}">
-        <button type="button" class="btn btn-outline-secondary branding-gradient-clear"
+        {{--  <button type="button" class="btn btn-outline-secondary branding-gradient-clear"
           title="{{ __('settings.branding_use_theme_gradient') }}"
           aria-label="{{ __('settings.branding_use_theme_gradient') }}">
           <i class="ti ti-restore"></i>
-        </button>
+        </button>  --}}
       </div>
       <div class="invalid-feedback d-block" data-error-for="gradient_end">@error('branding_gradient_end'){{ $message }}@enderror</div>
     </div>
