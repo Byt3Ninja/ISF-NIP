@@ -162,7 +162,7 @@
                   <div class="avatar avatar-xs">
                     <div class="avatar-initial rounded-circle overflow-hidden">
                       @if($page->createdBy && $page->createdBy->img_url)
-                        <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
+                        <img src="{{ $page->createdBy->image_url }}" alt="logo" class="rounded object-fit-cover" />
                       @else
                         <i class="ti ti-user text-dark"></i>
                       @endif
