@@ -46,6 +46,44 @@
     #heading {
         margin-top: 2rem;
     }
+    
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+    }
+    .auth-brand img {
+      height: 52px;
+      width: auto;
+      max-width: 200px;
+      object-fit: contain;
+    }
+    
+    @media (min-height: 0px) and (max-height: 900px) {
+      .auth-brand {
+        margin-bottom: 1.125rem;
+      }
+
+      .auth-brand img {
+        height: 44px;
+      }
+    }
+    
+    @media (max-width: 575.98px) {
+      .auth-brand img {
+        height: 44px;
+      }
+    }
+
+    /* Respect a reduced-motion preference for anything the pages animate. */
+    @media (prefers-reduced-motion: reduce) {
+      .auth-brand img {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
 
     @media (min-width: 992px) {
       #navbar-collapse {
@@ -79,7 +117,7 @@
     @php
         $setting = App\Settings::findorfail(1)->first();
     @endphp
-    <a class="app-brand auth-cover-brand bg-label-secondary p-4 rounded" href="/dashboard">
+    <a class="auth-brand" href="/dashboard">
       <img src="{{ $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png') }} " alt="avatar" height="50" width="150">
     </a>
     <!-- /Logo -->
