@@ -607,7 +607,7 @@ class LandingPagesController extends Controller
             'type'      => 'checkbox',
             'label_en'  => 'Enable Section',
             'label_ar'  => 'تفعيل القسم',
-            'value'     => $currentPage ? (bool) $currentPage->how_is_enabled : 1,
+            'value'     => $currentPage ? (bool) $currentPage->how_is_enabled : 0,
             'col'       => 12,
           ],
           [
