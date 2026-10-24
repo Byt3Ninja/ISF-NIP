@@ -180,758 +180,758 @@ class LandingPagesController extends Controller
 		return view('admin.landing-pages.show', compact('page', 'colors', 'visiblePrograms', 'customSections', 'showHow', 'showAbout', 'showPrograms'));
 	}
 
-  public function create(Request $request)
-  {
-    $cycles = $this->scopedCycles();
-    $programOrganizations = $this->programOrganizations($cycles);
-    $programTypes = Cycle::programTypes();
-    $sections = $this->buildSections();
+	public function create(Request $request)
+	{
+	$cycles = $this->scopedCycles();
+	$programOrganizations = $this->programOrganizations($cycles);
+	$programTypes = Cycle::programTypes();
+	$sections = $this->buildSections();
 
-    return view('admin.landing-pages.create', compact('cycles', 'programOrganizations', 'programTypes', 'sections'));
-  }
+	return view('admin.landing-pages.create', compact('cycles', 'programOrganizations', 'programTypes', 'sections'));
+	}
 
-  /**
-   * Organizations behind the given programs, deduplicated and sorted by
-   * name in the current locale — used to populate the Programs tab's
-   * organization filter dropdown.
-   */
-  protected function programOrganizations($cycles)
-  {
-    $locale = app()->getLocale();
+	/**
+	 * Organizations behind the given programs, deduplicated and sorted by
+	 * name in the current locale — used to populate the Programs tab's
+	 * organization filter dropdown.
+	 */
+	protected function programOrganizations($cycles)
+	{
+	$locale = app()->getLocale();
 
-    return $cycles->pluck('organization')
-      ->filter()
-      ->unique('id')
-      ->sortBy($locale === 'ar' ? 'name_ar' : 'name_en');
-  }
+	return $cycles->pluck('organization')
+		->filter()
+		->unique('id')
+		->sortBy($locale === 'ar' ? 'name_ar' : 'name_en');
+	}
 
-  /**
-   * Build the tab/field configuration shared by the create and edit
-   * screens. Field values are pulled from $currentPage when editing an
-   * existing page; they're left null on the create screen, where the
-   * Programs/Custom Sections tabs are also fully disabled until the page
-   * exists (see the "Programs_Note" banner).
-   */
-  protected function buildSections(?LandingPage $currentPage = null): array
-  {
-    $title_max_length = LandingPage::TITLE_MAX_LENGTH;
+	/**
+	 * Build the tab/field configuration shared by the create and edit
+	 * screens. Field values are pulled from $currentPage when editing an
+	 * existing page; they're left null on the create screen, where the
+	 * Programs/Custom Sections tabs are also fully disabled until the page
+	 * exists (see the "Programs_Note" banner).
+	 */
+	protected function buildSections(?LandingPage $currentPage = null): array
+	{
+	$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 	$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
 	$program_description_max_length = LandingPage::PROGRAM_DESCRIPTION_MAX_LENGTH;
 
-    $sections = [
-      [
-        'key'      => 'general',
-        'icon'     => 'ti-settings',
-        'label_en' => 'General',
-        'label_ar' => 'عام',
-        'route'    => $currentPage ? route('landing-pages.general.update', $currentPage->id) : route('landing-pages.store'),
-        'fields'   => [
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Page Title',
-            'label_ar'  => 'عنوان الصفحة',
-            'value'     => $currentPage?->title,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 12,
-          ],
-          [
-            'name'        => 'logo',
-            'type'        => 'image',
-            'label_en'    => 'Logo',
-            'label_ar'    => 'الشعار',
-            'value'       => $currentPage?->logo_url,
-            'required'    => true,
-            'accept'      => '.png,.jpg,.jpeg,.webp',
-            'max_size_mb' => 5,
-            'col'         => 12,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => $currentPage?->description,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => $currentPage?->description_ar,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'linkedin',
-            'type'      => 'url',
-            'label_en'  => 'LinkedIn',
-            'label_ar'  => 'لينكدإن',
-            'value'     => $currentPage?->linkedin,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'facebook',
-            'type'      => 'url',
-            'label_en'  => 'Facebook',
-            'label_ar'  => 'فيسبوك',
-            'value'     => $currentPage?->facebook,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'instagram',
-            'type'      => 'url',
-            'label_en'  => 'Instagram',
-            'label_ar'  => 'إنستغرام',
-            'value'     => $currentPage?->instagram,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'x',
-            'type'      => 'url',
-            'label_en'  => 'X',
-            'label_ar'  => 'إكس',
-            'value'     => $currentPage?->x,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'tiktok',
-            'type'      => 'url',
-            'label_en'  => 'TikTok',
-            'label_ar'  => 'تيك توك',
-            'value'     => $currentPage?->tiktok,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'youtube',
-            'type'      => 'url',
-            'label_en'  => 'YouTube',
-            'label_ar'  => 'يوتيوب',
-            'value'     => $currentPage?->youtube,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'hero',
-        'icon'     => 'ti-align-box-top-center',
-        'label_en' => 'Hero',
-        'label_ar' => 'البطل',
-        'route'    => $currentPage ? route('landing-pages.hero.update', $currentPage->id) : route('landing-pages.hero.update', 0),
-        'fields'   => [
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => $currentPage?->hero_title,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => $currentPage?->hero_title_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => $currentPage?->hero_title_tag,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => $currentPage?->hero_title_tag_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => $currentPage?->hero_description,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => $currentPage?->hero_description_ar,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'cta_text',
-            'type'      => 'text',
-            'label_en'  => 'CTA Text (English)',
-            'label_ar'  => 'نص الإجراء (بالإنجليزية)',
-            'value'     => $currentPage?->hero_cta_text ?: 'View Programs',
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'cta_text_ar',
-            'type'      => 'text',
-            'label_en'  => 'CTA Text (Arabic)',
-            'label_ar'  => 'نص الإجراء (بالعربية)',
-            'value'     => $currentPage?->hero_cta_text_ar ?: 'عرض البرامج',
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'cta_link',
-            'type'      => 'url',
-            'label_en'  => 'CTA Link',
-            'label_ar'  => 'رابط الإجراء',
-            'value'     => $currentPage?->hero_cta_link,
-            'required'  => false,
-            'maxlength' => 255,
-            'col'       => 12,
-            'hint_en'   => 'Leave empty to navigate to the Programs section on this landing page.',
-            'hint_ar'   => 'اتركه فارغاً للانتقال إلى قسم البرامج في صفحة الهبوط هذه.',
-          ],
-          [
-            'name'        => 'hero_image',
-            'type'        => 'image',
-            'label_en'    => 'Hero image',
-            'label_ar'    => 'صورة القسم الرئيسي',
-            'value'       => $currentPage?->hero_image_url,
-            'required'    => true,
-            'accept'      => '.png,.jpg,.jpeg,.webp',
-            'max_size_mb' => 5,
-            'col'         => 12,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'about',
-        'icon'     => 'ti-users',
-        'label_en' => 'About Us',
-        'label_ar' => 'من نحن',
-        'route'    => $currentPage ? route('landing-pages.about.update', $currentPage->id) : route('landing-pages.about.update', 0),
-        'fields'   => [
-          [
-            'name'      => 'is_enabled',
-            'type'      => 'checkbox',
-            'label_en'  => 'Enable Section',
-            'label_ar'  => 'تفعيل القسم',
-            'value'     => $currentPage ? (bool) $currentPage->about_is_enabled : 0,
-            'col'       => 12,
-          ],
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => $currentPage?->about_title,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => $currentPage?->about_title_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => $currentPage?->about_title_tag,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => $currentPage?->about_title_tag_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => $currentPage?->about_description,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => $currentPage?->about_description_ar,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'programs',
-        'icon'     => 'ti-rocket',
-        'label_en' => 'Programs',
-        'label_ar' => 'البرامج',
-        'route'    => $currentPage ? route('landing-pages.programs.update', $currentPage->id) : route('landing-pages.programs.update', 0),
-        'fields'   => [
-          [
-            'name'      => 'is_enabled',
-            'type'      => 'checkbox',
-            'label_en'  => 'Enable Section',
-            'label_ar'  => 'تفعيل القسم',
-            'value'     => $currentPage ? (bool) $currentPage->programs_is_enabled : 0,
-            'col'       => 12,
-          ],
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => $currentPage?->programs_title,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => $currentPage?->programs_title_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => $currentPage?->programs_title_tag,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => $currentPage?->programs_title_tag_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => $currentPage?->programs_description,
-            'required'  => true,
-            'maxlength' => $program_description_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => $currentPage?->programs_description_ar,
-            'required'  => true,
-            'maxlength' => $program_description_max_length,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'how',
-        'icon'     => 'ti-settings-bolt',
-        'label_en' => 'How It Works',
-        'label_ar' => 'كيف يعمل',
-        'route'    => $currentPage ? route('landing-pages.how.update', $currentPage->id) : route('landing-pages.how.update', 0),
-        'fields'   => [
-          [
-            'name'      => 'is_enabled',
-            'type'      => 'checkbox',
-            'label_en'  => 'Enable Section',
-            'label_ar'  => 'تفعيل القسم',
-            'value'     => $currentPage ? (bool) $currentPage->how_is_enabled : 0,
-            'col'       => 12,
-          ],
-          [
-            'name'      => 'title',
-            'type'      => 'text',
-            'label_en'  => 'Title',
-            'label_ar'  => 'العنوان',
-            'value'     => $currentPage?->how_title,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title (Arabic)',
-            'label_ar'  => 'العنوان بالعربية',
-            'value'     => $currentPage?->how_title_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag',
-            'type'      => 'text',
-            'label_en'  => 'Title tag',
-            'label_ar'  => 'العنوان الفرعي',
-            'value'     => $currentPage?->how_title_tag,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'title_tag_ar',
-            'type'      => 'text',
-            'label_en'  => 'Title tag (Arabic)',
-            'label_ar'  => 'العنوان الفرعي بالعربية',
-            'value'     => $currentPage?->how_title_tag_ar,
-            'required'  => true,
-            'maxlength' => $title_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description',
-            'type'      => 'textarea',
-            'label_en'  => 'Description',
-            'label_ar'  => 'الوصف',
-            'value'     => $currentPage?->how_description,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-          [
-            'name'      => 'description_ar',
-            'type'      => 'textarea',
-            'label_en'  => 'Description (Arabic)',
-            'label_ar'  => 'الوصف بالعربية',
-            'value'     => $currentPage?->how_description_ar,
-            'required'  => true,
-            'maxlength' => $description_max_length,
-            'col'       => 6,
-          ],
-        ],
-      ],
-      [
-        'key'      => 'branding',
-        'icon'     => 'ti-palette',
-        'label_en' => 'Branding',
-        'label_ar' => 'الهوية البصرية',
-        // Colors only: no generic fields. Saves through its own endpoint
-        // (like the other tabs), which never touches the section repeater
-        // below it. The id-0 fallback matches the other create-mode routes.
-        'route'    => $currentPage ? route('landing-pages.branding.update', $currentPage->id) : route('landing-pages.branding.update', 0),
-        'fields'   => [],
-      ],
-      [
-        'key'      => 'custom',
-        'icon'     => 'ti-puzzle',
-        'label_en' => 'Custom sections',
-        'label_ar' => 'أقسام مخصصة',
-        'route'    => $currentPage ? route('landing-pages.custom-sections.update', $currentPage->id) : route('landing-pages.custom-sections.update', 0),
-        'fields'   => [],
-      ],
-    ];
+	$sections = [
+		[
+		'key'      => 'general',
+		'icon'     => 'ti-settings',
+		'label_en' => 'General',
+		'label_ar' => 'عام',
+		'route'    => $currentPage ? route('landing-pages.general.update', $currentPage->id) : route('landing-pages.store'),
+		'fields'   => [
+			[
+			'name'      => 'title',
+			'type'      => 'text',
+			'label_en'  => 'Page Title',
+			'label_ar'  => 'عنوان الصفحة',
+			'value'     => $currentPage?->title,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 12,
+			],
+			[
+			'name'        => 'logo',
+			'type'        => 'image',
+			'label_en'    => 'Logo',
+			'label_ar'    => 'الشعار',
+			'value'       => $currentPage?->logo_url,
+			'required'    => true,
+			'accept'      => '.png,.jpg,.jpeg,.webp',
+			'max_size_mb' => 5,
+			'col'         => 12,
+			],
+			[
+			'name'      => 'description',
+			'type'      => 'textarea',
+			'label_en'  => 'Description',
+			'label_ar'  => 'الوصف',
+			'value'     => $currentPage?->description,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description_ar',
+			'type'      => 'textarea',
+			'label_en'  => 'Description (Arabic)',
+			'label_ar'  => 'الوصف بالعربية',
+			'value'     => $currentPage?->description_ar,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'linkedin',
+			'type'      => 'url',
+			'label_en'  => 'LinkedIn',
+			'label_ar'  => 'لينكدإن',
+			'value'     => $currentPage?->linkedin,
+			'required'  => false,
+			'maxlength' => 255,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'facebook',
+			'type'      => 'url',
+			'label_en'  => 'Facebook',
+			'label_ar'  => 'فيسبوك',
+			'value'     => $currentPage?->facebook,
+			'required'  => false,
+			'maxlength' => 255,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'instagram',
+			'type'      => 'url',
+			'label_en'  => 'Instagram',
+			'label_ar'  => 'إنستغرام',
+			'value'     => $currentPage?->instagram,
+			'required'  => false,
+			'maxlength' => 255,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'x',
+			'type'      => 'url',
+			'label_en'  => 'X',
+			'label_ar'  => 'إكس',
+			'value'     => $currentPage?->x,
+			'required'  => false,
+			'maxlength' => 255,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'tiktok',
+			'type'      => 'url',
+			'label_en'  => 'TikTok',
+			'label_ar'  => 'تيك توك',
+			'value'     => $currentPage?->tiktok,
+			'required'  => false,
+			'maxlength' => 255,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'youtube',
+			'type'      => 'url',
+			'label_en'  => 'YouTube',
+			'label_ar'  => 'يوتيوب',
+			'value'     => $currentPage?->youtube,
+			'required'  => false,
+			'maxlength' => 255,
+			'col'       => 6,
+			],
+		],
+		],
+		[
+		'key'      => 'hero',
+		'icon'     => 'ti-align-box-top-center',
+		'label_en' => 'Hero',
+		'label_ar' => 'البطل',
+		'route'    => $currentPage ? route('landing-pages.hero.update', $currentPage->id) : route('landing-pages.hero.update', 0),
+		'fields'   => [
+			[
+			'name'      => 'title',
+			'type'      => 'text',
+			'label_en'  => 'Title',
+			'label_ar'  => 'العنوان',
+			'value'     => $currentPage?->hero_title,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title (Arabic)',
+			'label_ar'  => 'العنوان بالعربية',
+			'value'     => $currentPage?->hero_title_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag',
+			'type'      => 'text',
+			'label_en'  => 'Title tag',
+			'label_ar'  => 'العنوان الفرعي',
+			'value'     => $currentPage?->hero_title_tag,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title tag (Arabic)',
+			'label_ar'  => 'العنوان الفرعي بالعربية',
+			'value'     => $currentPage?->hero_title_tag_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description',
+			'type'      => 'textarea',
+			'label_en'  => 'Description',
+			'label_ar'  => 'الوصف',
+			'value'     => $currentPage?->hero_description,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description_ar',
+			'type'      => 'textarea',
+			'label_en'  => 'Description (Arabic)',
+			'label_ar'  => 'الوصف بالعربية',
+			'value'     => $currentPage?->hero_description_ar,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'cta_text',
+			'type'      => 'text',
+			'label_en'  => 'CTA Text (English)',
+			'label_ar'  => 'نص الإجراء (بالإنجليزية)',
+			'value'     => $currentPage?->hero_cta_text ?: 'View Programs',
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'cta_text_ar',
+			'type'      => 'text',
+			'label_en'  => 'CTA Text (Arabic)',
+			'label_ar'  => 'نص الإجراء (بالعربية)',
+			'value'     => $currentPage?->hero_cta_text_ar ?: 'عرض البرامج',
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'cta_link',
+			'type'      => 'url',
+			'label_en'  => 'CTA Link',
+			'label_ar'  => 'رابط الإجراء',
+			'value'     => $currentPage?->hero_cta_link,
+			'required'  => false,
+			'maxlength' => 255,
+			'col'       => 12,
+			'hint_en'   => 'Leave empty to navigate to the Programs section on this landing page.',
+			'hint_ar'   => 'اتركه فارغاً للانتقال إلى قسم البرامج في صفحة الهبوط هذه.',
+			],
+			[
+			'name'        => 'hero_image',
+			'type'        => 'image',
+			'label_en'    => 'Hero image',
+			'label_ar'    => 'صورة القسم الرئيسي',
+			'value'       => $currentPage?->hero_image_url,
+			'required'    => true,
+			'accept'      => '.png,.jpg,.jpeg,.webp',
+			'max_size_mb' => 5,
+			'col'         => 12,
+			],
+		],
+		],
+		[
+		'key'      => 'about',
+		'icon'     => 'ti-users',
+		'label_en' => 'About Us',
+		'label_ar' => 'من نحن',
+		'route'    => $currentPage ? route('landing-pages.about.update', $currentPage->id) : route('landing-pages.about.update', 0),
+		'fields'   => [
+			[
+			'name'      => 'is_enabled',
+			'type'      => 'checkbox',
+			'label_en'  => 'Enable Section',
+			'label_ar'  => 'تفعيل القسم',
+			'value'     => $currentPage ? (bool) $currentPage->about_is_enabled : 0,
+			'col'       => 12,
+			],
+			[
+			'name'      => 'title',
+			'type'      => 'text',
+			'label_en'  => 'Title',
+			'label_ar'  => 'العنوان',
+			'value'     => $currentPage?->about_title,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title (Arabic)',
+			'label_ar'  => 'العنوان بالعربية',
+			'value'     => $currentPage?->about_title_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag',
+			'type'      => 'text',
+			'label_en'  => 'Title tag',
+			'label_ar'  => 'العنوان الفرعي',
+			'value'     => $currentPage?->about_title_tag,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title tag (Arabic)',
+			'label_ar'  => 'العنوان الفرعي بالعربية',
+			'value'     => $currentPage?->about_title_tag_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description',
+			'type'      => 'textarea',
+			'label_en'  => 'Description',
+			'label_ar'  => 'الوصف',
+			'value'     => $currentPage?->about_description,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description_ar',
+			'type'      => 'textarea',
+			'label_en'  => 'Description (Arabic)',
+			'label_ar'  => 'الوصف بالعربية',
+			'value'     => $currentPage?->about_description_ar,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+		],
+		],
+		[
+		'key'      => 'programs',
+		'icon'     => 'ti-rocket',
+		'label_en' => 'Programs',
+		'label_ar' => 'البرامج',
+		'route'    => $currentPage ? route('landing-pages.programs.update', $currentPage->id) : route('landing-pages.programs.update', 0),
+		'fields'   => [
+			[
+			'name'      => 'is_enabled',
+			'type'      => 'checkbox',
+			'label_en'  => 'Enable Section',
+			'label_ar'  => 'تفعيل القسم',
+			'value'     => $currentPage ? (bool) $currentPage->programs_is_enabled : 0,
+			'col'       => 12,
+			],
+			[
+			'name'      => 'title',
+			'type'      => 'text',
+			'label_en'  => 'Title',
+			'label_ar'  => 'العنوان',
+			'value'     => $currentPage?->programs_title,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title (Arabic)',
+			'label_ar'  => 'العنوان بالعربية',
+			'value'     => $currentPage?->programs_title_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag',
+			'type'      => 'text',
+			'label_en'  => 'Title tag',
+			'label_ar'  => 'العنوان الفرعي',
+			'value'     => $currentPage?->programs_title_tag,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title tag (Arabic)',
+			'label_ar'  => 'العنوان الفرعي بالعربية',
+			'value'     => $currentPage?->programs_title_tag_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description',
+			'type'      => 'textarea',
+			'label_en'  => 'Description',
+			'label_ar'  => 'الوصف',
+			'value'     => $currentPage?->programs_description,
+			'required'  => true,
+			'maxlength' => $program_description_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description_ar',
+			'type'      => 'textarea',
+			'label_en'  => 'Description (Arabic)',
+			'label_ar'  => 'الوصف بالعربية',
+			'value'     => $currentPage?->programs_description_ar,
+			'required'  => true,
+			'maxlength' => $program_description_max_length,
+			'col'       => 6,
+			],
+		],
+		],
+		[
+		'key'      => 'how',
+		'icon'     => 'ti-settings-bolt',
+		'label_en' => 'How It Works',
+		'label_ar' => 'كيف يعمل',
+		'route'    => $currentPage ? route('landing-pages.how.update', $currentPage->id) : route('landing-pages.how.update', 0),
+		'fields'   => [
+			[
+			'name'      => 'is_enabled',
+			'type'      => 'checkbox',
+			'label_en'  => 'Enable Section',
+			'label_ar'  => 'تفعيل القسم',
+			'value'     => $currentPage ? (bool) $currentPage->how_is_enabled : 0,
+			'col'       => 12,
+			],
+			[
+			'name'      => 'title',
+			'type'      => 'text',
+			'label_en'  => 'Title',
+			'label_ar'  => 'العنوان',
+			'value'     => $currentPage?->how_title,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title (Arabic)',
+			'label_ar'  => 'العنوان بالعربية',
+			'value'     => $currentPage?->how_title_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag',
+			'type'      => 'text',
+			'label_en'  => 'Title tag',
+			'label_ar'  => 'العنوان الفرعي',
+			'value'     => $currentPage?->how_title_tag,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'title_tag_ar',
+			'type'      => 'text',
+			'label_en'  => 'Title tag (Arabic)',
+			'label_ar'  => 'العنوان الفرعي بالعربية',
+			'value'     => $currentPage?->how_title_tag_ar,
+			'required'  => true,
+			'maxlength' => $title_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description',
+			'type'      => 'textarea',
+			'label_en'  => 'Description',
+			'label_ar'  => 'الوصف',
+			'value'     => $currentPage?->how_description,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+			[
+			'name'      => 'description_ar',
+			'type'      => 'textarea',
+			'label_en'  => 'Description (Arabic)',
+			'label_ar'  => 'الوصف بالعربية',
+			'value'     => $currentPage?->how_description_ar,
+			'required'  => true,
+			'maxlength' => $description_max_length,
+			'col'       => 6,
+			],
+		],
+		],
+		[
+		'key'      => 'branding',
+		'icon'     => 'ti-palette',
+		'label_en' => 'Branding',
+		'label_ar' => 'الهوية البصرية',
+		// Colors only: no generic fields. Saves through its own endpoint
+		// (like the other tabs), which never touches the section repeater
+		// below it. The id-0 fallback matches the other create-mode routes.
+		'route'    => $currentPage ? route('landing-pages.branding.update', $currentPage->id) : route('landing-pages.branding.update', 0),
+		'fields'   => [],
+		],
+		[
+		'key'      => 'custom',
+		'icon'     => 'ti-puzzle',
+		'label_en' => 'Custom sections',
+		'label_ar' => 'أقسام مخصصة',
+		'route'    => $currentPage ? route('landing-pages.custom-sections.update', $currentPage->id) : route('landing-pages.custom-sections.update', 0),
+		'fields'   => [],
+		],
+	];
 
-    foreach ($sections as &$section) {
-      // Every tab besides General needs an existing page to save into, so
-      // until the page is created (General saved), lock them: this pushes
-      // the admin toward the General tab first.
-      $section['locked'] = !$currentPage && $section['key'] !== 'general';
+	foreach ($sections as &$section) {
+		// Every tab besides General needs an existing page to save into, so
+		// until the page is created (General saved), lock them: this pushes
+		// the admin toward the General tab first.
+		$section['locked'] = !$currentPage && $section['key'] !== 'general';
 
-      foreach ($section['fields'] as &$field) {
-        $field['name_attr'] = "{$section['key']}[{$field['name']}]";
-        $field['id_attr'] = "{$section['key']}_{$field['name']}";
+		foreach ($section['fields'] as &$field) {
+		$field['name_attr'] = "{$section['key']}[{$field['name']}]";
+		$field['id_attr'] = "{$section['key']}_{$field['name']}";
 
-        if ($section['locked']) {
-          $field['disabled'] = true;
-        }
-      }
-      unset($field);
-    }
-    unset($section);
+		if ($section['locked']) {
+			$field['disabled'] = true;
+		}
+		}
+		unset($field);
+	}
+	unset($section);
 
-    return $sections;
-  }
+	return $sections;
+	}
 
-  /**
-   * Landing pages visible to the current user: Admin sees every page,
-   * Sub Admin sees pages created by users belonging to any organization
-   * they manage, and everyone else (including Organization Manager) only
-   * sees pages they personally created.
-   */
-  protected function scopedLandingPagesQuery()
-  {
-    $user = auth()->user();
-    $query = LandingPage::query();
+	/**
+	* Landing pages visible to the current user: Admin sees every page,
+	* Sub Admin sees pages created by users belonging to any organization
+	* they manage, and everyone else (including Organization Manager) only
+	* sees pages they personally created.
+	*/
+	protected function scopedLandingPagesQuery()
+	{
+	$user = auth()->user();
+	$query = LandingPage::query();
 
-    if ($user->hasRole('admin')) {
-      return $query;
-    }
+	if ($user->hasRole('admin')) {
+		return $query;
+	}
 
-    if ($user->hasRole('subadmin')) {
-      $orgIds = $user->organizations_ids;
+	if ($user->hasRole('subadmin')) {
+		$orgIds = $user->organizations_ids;
 
-      // A creator belongs to an organization either via the single
-      // `organization_id` column (organization managers / registered
-      // users) or via the user_organizations pivot (subadmins, who
-      // manage multiple orgs through that table instead of the single
-      // column — see User::getOrganizationsIdsAttribute()). Checking
-      // only the column misses subadmin-created pages, since a
-      // subadmin's own `organization_id` column is typically null.
-      return $query->whereHas('createdBy', function ($query) use ($orgIds) {
-        $query->whereIn('organization_id', $orgIds)
-          ->orWhereHas('organizations', function ($query) use ($orgIds) {
-            $query->whereIn('organizations.id', $orgIds);
-          });
-      });
-    }
+		// A creator belongs to an organization either via the single
+		// `organization_id` column (organization managers / registered
+		// users) or via the user_organizations pivot (subadmins, who
+		// manage multiple orgs through that table instead of the single
+		// column — see User::getOrganizationsIdsAttribute()). Checking
+		// only the column misses subadmin-created pages, since a
+		// subadmin's own `organization_id` column is typically null.
+		return $query->whereHas('createdBy', function ($query) use ($orgIds) {
+		$query->whereIn('organization_id', $orgIds)
+			->orWhereHas('organizations', function ($query) use ($orgIds) {
+			$query->whereIn('organizations.id', $orgIds);
+			});
+		});
+	}
 
-    return $query->where('created_by', $user->id);
-  }
+	return $query->where('created_by', $user->id);
+	}
 
-  /**
-   * The programs attached to a landing page, minus any whose
-   * organization is no longer within the page creator's organization
-   * access. Used to keep both the public page and the editor in step
-   * with the creator's current Sub Admin / Organization Manager scope
-   * without waiting for the Programs tab to be re-saved (the only thing
-   * that reconciles the landing_page_cycles pivot — see updatePrograms()).
-   */
-  protected function accessibleCycles(LandingPage $page)
-  {
-    $creator = $page->createdBy;
+	/**
+	* The programs attached to a landing page, minus any whose
+	* organization is no longer within the page creator's organization
+	* access. Used to keep both the public page and the editor in step
+	* with the creator's current Sub Admin / Organization Manager scope
+	* without waiting for the Programs tab to be re-saved (the only thing
+	* that reconciles the landing_page_cycles pivot — see updatePrograms()).
+	*/
+	protected function accessibleCycles(LandingPage $page)
+	{
+	$creator = $page->createdBy;
 
-    // No creator on record (e.g. the account was removed) or an Admin
-    // creator: leave every attachment in place rather than blanking a
-    // published page.
-    $cycles = (!$creator || $creator->hasRole('admin'))
-      ? $page->cycles
-      : $page->cycles->whereIn('organization_id', $creator->organizations_ids)->values();
+	// No creator on record (e.g. the account was removed) or an Admin
+	// creator: leave every attachment in place rather than blanking a
+	// published page.
+	$cycles = (!$creator || $creator->hasRole('admin'))
+		? $page->cycles
+		: $page->cycles->whereIn('organization_id', $creator->organizations_ids)->values();
 
-    return $this->applyProgramsOrder($cycles, $page->programs_order ?? []);
-  }
+	return $this->applyProgramsOrder($cycles, $page->programs_order ?? []);
+	}
 
-  /**
-   * Reorder a collection of programs/cycles according to a saved list of
-   * IDs (see LandingPagesController::reorderPrograms()), placing anything
-   * not present in that list — new or never-reordered programs — after
-   * the ones it does cover, in their original order.
-   */
-  protected function applyProgramsOrder($cycles, array $order)
-  {
-    if (empty($order)) {
-      return $cycles->values();
-    }
+	/**
+	* Reorder a collection of programs/cycles according to a saved list of
+	* IDs (see LandingPagesController::reorderPrograms()), placing anything
+	* not present in that list — new or never-reordered programs — after
+	* the ones it does cover, in their original order.
+	*/
+	protected function applyProgramsOrder($cycles, array $order)
+	{
+	if (empty($order)) {
+		return $cycles->values();
+	}
 
-    $cyclesById = $cycles->keyBy('id');
-    $ordered = collect($order)->map(fn ($id) => $cyclesById->get($id))->filter();
+	$cyclesById = $cycles->keyBy('id');
+	$ordered = collect($order)->map(fn ($id) => $cyclesById->get($id))->filter();
 
-    return $ordered->merge($cycles->whereNotIn('id', $order))->values();
-  }
+	return $ordered->merge($cycles->whereNotIn('id', $order))->values();
+	}
 
-  /**
-   * Programs available for attaching to a landing page: Super Admin sees
-   * every program, Sub Admin / Tenant Admin see only programs belonging to
-   * their organizations. For an existing page the scope is the page
-   * creator's, not the editor's, so whoever edits it (e.g. an Admin, or a
-   * Sub Admin with more organizations) works on the creator's programs only
-   * -- the same scope accessibleCycles() applies on the public page.
-   */
-  protected function scopedCycles(?LandingPage $page = null)
-  {
-    $user = auth()->user();
+	/**
+	* Programs available for attaching to a landing page: Super Admin sees
+	* every program, Sub Admin / Tenant Admin see only programs belonging to
+	* their organizations. For an existing page the scope is the page
+	* creator's, not the editor's, so whoever edits it (e.g. an Admin, or a
+	* Sub Admin with more organizations) works on the creator's programs only
+	* -- the same scope accessibleCycles() applies on the public page.
+	*/
+	protected function scopedCycles(?LandingPage $page = null)
+	{
+	$user = auth()->user();
 
-    // Fall back to the editor when the creator is gone or has no
-    // organizations left, rather than leaving the page with no programs.
-    $creator = $page?->createdBy;
-    if ($creator && ($creator->hasRole('admin') || !empty($creator->organizations_ids))) {
-      $user = $creator;
-    }
+	// Fall back to the editor when the creator is gone or has no
+	// organizations left, rather than leaving the page with no programs.
+	$creator = $page?->createdBy;
+	if ($creator && ($creator->hasRole('admin') || !empty($creator->organizations_ids))) {
+		$user = $creator;
+	}
 
-    $query = Cycle::with('organization')->withCount('steps');
+	$query = Cycle::with('organization')->withCount('steps');
 
-    if (!$user->hasRole('admin')) {
-      $orgIds = $user->organizations_ids;
-      $query->whereIn('organization_id', $orgIds);
-    }
+	if (!$user->hasRole('admin')) {
+		$orgIds = $user->organizations_ids;
+		$query->whereIn('organization_id', $orgIds);
+	}
 
-    return $query->orderBy('created_at', 'desc')->get();
-  }
+	return $query->orderBy('created_at', 'desc')->get();
+	}
 
-  /**
-   * Create a new custom landing page from the General tab of the
-   * create-page flow.
-   */
-  public function store(Request $request)
-  {
+	/**
+	 * Create a new custom landing page from the General tab of the
+	 * create-page flow.
+	 */
+	public function store(Request $request)
+	{
 	$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.create')) {
-            return abort(401);
-        }
-    $user = auth()->user();
-    $title_max_length = LandingPage::TITLE_MAX_LENGTH;
+			return abort(401);
+		}
+	$user = auth()->user();
+	$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 	$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
 
-    $validator = Validator::make($request->all(), [
-      'general.title' => 'required|string|max:' . $title_max_length,
-      'general.logo' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
-      'general.description' => 'required|string|max:' . $description_max_length,
-      'general.description_ar' => 'required|string|max:' . $description_max_length,
-      'general.linkedin' => 'nullable|url|max:255',
-      'general.facebook' => 'nullable|url|max:255',
-      'general.instagram' => 'nullable|url|max:255',
-      'general.x' => 'nullable|url|max:255',
-      'general.tiktok' => 'nullable|url|max:255',
-      'general.youtube' => 'nullable|url|max:255',
-    ], [
-      'general.title.required' => __('landing.validation.page_title_required'),
-      'general.title.max' => __('landing.validation.page_title_max', ['max' => $title_max_length]),
-      'general.logo.required' => __('landing.validation.logo_required'),
-      'general.logo.image' => __('landing.validation.image_format_invalid'),
-      'general.logo.mimes' => __('landing.validation.image_format_invalid'),
-      'general.logo.max' => __('landing.validation.logo_size_exceeded'),
-      'general.description.required' => __('landing.validation.description_required'),
-      'general.description_ar.required' => __('landing.validation.description_ar_required'),
-      'general.linkedin.url' => __('landing.validation.invalid_url', ['field' => 'LinkedIn', 'example' => 'https://linkedin.com/in/username']),
-      'general.facebook.url' => __('landing.validation.invalid_url', ['field' => 'Facebook', 'example' => 'https://facebook.com/yourpage']),
-      'general.instagram.url' => __('landing.validation.invalid_url', ['field' => 'Instagram', 'example' => 'https://instagram.com/yourprofile']),
-      'general.x.url' => __('landing.validation.invalid_url', ['field' => 'X', 'example' => 'https://x.com/yourprofile']),
-      'general.tiktok.url' => __('landing.validation.invalid_url', ['field' => 'TikTok', 'example' => 'https://tiktok.com/@yourprofile']),
-      'general.youtube.url' => __('landing.validation.invalid_url', ['field' => 'YouTube', 'example' => 'https://youtube.com/@yourchannel']),
-    ]);
+	$validator = Validator::make($request->all(), [
+		'general.title' => 'required|string|max:' . $title_max_length,
+		'general.logo' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:5120'],
+		'general.description' => 'required|string|max:' . $description_max_length,
+		'general.description_ar' => 'required|string|max:' . $description_max_length,
+		'general.linkedin' => 'nullable|url|max:255',
+		'general.facebook' => 'nullable|url|max:255',
+		'general.instagram' => 'nullable|url|max:255',
+		'general.x' => 'nullable|url|max:255',
+		'general.tiktok' => 'nullable|url|max:255',
+		'general.youtube' => 'nullable|url|max:255',
+	], [
+		'general.title.required' => __('landing.validation.page_title_required'),
+		'general.title.max' => __('landing.validation.page_title_max', ['max' => $title_max_length]),
+		'general.logo.required' => __('landing.validation.logo_required'),
+		'general.logo.image' => __('landing.validation.image_format_invalid'),
+		'general.logo.mimes' => __('landing.validation.image_format_invalid'),
+		'general.logo.max' => __('landing.validation.logo_size_exceeded'),
+		'general.description.required' => __('landing.validation.description_required'),
+		'general.description_ar.required' => __('landing.validation.description_ar_required'),
+		'general.linkedin.url' => __('landing.validation.invalid_url', ['field' => 'LinkedIn', 'example' => 'https://linkedin.com/in/username']),
+		'general.facebook.url' => __('landing.validation.invalid_url', ['field' => 'Facebook', 'example' => 'https://facebook.com/yourpage']),
+		'general.instagram.url' => __('landing.validation.invalid_url', ['field' => 'Instagram', 'example' => 'https://instagram.com/yourprofile']),
+		'general.x.url' => __('landing.validation.invalid_url', ['field' => 'X', 'example' => 'https://x.com/yourprofile']),
+		'general.tiktok.url' => __('landing.validation.invalid_url', ['field' => 'TikTok', 'example' => 'https://tiktok.com/@yourprofile']),
+		'general.youtube.url' => __('landing.validation.invalid_url', ['field' => 'YouTube', 'example' => 'https://youtube.com/@yourchannel']),
+	]);
 
-    if ($validator->fails()) {
-      return response()->json([
-        'success' => false,
-        'message' => __('landing.validation.please_correct_fields'),
-        'errors' => $validator->errors(),
-      ], 422);
-    }
+	if ($validator->fails()) {
+		return response()->json([
+		'success' => false,
+		'message' => __('landing.validation.please_correct_fields'),
+		'errors' => $validator->errors(),
+		], 422);
+	}
 
-    $general = $request->input('general', []);
+	$general = $request->input('general', []);
 
-    $page = new LandingPage();
-    $page->created_by = $user->id;
-    $page->title = $general['title'];
-    $page->slug = LandingPage::generateSlug($general['title']);
-    $page->status = true;
-    $page->logo = app(FileManagerService::class)->upload($request->file('general.logo'), 'landing-pages', 'public_uploads', 'image');
-    $page->description = $general['description'];
-    $page->description_ar = $general['description_ar'];
-    $page->linkedin = $general['linkedin'] ?? null;
-    $page->facebook = $general['facebook'] ?? null;
-    $page->instagram = $general['instagram'] ?? null;
-    $page->x = $general['x'] ?? null;
-    $page->tiktok = $general['tiktok'] ?? null;
-    $page->youtube = $general['youtube'] ?? null;
-    $page->save();
+	$page = new LandingPage();
+	$page->created_by = $user->id;
+	$page->title = $general['title'];
+	$page->slug = LandingPage::generateSlug($general['title']);
+	$page->status = true;
+	$page->logo = app(FileManagerService::class)->upload($request->file('general.logo'), 'landing-pages', 'public_uploads', 'image');
+	$page->description = $general['description'];
+	$page->description_ar = $general['description_ar'];
+	$page->linkedin = $general['linkedin'] ?? null;
+	$page->facebook = $general['facebook'] ?? null;
+	$page->instagram = $general['instagram'] ?? null;
+	$page->x = $general['x'] ?? null;
+	$page->tiktok = $general['tiktok'] ?? null;
+	$page->youtube = $general['youtube'] ?? null;
+	$page->save();
 
-    return response()->json([
-      'success' => true,
-      'message' => __('landing.success.general_saved'),
-      'redirect' => route('landing-pages.edit', $page->id),
-      'id' => $page->id,
-      'routes' => collect($this->buildSections($page))->pluck('route', 'key'),
-      'url_save_route' => route('landing-pages.url.save', $page->id),
-    ]);
-  }
+	return response()->json([
+		'success' => true,
+		'message' => __('landing.success.general_saved'),
+		'redirect' => route('landing-pages.edit', $page->id),
+		'id' => $page->id,
+		'routes' => collect($this->buildSections($page))->pluck('route', 'key'),
+		'url_save_route' => route('landing-pages.url.save', $page->id),
+	]);
+	}
 
-  public function edit(Request $request, $id)
-  {
-    $currentPage = $this->scopedLandingPagesQuery()->with('cycles', 'customSections', 'createdBy')->findOrFail($id);
-    $cycles = $this->scopedCycles($currentPage);
-    $cycles = $this->applyProgramsOrder($cycles, $currentPage->programs_order ?? []);
+	public function edit(Request $request, $id)
+	{
+	$currentPage = $this->scopedLandingPagesQuery()->with('cycles', 'customSections', 'createdBy')->findOrFail($id);
+	$cycles = $this->scopedCycles($currentPage);
+	$cycles = $this->applyProgramsOrder($cycles, $currentPage->programs_order ?? []);
 
-    $programOrganizations = $this->programOrganizations($cycles);
-    $programTypes = Cycle::programTypes();
-    $sections = $this->buildSections($currentPage);
-    $aboutCards = $currentPage->about_cards ?? [];
-    $howSteps = $currentPage->how_steps ?? [];
-    $customSectionBlocks = $currentPage->customSections;
-    $selectedCycleIds = $currentPage->cycles->pluck('id')->toArray();
-    $aboutIconsList = [
-      'ti-rocket' => 'Rocket', 'ti-bulb' => 'Idea', 'ti-target' => 'Target',
-      'ti-chart-line' => 'Growth', 'ti-users' => 'Community', 'ti-trophy' => 'Achievement',
-      'ti-shield' => 'Protection', 'ti-heart' => 'Care', 'ti-star' => 'Quality',
-      'ti-book' => 'Education', 'ti-code' => 'Code', 'ti-cpu' => 'Technology',
-      'ti-world' => 'Global', 'ti-flag' => 'Goal', 'ti-crown' => 'Leadership',
-      'ti-gift' => 'Reward', 'ti-briefcase' => 'Career', 'ti-cloud' => 'Cloud',
-    ];
+	$programOrganizations = $this->programOrganizations($cycles);
+	$programTypes = Cycle::programTypes();
+	$sections = $this->buildSections($currentPage);
+	$aboutCards = $currentPage->about_cards ?? [];
+	$howSteps = $currentPage->how_steps ?? [];
+	$customSectionBlocks = $currentPage->customSections;
+	$selectedCycleIds = $currentPage->cycles->pluck('id')->toArray();
+	$aboutIconsList = [
+		'ti-rocket' => 'Rocket', 'ti-bulb' => 'Idea', 'ti-target' => 'Target',
+		'ti-chart-line' => 'Growth', 'ti-users' => 'Community', 'ti-trophy' => 'Achievement',
+		'ti-shield' => 'Protection', 'ti-heart' => 'Care', 'ti-star' => 'Quality',
+		'ti-book' => 'Education', 'ti-code' => 'Code', 'ti-cpu' => 'Technology',
+		'ti-world' => 'Global', 'ti-flag' => 'Goal', 'ti-crown' => 'Leadership',
+		'ti-gift' => 'Reward', 'ti-briefcase' => 'Career', 'ti-cloud' => 'Cloud',
+	];
 
-    return view('admin.landing-pages.edit', compact(
-      'cycles',
-      'currentPage',
-      'programOrganizations',
-      'programTypes',
-      'sections',
-      'aboutCards',
-      'howSteps',
-      'customSectionBlocks',
-      'selectedCycleIds',
-      'aboutIconsList'
-    ));
-  }
+	return view('admin.landing-pages.edit', compact(
+		'cycles',
+		'currentPage',
+		'programOrganizations',
+		'programTypes',
+		'sections',
+		'aboutCards',
+		'howSteps',
+		'customSectionBlocks',
+		'selectedCycleIds',
+		'aboutIconsList'
+	));
+	}
 
 
 	/**
@@ -941,8 +941,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        } 
+			return abort(401);
+		} 
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
@@ -1024,8 +1024,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
@@ -1082,6 +1082,9 @@ class LandingPagesController extends Controller
 		$page->hero_title_tag_ar = $hero['title_tag_ar'];
 		$page->hero_description = $hero['description'];
 		$page->hero_description_ar = $hero['description_ar'];
+		$page->hero_cta_text = $hero['cta_text'];
+		$page->hero_cta_text_ar = $hero['cta_text_ar'];
+		$page->hero_cta_link = $hero['cta_link'];
 		$page->save();
 
 		return response()->json([
@@ -1100,8 +1103,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 		$program_description_max_length = LandingPage::PROGRAM_DESCRIPTION_MAX_LENGTH;
@@ -1176,8 +1179,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 
 		$request->validate([
 			'order' => 'required|array',
@@ -1207,8 +1210,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
@@ -1318,8 +1321,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$validCards = [];
 
 		foreach ($cards as $card) {
@@ -1344,8 +1347,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 		$description_max_length = LandingPage::DESCRIPTION_MAX_LENGTH;
@@ -1456,8 +1459,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$validSteps = [];
 
 		foreach ($steps as $step) {
@@ -1485,8 +1488,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 		$title_max_length = LandingPage::TITLE_MAX_LENGTH;
 
@@ -1566,8 +1569,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$page = $this->scopedLandingPagesQuery()->findOrFail($id);
 
 		$result = app(LandingPageCustomSectionService::class)->delete($page->id, (int) $sectionId);
@@ -1583,8 +1586,8 @@ class LandingPagesController extends Controller
 	{
 		$_user = auth()->user();
 		if (!$_user->ableTo('landing-pages.edit')) {
-            return abort(401);
-        }
+			return abort(401);
+		}
 		$this->scopedLandingPagesQuery()->findOrFail($id);
 
 		$validator = Validator::make($request->all(), [

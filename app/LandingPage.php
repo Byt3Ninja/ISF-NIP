@@ -42,6 +42,9 @@ class LandingPage extends Model
         'hero_title_tag_ar',
         'hero_description',
         'hero_description_ar',
+        'hero_cta_text',
+        'hero_cta_text_ar',
+        'hero_cta_link',
         'hero_image',
         // About Us
         'about_is_enabled',
