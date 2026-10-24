@@ -71,8 +71,8 @@
             </div>
           </div>
           <div class="col-12 col-lg-4 col-xl-4">
-            <select class="form-select" id="status-select" name="status">
-              <option value="">{{ __('admin.All_statuses') }}</option>
+            <select class="form-select select2" id="status-select" name="status">
+              <option value="all">{{ __('admin.All_statuses') }}</option>
               <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
                 {{ __('admin.Active') }}
               </option>

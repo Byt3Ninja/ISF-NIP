@@ -125,7 +125,16 @@
 			lengthChange: true,
 			pageLength: 10,
 			order: [[ 5, "desc" ]],
-			dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
+      language: {
+        url:
+          document.dir === 'rtl'
+            ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+            : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+        sLengthMenu: '_MENU_',
+        search: '',
+        searchPlaceholder: '{{ __('admin.Search') }}...',
+      },
+			dom: '<"row"<"col-12 col-md-10 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-2 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
 				buttons: [
 				{
 					extend: 'excel',
@@ -223,12 +232,33 @@
 				statusSelect.on('change', function() {
 						table.column(7).search(this.value).draw();
 				});
+        
+        $('.dataTables_filter .form-control').removeClass('form-control-sm');
+        $('.dataTables_length .form-select').removeClass('form-select-sm');
+        
+        const $wrapper = $(this.api().table().container());
+        $wrapper.find('.form-select, .dataTables_length select').each(function () {
+          const $this = $(this);
+          if ($this.hasClass('select2-hidden-accessible')) return;
+
+          const isLength = $this.closest('.dataTables_length').length > 0;
+
+          $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+          $this.select2({
+            dropdownParent: $this.parent(),
+            width: isLength ? '80px' : '100%',
+            minimumResultsForSearch: Infinity,
+          });
+
+          if (!isLength) {
+            $this.next('.select2-container').css({
+              'min-width': '150px',
+              'max-width': '200px'
+            });
+          }
+        });
 			},
-			@if ($l === 'ar')
-				language: {
-					url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json'
-				},
-			@endif
 		});
 
 		// Export button click handlers

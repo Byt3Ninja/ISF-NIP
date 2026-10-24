@@ -82,16 +82,16 @@
 												<td class="text-center">
 													<a 
 														href="{{ route('question-categories.edit', ['question_category' => $category->id]) }}" 
-														class="btn btn-label-primary btn-sm"
+														class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill"
 													>
-														<i class="ti ti-edit ti-xs me-2"></i> {{ __('admin.Edit') }}</a>
+														<i class="ti ti-edit ti-md"></i></a>
 													<button 
 														id='deleteAction' 
 														data-id='{{ $category->id }}' 
 														data-url="{{ route('question-categories.destroy', ['question_category' => $category->id]) }}" 
-														class="btn btn-label-danger btn-sm"
+														class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill"
 													> 
-														<i class="ti ti-trash ti-sm me-2"></i> {{ __('admin.Delete') }}
+														<i class="ti ti-trash ti-md"></i>
 													</button>
 												</td>
 											</tr>
@@ -114,35 +114,8 @@
 			const isArabic = "{{ $l }}" === "ar";
 			// Initialize DataTable
 			const table = $('#categoriesTable').DataTable({
-				responsive: true,
-				pageLength: 10,
-				lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "{{ __('admin.All') }}"]],
-				language: {
-					@if($l == 'ar')
-					url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/ar.json',
-					search: "",
-					searchPlaceholder: "ابحث هنا...",
-					@else
-					search: "",
-					searchPlaceholder: "{{ __('admin.Search') }}:",
-					lengthMenu: "{{ __('admin.show') }} _MENU_ {{ __('admin.Entries') }}",
-					info: "{{ __('admin.showing') }} _START_ {{ __('admin.To') }} _END_ {{ __('admin.of') }} _TOTAL_ {{ __('admin.Entries') }}",
-					infoEmpty: "{{ __('admin.showing') }} 0 {{ __('admin.To') }} 0 {{ __('admin.of') }} 0 {{ __('admin.Entries') }}",
-					infoFiltered: "({{ __('admin.filteredFrom') }} _MAX_ {{ __('admin.totalEntries') }})",
-					paginate: {
-							first: "{{ __('admin.First') }}",
-							last: "{{ __('admin.Last') }}",
-							next: "{{ __('admin.Next') }}",
-							previous: "{{ __('admin.Previous') }}"
-					},
-					emptyTable: "{{ __('admin.noDataAvailable') }}",
-					zeroRecords: "{{ __('admin.noMatchingRecords') }}"
-					@endif
-				},
+        ...getSharedDataTableConfig({ title: 'question-categories', descIndex: 0, actionsIndex: 4, withoutFilter: true }),
 				dom: '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-				displayLength: 10,
-				lengthMenu: [10, 25, 50, 75, 100],
-				order: [[0, 'desc']],
 				columnDefs: [
 					{
 						targets: [4], // Actions column

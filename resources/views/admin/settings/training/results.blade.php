@@ -254,10 +254,11 @@ $(function () {
   // 1. DataTable Initialization
   const table = $('#resultsDataTable').DataTable({
     ...getSharedDataTableConfig({}),
-    dom: '<"row mx-1 mb-4" <"col-md-9 d-flex align-items-center gap-3"l <"dt_filter_company"> <"dt_filter_step"> <"dt_filter_status">> <"col-md-3"f> >t<"row mx-1" <"col-md-6"i><"col-md-6"p>>',
+    responsive: true,
+    dom: '<"card-header border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2 py-3 px-4"<"d-flex flex-wrap align-items-center gap-2"l<"dt_filter_company"><"dt_filter_step"><"dt_filter_status">><"dt-toolbar__search"f>><"table-responsive"t><"card-footer d-flex flex-wrap justify-content-between align-items-center gap-2 py-2 px-4"<"dt-info"i><"dt-paging"p>>',
     initComplete: function () {
       $('.dt_filter_company').html(`
-        <select id="dt_filter_company" class="form-select">
+        <select id="dt_filter_company" class="form-select filter-select2">
           <option value="">{{ __('admin.all_startups') }}</option>
           @foreach ($companies as $c)
             <option value="{{ $c->{'name_' . $currentLang} }}">{{ $c->{'name_' . $currentLang} }}</option>
@@ -267,7 +268,7 @@ $(function () {
 
       // Step Filter — options built from $steps passed by the controller
       $('.dt_filter_step').html(`
-        <select id="dt_filter_step" class="form-select">
+        <select id="dt_filter_step" class="form-select filter-select2">
           <option value="">{{ __('admin.All_Steps') }}</option>
           <option value="0">{{ __('admin.Disapprove') }}</option>
           @foreach ($steps as $s)
@@ -277,7 +278,7 @@ $(function () {
       `);
 
       $('.dt_filter_status').html(`
-        <select id="dt_filter_status" class="form-select">
+        <select id="dt_filter_status" class="form-select filter-select2">
           <option value="">{{ __('admin.All_statuses') }}</option>
           <option value="100">Completed (100%)</option>
           <option value="0">Not Started (0%)</option>
@@ -286,7 +287,30 @@ $(function () {
       `);
 
       $('.dataTables_filter .form-control').removeClass('form-control-sm').css('width', '');
-      $('.dataTables_length .form-select').removeClass('form-select-sm');
+      $('.dataTables_length .form-select').removeClass('form-select-sm').css('width', 'auto');
+
+      // Initialize Select2
+      setTimeout(function() {
+        $('#resultsDataTable_wrapper .filter-select2, #resultsDataTable_wrapper .dataTables_length select').each(function () {
+          const $this = $(this);
+          if (!$this.hasClass('select2-hidden-accessible')) {
+            const isLength = $this.closest('.dataTables_length').length > 0;
+            const $parent = isLength ? $this.parent() : ($this.closest('.dt-filter').length ? $this.closest('.dt-filter') : $('body'));
+            $this.css('visibility', 'hidden');
+            $this.select2({
+              dropdownParent: $parent,
+              width: 'resolve',
+              minimumResultsForSearch: Infinity,
+              allowClear: false
+            });
+            $this.next('.select2-container').css({
+              'min-width': isLength ? '70px' : '150px',
+              'max-width': isLength ? '90px' : '200px'
+            });
+            setTimeout(function() { $this.css('visibility', 'visible'); }, 0);
+          }
+        });
+      }, 200);
     }
   });
 
@@ -334,11 +358,7 @@ $(function () {
     table.column(1).search(this.value).draw();
   });
 
-  $(document).on('change', '#dt_filter_step', function () {
-    table.draw();
-  });
-
-  $(document).on('change', '#dt_filter_status', function () {
+  $(document).on('change', '#dt_filter_step, #dt_filter_status', function () {
     table.draw();
   });
 

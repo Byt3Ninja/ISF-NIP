@@ -902,42 +902,9 @@
       $('#retryLoadBtn').on('click', () => fetchSessionData(currentSessionId));
     });
     $(document).ready(function() {
-    let mentorshipTable = $('#mentorship-sessions-table').DataTable({
-      "responsive": true,
-      "searching": true,
-      "order": [],
-      "columnDefs": [
-        {
-          "orderable": false,
-          "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        }
-      ],
-        "language": {
-          emptyTable: "{{ $l === 'ar' ? 'لا توجد جلسات ارشاد متاحة' : 'No Mentorship Sessions Found' }}",
-         @if ($l === 'ar')
-          "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-          "sLoadingRecords": "جارٍ التحميل...",
-          "sProcessing": "جارٍ التحميل...",
-          "sLengthMenu": "أظهر _MENU_ مدخلات",
-          "sZeroRecords": "لم يعثر على أية سجلات",
-          "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-          "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-          "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-          "sInfoPostFix": "",
-          "sSearch": "ابحث:",
-          "sUrl": "",
-          "oPaginate": {
-            "sFirst": "الأول",
-            "sPrevious": "السابق",
-            "sNext": "التالي",
-            "sLast": "الأخير"
-          },
-          "oAria": {
-            "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-          }
-      @endif
-       },
+      let mentorshipTable = $('#mentorship-sessions-table').DataTable({
+      ...getSharedDataTableConfig({ title: 'mentorship-sessions-table', descIndex: 0, actionsIndex: 11, withoutFilter: true }),
+      responsive: true,
       buttons: [
         { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 9] } },
         { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 9] } }

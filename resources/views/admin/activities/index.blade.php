@@ -142,147 +142,133 @@
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    const lang = "{{ $l }}";
-
-    const datatableLanguage = lang === 'ar' ? {
-        "sEmptyTable": "@lang('admin.No_data_available_in_table')",
-        "sLoadingRecords": "@lang('admin.Loading')...",
-        "sProcessing": "@lang('admin.Loading')...",
-        "sLengthMenu": "@lang('admin.Show') _MENU_ @lang('admin.Entries')",
-        "sZeroRecords": "@lang('admin.No_records_found')",
-        "sInfo": "@lang('admin.showing') _START_ @lang('admin.to') _END_ @lang('admin.of') _TOTAL_ @lang('admin.Entries')",
-        "sInfoEmpty": "@lang('admin.showing') 0 @lang('admin.to') 0 @lang('admin.of') 0 @lang('admin.Entries')",
-        "sInfoFiltered": "(@lang('admin.Filtered_from') _MAX_ @lang('admin.Total_Entries'))",
-        "sInfoPostFix": "",
-        "sSearch": "@lang('admin.Search'):",
-        "sUrl": "",
-        "oPaginate": {
-            "sFirst": "@lang('admin.First')",
-            "sPrevious": "@lang('admin.Previous')",
-            "sNext": "@lang('admin.Next')",
-            "sLast": "@lang('admin.Last')"
-        },
-        "oAria": {
-            "sSortAscending": ": @lang('admin.Activate_to_sort_ascending')",
-            "sSortDescending": ": @lang('admin.Activate_to_sort_descending')"
-        }
-    } : {};
-
     const table = $('#activities-datatable').DataTable({
-      language: datatableLanguage,
-      paging: true,
-      searching: true,
-      ordering: true,
-      order: [[6, 'desc']], // Changed to column 6 (Login_Time) since we removed email column
-      pageLength: 10,
-      lengthMenu: [10, 25, 50, 100],
-      dom: '<"row mb-2 px-8"<"col-sm-6"l><"col-sm-6"f>><"row mb-3"<"col-12"<"filter-row px-4">>>rtip<"d-none"B>', // Add filter-row container
-      buttons: [
-        {
-          extend: 'csv',
-          className: 'buttons-csv d-none'
-        },
-        {
-          extend: 'excel',
-          className: 'buttons-excel d-none'
-        }
-      ]
+      ...getSharedDataTableConfig({ title: 'activities-datatable', descIndex: 6, actionsIndex: 7}),
+      dom:
+        '<"row"' +
+        '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6 pb-6 pb-lg-0 mb-2"l>' +
+        '<"col-12 col-lg-3 dt-action-buttons d-flex justify-content-lg-end pe-0 pe-lg-6"f>' +
+        '>t<"row px-6"<"col-lg-6"i><"col-lg-6 d-flex justify-content-end"p>>',
+      initComplete: function() {
+        buildTableFilters(this.api());
+        setTimeout(
+          () => $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm'),
+          300
+        );
+      },
     });
 
-    const fieldsTranslation = {
-      en: {
-        'allPlatforms': 'All Platforms',
-        'allBrowsers': 'All Browsers',
-        'allLocations': 'All Locations',
-        'selectDate': 'Select Date'
-      },
-      ar: {
-        'allPlatforms': 'جميع المنصات',
-        'allBrowsers': 'جميع المتصفحات',
-        'allLocations': 'جميع المواقع',
-        'selectDate': 'اختر التاريخ'
+    /* ================================================================
+     * Column filters
+     * ============================================================== */
+    function buildTableFilters(api) {
+      const $wrapper = $(api.table().container());
+      if ($('#filterPlatform').length || $('#filterBrowser').length || $('#filterLocation').length || $('#filterLoginTime').length) return;
+
+      const lang = "{{ $l }}";
+      const container = $('<div class="d-flex flex-wrap gap-3 ms-3"></div>').insertAfter('.dataTables_length');
+
+      function addColumnFilter(colIdx, id, defaultLabel, useExactMatch) {
+        const select = $(
+          `<select id="${id}" class="form-select" style="min-width:150px">` +
+          `<option value="">${defaultLabel}</option></select>`
+        )
+          .appendTo(container)
+          .on('change', function () {
+            const val = $(this).val();
+            if (useExactMatch && val !== '') {
+              api.column(colIdx)
+                 .search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false)
+                 .draw();
+            } else {
+              api.column(colIdx).search(val, false, false).draw();
+            }
+          });
+
+        return select;
+      }
+
+      @if ($activities->isNotEmpty())
+      const platformFilter = addColumnFilter(3, 'filterPlatform', lang === 'ar' ? 'جميع المنصات' : 'All Platforms', true);
+      @foreach($activities->pluck('platform')->unique()->filter() as $platform)
+        platformFilter.append(`<option value="{{ $platform }}">{{ $platform }}</option>`);
+      @endforeach
+
+      const browserFilter = addColumnFilter(1, 'filterBrowser', lang === 'ar' ? 'جميع المتصفحات' : 'All Browsers', true);
+      @foreach($activities->pluck('browser')->unique()->filter() as $browser)
+        browserFilter.append(`<option value="{{ $browser }}">{{ $browser }}</option>`);
+      @endforeach
+
+      const locationFilter = addColumnFilter(5, 'filterLocation', lang === 'ar' ? 'جميع المواقع' : 'All Locations', true);
+      @foreach($activities->pluck('location')->unique()->filter() as $location)
+        locationFilter.append(`<option value="{{ $location }}">{{ $location }}</option>`);
+      @endforeach
+
+      $(`<input type="text" id="filterLoginTime" class="form-control" style="min-width:150px; max-width:200px" placeholder="${lang === 'ar' ? 'اختر التاريخ' : 'Select Date'}">`)
+        .appendTo(container);
+      @endif
+
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
+
+      flatpickr("#filterLoginTime", {
+        dateFormat: "Y-m-d",
+        allowInput: true,
+        onReady: function (selectedDates, dateStr, instance) {
+          const clearBtn = document.createElement("button");
+          clearBtn.type = "button";
+          clearBtn.className = "btn btn-sm btn-outline-primary w-100 mt-1";
+          clearBtn.textContent = "{{ __('admin.Clear') }}";
+          clearBtn.addEventListener("click", function () {
+            instance.clear();
+            instance.close();
+          });
+          instance.calendarContainer.appendChild(clearBtn);
+        },
+        onChange: function (selectedDates, dateStr, instance) {
+          api.draw();
+        }
+      });
+
+      if ($('#filterLoginTime').length) {
+        $('#filterLoginTime').wrap('<div class="position-relative"></div>');
       }
     }
 
-    // Add filter controls after table initialization
-    @if ($activities->isNotEmpty())
-    const filterHtml = `
-      <div class="row g-3 align-items-end mb-6">
-        <div class="col-md-3">
-          <select id="platformFilter" class="form-select">
-            <option value="">${fieldsTranslation[lang].allPlatforms}</option>
-            @foreach($activities->pluck('platform')->unique()->filter() as $platform)
-              <option value="{{ $platform }}">{{ $platform }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="col-md-3">
-          <select id="browserFilter" class="form-select">
-            <option value="">${fieldsTranslation[lang].allBrowsers}</option>
-            @foreach($activities->pluck('browser')->unique()->filter() as $browser)
-              <option value="{{ $browser }}">{{ $browser }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="col-md-3">
-          <select id="locationFilter" class="form-select">
-            <option value="">${fieldsTranslation[lang].allLocations}</option>
-            @foreach($activities->pluck('location')->unique()->filter() as $location)
-              <option value="{{ $location }}">{{ $location }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="col-md-3">
-          <input type="text" id="loginTimeFilter" class="form-control datepicker" placeholder="${fieldsTranslation[lang].selectDate}">
-        </div>
-      </div>
-    `;
-    $('.filter-row').html(filterHtml);
-    
-    // Re-initialize date picker for the dynamically added filter
-    flatpickr("#loginTimeFilter", {
-      dateFormat: "Y-m-d",
-      allowInput: true,
-      onChange: function(selectedDates, dateStr, instance) {
-        table.draw();
-      }
-    });
-    @endif
-
-    // Custom filter functions
     $.fn.dataTable.ext.search.push(
       function(settings, data, dataIndex) {
-        // Get filter values
-        const platformFilter = $('#platformFilter').val();
-        const browserFilter = $('#browserFilter').val();
-        const locationFilter = $('#locationFilter').val();
-        const loginTimeFilter = $('#loginTimeFilter').val();
-
-        // Get data from the row
-        const platform = data[3] || ''; // Platform column (index 3)
-        const browser = data[1] || '';   // Browser column (index 1)
-        const location = data[5] || '';  // Location column (index 5)
-        const loginTime = data[6] || ''; // Login Time column (index 6)
-
-        // Apply filters
-        if (platformFilter && platform.toLowerCase().indexOf(platformFilter.toLowerCase()) === -1) {
-          return false;
+        if (settings.nTable.id !== 'activities-datatable') {
+          return true;
         }
 
-        if (browserFilter && browser.toLowerCase().indexOf(browserFilter.toLowerCase()) === -1) {
-          return false;
-        }
-
-        if (locationFilter && location.toLowerCase().indexOf(locationFilter.toLowerCase()) === -1) {
-          return false;
-        }
+        const loginTimeFilter = $('#filterLoginTime').val();
+        const loginTime = data[6] || '';
 
         if (loginTimeFilter) {
-          // Parse the date from the login time (format: "01 Jan 2025, 12:30")
-          const loginDate = new Date(loginTime.split(',')[0]);
+          if (!loginTime) return false;
+          const datePart = loginTime.toString().split(',')[0].trim();
+          const loginDate = new Date(datePart);
           const filterDate = new Date(loginTimeFilter);
-          
-          // Compare dates (ignore time)
+          if (isNaN(loginDate) || isNaN(filterDate)) return false;
           if (loginDate.toDateString() !== filterDate.toDateString()) {
             return false;
           }
@@ -291,11 +277,6 @@
         return true;
       }
     );
-
-    // Bind change events to filters
-    $('#platformFilter, #browserFilter, #locationFilter, #loginTimeFilter').on('change keyup', function() {
-      table.draw();
-    });
     // Chart Data
     const topDevicesData = @json($topDevices);
     const topBrowsersData = @json($topBrowsers);

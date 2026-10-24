@@ -90,6 +90,11 @@
         { extend: 'csv', text: 'CSV', className: 'd-none', title: 'Portal_Log_Export_' + new Date().toISOString().slice(0, 10), exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
         { extend: 'excel', text: 'Excel', className: 'd-none', title: 'Portal_Log_Export_' + new Date().toISOString().slice(0, 10), exportOptions: { columns: [0, 1, 2, 3, 4, 5] } },
       ],
+      dom:
+        '<"row"' +
+        '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6 pb-6 pb-lg-0 mb-2"l>' +
+        '<"col-12 col-lg-3 dt-action-buttons d-flex justify-content-lg-end pe-0 pe-lg-6"f>' +
+        '>t<"row px-6"<"col-lg-6"i><"col-lg-6 d-flex justify-content-end"p>>',
     });
 
     $('#exportCsv').on('click', function (e) { e.preventDefault(); table.button('.buttons-csv').trigger(); });

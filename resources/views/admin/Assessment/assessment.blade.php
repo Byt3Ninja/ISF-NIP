@@ -291,14 +291,11 @@ $(function () {
 
   const table = $(`#${TABLE_ID}`).DataTable({
     ...getSharedDataTableConfig({ title: 'Assessments', descIndex: 5, actionsIndex: 6 }),
+    responsive: true,
     dom: `
-      <"dt-toolbar card-header d-flex flex-wrap gap-2 align-items-center py-3 px-4"
-        <"dt-toolbar__length"l>
-        <"dt-filter dt-filter--company">
-        <"dt-filter dt-filter--founder">
-        <"dt-filter dt-filter--date-from">
-        <"dt-filter dt-filter--date-to">
-        <"dt-toolbar__search ms-auto"f>
+      <"dt-toolbar card-header d-flex flex-wrap gap-2 align-items-center justify-content-between py-3 px-4"
+        <"d-flex flex-wrap align-items-center gap-2"l<"dt-filter dt-filter--company"><"dt-filter dt-filter--founder"><"dt-filter dt-filter--date-from"><"dt-filter dt-filter--date-to">>
+        <"dt-toolbar__search"f>
       >
       <"table-responsive"t>
       <"card-footer d-flex flex-wrap justify-content-between align-items-center gap-2 py-2 px-4"
@@ -313,7 +310,36 @@ $(function () {
       buildDateFilter('date-to',   'dt-filter--date-to',   "{{ __('cycles.End_Date') }}",   'dateTo');
 
       $('.dataTables_filter .form-control').removeClass('form-control-sm');
-      $('.dataTables_length .form-select').removeClass('form-select-sm');
+      $('.dataTables_length .form-select').removeClass('form-select-sm').css('width', 'auto');
+
+      // Initialize Select2 for filter selects
+      setTimeout(function() {
+        $('#assessments-table_wrapper .filter-select2, #assessments-table_wrapper .dataTables_length select').each(function () {
+          const $this = $(this);
+          if (!$this.hasClass('select2-hidden-accessible')) {
+            const isLength = $this.closest('.dataTables_length').length > 0;
+            const $parent = isLength ? $this.parent() : ($this.closest('.dt-filter').length ? $this.closest('.dt-filter') : $('body'));
+            $this.css('visibility', 'hidden');
+            $this.select2({
+              dropdownParent: $parent,
+              width: 'resolve',
+              minimumResultsForSearch: Infinity,
+              allowClear: false
+            });
+            $this.next('.select2-container').css({
+              'min-width': isLength ? '70px' : '150px',
+              'max-width': isLength ? '90px' : '200px'
+            });
+            setTimeout(function() { $this.css('visibility', 'visible'); }, 0);
+          }
+        });
+      }, 200);
+
+      // Style date inputs
+      $('#assessments-table_wrapper .dt-filter input[type="text"]').css({
+        'min-width': '150px',
+        'max-width': '200px'
+      });
     },
   });
 
@@ -378,11 +404,12 @@ $(function () {
       onChange([date]) { filters[filterKey] = date ? date.toISOString().slice(0, 10) : ''; table.draw(); },
       onClear()        { filters[filterKey] = ''; table.draw(); },
     });
+    $input.wrap('<div class="position-relative"></div>');
   }
 
   function buildSelect(id, placeholder, containerClass) {
     return $(`
-      <select id="${id}" class="form-select" style="min-width:150px;">
+      <select id="${id}" class="form-select filter-select2">
         <option value="">${placeholder}</option>
       </select>
     `).appendTo(`#${TABLE_ID}_wrapper .${containerClass}`);

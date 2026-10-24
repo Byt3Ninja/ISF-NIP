@@ -343,6 +343,7 @@ $(function () {
       ]
     }],
     initComplete: function () {
+      const $wrapper = $(this.api().table().container());
       const api            = this.api();
       const $filterWrap    = $('<div class="d-flex flex-wrap flex-md-nowrap gap-3 ms-3"></div>');
       $('.dataTables_length').after($filterWrap);
@@ -395,6 +396,28 @@ $(function () {
         $('.dataTables_filter .form-control').removeClass('form-control-sm');
         $('.dataTables_length .form-select').removeClass('form-select-sm');
       }, 300);
+      
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
     }
   });
 

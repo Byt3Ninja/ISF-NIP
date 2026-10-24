@@ -37,7 +37,7 @@ class LandingPagesController extends Controller
 			});
 		}]);
 
-		if ($request->status !== null && $request->status !== '') {
+		if ($request->status !== null && $request->status !== '' && $request->status !== 'all') {
 			$pagesQuery->where('status', $request->status);
 		}
 

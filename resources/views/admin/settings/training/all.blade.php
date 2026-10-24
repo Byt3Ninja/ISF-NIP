@@ -216,7 +216,30 @@ $(function () {
       buildTagFilter(this.api());
       buildCategoryFilter(this.api());
       $('.dataTables_filter .form-control').removeClass('form-control-sm').css('width', '');
-      $('.dataTables_length .form-select').removeClass('form-select-sm');
+      $('.dataTables_length .form-select').removeClass('form-select-sm').css('width', 'auto');
+
+      // Initialize Select2 for filter selects
+      setTimeout(function() {
+        $('#tblCourses_wrapper .filter-select2, #tblCourses_wrapper .dataTables_length select').each(function () {
+          const $this = $(this);
+          if (!$this.hasClass('select2-hidden-accessible')) {
+            const isLength = $this.closest('.dataTables_length').length > 0;
+            const $parent = isLength ? $this.parent() : ($this.closest('.dt-filter').length ? $this.closest('.dt-filter') : $('body'));
+            $this.css('visibility', 'hidden');
+            $this.select2({
+              dropdownParent: $parent,
+              width: 'resolve',
+              minimumResultsForSearch: Infinity,
+              allowClear: false
+            });
+            $this.next('.select2-container').css({
+              'min-width': isLength ? '70px' : '150px',
+              'max-width': isLength ? '90px' : '200px'
+            });
+            setTimeout(function() { $this.css('visibility', 'visible'); }, 0);
+          }
+        });
+      }, 200);
     },
   });
 
@@ -293,7 +316,7 @@ $(function () {
 
   function buildSelect(id, placeholder, containerClass) {
     return $(
-      `<select id="${id}" class="form-select" style="min-width:130px; max-width:160px;">` +
+      `<select id="${id}" class="form-select filter-select2">` +
       `<option value="">${placeholder}</option></select>`
     ).appendTo(`#tblCourses_wrapper .${containerClass}`);
   }

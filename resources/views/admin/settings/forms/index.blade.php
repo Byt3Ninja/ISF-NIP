@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
       { extend: 'excelHtml5', className: 'd-none' }
     ],
     initComplete: function () {
+      const $wrapper = $(this.api().table().container());
       createExportDropdown(formsTable, 'forms');
 
       @if(!$isOrgManager)
@@ -148,6 +149,28 @@ document.addEventListener('DOMContentLoaded', function () {
           formsTable.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
         });
       @endif
+      
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
 
       setTimeout(() => {
         $('.dataTables_filter .form-control').removeClass('form-control-sm');
@@ -172,6 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
       { extend: 'excelHtml5', className: 'd-none' }
     ],
     initComplete: function () {
+      const $wrapper = $(this.api().table().container());
       createExportDropdown(submissionsTable, 'submissions');
 
       const api = this.api();
@@ -181,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const orgs = [...new Set(api.column(3).data().toArray().filter(v => v))];
       if (orgs.length > 0) {
         const orgFilter = $(`
-          <select id="orgFilterSubs" class="form-select form-select-sm ms-3 me-2 mb-2" style="width:130px;">
+          <select id="orgFilterSubs" class="form-select form-select-sm" style="width:130px;">
             <option value="">@lang('forms.all_organizations')</option>
           </select>
         `).appendTo(lengthContainer);
@@ -196,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const programs = [...new Set(api.column(4).data().toArray().filter(v => v))];
       if (programs.length > 0) {
         const programFilter = $(`
-          <select id="programFilter" class="form-select form-select-sm ms-2 me-2 mb-2" style="width:130px;">
+          <select id="programFilter" class="form-select form-select-sm" style="width:130px;">
             <option value="">@lang('forms.all_programs')</option>
           </select>
         `).appendTo(lengthContainer);
@@ -211,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const steps = [...new Set(api.column(6).data().toArray().filter(v => v))];
       if (steps.length > 0) {
         const stepFilter = $(`
-          <select id="stepFilter" class="form-select form-select-sm ms-2 mb-2" style="width:130px;">
+          <select id="stepFilter" class="form-select form-select-sm" style="width:130px;">
             <option value="">@lang('forms.all_steps')</option>
           </select>
         `).appendTo(lengthContainer);
@@ -221,6 +245,30 @@ document.addEventListener('DOMContentLoaded', function () {
           api.column(6).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
         });
       }
+
+      lengthContainer.addClass('d-flex flex-wrap align-items-center gap-2');
+      
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
     },
     language: {
       url:

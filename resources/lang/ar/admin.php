@@ -4068,4 +4068,5 @@ return [
   'see_more' => 'عرض المزيد',
   'see_less' => 'عرض أقل',
   'fullscreen' => 'ملء الشاشة',
+  'no_data_to_export' => 'لا توجد بيانات لتصديرها',
 ];

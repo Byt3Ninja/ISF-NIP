@@ -185,6 +185,15 @@ if ($user->hasRole('Admin')) {
         lengthChange: true,
         pageLength: 10,
 				order: [[ 6, "desc" ]],
+        language: {
+            url:
+              document.dir === 'rtl'
+                ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+                : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+            sLengthMenu: '_MENU_',
+            search: '',
+            searchPlaceholder: '{{ __('admin.Search') }}...',
+          },
 				dom: '<"row"<"col-12 col-md-9 d-flex flex-wrap flex-md-nowrap align-items-center"l><"col-12 col-md-3 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 d-flex justify-content-end"p>>',
 				  buttons: [
           {
@@ -206,50 +215,74 @@ if ($user->hasRole('Admin')) {
           { orderable: false, targets: [0, 9] },
         ],
 				initComplete: function() {
-					// Create and insert organization filter
-					$('<select id="orgFilter" class="form-select form-select-sm ms-md-8 my-3 my-md-0" style="width: auto; max-width: 150px;">' +
+					const filterContainer = $('<div class="d-flex flex-wrap align-items-center gap-2 my-3 my-md-0 ms-md-8"></div>');
+
+					// Create organization filter
+					$('<select id="orgFilter" class="form-select form-select-sm" style="width: auto; max-width: 150px;">' +
             '<option value="">{{ $l == "en" ? "All Organizations" : "كل المنظمات" }}</option>' +
             '@foreach ($organizations as $organization)' +
             '<option value="{{ $organization->{'name_' . $l} }}">{{ $organization->{'name_' . $l} }}</option>' +
             '@endforeach' +
             '</select>')
-            .insertAfter('.dataTables_length label')
             .on('change', function() {
               const value = $(this).val();
               table.column(2).search(value).draw();
-            });
+            })
+            .appendTo(filterContainer);
 
-					// Create and insert program filter
-					$('<select id="programFilter" class="form-select form-select-sm mb-3 mb-md-0" style="width: auto; max-width: 150px;">' +
+					// Create program filter
+					$('<select id="programFilter" class="form-select form-select-sm" style="width: auto; max-width: 150px;">' +
             '<option value="">{{ $l == "en" ? "All Programs" : "كل البرامج" }}</option>' +
             '@foreach ($cycles as $cycle)' +
             '<option value="{{ $cycle->title }}">{{ $cycle->title }}</option>' +
             '@endforeach' +
             '</select>')
-            .insertAfter('#orgFilter')
             .on('change', function() {
               const value = $(this).val();
               table.column(3).search(value).draw();
-            });
+            })
+            .appendTo(filterContainer);
 
-					// Create and insert status filter
+					// Create status filter
 					$('<select id="statusFilter" class="form-select form-select-sm" style="width: auto; min-width: 150px;">' +
             '<option value="">{{ $l == "en" ? "All Statuses" : "كل الحالات" }}</option>' +
             '<option value="{{ __("admin.Draft") }}">{{ __("admin.Draft") }}</option>' +
             '<option value="{{ __("admin.Published") }}">{{ __("admin.Published") }}</option>' +
             '</select>')
-            .insertAfter('#programFilter')
             .on('change', function() {
               const value = $(this).val();
-              console.log('value', value);
               table.column(5).search(value).draw();
+            })
+            .appendTo(filterContainer);
+
+          $('.dataTables_length').after(filterContainer);
+
+          $('.dataTables_filter .form-control').removeClass('form-control-sm');
+          $('.dataTables_length .form-select').removeClass('form-select-sm');
+          
+          const $wrapper = $(this.api().table().container());
+          $wrapper.find('.form-select, .dataTables_length select').each(function () {
+            const $this = $(this);
+            if ($this.hasClass('select2-hidden-accessible')) return;
+
+            const isLength = $this.closest('.dataTables_length').length > 0;
+
+            $this.wrap('<div class="position-relative d-inline-block"></div>');
+
+            $this.select2({
+              dropdownParent: $this.parent(),
+              width: isLength ? '80px' : '100%',
+              minimumResultsForSearch: Infinity,
             });
+
+            if (!isLength) {
+              $this.next('.select2-container').css({
+                'min-width': '150px',
+                'max-width': '200px'
+              });
+            }
+          });
 				},
-				@if ($l === 'ar')
-					language: {
-						url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json'
-					},
-        @endif
 			});
 
 			// Export button click handlers

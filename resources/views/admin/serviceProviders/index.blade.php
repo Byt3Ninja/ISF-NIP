@@ -440,7 +440,22 @@ $tabs = [
 				language: dtLanguage,
 				initComplete() {
 					buildEnrolledFilters(this.api());
-					setTimeout(() => $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm'), 300);
+					setTimeout(() => {
+						$('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm');
+						$('#providersTable').closest('.dataTables_wrapper').find('.form-select:not(.select2-hidden-accessible)').each(function(){
+							if($(this).closest('.select2').length) return;
+							const $this = $(this);
+              const isLength = $this.closest('.dataTables_length').length > 0;
+							$this.wrap('<div class="position-relative d-inline-block"></div>');
+							$this.select2({dropdownParent: $this.parent(), width: isLength ? '80px' : '100%', minimumResultsForSearch: Infinity});
+							if (!isLength) {
+                $this.next('.select2-container').css({
+                  'min-width': '150px',
+                  'max-width': '200px'
+                });
+              }
+						});
+					}, 300);
 				}
 			});
 
@@ -463,6 +478,18 @@ $tabs = [
 						const text = stripHtml(String(d));
 						if (text && !seen.has(text)) { seen.add(text); $select.append(`<option value="${text}">${text}</option>`); }
 					});
+					setTimeout(function () {
+						if ($select.hasClass('select2-hidden-accessible')) {
+							$select.select2('destroy');
+						}
+						$select.wrap('<div class="position-relative d-inline-block"></div>');
+						$select.select2({
+							dropdownParent: $select.parent(),
+							width: 'auto',
+							minimumResultsForSearch: Infinity
+						});
+						$select.next('.select2-container').css({ 'min-width': '155px' });
+					}, 50);
 				}
 
 				addFilter(1, 'filter-enrolled-company', '{{ __("admin.all_companies") }}');
@@ -487,7 +514,23 @@ $tabs = [
 				language: dtLanguage,
 				initComplete() {
 					buildPendingFilters(this.api());
-					setTimeout(() => $('#pending .form-control-sm, #pending .form-select-sm').removeClass('form-control-sm form-select-sm'), 300);
+					setTimeout(() => {
+						$('#pending .form-control-sm, #pending .form-select-sm').removeClass('form-control-sm form-select-sm');
+						$('#pendingRequestsTable').closest('.dataTables_wrapper').find('.form-select, .dataTables_length select').each(function(){
+							const $this = $(this);
+							if ($this.hasClass('select2-hidden-accessible')) return;
+							const isLength = $this.closest('.dataTables_length').length > 0;
+							$this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : ' d-inline-block') + '"></div>');
+							$this.select2({
+								dropdownParent: $this.parent(),
+								width: isLength ? '80px' : 'auto',
+								minimumResultsForSearch: Infinity
+							});
+							if (!isLength) {
+								$this.next('.select2-container').css({'min-width':'155px'});
+							}
+						});
+					}, 300);
 				}
 			});
 
@@ -508,6 +551,18 @@ $tabs = [
 						const text = stripHtml(String(d));
 						if (text && !seen.has(text)) { seen.add(text); $select.append(`<option value="${text}">${text}</option>`); }
 					});
+					setTimeout(function () {
+						if ($select.hasClass('select2-hidden-accessible')) {
+							$select.select2('destroy');
+						}
+						$select.wrap('<div class="position-relative d-inline-block"></div>');
+						$select.select2({
+							dropdownParent: $select.parent(),
+							width: 'auto',
+							minimumResultsForSearch: Infinity
+						});
+						$select.next('.select2-container').css({ 'min-width': '155px' });
+					}, 50);
 				}
 
 				addFilter(1, 'filter-pending-company', '{{ __("admin.all_companies") }}');
@@ -538,7 +593,23 @@ $tabs = [
 				language: dtLanguage,
 				initComplete() {
 					buildHistoryFilters(this.api());
-					setTimeout(() => $('#history .form-control-sm, #history .form-select-sm').removeClass('form-control-sm form-select-sm'), 300);
+					setTimeout(() => {
+						$('#history .form-control-sm, #history .form-select-sm').removeClass('form-control-sm form-select-sm');
+						$('#historyRequestsTable').closest('.dataTables_wrapper').find('.form-select, .dataTables_length select').each(function(){
+							const $this = $(this);
+							if ($this.hasClass('select2-hidden-accessible')) return;
+							const isLength = $this.closest('.dataTables_length').length > 0;
+							$this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : ' d-inline-block') + '"></div>');
+							$this.select2({
+								dropdownParent: $this.parent(),
+								width: isLength ? '80px' : 'auto',
+								minimumResultsForSearch: Infinity
+							});
+							if (!isLength) {
+								$this.next('.select2-container').css({'min-width':'155px'});
+							}
+						});
+					}, 300);
 				}
 			});
 
@@ -561,6 +632,18 @@ $tabs = [
 						const text = stripHtml(String(d));
 						if (text && !seen.has(text)) { seen.add(text); $select.append(`<option value="${text}">${text}</option>`); }
 					});
+					setTimeout(function () {
+						if ($select.hasClass('select2-hidden-accessible')) {
+							$select.select2('destroy');
+						}
+						$select.wrap('<div class="position-relative d-inline-block"></div>');
+						$select.select2({
+							dropdownParent: $select.parent(),
+							width: 'auto',
+							minimumResultsForSearch: Infinity
+						});
+						$select.next('.select2-container').css({ 'min-width': '155px' });
+					}, 50);
 				}
 
 				addFilter(1, 'filter-history-company', '{{ __("admin.all_companies") }}');
