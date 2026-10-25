@@ -36,7 +36,7 @@ class SharedFileController extends Controller
         // Validation
         try {
             $request->validate([
-                'file'        => 'required|file|mimes:ppt,pptx,rar,zip,doc,docx,pdf,jpg,jpeg,png|max:10240',
+                'file'        => 'required|file|mimes:ppt,pptx,rar,zip,doc,docx,pdf|max:10240',
                 'description' => 'nullable|string'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
