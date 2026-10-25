@@ -203,7 +203,8 @@ class ProgramController extends Controller
             }
         }
 
-        $scheduleProvided = $request->has('programDateRange') || $request->has('programStepType') || $request->hasFile('programLogo');
+        // has(), not hasFile(): a failed upload or a non-file programLogo must still reach LOGO_RULE and fail
+        $scheduleProvided = $request->has('programDateRange') || $request->has('programStepType') || $request->has('programLogo');
         $contentProvided = $request->has('programDescription') || $request->has('programDescriptionAr');
 
         $rules = [

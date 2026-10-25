@@ -142,16 +142,10 @@
       init() {
         const dz = this;
         const logoErrorEl = document.getElementById("programLogoError");
-        // Replace the current file instead of silently keeping a rejected second one
-        dz.on("maxfilesexceeded", (file) => {
-          dz.removeAllFiles();
-          dz.addFile(file);
-          if (logoErrorEl) {
-            logoErrorEl.textContent = "";
-            logoErrorEl.classList.add("d-none");
-          }
-        });
-        dz.on("addedfile", () => {
+        // The newest file replaces the previous one (valid or rejected), so picking a
+        // valid logo clears a rejected one. Fires before Dropzone accepts/rejects it.
+        dz.on("addedfile", (file) => {
+          dz.files.filter((f) => f !== file).forEach((f) => dz.removeFile(f));
           if (logoErrorEl) {
             logoErrorEl.textContent = "";
             logoErrorEl.classList.add("d-none");
@@ -912,6 +906,34 @@
 
   const validators = [fv1, fv2, fv3, fv4, fv5];
 
+  // Rejected Dropzone files are never sent, so without this check a save would silently
+  // drop an invalid logo instead of blocking. Mirrors ProgramController::LOGO_RULE.
+  const LOGO_STEP = 1;
+  const LOGO_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+  const validateLogo = () => {
+    const logoErrorEl = document.getElementById("programLogoError");
+    const files = logoDropzone ? logoDropzone.files : [];
+    let message = "";
+    if (files.some((f) => !f.accepted)) {
+      message = "Please upload a valid image file (jpg, jpeg, png, gif, webp) with maximum size of 2MB.";
+    } else if (files.some((f) => f.size > 2 * 1024 * 1024)) {
+      message = "The uploaded file is too large. Maximum size is 2MB.";
+    } else if (files.some((f) => f.type && !LOGO_TYPES.includes(f.type.toLowerCase()))) {
+      message = "Please upload a valid image file (jpg, jpeg, png, gif, webp).";
+    }
+    if (logoErrorEl) {
+      logoErrorEl.textContent = message ? T(message, message) : "";
+      logoErrorEl.classList.toggle("d-none", !message);
+    }
+    return !message;
+  };
+
+  const validateStep = async (index) => {
+    const fieldsOk = await isValid(validators[index]);
+    const logoOk = index !== LOGO_STEP || validateLogo();
+    return fieldsOk && logoOk;
+  };
+
   // The branding Pickr widgets live in a separate IIFE below. Expose a hook so
   // they can refresh the matching color field's validation state on change/clear.
   window.programBrandingColorRevalidate = (name) => fv4.revalidateField(name);
@@ -939,60 +961,7 @@
   const goNext = (index) =>
     run(async () => {
       if (index === STEPS.length - 1) return publishFlow(false);
-      // Validate logo upload in Schedule & Media step before proceeding
-      if (index === 1 && logoDropzone) {
-        const logoErrorEl = document.getElementById("programLogoError");
-        if (logoErrorEl) {
-          logoErrorEl.textContent = "";
-          logoErrorEl.classList.add("d-none");
-        }
-        const rejectedFiles = typeof logoDropzone.getRejectedFiles === "function"
-          ? logoDropzone.getRejectedFiles()
-          : (logoDropzone.files || []).filter((f) => f.status === Dropzone.ERROR);
-        if (rejectedFiles && rejectedFiles.length > 0) {
-          const errMsg = T(
-            "Please upload a valid image file (jpg, jpeg, png, gif, webp) with maximum size of 2MB.",
-            "Please upload a valid image file (jpg, jpeg, png, gif, webp) with maximum size of 2MB.",
-          );
-          if (logoErrorEl) {
-            logoErrorEl.textContent = errMsg;
-            logoErrorEl.classList.remove("d-none");
-          }
-          return;
-        }
-        const acceptedFiles = typeof logoDropzone.getAcceptedFiles === "function"
-          ? logoDropzone.getAcceptedFiles()
-          : (logoDropzone.files || []).filter((f) => f.accepted);
-        if (acceptedFiles && acceptedFiles.length > 0) {
-          for (let i = 0; i < acceptedFiles.length; i++) {
-            const file = acceptedFiles[i];
-            if (file.size && file.size > 2 * 1024 * 1024) {
-              const errMsg = T(
-                "The uploaded file is too large. Maximum size is 2MB.",
-                "The uploaded file is too large. Maximum size is 2MB.",
-              );
-              if (logoErrorEl) {
-                logoErrorEl.textContent = errMsg;
-                logoErrorEl.classList.remove("d-none");
-              }
-              return;
-            }
-            const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-            if (file.type && validTypes.indexOf(file.type.toLowerCase()) === -1) {
-              const errMsg = T(
-                "Please upload a valid image file (jpg, jpeg, png, gif, webp).",
-                "Please upload a valid image file (jpg, jpeg, png, gif, webp).",
-              );
-              if (logoErrorEl) {
-                logoErrorEl.textContent = errMsg;
-                logoErrorEl.classList.remove("d-none");
-              }
-              return;
-            }
-          }
-        }
-      }
-      if (!(await isValid(validators[index]))) return;
+      if (!(await validateStep(index))) return;
       await saveStep(index);
       stepper.next();
     });
@@ -1002,7 +971,7 @@
     if (autoConfirm && confirmEl) confirmEl.checked = true; // clicking Publish is the confirmation
 
     for (let i = 0; i < validators.length; i++) {
-      if (!(await isValid(validators[i]))) {
+      if (!(await validateStep(i))) {
         goToStep(i);
         return;
       }
