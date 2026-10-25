@@ -55,6 +55,12 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
     {
         $this->Message = $Message;
         $this->mentorship_session = $mentorship_session;
+
+        // The decline email follows the platform default language from the
+        // general settings, not the founder's own profile language (GV-10028).
+        // Laravel renders the whole notification (subject, view, layout) in it.
+        $setting = Settings::first();
+        $this->locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
     }
 
     /**
@@ -151,10 +157,11 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
     public function toWhatsapp(object $notifiable): string
     {
         // Expecting $this->Message indices: [0]=subject/title, [1]=greeting, [2]=line, [3]=url, [4]=database message
+        // $this->Message is built in the founder's language, so wrap it in the same one.
         return __('notifications.mentorship_session.whatsapp', [
             'greeting' => $this->Message[1] ?? '',
             'line' => $this->Message[2] ?? '',
-        ]);
+        ], $notifiable->preferredLocale());
     }
 
     /**
@@ -162,9 +169,11 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
+        $locale = $notifiable->preferredLocale();
+
         return new BroadcastMessage([
-            'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
-            'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? '']),
+            'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => ''], $locale),
+            'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? ''], $locale),
             'time' => now()->toDateTimeString(),
         ]);
     }
