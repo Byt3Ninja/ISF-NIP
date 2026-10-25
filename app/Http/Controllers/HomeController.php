@@ -100,6 +100,33 @@ class HomeController extends Controller
 
     // ============> Functions of dashboards
 
+    /**
+     * SQL condition, prefixed with $glue ("AND"/"WHERE"), limiting a dashboard query to the
+     * user's data. A Program Manager is limited to its assigned programs through $cycleColumn,
+     * or gets no rows where the query has no program dimension ($cycleColumn null). Everyone
+     * else keeps the organization filter on $orgColumn (none for admins or users without
+     * organizations, as before).
+     */
+    private function dashboardScope($user, string $glue, ?string $cycleColumn, string $orgColumn): string
+    {
+        $orgIds = $user->organizations_ids;
+        if (empty($orgIds) || $user->hasRole('admin')) {
+            return '';
+        }
+        return " {$glue} {$orgColumn} IN (" . implode(',', array_map('intval', $orgIds)) . ")";
+    }
+
+    /**
+     * dashboardScope() for services. A service belongs to organizations through the
+     * organization_service pivot (services.organization_id is always NULL), so the
+     * org condition is applied inside an EXISTS on the pivot.
+     */
+    private function servicesScope($user, string $glue, string $serviceColumn): string
+    {
+        $orgScope = $this->dashboardScope($user, 'AND', null, 'os.organization_id');
+        return $orgScope === '' ? '' : " {$glue} EXISTS (SELECT 1 FROM organization_service os WHERE os.service_id = {$serviceColumn}{$orgScope})";
+    }
+
     protected function combinedDashboard()
     {
         $user = auth()->user();
@@ -231,9 +258,7 @@ class HomeController extends Controller
             if($user->hasRole('Registered')){
                 $services_requests_q .= " AND sr.user_id = " . $user->id;
             }
-            if ($has_org && !empty($orgIds) && !$user->hasRole('admin')) {
-                $services_requests_q .= " AND s.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ")";
-            }
+            $services_requests_q .= $this->servicesScope($user, 'AND', 'sr.service_id');
             $services_requests = collect(DB::select($services_requests_q));
         } else {
             $services_requests = collect([]);
@@ -1157,9 +1182,7 @@ class HomeController extends Controller
         $latest_events = collect(DB::select($latest_events_q, [TimezoneService::platformToday()]));
 
         $conditions = '';
-        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-            $conditions = " WHERE s.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-        }
+        $conditions = $this->servicesScope($user, 'WHERE', 's.id');
         $latest_services_q = "SELECT
                 s.id,
                 s.name_en,
