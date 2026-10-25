@@ -200,7 +200,7 @@ class InvitationController extends Controller
 
         // Claim the "send invitation email" step so a retry/duplicate call for this
         // invitation can never send it twice; a failed send gives the claim back.
-        NotificationClaim::on('invite_mentors', ['id' => $invitation->id], 'email_sent_at')
+        NotificationClaim::on('invite_mentor', ['id' => $invitation->id], 'email_sent_at')
             ->run(fn (NotificationClaim $claim) => dispatch((new SendInviteMentorEmail($invitation, auth()->user()->email))->withClaim($claim)));
         if($data['invitation_scope'] == 'Organization'){
             $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
