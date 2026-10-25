@@ -2214,6 +2214,7 @@
 
       $('#customAddSection').on('click', function () {
         if (customSectionsAtMax()) {
+          toastr.options = { "preventDuplicates": true };
           toastr.warning("{{ __('landing.Custom_Sections_Max_Hint') }}");
           return;
         }
