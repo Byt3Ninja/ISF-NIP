@@ -29,32 +29,40 @@ class InviteMentorMail extends Mailable implements ShouldQueue
     }
 
     /**
-     * Platform-branded email: the platform logo and name, never an
-     * organization's (EmailBranding).
+     * An invitation to one specific organization carries that organization's
+     * logo and name; a public or multi-organization invitation carries the
+     * platform's (EmailBranding).
      */
     public function emailBranding()
     {
-        return null;
+        $orgIds = $this->invitation->organization_ids ?? [];
+
+        if ($this->invitation->scope !== 'Organization' || count($orgIds) !== 1) {
+            return null;
+        }
+
+        return Organization::find(reset($orgIds));
     }
 
     public function build()
     {
         $orgIds = $this->invitation->organization_ids ?? [];
 
-        // The invitation email always carries the platform's own branding
-        // (logo, name) -- never an organization's -- regardless of which
-        // organizations the invite is scoped to.
+        // Logo, name and closing line follow emailBranding(): the invited
+        // organization, or the platform.
         $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
         app()->setLocale($locale);
 
-        $platformName = $orgData['org_name'] ?? config('app.name');
+        $brandName = $orgData['org_name'] ?? config('app.name');
+        // The "Platform" detail row always names the platform itself.
+        $platformName = $setting?->Platform_Name ?? config('app.name');
 
         $defaultSubject = $locale === 'ar'
-            ? "تمت دعوتك للانضمام إلى {$platformName} كمرشد"
-            : "You're Invited to Join {$platformName} as a Mentor";
+            ? "تمت دعوتك للانضمام إلى {$brandName} كمرشد"
+            : "You're Invited to Join {$brandName} as a Mentor";
 
         // An admin-authored subject/message is optional; when provided it
         // replaces the platform's default template text entirely.

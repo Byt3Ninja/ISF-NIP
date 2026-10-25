@@ -4,6 +4,8 @@ namespace Tests\Unit\Services;
 
 use App\Company;
 use App\Cycle;
+use App\InviteMentor;
+use App\Mail\InviteMentorMail;
 use App\Organization;
 use App\Services\EmailBranding;
 use App\Step;
@@ -133,6 +135,32 @@ class EmailBrandingTest extends TestCase
         if ($platformLogo) {
             $this->assertStringContainsString($platformLogo, $html);
         }
+    }
+
+    /** @test */
+    public function a_mentor_invitation_to_one_organization_shows_that_organizations_logo()
+    {
+        $mail = new InviteMentorMail(new InviteMentor([
+            'name'             => 'Invited Mentor',
+            'scope'            => 'Organization',
+            'organization_ids' => [(string) $this->programOrg->id],
+        ]));
+
+        $this->assertSame($this->programOrg->id, EmailBranding::forMail($mail)?->id);
+        $this->assertStringContainsString('program-org-logo.png', $mail->render());
+    }
+
+    /** @test */
+    public function a_public_or_multi_organization_mentor_invitation_shows_the_platform_logo()
+    {
+        $public = new InviteMentorMail(new InviteMentor(['scope' => 'Public', 'organization_ids' => []]));
+        $several = new InviteMentorMail(new InviteMentor([
+            'scope'            => 'Organization',
+            'organization_ids' => [$this->programOrg->id, $this->recipientOrg->id],
+        ]));
+
+        $this->assertNull(EmailBranding::forMail($public));
+        $this->assertNull(EmailBranding::forMail($several));
     }
 
     /**

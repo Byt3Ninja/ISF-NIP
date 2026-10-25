@@ -63,9 +63,9 @@
                     <p style="margin: 0;">{{ $isRtl ? 'مع أطيب التحيات،' : 'Best regards,' }}</p>
                     <p style="margin: 0; font-weight: 600;">
                         @if($isRtl)
-                            فريق {{ $invitePlatformName ?? config('app.name', 'GrowthLabs') }}
+                            فريق {{ $org_name ?? $invitePlatformName ?? config('app.name', 'GrowthLabs') }}
                         @else
-                            {{ $invitePlatformName ?? config('app.name', 'GrowthLabs') }} Team
+                            {{ $org_name ?? $invitePlatformName ?? config('app.name', 'GrowthLabs') }} Team
                         @endif
                     </p>
                 </div>
