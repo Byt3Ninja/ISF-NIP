@@ -32,13 +32,13 @@
                                             <td style="{{ $labelStyle }}">{{ $t('date') }}:</td>
                                             <td style="{{ $valueStyle }}">{{ $trainingDate }}</td>
                                         </tr>
+                                        @if($trainingStartTime !== '' || $trainingEndTime !== '')
+                                            <tr>
+                                                <td style="{{ $labelStyle }}">{{ $t('time') }}:</td>
+                                                <td style="{{ $valueStyle }}">{{ implode(' - ', array_filter([$trainingStartTime, $trainingEndTime], 'strlen')) }}</td>
+                                            </tr>
+                                        @endif
                                         @if($trainingIsOnline)
-                                            @if($trainingStartTime !== '' || $trainingEndTime !== '')
-                                                <tr>
-                                                    <td style="{{ $labelStyle }}">{{ $t('time') }}:</td>
-                                                    <td style="{{ $valueStyle }}">{{ $trainingStartTime }} - {{ $trainingEndTime }}</td>
-                                                </tr>
-                                            @endif
                                             <tr>
                                                 <td style="{{ $labelStyle }}">{{ $t('online_link') }}:</td>
                                                 <td style="{{ $valueStyle }}">

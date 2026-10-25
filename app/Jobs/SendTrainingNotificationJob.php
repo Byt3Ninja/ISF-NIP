@@ -172,7 +172,8 @@ class SendTrainingNotificationJob implements ShouldQueue
             $data = array_merge([
                 'name' => trim($user->first_name_en . ' ' . $user->last_name_en),
                 'title' => $this->title,
-                'date' => $start ? $start->format('Y-m-d h:i A') : $this->datetime,
+                // Date only (GV-7283): times go in their own start/end row.
+                'date' => $start ? $start->format('Y-m-d') : $this->datetime,
                 'type' => $this->type,
                 'organization' => $organization,
             ], $extra);
@@ -234,7 +235,7 @@ class SendTrainingNotificationJob implements ShouldQueue
                 'join_url' => $this->join_url ?? '',
                 'trainer_name' => $this->trainer_name ?? '',
                 'trainer_email' => $this->trainer_email ?? '',
-            ]);
+            ], true);
 
             foreach ($companies as $company) {
                 $user = $company->user;
