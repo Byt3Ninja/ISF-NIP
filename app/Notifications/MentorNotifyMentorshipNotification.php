@@ -188,7 +188,8 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
                 'attachments'       => $attachments,
                 // A declined session has no meeting: hide its link / location.
                 'isRejected'        => $mentorship_session?->approved === MentorshipApproval::REJECTED->value,
-                'viewSessionUrl'    => route('mentorships.sessions_list_detailed'),
+                // 'viewSessionUrl'    => route('mentorships.sessions_list_detailed'),
+                'viewSessionUrl'    => route('mentorships.sessions'),
             ], $orgData));
 
     }
