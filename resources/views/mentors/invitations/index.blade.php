@@ -212,7 +212,7 @@ $tabs = [
 </div>
 
 {{-- New Invitation Offcanvas --}}
-<div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="newInvitationOffcanvas" aria-labelledby="newInvitationOffcanvasLabel">
+<div class="offcanvas offcanvas-end w-px-800" tabindex="-1" id="newInvitationOffcanvas" aria-labelledby="newInvitationOffcanvasLabel">
   <div class="offcanvas-header border-bottom">
     <div class="d-flex justify-content-between w-100">
       <h5 class="offcanvas-title" id="newInvitationOffcanvasLabel">@lang('admin.new_invitation')</h5>
@@ -312,6 +312,7 @@ $tabs = [
             name="invitation_message"
             maxlength="10000"
           ></textarea>
+          <div class="text-muted mt-3"> {{ __('admin.Accepted formats') }}: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX | {{ __('admin.Max size') }}: 10MB </div>
           <div class="invalid-feedback" id="invitationMessageError"></div>
         </div>
 

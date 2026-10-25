@@ -820,4 +820,7 @@ return [
     'Program_Visibility_Public_Helper' => 'أنشئ صفحة هبوط عامة للبرنامج واعرضها.',
     'Program_Visibility_Private_Helper' => 'لن يتم إنشاء صفحة هبوط عامة للبرنامج.',
     'no_mentors_assigned' => 'لم يتم تعيين مرشدين',
+
+    'mentor_invite_supported_mimes' => 'نوع الملف غير مدعوم. أنواع الملفات المدعومة: jpg, png, pdf, doc, docx, xls, xlsx, ppt, pptx.',
+    'mentor_invite_max_file_size' => 'حجم الملف يتجاوز الحد الأقصى المسموح به وهو 10MB.',
 ];

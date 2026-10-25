@@ -267,6 +267,9 @@ class InvitationController extends Controller
     {
         $request->validate([
             'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx|max:10240',
+        ], [
+            'file.mimes' => __('cycles.mentor_invite_supported_mimes'),
+            'file.max' => __('cycles.mentor_invite_max_file_size'),
         ]);
 
         // استدعاء دالة الرفع

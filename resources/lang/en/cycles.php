@@ -825,4 +825,7 @@ return [
     'Program_Visibility_Public_Helper' => 'Create and display a public landing page for the program.',
     'Program_Visibility_Private_Helper' => 'No public landing page will be created for the program.',
     'no_mentors_assigned' => 'No mentors assigned',
+
+    'mentor_invite_supported_mimes' => 'The file format is not supported. accepted formats: jpg, png, pdf, doc, docx, xls, xlsx, ppt, pptx.',
+    'mentor_invite_max_file_size' => 'The file size exceeds the maximum limit of 10MB.',
 ];
