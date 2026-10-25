@@ -173,16 +173,20 @@ class Cycle extends Model
     {
         return app(\App\Services\FileManagerService::class)->getUrl($this->delegation_file, 'public_uploads');
     }
+
     // =============> Relations <========================
     public function organization(){
         return $this->belongsTo(Organization::class,'organization_id');
     }
+
     public function companies(){
         return $this->hasMany(Company::class,'cycle');
     }
+
     public function mentors(){
         return $this->belongsToMany(User::class, 'cycles_mentors', 'cycle_id', 'user_id');
     }
+
     public function CalenderSync()
     {
         return $this->morphMany(CalenderSync::class, 'calenderable');
@@ -204,9 +208,9 @@ class Cycle extends Model
     }
 
     public function trainingSessions()
-   {
-      return $this->hasManyThrough(TrainingSession::class, Step::class);
-   }
+    {
+        return $this->hasManyThrough(TrainingSession::class, Step::class);
+    }
 
     public function surveyResponses()
     {
@@ -293,5 +297,10 @@ class Cycle extends Model
     public function getMainColorAttribute($value)
     {
         return $value ?: PlatformBrandingService::programDefaults()['main_color'];
+    }
+
+    public function mentorshipSchedules()
+    {
+        return $this->hasMany(MentorshipSchedule::class, 'cycle_id');
     }
 }

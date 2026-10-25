@@ -1918,17 +1918,17 @@ class CyclesController extends Controller
     }
 
     function normalizeFieldName($fieldName)
-{
-    if (preg_match('/^field_\d+_(\d+)$/', $fieldName, $matches)) {
-        return 'field_' . intval($matches[1]);
-    }
+    {
+        if (preg_match('/^field_\d+_(\d+)$/', $fieldName, $matches)) {
+            return 'field_' . intval($matches[1]);
+        }
 
-    if (preg_match('/^field_(\d+)$/', $fieldName, $matches)) {
-        return 'field_' . intval($matches[1]);
-    }
+        if (preg_match('/^field_(\d+)$/', $fieldName, $matches)) {
+            return 'field_' . intval($matches[1]);
+        }
 
-    return $fieldName;
-}
+        return $fieldName;
+    }
 
     public function testSend(Request $request)
     {
