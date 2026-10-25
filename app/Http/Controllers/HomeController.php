@@ -226,7 +226,7 @@ class HomeController extends Controller
                     services s ON sr.service_id = s.id
                 WHERE
                     sr.deleted_at IS NULL
-                    AND sr.approved IS NULL
+                    -- AND sr.approved IS NULL
             ";
             if($user->hasRole('Registered')){
                 $services_requests_q .= " AND sr.user_id = " . $user->id;
@@ -2345,7 +2345,7 @@ class HomeController extends Controller
             $data['countCards'][] = [
                 'color' => 'secondary',
                 'href' => '/dashboard/requests/all',
-                'icon' => 'ti-speakerphone',
+                'icon' => 'ti ti-speakerphone',
                 'text' => 'Services Requests',
                 'permissions' => ['service_requests.list_all', 'dashboard.widgets_cards_service_requests_view'],
                 'count' => $services_requests->count(),
