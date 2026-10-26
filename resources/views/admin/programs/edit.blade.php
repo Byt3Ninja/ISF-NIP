@@ -9,6 +9,17 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 @stop
 
+@section('style')
+<style>
+  #dropzone-program-logo .dz-message {
+    margin: 4rem 0 1.5rem !important;
+  }
+  #dropzone-program-logo .dz-message::before {
+    top: 1rem;
+  }
+</style>
+@stop
+
 @section('content')
 @php
   $orgs = $_user->hasRole('Admin') ? \App\Organization::all() : $_user->organizations;
@@ -193,10 +204,10 @@ HTML;
           <div class="col-12">
             <label class="form-label d-block">{{ __('cycles.Program Logo') }}</label>
             <div class="dropzone needsclick p-0" id="dropzone-program-logo">
-              <div class="dz-message needsclick py-4">
-                <p class="h4 needsclick pt-3 mb-2">{{ __('cycles.Drag and drop your logo here') }}</p>
-                <p class="h6 text-muted d-block fw-normal mb-2">{{ __('cycles.or') }}</p>
-                <span class="note needsclick btn btn-sm btn-label-primary" id="btnBrowseLogo">{{ __('cycles.Browse image') }}</span>
+              <div class="dz-message needsclick">
+                <p class="small needsclick mb-2">{{ __('cycles.Drag and drop your logo here') }}</p>
+                <p class="small text-muted d-block fw-normal mb-2">{{ __('cycles.or') }}</p>
+                <span class="needsclick btn btn-xs btn-label-primary" id="btnBrowseLogo">{{ __('cycles.Browse image') }}</span>
               </div>
               <div class="fallback"><input name="file" type="file" /></div>
             </div>
