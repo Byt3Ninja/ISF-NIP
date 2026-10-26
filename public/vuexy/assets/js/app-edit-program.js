@@ -1081,7 +1081,7 @@
       components: {
         // Main components
         preview: true,
-        opacity: true,
+        // opacity: true,
         hue: true,
 
         // Input / output Options
