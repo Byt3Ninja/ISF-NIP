@@ -136,10 +136,10 @@ HTML;
           </div>
           <div class="col-sm-6">
             <label class="form-label" for="programTitleAr">{{ __('cycles.Program Title (Arabic)') }}<span class="text-danger">*</span></label>
-            <input type="text" id="programTitleAr" name="programTitleAr" class="form-control" dir="rtl" maxlength="50"
+            <input type="text" id="programTitleAr" name="programTitleAr" class="form-control" maxlength="50"
               placeholder="{{ __('cycles.Program Title (Arabic) placeholder') }}" value="{{ $ccycle->title_ar }}" />
           </div>
-          <div class="col-sm-6">
+          <div class="col-12">
             <label class="form-label" for="programCohort">{{ __('cycles.Cohort') }}</label>
             <input type="text" class="form-control" id="programCohort" name="programCohort" maxlength="20"
               placeholder="{{ __('cycles.Cohort placeholder') }}" value="{{ $ccycle->cohort }}" />
@@ -151,7 +151,7 @@ HTML;
           </div>
           <div class="col-12">
             <label class="form-label" for="programDescriptionAr">{{ __('cycles.Description (Arabic)') }}<span class="text-danger">*</span></label>
-            <textarea class="form-control" id="programDescriptionAr" name="programDescriptionAr" rows="4" dir="rtl" maxlength="{{ $descMax }}"
+            <textarea class="form-control" id="programDescriptionAr" name="programDescriptionAr" rows="4" maxlength="{{ $descMax }}"
               placeholder="{{ __('cycles.Description (Arabic) placeholder') }}">{{ $ccycle->description_ar }}</textarea>
           </div>
           {!! $navButtons(true) !!}
