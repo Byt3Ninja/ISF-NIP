@@ -148,13 +148,13 @@ class TaskNotification extends Notification implements ShouldQueue
                 'data'       => $this->data,
                 'notifiable' => $notifiable,
                 'action'     => $this->data['action'],
+                'taskUrl'    => $this->taskBoardUrl(),
             ], $orgData));
     }
 
     /**
      * Founder "task assigned" email: platform default language, and a
-     * View Task link that resolves to the right page for the task's type
-     * (admin-created ProgramTask vs mentor-created MentorshipTask).
+     * View Task link to the program's task board (taskBoardUrl).
      */
     protected function toFounderAssignedMail($notifiable, array $from, array $orgData): MailMessage
     {
@@ -171,10 +171,6 @@ class TaskNotification extends Notification implements ShouldQueue
             $firstName = trim((string) $notifiable->first_name_en);
             $lastName = trim((string) $notifiable->last_name_en);
         }
-
-        $viewUrl = $task instanceof ProgramTask
-            ? route('tasks.show', $task->id)
-            : route('startup.startup.mentorshipTasks.show', $task->id);
 
         $dueDate = $task->due_date ? Carbon::parse($task->due_date)->format('Y-m-d') : '';
 
@@ -207,15 +203,14 @@ class TaskNotification extends Notification implements ShouldQueue
                 'taskTitle' => $task->title ?? '',
                 'taskDueDate' => $dueDate,
                 'taskDescription' => trim((string) ($task->description ?? '')),
-                'taskViewUrl' => $viewUrl,
+                'taskViewUrl' => $this->taskBoardUrl(),
                 'taskAttachments' => $attachments,
             ], $orgData));
     }
 
     /**
      * Founder "task archived" email: platform default language, and a
-     * View Task link that opens the archived-tasks board for the task's
-     * type (admin-created ProgramTask vs mentor-created MentorshipTask).
+     * View Task link to the program's task board (taskBoardUrl).
      */
     protected function toFounderArchivedMail($notifiable, array $from, array $orgData): MailMessage
     {
@@ -233,10 +228,6 @@ class TaskNotification extends Notification implements ShouldQueue
             $lastName = trim((string) $notifiable->last_name_en);
         }
 
-        $viewUrl = $task instanceof ProgramTask
-            ? route('tasks.index')
-            : route('startup.mentorship_tasks.dashboard.view');
-
         $programName = $task instanceof ProgramTask
             ? ($task->program?->title ?? '')
             : ($task->mentorshipRequest?->cycle?->title ?? '');
@@ -253,14 +244,13 @@ class TaskNotification extends Notification implements ShouldQueue
                 'taskTitle' => $task->title ?? '',
                 'taskDescription' => trim((string) ($task->description ?? '')),
                 'taskProgramName' => $programName,
-                'taskViewUrl' => $viewUrl,
+                'taskViewUrl' => $this->taskBoardUrl(),
             ], $orgData));
     }
 
     /**
      * Founder "task reopened" email: platform default language, and a
-     * View Task link that opens the founder's task board for the task's
-     * type (admin-created ProgramTask vs mentor-created MentorshipTask).
+     * View Task link to the program's task board (taskBoardUrl).
      */
     protected function toFounderReopenedMail($notifiable, array $from, array $orgData): MailMessage
     {
@@ -277,10 +267,6 @@ class TaskNotification extends Notification implements ShouldQueue
             $firstName = trim((string) $notifiable->first_name_en);
             $lastName = trim((string) $notifiable->last_name_en);
         }
-
-        $viewUrl = $task instanceof ProgramTask
-            ? route('tasks.index')
-            : route('startup.mentorship_tasks.dashboard.view');
 
         $programName = $task instanceof ProgramTask
             ? ($task->program?->title ?? '')
@@ -301,7 +287,7 @@ class TaskNotification extends Notification implements ShouldQueue
                 'taskDescription' => trim((string) ($task->description ?? '')),
                 'taskProgramName' => $programName,
                 'taskDueDate' => $dueDate,
-                'taskViewUrl' => $viewUrl,
+                'taskViewUrl' => $this->taskBoardUrl(),
             ], $orgData));
     }
 
@@ -432,6 +418,18 @@ class TaskNotification extends Notification implements ShouldQueue
             'trace' => $exception->getTraceAsString(),
             'data' => $this->data,
         ]);
+    }
+
+    /**
+     * The View Task link for every task email: the program's task board,
+     * filtered to the task's cycle when one can be resolved.
+     */
+    protected function taskBoardUrl(): string
+    {
+        $task = $this->data['task'] ?? null;
+        $cycleId = $task?->mentorshipRequest?->cycle?->id ?? $task?->program?->id ?? null;
+
+        return route('mentorshipTasks.index') . ($cycleId ? '?cycle_id=' . $cycleId : '?nav=menu');
     }
 
     /**
