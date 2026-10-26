@@ -26,7 +26,7 @@ use App\Organization;
 use App\SurveyScopes;
 use App\ScreeningEvaluation;
 use App\Milestone;
-
+use App\Services\CompanyService;
 use App\Documentation;
 use App\Finalscreening;
 use App\MentorshipTask;
@@ -54,9 +54,11 @@ class HomeController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    protected CompanyService $companyService;
+    public function __construct(CompanyService $companyService)
     {
         $this->middleware('auth');
+        $this->companyService = $companyService;
     }
 
     /**
@@ -395,7 +397,7 @@ class HomeController extends Controller
                 // submits an application (ExternalCyclesController::registerUser(),
                 // CyclesController::saveForm()) and are never cleared on disapproval,
                 // so their existence is the durable signal of "this company applied".
-                $applied_form_data_org_filter = '';
+                /* $applied_form_data_org_filter = '';
                 if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
                     $applied_form_data_org_filter = " AND EXISTS (
                             SELECT 1 FROM steps st
@@ -432,7 +434,10 @@ class HomeController extends Controller
                 ";
 
                 $applied_companies_by_cycle = collect(DB::select($applied_companies_by_cycle_q));
-                $applied_company_count = $applied_companies_by_cycle->sum('company_count');
+                $applied_company_count = $applied_companies_by_cycle->sum('company_count'); */
+
+                $applied_companies_by_cycle = $this->companyService->getCompanies(['status' => 'applied'], false, false);
+                $applied_company_count = $applied_companies_by_cycle->count();;
 
                 $alumni_company = Almuni::whereHas('cycle', function ($q) use ($organizations_ids) {
                     $q->whereIn('organization_id', $organizations_ids);

@@ -49,7 +49,7 @@ class CompanyRepository
                     // "Applied" spans a company's whole application history, including
                     // after disapproval nulls out its cycle, so org scoping here must
                     // key off the applicant's own organization rather than the cycle.
-                    $query->whereHas('user', function ($q) use ($orgIds) {
+                    $query->whereHas('cycle.organization', function ($q) use ($orgIds) {
                         $q->whereIn('organization_id', $orgIds);
                     });
                 } else {
