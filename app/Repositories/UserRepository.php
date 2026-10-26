@@ -104,7 +104,7 @@ class UserRepository
     {
         try { 
             $user = DB::transaction(function () use ($data) {
-                $user = User::create(attributes: [
+                $user = User::forceCreate([
                     'first_name_en' => $data['first_name'],
                     'last_name_en' => $data['last_name'],
                     //this is a bug #1232
@@ -603,7 +603,7 @@ class UserRepository
             DB::beginTransaction();
             foreach ($userData as $row)
             {
-                $user = User::create([
+                $user = User::forceCreate([
                     'email'    => $row[1],
                     'first_name_en'    => $row[2],
                     'last_name_en'    => $row[3],

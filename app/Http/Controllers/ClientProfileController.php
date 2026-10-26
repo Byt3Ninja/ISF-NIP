@@ -264,8 +264,13 @@ class ClientProfileController extends Controller
             //     $user->mentorExpertises()->sync($request->expertises);
             // }
 
-            $updateArray = [];
-            $excludeArray = ['img_url', 'password', 'email', 'first_name_ar', 'last_name_ar'];
+            // Only the fields this form owns (audit C-6): a deny-list let users post
+            // company_id and join any startup, or bind another account's social identity.
+            $profileFields = [
+                'first_name_en', 'last_name_en', 'gender', 'title_en', 'phone', 'country_code',
+                'whatsapp', 'country_code_w_a', 'country_id', 'state_id', 'address', 'zip_code',
+                'HaveCompany', 'academic_stat', 'dob', 'national_id', 'currency', 'language', 'timezone',
+            ];
             if( $request->hasFile('img_url') )
             {
                 $img_url = $request->file('img_url');
@@ -277,7 +282,7 @@ class ClientProfileController extends Controller
                 $img_url = $user->img_url;
                 if( $request->has('should_remove_image') && $request->should_remove_image == 1 ) { $img_url = null; }
             }
-            $updateArray = $request->except($excludeArray) + ['img_url' => $img_url];
+            $updateArray = $request->only($profileFields) + ['img_url' => $img_url];
 
             // GV-10436 (ISF): founders also save their Entity, and the identification field their
             // status asks for. Student code and national ID are separate columns and a founder may

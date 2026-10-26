@@ -79,7 +79,7 @@ class RegistrationController extends Controller
 					// Never returned or mailed: the welcome email signs the founder in with a magic link.
 					$password = Str::random(40);
 					$user = new User();
-					$user->fill([
+					$user->forceFill([
 						'email' => $request->input('personal.email'),
 						'first_name_en' => $request->input('personal.first_name'),
 						'first_name_ar' => $request->input('personal.first_name'),

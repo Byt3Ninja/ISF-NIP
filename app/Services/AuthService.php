@@ -67,7 +67,8 @@ class AuthService
 
         DB::beginTransaction();
         try {
-            $user = User::create($userData);
+            // forceCreate: email_verified_at is deliberately not fillable, and create() dropped it.
+            $user = User::forceCreate($userData);
 
             // Role names can be renamed; default_for is the stable key.
             $role = Role::where('default_for', self::REGISTER_ROLES[$data['role']])->firstOrFail();

@@ -61,7 +61,7 @@ use Illuminate\Support\Facades\Http;
         			}
         if (!$user) {
           	$name = explode(" ",$getInfo->name);
-            $user = User::create([
+            $user = User::forceCreate([
                 'first_name_en' => $name[0],
               	'last_name_en' => $name[1],
                 'email'    => $getInfo->email,
@@ -100,7 +100,7 @@ use Illuminate\Support\Facades\Http;
                 return redirect('/dashboard');
             }else{
                 $name = explode(" ",$guser->name);
-                $newUser = User::create([
+                $newUser = User::forceCreate([
                   	'first_name_en'     => $name[0],
               		'last_name_en' => $name[1],
                     'email' => $guser->email,

@@ -415,7 +415,7 @@ class ExternalCyclesController extends Controller
 					$password = Str::random(40);
 					$request_token = Str::random(48);
 					$user = new User();
-					$user->fill([
+					$user->forceFill([
 						'email' => $request->input('register-email'),
 						'first_name_en' => $request->input('register-first-name'),
 						'first_name_ar' => $request->input('register-first-name'),

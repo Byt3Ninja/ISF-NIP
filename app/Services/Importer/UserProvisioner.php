@@ -27,7 +27,7 @@ class UserProvisioner
 
         if (!$user) {
             $plain = $this->generatePassword();
-            $user = User::create([
+            $user = User::forceCreate([
                 'email'             => $email,
                 'first_name_en'     => $founderData['first_name'] ?? null,
                 'first_name_ar'     => $founderData['first_name'] ?? null,
@@ -63,7 +63,7 @@ class UserProvisioner
             'HaveCompany'    => 1,
         ], fn($v) => $v !== null);
         if (!empty($updates)) {
-            $user->update($updates);
+            $user->forceFill($updates)->save();
         }
 
         if (method_exists($user, 'allotRole')) {

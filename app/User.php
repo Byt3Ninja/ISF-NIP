@@ -42,9 +42,11 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
      * @var array
      */
     protected $fillable = [
-        'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','education_entity_id','national_id','student_code','referral_source','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'accept_email', 'accept_whatsapp', 'accept_pusher',
-        'magic_login_sent_at', 'must_change_password'];
+        'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'title_ar', 'title_en', 'HaveCompany', 'country_id', 'state_id', 'city_id', 'password', 'img_url',
+        'PageId','dob','academic_stat','education_entity_id','national_id','student_code','referral_source','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'accept_email', 'accept_whatsapp', 'accept_pusher'];
+    // Not fillable on purpose (audit C-6): company_id (startup membership), email_verified_at,
+    // new_email, provider/provider_id/google_id (social identity), must_change_password and
+    // magic_login_sent_at. Code that sets them uses forceFill()/forceCreate() with server values.
     /**
      * The attributes that should be hidden for arrays.
      *
