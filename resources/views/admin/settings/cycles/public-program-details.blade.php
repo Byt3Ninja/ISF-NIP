@@ -277,7 +277,7 @@ $startDateForCountdown = $program->registration_starts_at?->toIso8601String();
 						</span>
 					</div>
 
-					<h1 class="display-2 fw-bolder mb-3">{{ $program->title }}</h1>
+					<h1 class="display-4 fw-bolder mb-3">{{ $program->title }}</h1>
 					<p class="lead mx-auto mb-5" style="max-width:700px;color:var(--on-surface-variant);">
 						{{ $program->description }}
 					</p>
