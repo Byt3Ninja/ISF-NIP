@@ -46,15 +46,21 @@ trait ConfiguresSmtp
     /**
      * Work out which organization a send belongs to.
      *
-     * Callers usually pass an OrganizationSettings model, but it is null
-     * whenever the organization could not be determined locally (most often
-     * for on-demand notifiables). In that case fall back to the organization
-     * the send is already running under.
+     * The organization the email is about decides, as it does for the
+     * branding and in ConfigureTenantMailTransport. Callers often pass the
+     * recipient's own OrganizationSettings, which must not switch the send to
+     * another account (configureSmtp() runs again inside many toMail()s).
+     * Without one, the settings passed in, and then the organization the send
+     * is already running under, are used.
      *
      * @param  mixed  $smtpSettings
      */
     protected function resolveSendingOrganization($smtpSettings)
     {
+        if ($organization = EmailBranding::forMail($this)) {
+            return $organization;
+        }
+
         if ($organization = ($smtpSettings?->organization ?? null)) {
             return $organization;
         }
@@ -100,17 +106,15 @@ trait ConfiguresSmtp
     }
 
     /**
-     * Get the from address and name the email should be sent with.
+     * Get the from address and name the email should be sent with: the
+     * sender of the account that sends it.
      *
      * @param  mixed  $smtpSettings
      * @return array{address: string|null, name: string|null}
      */
     protected function getFromAddress($smtpSettings): array
     {
-        $organization = $smtpSettings?->organization
-            ?? TenantMailer::resolveOrganization($smtpSettings);
-
-        $config = TenantMailer::configForOrganization($organization)
+        $config = TenantMailer::configForOrganization($this->resolveSendingOrganization($smtpSettings))
             ?? TenantMailer::globalConfig();
 
         return [
