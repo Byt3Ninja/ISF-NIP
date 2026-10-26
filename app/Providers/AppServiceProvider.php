@@ -308,6 +308,7 @@ class AppServiceProvider extends ServiceProvider
                     }
                     if( $type == 'mentorship' )
                     {
+                        if( !$response->mentorship_session ) { continue; }
                         $metadata = [
                             'session' => $response->mentorship_session,
                             'step' => $response->mentorship_step,
