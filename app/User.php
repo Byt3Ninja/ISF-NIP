@@ -268,6 +268,11 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         return $this->belongsTo(Organization::class)->withTrashed();
     }
 
+    public function hasEligibleOrganizations()
+    {
+        return ( $this->hasAnyRole('admin') || ( count( $this->organizations_ids ) > 0 && !$this->hasAnyRole('admin') ) );
+    }
+
     /**
      * Many-to-many relationship for Sub-Admin users with multiple organizations.
      */

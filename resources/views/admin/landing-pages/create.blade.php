@@ -124,6 +124,12 @@
     </p>
   </div>
 
+  @if( !$hasEligibleOrganizations )
+    <div class="alert alert-warning mb-3" role="alert">
+      <i class="ti ti-alert-triangle me-2"></i>
+      {{ __('landing.No_Eligible_Organizations') }}
+    </div>
+  @endif
   <div class="card mb-4">
     <div class="card-header border-bottom">
       <h6 class="card-title mb-0 d-flex align-items-center gap-2">
@@ -186,6 +192,7 @@
             >
               <form
                 action="{{ $section['route'] }}"
+                id="createLandingPageForm"
                 method="POST"
                 enctype="multipart/form-data"
                 class="section-form"
@@ -702,7 +709,7 @@
                 {{-- Save button, bottom of each section. Stays inside the
                      fieldset so the locked-section state still disables it. --}}
                 <div class="d-flex justify-content-end mt-4 pt-4 border-top">
-                  <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                  <button type="submit" class="btn btn-primary d-flex align-items-center gap-1 {{ $hasEligibleOrganizations ? '' : 'disabled' }}" {{ $hasEligibleOrganizations ? '' : 'disabled' }}>
                     <i class="ti ti-device-floppy"></i>
                     {{ __('landing.Save') }}
                   </button>

@@ -116,7 +116,7 @@
                   </option>
 
                   @foreach ($roles as $role)
-                    <option value="{{ $role['name'] }}"
+                    <option value="{{ $role['default_for'] }}"
                         {{ request('role') === 'mentor' && $role['name'] === 'mentor' ? 'selected' : '' }}>
                         {{ __('admin.' . $role['name']) }}
                     </option>

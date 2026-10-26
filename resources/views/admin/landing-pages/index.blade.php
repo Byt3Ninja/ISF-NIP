@@ -49,6 +49,12 @@
   {{-- Header --}}
   <div class="card mb-6">
     <div class="card-header">
+      @if( !$hasEligibleOrganizations )
+        <div class="alert alert-warning mb-3" role="alert">
+          <i class="ti ti-alert-triangle me-2"></i>
+          {{ __('landing.No_Eligible_Organizations') }}
+        </div>
+      @endif
       <h4 class="mb-2">{{ __('admin.Custom Landing Pages') }}</h4>
       <p class="mb-0">{{ __('landing.Custom_Landing_Page_Description') }}</p>
     </div>
@@ -81,12 +87,14 @@
               </option>
             </select>
           </div>
+          @if( $_user->ableTo('landing-pages.create', $permissions) )
           <div class="col-12 col-lg-3 col-xl-2 d-grid">
-            <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
+            <a href="{{ $hasEligibleOrganizations ? route('landing-pages.create') : 'javascript:void(0);' }}" class="btn btn-primary {{ $hasEligibleOrganizations ? '' : 'disabled' }}" {{ $hasEligibleOrganizations ? '' : 'disabled' }}>
               <i class="ti ti-plus me-2"></i>
               {{ __('landing.Add_New_Page') }}
             </a>
           </div>
+          @endif
         </div>
       </form>
     </div>
@@ -107,10 +115,12 @@
               <br>
               {{ __('landing.Programs') }}. {{ __('landing.Get_Started') }}
             </p>
-            <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
+            @if( $_user->ableTo('landing-pages.create', $permissions) )
+            <a href="{{ $hasEligibleOrganizations ? route('landing-pages.create') : 'javascript:void(0);' }}" class="btn btn-primary {{ $hasEligibleOrganizations ? '' : 'disabled' }}" {{ $hasEligibleOrganizations ? '' : 'disabled' }}>
               <i class="ti ti-plus me-2"></i>
               {{ __('landing.Create_First_Page') }}
             </a>
+            @endif
           </div>
         </div>
       </div>

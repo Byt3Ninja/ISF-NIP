@@ -60,6 +60,7 @@ return [
     'Custom_Landing_Page_Description' => 'Manage and create tailored landing pages for your programs.',
     'Add_New_Page' => 'Add New Page',
     'No_LandingPages' => 'No landing pages created yet',
+    'No_Eligible_Organizations' => 'No eligible organizations found. Please create an organization with at least one program to create a landing page.',
     'Have_Not_Created' => "You haven't created any custom landing pages for your",
     'Programs' => 'programs',
     'Get_Started' => 'Get started by creating your first landing page.',
