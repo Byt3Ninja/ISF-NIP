@@ -598,6 +598,10 @@ class ExternalCyclesController extends Controller
 			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: $brandDefaults['end_color']);
 			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: $brandDefaults['main_color']);
 			$program->main_rgb = PlatformBrandingService::rgbOf($program->main_color);
+			// The hero tints start/end at one fixed strength (--hero-tint in the views); any alpha
+			// in the stored hex is ignored, since the wizard's picker hides it from the admin.
+			$program->start_rgb = PlatformBrandingService::rgbOf($program->start_color) ?? PlatformBrandingService::rgbOf($brandDefaults['start_color']);
+			$program->end_rgb = PlatformBrandingService::rgbOf($program->end_color) ?? PlatformBrandingService::rgbOf($brandDefaults['end_color']);
 		}
 		return $program;
 	}

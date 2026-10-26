@@ -30,6 +30,8 @@
 			--secondary: #0891b2;
 			--tertiary: #d97706;
 			--outline: #e2e8f0;
+			/* Strength of the program's gradient start/end blobs in the hero. */
+			--hero-tint: 0.3;
 		}
 
 		/* Override default theme purple/primary colors with the customized main color */
@@ -83,8 +85,8 @@
 		}
 
 		.hero-gradient {
-			background: radial-gradient(circle at 20% 30%, {{ $program->start_color }} 0%, transparent 50%),
-						radial-gradient(circle at 80% 70%, {{ $program->end_color }} 0%, transparent 50%);
+			background: radial-gradient(circle at 20% 30%, rgba({{ $program->start_rgb }}, var(--hero-tint)) 0%, transparent 80%),
+						radial-gradient(circle at 80% 70%, rgba({{ $program->end_rgb }}, var(--hero-tint)) 0%, transparent 80%);
 		}
 
 		.btn-primary-custom {
