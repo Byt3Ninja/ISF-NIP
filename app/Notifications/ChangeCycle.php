@@ -134,7 +134,6 @@ class ChangeCycle extends Notification implements ShouldQueue
 
             $data['preferred_language'] = $lang;
             $data['organization_name'] = $orgName;
-            $data['program_view_url'] = url('/dashboard');
 
             return (new MailMessage)
                 ->from($from['address'], $from['name'])

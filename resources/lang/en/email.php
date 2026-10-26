@@ -249,7 +249,6 @@ return [
         'phase_start_date' => 'Phase Start Date',
         'phase_description' => 'Phase Description',
         'login_intro' => 'Please log in to the platform to review the upcoming activities and requirements for this phase.',
-        'button' => 'View Program',
         'wishes' => 'We look forward to supporting your journey and success.',
         'regards' => 'Best regards,',
         'team' => ':organization_name Team',
