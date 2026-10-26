@@ -63,7 +63,7 @@ NOTE: `message` is rendered as HTML. Escape any user-provided data before passin
     aria-hidden="true" aria-labelledby="alertModal-{{ $type }}-title" aria-describedby="alertModal-{{ $type }}-message">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 rounded-4 shadow-lg">
-        <button type="button" class="btn-close position-absolute top-0 end-0 m-12 z-3" data-bs-dismiss="modal"
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-12 z-3 border-0 shadow-none" data-bs-dismiss="modal"
           aria-label="Close"></button>
 
         <div
