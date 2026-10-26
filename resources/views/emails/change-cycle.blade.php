@@ -56,6 +56,14 @@
 
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $t('login_intro') }}</p>
 
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{ route('login') }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ $t('login_button') }}</a>
+                                </td>
+                            </tr>
+                        </table>
+
                         <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ $t('wishes') }}</p>
 
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
