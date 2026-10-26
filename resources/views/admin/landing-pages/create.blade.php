@@ -2269,6 +2269,7 @@
         const $form = $(this);
         const sectionKey = $form.data('section');
         const fv = sectionValidations[sectionKey];
+        const hasEligibleOrganizations = @json($hasEligibleOrganizations);
 
         const submitViaAjax = function () {
           const $btn = $form.find('button[type="submit"]');
@@ -2423,6 +2424,8 @@
             });
         }.bind(this);
 
+        if (!hasEligibleOrganizations) return;
+        
         // Custom sections use hand-rolled validation (rich-text editors,
         // image upload checks and button-link checks).
         if (sectionKey === 'custom') {
