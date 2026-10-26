@@ -2504,7 +2504,7 @@ class HomeController extends Controller
         ];
         $data['countCards'][] = [
             'color' => 'info',
-            'href' => '#',
+            'href' => '/dashboard/users?role=registered',
             'icon' => 'ti-building',
             'text' => 'Founders',
             'permissions' => ['users.index', 'users.view_companies', 'dashboard.widgets_cards_startups_view'],

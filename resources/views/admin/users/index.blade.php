@@ -268,6 +268,10 @@ $(function () {
           });
         }
       });
+
+      @if (request('role') === 'registered')
+        $('#filterRole').val('registered').trigger('change');
+      @endif
     }
   });
 
