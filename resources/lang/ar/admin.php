@@ -3565,6 +3565,7 @@ return [
 	'file_image_type_validation' => 'الملف يجب ان يكون صورة.',
 	'file_mimes_validation' => 'الصورة يجب ان تكون jpeg, png, jpg, gif, او webp.',
 	'file_size_validation' => 'حجم الصورة يجب ان يكون اقل من 5MB.',
+	'screening_guidelines_too_large' => 'حجم الإرشادات كبير جدًا ولا يمكن حفظه. يرجى حذف الصور الكبيرة الملصقة وإدراجها باستخدام زر الصورة بدلاً من ذلك (الحد الأقصى 5MB لكل صورة).',
 	'cycle_required_validation' => 'البرنامج مطلوب.',
 	'cycle_exists_validation' => 'برنامج غير صحيح.',
 	'step_required_validation' => 'المرحلة مطلوبة.',

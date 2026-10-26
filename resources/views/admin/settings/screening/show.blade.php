@@ -455,6 +455,7 @@
 @stop
 
 @section('pagescripts')
+@include('admin.settings.screening-guidelines-scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const $editorTextarea = $('#screening-guidelines-editor');
@@ -489,6 +490,11 @@
       ],
       buttons: { expand: ExpandButton },
       dialogsInBody: true,
+      callbacks: {
+        onImageUpload: function (files) {
+          uploadScreeningGuidelinesImage(files[0], $editorTextarea);
+        }
+      }
     });
     
       // Set the initial content after Summernote is initialized
@@ -729,10 +735,9 @@
           }
         },
         error: function (xhr) {
-          const errorMessage = xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}';
           releaseAlert('danger', {
             title: '{{ __('admin.Error') }}',
-            message: errorMessage,
+            message: screeningGuidelinesSaveErrorMessage(xhr),
           });
         }
       });

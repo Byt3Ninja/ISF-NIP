@@ -472,6 +472,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
 @stop
 
 @section('pagescripts')
+  @include('admin.settings.screening-guidelines-scripts')
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const $editorTextarea = $('#screening-guidelines-editor');
@@ -512,7 +513,7 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         dialogsInBody: true,
         callbacks: {
           onImageUpload: function(files) {
-            uploadSummernoteImage(files[0], $('#screening-guidelines-editor'));
+            uploadScreeningGuidelinesImage(files[0], $editorTextarea);
           }
         }
       });
@@ -530,47 +531,6 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
         // the editor now lives in the modal body, so find it there and put it back after the textarea
         $editorTextarea.after($('#guidelines-modal-body > .note-editor.note-frame'));
       });
-
-      // Image upload handler function
-      function uploadSummernoteImage(file, editor) {
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toastr.error('{{ $l == 'ar' ? 'حجم الصورة يجب أن لا يتجاوز 5 ميجابايت' : 'Image size must not exceed 5MB' }}');
-          return;
-        }
-
-        // Validate file type
-        const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
-        if (!validTypes.includes(file.type)) {
-          toastr.error('{{ $l == 'ar' ? 'يرجى اختيار صورة صالحة (jpeg, png, jpg, gif, webp)' : 'Please select a valid image (jpeg, png, jpg, gif, webp)' }}');
-          return;
-        }
-
-        const data = new FormData();
-        data.append('image', file);
-        data.append('step_id', '{{ $cstep->id }}');
-        data.append('_token', '{{ csrf_token() }}');
-
-        $.ajax({
-          url: '{{ route('screening.guidelines.upload_image', ['id' => $cstep->id]) }}',
-          method: 'POST',
-          data: data,
-          processData: false,
-          contentType: false,
-          success: function(response) {
-              if (response.status) {
-                  // Insert image into editor
-                  editor.summernote('insertImage', response.url);
-              } else {
-                  toastr.error(response.message || '{{ $l == 'ar' ? 'فشل تحميل الصورة' : 'Image upload failed' }}');
-              }
-          },
-          error: function(xhr) {
-              const message = xhr.responseJSON?.message || '{{ $l == 'ar' ? 'حدث خطأ أثناء تحميل الصورة' : 'An error occurred while uploading the image' }}';
-              toastr.error(message);
-          }
-        });
-      }
 
       // Set the initial content after Summernote is initialized
       if (initialContent.trim() !== '') {
@@ -772,10 +732,9 @@ $hiddenCompanyNames = $hiddenCompanyIds->map(fn($cid) => $companiesById[$cid] ??
             }
           },
           error: function(xhr) {
-            const errorMessage = xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}';
             releaseAlert('danger', {
               title: '{{ __('admin.Error') }}',
-              message: errorMessage,
+              message: screeningGuidelinesSaveErrorMessage(xhr),
             });
           }
         });

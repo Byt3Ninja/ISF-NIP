@@ -3516,6 +3516,7 @@ return [
 	'file_image_type_validation' => 'File must be an image.',
 	'file_mimes_validation' => 'Image must be jpeg, png, jpg, gif, or webp.',
 	'file_size_validation' => 'Image size must not exceed 5MB.',
+	'screening_guidelines_too_large' => 'The guidelines are too large to save. Remove large pasted images and insert them with the image button instead (max 5MB per image).',
 	'cycle_required_validation' => 'Cycle ID is required.',
 	'cycle_exists_validation' => 'Invalid cycle.',
 	'step_required_validation' => 'Step ID is required.',
