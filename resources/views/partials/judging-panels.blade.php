@@ -171,6 +171,30 @@
     text-align: start;
   }
 
+  /* Assigned Judges / Startups boxes on the screening pages (their chips are
+     re-rendered by updateStepAssignees below). A minimum, not a fixed height:
+     a fixed one let the chips spill over the next section on narrow screens
+     (GV-9858). The visible chips are capped at maxVisible, so growth is bounded. */
+  .screening-assignees {
+    min-height: 150px;
+  }
+
+  /* Phones: the tab, the panel body and the session box each add their own
+     inset, which left the inputs a third of the screen wide. */
+  @media (max-width: 575.98px) {
+    #panels-container .accordion-item > .accordion-collapse > .accordion-body {
+      padding: 1rem .75rem;
+    }
+
+    #panels-container .accordion-header .accordion-button {
+      padding-inline: 1rem;
+    }
+
+    #panels-container .session-inputs {
+      padding: 1rem !important;
+    }
+  }
+
 </style>
 
 <div class="row">
@@ -1785,14 +1809,14 @@
       const maxVisible = 10;
 
       const renderBadge = (id, name, imgUrl, href, iconClass) => `
-      <a href="${href}" class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">
-        <div class="avatar avatar-xs me-2">
+      <a href="${href}" class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center mw-100">
+        <div class="avatar avatar-xs flex-shrink-0 me-2">
           ${imgUrl
           ? `<img src="${imgUrl}" class="rounded-circle object-fit-cover">`
           : `<div class="avatar-initial rounded-circle bg-label-secondary"><i class="${iconClass} ti-xs"></i></div>`
         }
         </div>
-        ${name}
+        <span class="text-truncate" title="${esc(name)}">${esc(name)}</span>
       </a>`;
 
       const renderOverflowBadge = (hiddenNames, count) => {

@@ -196,21 +196,21 @@
             </div>
 
             <!-- Judges -->
-            <div class="col-lg-6">
+            <div class="col-lg-6 d-flex flex-column">
               <div class="border-start border-dark border-4 ps-3 mb-3">
                 <h6 class="text-dark fw-bold small mb-0">
                   <i class="ti ti-user-check me-2"></i>{{ __('cycles.Assigned Judges') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
+              <div class="screening-assignees p-3 bg-light-subtle rounded-2 border flex-grow-1">
                 <div id="assigned-judges" class="d-flex flex-wrap gap-2">
                   @forelse ($visibleJudgeIds as $judgeId)
                     @php $judge = $judges->find($judgeId); @endphp
 
                     @if ($judge)
                       <a href="/dashboard/users/{{ $judge->id }}/edit"
-                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center">
-                        <div class="avatar avatar-xs me-2">
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center mw-100">
+                        <div class="avatar avatar-xs flex-shrink-0 me-2">
                           @if ($judge->img_url)
                             <img src="/191014/{{ $judge->img_url }}" alt="img" class="rounded-circle object-fit-cover">
                           @else
@@ -219,7 +219,8 @@
                             </div>
                           @endif
                         </div>
-                        {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }}
+                        @php $judgeName = $judge->{'first_name_' . $l} . ' ' . $judge->{'last_name_' . $l}; @endphp
+                        <span class="text-truncate" title="{{ $judgeName }}">{{ $judgeName }}</span>
                       </a>
                     @endif
                   @empty
@@ -241,21 +242,21 @@
             </div>
 
             <!-- Companies -->
-            <div class="col-lg-6">
+            <div class="col-lg-6 d-flex flex-column">
               <div class="border-start border-dark border-4 ps-3 mb-3">
                 <h6 class="text-dark fw-bold small mb-0">
                   <i class="ti ti-building-skyscraper me-2"></i>{{ __('admin.assigned_startups') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
+              <div class="screening-assignees p-3 bg-light-subtle rounded-2 border flex-grow-1">
                 <div id="assigned-companies" class="d-flex flex-wrap gap-2">
                   @forelse ($visibleCompanyIds as $companyId)
                     @php $company = $companiesById[$companyId] ?? null; @endphp
 
                     @if ($company)
                       <a href="/dashboard/companyProfile/{{ $company->id }}"
-                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center">
-                        <div class="avatar avatar-xs me-2">
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center mw-100">
+                        <div class="avatar avatar-xs flex-shrink-0 me-2">
                           @if ($company->logo)
                             <img src="{{ $company->logo }}" alt="logo" class="rounded-circle object-fit-cover">
                           @else
@@ -264,7 +265,7 @@
                             </div>
                           @endif
                         </div>
-                        {{ $company->{'name_' . $l} }}
+                        <span class="text-truncate" title="{{ $company->{'name_' . $l} }}">{{ $company->{'name_' . $l} }}</span>
                       </a>
                     @endif
                   @empty
@@ -305,7 +306,7 @@
       <!--/ Navigation Pills -->
 
       <!-- Tab Content -->
-      <div class="tab-content bg-card shadow">
+      <div class="tab-content bg-card shadow p-4 p-sm-6">
         <!-- Judging Panels Tab -->
         <div class="tab-pane fade show active" id="judging_panels" role="tabpanel" aria-labelledby="judging_panels-tab">
           @include('partials.judging-panels', ['id' => $id, 'screening_type' => 'initial'])
