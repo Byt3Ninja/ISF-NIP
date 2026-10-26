@@ -1050,26 +1050,44 @@
     JSON.parse(document.getElementById("btnResetBrandingColors")?.dataset.defaults || "{}")
   );
 
+  const splitColor = (value) => {
+    const match = /^#?([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec((value || "").trim());
+    if (!match) return { base: "", alpha: "" };
+    let hex = match[1];
+    if (hex.length === 3 || hex.length === 4) {
+      hex = hex.split("").map((c) => c + c).join("");
+    }
+    return {
+      base: "#" + hex.slice(0, 6).toLowerCase(),
+      alpha: hex.length === 8 ? hex.slice(6).toLowerCase() : "",
+    };
+  };
+
+  const withAlpha = (base, alpha) => (alpha ? base + alpha : base);
+
   const brandingDefaults = [
     { containerId: "#programColorGradientStart", hiddenId: "#programColorGradientStartVal", field: "programColorGradientStartVal", key: "start" },
     { containerId: "#programColorGradientEnd", hiddenId: "#programColorGradientEndVal", field: "programColorGradientEndVal", key: "end" },
     { containerId: "#programColorMain", hiddenId: "#programColorMainVal", field: "programColorMainVal", key: "main" },
   ];
 
+  const pickerAlphas = {};
+
   const initColorPicker = ({ containerId, hiddenId, field, key }) => {
     const el = document.querySelector(containerId);
     const hidden = document.querySelector(hiddenId);
     if (!el || !hidden) return null;
 
-    // An existing stored value (edit flow) wins over the default; keep 8-digit
-    // (alpha) hex untouched because the hero gradients rely on that tint.
-    const initial = (hidden.value.trim() || BRAND_DEFAULTS[key]).trim();
-    hidden.value = initial;
+    const stored = (hidden.value.trim() || BRAND_DEFAULTS[key]).trim();
+    const parsed = splitColor(stored);
+    const base = parsed.base || BRAND_DEFAULTS[key];
+    pickerAlphas[key] = key === "main" ? "" : parsed.alpha;
+    hidden.value = withAlpha(base, pickerAlphas[key]);
 
     const picker = PickrLib.create({
       el,
       theme: "classic",
-      default: initial,
+      default: base,
       swatches: [
         "#7367F0",
         "#28C76F",
@@ -1081,7 +1099,7 @@
       components: {
         // Main components
         preview: true,
-        // opacity: true,
+        opacity: false,
         hue: true,
 
         // Input / output Options
@@ -1100,7 +1118,12 @@
 
     // Pickr 1.x has no onChange/onSave options: values must be read from events
     const sync = (picked) => {
-      hidden.value = picked ? picked.toHEXA().toString() : "";
+      if (!picked) {
+        hidden.value = "";
+      } else {
+        const hex = picked.toHEXA().toString().replace(/^#/, "").slice(0, 6).toLowerCase();
+        hidden.value = withAlpha("#" + hex, pickerAlphas[key]);
+      }
       window.programBrandingColorRevalidate?.(field);
     };
     picker
@@ -1119,10 +1142,13 @@
     .getElementById("btnResetBrandingColors")
     ?.addEventListener("click", () => {
       brandingDefaults.forEach((cfg, i) => {
-        pickers[i]?.setColor(BRAND_DEFAULTS[cfg.key], true);
+        const parsed = splitColor(BRAND_DEFAULTS[cfg.key]);
+        const base = parsed.base || BRAND_DEFAULTS[cfg.key];
+        pickerAlphas[cfg.key] = cfg.key === "main" ? "" : parsed.alpha;
+        pickers[i]?.setColor(base, true);
         pickers[i]?.applyColor(true);
         const hidden = document.querySelector(cfg.hiddenId);
-        if (hidden) hidden.value = BRAND_DEFAULTS[cfg.key];
+        if (hidden) hidden.value = withAlpha(base, pickerAlphas[cfg.key]);
         window.programBrandingColorRevalidate?.(cfg.field);
       });
     });
