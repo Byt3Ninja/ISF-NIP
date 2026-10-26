@@ -788,6 +788,7 @@ return [
     'The cohort must be less than 20 characters long' => 'يجب أن تكون الدفعة أقل من 20 حرفًا',
     'Select option' => 'اختر خيارًا',
     'Please select the program duration' => 'يرجى تحديد مدة البرنامج',
+    "Please pick both a start and an end date" => 'يرجى اختيار تاريخي البدء والانتهاء',
     'Please choose how the program runs' => 'يرجى اختيار كيفية تشغيل البرنامج',
     'Please enter the description' => 'يرجى إدخال الوصف',
     'The description must be less than 100 characters long' => 'يجب أن يكون الوصف أقل من 100 حرف',

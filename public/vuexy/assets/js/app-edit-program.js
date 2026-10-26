@@ -681,8 +681,8 @@
         },
         callback: {
           message: T(
-            "Please pick both a start and an end date (click the same day twice for a one-day program)",
-            "Please pick both a start and an end date (click the same day twice for a one-day program)",
+            "Please pick both a start and an end date",
+            "Please pick both a start and an end date",
           ),
           callback: (input) =>
             /^\d{4}-\d{2}-\d{2} to \d{4}-\d{2}-\d{2}$/.test(input.value.trim()),

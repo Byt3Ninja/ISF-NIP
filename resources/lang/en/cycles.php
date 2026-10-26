@@ -794,6 +794,7 @@ return [
     'The cohort must be less than 20 characters long' => 'The cohort must be less than 20 characters long',
     'Select option' => 'Select option',
     'Please select the program duration' => 'Please select the program duration',
+    "Please pick both a start and an end date" => 'Please pick both a start and an end date',
     'Please choose how the program runs' => 'Please choose how the program runs',
     'Please enter the description' => 'Please enter the description',
     'The description must be less than 100 characters long' => 'The description must be less than 100 characters long',

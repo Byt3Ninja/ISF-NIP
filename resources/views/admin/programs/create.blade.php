@@ -305,33 +305,33 @@ HTML;
         </div>
         <div class="row g-6">
           <div class="col-12">
-            <label class="form-label d-block">{{ __('cycles.Custom Pages') }}</label>
-            <small class="text-body d-block mb-3">{{ __('cycles.Add pages such as Terms, Curriculum or FAQ. Each page has its own visibility and rich description.') }}</small>
+            {{-- <label class="form-label d-block">{{ __('cycles.Custom Pages') }}</label>
+            <small class="text-body d-block mb-3">{{ __('cycles.Add pages such as Terms, Curriculum or FAQ. Each page has its own visibility and rich description.') }}</small> --}}
             <div id="programPagesRepeater" class="form-repeater">
               <div data-repeater-list="programPages">
                 <div data-repeater-item>
                   <div class="card border shadow-none mb-3">
                     <div class="card-body">
                       <div class="row g-6">
-                        <div class="col-sm-4">
+                        <div class="col-12">
+                          <label class="form-label d-block">{{ __('cycles.Status') }}</label>
+                          <div class="form-check form-switch my-2">
+                            <input class="form-check-input page-status" type="checkbox" name="programPageStatus" value="1" checked />
+                            <label class="form-check-label page-status-label">{{ __('cycles.Active') }}</label>
+                          </div>
+                        </div>
+                        <div class="col-12">
                           <label class="form-label">{{ __('cycles.Page Name') }}</label>
                           <input type="text" class="form-control" name="programPageName" maxlength="150"
                             placeholder="{{ __('cycles.Page Name placeholder') }}" />
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-12">
                           <label class="form-label">{{ __('cycles.Page Visibility') }}</label>
                           <select class="form-select" name="programPageVisibility">
                             <option value="public" selected>{{ __('cycles.Public') }}</option>
                             <option value="participants">{{ __('cycles.Participants') }}</option>
                             <option value="admins-only">{{ __('cycles.Admins only') }}</option>
                           </select>
-                        </div>
-                        <div class="col-sm-4">
-                          <label class="form-label d-block">{{ __('cycles.Status') }}</label>
-                          <div class="form-check form-switch my-2">
-                            <input class="form-check-input page-status" type="checkbox" name="programPageStatus" value="1" checked />
-                            <label class="form-check-label page-status-label">{{ __('cycles.Active') }}</label>
-                          </div>
                         </div>
                         <div class="col-12">
                           <label class="form-label d-block">{{ __('cycles.Description') }}</label>
