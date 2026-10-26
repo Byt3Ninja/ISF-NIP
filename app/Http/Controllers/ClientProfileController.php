@@ -551,17 +551,19 @@ class ClientProfileController extends Controller
                 $l = app()->getLocale();
                 $firstNameColumn = $l == 'ar' ? 'first_name_en' : 'first_name_en';
                 $lastNameColumn = $l == 'ar' ? 'first_name_en' : 'last_name_en';
-                $mentors = User::role('mentor')
-                    ->with(['bio', 'mentorExpertises', 'mentorCycles', 'schedule' => function ($q) {
-                        $q->where(function ($query) {
-                            $query->whereNull('date')
-                                ->orWhere('date', '>', date('Y-m-d'))
-                                ->orWhere(function ($q2) {
-                                    $q2->where('date', date('Y-m-d'))
-                                       ->where('tto', '>', date('H:i:s'));
-                                });
-                        });
-                    }])
+                $mentors = User::with(['bio', 'mentorExpertises', 'mentorCycles', 'schedule' => function ($q) {
+                    $q->where(function ($query) {
+                        $query->whereNull('date')
+                            ->orWhere('date', '>', date('Y-m-d'))
+                            ->orWhere(function ($q2) {
+                                $q2->where('date', date('Y-m-d'))
+                                    ->where('tto', '>', date('H:i:s'));
+                            });
+                    });
+                }])
+                    ->whereHas('roles', function ($q) {
+                        $q->where('default_for', 'mentor');
+                    })
                     ->withAvg(['mentorshipRequests as avg_rating' => function ($q) {
                         $q->where('approved', 'Yes');
                     }], 'rating')
@@ -681,10 +683,8 @@ class ClientProfileController extends Controller
                 }
 
                 $mentors = $mentors->with('mentorExpertises');
-                $mentors = $mentors->get();
+                $mentors = $mentors->get();              
 
-              
-              
                 if (!$user->hasRole('Admin') && !empty($orgIds)) {
                     $cycles = Cycle::whereIn('organization_id', $orgIds)->get();
                     // Dead post-collection filter code commented out (filters run at DB level above)
@@ -728,12 +728,12 @@ class ClientProfileController extends Controller
                     $mentor->is_public = !in_array($mentor->id, $getOrganization);
                     return $mentor;
                 });
-                
                     
                 // $mentors = User::role('mentor')->get();
                 // GV-3554: founders only see mentor cards once their program has
                 // reached the mentorship stage.
-                $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany($user->company);
+                $mentorshipActive = true;
+                if( $user->hasRole('registered') ) { $mentorshipActive = MentorshipAvailabilityService::isActiveForCompany($user->company); }
 
                 return view('mentors.index', compact('mentors', 'cycles', 'offline_allowed', 'programFilter', 'mentorshipActive', 'expertises', 'organizations'));
             }
