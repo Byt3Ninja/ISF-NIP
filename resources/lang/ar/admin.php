@@ -3862,7 +3862,7 @@ return [
 	'archive' => 'ارشفه',
 	'view_tasks' => 'عرض التاسكات',
 	'Incubated_Startups' =>  'شركة ناشئة نشطه',
-	'Applied_Startups' => ' شركة ناشئة مُتقدمة للانضمام ',
+	'Enrolled_Startups' => 'شركة ناشئة ملتحقة',
 	'Alumni_Startups' => 'شركات ناشئة متخرجة',
 	'move_task_failed' => 'فشل نقل المهمة. جارٍ التراجع عن التغييرات.',
 	'delete_attachment' => 'حذف المرفق',

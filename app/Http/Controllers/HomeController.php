@@ -388,56 +388,9 @@ class HomeController extends Controller
             }
 
             if ($organizations_ids != null || $user->hasRole('admin')) {
-                // "Applied Startups" counts every startup that has actually submitted
-                // an application to at least one program, ever — regardless of its
-                // current pipeline stage or approval status. Disapproval nulls out
-                // companies.cycle/step (ScreeningController::changestep()), so those
-                // columns can't tell "applied then rejected" apart from "registered,
-                // never applied". form_data rows are written the moment a founder
-                // submits an application (ExternalCyclesController::registerUser(),
-                // CyclesController::saveForm()) and are never cleared on disapproval,
-                // so their existence is the durable signal of "this company applied".
-                /* $applied_form_data_org_filter = '';
-                if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-                    $applied_form_data_org_filter = " AND EXISTS (
-                            SELECT 1 FROM steps st
-                            JOIN cycles cyc ON cyc.id = st.cycle_id
-                            WHERE st.id = fd.step_id
-                            AND cyc.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")
-                        )";
-                }
-                $applied_companies_by_cycle_q = "SELECT
-                        COUNT(comp.id) AS company_count
-                    FROM
-                        companies comp
-                    WHERE
-                        comp.deleted_at IS NULL
-                        AND EXISTS (
-                            SELECT 1 FROM form_data fd
-                            WHERE fd.company_id = comp.id
-                            {$applied_form_data_org_filter}
-                        )
-                        AND EXISTS (
-                            SELECT 1 FROM users u
-                            JOIN model_has_roles mhr ON mhr.model_id = u.id
-                            JOIN roles r ON r.id = mhr.role_id
-                            WHERE u.company_id = comp.id
-                            AND r.default_for = 'registered'
-                        )
-                        AND NOT EXISTS (
-                            SELECT 1 FROM users u
-                            JOIN model_has_roles mhr ON mhr.model_id = u.id
-                            JOIN roles r ON r.id = mhr.role_id
-                            WHERE u.company_id = comp.id
-                            AND r.default_for IN ('admin', 'organizationmanager', 'subadmin')
-                        )
-                ";
-
-                $applied_companies_by_cycle = collect(DB::select($applied_companies_by_cycle_q));
-                $applied_company_count = $applied_companies_by_cycle->sum('company_count'); */
-
-                $applied_companies_by_cycle = $this->companyService->getCompanies(['status' => 'applied'], false, false);
-                $applied_company_count = $applied_companies_by_cycle->count();;
+                // Same query as the /dashboard/companies?status=enrolled list the card links to,
+                // so the two always agree.
+                $enrolled_company_count = $this->companyService->getCompanies(['status' => 'enrolled'], false, false)->count();
 
                 $alumni_company = Almuni::whereHas('cycle', function ($q) use ($organizations_ids) {
                     $q->whereIn('organization_id', $organizations_ids);
@@ -447,8 +400,7 @@ class HomeController extends Controller
                 ->get();
                                
             } else {
-                $applied_companies_by_cycle = collect([]);
-                $applied_company_count = 0;
+                $enrolled_company_count = 0;
                 $alumni_company = Almuni::select('company_id')->distinct()->get();
 
             }
@@ -456,8 +408,7 @@ class HomeController extends Controller
             $companies = collect([]);
             $incubators_company = collect([]);
             $alumni_company = collect([]);
-            $applied_companies_by_cycle = collect([]);
-            $applied_company_count = 0;
+            $enrolled_company_count = 0;
         }
 
         if (array_intersect(['dashboard.widgets_cards_mentorship_requests_view', 'dashboard.widgets_cards_mentorship_sessions_durations_view'], $permissions)) {
@@ -2495,11 +2446,11 @@ class HomeController extends Controller
         ];
         $data['countCards'][] = [
             'color' => 'info',
-            'href' => '/dashboard/companies?status=applied',
+            'href' => '/dashboard/companies?status=enrolled',
             'icon' => 'ti-building',
-            'text' => 'Applied_Startups',
+            'text' => 'Enrolled_Startups',
             'permissions' => ['users.view_companies', 'dashboard.widgets_cards_startups_view'],
-            'count' => $applied_company_count,
+            'count' => $enrolled_company_count,
             'isRating' => false,
         ];
         $data['countCards'][] = [

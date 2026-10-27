@@ -34,7 +34,6 @@ class CompanyRepository
             $orgIds = $user->organizations_ids;
             if (!empty($orgIds)) {
                 $isAlumni = !empty($filters['status']) && $filters['status'] === 'alumni';
-                $isApplied = !empty($filters['status']) && $filters['status'] === 'applied';
                 if ($isAlumni) {
                     $query->whereIn('id', function ($q) use ($orgIds) {
                         $q->select('company_id')
@@ -44,13 +43,6 @@ class CompanyRepository
                                 $q2->select('id')->from('cycles')
                                     ->whereIn('organization_id', $orgIds);
                             });
-                    });
-                } elseif ($isApplied) {
-                    // "Applied" spans a company's whole application history, including
-                    // after disapproval nulls out its cycle, so org scoping here must
-                    // key off the applicant's own organization rather than the cycle.
-                    $query->whereHas('cycle.organization', function ($q) use ($orgIds) {
-                        $q->whereIn('organization_id', $orgIds);
                     });
                 } else {
                     $query->whereHas('cycleRelation.organization', function ($q) use ($orgIds) {
@@ -143,14 +135,11 @@ class CompanyRepository
                 $query->whereNotNull('cycle')->whereHas('stepdata', function ($q) {
                     $q->where('stype', '!=', 1);
                 });
-            } elseif($filters['status'] == 'applied') {
-                // "Applied" = startups that actually submitted an application to a
-                // program, ever — regardless of current stage/approval status. A
-                // form_data row is written the moment a founder submits (see
-                // ExternalCyclesController::registerUser(), CyclesController::saveForm())
-                // and survives disapproval nulling out cycle/step, so its existence is
-                // what distinguishes "applied" from "registered but never applied".
-                $query->whereHas('formData');
+            } elseif($filters['status'] == 'enrolled') {
+                // "Enrolled" = currently in a program, at any phase. Disapproval nulls
+                // companies.cycle (ScreeningController::changestep()), so rejected
+                // startups drop out.
+                $query->whereHas('cycleRelation');
             }
 
         }

@@ -382,6 +382,9 @@
             <option value="incubated" {{ request('status') == 'incubated' ? 'selected' : '' }}>
               {{ __('admin.Active') ?? 'Active Startups' }}
             </option>
+            <option value="enrolled" {{ request('status') == 'enrolled' ? 'selected' : '' }}>
+              {{ __('admin.Enrolled') ?? 'Enrolled Startups' }}
+            </option>
             <option value="alumni" {{ request('status') == 'alumni' ? 'selected' : '' }}>
               {{ __('startup.alumni') ?? 'Alumni Startups' }}
             </option>

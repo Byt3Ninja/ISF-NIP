@@ -3813,7 +3813,7 @@ return [
 	'archive' => 'Archive',
 	'view_tasks'=> 'View Tasks',
 	'Incubated_Startups' => 'Active Startups',
-	'Applied_Startups' => 'Applied Startups',
+	'Enrolled_Startups' => 'Enrolled Startups',
 	'Alumni_Startups' => 'Alumni Startups',
 	'move_task_failed' => 'Failed to move task. Reverting changes.',
 	'delete_attachment' => 'Delete Attachment',
