@@ -214,7 +214,7 @@ function bindChangeStepEvents() {
   $('#bulkChangeStepBtn').on('click', () => {
     currentModalCtx = 'bulk';
     singleCompanyData = null;
-    $('#modalStepSelect').val('');
+    $('#modalStepSelect').val('').trigger('change');
     $('#singleCompanyInfo').hide();
     $('#affectedCompaniesInfo').show();
     updateSelectedTags();
@@ -231,7 +231,7 @@ function bindChangeStepEvents() {
       currentStepTitle: $(this).data('current-step-title'),
     };
 
-    $('#modalStepSelect').val(singleCompanyData.currentStep);
+    $('#modalStepSelect').val(singleCompanyData.currentStep).trigger('change');;
     $('#selectedCount').text('1');
     $('#singleCompanyName').text(singleCompanyData.name);
     $('#singleCompanyUser').text(singleCompanyData.userName);
