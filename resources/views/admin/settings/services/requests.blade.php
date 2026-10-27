@@ -230,7 +230,7 @@ $config = [
 
               {{-- Note from Founder --}}
               @php($founderNote = trim($request['description'] ?? ''))
-              <div class="bg-warning-subtle border rounded p-3 mb-3">
+              <div class="bg-label-warning border rounded p-3 mb-3">
                 <div class="d-flex align-items-center gap-1 mb-1">
                   <i class="ti ti-note text-warning"></i>
                   <span class="fw-bold text-uppercase small text-dark">{{ __('admin.note_from_founder') }}</span>
