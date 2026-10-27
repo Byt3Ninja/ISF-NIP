@@ -370,9 +370,9 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
 
-  <form id="filter-form" method="GET" action="{{ route('users.view_companies') }}" data-ignore-dirty>
-    <div class="offcanvas-body d-flex flex-column">
-      <div class="flex-grow-1">
+  <form id="filter-form" method="GET" action="{{ route('users.view_companies') }}" data-ignore-dirty class="d-flex flex-column h-100">
+    <div class="offcanvas-body d-flex flex-column flex-grow-1 overflow-auto">
+      <div>
         <div class="form-group mb-4">
           <label for="alumniStatusFilter" class="form-label">{{ __('admin.status') ?? 'Status' }}</label>
           <select name="status" id="alumniStatusFilter" class="form-select select2">
@@ -452,17 +452,17 @@
           </select>
         </div>
       </div>
+    </div>
 
-      <div class="border-top pt-3 mt-3 d-flex gap-2">
-        <button type="button" class="btn btn-outline-secondary flex-fill" id="cancelFilterBtn" data-bs-dismiss="offcanvas">
-          <i class="ti ti-x me-2"></i>
-          {{ __('admin.Cancel') }}
-        </button>
-        <button type="submit" class="btn btn-primary flex-fill">
-          <i class="ti ti-filter me-2"></i>
-          {{ __('cycles.Apply_Filters') }}
-        </button>
-      </div>
+    <div class="offcanvas-footer border-top p-3 d-flex gap-2 bg-white">
+      <button type="button" class="btn btn-outline-secondary flex-fill" id="cancelFilterBtn" data-bs-dismiss="offcanvas">
+        <i class="ti ti-x me-2"></i>
+        {{ __('admin.Cancel') }}
+      </button>
+      <button type="submit" class="btn btn-primary flex-fill">
+        <i class="ti ti-filter me-2"></i>
+        {{ __('cycles.Apply_Filters') }}
+      </button>
     </div>
   </form>
 </div>

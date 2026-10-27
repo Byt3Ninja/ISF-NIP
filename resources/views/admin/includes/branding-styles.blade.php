@@ -265,6 +265,10 @@ html[dir=rtl] .border-primary,
   background: radial-gradient(rgba(var(--theme-main-rgb), .2) 0, rgba(var(--theme-main-rgb), .3) 40%, rgba(var(--theme-main-rgb), .4) 50%, rgba(var(--theme-main-rgb), .5) 60%, rgba(255,255,255,0) 70%);
 }
 
+li.active.menu-item::before {
+  display: none;
+}
+
 .bg-menu-theme.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
 .menu.bg-primary.menu-vertical .menu-item.active > .menu-link:not(.menu-toggle),
 .bg-menu-theme.menu-horizontal .menu-inner > .menu-item.active > .menu-link.menu-toggle,
@@ -702,6 +706,23 @@ li.ui-timepicker-selected,
   background-color: var(--theme-main-hover) !important;
   border-color: var(--theme-main-hover) !important;
   color: var(--theme-btn-text) !important;
+}
+
+/* Form Range */
+#filterRating::-webkit-slider-runnable-track {
+  background-color: var(--theme-main) !important;
+}
+#filterRating::-moz-range-track {
+  background-color: var(--theme-main) !important;
+}
+
+#filterRating::-webkit-slider-thumb,
+#filterRating::-moz-range-thumb {
+  background-color: var(--theme-main) !important;
+}
+#filterRating::-webkit-slider-thumb:active,
+#filterRating::-moz-range-thumb:active {
+  background-color: var(--theme-main) !important;
 }
 
 

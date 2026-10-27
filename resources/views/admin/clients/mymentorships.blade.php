@@ -1,9 +1,5 @@
 @extends('layouts.admin')
 
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/vendors/css/tables/datatable/datatables.min.css">
-@stop
-
 @section('content')
   <!-- BEGIN: Content-->
   <div class="">
@@ -18,6 +14,7 @@
                 <div class="card">
                   <div class="card-header d-flex justify-content-between flex-wrap align-items-center border-bottom">
                     <h5 class="card-title mb-0">{{ __('startup.mentorship_requests.label') }}</h5>
+                    <x-export-dropdown />
                   </div>
                   <div class="card-content">
                     <div class="card-datatable table-responsive">
@@ -59,7 +56,7 @@
                                 </a>
                               </td>
                               <td>{{ optional( \App\Services\TimezoneService::forViewer( \App\Services\TimezoneService::wallClock( $session->zoom_date, \App\Services\TimezoneService::platform( $session->organization_id ?? null ) ), $_user ) )->format('Y-m-d H:i') }} ({{ $session->period }}M)</td>
-                              <td>
+                              <td style="max-width: 250px;">
                                 @php
                                   $comment = $session->admin_comment ?? $session->comment;
                                 @endphp
@@ -80,10 +77,10 @@
                                   $badgeColor = 'secondary';
                                   $badgeIcon = 'screen-share';
                                   if ($session->session_type == 'Online') {
-                                    $badgeColor = 'success';
+                                    $badgeColor = 'primary';
                                     $badgeIcon = 'video';
                                   } elseif ($session->session_type == 'Offline'){
-                                    $badgeColor = 'warning';
+                                    $badgeColor = 'secondary';
                                     $badgeIcon = 'map';
                                   }
                                 @endphp
@@ -118,12 +115,12 @@
                                   @endif
                                 @else
                                   <span class="warning">
-                                    <a class="btn btn-sm btn-label-success" href="{{ $session->google_map_url ?? '#' }}" target="_blank">
+                                    <a class="btn btn-sm btn-primary" href="{{ $session->google_map_url ?? '#' }}" target="_blank">
                                       <i class="ti ti-map me-2"></i>
-                                      {{ __('admin.Location') }}
+                                      {{ __('cycles.View_Location') }}
                                     </a>
                                     <div class="mt-1">
-                                      <small> <i class="fas fa-map-marker-alt"></i> {{ $session->address }} </small>
+                                      <small> <i class="ti ti-map-pin ti-sm me-1"></i> {{ $session->address }} </small>
                                     </div>
                                   </span>
                                 @endif
@@ -161,38 +158,20 @@
 
 @stop
 @section('scripts')
-  @if ($l == 'ar')
-    <script type="text/javascript">
-      $(document).ready(function() {
-        $('.zero-configuration').DataTable({
-          "language": {
-            "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-            "sLoadingRecords": "جارٍ التحميل...",
-            "sProcessing": "جارٍ التحميل...",
-            "sLengthMenu": "أظهر _MENU_ مدخلات",
-            "sZeroRecords": "لم يعثر على أية سجلات",
-            "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-            "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-            "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-            "sInfoPostFix": "",
-            "sSearch": "ابحث:",
-            "sUrl": "",
-            "oPaginate": {
-              "sFirst": "الأول",
-              "sPrevious": "السابق",
-              "sNext": "التالي",
-              "sLast": "الأخير"
-            },
-            "oAria": {
-              "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-              "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-            }
-          }
-        });
+  <script type="text/javascript">
+    $(document).ready(function() {
+      // Initialize DataTable
+      const table = $('.zero-configuration').DataTable({
+        ...getSharedDataTableConfig({ title: 'mentorship-requests', descIndex: 2, actionsIndex: 6, withoutFilter: true }),
+        dom:
+          '<"row"' +
+          '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6 pb-6 pb-lg-0 mb-2"l>' +
+          '<"col-12 col-lg-3 dt-action-buttons d-flex justify-content-lg-end pe-0 pe-lg-6"f>' +
+          '>t<"row px-6"<"col-lg-6"i><"col-lg-6 d-flex justify-content-end"p>>',
       });
-    </script>
-  @endif
-  <script src="/app-assets/vendors/js/tables/datatable/datatables.min.js"></script>
-  <script src="/app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js"></script>
-  <script src="/app-assets/js/scripts/datatables/datatable.js"></script>
+      
+      $('#exportCsv').on('click', function (e) { e.preventDefault(); table.button('.buttons-csv').trigger(); });
+      $('#exportExcel').on('click', function (e) { e.preventDefault(); table.button('.buttons-excel').trigger(); });
+    });
+  </script>
 @stop

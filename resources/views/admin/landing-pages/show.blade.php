@@ -320,7 +320,7 @@
         </div>
 
         <div class="col-lg-5 ms-auto d-flex align-items-center justify-content-center justify-content-lg-end">
-          <div class="hero-visual" aria-label="{{ $heroTitle ?? $page->title }}">
+          <div class="hero-visual mt-6" aria-label="{{ $heroTitle ?? $page->title }}">
             <div class="hero-image-wrapper">
               @if($page->hero_image_url)
                 <img src="{{ $page->hero_image_url }}" alt="hero-image" class="hero-img">
@@ -521,7 +521,7 @@
 
                   {{-- Description --}}
                   @if($programDescription)
-                    <p class="line-clamp-3 mb-0">{{ $programDescription }}</p>
+                    <p class="line-clamp-3 mb-2">{{ $programDescription }}</p>
                   @endif
 
                   <div class="mt-auto">

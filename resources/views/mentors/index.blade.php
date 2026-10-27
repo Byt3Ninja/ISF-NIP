@@ -264,7 +264,7 @@
                   <span class="input-group-text"><i class="ti ti-sort-descending text-muted" aria-hidden="true"></i>
                     <span class="visually-hidden">{{ __('mentor.directory.sort_label') }}</span>
                   </span>
-                  <select class="form-select" id="sortMentors" name="sort" data-default="rating" aria-label="{{ __('mentor.directory.sort_label') }}">
+                  <select class="form-select select2" id="sortMentors" name="sort" data-default="rating" aria-label="{{ __('mentor.directory.sort_label') }}">
                     @foreach ($sortOptions as $value => $label)
                       <option value="{{ $value }}" @selected($sort === $value)>{{ $label }}</option>
                     @endforeach
@@ -609,7 +609,8 @@
     if (!form) return;
 
     // Sort is applied as soon as it changes.
-    document.getElementById('sortMentors').addEventListener('change', function () {
+    $('#sortMentors').on('change', function () {
+      $(this).trigger('change.select2');
       form.requestSubmit();
     });
 
