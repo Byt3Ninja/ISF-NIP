@@ -1091,9 +1091,12 @@ header[id] {
 .gl-footer a.flink {
   color: var(--bs-secondary);
   font-size: 0.9rem;
+  padding: 0;
+  line-height: 1.1;
   transition:
     color 0.2s ease,
     padding-inline-start 0.2s ease;
+  text-decoration: none;
 }
 
 .gl-footer a.flink:hover {
@@ -1124,8 +1127,7 @@ header[id] {
   display: block;
 }
 
-/* Description fills the column width and truncates with an ellipsis after
-   three lines; the full copy stays reachable through the title tooltip. */
+/* Description fills the column width; expands to show full text on hover. */
 .gl-footer .footer-desc {
   margin-bottom: 0;
   line-height: 1.7;
@@ -1135,6 +1137,14 @@ header[id] {
   line-clamp: 3;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.2s ease;
+}
+
+.gl-footer .footer-desc:hover {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+  display: block;
 }
 
 .gl-footer .footer-socials a.footer-social {

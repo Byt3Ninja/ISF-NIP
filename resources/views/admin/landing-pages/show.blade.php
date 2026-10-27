@@ -813,7 +813,7 @@
                     ? route('public.program_join', ['org_slug' => $lpFooterProgram->organization->short_code, 'program_slug' => $lpFooterProgram->public_slug])
                     : null;
                 @endphp
-                <a href="{{ $lpFooterProgramUrl ?: '#programs' }}" class="flink"
+                <a href="{{ $lpFooterProgramUrl ?: '#programs' }}" class="line-clamp-1 flink"
                   @if($lpFooterProgramUrl) target="_blank" rel="noopener noreferrer" @endif>{{ $lpFooterProgramTitle }}</a>
               @endforeach
               @if($lpFooterProgramsOverflow)
