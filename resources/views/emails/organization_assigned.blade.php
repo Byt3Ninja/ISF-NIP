@@ -11,6 +11,7 @@
 
     $managerName = trim(($user->first_name_en ?? '') . ' ' . ($user->last_name_en ?? '')) ?: ($user->name ?? '');
     $organizationName = $organization->name ?? $org_name;
+    $t = fn ($key, $replace = []) => __('email.org_assignment_invite_email.' . $key, $replace, $isRtl ? 'ar' : 'en');
 @endphp
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F3F4F6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px 0;">
     <tr>
