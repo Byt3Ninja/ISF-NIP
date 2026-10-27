@@ -1044,6 +1044,11 @@
               }
             }
           });
+          // Slot-booked sessions take the slot's length (e.g. 15 min), which the fixed list lacks;
+          // selecting a missing value leaves the select empty and the form posts no period.
+          if (response.period && !$('#period option[value="' + response.period + '"]').length) {
+            $('#period').append($('<option>', { value: response.period, text: response.period + ' {{ __('cycles.Minutes') }}' }));
+          }
           $('#period').val(response.period);
           $('#notes').val(response.admin_comment);
           $('#ModifyRequest').modal('show');

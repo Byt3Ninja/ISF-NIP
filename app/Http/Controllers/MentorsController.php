@@ -1191,16 +1191,21 @@ class MentorsController extends Controller
 		}
 
 		$request->date = \Carbon\Carbon::createFromFormat('Y-m-d h:i a', $request->date)->format('Y-m-d H:i:s');
-		
+
 		if ($request) {
-			
+			$session = MentorshipRequest::findOrFail($request->id);
+			// A period the dialog could not select is not posted; keep the session's own length.
+			if (!(int) $request->period) {
+				$request->merge(['period' => $session->period]);
+			}
+
 			// GV-9566: the edited time is platform wall-clock of the session's organization.
-			$slotZone = TimezoneService::platform(MentorshipRequest::whereKey($request->id)->value('organization_id'));
+			$slotZone = TimezoneService::platform($session->organization_id);
 			if (\App\Settings::hasReachedMaxConcurrentSessions(Carbon::parse($request->date, $slotZone), $request->period)) {
 				return back()->with(['message2' => __('api.max_concurrent_sessions_reached')]);
 			}
 
-			$approved = $start = $join = null;
+			$approved = $start = $join = $meetingId = $passcode = null;
 			if ($request->approved) {
 				$approved = 'Yes';
 				$topic = "Online mentorship meeting (M" . $request->mentorid . '- U' . $request->userid . ')';
@@ -1216,7 +1221,7 @@ class MentorsController extends Controller
 				$meetingId = $onlineMeeting['data']['id'];
 				$passcode = $onlineMeeting['data']['passcode'] ?? null;
 			}
-			MentorshipRequest::find($request->id)->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'zoom_passcode' => $passcode, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
+			$session->update(['period' => $request->period, 'zoom_date' => $request->date, 'admin_comment' => $request->notes, 'approved' => $approved, 'zoom_passcode' => $passcode, 'start_url' => $start, 'join_url' => $join, 'zoom_id' => $meetingId]);
 				
 			SendMentorshipRequestJob::dispatch($request->mentorid, $request->date, $request->period, auth()->id(), null, $request->id, null, 'modifySession');
 			/// Notify Mentor

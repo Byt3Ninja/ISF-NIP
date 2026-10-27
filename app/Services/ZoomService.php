@@ -333,9 +333,15 @@ class ZoomService implements OnlineMeetingServiceInterface
             ];
         }
 
+        // A missing duration used to reach the int-typed host lookup as null and 500 the page.
+        if ((int) ($data['duration'] ?? 0) <= 0) {
+            Log::error('ZoomService::createMeeting - Missing meeting duration.', ['duration' => $data['duration'] ?? null]);
+            return ['success' => false, 'data' => 'Missing meeting duration'];
+        }
+
         $timeZone = $this->meetingTimezone($data, $user);
 
-        $hostEmail = $this->getAvailableZoomUserEmail($data['start_time'], $data['duration'], $timeZone);
+        $hostEmail = $this->getAvailableZoomUserEmail($data['start_time'], (int) $data['duration'], $timeZone);
         if( empty( $hostEmail ) || !trim( $hostEmail ) )
         {
             $path = 'users/me/meetings';
