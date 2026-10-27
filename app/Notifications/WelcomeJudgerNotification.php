@@ -155,7 +155,10 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
         // (SMTP routing above still uses the organization.)
         $platformOrgData = $this->buildEmailOrganizationData(null);
 
-        $mail = (new MailMessage)
+        // One-time sign-in link for the judge (GV-7312); lost in the GV-7182 merge.
+        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+
+        return (new MailMessage)
             ->subject(Lang::get('email.judge_account_welcome_email.subject', [], $locale))
             ->view('emails.welcome_judger', array_merge([
                 'data'          => $this->data,
