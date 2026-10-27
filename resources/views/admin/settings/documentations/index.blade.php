@@ -114,6 +114,11 @@
           { extend: 'csv', text: 'CSV', className: 'd-none', title: 'Documentations_Export_' + new Date().toISOString().slice(0, 10), exportOptions: { columns: [0, 1, 2, 3] } },
           { extend: 'excel', text: 'Excel', className: 'd-none', title: 'Documentations_Export_' + new Date().toISOString().slice(0, 10), exportOptions: { columns: [0, 1, 2, 3] } },
         ],
+      dom:
+        '<"row"' +
+        '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6 pb-6 pb-lg-0 mb-2"l>' +
+        '<"col-12 col-lg-3 dt-action-buttons d-flex justify-content-lg-end pe-0 pe-lg-6"f>' +
+        '>t<"row px-6"<"col-lg-6"i><"col-lg-6 d-flex justify-content-end"p>>',
       });
 
       $('#exportCsv').on('click', function(e) { e.preventDefault(); table.button('.buttons-csv').trigger(); });
@@ -126,41 +131,28 @@
         var id = $(this).data('id');
         var token = '{{ csrf_token() }}';
         
-        Swal.fire({
+        releaseAlert('warning', {
           title: "{{__('admin.SureDelete')}}",
-          text: "{{__('admin.Recover')}}",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}",
-          reverseButtons: true,
-          customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-          },
-          buttonsStyling: false,
+          message: "{{__('admin.Recover')}}",
+          confirmText: "{{ __('admin.DYes') }}",
+          cancelText: "{{ __('admin.No') }}",
+          confirmColor: 'danger'
         })
-        .then((result) => {
-          if (result.value) {
+        .then((ok) => {
+          if (ok) {
             $.post(url, {'_method': 'DELETE' , '_token': token},
               function(response) {
-                Swal.fire({
-                  icon: 'success',
+                releaseAlert('success', {
                   title: "{{ __('admin.Deleted') }}!",
-                  html: "{{ __('admin.FileDeleted') }}.",
-                  showCancelButton: false,
-                  showConfirmButton: true,
-                  confirmButtonText: "{{ __('admin.OK') }}",
-                  customClass: {
-                      confirmButton: 'btn btn-primary',
-                  },
-                  buttonsStyling: false,
+                  message: "{{ __('admin.FileDeleted') }}.",
+                  confirmText: "{{ __('admin.OK') }}",
+                  confirmColor: 'primary'
                 });
                 // Remove the row from DataTable if still on same page
                 $('#organizations-list-datatable').DataTable().row($(e.target).closest('tr')).remove().draw();
               }
             ).fail(function(error) { 
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}!",
                 message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });

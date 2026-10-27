@@ -630,8 +630,8 @@
                 @if ($_user->hasRole('Admin'))
                 <td>
                   <small>{!! $session->rate_comment
-                    ? str_repeat('<i class="bx bxs-star" style="color:#fc960f"></i>', $session->rating).'<br>'.$session->rate_comment
-                    : $session->comment !!}</small>
+                    ? str_repeat('<i class="bx bxs-star" style="color:#fc960f"></i>', $session->rating).'<br>'.e($session->rate_comment)
+                    : e($session->comment) !!}</small>
                 </td>
                 @endif
                 <td>{{ $session->zoom_date }}<br>({{ $session->period }}M)</td>
@@ -861,7 +861,7 @@ document.getElementById('sendMessageBtn')?.addEventListener('click', function ()
   $.post('/dashboard/sendteammessage', { subject, message, receiver, _token: '{{ csrf_token() }}' })
     .done(r => {
       if (r.success) {
-        releaseSuccessAlert({ message: '{{ $isEn ? 'Message sent successfully' : 'تم إرسال الرسالة بنجاح' }}' });
+        releaseAlert('success', { message: '{{ $isEn ? 'Message sent successfully' : 'تم إرسال الرسالة بنجاح' }}' });
         bootstrap.Modal.getInstance(document.getElementById('sendMessageModal')).hide();
       } else {
         releaseErrorAlert({ message: r.message || '{{ $isEn ? 'Failed to send message' : 'فشل في إرسال الرسالة' }}' });
@@ -882,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: '{{ $isEn ? 'New Registrations Monthly' : 'المسجلون الجدد شهرياً' }}',
           data: @json($regCounts),
-          borderColor: '#7367f0',
+          borderColor: config.colors.primary,
           tension: 0.1,
           fill: false,
         }],
@@ -896,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: @json($data['submissionLabels']),
         datasets: [{
           data: @json($data['submissionCounts']),
-          backgroundColor: ['#7367f0', '#99e3ed', '#ffb7b9'],
+          backgroundColor: [config.colors.primary, '#99e3ed', '#ffb7b9'],
         }],
       },
       titleText: '{{ $isEn ? 'Projects by Track' : 'المشاريع حسب المحور' }}',
@@ -909,7 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: '{{ $isEn ? 'Teams Status' : 'حالة الفرق' }}',
           data: @json($pieData),
-          backgroundColor: ['#dfdfe3', '#7367f0'],
+          backgroundColor: ['#dfdfe3', config.colors.primary],
         }],
       },
       titleText: '{{ $isEn ? 'Team Formation Status' : 'حالة تكوين الفرق' }}',

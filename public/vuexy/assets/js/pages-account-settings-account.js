@@ -98,34 +98,22 @@ document.addEventListener('DOMContentLoaded', function (e) {
     if (deactivateButton) {
       deactivateButton.onclick = function () {
         if (accountActivation.checked == true) {
-          Swal.fire({
-            text: 'Are you sure you would like to deactivate your account?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes',
-            customClass: {
-              confirmButton: 'btn btn-primary me-2 waves-effect waves-light',
-              cancelButton: 'btn btn-label-secondary waves-effect waves-light'
-            },
-            buttonsStyling: false
-          }).then(function (result) {
-            if (result.value) {
-              Swal.fire({
-                icon: 'success',
+          releaseAlert('warning', {
+            message: 'Are you sure you would like to deactivate your account?',
+            confirmText: 'Yes',
+            confirmColor: 'primary'
+          }).then(function (ok) {
+            if (ok) {
+              releaseAlert('success', {
                 title: 'Deleted!',
-                text: 'Your file has been deleted.',
-                customClass: {
-                  confirmButton: 'btn btn-success waves-effect waves-light'
-                }
+                message: 'Your file has been deleted.',
+                confirmColor: 'success'
               });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-              Swal.fire({
+            } else {
+              releaseAlert('danger', {
                 title: 'Cancelled',
-                text: 'Deactivation Cancelled!!',
-                icon: 'error',
-                customClass: {
-                  confirmButton: 'btn btn-success waves-effect waves-light'
-                }
+                message: 'Deactivation Cancelled!!',
+                confirmColor: 'success'
               });
             }
           });

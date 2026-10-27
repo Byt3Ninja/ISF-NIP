@@ -443,31 +443,15 @@
 					}
 				}
 			],
-			@if ($l == 'ar')
-				language: {
-					sEmptyTable: "ليست هناك بيانات متاحة في الجدول",
-					sLoadingRecords: "جارٍ التحميل...",
-					sProcessing: "جارٍ التحميل...",
-					sLengthMenu: "أظهر _MENU_ مدخلات",
-					sZeroRecords: "لم يعثر على أية سجلات",
-					sInfo: "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-					sInfoEmpty: "يعرض 0 إلى 0 من أصل 0 سجل",
-					sInfoFiltered: "(منتقاة من مجموع _MAX_ مُدخل)",
-					sInfoPostFix: "",
-					sSearch: "ابحث:",
-					sUrl: "",
-					oPaginate: {
-						sFirst: "الأول",
-						sPrevious: "السابق",
-						sNext: "التالي",
-						sLast: "الأخير"
-					},
-					oAria: {
-						sSortAscending: ": تفعيل لترتيب العمود تصاعدياً",
-						sSortDescending: ": تفعيل لترتيب العمود تنازلياً"
-					}
-				},
-			@endif
+			language: {
+        url:
+          document.dir === 'rtl'
+            ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+            : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+        sLengthMenu: '_MENU_',
+        search: '',
+        searchPlaceholder: '{{ __('admin.Search') }}...',
+      },
 			initComplete: function (settings, json) {
 				@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
 				// User filter
@@ -524,7 +508,7 @@
 
 				@if( $_user->hasAnyRole('Admin|organizationManager|manager') )
 				// Date filter
-				const dateFilter = $(`<input type="text" id="date-filter" class="form-control form-control-sm datepicker me-1" style="width: 150px; display: inline-block;" placeholder="{{ __('admin.Date') }}">`)
+				const dateFilter = $(`<input type="text" id="date-filter" class="form-control datepicker me-1" style="width: 150px; display: inline-block;" placeholder="{{ __('admin.Date') }}">`)
 					.insertAfter('#status-filter');
 
 				// Initialize datepicker for the filter
@@ -548,6 +532,32 @@
 					}
 				});
 				@endif
+        
+        $('.dataTables_filter .form-control').removeClass('form-control-sm');
+        $('.dataTables_length .form-select').removeClass('form-select-sm');
+        
+        const $wrapper = $(this.api().table().container());
+        $wrapper.find('.form-select, .dataTables_length select').each(function () {
+          const $this = $(this);
+          if ($this.hasClass('select2-hidden-accessible')) return;
+
+          const isLength = $this.closest('.dataTables_length').length > 0;
+
+          $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block me-2' : '') + '"></div>');
+
+          $this.select2({
+            dropdownParent: $this.parent(),
+            width: isLength ? '80px' : '100%',
+            minimumResultsForSearch: Infinity,
+          });
+
+          if (!isLength) {
+            $this.next('.select2-container').css({
+              'min-width': '150px',
+              'max-width': '200px'
+            });
+          }
+        });
 			}
 		});
 

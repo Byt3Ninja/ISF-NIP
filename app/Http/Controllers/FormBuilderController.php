@@ -23,8 +23,8 @@ class FormBuilderController extends Controller
      */
     private function authorizeOrganization($organizationId): void
     {
-        $actor = auth()->user();
-        if (!$actor->hasRole('admin') && !$actor->ownsOrganization($organizationId)) {
+        // managesOrganization, not ownsOrganization: a founder "owns" their own program's organization.
+        if (!auth()->user()->managesOrganization($organizationId)) {
             abort(403);
         }
     }
@@ -831,6 +831,8 @@ class FormBuilderController extends Controller
         if (!is_numeric($organization_id) || (int) $organization_id <= 0) {
             return response()->json(['data' => [], 'appear' => '']);
         }
+        // This route has no name, so the route-permission middleware never sees it.
+        abort_unless(auth()->user()->ableToAny(['forms.builder_view', 'forms.design_save']), 403);
         $this->authorizeOrganization($organization_id);
         $builders = BuilderForm::where('organization_id',$organization_id)->get();
         $output = [];

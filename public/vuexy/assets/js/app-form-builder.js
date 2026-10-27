@@ -119,7 +119,7 @@ let isBuilderFormDirty = false;
     if (org_id && org_id !== '0') url += '?org_id=' + org_id;
 
     if (isBuilderFormDirty) {
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: FB_CONFIG.translations.confirm_switch,
         message: FB_CONFIG.translations.confirm_switch_message,
         onConfirm: () => location.href = url,
@@ -136,11 +136,11 @@ let isBuilderFormDirty = false;
     const url = '/dashboard/show-builder';
 
     if (isBuilderFormDirty) {
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title:             t.are_you_sure,
         message:           t.unsaved_changes_msg,
-        confirmButtonText: t.discard_create,
-        cancelButtonText:  t.cancel,
+        confirmText: t.discard_create,
+        cancelText:  t.cancel,
         onConfirm:         () => location.href = url,
       });
       return;
@@ -1019,11 +1019,11 @@ function saveForm() {
   const organizationId = document.getElementById('organization_id').value;
 
   if (!formTitle) {
-    releaseWarningAlert({ message: t.form_title_required });
+    releaseAlert('warning', { hideCancel: true, message: t.form_title_required });
     return;
   }
   if (!organizationId) {
-    releaseWarningAlert({ message: t.organization_required });
+    releaseAlert('warning', { hideCancel: true, message: t.organization_required });
     return;
   }
 
@@ -1036,7 +1036,7 @@ function saveForm() {
   });
 
   if (hasEmptySection) {
-    releaseWarningAlert({ message: t.empty_section_error });
+    releaseAlert('warning', { hideCancel: true, message: t.empty_section_error });
     return;
   }
 
@@ -1083,11 +1083,11 @@ function saveForm() {
     .then(r => r.json())
     .then(data => {
       if (!data?.success) {
-        releaseFailureAlert({ message: data?.message || t.error_saving_form });
+        releaseAlert('danger', { message: data?.message || t.error_saving_form });
         return;
       }
       const wasUpdated = data.action === 'updated';
-      releaseSuccessAlert({
+      releaseAlert('success', {
         message: wasUpdated ? t.form_updated_successfully : t.form_saved_successfully
       });
       // Reload the builder for the same form so the edited values
@@ -1100,7 +1100,7 @@ function saveForm() {
         window.location.href = `/dashboard/show-builder/${data.id}${orgParam}`;
       }, 1500);
     })
-    .catch(() => releaseFailureAlert({ message: t.error_saving_form }));
+    .catch(() => releaseAlert('danger', { message: t.error_saving_form }));
 }
 
 function extractQuestionData(questionCard) {
@@ -1314,11 +1314,11 @@ function submitFormModal(set, id) {
   const organization_id = $('#modal_organization_id').val();
 
   if (!title) {
-    releaseFailureAlert({ message: t.form_title_required });
+    releaseAlert('danger', { message: t.form_title_required });
     return;
   }
   if (!organization_id) {
-    releaseFailureAlert({ message: t.organization_required });
+    releaseAlert('danger', { message: t.organization_required });
     return;
   }
 
@@ -1338,17 +1338,17 @@ function submitFormModal(set, id) {
     },
     error: function () {
       $submit.prop('disabled', false);
-      releaseFailureAlert({ message: t.error_occurred });
+      releaseAlert('danger', { message: t.error_occurred });
     },
   });
 }
 
 async function deleteForm(set, id, title, organization_id = 0) {
-  releaseWarningAlert({
+  releaseAlert('warning', {
     title:             t.are_you_sure,
     message:           t.deleting_form,
-    confirmButtonText: t.yes,
-    cancelButtonText:  t.no,
+    confirmText: t.yes,
+    cancelText:  t.no,
     confirmColor:      'danger',
     onConfirm: async () => {
       $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
@@ -1357,7 +1357,7 @@ async function deleteForm(set, id, title, organization_id = 0) {
         url:  '/dashboard/builder/' + set,
         data: { id, title, organization_id },
         success: () => { location.href = '/dashboard/show-builder'; },
-        error:   () => { releaseFailureAlert({ message: t.error_occurred }); },
+        error:   () => { releaseAlert('danger', { message: t.error_occurred }); },
       });
     },
   });

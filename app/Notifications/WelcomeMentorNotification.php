@@ -6,18 +6,20 @@ use App\Settings;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\WhatsAppService;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
+use Throwable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class WelcomeMentorNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
 
     public $user;
-    public $password;
 
     public WhatsAppService $whatsAppService;
 
@@ -27,10 +29,11 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct($user, $password)
+    public function __construct($user)
     {
+        // No password: the mail only links to the login page (the mentor chose the
+        // password), and a queued notification must not serialize it into the jobs table.
         $this->user = $user;
-        $this->password = $password;
     }
 
     /**
@@ -63,6 +66,15 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
@@ -75,7 +87,7 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
         $from = $this->getFromAddress($smtpSettings);
         // This is a platform-branded email (platform logo/name), not the
         // mentor's organization -- SMTP routing still uses the org, above.
-        $orgData = $this->buildEmailOrganizationData(null);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 
@@ -136,5 +148,26 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
         'time'    => now()->toDateTimeString(),
     ]);
     }
-    
+
+    /**
+     * Get the database representation of the notification ('database' is always in via()).
+     */
+    public function toArray(object $notifiable): array
+    {
+        // Follow the platform's default language, like the mail.
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+
+        return [
+            'message' => Lang::get('notifications.welcome.database', [], $locale),
+            'user_id' => $notifiable->id,
+        ];
+    }
+
+    /** Queued: when the worker gives up, free the welcome slot so it can be sent again. */
+    public function failed(Throwable $exception): void
+    {
+        $this->releaseClaim();
+        report($exception);
+    }
 }

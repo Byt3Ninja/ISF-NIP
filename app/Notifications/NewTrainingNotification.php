@@ -109,8 +109,7 @@ class NewTrainingNotification extends Notification implements ShouldQueue
 
         // Branded with the organization running the training (its cycle's
         // organization), not the recipient's own organization relation.
-        $trainingOrg = $this->data['organization'] ?? $org;
-        $orgData = $this->buildEmailOrganizationData($trainingOrg);
+        $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
@@ -141,6 +140,8 @@ class NewTrainingNotification extends Notification implements ShouldQueue
                 'trainingLink' => $this->data['join_url'] ?? '',
                 'trainingMapLink' => $this->data['join_url'] ?? '',
                 'trainingAddress' => $this->data['Address'] ?? '',
+                'trainingTrainerName' => trim((string) ($this->data['trainer_name'] ?? '')),
+                'trainingTrainerEmail' => trim((string) ($this->data['trainer_email'] ?? '')),
             ], $orgData));
     }
 

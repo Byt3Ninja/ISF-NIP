@@ -277,20 +277,19 @@
                     <input type="hidden" name="active_tab" value="{{ $section['id'] }}" />
 
                     <div class="p-4">
-                      {{-- Section Header with Save/Reset --}}
-                      <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="mb-0">{{ $section['label'] }}</h5>
-                        <div class="d-flex gap-2">
-                          <button type="submit" class="btn btn-primary">
-                            <i class="ti ti-device-floppy me-2"></i>{{ __('admin.Save') }}
-                          </button>
-                        </div>
-                      </div>
+                      <h5 class="mb-4">{{ $section['label'] }}</h5>
 
                       {{-- Include the actual section content --}}
                       @include('admin.organizations.wizard.partials._landing_section' . ($key + 1), [
                         'section' => $section,
                       ])
+
+                      {{-- Save button, bottom of each section --}}
+                      <div class="d-flex justify-content-end mt-4 pt-4 border-top">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="ti ti-device-floppy me-2"></i>{{ __('admin.Save') }}
+                        </button>
+                      </div>
                     </div>
                   </form>
                 </div>

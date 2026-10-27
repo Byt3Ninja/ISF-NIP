@@ -81,6 +81,8 @@
                                                 </td>
                                             </tr>
                                         @endif
+                                        {{-- A declined session has no meeting link or location to share. --}}
+                                        @if(empty($isRejected))
                                         @if( $sessionType == 'online' || $sessionType == 'both' )
                                             <tr>
                                                 <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.mentor_notify_email.meeting_link') }}:</td>
@@ -107,6 +109,7 @@
                                                 <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280; width: 150px;">{{ __('email.address') }}:</td>
                                                 <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: {{ $alignEnd }};">{{ $address ?: '-' }}</td>
                                             </tr>
+                                        @endif
                                         @endif
                                     </table>
                                 </td>

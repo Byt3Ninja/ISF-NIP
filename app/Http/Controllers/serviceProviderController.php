@@ -42,7 +42,7 @@ class serviceProviderController extends Controller
      * Generate a password that satisfies the platform validation:
      * at least 1 uppercase, 1 lowercase, 1 digit, 1 special character, 8-20 chars.
      */
-    private function generateCompliantPassword(int $length = 12): string
+    private function generateCompliantPassword(int $length = 16): string
     {
         $upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
         $lower   = 'abcdefghjkmnpqrstuvwxyz';
@@ -316,15 +316,9 @@ class serviceProviderController extends Controller
 
 			DB::commit();
 
-			$login_url = route('login');
-			if( in_array(env('APP_ENV', 'local'), ['local']) )
-			{
-				return view('emails.service-providers.registration', compact('contact_name', 'email', 'password', 'login_url', 'locale'));
-			}
-
 			if( config('mail.driver') && config('mail.host') && config('mail.port') && config('mail.username') && config('mail.password') )
 			{
-				Mail::to($email)->queue(new serviceProviderRegistrationMail($contact_name, $email, $password, $login_url, $locale));
+				Mail::to($email)->queue(new serviceProviderRegistrationMail($contact_name, $email, $provider_user->generateMagicLoginUrl(), $locale));
 			}
 
 			return redirect()->back()->with('success', __('auth.provider_registration_recorded'));
@@ -452,6 +446,13 @@ class serviceProviderController extends Controller
 			$registration->action_at = now();
 			$registration->reason = $reason;
 			$registration->save();
+
+			// C39: the applicant's account (created at registration) loses provider access;
+			// a role-less rejected applicant is then signed out by BlockRejectedProviderApplicants.
+			if( $registration->user_id )
+			{
+				User::find( $registration->user_id )?->deAllotRole('serviceProvider');
+			}
 
 			if( in_array(env('APP_ENV', 'local'), ['local']) )
 			{

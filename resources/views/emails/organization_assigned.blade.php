@@ -11,6 +11,7 @@
 
     $managerName = trim(($user->first_name_en ?? '') . ' ' . ($user->last_name_en ?? '')) ?: ($user->name ?? '');
     $organizationName = $organization->name ?? $org_name;
+    $t = fn ($key, $replace = []) => __('email.org_assignment_invite_email.' . $key, $replace, $isRtl ? 'ar' : 'en');
 @endphp
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F3F4F6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px 0;">
     <tr>
@@ -27,7 +28,7 @@
     <table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 20px;">
         <tr>
             <td align="center">
-                <a href="{{ $dashboardUrl }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ $t('button') }}</a>
+                <a href="{{ $acceptUrl }}" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #4F46E5; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">{{ $t('button') }}</a>
             </td>
         </tr>
     </table>

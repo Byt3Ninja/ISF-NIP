@@ -193,20 +193,42 @@ class ZoomService implements OnlineMeetingServiceInterface
         return $this->zoomApiUrl;
     }
 
-    public function toZoomTimeFormat(string $dateTime): string
+    /**
+     * Zoom reads `start_time` as local time in the payload's `timezone`.
+     *
+     * GV-9566: accepts platform wall-clock strings, ISO strings with an offset
+     * and unix timestamps (training sessions). Timestamps used to reach
+     * `new \DateTime("1727000000")`, which throws, so training meetings were
+     * created without a start time.
+     */
+    public function toZoomTimeFormat($dateTime, ?string $timezone = null): string
     {
-        try {
-            $date = new \DateTime($dateTime);
-            return $date->format('Y-m-d\TH:i:s');
-        } catch (\Exception $e) {
-            Log::error('ZoomService->toZoomTimeFormat: ' . $e->getMessage());
-            return ''; // أو throw exception
+        $timezone = $timezone ?? TimezoneService::platform();
+        $moment = TimezoneService::wallClock($dateTime, $timezone);
+
+        if (is_null($moment)) {
+            Log::error('ZoomService->toZoomTimeFormat: unparseable start time.', ['start_time' => $dateTime]);
+            return '';
         }
+
+        return $moment->copy()->setTimezone($timezone)->format('Y-m-d\TH:i:s');
     }
-    protected function getAvailableZoomUserEmail(string $startTime, int $duration): ?string
+
+    /** The zone a meeting's start time is expressed in (GV-9566). */
+    private function meetingTimezone(array $data, $user): string
     {
-        $startTimestamp = strtotime($startTime);
-        if ($startTimestamp === false) {
+        if (!empty($data['timezone']) && TimezoneService::isValid($data['timezone'])) {
+            return $data['timezone'];
+        }
+
+        return TimezoneService::platform(optional(optional($user)->organization)->id);
+    }
+
+    protected function getAvailableZoomUserEmail($startTime, int $duration, ?string $timezone = null): ?string
+    {
+        // A real instant: Zoom lists existing meetings in UTC.
+        $startTimestamp = optional(TimezoneService::wallClock($startTime, $timezone ?? TimezoneService::platform()))->timestamp;
+        if (empty($startTimestamp)) {
             Log::warning('ZoomService: Unparseable start time for host selection.', ['start_time' => $startTime]);
             return null;
         }
@@ -292,7 +314,11 @@ class ZoomService implements OnlineMeetingServiceInterface
         $user = Auth::user();
         $orgId = optional(optional($user)->organization)->id;
 
-        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null, $orgId)) {
+        // GV-9566: read the start in the meeting's own zone (the caller's step or
+        // organization), not the creating user's organization zone.
+        $startsAt = TimezoneService::wallClock($data['start_time'] ?? null, $this->meetingTimezone($data, $user));
+
+        if (Settings::hasReachedMaxConcurrentSessions($startsAt, $data['duration'] ?? null, $orgId)) {
             return [
                 'success' => false,
                 'data'    => __('settings.max_concurrent_sessions_reached'),
@@ -307,24 +333,15 @@ class ZoomService implements OnlineMeetingServiceInterface
             ];
         }
 
-        $timeZone = 'Africa/Cairo'; // Default
-        if ($user) { // $user should be available if ensureCredentialsInitialized passed
-            try{
-                 $org = $user->organization;
-                if ($org && $org->time_zone) {
-                    $timeZone = $org->time_zone;
-                }else{
-                 $setting = Settings::where('id', 1)->first();
-                 if ($setting && $setting->timezone) {
-                    $timeZone = $setting->timezone;
-                }
-                }  
-            }catch (\Exception $e) {
-                Log::error('ZoomService->createMeeting: ' . $e->getMessage());
-            }
+        // A missing duration used to reach the int-typed host lookup as null and 500 the page.
+        if ((int) ($data['duration'] ?? 0) <= 0) {
+            Log::error('ZoomService::createMeeting - Missing meeting duration.', ['duration' => $data['duration'] ?? null]);
+            return ['success' => false, 'data' => 'Missing meeting duration'];
         }
 
-        $hostEmail = $this->getAvailableZoomUserEmail($data['start_time'], $data['duration']);
+        $timeZone = $this->meetingTimezone($data, $user);
+
+        $hostEmail = $this->getAvailableZoomUserEmail($data['start_time'], (int) $data['duration'], $timeZone);
         if( empty( $hostEmail ) || !trim( $hostEmail ) )
         {
             $path = 'users/me/meetings';
@@ -338,7 +355,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         $payload = [
             'topic'      => $data['topic'],
             'type'       => self::MEETING_TYPE_SCHEDULE,
-            'start_time' => $this->toZoomTimeFormat($data['start_time']),
+            'start_time' => $this->toZoomTimeFormat($data['start_time'], $timeZone),
             'duration'   => $data['duration'],
             'agenda'     => $data['agenda'] ?? null,
             'timezone'   => $timeZone,
@@ -434,24 +451,8 @@ class ZoomService implements OnlineMeetingServiceInterface
             ];
         }
 
-        $timeZone = 'Africa/Cairo'; // Default, same logic as createMeeting for dynamic timezone
-         if ($user) {
-            try{
-                if ($user->hasAnyRole(['Admin', 'subadmin'])) {
-                    $setting = Settings::where('id', 1)->first();
-                    if ($setting && $setting->timezone) {
-                        $timeZone = $setting->timezone;
-                    }
-                } elseif ($user->hasRole('organizationManager')) {
-                    $org = $user->organization;
-                    if ($org && $org->time_zone) {
-                        $timeZone = $org->time_zone;
-                    }
-                }
-            }catch (\Exception $e) {
-                Log::error('ZoomService->updateMeeting: ' . $e->getMessage());
-            }
-        }
+        // GV-9566: the same zone createMeeting() uses; the two used to disagree.
+        $timeZone = $this->meetingTimezone($data, $user);
 
         $path = 'meetings/' . $id;
         $url = $this->retrieveZoomUrl();
@@ -459,7 +460,7 @@ class ZoomService implements OnlineMeetingServiceInterface
         $payload = [
             'topic'      => $data['topic'],
             'type'       => self::MEETING_TYPE_SCHEDULE, // Or make it dynamic if needed
-            'start_time' => $this->toZoomTimeFormat($data['start_time']),
+            'start_time' => $this->toZoomTimeFormat($data['start_time'], $timeZone),
             'duration'   => $data['duration'],
             'agenda'     => $data['agenda'] ?? null,
             'timezone'   => $timeZone,

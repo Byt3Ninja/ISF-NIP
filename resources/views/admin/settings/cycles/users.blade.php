@@ -41,7 +41,7 @@
                 @foreach ($cycles as $cycle)
                   <option value="{{ $cycle->id }}" @selected($cycle->id == $id)>
                     {{ $cycle->title }}
-                    ({{ $cycle->start->format('d-m-Y') ?? '-' }} - {{ $cycle->end->format('d-m-Y') ?? '-' }})
+                    ({{ $cycle->start?->format('d-m-Y') ?? '-' }} - {{ $cycle->end?->format('d-m-Y') ?? '-' }})
                     — {{ optional($cycle->organization)->name }}
                   </option>
                 @endforeach
@@ -265,7 +265,7 @@
         <div class="modal-body">
           <div class="mb-6">
             <label class="form-label">{{ __('cycles.Select Step') }}</label>
-            <select class="form-select" id="modalStepSelect">
+            <select class="form-select select2" id="modalStepSelect">
               <option value="" selected disabled>{{ __('cycles.Select Step') }}</option>
               <option value="0">{{ __('cycles.Disapprove') }}</option>
               @foreach ($steps->where('stype', '!=', '7') as $step)

@@ -3,6 +3,8 @@ namespace App\Services;
 
 use App\TrainingSession;
 use App\SessionReport;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TrainingReportService
@@ -15,12 +17,22 @@ class TrainingReportService
                     $q2->where('title', $filters['program']);
                 });
             })
+            // GV-9566: `datetime` is a unix timestamp, so whereDate() never matched;
+            // compare it with the day boundaries in the platform zone.
             ->when(isset($filters['date_from']), function ($q) use ($filters) {
-                $q->whereDate('datetime', '>=', $filters['date_from']);
+                $q->where('datetime', '>=', $this->dayBoundary($filters['date_from'], false));
             })
             ->when(isset($filters['date_to']), function ($q) use ($filters) {
-                $q->whereDate('datetime', '<=', $filters['date_to']);
+                $q->where('datetime', '<=', $this->dayBoundary($filters['date_to'], true));
             });
+    }
+
+    /** Start (or end) of a Y-m-d day in the platform zone, as a unix timestamp. */
+    protected function dayBoundary($date, bool $end): int
+    {
+        $day = Carbon::parse($date, TimezoneService::platform());
+
+        return ($end ? $day->endOfDay() : $day->startOfDay())->timestamp;
     }
 
     public function getSummary(array $filters)
@@ -186,7 +198,8 @@ class TrainingReportService
         ->map(function ($s) {
             return [
                 'id' => $s->id,
-                'date' => date('Y-m-d H:i', is_numeric($s->datetime) ? (int) $s->datetime : strtotime($s->datetime)),
+                // GV-9566: shown in the viewer's own timezone.
+                'date' => optional($s->startsAt(Auth::user()))->format('Y-m-d H:i'),
                 'title' => $s->title,
                 'type' => $s->type,
                 'trainer' => $s->trainer_name,

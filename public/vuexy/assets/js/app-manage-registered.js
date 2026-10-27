@@ -20,14 +20,14 @@ function ajaxSetup() {
 }
 
 function releaseSuccess(message) {
-  if (typeof releaseSuccessAlert === 'function') {
-    releaseSuccessAlert({ title: i18n.success, message });
+  if (typeof releaseAlert === 'function') {
+    releaseAlert('success', { title: i18n.success, message });
   }
 }
 
 function releaseFailure(message) {
-  if (typeof releaseFailureAlert === 'function') {
-    releaseFailureAlert({ title: i18n.error, message });
+  if (typeof releaseAlert === 'function') {
+    releaseAlert('danger', { title: i18n.error, message });
   }
 }
 
@@ -214,7 +214,7 @@ function bindChangeStepEvents() {
   $('#bulkChangeStepBtn').on('click', () => {
     currentModalCtx = 'bulk';
     singleCompanyData = null;
-    $('#modalStepSelect').val('');
+    $('#modalStepSelect').val('').trigger('change');
     $('#singleCompanyInfo').hide();
     $('#affectedCompaniesInfo').show();
     updateSelectedTags();
@@ -231,7 +231,7 @@ function bindChangeStepEvents() {
       currentStepTitle: $(this).data('current-step-title'),
     };
 
-    $('#modalStepSelect').val(singleCompanyData.currentStep);
+    $('#modalStepSelect').val(singleCompanyData.currentStep).trigger('change');;
     $('#selectedCount').text('1');
     $('#singleCompanyName').text(singleCompanyData.name);
     $('#singleCompanyUser').text(singleCompanyData.userName);
@@ -277,12 +277,12 @@ function bindMarkAlumniBulk() {
       .filter(([, d]) => d.atAlumniStep && !d.isAlumni);
 
     if (!eligible.length) {
-      Swal.fire({
+      releaseAlert('warning', {
         title: i18n.warning,
-        text: i18n.noStartupsSelected,
-        icon: 'warning',
-        confirmButtonText: i18n.confirmBtnText,
-        customClass: { confirmButton: 'btn btn-primary ms-3' },
+        message: i18n.noStartupsSelected,
+        confirmText: i18n.confirmBtnText,
+        confirmColor: 'primary',
+        hideCancel: true
       });
       return;
     }
@@ -301,11 +301,11 @@ function bindMarkAlumniBulk() {
           ${tags}
       </div>`;
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: i18n.markAlumniTitle,
-      html: warningHtml,
-      confirmButtonText: i18n.confirmBtnText,
-      cancelButtonText: i18n.cancelBtnText,
+      message: warningHtml,
+      confirmText: i18n.confirmBtnText,
+      cancelText: i18n.cancelBtnText,
       onConfirm: () => doMarkAlumni(eligible.map(([id]) => id), null, true),
     });
   });
@@ -330,7 +330,7 @@ function doMarkAlumni(companyIds, companyName, isBulk) {
         setTimeout(() => location.reload(), 1000);
       }).fail(xhr => {
         if (xhr.status === 422 && xhr.responseJSON?.message) {
-          releaseWarningAlert({ title: i18n.warning, message: xhr.responseJSON.message });
+          releaseAlert('warning', { hideCancel: true, title: i18n.warning, message: xhr.responseJSON.message });
         } else {
           releaseFailure(i18n.markAlumniError);
         }
@@ -351,7 +351,7 @@ function doMarkAlumni(companyIds, companyName, isBulk) {
         const firstFail = failed[0];
 
         if (firstFail.xhr.status === 422 && firstFail.xhr.responseJSON?.message) {
-          releaseWarningAlert({ title: i18n.warning, message: firstFail.xhr.responseJSON.message });
+          releaseAlert('warning', { hideCancel: true, title: i18n.warning, message: firstFail.xhr.responseJSON.message });
           if (results.some(r => r.ok)) location.reload();
         } else {
           releaseFailure(i18n.markAlumniError);
@@ -368,13 +368,11 @@ function doMarkAlumni(companyIds, companyName, isBulk) {
     return;
   }
 
-  releaseWarningAlert({
+  releaseAlert('warning', {
     title: i18n.markAlumniTitle,
     message: i18n.markAlumniConfirmation,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: i18n.confirmBtnText,
-    cancelButtonText: i18n.cancelBtnText,
+    confirmText: i18n.confirmBtnText,
+    cancelText: i18n.cancelBtnText,
     onConfirm: () => fire(companyIds),
   });
 }
@@ -389,7 +387,7 @@ $('#delete-button').on('click', function () {
 
   if (!cycleId) return;
 
-  releaseWarningAlert({
+  releaseAlert('warning', {
     title: i18n.deleteProgram,
     message: i18n.sureDeleteCycle,
     confirmText: i18n.yesDelete,

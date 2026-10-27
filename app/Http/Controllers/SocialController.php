@@ -17,7 +17,11 @@ use Illuminate\Support\Facades\Http;
  class SocialController extends Controller
  {
 
+    /** Socialite drivers this generic flow is configured for (Settings holds Google credentials only). */
+    private const PROVIDERS = ['google'];
+
     public function redirect($provider){
+        abort_unless(in_array($provider, self::PROVIDERS, true), 404);
     //   dd(config('services.LINKEDIN_CLIENT_ID'), config('services.LINKEDIN_CLIENT_SECRET'), config('services.LINKEDIN_REDIRECT_URI'));
         $settings = Settings::where('id', 1)->first();
         $config = [
@@ -29,6 +33,7 @@ use Illuminate\Support\Facades\Http;
         return Socialite::driver($provider)->redirect();
     }
     public function callback($provider){
+        abort_unless(in_array($provider, self::PROVIDERS, true), 404);
         $settings = Settings::where('id', 1)->first();
         $config = [
             'services.google.client_id' => $settings->GOOGLE_CLIENT_ID ?? '',
@@ -44,6 +49,7 @@ use Illuminate\Support\Facades\Http;
       return redirect()->to('/login')->withErrors(['social'=>'error']);
       }
       	auth()->login($user);
+        request()->session()->regenerate();
         return redirect()->to('/dashboard');
     }
  
@@ -78,19 +84,19 @@ use Illuminate\Support\Facades\Http;
     public function handleGoogleCallback(){
       
         try {
-            $guser = Socialite::driver('google')->stateless()->user();
+            $guser = Socialite::driver('google')->user();
             $finduser = User::where('google_id', $guser->id)->first();
             
 			if (!$finduser) {
                 $finduser = User::where('email', $guser->email)->first();
-//                if ($finduser){
-//                  return redirect()->to('/login')->withErrors(['social'=>'error']);
-//                }
-
-                // $finduser->update(['google_id'=> $guser->id,'email_verified_at' => now()]);
+                // Only sign in to an existing account by email when Google vouches for that address.
+                if ($finduser && !$this->providerVerifiedEmail($guser->user ?? [])) {
+                    return redirect()->to('/login')->withErrors(['social' => 'error']);
+                }
             }
             if($finduser){
               	auth()->login($finduser);
+                request()->session()->regenerate();
                 return redirect('/dashboard');
             }else{
                 $name = explode(" ",$guser->name);
@@ -105,23 +111,22 @@ use Illuminate\Support\Facades\Http;
 				$newUser->allotRole('Registered');
                 event(new WebMessage('NewUser', $guser->name, 1));
               	auth()->login($newUser);
+                request()->session()->regenerate();
                 return redirect('/dashboard');
             }
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return redirect('auth/google');
         }
     }
 
     // ===========> LinkedIn <==========
-    public function redirectToLinkedIn($data)
+    public function redirectToLinkedIn($data = null)
     {
-        
-        if($data == '2520'){
-            session(['role' => 'Mentor']);
-        }else{
-            session(['role' => 'Registered']);
-        }
+        // $data is kept for old links (/auth/linkedin/2521); it no longer picks a role.
+        // Every new LinkedIn account is a Founder, like the Google flow.
+        $state = Str::random(40);
+        session(['linkedin_oauth_state' => $state]);
     
         // dd(config('services.linkedin.client_id'), config('services.linkedin.client_secret'), config('services.linkedin.redirect'));
         $LINKEDIN_CLIENT_ID = config('services.linkedin.client_id');
@@ -136,7 +141,8 @@ use Illuminate\Support\Facades\Http;
         $url = $authorizationUrl . '?response_type=code'
             . '&client_id=' . $clientId
             . '&redirect_uri=' . urlencode($redirectUri)
-            . '&scope=' . urlencode($scope);
+            . '&scope=' . urlencode($scope)
+            . '&state=' . urlencode($state);
             
         return redirect($url);
     }
@@ -146,6 +152,10 @@ use Illuminate\Support\Facades\Http;
         
         if (!$request->has('code')) {
             return redirect()->route('login')->with('error', 'Authorization code is missing');
+        }
+        $expectedState = (string) session()->pull('linkedin_oauth_state', '');
+        if ($expectedState === '' || !hash_equals($expectedState, (string) $request->get('state'))) {
+            return redirect()->route('login')->with('error', 'Unable to authenticate');
         }
         $LINKEDIN_CLIENT_ID = config('services.linkedin.client_id');
         $LINKEDIN_CLIENT_SECRET = config('services.linkedin.client_secret');
@@ -179,10 +189,20 @@ use Illuminate\Support\Facades\Http;
                   if ($user == null) {
                       // حاول العثور على المستخدم باستخدام البريد الإلكتروني
                       $user = User::where('email', $userInfo['email'] ?? null)->first();
-                      if ($user == null) {
-                          // إذا لم يتم العثور على المستخدم، قم بإنشاء مستخدم جديد
-                          $user = new User;
+                      if ($user != null) {
+                          // Existing account: link it only when LinkedIn vouches for the address,
+                          // and never touch its profile or roles.
+                          if (!$this->providerVerifiedEmail($userInfo)) {
+                              return redirect()->route('login')->with('error', 'Unable to authenticate');
+                          }
+                          $user->linkedin_id = $userInfo['sub'] ?? '';
+                          $user->save();
+                          auth()->login($user);
+                          request()->session()->regenerate();
+                          return redirect('/dashboard');
                       }
+                      // إذا لم يتم العثور على المستخدم، قم بإنشاء مستخدم جديد
+                      $user = new User;
                       // تعيين بيانات المستخدم
                       $user->first_name_en = $userInfo['given_name'] ?? '';
                       $user->last_name_en = $userInfo['family_name'] ?? '';
@@ -200,25 +220,33 @@ use Illuminate\Support\Facades\Http;
                           $user->email_verified_at = now();
                       }
                       $user->save();
-                      $user->allotRole(session('role'));
+                      $user->allotRole('Registered');
                   } else {
                       // تحديث linkedin_id إذا تم العثور على المستخدم
                       $user->linkedin_id = $userInfo['sub'] ?? '';
                       $user->save();
                   }
                     auth()->login($user);
-                    session()->forget('role');
+                    request()->session()->regenerate();
                     return redirect('/dashboard');
                 }
             }
     
             return redirect()->route('login')->with('error', $response->json()['error_description'] ?? 'Unable to authenticate');
         } catch (\Exception $e) {
-          dd($e);
+            report($e);
             return redirect()->route('login')->with('error', 'An unexpected error occurred');
         }
     }
     
+    /** OIDC-style claim from Google/LinkedIn: did the provider verify this email address? */
+    private function providerVerifiedEmail(array $claims): bool
+    {
+        $verified = $claims['email_verified'] ?? $claims['verified_email'] ?? false;
+
+        return $verified === true || $verified === 'true' || $verified === 1 || $verified === '1';
+    }
+
     private function getUserInfo($accessToken)
     {
         // طلب للحصول على بيانات المستخدم

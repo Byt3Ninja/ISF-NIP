@@ -2,13 +2,15 @@
 
 namespace App;
 
+use App\Casts\PlatformDateTime;
 use Illuminate\Database\Eloquent\Model;
 
 class MentorshipRequest extends Model
 {
     protected $table = 'mentorship_requests';
     protected $guarded = ['id', 'created_at', 'updated_at'];
-    protected $casts = ['zoom_date'  => 'date:Y-m-d H:i'];
+    // GV-9566: wall-clock in the organization's platform zone, see PlatformDateTime.
+    protected $casts = ['zoom_date' => PlatformDateTime::class . ':Y-m-d H:i,organization_id'];
 
     public function getCodeAttribute(){
         return "M-".$this->mentor->id.'-'.$this->user->id.'-'.$this->id;

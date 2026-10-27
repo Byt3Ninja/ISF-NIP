@@ -29,7 +29,7 @@
     }
 
     .circle {
-      stroke: rgba(115, 103, 240, 0.9);
+      stroke: rgba(var(--bs-primary-rgb), 0.9);
       /* Progress color */
       transition: stroke-dasharray 0.3s ease;
     }

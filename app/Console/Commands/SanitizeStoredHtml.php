@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  *   - cycle_custom_pages.content     (CycleCustomPagesController add/update)
  *   - questions_bank.question        (QuestionsBankController store/update)
  *   - documentations.content_ar/en   (DocumentationController store/update)
+ *   - organization_custom_sections.content          (OrganizationCustomSectionService)
+ *   - landing_page_custom_sections.content/_ar      (LandingPageCustomSectionService)
  *
  * The command is idempotent: it only writes a row when the sanitized value
  * actually differs from the stored value, so re-running it is a no-op. Run with
@@ -45,6 +47,8 @@ class SanitizeStoredHtml extends Command
         ['table' => 'cycle_custom_pages', 'key' => 'id', 'columns' => ['content']],
         ['table' => 'questions_bank',     'key' => 'id', 'columns' => ['question']],
         ['table' => 'documentations',     'key' => 'id', 'columns' => ['content_ar', 'content_en']],
+        ['table' => 'organization_custom_sections', 'key' => 'id', 'columns' => ['content']],
+        ['table' => 'landing_page_custom_sections', 'key' => 'id', 'columns' => ['content', 'content_ar']],
     ];
 
     /**

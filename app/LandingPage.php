@@ -42,6 +42,9 @@ class LandingPage extends Model
         'hero_title_tag_ar',
         'hero_description',
         'hero_description_ar',
+        'hero_cta_text',
+        'hero_cta_text_ar',
+        'hero_cta_link',
         'hero_image',
         // About Us
         'about_is_enabled',
@@ -70,6 +73,12 @@ class LandingPage extends Model
         'programs_description',
         'programs_description_ar',
         'programs_order',
+        // Branding
+        'branding_gradient_start',
+        'branding_gradient_middle',
+        'branding_gradient_end',
+        'branding_button_bg',
+        'branding_button_text',
     ];
 
     protected $casts = [
@@ -134,6 +143,61 @@ class LandingPage extends Model
         $mandatory = $isAr
             ? [$this->about_title_ar, $this->about_title_tag_ar, $this->about_description_ar]
             : [$this->about_title, $this->about_title_tag, $this->about_description];
+
+        foreach ($mandatory as $value) {
+            if (trim((string) $value) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Whether the How It Works section should render on the public landing
+     * page for the given language. It must be enabled and have all mandatory
+     * fields (title, title tag, description) filled for that language.
+     *
+     * @param bool $isAr Render language is Arabic
+     * @return bool
+     */
+    public function isHowRenderable($isAr = false)
+    {
+        if (!$this->how_is_enabled) {
+            return false;
+        }
+
+        $mandatory = $isAr
+            ? [$this->how_title_ar, $this->how_title_tag_ar, $this->how_description_ar]
+            : [$this->how_title, $this->how_title_tag, $this->how_description];
+
+        foreach ($mandatory as $value) {
+            if (trim((string) $value) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Whether the Programs section should render on the public landing page
+     * for the given language. It must be enabled and have all mandatory
+     * fields (title, title tag, description) filled for that language.
+     * Callers must also make sure there is at least one program to list.
+     *
+     * @param bool $isAr Render language is Arabic
+     * @return bool
+     */
+    public function isProgramsRenderable($isAr = false)
+    {
+        if (!$this->programs_is_enabled) {
+            return false;
+        }
+
+        $mandatory = $isAr
+            ? [$this->programs_title_ar, $this->programs_title_tag_ar, $this->programs_description_ar]
+            : [$this->programs_title, $this->programs_title_tag, $this->programs_description];
 
         foreach ($mandatory as $value) {
             if (trim((string) $value) === '') {

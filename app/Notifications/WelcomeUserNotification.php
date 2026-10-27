@@ -3,9 +3,12 @@
 namespace App\Notifications;
 
 use App\Broadcasting\WhatsAppChannel;
+use App\Settings;
 use App\Services\WhatsAppService;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
+use Throwable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -13,10 +16,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class WelcomeUserNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
  
     public $user;
-    public $password;
 
     public WhatsAppService $whatsAppService;
 
@@ -26,10 +28,18 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct($user, $password)
+    public function __construct($user)
     {
+        // No password: the mail signs the user in with a magic link, and a queued
+        // notification must not serialize a plaintext password into the jobs table.
         $this->user = $user;
-        $this->password = $password;
+
+        // The user's own profile language; a new user has none yet, so they
+        // get the platform default language chosen in the settings. Laravel
+        // renders the whole notification (subject, view, layout) in it.
+        $setting = Settings::first();
+        $platformLocale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $this->locale = in_array($user->language, ['en', 'ar'], true) ? $user->language : $platformLocale;
     }
 
     /**
@@ -62,6 +72,15 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
@@ -72,10 +91,17 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
         $from = $this->getFromAddress($smtpSettings);
         // Always the platform's own branding (logo/name), never the user's
         // organization -- SMTP routing still uses the org, above.
-        $orgData = $this->buildEmailOrganizationData(null);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
         $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+
+        $firstName = $this->locale === 'ar' ? trim((string) $this->user->first_name_ar) : '';
+        $lastName = $this->locale === 'ar' ? trim((string) $this->user->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $this->user->first_name_en);
+            $lastName = trim((string) $this->user->last_name_en);
+        }
 
         return (new MailMessage)
             ->from(config('mail.from.address'), config('mail.from.name'))
@@ -83,6 +109,7 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
             ->view('emails.welcome-email', array_merge([
                 'user'          => $this->user,
                 'magicLoginUrl' => $magicLoginUrl,
+                'welcomeRecipientName' => trim($firstName . ' ' . $lastName),
             ], $orgData));
     }
 
@@ -129,5 +156,12 @@ class WelcomeUserNotification extends Notification implements ShouldQueue
         return [
             'message' => __('notifications.welcome.database')
         ];
+    }
+
+    /** Queued: when the worker gives up, free the welcome slot so it can be sent again. */
+    public function failed(Throwable $exception): void
+    {
+        $this->releaseClaim();
+        report($exception);
     }
 }

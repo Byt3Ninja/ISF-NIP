@@ -345,9 +345,9 @@
       return;
     }
 
-    // Show confirmation dialog (assuming releaseWarningAlert is globally available)
-    if (typeof releaseWarningAlert === 'function') {
-      releaseWarningAlert({
+    // Show confirmation dialog (assuming releaseAlert is globally available)
+    if (typeof releaseAlert === 'function') {
+      releaseAlert('warning', {
         title: LANG.warning || 'Warning',
         message: LANG.confirmDelete || 'Are you sure you want to delete this section?',
         confirmColor: 'danger',
@@ -378,7 +378,7 @@
         }
       });
     } else {
-      // Fallback if releaseWarningAlert is not available
+      // Fallback if releaseAlert is not available
       if (confirm(LANG.confirmDelete || 'Are you sure you want to delete this section?')) {
         const quillEl = $card.find('.cs-quill-editor')[0];
         if (quillEl && quillMap.has(quillEl)) quillMap.delete(quillEl);

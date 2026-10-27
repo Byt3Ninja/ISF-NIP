@@ -3,358 +3,188 @@
 namespace App\Notifications;
 
 use App\Company;
-use App\Settings;
-use App\Step;
-use App\Traits\ConfiguresSmtp;
-use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
-use App\Broadcasting\WhatsAppChannel;
-use App\Services\GlobalNotificationSettingsService;
-use Throwable;
 
 /**
- * Tells a startup that its screening meeting was newly scheduled, that its time
- * moved, or that it was cancelled (GV-8892 / GV-8893).
- *
- * Sent for both initial screening (stype 2) and final screening (stype 5).
+ * Tells a founder that their screening / final screening meeting was newly
+ * scheduled, rescheduled, or cancelled (GV-8892 / GV-8893, texts from GV-3295:
+ * GV-8517..GV-8547, GV-8589..GV-8619, GV-8661..GV-8686, GV-8729..GV-8759).
  *
  * With interval scheduling each startup's slot is derived from its POSITION in
- * the panel's company list, so adding, removing or reordering startups reflows
- * the times of everyone after the edit — not just the startup the admin
- * touched. The caller diffs the before/after slots and hands this class only
- * the startups whose time actually changed; this class just renders for
- * whoever it is given.
+ * the panel, so adding, removing or reordering startups reflows the times of
+ * everyone after the edit. The caller diffs the before/after slots and hands
+ * this class only the startups whose meeting actually changed.
  *
  * The notifiable is the company OWNER (the user whose `users.company_id` points
  * at the company), since a Company is not itself notifiable.
  */
-class StartupMeetingTimeChangedNotification extends Notification implements ShouldQueue
+class StartupMeetingTimeChangedNotification extends ScreeningMeetingNotification
 {
-    use Queueable, ConfiguresSmtp;
-
     /**
-     * The number of times the job may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 3;
-
-    /**
-     * The number of seconds to wait before retrying the job.
-     *
-     * @var int
-     */
-    public $backoff = 60;
-
-    /**
-     * The screening step whose schedule changed.
-     *
-     * Stored as ids, not models: this notification is queued, and serialized
-     * models would restore stale attributes (or fail outright if the step or
-     * company is edited before the worker picks the job up).
-     *
-     * @var int
-     */
-    public $stepId;
-
-    /**
-     * The startup whose meeting changed.
-     *
      * @var int
      */
     public $companyId;
 
     /**
-     * The slot start as 'Y-m-d H:i' — the NEW time when scheduled or
-     * rescheduled, or the time the cancelled meeting had been set for.
-     *
-     * Passed as a plain string rather than a Carbon so the queued payload does
-     * not depend on Carbon's serialization format.
-     *
-     * @var string|null
-     */
-    public $slotStart;
-
-    /**
-     * Which of the three events this is: 'scheduled', 'rescheduled' or
-     * 'cancelled'. Doubles as the lang-file key for every channel.
-     *
-     * Adding a startup to a NEW panel is not a reschedule — a panel is one
-     * meeting, so a second panel is an ADDITIONAL meeting (another round),
-     * leaving any existing one exactly where it was. Telling the founder their
-     * meeting "has been rescheduled" would read as the first one having moved,
-     * and they would not attend it.
-     *
-     * @var string
-     */
-    public $variant;
-
-    /**
-     * Whether the meeting was cancelled rather than moved.
-     *
-     * Kept as a derived property because the email blade branches on it for
-     * the accent colour and the "new meeting time" panel.
+     * Kept for jobs queued before $variant existed, which restore with only
+     * this flag set.
      *
      * @var bool
      */
     public $cancelled;
 
     /**
-     * @param  string  $variant  'scheduled', 'rescheduled' or 'cancelled'. Also
-     *                           accepts the legacy boolean $cancelled flag.
+     * The argument order is kept from the original signature so jobs already on
+     * the queue still construct the same way; new arguments are appended.
+     *
+     * @param  string|bool  $variant  'scheduled', 'rescheduled' or 'cancelled' (or the legacy $cancelled flag)
      */
-    public function __construct(int $stepId, int $companyId, ?string $slotStart, $variant = 'rescheduled')
-    {
-        $this->stepId = $stepId;
-        $this->companyId = $companyId;
-        $this->slotStart = $slotStart;
+    /**
+     * @var array<int, int>|null
+     */
+    public $judgeIds;
 
-        // Tolerate the previous bool signature: queued jobs serialized before a
-        // deploy restore with a boolean here and must still render.
+    public function __construct(
+        int $stepId,
+        int $companyId,
+        ?string $slotStart,
+        $variant = 'rescheduled',
+        ?string $slotEnd = null,
+        ?string $meetingLink = null,
+        ?string $passcode = null,
+        bool $sendEmail = true,
+        ?array $judgeIds = null
+    ) {
         if (is_bool($variant)) {
             $variant = $variant ? 'cancelled' : 'rescheduled';
         }
 
-        $this->variant = in_array($variant, ['scheduled', 'rescheduled', 'cancelled'], true)
-            ? $variant
-            : 'rescheduled';
+        $this->stepId = $stepId;
+        $this->companyId = $companyId;
+        $this->slotStart = $slotStart;
+        $this->slotEnd = $slotEnd;
+        $this->meetingLink = $meetingLink;
+        $this->passcode = $passcode;
+        $this->sendEmail = $sendEmail;
+        $this->variant = in_array($variant, ['scheduled', 'rescheduled', 'cancelled'], true) ? $variant : 'rescheduled';
         $this->cancelled = $this->variant === 'cancelled';
+        $this->judgeIds = $judgeIds;
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
+     * Whether this is a Final Screening (stype 5) session, as opposed to
+     * Initial Screening (stype 2) -- the two stages share this class, but the
+     * literal "Final Screening Session" wording and the judges list/CTA are
+     * specific to final screening only.
      */
-    public function via(object $notifiable): array
+    protected function isFinalStage(): bool
     {
-        $org = $notifiable->organization;
-        $smtpSettings = $org?->organizationSettings;
-
-        // Configure SMTP if settings exist
-        $this->configureSmtp($smtpSettings);
-
-        // Organization channel toggles (default to true when not configured)
-        $orgAcceptEmail = $smtpSettings?->accept_email ?? true;
-        $orgAcceptWhatsapp = $smtpSettings?->accept_whatsapp ?? true;
-        $orgAcceptPusher = $smtpSettings?->accept_pusher ?? true;
-
-        $channels = [];
-
-        if (GlobalNotificationSettingsService::isWhatsAppEnabled()
-            && $orgAcceptWhatsapp
-            && $notifiable->accept_whatsapp) {
-            $channels[] = WhatsAppChannel::class;
-        }
-
-        if (GlobalNotificationSettingsService::isPusherEnabled()
-            && $orgAcceptPusher
-            && $notifiable->accept_pusher) {
-            $channels[] = 'broadcast';
-        }
-
-        if (GlobalNotificationSettingsService::isEmailEnabled()
-            && $orgAcceptEmail
-            && $notifiable->accept_email) {
-            $channels[] = 'mail';
-        }
-
-        // Always store in database for audit/history if any channels are active
-        if (!empty($channels)) {
-            $channels[] = 'database';
-        }
-
-        return $channels;
+        return (int) ($this->step()?->stype) === 5;
     }
 
     /**
-     * Get the mail representation of the notification.
+     * A founder's first booking on an Initial Screening (stype 2) panel, which
+     * has its own literal "Screening Session" template.
      */
-    public function toMail(object $notifiable): MailMessage
+    protected function isInitialScheduled(): bool
     {
-        $setting = Settings::first();
-        $platformName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
-        $org = $notifiable->organization;
-        $smtpSettings = $org?->organizationSettings;
-
-        $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
-
-        $this->configureSmtp($smtpSettings);
-
-        // Same rule as the judge notification: apply the platform default
-        // language explicitly. User implements HasLocalePreference, so Laravel
-        // otherwise restores the recipient's own language around this queued
-        // job, and it must run before ->view() because the blade and
-        // emails/layout/header read app()->getLocale() lazily at render time.
-        app()->setLocale($this->resolveLocale($setting, $notifiable));
-
-        $step = Step::with('cycle')->find($this->stepId);
-        $key = $this->variant;
-
-        return (new MailMessage)
-            ->from($from['address'], $from['name'])
-            ->subject(__('email.startup_meeting_changed_email.' . $key . '.subject'))
-            ->view('emails.startup_meeting_time_changed', array_merge([
-                'recipient'     => $notifiable,
-                'startupName'   => $this->startupName(),
-                'programName'   => $this->programName($step, $platformName),
-                'meetingDate'   => $this->formatDate(),
-                'meetingTime'   => $this->formatTime(),
-                'cancelled'     => $this->cancelled,
-                'variant'       => $this->variant,
-                'dashboardUrl'  => url('/dashboard'),
-                'platformName'  => $platformName,
-            ], $orgData));
+        return !$this->isFinalStage() && $this->variant === 'scheduled';
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toDatabase(object $notifiable): array
+    protected function judgeNames(): string
     {
-        $key = $this->variant;
+        if (empty($this->judgeIds)) {
+            return '';
+        }
+
+        return \App\User::whereIn('id', $this->judgeIds)
+            ->get()
+            ->map(fn ($u) => trim($u->name))
+            ->filter()
+            ->implode(', ');
+    }
+
+    protected function audience(): string
+    {
+        return 'founder';
+    }
+
+    protected function dashboardPath(): string
+    {
+        return '/dashboard';
+    }
+
+    protected function details(object $notifiable): array
+    {
+        $label = fn (string $key) => __('email.screening_meeting_email.label.' . $key, ['stage' => $this->stageName()]);
+
+        if ($this->variant === 'cancelled') {
+            return [
+                $label('step')    => $this->stepName(),
+                $label('startup') => $this->companyName(Company::find($this->companyId)),
+                $label('date')    => $this->formatDate($notifiable),
+                $label('time')    => $this->timeRange($notifiable),
+            ];
+        }
+
+        if ($this->isInitialScheduled()) {
+            return [
+                $label('judges')       => $this->judgeNames() ?: '-',
+                // Isolated left-to-right so the digits and AM/PM keep their order in an RTL email.
+                $label('date_time')    => "\u{2066}" . $this->formatDate($notifiable) . ', ' . $this->timeRange($notifiable) . "\u{2069}",
+                $label('session_link') => $this->meetingLink ?: '-',
+                $label('passcode')     => $this->passcode,
+            ];
+        }
+
+        $rows = [$label('step') => $this->stepName()];
+
+        // Judges are only meaningful (and only populated by the caller) for
+        // a Final Screening panel -- Initial Screening keeps its prior rows.
+        if ($this->isFinalStage()) {
+            $rows[$label('judges')] = $this->judgeNames();
+        }
+
+        return $rows + [
+            $label('date')         => $this->formatDate($notifiable),
+            $label('time')         => $this->timeRange($notifiable),
+            $label('meeting_link') => $this->meetingLink,
+            $label('passcode')     => $this->passcode,
+        ];
+    }
+
+    protected function key(string $part): string
+    {
+        // The literal "Final Screening Session" template applies only to a
+        // founder's final-screening session being scheduled/rescheduled; every
+        // other combination (initial screening, judge audience, cancelled)
+        // keeps the shared generic wording.
+        if ($this->isFinalStage() && in_array($this->variant, ['scheduled', 'rescheduled'], true)) {
+            return 'email.screening_meeting_email.founder.' . $this->variant . '_final.' . $part;
+        }
+
+        if ($this->isInitialScheduled()) {
+            return 'email.screening_meeting_email.founder.scheduled_initial.' . $part;
+        }
+
+        return parent::key($part);
+    }
+
+    protected function cta(object $notifiable): ?array
+    {
+        if ($this->isInitialScheduled()) {
+            return empty($this->meetingLink) ? null : [
+                'label' => __('email.screening_meeting_email.screening_join_button'),
+                'url'   => $this->meetingLink,
+            ];
+        }
+
+        if (!$this->isFinalStage() || $this->variant === 'cancelled' || empty($this->meetingLink)) {
+            return null;
+        }
 
         return [
-            'message' => __('email.startup_meeting_changed_email.' . $key . '.database', [
-                'date' => $this->formatDate(),
-                'time' => $this->formatTime(),
-            ]),
+            'label' => __('email.screening_meeting_email.final_join_button'),
+            'url'   => $this->meetingLink,
         ];
-    }
-
-    /**
-     * WhatsApp message content.
-     */
-    public function toWhatsapp(object $notifiable): string
-    {
-        $step = Step::with('cycle')->find($this->stepId);
-        $key = $this->variant;
-
-        return __('email.startup_meeting_changed_email.' . $key . '.whatsapp', [
-            'name'         => trim($notifiable->name ?? ''),
-            'program_name' => $this->programName($step, config('app.name')),
-            'date'         => $this->formatDate(),
-            'time'         => $this->formatTime(),
-        ]);
-    }
-
-    /**
-     * Broadcast payload.
-     */
-    public function toBroadcast(object $notifiable): BroadcastMessage
-    {
-        $key = $this->variant;
-
-        return new BroadcastMessage([
-            'subject' => __('email.startup_meeting_changed_email.' . $key . '.subject'),
-            'message' => __('email.startup_meeting_changed_email.' . $key . '.database', [
-                'date' => $this->formatDate(),
-                'time' => $this->formatTime(),
-            ]),
-            'url'     => '/dashboard',
-            'time'    => now()->toDateTimeString(),
-        ]);
-    }
-
-    /**
-     * Decide the language this email renders in.
-     *
-     * Order: the platform default from general settings, then the recipient's
-     * own `users.language`, then the app locale — matching
-     * JudgeAssignedToScreeningNotification, so both screening emails behave the
-     * same way. The recipient's preference sits in the middle because most rows
-     * have `language` NULL.
-     */
-    protected function resolveLocale($setting, object $notifiable): string
-    {
-        $candidates = [
-            $setting?->Default_Language,
-            $notifiable->language ?? null,
-            config('app.locale', 'en'),
-        ];
-
-        foreach ($candidates as $locale) {
-            if (in_array($locale, ['en', 'ar'], true)) {
-                return $locale;
-            }
-        }
-
-        return 'en';
-    }
-
-    /**
-     * The program (cycle) name in the active locale, falling back to the
-     * platform name when the step has no cycle.
-     */
-    protected function programName(?Step $step, string $fallback): string
-    {
-        $title = $step?->cycle?->title;
-
-        return filled($title) ? $title : $fallback;
-    }
-
-    /**
-     * The startup's own name, looked up lazily so the queued payload stays a
-     * plain id. Blank when the company has since been deleted — the email still
-     * makes sense addressed to the owner by name.
-     */
-    protected function startupName(): string
-    {
-        $company = Company::find($this->companyId);
-
-        return trim((string) ($company->title ?? ''));
-    }
-
-    /**
-     * The meeting date, or an em dash when the slot is unknown.
-     */
-    protected function formatDate(): string
-    {
-        return $this->slot()?->format('d-m-Y') ?? '—';
-    }
-
-    /**
-     * The meeting start time, or an em dash when the slot is unknown.
-     */
-    protected function formatTime(): string
-    {
-        return $this->slot()?->format('h:i A') ?? '—';
-    }
-
-    /**
-     * Parse the stored slot string, tolerating a malformed value rather than
-     * failing the whole notification over a display field.
-     */
-    protected function slot(): ?Carbon
-    {
-        if (empty($this->slotStart)) {
-            return null;
-        }
-
-        try {
-            return Carbon::parse($this->slotStart);
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * Handle a job failure.
-     */
-    public function failed(Throwable $exception): void
-    {
-        Log::error('Startup meeting time change notification failed after all retries', [
-            'error'      => $exception->getMessage(),
-            'step_id'    => $this->stepId,
-            'company_id' => $this->companyId,
-        ]);
     }
 }

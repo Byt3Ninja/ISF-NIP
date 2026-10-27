@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Model;
 
 class LandingPageCustomSection extends Model
@@ -28,5 +29,16 @@ class LandingPageCustomSection extends Model
     public function landingPage()
     {
         return $this->belongsTo(LandingPage::class);
+    }
+
+    /** Rich-text bodies for {!! !!} output; also clean rows saved before sanitize-on-write. */
+    public function getSafeContentAttribute(): string
+    {
+        return HtmlSanitizer::clean($this->content);
+    }
+
+    public function getSafeContentArAttribute(): string
+    {
+        return HtmlSanitizer::clean($this->content_ar);
     }
 }

@@ -9,11 +9,9 @@ use App\User;
 use App\Country;
 use App\State;
 use App\City;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CompanyRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected CompanyRepository $companyRepository;
 

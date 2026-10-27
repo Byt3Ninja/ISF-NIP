@@ -19,6 +19,22 @@
           <input type="hidden" name="cycle_id" id="addCycleID">
           <input type="hidden" name="user_id" id="addUserID">
 
+          <!-- Startup Selection (For Admin/Tenant Admin) -->
+          <div class="mb-4 d-none" id="startup-select-container">
+            <div class="form-group">
+              <label for="startup_user_id" class="form-label fw-semibold fs-6 mb-1">
+                <i class="ti ti-building text-primary me-2"></i>
+                {{ $l == 'ar' ? 'اختر الشركة الناشئة' : 'Select Startup' }}:
+              </label>
+              <select class="form-select border-2" id="startup_user_id" name="user_id">
+                <option value="">{{ $l == 'ar' ? 'اختر شركة ناشئة' : 'Select a startup' }}</option>
+              </select>
+              <div class="invalid-feedback startup-error" style="display:none;">
+                {{ $l == 'ar' ? 'يرجى اختيار شركة ناشئة.' : 'Please select a startup.' }}
+              </div>
+            </div>
+          </div>
+
           <!-- Mentor Schedule Section -->
           <div class="mb-4" id="mentor-schedule-container">
             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -36,7 +52,7 @@
             </div>
           </div>
 
-          <!-- Date and Time Selection (Wrapped in Card) -->
+          <!-- Date and Time Selection (Predefined Slots) -->
           <div class="card border-0 mb-4">
             <div class="card-body p-3">
               <!-- Title with Icon -->
@@ -45,38 +61,21 @@
                 <h5 class="text-dark mb-0 fw-semibold">{{ $l == 'ar' ? 'التاريخ والوقت' : 'Date & Time' }}</h5>
               </div>
               <div class="row">
-                <div class="col-12">
-                  <div class="form-group mb-4">
-                    <label for="date" class="form-label fs-6 fw-semibold mb-1">{{__('dashboard.Date')}}:</label>
-                    <div class="input-group input-group-merge">
-                      <input type="text" class="form-control" id="flatpickr-datetimeLimit"
-                        placeholder="{{__('dashboard.Date')}}" name="date" required>
-                      <div class="input-group-text">
-                        <i class="ti ti-calendar text-secondary"></i>
-                      </div>
-                    </div>
-                    <div class="invalid-feedback date-error">{{ __('admin.Please_select_date') }}</div>
-                  </div>
+                <!-- Left Side: Inline Calendar -->
+                <div class="col-md-6 mb-4">
+                  <label class="form-label fs-6 fw-semibold mb-2">{{ $l == 'ar' ? 'اختر التاريخ' : 'Select Date' }}:</label>
+                  <div id="inline-calendar" class="d-flex justify-content-center"></div>
+                  <input type="hidden" id="flatpickr-datetimeLimit" name="date" required>
+                  <div class="invalid-feedback date-error" style="display:none;">{{ __('admin.Please_select_date') }}</div>
                 </div>
-                <div class="col-6">
-                  <div class="form-group mb-4">
-                    <label for="from" class="form-label fw-semibold fs-6 mb-1">
-                      {{__('dashboard.From')}}:
-                    </label>
-                    <select class="select2 form-select" id="timeFrom" name="timeFrom">
-                    </select>
-                    <div class="invalid-feedback from-error">{{ __('admin.Please_select_from_time') }}</div>
+                
+                <!-- Right Side: Slots Checklist -->
+                <div class="col-md-6 mb-4">
+                  <label class="form-label fs-6 fw-semibold mb-2">{{ $l == 'ar' ? 'المواعيد المتاحة' : 'Available Slots' }}:</label>
+                  <div id="slots-container" class="border rounded p-3 bg-light" style="max-height: 350px; overflow-y: auto;">
+                    <p class="text-muted mb-0 text-center py-4">{{ $l == 'ar' ? 'الرجاء اختيار تاريخ لعرض المواعيد المتاحة' : 'Please select a date to view available slots' }}</p>
                   </div>
-                </div>
-                <div class="col-6">
-                  <div class="form-group mb-4">
-                    <label for="to" class="form-label fw-semibold fs-6 mb-1">
-                      {{__('dashboard.To')}}:
-                    </label>
-                    <select class="select2 form-select" id="timeTo" name="timeTo">
-                    </select>
-                    <div class="invalid-feedback to-error">{{ __('admin.Please_select_to_time') }}</div>
-                  </div>
+                  <div class="invalid-feedback slots-error" style="display:none;"></div>
                 </div>
               </div>
             </div>
@@ -121,7 +120,7 @@
                 <i class="ti ti-notes me-2 text-primary"></i>
                 {{__('dashboard.Add note')}}:
               </label>
-              <textarea class="form-control form-control-lg border-2" id="notes" name="notes" rows="4"
+              <textarea class="form-control form-control-lg border-2" id="notes" name="notes" rows="4" maxlength="{{ $mentorshipNotesMaxLength }}"
                 placeholder="{{__('dashboard.Write your note here')}}"></textarea>
             </div>
           </div>

@@ -259,8 +259,8 @@
 
   function deleteRecord(event, button) {
     event.preventDefault();
-    if (typeof releaseWarningAlert === 'function') {
-      releaseWarningAlert({
+    if (typeof releaseAlert === 'function') {
+      releaseAlert('warning', {
         title: '{{ __("admin.Confirm") }}',
         message: "{{ __('startup.delete_customer_growth_confirm') }}",
         confirmText: '{{ __("admin.Yes") }}',

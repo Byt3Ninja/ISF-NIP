@@ -4,7 +4,7 @@
  */
 
 $tabs = [
-  ['id' => 'founders', 'label' => 'Founders', 'icon' => 'users'],
+  ['id' => 'founders', 'label' => 'Founders', 'icon' => 'user-dollar'],
   ['id' => 'investors', 'label' => 'investors', 'icon' => 'building-bank'],
   ['id' => 'shareholders', 'label' => 'shareholders', 'icon' => 'chart-pie'],
 ];
@@ -61,7 +61,7 @@ $foundersCount = count($foundersPayload);
     <div class="tab-pane fade show active" id="founders-pane" role="tabpanel">
       <div class="row align-items-center mb-8">
         <div class="col-md-4">
-          <h5 class="mb-4 mb-md-0">{{ __('admin.Founders') }} (<span id="count-founders">{{ $foundersCount }}</span>)</h5>
+          <h5 class="mb-4 mb-md-0">{{ __('admin.Add_Cofounders') }} (<span id="count-founders">{{ $foundersCount }}</span>)</h5>
         </div>
         <div class="col-md-5">
           <div class="input-group input-group-merge">

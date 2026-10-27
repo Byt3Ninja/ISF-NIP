@@ -5,6 +5,11 @@
 @stop
 
 @section('content')
+@php
+    // GV-9566: timerdate is wall-clock typed in the platform zone; read it as that
+    // instant (not in the server zone) for the open/closed checks and the countdown.
+    $eventAt = \App\Services\TimezoneService::wallClock($event->timerdate);
+@endphp
 <link rel="stylesheet" href="/css/jquery.countdown.css" />
 <div class="inner-banner has-base-color-overlay text-center" style="background: url(/images/background/entrepreneur.jpg);">
     <div class="container">
@@ -51,12 +56,12 @@ Registration failed, Your Email already registered.
                     <div class="default-form-area">
                         {!!$event->{'body_'.$l} !!}
                        <br />
-                        @if (now() <= $event->timerdate)
+                        @if ($eventAt && now() <= $eventAt)
                         <div class="link_btn center">
                             <a href="#register" class="thm-btn">{{ __('Register now')}}</a>
                         </div>
                         <br />
-                        @if($event->showtimer and $event->timerdate <= now()->addDays(98))
+                        @if($event->showtimer and $eventAt and $eventAt <= now()->addDays(98))
                         <div class="section-title">
                             <h4>{{ __('Time remining')}}</h4>
                         </div>
@@ -78,7 +83,7 @@ Registration failed, Your Email already registered.
                         </div>
                     </div>
                         @endif
-                        @if ($event->timerdate >= now())
+                        @if ($eventAt && $eventAt >= now())
                         <a id="register" data-hs-anchor="true"></a>
                         <br />
                         <div class="row">
@@ -160,7 +165,8 @@ Registration failed, Your Email already registered.
         <script>
             $(function(){
                 var note = $('#note'),
-                    ts = new Date("{{date('Y',strtotime($event->timerdate))}}-{{date('m',strtotime($event->timerdate))}}-{{date('d',strtotime($event->timerdate))}}T{{date('H',strtotime($event->timerdate))}}:{{date('i',strtotime($event->timerdate))}}:00"),
+                    {{-- GV-9566: ISO-8601 instant with offset; a bare wall-clock was read in the browser's zone --}}
+                    ts = new Date("{{ $eventAt?->toIso8601String() }}"),
                     newYear = true
                 if((new Date()) > ts){
 

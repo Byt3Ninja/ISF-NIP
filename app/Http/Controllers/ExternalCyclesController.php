@@ -7,8 +7,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
 use App\Services\WhatsAppService;
+use App\Services\TimezoneService;
+use App\Services\PlatformBrandingService;
 use App\Services\FormSectionStructurer;
 use Illuminate\Support\Facades\DB;
+use App\Support\NotificationClaim;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -112,9 +115,11 @@ class ExternalCyclesController extends Controller
 		if ($firstFormStep) {
 			$stepStart = $firstFormStep->from ? \Carbon\Carbon::parse($firstFormStep->from) : null;
 			$stepEnd = $firstFormStep->to ? \Carbon\Carbon::parse($firstFormStep->to) : null;
-			$now = now();
+			// GV-9566: step dates are inclusive days in the program's platform zone
+			// (comparing now() with the `to` midnight closed it on its last morning).
+			$today = TimezoneService::platformToday(TimezoneService::forStep($firstFormStep->id));
 
-			$isOpen = ($stepStart === null || $now->gte($stepStart)) && ($stepEnd === null || $now->lte($stepEnd));
+			$isOpen = ($stepStart === null || $today >= $stepStart->format('Y-m-d')) && ($stepEnd === null || $today <= $stepEnd->format('Y-m-d'));
 			if (!$isOpen) {
 				return redirect()->to("/o/" . ($program->org_slug ?? $org_slug))->with('error', app()->getLocale() == 'ar' ? 'التقديم مغلق حالياً.' : 'Applications are currently closed.');
 			}
@@ -358,7 +363,8 @@ class ExternalCyclesController extends Controller
 
 				DB::beginTransaction();
 				try {
-					$password = Str::random(6);
+					// Never shown or mailed: the welcome email signs the founder in with a magic link.
+					$password = Str::random(40);
 					$request_token = Str::random(48);
 					$user = new User();
 					$user->fill([
@@ -385,9 +391,6 @@ class ExternalCyclesController extends Controller
 					$user->save();
 					$user->allotRole('registered');
 					// $user->sendEmailVerificationNotification();
-					if ($user->claimEmailSlot('user_welcome_sent_at')) {
-						$user->notify(new WelcomeUserNotification($user, $password));
-					}
 					$company = new Company();
 
                 	$company->name_en = $user->first_name_en . " " . $user->last_name_en;
@@ -471,20 +474,38 @@ class ExternalCyclesController extends Controller
                 			throw $th;
             			}
 
+        			}
+					DB::commit();
+
+					// Outbound messages leave only once the account and the join are committed:
+					// a failure above must not have emailed or messaged a user who doesn't exist.
+					// Nothing after the commit may throw into the catch below (its rollBack is
+					// for the open transaction), so failures here are reported, not rethrown.
+					try {
+						NotificationClaim::on('users', ['id' => $user->id], 'user_welcome_sent_at')
+							->run(fn (NotificationClaim $claim) => $user->notify((new WelcomeUserNotification($user))->withClaim($claim)));
+					} catch (\Throwable $th) {
+						report($th);
+					}
+
+					if( !in_array(env('APP_ENV', 'local'), ['local']) )
+					{
             			$phoneNumber = $user->country_code_w_a . $user->whatsapp;
             			$Massage = "Dear " . $user->name . ",
             				Congratulations! You have successfully joined the" . $data['cycle'] . ", 
             				We are excited to have you on board and look forward to supporting your journey.
             				Thanks from " . env('APP_NAME');
-						
+
 						if( $phoneNumber )
 						{
-							$whatsAppService = new WhatsAppService();
-							$result = $whatsAppService->sendMessage($phoneNumber, $Massage);
-							Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+							try {
+								$result = app(WhatsAppService::class)->sendMessage($phoneNumber, $Massage);
+								Log::info('Message sent to user: ' . $phoneNumber . ' Result: ' . json_encode($result));
+							} catch (\Throwable $th) {
+								report($th);
+							}
 						}
-        			}
-					DB::commit();
+					}
 
 					// Sent only once the join is committed, and once per program.
 					if( !in_array(env('APP_ENV', 'local'), ['local']) && $user->claimProgramJoinSlot((int) $program->id) )
@@ -520,6 +541,7 @@ class ExternalCyclesController extends Controller
 		$program = DB::table('cycles AS p')
 			->select([
 				'p.id AS id',
+				'p.organization_id',
 				'p.title',
 				'p.description',
 				'p.start',
@@ -562,12 +584,24 @@ class ExternalCyclesController extends Controller
 			}
 			$program->registration_start = $start . ' 00:00:00';
 			$program->registration_end = $end . ' 23:59:59';
+			// GV-9566: the window as real instants in the program's platform zone,
+			// for the page's Apply gate and its JS countdown.
+			$zone = TimezoneService::platform($program->organization_id ? (int) $program->organization_id : null);
+			$program->registration_starts_at = TimezoneService::wallClock($program->registration_start, $zone);
+			$program->registration_ends_at = TimezoneService::wallClock($program->registration_end, $zone);
 			$program->org = $l == 'ar' ? $program->ar_org_name : $program->en_org_name;
 			$program->ranges = date_ranges( $start, $end );
 
-			$program->start_color = preg_replace('/^#+/', '#', $program->start_color ?: '#6366f114');
-			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: '#0891b214');
-			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: '#6366f1');
+			// A program's own colors win; platform branding is the fallback (GV-9673).
+			$brandDefaults = PlatformBrandingService::programDefaults();
+			$program->start_color = preg_replace('/^#+/', '#', $program->start_color ?: $brandDefaults['start_color']);
+			$program->end_color = preg_replace('/^#+/', '#', $program->end_color ?: $brandDefaults['end_color']);
+			$program->main_color = preg_replace('/^#+/', '#', $program->main_color ?: $brandDefaults['main_color']);
+			$program->main_rgb = PlatformBrandingService::rgbOf($program->main_color);
+			// The hero tints start/end at one fixed strength (--hero-tint in the views); any alpha
+			// in the stored hex is ignored, since the wizard's picker hides it from the admin.
+			$program->start_rgb = PlatformBrandingService::rgbOf($program->start_color) ?? PlatformBrandingService::rgbOf($brandDefaults['start_color']);
+			$program->end_rgb = PlatformBrandingService::rgbOf($program->end_color) ?? PlatformBrandingService::rgbOf($brandDefaults['end_color']);
 		}
 		return $program;
 	}

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Organization;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,6 +16,13 @@ class MentorshipSessionFounderNotification extends Notification implements Shoul
 {
     use Queueable, ConfiguresSmtp;
 
+    /**
+     * The organization running the session; brands the email.
+     *
+     * @var Organization|null
+     */
+    public $organization;
+
     public $tries = 3;
     public $backoff = 60;
 
@@ -25,8 +33,9 @@ class MentorshipSessionFounderNotification extends Notification implements Shoul
      *
      * @param array $sessionData
      */
-    public function __construct(array $sessionData)
+    public function __construct(array $sessionData, ?Organization $organization = null)
     {
+        $this->organization = $organization;
         $this->sessionData = $sessionData;
     }
 
@@ -38,7 +47,7 @@ class MentorshipSessionFounderNotification extends Notification implements Shoul
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->organization ?? $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
         // Configure SMTP if settings exist
@@ -71,11 +80,11 @@ class MentorshipSessionFounderNotification extends Notification implements Shoul
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $org = $notifiable->organization;
+        $org = $this->organization ?? $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $locale = $notifiable->preferredLocale() === 'ar' ? 'ar' : 'en';
 
@@ -100,6 +109,7 @@ class MentorshipSessionFounderNotification extends Notification implements Shoul
                 'sessionType' => $this->sessionData['session_type'],
                 'location' => $this->sessionData['location'] ?? null,
                 'meetingLink' => $this->sessionData['meeting_link'] ?? null,
+                'passcode' => $this->sessionData['passcode'] ?? null,
             ], $orgData));
     }
 

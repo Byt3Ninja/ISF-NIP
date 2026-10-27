@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Casts\PlatformDateTime;
 use App\Like;
 
 use App\Traits\Auditable;
@@ -36,8 +37,9 @@ class Quizzes extends Model
 		'organization_id' => 'integer',
 		'training_id' => 'integer',
 		'description' => 'string',
-		'start' => 'datetime',
-		'end' => 'datetime',
+		// GV-9566: wall-clock in the organization's platform zone, see PlatformDateTime.
+		'start' => PlatformDateTime::class . ':,organization_id',
+		'end' => PlatformDateTime::class . ':,organization_id',
 		'time_limit' => 'double',
 		'attempts' => 'integer',
 		'retry_after' => 'string',

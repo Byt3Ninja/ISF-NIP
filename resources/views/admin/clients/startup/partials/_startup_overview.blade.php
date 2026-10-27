@@ -418,35 +418,42 @@
         @endif
       </div>
       <div class="card-body">
-        <ul class="nav widget-nav-tabs d-flex gap-2 border-0 pb-4 nav-tabs flex-nowrap overflow-auto" role="tablist">
+        <ul class="nav widget-nav-tabs d-flex flex-wrap gap-2 border-0 pb-4 nav-tabs" role="tablist">
           @foreach ($strategyTabs as $tab)
-            <li class="nav-item flex-grow-1">
-              <a
-                href="javascript:void(0);"
+            <li class="nav-item">
+              <a href="javascript:void(0);"
                 class="nav-link {{ $loop->first ? 'active' : '' }} d-flex flex-column align-items-center border"
-                data-bs-toggle="tab"
-                data-bs-target="#{{ $tab['id'] }}"
-                style="min-width: 150px;"
-              >
+                data-bs-toggle="tab" data-bs-target="#{{ $tab['id'] }}">
                 <div class="badge rounded bg-label-{{ $tab['color'] }} p-2">
                   <i class="ti {{ $tab['icon'] }} ti-md"></i>
                 </div>
-                <h6 class="mt-2 mb-0 small">{{ $tab['title'] }}</h6>
+
+                <h6 class="mt-2 mb-0 small text-center">
+                  {{ $tab['title'] }}
+                </h6>
               </a>
             </li>
           @endforeach
         </ul>
-
+      
         <div class="tab-content mt-4 border-0 p-0">
           @foreach ($strategyTabs as $tab)
             <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $tab['id'] }}">
               @if (!empty($tab['badge']))
                 <div class="mb-3 d-flex align-items-center">
-                  <span class="badge bg-label-{{ $tab['color'] }} px-3 py-2">{{ $tab['badge'] }}</span>
+                  <span class="badge bg-label-{{ $tab['color'] }} px-3 py-2">
+                    {{ $tab['badge'] }}
+                  </span>
                 </div>
               @endif
-              <h6 class="fw-bold">{{ $tab['heading'] }}</h6>
-              <p class="text-break {{ empty($tab['link']) ? 'mb-0' : '' }}" style="white-space: pre-line; word-break: break-word;">{{ $tab['value'] }}</p>
+
+              <h6 class="fw-bold mb-0">{{ $tab['heading'] }}</h6>
+
+              <p class="text-break {{ empty($tab['link']) ? 'mb-0' : '' }}"
+                style="white-space: pre-line; word-break: break-word;">
+                {{ $tab['value'] }}
+              </p>
+
               @if (!empty($tab['link']))
                 <a href="{{ $tab['link'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">
                   <i class="ti ti-link me-1"></i>

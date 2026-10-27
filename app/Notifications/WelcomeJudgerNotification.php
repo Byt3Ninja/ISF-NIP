@@ -4,7 +4,9 @@ namespace App\Notifications;
 
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
+use Throwable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -15,7 +17,7 @@ use App\Broadcasting\WhatsAppChannel;
 
 class WelcomeJudgerNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
 
     public $tries = 3;
     public $backoff = 60;
@@ -101,6 +103,15 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
@@ -110,7 +121,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
 
         $this->configureSmtp($smtpSettings);
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $platformName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
@@ -132,12 +143,6 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
                     'user'          => $notifiable,
                     'magicLoginUrl' => $notifiable->generateMagicLoginUrl(),
                 ], $orgData));
-
-            if (!empty($fromAddress)) {
-                $mail->from($fromAddress, $fromName);
-            }
-
-            return $mail;
         }
 
         $judgerName = $this->data['name'] ?? null;
@@ -153,9 +158,13 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
 
         // Platform-branded email: platform logo/name, never the organization's.
         // (SMTP routing above still uses the organization.)
-        $platformOrgData = $this->buildEmailOrganizationData(null);
+        $platformOrgData = $this->emailBrandingData();
 
-        $mail = (new MailMessage)
+        // One-time sign-in link for the judge (GV-7312); lost in the GV-7182 merge.
+        $magicLoginUrl = $notifiable->generateMagicLoginUrl();
+
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
             ->subject(Lang::get('email.judge_account_welcome_email.subject', [], $locale))
             ->view('emails.welcome_judger', array_merge([
                 'data'          => $this->data,
@@ -170,12 +179,6 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
                 'assignedBy'    => $this->data['assigned_by'] ?? null,
                 'magicLoginUrl' => $magicLoginUrl,
             ], $platformOrgData));
-
-        if (!empty($fromAddress)) {
-            $mail->from($fromAddress, $fromName);
-        }
-
-        return $mail;
     }
 
     /**
@@ -187,6 +190,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     {
         // The judge welcome email follows the platform's default language
         // (General Settings), not the recipient's personal preference.
+        $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
             ? $setting->Default_Language
             : 'en';
@@ -209,6 +213,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     {
         // The judge welcome email follows the platform's default language
         // (General Settings), not the recipient's personal preference.
+        $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
             ? $setting->Default_Language
             : 'en';
@@ -230,6 +235,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     {
         // The judge welcome email follows the platform's default language
         // (General Settings), not the recipient's personal preference.
+        $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
             ? $setting->Default_Language
             : 'en';
@@ -242,5 +248,12 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
             'message' => Lang::get("notifications.{$group}.broadcast", [], $locale),
             'time' => now()->toDateTimeString(),
         ]);
+    }
+
+    /** Queued: when the worker gives up, free the welcome slot so it can be sent again. */
+    public function failed(Throwable $exception): void
+    {
+        $this->releaseClaim();
+        report($exception);
     }
 }

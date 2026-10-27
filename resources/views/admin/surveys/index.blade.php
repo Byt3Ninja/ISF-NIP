@@ -343,12 +343,42 @@ if ($_user->hasAnyRole('mentor|Registered')) {
         requiredSelect.on('change', function() {
             table.column(3).search(this.value).draw();
         });
+        
+        $('.dataTables_filter .form-control').removeClass('form-control-sm');
+        $('.dataTables_length .form-select').removeClass('form-select-sm');
+            
+        const $wrapper = $(this.api().table().container());
+        $wrapper.find('.form-select, .dataTables_length select').each(function () {
+          const $this = $(this);
+          if ($this.hasClass('select2-hidden-accessible')) return;
+
+          const isLength = $this.closest('.dataTables_length').length > 0;
+
+          $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+          $this.select2({
+            dropdownParent: $this.parent(),
+            width: isLength ? '80px' : '100%',
+            minimumResultsForSearch: Infinity,
+          });
+
+          if (!isLength) {
+            $this.next('.select2-container').css({
+              'min-width': '150px',
+              'max-width': '200px'
+            });
+          }
+        });
       },
-      @if ($l === 'ar')
-        language: {
-          url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json'
-        },
-      @endif
+      language: {
+        url:
+          document.dir === 'rtl'
+            ? 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+            : 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json',
+        sLengthMenu: '_MENU_',
+        search: '',
+        searchPlaceholder: '{{ __('admin.Search') }}...',
+      },
     });
 
     // Export button click handlers
@@ -367,22 +397,15 @@ if ($_user->hasAnyRole('mentor|Registered')) {
       var token = '{{ csrf_token() }}';
       var id = $(this).data('id');
     
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary'
-        },
-        buttonsStyling: false
+        message: "{{ __('admin.Recover') }}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
       })
-      .then((result) => {
-        if (result.value) {
+      .then((ok) => {
+        if (ok) {
           $.post(url, {
               '_method': 'DELETE',
               '_token': token
@@ -390,13 +413,13 @@ if ($_user->hasAnyRole('mentor|Registered')) {
             function(response) {
               const row = table.row($('#survey-row-' + id));
               row.remove().draw();
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: "{{ __('admin.Deleted') }}!",
                 message: "{{ __('admin.DeletedSuccessfully') }}.",
               });
             }
           ).fail(function(error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}!",
               message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
             });
@@ -544,6 +567,29 @@ if ($_user->hasAnyRole('mentor|Registered')) {
           $('.dataTables_filter .form-control').removeClass('form-control-sm');
           $('.dataTables_length .form-select').removeClass('form-select-sm');
         }, 300);
+        
+        const $wrapper = $(this.api().table().container());
+        $wrapper.find('.form-select, .dataTables_length select').each(function () {
+          const $this = $(this);
+          if ($this.hasClass('select2-hidden-accessible')) return;
+
+          const isLength = $this.closest('.dataTables_length').length > 0;
+
+          $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+          $this.select2({
+            dropdownParent: $this.parent(),
+            width: isLength ? '80px' : '100%',
+            minimumResultsForSearch: Infinity,
+          });
+
+          if (!isLength) {
+            $this.next('.select2-container').css({
+              'min-width': '150px',
+              'max-width': '200px'
+            });
+          }
+        });
       }
     });
   });

@@ -16,6 +16,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewTrainingNotification;
+use App\Services\TimezoneService;
+use Carbon\Carbon;
 
 class SendTrainingNotificationJob implements ShouldQueue
 {
@@ -33,6 +35,11 @@ class SendTrainingNotificationJob implements ShouldQueue
     protected $trainer_email;
     protected $addOrEdit;
     protected $endDatetime;
+
+    /** Resolved in handle() (GV-9566): real instants and the step's platform zone. */
+    protected ?Carbon $startsAt = null;
+    protected ?Carbon $endsAt = null;
+    protected ?string $stepTimezone = null;
     protected $hostUrl;
 
     public function __construct($step, $trainingSession, $title, $datetime, $join_url, $address, $type, $lang = 'en', $trainer_name = null, $trainer_email = null, $addOrEdit, $endDatetime = null, $hostUrl = null)
@@ -111,7 +118,7 @@ class SendTrainingNotificationJob implements ShouldQueue
      * founder per training instance, and only when the platform email
      * channel is enabled for them.
      */
-    protected function notifyFoundersOfNewTraining($step, $companies, array $extra = []): void
+    protected function notifyFoundersOfNewTraining($step, $companies, array $extra = [], bool $withTimes = false): void
     {
         if ($this->addOrEdit !== 'add') {
             return;
@@ -158,13 +165,23 @@ class SendTrainingNotificationJob implements ShouldQueue
                 continue;
             }
 
+            // GV-9566: each founder reads the session in their own timezone.
+            $start = $this->forRecipient($this->startsAt, $user);
+            $end = $this->forRecipient($this->endsAt, $user);
+
             $data = array_merge([
                 'name' => trim($user->first_name_en . ' ' . $user->last_name_en),
                 'title' => $this->title,
-                'date' => $this->datetime,
+                // Date only (GV-7283): times go in their own start/end row.
+                'date' => $start ? $start->format('Y-m-d') : $this->datetime,
                 'type' => $this->type,
                 'organization' => $organization,
             ], $extra);
+
+            if ($withTimes) {
+                $data['start_time'] = $start ? $start->format('h:i A') : '';
+                $data['end_time'] = $end ? $end->format('h:i A') : '';
+            }
 
             try {
                 $user->notify(new NewTrainingNotification($data));
@@ -190,16 +207,21 @@ class SendTrainingNotificationJob implements ShouldQueue
             return;
         }
 
+        $this->stepTimezone = TimezoneService::forStep($step->id);
+        [$this->startsAt, $this->endsAt] = $this->sessionInstants();
+        // The trainer has no account, so no timezone of their own.
+        $trainerStart = $this->forRecipient($this->startsAt, null);
+        $trainerEnd = $this->forRecipient($this->endsAt, null);
+
         $organization = optional($step->cycle)->organization;
         $org_name = $organization->{'name_' . $this->lang} ?? 'Unknown Organization';
         Log::info("SendTrainingNotificationJob: org_name: " . $org_name);
         if ($this->type == 'offline') {
             // Notify Trainer
-            $offlineStart = strtotime((string) $this->datetime);
             $this->notifyTrainerOfAssignment($step, [
-                'session_date' => $offlineStart ? date('Y-m-d', $offlineStart) : ($this->datetime ?? ''),
-                'start_time' => $offlineStart ? date('h:i A', $offlineStart) : '',
-                'end_time' => $this->endDatetime ? date('h:i A', strtotime((string) $this->endDatetime)) : '',
+                'session_date' => $trainerStart ? $trainerStart->format('Y-m-d') : ($this->datetime ?? ''),
+                'start_time' => $trainerStart ? $trainerStart->format('h:i A') : '',
+                'end_time' => $trainerEnd ? $trainerEnd->format('h:i A') : '',
                 'join_url' => $this->join_url ?? '',
                 'Address' => $this->address ?? '',
             ]);
@@ -211,7 +233,9 @@ class SendTrainingNotificationJob implements ShouldQueue
             $this->notifyFoundersOfNewTraining($step, $companies, [
                 'Address' => $this->address ?? '',
                 'join_url' => $this->join_url ?? '',
-            ]);
+                'trainer_name' => $this->trainer_name ?? '',
+                'trainer_email' => $this->trainer_email ?? '',
+            ], true);
 
             foreach ($companies as $company) {
                 $user = $company->user;
@@ -264,11 +288,10 @@ class SendTrainingNotificationJob implements ShouldQueue
             }
         } elseif ($this->type == 'sessions') {
             // Notify Trainer
-            $sessionsStart = strtotime((string) $this->datetime);
             $this->notifyTrainerOfAssignment($step, [
-                'session_date' => $sessionsStart ? date('Y-m-d', $sessionsStart) : ($this->datetime ?? ''),
-                'start_time' => $sessionsStart ? date('h:i A', $sessionsStart) : '',
-                'end_time' => $this->endDatetime ? date('h:i A', strtotime((string) $this->endDatetime)) : '',
+                'session_date' => $trainerStart ? $trainerStart->format('Y-m-d') : ($this->datetime ?? ''),
+                'start_time' => $trainerStart ? $trainerStart->format('h:i A') : '',
+                'end_time' => $trainerEnd ? $trainerEnd->format('h:i A') : '',
                 // The trainer hosts the meeting, so they get the start/host
                 // link; founders (below) get the plain join link instead.
                 'join_url' => $this->hostUrl ?? $this->join_url ?? '',
@@ -278,12 +301,11 @@ class SendTrainingNotificationJob implements ShouldQueue
                 ->with(['user', 'cycledata', 'stepdata'])
                 ->get();
 
-            $startTimestamp = strtotime((string) $this->datetime);
             $this->notifyFoundersOfNewTraining($step, $companies, [
                 'join_url' => $this->join_url ?? '',
-                'start_time' => $startTimestamp ? date('h:i A', $startTimestamp) : '',
-                'end_time' => $this->endDatetime ? date('h:i A', strtotime((string) $this->endDatetime)) : '',
-            ]);
+                'trainer_name' => $this->trainer_name ?? '',
+                'trainer_email' => $this->trainer_email ?? '',
+            ], true);
 
             foreach ($companies as $company) {
                 $user = $company->user;
@@ -306,5 +328,34 @@ class SendTrainingNotificationJob implements ShouldQueue
     public function failed(\Throwable $exception)
     {
         Log::error('Job failed: ' . $exception->getMessage());
+    }
+
+    /**
+     * The session's start/end as real instants (GV-9566).
+     *
+     * Read from the stored unix timestamps; $this->datetime (a display string
+     * of platform wall-clock) is only the fallback.
+     *
+     * @return array{0: ?Carbon, 1: ?Carbon}
+     */
+    protected function sessionInstants(): array
+    {
+        $id = is_object($this->trainingSession) ? ($this->trainingSession->id ?? null) : $this->trainingSession;
+        $row = is_numeric($id) ? DB::table('training_sessions')->where('id', $id)->first(['datetime', 'enddatetime']) : null;
+
+        return [
+            TimezoneService::wallClock($row->datetime ?? $this->datetime, $this->stepTimezone),
+            TimezoneService::wallClock($row->enddatetime ?? $this->endDatetime, $this->stepTimezone),
+        ];
+    }
+
+    /** A session instant as $recipient reads it; no zone of their own => the step's platform zone. */
+    protected function forRecipient(?Carbon $moment, $recipient): ?Carbon
+    {
+        if (is_null($moment)) {
+            return null;
+        }
+
+        return TimezoneService::forViewer($moment->copy()->setTimezone($this->stepTimezone ?? TimezoneService::platform()), $recipient);
     }
 }

@@ -273,8 +273,9 @@ class ActivityController extends Controller
         $actor = auth()->user();
 
         if (!$actor->hasRole('admin')) {
-            $inScope = $actor->ownsOrganization($target->organization_id)
-                || $actor->ownsOrganization($target->company?->cycledata?->organization_id);
+            // managesOrganization: a founder "owns" their program's org but must never reset its staff's passwords.
+            $inScope = $actor->managesOrganization($target->organization_id)
+                || $actor->managesOrganization($target->company?->cycledata?->organization_id);
             abort_if($target->hasRole('admin') || !$inScope, 403);
         }
 

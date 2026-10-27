@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Mentors;
 
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -86,14 +87,16 @@ class ScheduleController extends Controller
         'timezone'   => 'nullable|timezone',
     ]);
 
-    $timezone = $request->input('timezone', 'UTC');
+    // GV-9566: schedules (tfrom/tto) and zoom_date are platform wall-clock, not UTC.
+    // Days are walked in the platform zone; times are converted to the requested zone
+    // (default: the platform zone, i.e. as stored).
+    $platform = TimezoneService::platform();
+    $timezone = $request->input('timezone') ?: $platform;
 
-    $startDate = Carbon::parse($request->input('start_date', now($timezone)->startOfWeek()))
-        ->setTimezone('UTC')
+    $startDate = Carbon::parse($request->input('start_date', now($timezone)->startOfWeek()->toDateString()), $platform)
         ->startOfDay();
 
-    $endDate = Carbon::parse($request->input('end_date', $startDate->copy()->addDays(6)))
-        ->setTimezone('UTC')
+    $endDate = Carbon::parse($request->input('end_date', $startDate->copy()->addDays(6)->toDateString()), $platform)
         ->endOfDay();
 
     if ($endDate->diffInDays($startDate) > 30) {
@@ -114,6 +117,7 @@ class ScheduleController extends Controller
     ->select(
         'mr.id as session_id',
         'mr.zoom_date as session_date', 
+        'mr.organization_id',
         DB::raw("TIME_FORMAT(mr.zoom_date, '%H:%i:%s') as start_time"),
         DB::raw("SEC_TO_TIME(mr.period * 60) as duration"), 
         'c.name_en as startup_name'
@@ -124,10 +128,13 @@ class ScheduleController extends Controller
 
     $reservedByDate = [];
     foreach ($reservedSessions as $r) {
-       $start = Carbon::parse($r->session_date)->setTimezone($timezone);
+       $at = TimezoneService::wallClock($r->session_date, TimezoneService::platform($r->organization_id ? (int) $r->organization_id : null));
+       if (!$at) continue;
+       $start = $at->copy()->setTimezone($timezone);
       $end = $start->copy()->addMinutes($r->period ?? 60);
 
-    $reservedByDate[$start->toDateString()][] = [
+    // Keyed by platform date, like the available slots below.
+    $reservedByDate[$at->copy()->setTimezone($platform)->toDateString()][] = [
         'start' => $start->format('H:i:s'),
         'end' => $end->format('H:i:s'),
         'status' => 'reserved',
@@ -144,11 +151,11 @@ class ScheduleController extends Controller
         $dateStr = $current->format('Y-m-d');
         $dayName = strtolower($current->format('l'));
 
-        $dayAvailable = $availableSlots->where('days', ucfirst($dayName))->map(function ($slot) use ($timezone, $dateStr) {
+        $dayAvailable = $availableSlots->where('days', ucfirst($dayName))->map(function ($slot) use ($timezone, $dateStr, $platform) {
             return [
                 'id' => $slot->id,
-                'start' => Carbon::parse($dateStr . ' ' . $slot->tfrom, 'UTC')->setTimezone($timezone)->format('H:i:s'),
-                'end' => Carbon::parse($dateStr . ' ' . $slot->tto, 'UTC')->setTimezone($timezone)->format('H:i:s'),
+                'start' => Carbon::parse($dateStr . ' ' . $slot->tfrom, $platform)->setTimezone($timezone)->format('H:i:s'),
+                'end' => Carbon::parse($dateStr . ' ' . $slot->tto, $platform)->setTimezone($timezone)->format('H:i:s'),
                 'status' => 'available',
             ];
         })->values()->toArray();
@@ -476,7 +483,9 @@ public function show(Request $request, $id)
     if (!$user->hasRole('Mentor') && !$user->hasRole('Registered')) {
         return $this->forbidden(__('api.forbidden'));
     }
-    $timezone = $request->input('timezone', 'UTC');
+    // GV-9566: tfrom/tto are platform wall-clock (default output: as stored).
+    $platform = TimezoneService::platform();
+    $timezone = $request->input('timezone') ?: $platform;
 
     $slot = DB::table('schedules')->where('id', $id)->where('active', 1)->first();
 
@@ -488,8 +497,8 @@ public function show(Request $request, $id)
         'slotId' => $slot->id,
         'mentorId' => $slot->user_id,
         'day' => $slot->days,
-        'start' => Carbon::parse($slot->tfrom, 'UTC')->setTimezone($timezone)->format('H:i:s'),
-        'end' => Carbon::parse($slot->tto, 'UTC')->setTimezone($timezone)->format('H:i:s'),
+        'start' => Carbon::parse($slot->tfrom, $platform)->setTimezone($timezone)->format('H:i:s'),
+        'end' => Carbon::parse($slot->tto, $platform)->setTimezone($timezone)->format('H:i:s'),
         'timezone' => $timezone,
         'status' => 'available'
     ]);

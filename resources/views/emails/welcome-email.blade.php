@@ -19,7 +19,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 40px 40px 20px 40px; text-align: {{ $alignStart }}; direction: {{ $dirAttr }};">
-    <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ trim(strtolower($user->gender ?? '')) == 'female' ? __('email.new_user_welcome_email.dear_female') : __('email.new_user_welcome_email.dear_male') }} {{ $user->first_name_en . ' ' . $user->last_name_en }}{{ $isRtl ? '،' : ',' }}</h1>
+    <h1 style="margin: 0 0 20px 0; font-size: 24px; color: #111827; font-weight: bold;">{{ trim(strtolower($user->gender ?? '')) == 'female' ? __('email.new_user_welcome_email.dear_female') : __('email.new_user_welcome_email.dear_male') }} {{ $welcomeRecipientName ?? ($user->first_name_en . ' ' . $user->last_name_en) }}{{ $isRtl ? '،' : ',' }}</h1>
     <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.new_user_welcome_email.m1', ['platform_name' => $platformName]) }}</p>
     <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 150%; color: #374151;">{{ __('email.new_user_welcome_email.m2') }}</p>
     @isset($magicLoginUrl)

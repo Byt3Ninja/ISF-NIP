@@ -49,6 +49,15 @@ class ResetPassword extends Notification
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Build the mail representation of the notification.
      *
      * @param  mixed  $notifiable
@@ -63,7 +72,7 @@ class ResetPassword extends Notification
             $this->configureSmtp($smtpSettings);
             $from = $this->getFromAddress($smtpSettings);
             // Platform-branded email (platform logo/name); the org only routes SMTP.
-            $orgData = $this->buildEmailOrganizationData(null);
+            $orgData = $this->emailBrandingData();
 
             $resetUrl = $this->resetUrl($notifiable);
             $expire = (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire');

@@ -4,6 +4,8 @@ namespace App\Services;
 
 use HTMLPurifier;
 use HTMLPurifier_Config;
+use HTMLPurifier_URIScheme_data;
+use HTMLPurifier_URISchemeRegistry;
 
 /**
  * Sanitizes user-supplied rich-text/HTML so that legitimate formatting markup
@@ -40,6 +42,13 @@ class HtmlSanitizer
             'tel'    => true,
             'data'   => true,
         ]);
+
+        // Editors paste pictures as WebP too, which HTMLPurifier's data: scheme does not list.
+        // The scheme still decodes the payload and checks its real type (exif_imagetype), so
+        // only genuine WebP images pass; landing-page sections already store such images.
+        $dataScheme = new HTMLPurifier_URIScheme_data();
+        $dataScheme->allowed_types['image/webp'] = true;
+        HTMLPurifier_URISchemeRegistry::instance()->register('data', $dataScheme);
 
         // Keep target="_blank" usable on links from the editor.
         $config->set('HTML.TargetBlank', true);

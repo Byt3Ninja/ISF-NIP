@@ -261,31 +261,19 @@
     const deleteButton = document.querySelector('.btn-delete');
     if (deleteButton) {
       deleteButton.addEventListener('click', function() {
-      Swal.fire({
+      releaseAlert('warning', {
         title: '{{ __('admin.Delete Submission') }}',
-        text: '{{ __('admin.Delete Submission Confirmation') }}',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: '{{ __('admin.Delete') }}',
-        cancelButtonText: '{{ __('admin.Cancel') }}',
-        customClass: {
-          confirmButton: 'btn btn-danger me-3',
-          cancelButton: 'btn btn-label-secondary'
-        },
-        buttonsStyling: false
-      }).then((result) => {
-        if (result.isConfirmed) {
-          Swal.fire({
+        message: '{{ __('admin.Delete Submission Confirmation') }}',
+        confirmText: '{{ __('admin.Delete') }}',
+        cancelText: '{{ __('admin.Cancel') }}',
+        confirmColor: 'danger'
+      }).then((ok) => {
+        if (ok) {
+          releaseAlert('success', {
             title: '{{ __('admin.Deleted') }}',
-            text: '{{ __('admin.Deleted Successfully') }}',
-            icon: 'success',
-            showCancelButton: false,
-            showConfirmButton: true,
-            confirmButtonText: "{{ __('admin.OK') }}",
-            customClass: {
-                confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: '{{ __('admin.Deleted Successfully') }}',
+            confirmText: "{{ __('admin.OK') }}",
+            confirmColor: 'primary'
           });
         }
         });

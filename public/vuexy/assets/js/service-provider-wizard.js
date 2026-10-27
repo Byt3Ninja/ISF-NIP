@@ -777,7 +777,7 @@
       .flatMap(([, msgs]) => msgs);
 
     if (nonPortfolioErrors.length) {
-      releaseFailureAlert({
+      releaseAlert('danger', {
         title: lang === 'ar' ? 'خطأ!' : 'Error!',
         message: nonPortfolioErrors.join('\n'),
       });
@@ -821,7 +821,7 @@
         if (errors && stepIndex === 3) {
           displayPortfolioErrors(errors);
         } else {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: lang === 'ar' ? 'خطأ!' : 'Error!',
             message: xhr.responseJSON?.message || (lang === 'ar' ? 'حدث خطأ أثناء الحفظ' : 'An error occurred while saving'),
           });
@@ -831,7 +831,7 @@
   }
 
   /* function submitFormData() {
-    releaseSuccessAlert({
+    releaseAlert('success', {
       title: lang === 'ar' ? 'تم!' : 'Done!',
       message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
     });

@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Services\EmailBranding;
 use App\Services\TenantMailer;
 
 /**
@@ -45,8 +46,11 @@ trait RoutesTenantMail
         $factory = app(\Illuminate\Contracts\Mail\Factory::class);
 
         // MailConfig::set() already purged the cached mailers, so this builds
-        // a mailer using the organization's transport and sender.
-        return $factory->mailer($this->mailer ?? config('mail.default'));
+        // a mailer using the organization's transport and sender. $this->mailer
+        // is ignored: Mailer::sendMailable() pins it to the mailer the send
+        // started on, before the organization was applied (smtp for an
+        // organization on Resend, or the reverse).
+        return $factory->mailer(config('mail.default'));
     }
 
     /**
@@ -54,6 +58,11 @@ trait RoutesTenantMail
      */
     protected function resolveMailOrganization()
     {
+        // The organization the email is about, as for its branding and From.
+        if ($organization = EmailBranding::forMail($this)) {
+            return $organization;
+        }
+
         if (method_exists($this, 'mailOrganization')) {
             $organization = TenantMailer::resolveOrganization($this->mailOrganization());
 

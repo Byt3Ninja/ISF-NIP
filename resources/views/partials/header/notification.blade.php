@@ -80,7 +80,7 @@ if($user)
          @endif
         @endrole --}}
 
-        @hasanyrole('Admin|organizationManager')
+        @hasanyrole('Admin')
           @if ($msgs)
             <li class="list-group-item list-group-item-action dropdown-notifications-item">
               <a class="d-flex justify-content-between" href="/dashboard/mymsg">

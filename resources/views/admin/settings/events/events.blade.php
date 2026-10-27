@@ -83,10 +83,7 @@
                                   <a class="btn btn-sm btn-label-info" href="/dashboard/editevent/{{ $event->id }}"><i
                                       class="ti ti-edit text-info"> </i></a>
                                   |
-                                  <a class="btn btn-sm btn-label-danger"
-                                    onclick="return confirm('Are you sure, delete event & all its registered users?');"
-                                    href="{{ URL::to('dashboard/deleteevent/' . $event->id ?? null) }}"><i
-                                      class="ti ti-trash text-danger"> </i></a>
+                                  @include('partials.forms.confirm-action', ['formId' => 'delete-event-' . $event->id, 'action' => route('events.delete', $event->id), 'message' => 'Are you sure, delete event & all its registered users?', 'label' => '<i class="ti ti-trash text-danger"> </i>', 'class' => 'btn btn-sm btn-label-danger'])
                                 </td>
                               </tr>
                             @endforeach

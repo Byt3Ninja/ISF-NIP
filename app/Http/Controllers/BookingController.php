@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Inclusive;
 use App\Room;
-use App\room_booking;
+use App\Room_booking;
 use App\Rooms_inclusive;
 use App\Rooms_img;
 use App\User;
@@ -64,10 +64,12 @@ class BookingController extends Controller
     public function store(request $request)
     {
         $user = Auth()->user()->id;
-        $room = Room_booking::create($request->except(['user_id'],['approved'],['user_added']) +
+        // C4: the forced fields go on the left of `+` (the left operand wins) and except() takes one
+        // array -- the old call only dropped user_id, so a posted `approved` let a booker self-approve.
+        $room = Room_booking::create(
             ['user_id' => $user,
             'approved' => 'Reviewing',
-            'user_added' => null]
+            'user_added' => null] + $request->except(['user_id', 'approved', 'user_added'])
         );
         if($room) { return redirect()->back()->with( ['msg' => 'StoredSuccessfully'] ); }
         return redirect()->back()->with( ['msg' => 'admin.FailedStore'] );

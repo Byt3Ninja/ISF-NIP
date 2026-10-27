@@ -78,6 +78,25 @@ class ImporterSessionService
         return $session;
     }
 
+    /**
+     * Atomically move a ready (validated / conflicts-reviewed) session to IMPORTING.
+     * False when another request already claimed it -- an in-memory status check
+     * followed by save() let two concurrent executes both import the same file.
+     */
+    public function claimForImport(ImporterSession $session): bool
+    {
+        $claimed = ImporterSession::whereKey($session->getKey())
+            ->whereIn('status', [ImporterSession::STATUS_VALIDATED, ImporterSession::STATUS_CONFLICTS_REVIEWED])
+            ->update(['status' => ImporterSession::STATUS_IMPORTING]) > 0;
+
+        if ($claimed) {
+            $session->status = ImporterSession::STATUS_IMPORTING;
+            $session->syncOriginalAttribute('status');
+        }
+
+        return $claimed;
+    }
+
     public function touchExpiresAt(ImporterSession $session): ImporterSession
     {
         $session->expires_at = Carbon::now()->addHours(self::EXPIRY_HOURS);

@@ -11,6 +11,37 @@
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
   }
+
+  /* Status accent bar along the card's top edge, plus a matching hover tint.
+     --status-color is declared once per status and reused by the bar, the hover
+     shadow, and the hover border, so the three can never drift apart.
+     Colors mirror .bg-label-primary / .bg-label-warning in theme-default.css. */
+  .landing-card {
+    --status-color: transparent;
+    --status-shadow: rgba(0, 0, 0, .12);
+    transition: transform .25s ease-in-out, box-shadow .25s ease-in-out, border-color .25s ease-in-out;
+  }
+
+  .landing-card.status-active {
+    --status-color: var(--bs-primary);
+    --status-shadow: rgba(75, 75, 75, 0.22);
+  }
+
+  .landing-card.status-inactive {
+    --status-color: #ff9f43;
+    --status-shadow: rgba(255, 159, 67, .22);
+  }
+
+  .landing-card.status-active,
+  .landing-card.status-inactive {
+    border-top: 3px solid var(--status-color);
+  }
+
+  .landing-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--status-color);
+    box-shadow: 0 .75rem 1.5rem var(--status-shadow) !important;
+  }
   </style>
 @endsection
 
@@ -18,7 +49,13 @@
   {{-- Header --}}
   <div class="card mb-6">
     <div class="card-header">
-      <h4 class="mb-2">{{ __('landing.Custom_Landing_Page') }}</h4>
+      @if( !$hasEligibleOrganizations )
+        <div class="alert alert-warning mb-3" role="alert">
+          <i class="ti ti-alert-triangle me-2"></i>
+          {{ __('landing.No_Eligible_Organizations') }}
+        </div>
+      @endif
+      <h4 class="mb-2">{{ __('admin.Custom Landing Pages') }}</h4>
       <p class="mb-0">{{ __('landing.Custom_Landing_Page_Description') }}</p>
     </div>
     <div class="card-body">
@@ -28,6 +65,7 @@
             <div class="input-group input-group-merge">
               <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
               <input 
+                name="search"
                 type="search" 
                 id="debounced-search" 
                 class="form-control"
@@ -39,8 +77,8 @@
             </div>
           </div>
           <div class="col-12 col-lg-4 col-xl-4">
-            <select class="form-select" id="status-select" name="status">
-              <option value="">{{ __('admin.All_statuses') }}</option>
+            <select class="form-select select2" id="status-select" name="status">
+              <option value="all">{{ __('admin.All_statuses') }}</option>
               <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
                 {{ __('admin.Active') }}
               </option>
@@ -49,12 +87,14 @@
               </option>
             </select>
           </div>
+          @if( $_user->ableTo('landing-pages.create', $permissions) )
           <div class="col-12 col-lg-3 col-xl-2 d-grid">
-            <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
+            <a href="{{ $hasEligibleOrganizations ? route('landing-pages.create') : 'javascript:void(0);' }}" class="btn btn-primary {{ $hasEligibleOrganizations ? '' : 'disabled' }}" {{ $hasEligibleOrganizations ? '' : 'disabled' }}>
               <i class="ti ti-plus me-2"></i>
               {{ __('landing.Add_New_Page') }}
             </a>
           </div>
+          @endif
         </div>
       </form>
     </div>
@@ -66,7 +106,7 @@
       <div class="col-12">
         <div class="card">
           <div class="card-body text-center">
-            <img src="/icons/empty-state.svg" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
+            <img src="/images/empty-state.png" class="img-fluid" style="max-width: 300px; height: auto;" alt="No Result">
             <h4 class="mb-2">
               {{ __('landing.No_LandingPages') }}
             </h4>
@@ -75,10 +115,12 @@
               <br>
               {{ __('landing.Programs') }}. {{ __('landing.Get_Started') }}
             </p>
-            <a href="{{ route('landing-pages.create') }}" class="btn btn-primary">
+            @if( $_user->ableTo('landing-pages.create', $permissions) )
+            <a href="{{ $hasEligibleOrganizations ? route('landing-pages.create') : 'javascript:void(0);' }}" class="btn btn-primary {{ $hasEligibleOrganizations ? '' : 'disabled' }}" {{ $hasEligibleOrganizations ? '' : 'disabled' }}>
               <i class="ti ti-plus me-2"></i>
               {{ __('landing.Create_First_Page') }}
             </a>
+            @endif
           </div>
         </div>
       </div>
@@ -87,7 +129,7 @@
 
         <div class="col-xl-4 col-md-6" data-id="{{ $page->id }}">
 
-          <div class="card landing-card h-100 shadow-sm" data-url="{{ $page->public_url }}">
+          <div class="card landing-card h-100 shadow-sm status-{{ $page->status ? 'active' : 'inactive' }}" data-url="{{ $page->public_url }}">
 
             <div class="card-body d-flex flex-column">
 
@@ -108,12 +150,12 @@
                 <div>
 
                   <h5 class="card-title mb-1 line-clamp-1">
-                    <a href="{{ route('landing-pages.edit', $page->id) }}" class="text-dark">
-                      {{ Str::limit($page->title, 35) }}
+                    <a href="{{ route('landing-pages.edit', $page->id) }}" class="text-dark" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $page->title }}">
+                      {{ Str::limit($page->title, $titleMaxLength) }}
                     </a>
                   </h5>
 
-                  <div class="badge rounded-pill bg-label-{{ $page->status ? 'info' : 'danger' }} mb-3 pb-1">
+                  <div class="badge rounded-pill bg-label-{{ $page->status ? 'primary' : 'warning' }} mb-3 pb-1">
                     <i class="ti ti-point-filled ti-xs"></i>
                     {{ $page->status ? __('admin.Active') : __('admin.Inactive') }}
                   </div>
@@ -128,26 +170,26 @@
 
               @if ($_user->hasAnyRole('admin'))
                 <a href="{{ route('mentors.profile_view', $page->created_by) }}" target="_blank" rel="noopener" class="d-flex align-items-center gap-2 mt-auto">
-                  <div class="avatar">
+                  <div class="avatar avatar-xs">
                     <div class="avatar-initial rounded-circle overflow-hidden">
                       @if($page->createdBy && $page->createdBy->img_url)
-                        <img src="{{ $page->createdBy->img_url }}" alt="logo" class="rounded object-fit-cover" />
+                        <img src="{{ $page->createdBy->image_url }}" alt="logo" class="rounded object-fit-cover" />
                       @else
                         <i class="ti ti-user text-dark"></i>
                       @endif
                     </div>
                   </div>
-                  <span class="text-body">{{ __('admin.created_by') }}</span>
-                  <span
-                    class="fw-semibold text-dark"
+                  <small class="text-body">{{ __('admin.created_by') }}</small>
+                  <small
+                    class="fw-semibold text-dark fs-xs"
                   >
                     {{ $page->createdBy->name ?? '' }}
-                  </span>
+                  </small>
                 </a>
               @endif
             </div>
 
-            <div class="card-footer bg-card border-top pt-6 d-flex justify-content-between align-items-center">
+            <div class="card-footer bg-card border-top py-2 d-flex justify-content-between align-items-center">
 
               <div class="text-secondary small">
                 <i class="ti ti-rocket me-1"></i>
@@ -226,7 +268,7 @@
         ? "هل أنت متأكد من حذف '" + pageName + "'؟ سيتم حذف صفحة الهبوط نهائيًا ولن يكون رابطها العام متاحًا بعد ذلك."
         : "Are you sure you want to delete '" + pageName + "'? This landing page will be permanently removed, and its public URL will no longer be accessible.";
 
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: "{{ $l == 'ar' ? 'حذف صفحة الهبوط' : 'Delete Landing Page' }}",
         message: warningMessage,
         confirmText: "{{ $l == 'ar' ? 'حذف' : 'Delete' }}",
@@ -239,7 +281,7 @@
           },
             function (response) {
               if (response.success) {
-                releaseSuccessAlert({
+                releaseAlert('success', {
                   title: "{{ __('admin.Deleted') }}!",
                   message: "{{ $l == 'ar' ? 'تم حذف صفحة الهبوط بنجاح.' : 'Landing page deleted successfully.' }}",
                 });
@@ -254,7 +296,7 @@
                 });
 
               } else {
-                releaseFailureAlert({
+                releaseAlert('danger', {
                   title: "{{ __('admin.Error') }}",
                   message: response.message ? response.message : "{{ __('admin.DeleteFailed') }}"
                 });
@@ -265,7 +307,7 @@
             if (xhr.responseJSON && xhr.responseJSON.message) {
               errorMessage = xhr.responseJSON.message;
             }
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}",
               message: errorMessage
             })

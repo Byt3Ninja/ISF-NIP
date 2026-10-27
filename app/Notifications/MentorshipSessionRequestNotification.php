@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Organization;
 use App\Settings;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\WhatsAppService;
@@ -11,10 +12,18 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Services\TimezoneService;
 
 class MentorshipSessionRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable, ConfiguresSmtp;
+
+    /**
+     * The organization running the session; brands the email.
+     *
+     * @var Organization|null
+     */
+    public $organization;
 
     public $startupName;
     public $requestedMentor;
@@ -52,8 +61,10 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
         $locationName = null,
         $locationUrl = null,
         $address = null,
-        $attachments = []
+        $attachments = [],
+        ?Organization $organization = null
     ) {
+        $this->organization = $organization;
         $this->startupName = $startupName;
         $this->requestedMentor = $requestedMentor;
         $this->dateTime = $dateTime;
@@ -107,11 +118,11 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $notifiable->organization;
+        $org = $this->organization ?? $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 
@@ -122,9 +133,10 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
         $founderName = $this->founder->name ?? '';
         $signOffName = $orgData['org_name'] ?? $platformName;
 
-        $preferredTime = isset($this->dateTime['start_time'], $this->dateTime['end_time'])
-            ? $this->dateTime['start_time'] . ' – ' . $this->dateTime['end_time']
-            : ($this->dateTime['start_time'] ?? '');
+        $dateTime = $this->forRecipient($notifiable);
+        $preferredTime = isset($dateTime['start_time'], $dateTime['end_time'])
+            ? $dateTime['start_time'] . ' – ' . $dateTime['end_time']
+            : ($dateTime['start_time'] ?? '');
 
         return (new MailMessage)
             ->from(config('mail.from.address'), config('mail.from.name'))
@@ -134,7 +146,7 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
                 'startupName'       => $this->startupName,
                 'requestedMentor'   => $this->requestedMentor,
                 'sessionNotes'      => $this->sessionNotes,
-                'preferredDate'     => $this->dateTime['date'] ?? '',
+                'preferredDate'     => $dateTime['date'] ?? '',
                 'preferredTime'     => $preferredTime,
                 'platformName'      => $signOffName,
                 'founder'           => $this->founder,
@@ -186,11 +198,30 @@ class MentorshipSessionRequestNotification extends Notification implements Shoul
             'message' => __('notifications.mentorship_request.database', [
                 'startup_name' => $this->startupName,
                 'mentor_name' => $this->requestedMentor,
-                'session_date' => $this->dateTime['date'] ?? '',
-                'start_time' => $this->dateTime['start_time'] ?? '',
-                'end_time' => $this->dateTime['end_time'] ?? ''
+                'session_date' => $this->forRecipient($notifiable)['date'] ?? '',
+                'start_time' => $this->forRecipient($notifiable)['start_time'] ?? '',
+                'end_time' => $this->forRecipient($notifiable)['end_time'] ?? ''
             ])
         ];
     }
-    
+
+    /** The requested platform wall-clock date/times in the recipient's own timezone (GV-9566). */
+    protected function forRecipient($notifiable): array
+    {
+        $dateTime = (array) $this->dateTime;
+
+        if (empty($dateTime['date']) || empty($dateTime['start_time'])) {
+            return $dateTime;
+        }
+
+        $start = TimezoneService::wallClockForViewer($dateTime['date'], $dateTime['start_time'], $notifiable);
+        $dateTime['date'] = $start['date'];
+        $dateTime['start_time'] = $start['time'];
+
+        if (!empty($dateTime['end_time'])) {
+            $dateTime['end_time'] = TimezoneService::wallClockForViewer($this->dateTime['date'], $dateTime['end_time'], $notifiable)['time'];
+        }
+
+        return $dateTime;
+    }
 }

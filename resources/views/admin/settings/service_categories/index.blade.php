@@ -272,6 +272,29 @@ $(function() {
       });
 
       setTimeout(() => $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm'), 300);
+      
+      const $wrapper = $(this.api().table().container());
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
     }
   });
 
@@ -442,9 +465,9 @@ $(function() {
       success: function(response) {
         modal.hide();
         
-        releaseSuccessAlert({
+        releaseAlert('success', {
           title: isEdit ? '{{ __("admin.Updated") }}!' : '{{ __("admin.Created") }}!',
-          html: isEdit ? '{{ __("admin.UpdatedSuccessfully") }}.' : '{{ __("admin.CreatedSuccessfully") }}.'
+          message: isEdit ? '{{ __("admin.UpdatedSuccessfully") }}.' : '{{ __("admin.CreatedSuccessfully") }}.'
         });
         
         // Reload page to refresh table
@@ -477,9 +500,9 @@ $(function() {
           errorMsg = Object.values(errors).flat().join('<br>');
         }
         
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: '{{ __("admin.Error") }}!',
-          html: errorMsg
+          message: errorMsg
         });
       }
     });
@@ -491,7 +514,7 @@ $(function() {
     const row = table.row(button.closest('tr'));
     const { url } = button.data();
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('admin.SureDelete') }}",
       message: "{{ __('admin.Recover') }}",
       confirmText: "{{ __('admin.DYes') }}",
@@ -503,15 +526,15 @@ $(function() {
           _token: '{{ csrf_token() }}' 
         })
         .done(() => {
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title: "{{ __('admin.Deleted') }}!",
-            html: "{{ __('admin.DeletedSuccessfully') }}."
+            message: "{{ __('admin.DeletedSuccessfully') }}."
           });
 
           row.remove().draw();
         })
         .fail(error => {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: "{{ __('admin.Error') }}!",
             message: error?.message || "{{ __('admin.unexpected_error') }}"
           });

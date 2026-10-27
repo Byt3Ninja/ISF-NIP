@@ -18,21 +18,23 @@
     <div class="tab-content p-0 shadow-none">
       <div class="tab-pane fade show active" id="enrolled-programs" role="tabpanel" aria-labelledby="enrolled-programs-tab">
         @foreach($cycles as $cycle)
-          @if (!is_null($cycle->organization))
-            @php
-              $imageUrl = $cycle->organization->image_url;
-              if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) { 
-                $imageUrl = asset($imageUrl); 
-              }
-              $imagePath = parse_url($imageUrl, PHP_URL_PATH);
-              $fileN = ltrim(str_replace('/dashboard/uploads/files/', '', $imagePath), '/');
-            @endphp
-          @endif
-
+          @php
+            $cycleHasImage = (bool) $cycle->img_url
+              || ($cycle->organization && (bool) $cycle->organization->img_url);
+          @endphp
           <div class="card card-body mb-4">
             <div class="d-flex flex-column flex-md-row align-items-start gap-3">
-              <img src="{{ $imageUrl }}" class="rounded object-fit-contain border shadow-xs" 
-                   style="width: 110px; height: 110px;" alt="program-image">
+              <div class="avatar avatar-lg flex-shrink-0">
+                <span class="avatar-initial rounded bg-label-primary" style="cursor: default;">
+                  <i class="ti ti-rocket text-primary ti-2xl"></i>
+                </span>
+                @if ($cycleHasImage)
+                  <img src="{{ $cycle->logo }}" alt="program-image"
+                       class="position-absolute top-0 start-0 w-100 h-100 object-fit-contain rounded"
+                       style="padding: 4px; background-color: #fff; cursor: default;"
+                       onerror="this.onerror=null; this.remove();">
+                @endif
+              </div>
               <div class="flex-grow-1">
                 <h5 class="fw-semibold line-clamp-2 mb-3 w-100 w-md-75">
                   {{ $cycle->title }}
@@ -46,7 +48,7 @@
                   <div class="d-flex align-items-center gap-1">
                     <i class="ti ti-picture-in-picture-top text-primary"></i>
                     <span>{{ __('admin.Upcoming Sessions') }}</span>
-                    <span class="fw-bold ms-1">{{ $cycle->mentorshipRequests()->where('zoom_date', '>', now())->count() }}</span>
+                    <span class="fw-bold ms-1">{{ $cycle->mentorshipRequests()->where('zoom_date', '>', \App\Services\TimezoneService::platformNow()->format('Y-m-d H:i:s'))->count() }}</span>
                   </div>
                   <div class="d-flex align-items-center gap-1">
                     <i class="ti ti-archive text-primary"></i>
@@ -123,7 +125,7 @@
                       <td>
                         <div class="d-flex align-items-center gap-2">
                           <i class="ti ti-calendar-event text-primary"></i>
-                          <span>{{ $session->zoom_date }}</span>
+                          <span>{{ optional(\App\Services\TimezoneService::forViewer($session->zoom_date, $_user))->format('Y-m-d H:i:s') }}</span>
                           <small class="text-muted">
                             @php
                               $period = $session->period;

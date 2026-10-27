@@ -162,7 +162,7 @@
 
         const banner = document.getElementById('importer-result-banner');
         const totals = data.totals || {};
-        const cls = (totals.failed === 0 && totals.skipped === 0)
+        const cls = (totals.failed === 0 && totals.skipped === 0 && !totals.email_failed)
             ? 'alert-success'
             : (totals.imported === 0 ? 'alert-danger' : 'alert-warning');
         banner.className = 'alert ' + cls;
@@ -174,7 +174,7 @@
         document.getElementById('importer-result-failed').textContent    = totals.failed    || 0;
 
         const list = document.getElementById('importer-result-list');
-        const rows = [].concat(data.failed_rows || [], data.skipped_rows || []);
+        const rows = [].concat(data.failed_rows || [], data.email_failed_rows || [], data.skipped_rows || []);
         list.innerHTML = rows.map(function (r) {
             const msg = t.locale === 'ar' ? r.reason_ar : r.reason_en;
             return '<li>Row ' + r.row + ': ' + escapeHtml(msg) + '</li>';

@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-start mb-5">
       <div>
         <h4 class="card-title mb-1">{{ __('admin.Startups') }}</h4>
-        <p class="mb-0">{{ __('admin.see_all_startups') }}</p>
+        <p class="mb-0">{{ __('admin.startups_subtitle') }}</p>
       </div>
 
       {{-- <button class="btn btn-primary px-4 py-2 shadow-sm">
@@ -30,10 +30,15 @@
 
     {{-- Search & Filter --}}
     <div class="d-flex gap-3 align-items-center mb-5 flex-wrap">
-      <div class="position-relative" style="max-width: 620px; width:100%;">
-        <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-        <input type="text" class="form-control ps-10" id="debounced-search"
-          placeholder="{{ __('admin.Search') }}..." value="{{ request('search') }}">
+      <div class="input-group input-group-merge position-relative" style="max-width: 620px; width:100%;">
+        <span class="input-group-text"><i class="ti ti-search text-muted"></i></span>
+        <input 
+          type="text"
+          class="form-control"
+          id="debounced-search"
+          placeholder="{{ __('admin.Search') }}..." 
+          value="{{ request('search') }}"
+        />
       </div>
 
       <button type="button" class="btn btn-primary px-4 py-2" data-bs-toggle="offcanvas"
@@ -301,12 +306,14 @@
                   <hr class="my-3">
 
                   {{-- Sector --}}
+                  @if ($company->sectoR)
                   <div class="d-flex align-items-center gap-2">
                     <i class="ti ti-category text-warning"></i>
                     <span class="fw-semibold text-capitalize text-dark small">
                       {{ $company->sectoR ? $company->sectoR->{'name_' . $l} : $company->sector }}
                     </span>
                   </div>
+                  @endif
 
                   {{-- Organization & Cycle --}}
                   <div class="d-flex flex-wrap align-items-center gap-3 mt-2 small">
@@ -363,17 +370,20 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
 
-  <form id="filter-form" method="GET" action="{{ route('users.view_companies') }}" data-ignore-dirty>
-    <div class="offcanvas-body d-flex flex-column">
-      <div class="flex-grow-1">
+  <form id="filter-form" method="GET" action="{{ route('users.view_companies') }}" data-ignore-dirty class="d-flex flex-column h-100">
+    <div class="offcanvas-body d-flex flex-column flex-grow-1 overflow-auto">
+      <div>
         <div class="form-group mb-4">
           <label for="alumniStatusFilter" class="form-label">{{ __('admin.status') ?? 'Status' }}</label>
           <select name="status" id="alumniStatusFilter" class="form-select select2">
             <option value="all" {{ request('status', 'all') == 'all' ? 'selected' : '' }}>
-              {{ __('admin.applied_all') ?? 'Applied (All) Startups' }}
+              {{ __('admin.All') ?? 'All Startups' }}
             </option>
             <option value="incubated" {{ request('status') == 'incubated' ? 'selected' : '' }}>
-              {{ __('admin.incubated') ?? 'Incubated Startups' }}
+              {{ __('admin.Active') ?? 'Active Startups' }}
+            </option>
+            <option value="enrolled" {{ request('status') == 'enrolled' ? 'selected' : '' }}>
+              {{ __('admin.Enrolled') ?? 'Enrolled Startups' }}
             </option>
             <option value="alumni" {{ request('status') == 'alumni' ? 'selected' : '' }}>
               {{ __('startup.alumni') ?? 'Alumni Startups' }}
@@ -445,17 +455,17 @@
           </select>
         </div>
       </div>
+    </div>
 
-      <div class="border-top pt-3 mt-3 d-flex gap-2">
-        <button type="button" class="btn btn-outline-secondary flex-fill" id="cancelFilterBtn" data-bs-dismiss="offcanvas">
-          <i class="ti ti-x me-2"></i>
-          {{ __('admin.Cancel') }}
-        </button>
-        <button type="submit" class="btn btn-primary flex-fill">
-          <i class="ti ti-filter me-2"></i>
-          {{ __('cycles.Apply_Filters') }}
-        </button>
-      </div>
+    <div class="offcanvas-footer border-top p-3 d-flex gap-2 bg-white">
+      <button type="button" class="btn btn-outline-secondary flex-fill" id="cancelFilterBtn" data-bs-dismiss="offcanvas">
+        <i class="ti ti-x me-2"></i>
+        {{ __('admin.Cancel') }}
+      </button>
+      <button type="submit" class="btn btn-primary flex-fill">
+        <i class="ti ti-filter me-2"></i>
+        {{ __('cycles.Apply_Filters') }}
+      </button>
     </div>
   </form>
 </div>

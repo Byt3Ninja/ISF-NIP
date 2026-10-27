@@ -4,6 +4,28 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
 <style>
   #historyTabs .nav-item .nav-link { font-size: 12px; }
+
+  /* Founder note — clamp to 3 lines until expanded */
+  .founder-note-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
+  .note-toggle { font-size: 12px; font-weight: 600; }
+  .req-detail-label { font-size: 11px; line-height: 1.2; }
+  .req-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .req-provider-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
 </style>
 @stop
 
@@ -165,13 +187,13 @@ $config = [
           <div class="card-body d-flex flex-column">
 
             {{-- Header --}}
-            <div class="d-flex justify-content-between align-items-start mb-4">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-4">
               <div class="d-flex align-items-center gap-2">
                 <div class="avatar avatar-md rounded">
                   <img src="{{ $request['image_url'] }}" alt="Avatar" class="rounded object-fit-cover border">
                 </div>
                 <div>
-                  <h6 class="mb-0">{{ $request['title'] }}</h6>
+                  <h6 class="mb-0 fw-bold">{{ $request['title'] }}</h6>
                   <small class="text-muted">{{ $request['date'] }}</small>
                 </div>
               </div>
@@ -180,36 +202,70 @@ $config = [
               </span>
             </div>
 
-            {{-- Description --}}
-            <p class="text-muted small flex-grow-1">{{ $request['description'] }}</p>
+            {{-- Details --}}
+            <div class="d-flex flex-column flex-grow-1">
 
-            {{-- Price --}}
-            @if($request['price'])
-            <div class="mb-3">
-              <span class="fw-semibold text-dark">{{ $request['price'] }} {{ $request['currency'] }}</span>
-            </div>
-            @endif
+              {{-- Founder & Startup --}}
+              <div class="d-flex flex-column gap-3 mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-label-primary text-primary req-icon">
+                    <i class="ti ti-user"></i>
+                  </span>
+                  <div class="d-flex flex-column">
+                    <small class="text-muted req-detail-label">{{ __('admin.Founder') }}</small>
+                    <a href="{{ $request['founder_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none text-break">{{ $request['founder_name'] }}</a>
+                  </div>
+                </div>
 
-            {{-- Startup & Founder --}}
-            <div class="d-flex flex-column gap-2 mb-4">
-              <div class="d-flex align-items-center gap-2">
-                <i class="ti ti-building-skyscraper text-dark"></i>
-                <span class="text-body">{{ __('admin.Startup') }}:</span>
-                <a href="{{ $request['startup_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['startup_name'] }}</a>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-label-info text-info req-icon">
+                    <i class="ti ti-building-skyscraper"></i>
+                  </span>
+                  <div class="d-flex flex-column">
+                    <small class="text-muted req-detail-label">{{ __('admin.Startup') }}</small>
+                    <a href="{{ $request['startup_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none text-break">{{ $request['startup_name'] }}</a>
+                  </div>
+                </div>
               </div>
-              <div class="d-flex align-items-center gap-2">
-                <i class="ti ti-user text-dark"></i>
-                <span class="text-body">{{ __('admin.registered') }}:</span>
-                <a href="{{ $request['founder_url'] ?? '#' }}" class="fw-semibold text-dark text-decoration-none">{{ $request['founder_name'] }}</a>
-              </div>
-            </div>
 
-            {{-- Service Provider --}}
-            <a href="{{ $request['service_provider']['profile_url'] ?? '#' }}" class="d-flex align-items-center mb-4 text-decoration-none">
-              <img src="{{ $request['service_provider']['image_url'] }}" class="rounded-circle me-2"
-                width="40" height="40" alt="provider">
-              <div class="fw-semibold text-dark">{{ $request['service_provider']['name'] }}</div>
-            </a>
+              {{-- Note from Founder --}}
+              @php($founderNote = trim($request['description'] ?? ''))
+              <div class="bg-label-warning border rounded p-3 mb-3" style="min-height: 125px;">
+                <div class="d-flex align-items-center gap-1 mb-1">
+                  <i class="ti ti-note text-warning"></i>
+                  <span class="fw-bold text-uppercase small text-dark">{{ __('admin.note_from_founder') }}</span>
+                </div>
+                @if($founderNote !== '' && $founderNote !== '—')
+                <p class="mb-0 small text-body founder-note founder-note-clamp" style="white-space: pre-wrap;">{{ $founderNote }}</p>
+                  @if(mb_strlen($founderNote) > 177)
+                    <button type="button" class="btn btn-link btn-sm p-0 mt-1 note-toggle d-none">
+                      {{ __('admin.see_more') }}
+                    </button>
+                  @endif
+                @else
+                <p class="mb-0 small text-muted fst-italic">{{ __('admin.no_notes_provided') }}</p>
+                @endif
+              </div>
+
+              {{-- Price & Service Provider --}}
+              @php($showProvider = !$_user->hasRole('serviceProvider'))
+              @if($request['price'] || $showProvider)
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-auto mb-4">
+                @if($showProvider)
+                <a href="{{ $request['service_provider']['profile_url'] ?? '#' }}" class="d-flex align-items-center gap-2 text-decoration-none">
+                  <img src="{{ $request['service_provider']['image_url'] }}" class="rounded-circle border req-provider-logo"
+                    alt="{{ $request['service_provider']['name'] }}">
+                  <span class="fw-semibold text-dark text-break">{{ $request['service_provider']['name'] }}</span>
+                </a>
+                @endif
+                
+                @if($request['price'])
+                <span class="fw-bold text-dark">{{ $request['price'] }} {{ $request['currency'] }}</span>
+                @endif
+              </div>
+              @endif
+
+            </div>
 
             {{-- Actions --}}
             <div class="d-flex gap-2 mt-auto">
@@ -642,6 +698,9 @@ const statuses = {
   Approved  : '{{ __('admin.Approved') }}',
 };
 
+const noteSeeMore = @json(__('admin.see_more'));
+const noteSeeLess = @json(__('admin.see_less'));
+
 document.addEventListener('DOMContentLoaded', function () {
 
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -670,6 +729,30 @@ document.addEventListener('DOMContentLoaded', function () {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
               .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
+
+  /* ── Founder note: See more / See less ── */
+  function setupFounderNoteToggles() {
+    document.querySelectorAll('.note-toggle').forEach(btn => {
+      if (btn.dataset.ready) return;
+      const note = btn.parentElement.querySelector('.founder-note');
+      if (!note) return;
+
+      if (note.scrollHeight <= note.clientHeight + 1) {
+        btn.classList.add('d-none');
+        btn.dataset.ready = '1';
+        return;
+      }
+
+      btn.dataset.ready = '1';
+      btn.classList.remove('d-none');
+      btn.addEventListener('click', () => {
+        const collapsed = note.classList.toggle('founder-note-clamp');
+        btn.textContent = collapsed ? noteSeeMore : noteSeeLess;
+      });
+    });
+  }
+  setupFounderNoteToggles();
+  window.addEventListener('load', setupFounderNoteToggles);
 
   const userRole = '{{ $_user->getRoleNames()->first() }}';
   const emptyReviewMsg = userRole === 'serviceProvider'

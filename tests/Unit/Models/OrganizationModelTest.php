@@ -7,11 +7,9 @@ use App\Organization;
 use App\User;
 use App\Cycle;
 use App\Company;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class OrganizationModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_fillable_attributes()

@@ -8,7 +8,7 @@
     padding: 0;
   }
   
-  .swal2-container {
+  .modal {
     z-index: 9999 !important;
   }
 
@@ -171,6 +171,30 @@
     text-align: start;
   }
 
+  /* Assigned Judges / Startups boxes on the screening pages (their chips are
+     re-rendered by updateStepAssignees below). A minimum, not a fixed height:
+     a fixed one let the chips spill over the next section on narrow screens
+     (GV-9858). The visible chips are capped at maxVisible, so growth is bounded. */
+  .screening-assignees {
+    min-height: 150px;
+  }
+
+  /* Phones: the tab, the panel body and the session box each add their own
+     inset, which left the inputs a third of the screen wide. */
+  @media (max-width: 575.98px) {
+    #panels-container .accordion-item > .accordion-collapse > .accordion-body {
+      padding: 1rem .75rem;
+    }
+
+    #panels-container .accordion-header .accordion-button {
+      padding-inline: 1rem;
+    }
+
+    #panels-container .session-inputs {
+      padding: 1rem !important;
+    }
+  }
+
 </style>
 
 <div class="row">
@@ -209,9 +233,15 @@
             // what took place. Collapsed by default so live panels stay in view.
             $isHistory = !empty($panel['is_history']);
             $expanded = $index === 0 && !$isHistory;
+            // GV-9671. Whether this panel was SAVED with a scheduled session, i.e.
+            // whether real meetings exist that a save could move. The first panel
+            // of a step (and any never-scheduled one) has none, so the "meeting
+            // times may change" warning must not fire for it.
+            $hasSavedSession = !empty($panel['session']) && ($panel['session']['checked'] ?? false) == true;
           @endphp
           <div class="accordion-item border {{ $isHistory ? 'panel-history' : '' }}" data-index="{{ $index }}"
-            @if($isHistory) data-history="1" @endif>
+            @if($isHistory) data-history="1" @endif
+            @if($hasSavedSession) data-saved-session="1" @endif>
             @if($isHistory)
               {{-- The panel number this history record is stored under. Deleting an
                    earlier panel renumbers the accordion, so position alone cannot
@@ -572,14 +602,11 @@
           .map(n => `<li class="text-start">${esc(n)}</li>`)
           .join('');
 
-        const { isConfirmed } = await Swal.fire({
-          icon: 'warning',
-          html: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
-          showCancelButton: true,
-          confirmButtonText: '{{ __("admin.Confirm") }}',
-          cancelButtonText: '{{ __("admin.Cancel") }}',
-          customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-          buttonsStyling: false
+        const isConfirmed = await releaseAlert('warning', {
+          message: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
+          confirmText: '{{ __("admin.Confirm") }}',
+          cancelText: '{{ __("admin.Cancel") }}',
+          confirmColor: 'primary'
         });
 
         return isConfirmed ? ids : ids.filter(id => !duplicates.includes(id));
@@ -1033,14 +1060,11 @@
           .map(n => `<li class="text-start">${esc(n)}</li>`)
           .join('');
 
-        const { isConfirmed } = await Swal.fire({
-          icon: 'warning',
-          html: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
-          showCancelButton: true,
-          confirmButtonText: '{{ __("admin.Confirm") }}',
-          cancelButtonText: '{{ __("admin.Cancel") }}',
-          customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-          buttonsStyling: false
+        const isConfirmed = await releaseAlert('warning', {
+          message: `<p class="mb-2">{{ __("admin.companies_assigned_other_panel") }}</p><ul class="mb-0">${names}</ul>`,
+          confirmText: '{{ __("admin.Confirm") }}',
+          cancelText: '{{ __("admin.Cancel") }}',
+          confirmColor: 'primary'
         });
 
         if (!isConfirmed) {
@@ -1214,6 +1238,8 @@
         // read-only DIRECTLY on those elements, so clearing the fieldset alone
         // leaves both controls dead in the new panel.
         $clone.removeAttr('data-history').removeClass('panel-history');
+        // A new panel has no saved meetings, whatever its source had (GV-9671).
+        $clone.removeAttr('data-saved-session');
         $clone.find('fieldset').prop('disabled', false).removeAttr('disabled');
         $clone.find('select').prop('disabled', false).removeAttr('disabled');
         $clone.find('input, textarea, button').prop('disabled', false);
@@ -1326,14 +1352,14 @@
 
         const panelIdx = $panel.data('index') + 1; // 1-based index for backend
 
-        const result = await Swal.fire({
-          icon: 'warning', title: '@lang("admin.SureDelete")', showCancelButton: true,
-          confirmButtonText: '@lang("admin.DYes")', cancelButtonText: '@lang("Cancel")',
-          customClass: { confirmButton: 'btn btn-danger me-2', cancelButton: 'btn btn-label-secondary' },
-          buttonsStyling: false
+        const ok = await releaseAlert('warning', {
+          title: '@lang("admin.SureDelete")',
+          confirmText: '@lang("admin.DYes")',
+          cancelText: '@lang("Cancel")',
+          confirmColor: 'danger'
         });
 
-        if (result.isConfirmed) {
+        if (ok) {
           try {
             const response = await fetch('{{ route("screening.delete_judging_panel") }}', {
               method: 'POST',
@@ -1343,18 +1369,24 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
               },
-              body: JSON.stringify({ step: '{{ $cstep->id }}', panel: panelIdx })
+              // Deleting a panel cancels its meetings (GV-3295). The panel's own
+              // "Notify now" switch decides whether that is emailed too.
+              body: JSON.stringify({
+                step: '{{ $cstep->id }}',
+                panel: panelIdx,
+                notify: $panel.find('.notify-toggle').is(':checked')
+              })
             });
             const data = await response.json();
             if (data.success) {
               $panel.remove();
               renumberPanels();
-              releaseSuccessAlert({ title: '{{ __('admin.success') }}', message: data.message });
+              releaseAlert('success', { title: '{{ __('admin.success') }}', message: data.message });
             } else {
-              releaseFailureAlert({ title: '{{ __('admin.error') }}', message: data.message });
+              releaseAlert('danger', { title: '{{ __('admin.error') }}', message: data.message });
             }
           } catch (e) {
-            releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
+            releaseAlert('danger', { title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
           }
         }
       });
@@ -1550,15 +1582,12 @@
             }
           }[changeKind];
 
-          const { isConfirmed } = await Swal.fire({
-            icon: 'warning',
+          const isConfirmed = await releaseAlert('warning', {
             title: copy.title,
-            text: copy.body,
-            showCancelButton: true,
-            confirmButtonText: '{{ __("admin.Confirm") }}',
-            cancelButtonText: '{{ __("admin.Cancel") }}',
-            customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-            buttonsStyling: false
+            message: copy.body,
+            confirmText: '{{ __("admin.Confirm") }}',
+            cancelText: '{{ __("admin.Cancel") }}',
+            confirmColor: 'primary'
           });
 
           // Cancel leaves the form exactly as the admin left it, so the panel can
@@ -1593,6 +1622,12 @@
 
         // An unscheduled panel has no meeting times to move.
         if (!$p.find('.session-toggle').is(':checked')) return null;
+
+        // Nor does one that was never saved with a schedule: a brand-new panel
+        // (the first on a step, or one just added) or a panel being scheduled for
+        // the first time. Its empty baseline would otherwise make every startup
+        // it is given read as an "assignment change" (GV-9671).
+        if ($p.attr('data-saved-session') !== '1') return null;
 
         // The dialog promises "affected startups will be notified", and with
         // "Notify now" off the server deliberately emails nobody. Warning about
@@ -1655,6 +1690,33 @@
         return baseline.some((id, i) => id !== current[i]);
       };
 
+      // After a successful save, make what was just submitted the new "saved"
+      // state — exactly what a reload would render. The save is AJAX, so without
+      // this every baseline panelChangeKind() and startChanged() read stays at
+      // page-load values: a first-created panel kept looking never-scheduled and
+      // later edits skipped the warning until the page was refreshed (GV-9671).
+      const rebaselinePanels = () => {
+        $('.accordion-item').not('[data-history="1"]').each((_, el) => {
+          const $p = $(el);
+
+          if ($p.find('.session-toggle').is(':checked')) {
+            $p.attr('data-saved-session', '1');
+          } else {
+            $p.removeAttr('data-saved-session');
+          }
+
+          $p.find('.session-date, .session-time, .interval-duration').each((_, input) => {
+            $(input).attr('value', $(input).val() || '');
+          });
+
+          const companies = $p.find('input[type="hidden"][name*="[companies][]"]')
+            .toArray()
+            .map(input => parseInt(input.value, 10))
+            .filter(id => !isNaN(id));
+          $p.find('.companies-picker-trigger').attr('data-companies-baseline', JSON.stringify(companies));
+        });
+      };
+
       // Posts the panels, handling the judge-conflict round-trip.
       //
       // Judge double-booking (GV-8300) can only be resolved on the server: a
@@ -1689,15 +1751,12 @@
             if (!d.success) {
               if (!acknowledged && d.requires_confirmation && Array.isArray(d.judge_conflicts) && d.judge_conflicts.length) {
                 setSubmitBusy(false);
-                const { isConfirmed } = await Swal.fire({
-                  icon: 'warning',
+                const isConfirmed = await releaseAlert('warning', {
                   title: '{{ __("admin.screening.judge_conflict_title") }}',
-                  html: d.judge_conflicts.map(m => `<p class="mb-2 text-start">${esc(m)}</p>`).join(''),
-                  showCancelButton: true,
-                  confirmButtonText: '{{ __("admin.Confirm") }}',
-                  cancelButtonText: '{{ __("admin.Cancel") }}',
-                  customClass: { confirmButton: 'btn btn-primary me-2', cancelButton: 'btn btn-label-secondary' },
-                  buttonsStyling: false
+                  message: d.judge_conflicts.map(m => `<p class="mb-2 text-start">${esc(m)}</p>`).join(''),
+                  confirmText: '{{ __("admin.Confirm") }}',
+                  cancelText: '{{ __("admin.Cancel") }}',
+                  confirmColor: 'primary'
                 });
 
                 // Cancel leaves the form exactly as the admin left it, so the
@@ -1708,7 +1767,7 @@
               }
 
               setSubmitBusy(false);
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: '{{ __('admin.error') }}',
                 message: d.message || '{{ __('admin.unexpected_error') }}'
               });
@@ -1717,8 +1776,9 @@
             }
 
             setSubmitBusy(false);
+            rebaselinePanels();
 
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: '{{ __('admin.success') }}',
               message: d?.message || '{{ __('admin.Saved_successfully') }}',
             });
@@ -1742,21 +1802,21 @@
           })
           .catch(e => {
             setSubmitBusy(false);
-            releaseFailureAlert({ title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
+            releaseAlert('danger', { title: '{{ __('admin.error') }}', message: e?.message || '{{ __('admin.unexpected_error') }}' });
           });
       };
 
       const maxVisible = 10;
 
       const renderBadge = (id, name, imgUrl, href, iconClass) => `
-      <a href="${href}" class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center">
-        <div class="avatar avatar-xs me-2">
+      <a href="${href}" class="badge text-dark bg-card border px-3 py-2 rounded-pill d-flex align-items-center mw-100">
+        <div class="avatar avatar-xs flex-shrink-0 me-2">
           ${imgUrl
           ? `<img src="${imgUrl}" class="rounded-circle object-fit-cover">`
           : `<div class="avatar-initial rounded-circle bg-label-secondary"><i class="${iconClass} ti-xs"></i></div>`
         }
         </div>
-        ${name}
+        <span class="text-truncate" title="${esc(name)}">${esc(name)}</span>
       </a>`;
 
       const renderOverflowBadge = (hiddenNames, count) => {
@@ -1837,7 +1897,7 @@
         const text = $(this).closest('.input-group').find('.meeting-link-input').val();
         if (text) {
           navigator.clipboard.writeText(text).then(() => {
-            releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
+            releaseAlert('success', { title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
           });
         }
       });
@@ -1847,7 +1907,7 @@
         const text = $(this).closest('.input-group').find('.meeting-password-input').val();
         if (text) {
           navigator.clipboard.writeText(text).then(() => {
-            releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
+            releaseAlert('success', { title: '{{ __("admin.success") }}', message: '{{ __("admin.copied_to_clipboard") }}' });
           });
         }
       });

@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Role;
 use App\Traits\ApiResponder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 class StoreRoleRequest extends FormRequest
 {
     use ApiResponder;
@@ -19,6 +21,7 @@ class StoreRoleRequest extends FormRequest
     {
         return [
             'name' => 'required|string|min:2|max:100|regex:/^[A-Za-z0-9 _-]+$/|unique:roles,name',
+            'default_for' => ['nullable', 'string', Rule::in(Role::DEFAULT_FOR_VALUES)],
             'permissions' => 'required|array|min:1',
             'permissions_flat' => 'required|array|min:1',
             'permissions_flat.*' => 'string|exists:permissions,name',

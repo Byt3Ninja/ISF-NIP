@@ -15,6 +15,7 @@ class MentorshipTaskController extends Controller
 {
     public function index($id){
         $mentorship= MentorshipRequest::findOrFail($id);
+        $this->authorizeMentorship($mentorship);
         $mentorshipTasks = $mentorship->mentorshipTasks;
 
         
@@ -43,17 +44,20 @@ class MentorshipTaskController extends Controller
 
     public function show($id){
         $task= MentorshipTask::findOrFail($id);
+        $this->authorizeTask($task);
         return view('startup.mentorshipTask.show',compact('task'));
     }
 
     public function complete(Request $request,$id){
+        // Outside the try: its catch would turn the 403/404 into a 500.
+        $task= MentorshipTask::findOrFail($id);
+        $this->authorizeTask($task);
         try{
 
-            $task= MentorshipTask::findOrFail($id);
             $result=$task->update(['status'=>'completed',/*'done_date'=>now()->format('Y-m-d'),'reply'=>$request->reply*/]);
 
             if($result)
-                return redirect(route('startup.mentorshipTasks.index',['mentorship_id'=>$task->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] );
+                return redirect(route('startup.startup.mentorshipTasks.index',['mentorship_id'=>$task->mentorship_request_id]))->with( ['message' => 'StoredSuccessfully'] );
             else
                 return back()->withInput()->with( ['message2' => 'FailedStore'] );
 
@@ -66,9 +70,11 @@ class MentorshipTaskController extends Controller
 
     }
     public function sendComment(Request $request){
+        // Outside the try: its catch would turn the 403/404 into a 500.
+        $task= MentorshipTask::findOrFail($request->mentorship_task_id);
+        $this->authorizeTask($task);
         try{
 
-            $task= MentorshipTask::findOrFail($request->mentorship_task_id);
             if ($task->status === 'completed') {
                 return back()->with(['message2' => 'TaskAlreadyCompleted']);
             }
@@ -88,6 +94,32 @@ class MentorshipTaskController extends Controller
             abort(500);
 
         }
+    }
+
+    /** H3: the startup's own team, the task's mentor, or an admin. */
+    private function authorizeTask(MentorshipTask $task): void
+    {
+        $user = auth()->user();
+        abort_unless(
+            $user->hasRole('admin')
+                || ($user->company_id && (int) $task->company_id === (int) $user->company_id)
+                || (int) $task->mentor_id === (int) $user->id,
+            403
+        );
+    }
+
+    /** H3: the founder who made the request, their teammates, its mentor, or an admin. */
+    private function authorizeMentorship(MentorshipRequest $mentorship): void
+    {
+        $user = auth()->user();
+        $requesterCompanyId = $mentorship->user?->company_id;
+        abort_unless(
+            $user->hasRole('admin')
+                || (int) $mentorship->user_id === (int) $user->id
+                || ($user->company_id && $requesterCompanyId && (int) $requesterCompanyId === (int) $user->company_id)
+                || (int) $mentorship->mentor_id === (int) $user->id,
+            403
+        );
     }
 
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\Cycle;
 use App\Finalscreening;
 use App\Events\ChangeStep;
 use App\Events\JudgeAssigned;
@@ -14,6 +15,7 @@ use App\Jobs\ExportScreeneData;
 use App\Jobs\SendChangeCycleNotificationJob;
 use App\Notifications\ChangeCycle;
 use App\Notifications\JudgeAssignedToScreeningNotification;
+use App\Notifications\JudgeScreeningMeetingChangedNotification;
 use App\Notifications\StartupMeetingTimeChangedNotification;
 use App\Notifications\TemplateEmail;
 use App\Screening;
@@ -26,9 +28,12 @@ use App\Factories\OnlineMeetingFactory;
 use App\Services\JudgeScheduleConflictService;
 use App\Services\PanelWindowService;
 use App\Services\ScreeningSlotService;
+use App\Services\TimezoneService;
+use App\Services\ProtectedFiles\FileAccess;
 use App\Services\WhatsAppService;
 use App\Step;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -87,7 +92,8 @@ class ScreeningController extends Controller
 
 		if( $request->filled('status') && $request->input('status', 'all') != 'all')
 		{
-			$today = now()->toDateString();
+			// GV-9566: step DATE columns vs the platform zone's today, not the server's.
+			$today = TimezoneService::platformToday();
 			switch ($request->status)
 			{
 				case 'upcoming':
@@ -336,8 +342,7 @@ class ScreeningController extends Controller
 					// preserved as a record of what actually took place. Derived from
 					// the saved row (not request input), so it cannot be spoofed.
 					'is_history' => PanelWindowService::isPast(
-						PanelWindowService::fromScreening($screening),
-						auth()->user()
+						PanelWindowService::fromScreening($screening)
 					),
 					// The panel number this record is STORED under. The view's loop
 					// index is not the same thing once panels have been deleted, so
@@ -425,6 +430,8 @@ class ScreeningController extends Controller
 
 		if( empty( $judges ) ) { return Redirect::back()->with('message2', __('admin.Please_Choose_Judges')); }
 
+		$this->authorizeStepStaff($request->step, 'screening.add_judging_panels');
+
 		if( $request->step )
 		{
 			$type = Step::where('id', $request->step)->pluck('data')->first();
@@ -507,6 +514,7 @@ class ScreeningController extends Controller
 						"You have a New Judging Request." 
 						];
 						$MSG = new TemplateEmail($message);
+						$MSG->program = $cstep;
 						broadcast(new JudgeAssigned(
 							$rname->id,
 							"Kindly note that we need your experiences to judge New Incubation Cycle registered users, the judging period is from " . $cstep?->from->format('d-m-Y') . " to " . $cstep?->to->format('d-m-Y') . ".",
@@ -543,6 +551,15 @@ class ScreeningController extends Controller
 			return redirect()->back()->with('message2', 'startup not complete the form');
 		}
 		$company = Company::where('id', $answers->pluck(['company_id'])->first())->first();
+
+		// H7: only admins, staff managing the program's organization, or a judge assigned to this startup.
+		$user = auth()->user();
+		$programOrgId = Cycle::whereKey(Step::whereKey($answers->first()->step_id)->value('cycle_id'))->value('organization_id');
+		abort_unless(
+			$user->managesOrganization($programOrgId) || app(FileAccess::class)->isAssignedJudge($user, (int) $cid),
+			403
+		);
+
 		// Uploaded answers get their authorized link here (null when this viewer may not open them).
 		$answers->each(function ($answer) {
 			$answer->file_url = Formdata::fileAnswer($answer->answer, $answer->company_id)['file_url'] ?? null;
@@ -563,6 +580,15 @@ class ScreeningController extends Controller
 	 *
 	 * @return array the panels array with history entries replaced
 	 */
+	/** Staff route guard: the permission plus management of the step's program organization. */
+	private function authorizeStepStaff($stepId, string $permission): void
+	{
+		$user = Auth::user();
+		$organizationId = Cycle::whereKey(Step::whereKey($stepId)->value('cycle_id'))->value('organization_id');
+
+		abort_unless($user->ableTo($permission) && $organizationId && $user->managesOrganization($organizationId), 403);
+	}
+
 	private function restoreHistoryPanels(int $stepId, array $panels): array
 	{
 		if (!$stepId || empty($panels)) {
@@ -589,7 +615,7 @@ class ScreeningController extends Controller
 				continue;
 			}
 
-			if (!PanelWindowService::isPast(PanelWindowService::fromScreening($saved), auth()->user())) {
+			if (!PanelWindowService::isPast(PanelWindowService::fromScreening($saved))) {
 				continue;
 			}
 
@@ -688,8 +714,8 @@ class ScreeningController extends Controller
 				continue;
 			}
 
-			$window = PanelWindowService::fromInput($panel);
-			if (!$window || !PanelWindowService::startsInPast($window, auth()->user())) {
+			$window = PanelWindowService::fromInput($panel, TimezoneService::forStep($stepId));
+			if (!$window || !PanelWindowService::startsInPast($window)) {
 				continue;
 			}
 
@@ -798,16 +824,15 @@ class ScreeningController extends Controller
 			->map(fn ($row) => ((int) $row->panel) . ':' . ((int) $row->user_id))
 			->unique();
 
-		// Snapshot every scheduled startup's meeting slot BEFORE the rebuild, for
-		// the same reason as $judgesBefore: the delete below is a hard delete, so
-		// a line later there is nothing left to diff against (GV-8892 / GV-8893).
+		// Snapshot every panel's meeting, roster and startup slots BEFORE the
+		// rebuild, for the same reason as $judgesBefore: the delete below is a
+		// hard delete, so a line later there is nothing left to diff against
+		// (GV-8892 / GV-8893 / GV-3295). It also carries each panel's existing
+		// online meeting, which the rebuild reuses instead of minting a new one.
 		//
 		// Taken after the conflict gate has passed, so a save that comes back
 		// asking for confirmation notifies nobody.
-		$slotsBefore = $this->snapshotCompanySlots($stepId);
-
-		// Clear existing screenings for this step
-		Screening::where('step_id', $stepId)->delete();
+		$panelsBefore = $this->snapshotPanels((int) $stepId);
 
 		// Accumulate the full set of judges assigned to each company across ALL
 		// panels. A company may appear in more than one panel (e.g. its own panel
@@ -819,6 +844,10 @@ class ScreeningController extends Controller
 		// once, after the loop.
 		$judgesByCompany = [];
 		$meetingByCompany = [];
+		// The rebuilt rows. Collected first and written in ONE transaction after the loop,
+		// so every panel's meeting exists before anything is deleted and a failure part-way
+		// can't leave the step with some panels (or none).
+		$screeningRows = [];
 
 		// Create new screenings if panels exist
 		foreach ($panels as $index => $panel) {
@@ -884,20 +913,21 @@ class ScreeningController extends Controller
 						$duration = max($start->diffInMinutes($end), 1);
 					}
 
-					$meetingService = OnlineMeetingFactory::create();
-					$meetingResult = $meetingService->createMeeting([
+					$meeting = $this->panelMeeting($panelsBefore[$panelNumber] ?? null, [
 						'topic' => 'Screening Panel #' . $panelNumber . ' - ' . ($step->title ?? 'Screening'),
 						'start_time' => $startDateTime,
 						'duration' => $duration,
 						'host_video' => 1,
 						'participant_video' => 1,
+						// GV-9566: booked in the step's platform zone, the zone the panel was typed in.
+						'timezone' => TimezoneService::forStep($stepId),
 					]);
 
-					if (!empty($meetingResult['success']) && !empty($meetingResult['data'])) {
-						$meetingLink = $meetingResult['data']['join_url'] ?? null;
-						$meetingPassword = $meetingResult['data']['passcode'] ?? null;
-						$zoomId = $meetingResult['data']['id'] ?? null;
-						$startUrl = $meetingResult['data']['start_url'] ?? null;
+					if ($meeting) {
+						$meetingLink = $meeting['join_url'] ?? null;
+						$meetingPassword = $meeting['passcode'] ?? null;
+						$zoomId = $meeting['id'] ?? null;
+						$startUrl = $meeting['start_url'] ?? null;
 					}
 				} catch (\Exception $e) {
 					Log::warning("Failed to auto-generate meeting for panel {$panelNumber}, step {$stepId}: " . $e->getMessage());
@@ -905,7 +935,7 @@ class ScreeningController extends Controller
 			}
 
 			foreach ($judgeIds as $judgeId) {
-				Screening::create([
+				$screeningRows[] = [
 					'step_id' => $stepId,
 					'user_id' => $judgeId,
 					'panel' => $panelNumber,
@@ -918,7 +948,7 @@ class ScreeningController extends Controller
 					'start_time' => $panel['start_time'] ?? null,
 					'end_time' => $endTime ?: null,
 					'interval' => $interval,
-				]);
+				];
 			}
 
 			// Add meeting data to panels response
@@ -961,28 +991,36 @@ class ScreeningController extends Controller
 			}
 		}
 
-		// Persist the Final Screening judge assignments. Mirror the screenings
-		// rebuild above: clear the step's existing rows, then write one row per
-		// company holding the merged (unique) judge list. The clear removes stale
-		// rows for companies/panels no longer present in this submission.
-		if ($step && $step->stype == 5) {
-			\App\Finalscreening::where('step_id', $stepId)->delete();
-			foreach ($judgesByCompany as $companyId => $judgeIds) {
-				// The Finalscreening model casts `judges` to array, so it json_encodes on save.
-				// Pass the array directly — passing a pre-encoded string causes double-encoding.
-				\App\Finalscreening::create([
-					'step_id' => $stepId,
-					'company_id' => $companyId,
-					'judges' => array_values(array_unique(array_map('intval', $judgeIds))),
-					'join_url' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['meeting_link'] ? ( $meetingByCompany[$companyId]['meeting_link'] ?? null ) : null,
-					'datetime' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['datetime'] ? ( $meetingByCompany[$companyId]['datetime'] ?? null ) : null,
-					'duration' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['duration'] ? ( $meetingByCompany[$companyId]['duration'] ?? null ) : null,
-				]);
+		DB::transaction(function () use ($stepId, $step, $screeningRows, $judgesByCompany, $meetingByCompany) {
+			// Clear existing screenings for this step, then write the rebuilt panels.
+			Screening::where('step_id', $stepId)->delete();
+			foreach ($screeningRows as $row) {
+				Screening::create($row);
 			}
-		}
+
+			// Persist the Final Screening judge assignments. Mirror the screenings
+			// rebuild above: clear the step's existing rows, then write one row per
+			// company holding the merged (unique) judge list. The clear removes stale
+			// rows for companies/panels no longer present in this submission.
+			if ($step && $step->stype == 5) {
+				\App\Finalscreening::where('step_id', $stepId)->delete();
+				foreach ($judgesByCompany as $companyId => $judgeIds) {
+					// The Finalscreening model casts `judges` to array, so it json_encodes on save.
+					// Pass the array directly — passing a pre-encoded string causes double-encoding.
+					\App\Finalscreening::create([
+						'step_id' => $stepId,
+						'company_id' => $companyId,
+						'judges' => array_values(array_unique(array_map('intval', $judgeIds))),
+						'join_url' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['meeting_link'] ? ( $meetingByCompany[$companyId]['meeting_link'] ?? null ) : null,
+						'datetime' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['datetime'] ? ( $meetingByCompany[$companyId]['datetime'] ?? null ) : null,
+						'duration' => array_key_exists($companyId, $meetingByCompany) && $meetingByCompany[$companyId]['duration'] ? ( $meetingByCompany[$companyId]['duration'] ?? null ) : null,
+					]);
+				}
+			}
+		});
 
 		$this->notifyNewlyAssignedJudges($stepId, $panels, $judgesBefore);
-		$this->notifyAffectedStartups($stepId, $panels, $slotsBefore);
+		$this->notifyScheduleChanges((int) $stepId, $panels, $panelsBefore);
 
 		return response()->json([
 			'success' => true,
@@ -1062,289 +1100,394 @@ class ScreeningController extends Controller
 	}
 
 	/**
-	 * Snapshot the scheduled meeting slot of every startup on a step.
+	 * Snapshot every panel on a step: its meeting window, roster, online meeting
+	 * and each startup's slot.
 	 *
-	 * Keyed "companyId:panel" => ['company' => int, 'start' => 'Y-m-d H:i'|null,
-	 * 'panel' => int]. A company sitting in several panels holds ONE ENTRY PER
-	 * PANEL, because each panel is a separate meeting with its own time.
+	 * Taken before AND after the rebuild in addJudgingPanels(), whose delete is a
+	 * hard delete, and before deleteJudgingPanel() removes a panel.
 	 *
-	 * Collapsing a company to a single (earliest) slot silently hid every change
-	 * to its other panels (GV-8892 follow-up): editing panel 2's interval, date
-	 * or roster left the company's earliest slot — on panel 3 — untouched, so the
-	 * diff saw no change and nobody was emailed.
+	 * `screenings` holds one row PER JUDGE PER PANEL, so rows are grouped by panel
+	 * first. Each panel is its own meeting: a company sitting in several panels
+	 * has a slot in each, and a change to any of them must be seen (GV-8892).
 	 *
-	 * `screenings` holds one row PER JUDGE PER PANEL, so the rows are collapsed
-	 * to one entry per panel first — otherwise a panel with three judges would
-	 * compute every one of its companies' slots three times.
+	 * Times are platform wall-clock 'Y-m-d H:i' strings, compared as strings.
+	 * `start`/`end` is the whole panel window — with an interval, `end_time` is
+	 * already stored as start + (startups x interval).
 	 *
-	 * @return array<string, array{company: int, start: ?string, panel: int}>
+	 * @return array<int, array{start: ?string, end: ?string, judges: array<int, int>, companies: array<int, int>, slots: array<int, array{start: ?string, end: ?string}>, meeting_link: ?string, meeting_password: ?string, zoom_id: ?string, start_url: ?string}>
 	 */
-	private function snapshotCompanySlots(int $stepId): array
+	private function snapshotPanels(int $stepId): array
 	{
-		$slots = [];
+		$panels = [];
 
-		$panelRows = Screening::where('step_id', $stepId)->get()->unique('panel');
+		foreach (Screening::where('step_id', $stepId)->get()->groupBy('panel') as $panelNumber => $rows) {
+			$row = $rows->first();
+			$date = $row->session_date instanceof \DateTimeInterface
+				? $row->session_date->format('Y-m-d')
+				: $row->session_date;
+			$interval = $row->interval ? (int) $row->interval : null;
 
-		foreach ($panelRows as $row) {
-			$companyIds = is_array($row->users) ? $row->users : (json_decode((string) $row->users, true) ?: []);
+			$users = is_array($row->users) ? $row->users : (json_decode((string) $row->users, true) ?: []);
+			$companyIds = array_values(array_filter(array_map('intval', $users)));
 
-			foreach (array_values($companyIds) as $position => $companyId) {
-				$companyId = (int) $companyId;
+			$slots = [];
+			foreach ($companyIds as $position => $companyId) {
+				$slots[$companyId] = $this->slotStrings(
+					ScreeningSlotService::slotFor($date, $row->start_time, $interval, $position, $row->end_time)
+				);
+			}
 
-				if (!$companyId) {
+			$window = $this->slotStrings(ScreeningSlotService::slotFor($date, $row->start_time, null, 0, $row->end_time));
+
+			$panels[(int) $panelNumber] = [
+				'start'            => $window['start'],
+				'end'              => $window['end'],
+				'judges'           => $rows->pluck('user_id')->map(fn ($id) => (int) $id)->unique()->values()->all(),
+				'companies'        => $companyIds,
+				'slots'            => $slots,
+				'meeting_link'     => $row->meeting_link,
+				'meeting_password' => $row->meeting_password,
+				'zoom_id'          => $row->zoom_id,
+				'start_url'        => $row->start_url,
+			];
+		}
+
+		return $panels;
+	}
+
+	/**
+	 * A slot as comparable strings. An end before its start crossed midnight
+	 * (end times are stored without a date), so it belongs to the next day.
+	 *
+	 * @return array{start: ?string, end: ?string}
+	 */
+	private function slotStrings(array $slot): array
+	{
+		$start = $slot['start'] ?? null;
+		$end = $slot['end'] ?? null;
+
+		if ($start && $end && $end->lt($start)) {
+			$end = $end->copy()->addDay();
+		}
+
+		return [
+			'start' => $start?->format('Y-m-d H:i'),
+			'end'   => $end?->format('Y-m-d H:i'),
+		];
+	}
+
+	/**
+	 * The online meeting for a live panel.
+	 *
+	 * A panel keeps ONE meeting for its whole life. The rebuild used to call
+	 * createMeeting() on every save, so any edit — even a roster change that
+	 * moved nobody — minted a new link and passcode, orphaned the old meeting,
+	 * and silently invalidated the link every judge and founder had already been
+	 * sent. Now an unchanged window reuses the meeting as is, a moved one is
+	 * updated in place (the link survives), and a new one is created only when
+	 * the panel has none or the provider cannot update.
+	 *
+	 * @param  array|null  $previous  this panel's entry from snapshotPanels()
+	 * @return array{id: mixed, join_url: ?string, passcode: ?string, start_url: ?string}|null
+	 */
+	private function panelMeeting(?array $previous, array $data): ?array
+	{
+		$start = Carbon::parse($data['start_time']);
+
+		if ($previous && !empty($previous['zoom_id']) && !empty($previous['meeting_link'])) {
+			$existing = [
+				'id'        => $previous['zoom_id'],
+				'join_url'  => $previous['meeting_link'],
+				'passcode'  => $previous['meeting_password'],
+				'start_url' => $previous['start_url'],
+			];
+
+			$unchanged = $previous['start'] === $start->format('Y-m-d H:i')
+				&& $previous['end'] === $start->copy()->addMinutes((int) $data['duration'])->format('Y-m-d H:i');
+
+			if ($unchanged) {
+				return $existing;
+			}
+
+			$service = OnlineMeetingFactory::create();
+			if (method_exists($service, 'update') && !empty($service->update($previous['zoom_id'], $data)['success'])) {
+				return $existing;
+			}
+		}
+
+		$result = OnlineMeetingFactory::create()->createMeeting($data);
+
+		if (empty($result['success']) || empty($result['data']) || !is_array($result['data'])) {
+			return null;
+		}
+
+		return [
+			'id'        => $result['data']['id'] ?? null,
+			'join_url'  => $result['data']['join_url'] ?? null,
+			'passcode'  => $result['data']['passcode'] ?? null,
+			'start_url' => $result['data']['start_url'] ?? null,
+		];
+	}
+
+	/**
+	 * Tell the judges and founders whose meeting this save moved or cancelled
+	 * (GV-3295 reschedule & cancellation; founders since GV-8892 / GV-8893).
+	 *
+	 * Runs for initial (stype 2) and final (stype 5) screening and for every
+	 * role that can assign — all of them save through addJudgingPanels().
+	 *
+	 * Everything is decided from ONE before/after diff per save, so nobody hears
+	 * about the same change twice, and nobody hears about a meeting that did not
+	 * change:
+	 *
+	 *  - founder: its slot's start OR end moved. With interval scheduling,
+	 *    adding, removing or reordering startups reflows every slot after the
+	 *    edit, and an interval change moves even the first startup's END.
+	 *    Comparing the start alone missed both.
+	 *  - judge: the panel window they sat on before AND after the save moved
+	 *    (a newly added judge gets the assignment email instead), or a startup
+	 *    was removed from a panel they were on — one cancellation per startup,
+	 *    because the template names that startup's founder.
+	 *
+	 * History panels are skipped: a finished meeting cannot move. A panel's
+	 * "Notify now" switch decides email/WhatsApp only; the in-platform
+	 * notification always goes out (GV-3295 decision D1).
+	 *
+	 * @param  array<int, array>  $panelsBefore  snapshotPanels() before the rebuild
+	 */
+	private function notifyScheduleChanges(int $stepId, array $panels, array $panelsBefore): void
+	{
+		// Panels this save can change: 1-based number => its "Notify now" switch.
+		$live = [];
+		foreach ($panels as $index => $panel) {
+			if (!isset($panel['history_panel'])) {
+				$live[$index + 1] = filter_var($panel['notify'] ?? false, FILTER_VALIDATE_BOOLEAN);
+			}
+		}
+
+		if (empty($live)) {
+			return;
+		}
+
+		$panelsAfter = $this->snapshotPanels($stepId);
+		$founders = ['scheduled' => [], 'rescheduled' => [], 'cancelled' => []];
+
+		foreach ($live as $panelNumber => $sendEmail) {
+			$before = $panelsBefore[$panelNumber] ?? null;
+			$after = $panelsAfter[$panelNumber] ?? null;
+
+			foreach ($after['slots'] ?? [] as $companyId => $slot) {
+				$old = $before['slots'][$companyId] ?? null;
+
+				if ($slot['start'] === null || ($old && $old === $slot)) {
 					continue;
 				}
 
-				$slot = ScreeningSlotService::slotFor(
-					$row->session_date instanceof \DateTimeInterface
-						? $row->session_date->format('Y-m-d')
-						: $row->session_date,
-					$row->start_time,
-					isset($row->interval) ? (int) $row->interval : null,
-					$position,
-					$row->end_time
+				// Only a startup that already had a time on THIS panel was moved.
+				// Otherwise it is a first booking: a panel is one meeting, so a
+				// second panel is an additional meeting and any earlier one stays
+				// exactly where it was. Calling it a reschedule would read as the
+				// first meeting having moved, and the founder would skip it. A slot
+				// that already took place is history, not a meeting to move.
+				$variant = ($old && $this->isUpcoming($stepId, $old)) ? 'rescheduled' : 'scheduled';
+				$this->queueFounderChange($founders[$variant], $companyId, $slot, $after, $sendEmail);
+			}
+
+			if (!$before) {
+				continue;
+			}
+
+			// Removal is decided by MEMBERSHIP, never by the slot: a removed
+			// startup and one moved into the first slot can produce identical
+			// slot data. Only its absence from the rebuilt panel tells them apart.
+			$removed = array_filter(
+				array_diff($before['companies'], $after['companies'] ?? []),
+				fn ($companyId) => $this->isUpcoming($stepId, $before['slots'][$companyId])
+			);
+
+			foreach ($removed as $companyId) {
+				$this->queueFounderChange($founders['cancelled'], $companyId, $before['slots'][$companyId], $before, $sendEmail);
+			}
+
+			$this->notifyJudgesOfCancellations($stepId, $before, $removed, $sendEmail);
+
+			$windowMoved = $after
+				&& $after['start'] !== null
+				&& $this->isUpcoming($stepId, $before)
+				&& ($before['start'] !== $after['start'] || $before['end'] !== $after['end']);
+
+			if ($windowMoved) {
+				$this->notifyUsers(
+					array_intersect($after['judges'], $before['judges']),
+					fn () => new JudgeScreeningMeetingChangedNotification(
+						$stepId, 'rescheduled', $after['start'], $after['end'], $after['companies'],
+						$after['meeting_link'], $after['meeting_password'], $sendEmail
+					),
+					['step_id' => $stepId, 'panel' => $panelNumber, 'variant' => 'judge rescheduled']
 				);
-
-				$start = !empty($slot['start']) ? $slot['start']->format('Y-m-d H:i') : null;
-
-				// One entry per (company, panel): each panel is its own meeting, so
-				// a company in several panels must be diffed panel by panel.
-				$panelNumber = (int) $row->panel;
-
-				$slots[$companyId . ':' . $panelNumber] = [
-					'company' => $companyId,
-					'start'   => $start,
-					'panel'   => $panelNumber,
-				];
 			}
 		}
 
-		return $slots;
+		// One founder message per save. A move wins over a first booking or a
+		// cancellation of the same startup elsewhere: it names the new time of a
+		// meeting the founder already knew about, which says more.
+		$founders['scheduled'] = array_diff_key($founders['scheduled'], $founders['rescheduled']);
+		$founders['cancelled'] = array_diff_key($founders['cancelled'], $founders['rescheduled'], $founders['scheduled']);
+
+		foreach ($founders as $variant => $changes) {
+			$this->sendFounderNotifications($stepId, $changes, $variant);
+		}
 	}
 
 	/**
-	 * Which startups and which panel numbers the "Notify now" switch covers.
+	 * Deleting a panel cancels every meeting on it (GV-3295 decision D2): each
+	 * founder, and each judge once per startup, exactly as if every startup had
+	 * been removed. The panel's own "Notify now" switch, sent with the delete
+	 * request, decides email; in-platform notifications always go out (D1).
 	 *
-	 * Returns [companyId => true, [panelNumber, ...]]. The company map gates
-	 * startups still on a panel; the panel-number list gates startups REMOVED
-	 * from one, which by definition no longer appear in any panel's list.
-	 *
-	 * Panel numbers are 1-based here, matching how the Screening rows and
-	 * $stepList are numbered from this same $panels array.
-	 *
-	 * @return array{0: array<int, true>, 1: array<int, int>}
+	 * @param  array  $panel  the deleted panel's snapshotPanels() entry
 	 */
-	private function notifyingPanelScope(array $panels): array
+	private function notifyPanelDeleted(int $stepId, array $panel, bool $sendEmail): void
 	{
-		$companies = [];
-		$panelNumbers = [];
+		$scheduled = array_filter(
+			$panel['companies'],
+			fn ($companyId) => $this->isUpcoming($stepId, $panel['slots'][$companyId])
+		);
 
-		foreach ($panels as $index => $panel) {
-			// A finished meeting must not re-notify. Blade hides the switch on a
-			// history panel, but the payload is not a boundary — re-check here.
-			if (isset($panel['history_panel'])) {
-				continue;
-			}
-
-			if (!filter_var($panel['notify'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
-				continue;
-			}
-
-			$panelNumbers[] = $index + 1;
-
-			foreach ((array) ($panel['companies'] ?? []) as $companyId) {
-				$companyId = (int) $companyId;
-
-				if ($companyId) {
-					$companies[$companyId] = true;
-				}
-			}
-		}
-
-		return [$companies, $panelNumbers];
-	}
-
-	/**
-	 * Email startups whose scheduled meeting time actually moved (GV-8892 /
-	 * GV-8893), and those whose meeting was cancelled by removing them from a
-	 * scheduled panel.
-	 *
-	 * Runs for both initial screening (stype 2) and final screening (stype 5) —
-	 * both save through addJudgingPanels(), and every role that can assign hits
-	 * the same endpoint, so one call site covers all of them.
-	 *
-	 * Only genuine changes notify. A startup whose slot is unmoved gets nothing,
-	 * which is what "the affected startup" means: with interval scheduling,
-	 * adding, removing or REORDERING startups reflows the positions after the
-	 * edit, so the set of affected startups is far wider than the ones the admin
-	 * actually touched — and narrower than the whole panel.
-	 *
-	 * Gated on the panel's "Notify now" switch, exactly like the judge emails:
-	 * the switch's own hint promises to email "the judges and startups in this
-	 * panel", and saving must never contact anyone unless asked. An admin
-	 * reordering startups with the switch off is making a quiet correction, and
-	 * the confirmation dialog is suppressed to match.
-	 *
-	 * @param  array<string, array{company: int, start: ?string, panel: int}>  $slotsBefore
-	 */
-	private function notifyAffectedStartups(int $stepId, array $panels, array $slotsBefore): void
-	{
-		[$notifiableCompanies, $notifyingPanelNumbers] = $this->notifyingPanelScope($panels);
-
-		if (empty($notifiableCompanies) && empty($notifyingPanelNumbers)) {
-			return;
-		}
-
-		$slotsAfter = $this->snapshotCompanySlots($stepId);
-
-		$scheduled = [];
-		$rescheduled = [];
 		$cancelled = [];
-
-		// Compared per (company, panel): a company in several panels holds one
-		// meeting per panel, and a change to any of them must reach it.
-		foreach ($slotsAfter as $key => $after) {
-			$companyId = $after['company'];
-			$before = $slotsBefore[$key] ?? null;
-
-			// Newly scheduled, or moved to a different time. A company that had no
-			// slot before and still has none is not a change.
-			if ($after['start'] === null) {
-				continue;
-			}
-
-			// Only startups sitting on a panel whose switch is on.
-			if (!isset($notifiableCompanies[$companyId])) {
-				continue;
-			}
-
-			// The panel this slot belongs to must itself be notifying, otherwise a
-			// quiet edit to panel 2 would ride out on panel 3's switch.
-			if (!in_array($after['panel'], $notifyingPanelNumbers, true)) {
-				continue;
-			}
-
-			if ($before !== null && $before['start'] === $after['start']) {
-				continue;
-			}
-
-			// "Rescheduled" is only true of a meeting the startup ALREADY had at a
-			// different time. Two cases are a first booking, not a move:
-			//
-			//  - the startup had no meeting on this step at all;
-			//  - it holds this slot on a panel it was not on before. A panel is
-			//    ONE meeting, so a second panel is an ADDITIONAL meeting (another
-			//    round) and any earlier one stays exactly where it was. Calling
-			//    that a reschedule reads as the first meeting having moved, and
-			//    the founder stops attending it.
-			//
-			// Only a slot on a panel the startup was already sitting on is a
-			// genuine move: that panel's times reflowed underneath it.
-			$bucket = ($before === null) ? 'scheduled' : 'rescheduled';
-
-			// Earliest changed slot wins when several of a company's panels moved,
-			// so it receives one mail naming its next meeting.
-			if ($bucket === 'scheduled') {
-				if (!isset($scheduled[$companyId]) || $after['start'] < $scheduled[$companyId]) {
-					$scheduled[$companyId] = $after['start'];
-				}
-			} elseif (!isset($rescheduled[$companyId]) || $after['start'] < $rescheduled[$companyId]) {
-				$rescheduled[$companyId] = $after['start'];
-			}
+		foreach ($scheduled as $companyId) {
+			$this->queueFounderChange($cancelled, $companyId, $panel['slots'][$companyId], $panel, $sendEmail);
 		}
 
-		// Removal is decided by MEMBERSHIP, never by the slot: positionOf()
-		// returns 0 for a company it cannot find, so a removed startup and one
-		// moved into the first slot produce identical slot data. Only the
-		// company's absence from the rebuilt step distinguishes them.
-		foreach ($slotsBefore as $key => $before) {
-			$companyId = $before['company'];
-
-			if ($before['start'] === null) {
-				continue;
-			}
-
-			if (array_key_exists($key, $slotsAfter)) {
-				continue;
-			}
-
-			// A removed startup is on no panel any more, so it cannot be looked
-			// up in $notifiableCompanies. Gate it on the panel it was removed
-			// FROM instead — that panel's switch is the consent that covers it.
-			if (!in_array((int) $before['panel'], $notifyingPanelNumbers, true)) {
-				continue;
-			}
-
-			// Losing THIS panel's meeting is a cancellation even when the company
-			// still sits on another panel: the two are separate meetings, and the
-			// one in hand is genuinely gone.
-			//
-			// A reschedule already queued for this company wins, though: the same
-			// save moved another of its meetings, and one mail naming the new time
-			// says more than a bare cancellation.
-			if (isset($rescheduled[$companyId]) || isset($scheduled[$companyId])) {
-				continue;
-			}
-
-			$cancelled[$companyId] = $before['start'];
-		}
-
-		// A move reported for the same company wins over a first booking: one mail
-		// per save, naming the change to the meeting it already knew about.
-		$scheduled = array_diff_key($scheduled, $rescheduled);
-
-		if (empty($scheduled) && empty($rescheduled) && empty($cancelled)) {
-			return;
-		}
-
-		$this->sendStartupMeetingNotifications($stepId, $scheduled, 'scheduled');
-		$this->sendStartupMeetingNotifications($stepId, $rescheduled, 'rescheduled');
-		$this->sendStartupMeetingNotifications($stepId, $cancelled, 'cancelled');
+		$this->sendFounderNotifications($stepId, $cancelled, 'cancelled');
+		$this->notifyJudgesOfCancellations($stepId, $panel, $scheduled, $sendEmail);
 	}
 
 	/**
-	 * Deliver one batch of startup meeting notifications.
+	 * Whether a slot is still ahead: only an UPCOMING meeting can be cancelled.
+	 * A meeting that already took place is history, and telling anyone it was
+	 * "cancelled" would be false.
+	 *
+	 * @param  array{start: ?string, end: ?string}  $slot
+	 */
+	private function isUpcoming(int $stepId, array $slot): bool
+	{
+		$last = $slot['end'] ?? $slot['start'];
+
+		return $last !== null
+			&& $last > TimezoneService::platformNow(TimezoneService::forStep($stepId))->format('Y-m-d H:i');
+	}
+
+	/**
+	 * One cancellation per (judge, removed startup), sent to the judges who sat
+	 * on the panel BEFORE the change — "only judges assigned to the removed
+	 * startup" — with that startup's own slot.
+	 *
+	 * @param  array  $panel  the panel's snapshotPanels() entry from before the change
+	 * @param  array<int, int>  $companyIds
+	 */
+	private function notifyJudgesOfCancellations(int $stepId, array $panel, array $companyIds, bool $sendEmail): void
+	{
+		foreach ($companyIds as $companyId) {
+			$slot = $panel['slots'][$companyId];
+
+			$this->notifyUsers(
+				$panel['judges'],
+				fn () => new JudgeScreeningMeetingChangedNotification(
+					$stepId, 'cancelled', $slot['start'], $slot['end'], [$companyId], null, null, $sendEmail
+				),
+				['step_id' => $stepId, 'company_id' => $companyId, 'variant' => 'judge cancelled']
+			);
+		}
+	}
+
+	/**
+	 * Record a founder change, keeping the EARLIEST slot when a company changes
+	 * on several panels in one save, so it gets one message naming its next
+	 * meeting.
+	 *
+	 * @param  array<int, array>  $bucket  company id => change, by reference
+	 * @param  array{start: ?string, end: ?string}  $slot
+	 * @param  array  $panel  the snapshotPanels() entry the slot belongs to
+	 */
+	private function queueFounderChange(array &$bucket, int $companyId, array $slot, array $panel, bool $sendEmail): void
+	{
+		if (isset($bucket[$companyId]) && $bucket[$companyId]['start'] <= $slot['start']) {
+			return;
+		}
+
+		$bucket[$companyId] = [
+			'start'      => $slot['start'],
+			'end'        => $slot['end'],
+			'link'       => $panel['meeting_link'],
+			'passcode'   => $panel['meeting_password'],
+			'judges'     => $panel['judges'] ?? [],
+			'send_email' => $sendEmail,
+		];
+	}
+
+	/**
+	 * Deliver one batch of founder meeting notifications.
 	 *
 	 * The notifiable is the company OWNER — a Company is not itself notifiable.
 	 * Ownership lives on `users.company_id` (there is no `companies.user_id`),
 	 * so the owners are resolved from the users side in a single query.
 	 *
-	 * @param  array<int, string>  $companies  company id => slot start
+	 * @param  array<int, array>  $changes  company id => queueFounderChange() entry
 	 * @param  string  $variant  'scheduled', 'rescheduled' or 'cancelled'
 	 */
-	private function sendStartupMeetingNotifications(int $stepId, array $companies, string $variant): void
+	private function sendFounderNotifications(int $stepId, array $changes, string $variant): void
 	{
-		if (empty($companies)) {
+		if (empty($changes)) {
 			return;
 		}
 
-		$owners = User::whereIn('company_id', array_keys($companies))
-			->get()
-			->keyBy('company_id');
+		$owners = User::whereIn('company_id', array_keys($changes))->get()->keyBy('company_id');
 
-		foreach ($companies as $companyId => $slotStart) {
+		foreach ($changes as $companyId => $change) {
 			$owner = $owners->get($companyId);
 
 			if (!$owner) {
 				continue;
 			}
 
+			$this->notifyUsers(
+				[$owner],
+				fn () => new StartupMeetingTimeChangedNotification(
+					$stepId, (int) $companyId, $change['start'], $variant, $change['end'],
+					$variant === 'cancelled' ? null : $change['link'],
+					$variant === 'cancelled' ? null : $change['passcode'],
+					$change['send_email'],
+					$variant === 'cancelled' ? null : ($change['judges'] ?? [])
+				),
+				['step_id' => $stepId, 'company_id' => $companyId, 'variant' => 'founder ' . $variant]
+			);
+		}
+	}
+
+	/**
+	 * Notify each user, never letting a delivery failure fail the save: the
+	 * schedule is already persisted, and throwing here would report an error for
+	 * work that succeeded.
+	 *
+	 * @param  iterable<int|User>  $users  users or user ids
+	 * @param  callable(): \Illuminate\Notifications\Notification  $make
+	 */
+	private function notifyUsers(iterable $users, callable $make, array $context): void
+	{
+		$users = collect($users);
+		$ids = $users->filter(fn ($user) => !$user instanceof User)->map(fn ($id) => (int) $id)->unique()->all();
+
+		$recipients = $users->filter(fn ($user) => $user instanceof User)
+			->merge($ids ? User::whereIn('id', $ids)->get() : []);
+
+		foreach ($recipients as $user) {
 			try {
-				$owner->notify(new StartupMeetingTimeChangedNotification(
-					$stepId,
-					(int) $companyId,
-					$slotStart,
-					$variant
-				));
+				$user->notify($make());
 			} catch (\Throwable $th) {
-				// A mail failure must never fail the save: the schedule is already
-				// persisted, and throwing here would report an error for work that
-				// succeeded.
-				Log::error('Failed to notify startup of screening meeting change', [
-					'company_id' => $companyId,
-					'step_id'    => $stepId,
-					'variant'    => $variant,
-					'error'      => $th->getMessage(),
+				Log::error('Failed to send screening meeting notification', $context + [
+					'user_id' => $user->id,
+					'error'   => $th->getMessage(),
 				]);
 			}
 		}
@@ -1354,10 +1497,12 @@ class ScreeningController extends Controller
     {
         $request->validate([
             'step' => 'required|exists:steps,id',
-            'panel' => 'required|integer'
+            'panel' => 'required|integer',
+            'notify' => 'nullable|boolean',
         ]);
 
         $stepId = $request->step;
+        $this->authorizeStepStaff($stepId, 'screening.delete_judging_panel');
         $panelIdx = (int)$request->panel; // 1-based index from UI usually, or 0-based. Let's assume 1-based to match 'panel' column.
 
         // A finished panel is a record of a screening that took place; it cannot be
@@ -1365,7 +1510,7 @@ class ScreeningController extends Controller
         // — this endpoint takes a panel number straight from the request, so the
         // rule has to be enforced here too.
         $existing = Screening::where('step_id', $stepId)->where('panel', $panelIdx)->first();
-        if ($existing && PanelWindowService::isPast(PanelWindowService::fromScreening($existing), auth()->user())) {
+        if ($existing && PanelWindowService::isPast(PanelWindowService::fromScreening($existing))) {
             return response()->json([
                 'success' => false,
                 'message' => __('admin.screening.panel_history_cannot_delete'),
@@ -1374,6 +1519,10 @@ class ScreeningController extends Controller
 
         $step = Step::findOrFail($stepId);
         $list = json_decode($step->list, true) ?? [];
+
+        // Deleting a panel cancels every meeting on it (GV-3295 decision D2).
+        // Snapshot it now: the delete below is a hard delete.
+        $panelBefore = $this->snapshotPanels((int) $stepId)[$panelIdx] ?? null;
         
         // Remove the panel from the list
         if (isset($list[$panelIdx])) {
@@ -1385,15 +1534,23 @@ class ScreeningController extends Controller
             foreach ($list as $oldIdx => $data) {
                 $newList[$i++] = $data;
             }
-            $step->update(['list' => !empty($newList) ? json_encode($newList) : null]);
-            
-            // Delete screenings for the target panel
-            Screening::where('step_id', $stepId)->where('panel', $panelIdx)->delete();
-            
-            // Shift subsequent screenings down if needed to maintain panel alignment
-            $screeningsToShift = Screening::where('step_id', $stepId)->where('panel', '>', $panelIdx)->get();
-            foreach ($screeningsToShift as $sc) {
-                $sc->update(['panel' => $sc->panel - 1]);
+            // All-or-nothing: the panel list, the deleted panel and the renumbered
+            // ones must change together or the panels drift out of alignment.
+            DB::transaction(function () use ($step, $newList, $stepId, $panelIdx) {
+                $step->update(['list' => !empty($newList) ? json_encode($newList) : null]);
+
+                // Delete screenings for the target panel
+                Screening::where('step_id', $stepId)->where('panel', $panelIdx)->delete();
+
+                // Shift subsequent screenings down if needed to maintain panel alignment
+                $screeningsToShift = Screening::where('step_id', $stepId)->where('panel', '>', $panelIdx)->get();
+                foreach ($screeningsToShift as $sc) {
+                    $sc->update(['panel' => $sc->panel - 1]);
+                }
+            });
+
+            if ($panelBefore) {
+                $this->notifyPanelDeleted((int) $stepId, $panelBefore, $request->boolean('notify'));
             }
 
             return response()->json([
@@ -1410,6 +1567,18 @@ class ScreeningController extends Controller
 
 	public function save(Request $request)
 	{
+		// H1: only a judge assigned to this startup, or staff of the program, may score it.
+		$actor = Auth::user();
+		$companyId = (int) $request->company_id;
+		$cycleId = Step::whereKey($request->form_id)->value('cycle_id');
+		$fileAccess = app(FileAccess::class);
+		abort_unless(
+			$companyId && $cycleId
+			&& (int) Company::whereKey($companyId)->value('cycle') === (int) $cycleId
+			&& ($fileAccess->isAssignedJudge($actor, $companyId) || $actor->managesOrganization(Cycle::whereKey($cycleId)->value('organization_id'))),
+			403
+		);
+
 		$answers = Formdata::where('form_id', $request->form_id)->where('company_id', $request->company_id)->orderBy('field_id', 'ASC')->get(['field_id']);
 
 		$user = Auth::id();
@@ -1424,6 +1593,8 @@ class ScreeningController extends Controller
 
 	public function add(Request $request)
 	{
+		$this->authorizeStepStaff($request->sid, 'screening.add_judging_panels');
+
 		$list = json_encode($request->panelusers);
 		if ($list) {
 			Screening::where('step_id', $request->sid)->where('panel', $request->pid)->update(['users' => $list]);
@@ -1435,6 +1606,8 @@ class ScreeningController extends Controller
 
 	public function getusers($fid, $sid, $pid)
 	{
+		$this->authorizeStepStaff($sid, 'screening.manage');
+
 		$list = Screening::where('step_id', $sid)->where('panel', $pid)->first(['users']);
 		$outlist = Screening::where('step_id', $sid)->where('panel', '<>', $pid)->pluck('users');
 		$outlist ? $outlist = ('[' . str_replace(['[', ']'], '', json_encode($outlist)) . ']') : $outlist = [];
@@ -1755,6 +1928,8 @@ class ScreeningController extends Controller
 		]);
 
 		$id = $request->stepId;
+		// Only staff managing the step's program may build or publish its evaluation.
+		$this->authorizeStepStaff($id, $status == 'publish' ? 'screening.evaluation_publish' : 'screening.evaluation_save_draft');
 		$criteria = collect( $request->criteria );
 
 		// Precise, named field-level check: reports the exact criterion / sub-criterion at fault.
@@ -1783,7 +1958,7 @@ class ScreeningController extends Controller
 						if( $total != 1 )
 						{
 							$name = $criteriaItem['name'];
-							if( $criteria->sum('weight') > 1 ) { return response()->json(['status' => false, 'message' => __('admin.category_weight_not_exceed_100', ['category' => $name])], 200); }
+							if( $total > 1 ) { return response()->json(['status' => false, 'message' => __('admin.category_weight_not_exceed_100', ['category' => $name])], 200); }
 							else { return response()->json(['status' => false, 'message' => __('admin.category_weight_be_100', ['category' => $name])], 200); }
 						}
 					}
@@ -1892,82 +2067,86 @@ class ScreeningController extends Controller
 					$toRemove['criteria'][] = $savedCriterion;
 				}
 			}
-			foreach( $toCreate['criteria'] as $value )
-			{
-				$criteria = new ScreeningEvaluationCriteria;
-				$criteria->title = $value['name'];
-				$criteria->weight = $value['weight'] * 100;
-				$criteria->evaluation_id = $evaluation->id;
-				$criteria->save();
-				if( array_key_exists('subCriteria', $value) )
+			// All-or-nothing: a failure part-way (e.g. a delete) must not leave the
+			// evaluation with half of the new criteria tree.
+			DB::transaction(function () use ($toCreate, $toUpdate, $toRemove, $evaluation, $status) {
+				foreach( $toCreate['criteria'] as $value )
 				{
-					foreach( $value['subCriteria'] as $sub )
+					$criteria = new ScreeningEvaluationCriteria;
+					$criteria->title = $value['name'];
+					$criteria->weight = $value['weight'] * 100;
+					$criteria->evaluation_id = $evaluation->id;
+					$criteria->save();
+					if( array_key_exists('subCriteria', $value) )
+					{
+						foreach( $value['subCriteria'] as $sub )
+						{
+							$subCriteria = new ScreeningEvaluationCriteria;
+							$subCriteria->title = $sub['name'];
+							$subCriteria->weight = $sub['weight'] * 100;
+							$subCriteria->parent_id = $criteria->id;
+							$subCriteria->evaluation_id = null;
+							$subCriteria->save();
+						}
+					}
+				}
+				if( array_key_exists('subCriteria', $toCreate) )
+				{
+					foreach( $toCreate['subCriteria'] as $sub )
 					{
 						$subCriteria = new ScreeningEvaluationCriteria;
 						$subCriteria->title = $sub['name'];
 						$subCriteria->weight = $sub['weight'] * 100;
-						$subCriteria->parent_id = $criteria->id;
+						$subCriteria->parent_id = $sub['parent_id'];
 						$subCriteria->evaluation_id = null;
 						$subCriteria->save();
 					}
 				}
-			}
-			if( array_key_exists('subCriteria', $toCreate) )
-			{
-				foreach( $toCreate['subCriteria'] as $sub )
+				if( array_key_exists('criteria', $toUpdate) )
 				{
-					$subCriteria = new ScreeningEvaluationCriteria;
-					$subCriteria->title = $sub['name'];
-					$subCriteria->weight = $sub['weight'] * 100;
-					$subCriteria->parent_id = $sub['parent_id'];
-					$subCriteria->evaluation_id = null;
-					$subCriteria->save();
+					foreach( $toUpdate['criteria'] as $value )
+					{
+						$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
+						$criteria->title = $value['name'];
+						$criteria->weight = $value['weight'] * 100;
+						$criteria->save();
+					}
 				}
-			}
-			if( array_key_exists('criteria', $toUpdate) )
-			{
-				foreach( $toUpdate['criteria'] as $value )
+				if( array_key_exists('subCriteria', $toUpdate) )
 				{
-					$criteria = ScreeningEvaluationCriteria::find ( $value['id'] );
-					$criteria->title = $value['name'];
-					$criteria->weight = $value['weight'] * 100;
-					$criteria->save();
+					foreach( $toUpdate['subCriteria'] as $sub )
+					{
+						$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
+						$subCriteria->title = $sub['name'];
+						$subCriteria->weight = $sub['weight'] * 100;
+						$subCriteria->save();
+					}
 				}
-			}
-			if( array_key_exists('subCriteria', $toUpdate) )
-			{
-				foreach( $toUpdate['subCriteria'] as $sub )
-				{
-					$subCriteria = ScreeningEvaluationCriteria::find ( $sub['id'] );
-					$subCriteria->title = $sub['name'];
-					$subCriteria->weight = $sub['weight'] * 100;
-					$subCriteria->save();
-				}
-			}
 
-			if( array_key_exists('subCriteria', $toRemove) )
-			{
-				foreach( $toRemove['subCriteria'] as $sub )
+				if( array_key_exists('subCriteria', $toRemove) )
 				{
-					$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
-					if( $subCriteria ) { $subCriteria->delete(); }
+					foreach( $toRemove['subCriteria'] as $sub )
+					{
+						$subCriteria = ScreeningEvaluationCriteria::find ( $sub->id );
+						if( $subCriteria ) { $subCriteria->delete(); }
+					}
 				}
-			}
 
-			if( array_key_exists('criteria', $toRemove) )
-			{
-				foreach( $toRemove['criteria'] as $value )
+				if( array_key_exists('criteria', $toRemove) )
 				{
-					$criteria = ScreeningEvaluationCriteria::find ( $value->id );
-					if( $criteria ) { $criteria->delete(); }
+					foreach( $toRemove['criteria'] as $value )
+					{
+						$criteria = ScreeningEvaluationCriteria::find ( $value->id );
+						if( $criteria ) { $criteria->delete(); }
+					}
 				}
-			}
 
-			if( $status == 'publish' )
-			{
-				$evaluation->status = true;
-				$evaluation->save();
-			}
+				if( $status == 'publish' )
+				{
+					$evaluation->status = true;
+					$evaluation->save();
+				}
+			});
 
 			$evaluationForm = ScreeningEvaluation::getEvaluationData( $id );
 			return response()->json([
@@ -2165,6 +2344,7 @@ class ScreeningController extends Controller
 		}
 
 		$step = Step::with('cycle')->find($stepId);
-		abort_unless($step && $step->cycle && $user->ownsOrganization($step->cycle->organization_id), 403);
+		// managesOrganization, not ownsOrganization: a founder "owns" their own program's organization.
+		abort_unless($step && $step->cycle && $user->managesOrganization($step->cycle->organization_id), 403);
 	}
 }

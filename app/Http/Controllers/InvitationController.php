@@ -6,7 +6,9 @@ use App\Settings;
 use App\Invitation;
 use App\InviteMentor;
 use App\Organization;
+use App\Services\RichTextSanitizer;
 use Illuminate\Support\Str;
+use App\Support\NotificationClaim;
 use App\Mail\InviteMentorMail;
 use Illuminate\Http\UploadedFile;
 use App\Jobs\SendInviteMentorEmail;
@@ -16,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class InvitationController extends Controller
 {
-    public function index()
+    public function index(RichTextSanitizer $sanitizer)
     {
         $user = auth()->user();
         if($user->hasRole('admin')) {
@@ -38,7 +40,7 @@ class InvitationController extends Controller
 
         $organizationMap = collect($allOrganizations)->keyBy('id');
 
-        $invitations = $inviteMentors->map(function ($invite) use ($organizationMap) {
+        $invitations = $inviteMentors->map(function ($invite) use ($organizationMap, $sanitizer) {
             // $orgIds = is_string($invite->organization_ids) ? json_decode($invite->organization_ids, true) : ($invite->organization_ids ?? []);
             $orgIds = [];
 
@@ -67,7 +69,7 @@ class InvitationController extends Controller
                 'subject'          => $invite->subject,
                 'scope'            => $invite->scope,
                 'status'           => $invite->status,
-                'message_content'  => strip_tags($invite->message_content),
+                'message_content'  => $sanitizer->clean($invite->message_content),
                 'response_message' => '',
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
@@ -152,7 +154,7 @@ class InvitationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return void
      */
-    public function store(Request $request)
+    public function store(Request $request, RichTextSanitizer $sanitizer)
     {
            
         $setting = Settings::first();
@@ -190,21 +192,16 @@ class InvitationController extends Controller
         // Custom subject/message are optional -- when left blank, the mail
         // falls back to the platform's default "invited as a mentor" template.
         $invitation->subject = $data['invitation_subject'] ?: null;
-        $invitation->message_content = !empty($data['invitation_message'])
-            ? trim(preg_replace('/📎[^\n]*/', '', strip_tags($data['invitation_message'])))
-            : null;
+        // Keep the editor's formatting (bold, colors, lists...) for the email,
+        // minus anything unsafe and the uploaded-file links (sent as attachments).
+        $invitation->message_content = $sanitizer->cleanWithoutAttachmentLinks($data['invitation_message'] ?? null);
         $invitation->attachments = $data['attachments'] ?? [];
         $invitation->save();
 
-        // Atomically claim the "send invitation email" step so a retry/duplicate
-        // call for this same invitation can never send the email twice.
-        $claimedInviteNotify = InviteMentor::where('id', $invitation->id)
-            ->whereNull('email_sent_at')
-            ->update(['email_sent_at' => now()]);
-
-        if ($claimedInviteNotify) {
-            dispatch(new SendInviteMentorEmail($invitation, auth()->user()->email));
-        }
+        // Claim the "send invitation email" step so a retry/duplicate call for this
+        // invitation can never send it twice; a failed send gives the claim back.
+        NotificationClaim::on('invite_mentor', ['id' => $invitation->id], 'email_sent_at')
+            ->run(fn (NotificationClaim $claim) => dispatch((new SendInviteMentorEmail($invitation, auth()->user()->email))->withClaim($claim)));
         if($data['invitation_scope'] == 'Organization'){
             $allOrganizations = Organization::whereIn('id', $data['organizations'])->get();
             $organizationMap = collect($allOrganizations)->keyBy('id');
@@ -212,7 +209,7 @@ class InvitationController extends Controller
             $organizationMap = [];
         }
        
-        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) use ($organizationMap) {
+        $invitation = InviteMentor::where('id', $invitation->id)->get()->map(function ($invite) use ($organizationMap, $sanitizer) {
 
          $orgIds = [];
 
@@ -236,7 +233,7 @@ class InvitationController extends Controller
                 'subject'          => $invite->subject,
                 'scope'            => $invite->scope,
                 'status'           => $invite->status,
-                'message_content'  => $invite->message_content ?? null,
+                'message_content'  => $sanitizer->clean($invite->message_content),
                 'response_message' => $invite->response_message ?? null,
                 'created_at'       => $invite->created_at->format('Y-m-d H:i:s'),
                 'accepted_at'      => $invite->updated_at == $invite->created_at ? 'N/A' : $invite->updated_at->format('Y-m-d H:i:s'),
@@ -270,6 +267,9 @@ class InvitationController extends Controller
     {
         $request->validate([
             'file' => 'required|file|bail|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx|max:10240',
+        ], [
+            'file.mimes' => __('cycles.mentor_invite_supported_mimes'),
+            'file.max' => __('cycles.mentor_invite_max_file_size'),
         ]);
 
         // استدعاء دالة الرفع

@@ -11,11 +11,14 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Throwable;
+use App\Services\TimezoneService;
+use Carbon\Carbon;
 
 class MentorshipRequestNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
 
     /**
      * The number of times the job may be attempted.
@@ -60,7 +63,7 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -107,16 +110,20 @@ class MentorshipRequestNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         $smtpSettings = $org?->organizationSettings;
         
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
-        $sessionTimestamp = strtotime($this->data['date'] ?? 'now');
-        $sessionDate = date('Y-m-d', $sessionTimestamp);
-        $sessionTime = date('h:i A', $sessionTimestamp);
+        // GV-9566: the session's platform wall-clock, shown in the recipient's own timezone.
+        $session = TimezoneService::forViewer(
+            TimezoneService::wallClock($this->data['date'] ?? null) ?? Carbon::now(),
+            $notifiable
+        );
+        $sessionDate = $session->format('Y-m-d');
+        $sessionTime = $session->format('h:i A');
         if (app()->getLocale() == 'ar') {
             $sessionTime = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $sessionTime);
         }

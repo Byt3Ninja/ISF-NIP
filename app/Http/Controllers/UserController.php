@@ -15,8 +15,8 @@ use App\Settings;
 use App\Role as R;
 use App\Team_member;
 use App\TeamFormation;
+use App\Organization;
 use Illuminate\Http\Request;
-use App\Mail\WelcomeJudgerMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -26,6 +26,7 @@ use \Spatie\Permission\Models\Role as Role;
 use DB, Log, Exception, Session, URL, File;
 use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Notifications\WelcomeJudgerNotification;
+use App\Notifications\OrganizationAssignedNotification;
 use Illuminate\Support\Facades\Log as FacadesLog;
 
 class UserController extends Controller
@@ -79,8 +80,9 @@ class UserController extends Controller
 		$actor = auth()->user();
 		abort_unless($actor->ableTo('users.login_as'), 403);
 		if (!$actor->hasRole('admin')) {
-			$inScope = $actor->ownsOrganization($user->organization_id)
-				|| $actor->ownsOrganization($user->company?->cycledata?->organization_id);
+			// managesOrganization: a founder "owns" their program's org but must never log in as its staff.
+			$inScope = $actor->managesOrganization($user->organization_id)
+				|| $actor->managesOrganization($user->company?->cycledata?->organization_id);
 			abort_if($user->hasRole('admin') || !$inScope, 403);
 		}
 
@@ -98,6 +100,14 @@ class UserController extends Controller
 			abort(403);
 		}
 		$originalUser = User::find(session('impersonator_id'));
+		// C40: the impersonating account no longer exists -- end the session instead of crashing.
+		if( !$originalUser ) {
+			session()->forget('impersonator_id');
+			Auth::logout();
+			request()->session()->invalidate();
+			request()->session()->regenerateToken();
+			abort(403);
+		}
 		if( !$originalUser->ableTo('users.login_as') ) {
 			abort(401);
 		}
@@ -162,10 +172,10 @@ class UserController extends Controller
 
 		// Only admins can assign all organizations, Sub-Admin sees their assigned orgs
 		if ($authUser->hasRole('Admin')) {
-			$organizations = \App\Organization::all();
+			$organizations = Organization::all();
 		} elseif ($authUser->hasAnyRole(['organizationManager', 'subadmin'])) {
 			$orgIds = $authUser->organizations_ids;
-			$organizations = \App\Organization::whereIn('id', $orgIds)->get();
+			$organizations = Organization::whereIn('id', $orgIds)->get();
 		} else {
 			$organizations = collect();
 		}
@@ -206,7 +216,27 @@ class UserController extends Controller
 			}
 		}
 
-		$user->organizations()->sync($organizationIds);
+		$changes = $user->organizations()->sync($organizationIds);
+
+		// Tell the sub-admin about each organization they were newly assigned to.
+		// sync() only reports organizations that weren't attached before, so
+		// re-saving the same selection never re-sends, and removals send nothing.
+		if( !empty( $changes['attached'] ) )
+		{
+			$assignedBy = Auth::user();
+			foreach (Organization::whereIn('id', $changes['attached'])->get() as $organization)
+			{
+				try {
+					$user->notify(new OrganizationAssignedNotification($organization, $assignedBy));
+				} catch (\Throwable $e) {
+					// A mail/queue problem must not undo the assignment itself.
+					\Log::error('OrganizationAssignedNotification failed: ' . $e->getMessage(), [
+						'user_id' => $user->id,
+						'organization_id' => $organization->id,
+					]);
+				}
+			}
+		}
 
 		return redirect()->route('users.edit', $user->id)
 			->with(['success' => 'OrganizationsUpdatedSuccessfully']);

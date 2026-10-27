@@ -307,21 +307,14 @@
       let deleteUrl = button.data('url');
 
       let confirmationMessage = "{{ __('admin.delete_program') }}"; 
-      Swal.fire({
-       	title: "{{__('admin.SureDelete')}}",
-        text: "{{__('admin.Recover')}}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-    }).then((result) => {
-        if (result.isConfirmed) {
+      releaseAlert('warning', {
+        title: "{{__('admin.SureDelete')}}",
+        message: "{{__('admin.Recover')}}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
+      }).then((ok) => {
+        if (ok) {
           $.ajax({
             url: deleteUrl,
             type: 'DELETE',
@@ -340,11 +333,10 @@
               });
             },
             error: function() {
-              Swal.fire(
-                '{{ __('admin.Error') }}',
-                '{{ __('admin.could_not_unlink_program') }}',
-                'error'
-              );
+              releaseAlert('danger', {
+                title: '{{ __('admin.Error') }}',
+                message: '{{ __('admin.could_not_unlink_program') }}'
+              });
             }
           });
         }
@@ -369,21 +361,14 @@
       let button = $(this);
       let deleteUrl = button.data('url');
       let confirmationMessage = "{{ __('admin.delete_team_member') }}"; 
-      Swal.fire({
-       	title: "{{__('admin.SureDelete')}}",
-        text: "{{__('admin.Recover')}}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-      }).then((result) => {
-        if (result.isConfirmed) {
+      releaseAlert('warning', {
+        title: "{{__('admin.SureDelete')}}",
+        message: "{{__('admin.Recover')}}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
+      }).then((ok) => {
+        if (ok) {
           $.ajax({
             url: deleteUrl,
             type: 'DELETE',
@@ -402,11 +387,10 @@
               });
             },
             error: function() {
-              Swal.fire(
-                '{{ __('admin.Error') }}',
-                '{{ __('admin.could_not_remove_team_member') }}',
-                'error'
-              );
+              releaseAlert('danger', {
+                title: '{{ __('admin.Error') }}',
+                message: '{{ __('admin.could_not_remove_team_member') }}'
+              });
             }
           });
         }

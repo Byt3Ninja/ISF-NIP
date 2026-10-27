@@ -12,6 +12,12 @@
 	<style>
 		:root {
 			--primary: {{ $program->main_color }};
+			/* The program's own color wins over Platform Branding: re-point the branding variables
+			   (admin/includes/branding-styles) so every themed element follows the program. */
+			--theme-main: var(--primary);
+			@if ($program->main_rgb)
+			--theme-main-rgb: {{ $program->main_rgb }};
+			@endif
 			--on-primary: #ffffff;
 			--background: #f8fafc;
 			--surface: #ffffff;
@@ -21,6 +27,8 @@
 			--secondary: #0891b2;
 			--tertiary: #d97706;
 			--outline: #e2e8f0;
+			/* Strength of the program's gradient start/end blobs in the hero. */
+			--hero-tint: 0.3;
 		}
 
 		/* Override default theme purple/primary colors with the customized main color */
@@ -67,8 +75,8 @@
 		}
 
 		.hero-gradient {
-			background: radial-gradient(circle at 20% 30%, {{ $program->start_color }} 0%, transparent 50%),
-						radial-gradient(circle at 80% 70%, {{ $program->end_color }} 0%, transparent 50%);
+			background: radial-gradient(circle at 20% 30%, rgba({{ $program->start_rgb }}, var(--hero-tint)) 0%, transparent 80%),
+						radial-gradient(circle at 80% 70%, rgba({{ $program->end_rgb }}, var(--hero-tint)) 0%, transparent 80%);
 		}
 
 		.btn-primary-custom {
@@ -171,8 +179,10 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 	$month = $monthMatch[0] ?? '';
 	$endDateForCountdown = trim($month . ' ' . $endDatePart);
 }
-$endDateForCountdown = $program->registration_end;
-$startDateForCountdown = $program->registration_start;
+// GV-9566: ISO-8601 instants with offset, so the browser does not read the
+// window in its own zone.
+$endDateForCountdown = $program->registration_ends_at?->toIso8601String();
+$startDateForCountdown = $program->registration_starts_at?->toIso8601String();
 @endphp
 
 <body>
@@ -269,7 +279,7 @@ $startDateForCountdown = $program->registration_start;
 						</span>
 					</div>
 
-					<h1 class="display-2 fw-bolder mb-3">{{ $program->title }}</h1>
+					<h1 class="display-4 fw-bolder mb-3">{{ $program->title }}</h1>
 					<p class="lead mx-auto mb-5" style="max-width:700px;color:var(--on-surface-variant);">
 						{{ $program->description }}
 					</p>
@@ -310,7 +320,7 @@ $startDateForCountdown = $program->registration_start;
 						</div>
 					</div>
 
-					@if( now()->gt( $program->registration_start ) && now()->lt( $program->registration_end ) )
+					@if( $program->registration_starts_at && $program->registration_ends_at && now()->gt( $program->registration_starts_at ) && now()->lt( $program->registration_ends_at ) )
 					<div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
 						<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" class="btn btn-primary-custom px-5 py-3 fs-5">
 							<i class="ti ti-send me-2"></i>{{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}

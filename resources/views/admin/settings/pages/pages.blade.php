@@ -93,8 +93,7 @@
           @endif
           </td>
           <td><a href="/dashboard/editpage/{{ $page->id }}"><i class="ti ti-edit text-info"> </i></a> |
-            <a onclick="return confirm('{{ __('settings.SureDelete') }}');"
-              href="{{ URL::to('dashboard/deletepage/' . $page->id ?? null) }}"><i class="ti ti-trash text-danger"> </i></a>
+            @include('partials.forms.confirm-action', ['formId' => 'delete-page-' . $page->id, 'action' => route('pages.delete', $page->id), 'message' => __('settings.SureDelete'), 'label' => '<i class="ti ti-trash text-danger"> </i>'])
             @if ($page->published)
             |<a target="_blank" href="/page/{{ $page->url }}"><i class="ti ti-eye"> </i></a>
             @else

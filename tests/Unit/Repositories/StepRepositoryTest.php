@@ -6,11 +6,9 @@ use Tests\TestCase;
 use App\Repositories\StepRepository;
 use App\Step;
 use App\Cycle;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class StepRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected StepRepository $stepRepository;
 

@@ -110,11 +110,10 @@ class GoogleCalendarService
     {
         $service = $this->getCalendarService($user);
 
-        $s = new \DateTime($eventData['start_date_time']);
-        $interval = new \DateInterval('PT3H');
-        $s->sub($interval);
-        $e = new \DateTime($eventData['end_date_time']);
-        $e->sub($interval);
+        // GV-9566: platform wall-clock -> real UTC instants. This used to
+        // subtract a fixed 3 hours, i.e. assume every platform ran on UTC+3.
+        $s = TimezoneService::wallClock($eventData['start_date_time'])->utc();
+        $e = TimezoneService::wallClock($eventData['end_date_time'])->utc();
         $event = new Google_Service_Calendar_Event(array(
             'summary' => $eventData['title'],
             'location' => $eventData['location'] ?? '',

@@ -7,7 +7,6 @@ use App\Services\UserService;
 use App\Repositories\UserRepository;
 use App\User;
 use App\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\UploadedFile;
@@ -17,7 +16,6 @@ use Mockery;
 
 class UserServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected UserService $userService;
     protected $userRepositoryMock;

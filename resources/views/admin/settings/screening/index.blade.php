@@ -131,7 +131,8 @@
                       // Status from the step's date window vs today. Guard null
                       // dates (treat a missing window as active, not "completed",
                       // which a null < today comparison would wrongly produce).
-                      $today = date('Y-m-d');
+                      // GV-9566: "today" in the step's platform zone, not the server's.
+                      $today = \App\Services\TimezoneService::platformToday(\App\Services\TimezoneService::forStep($step->id));
                       $status = (!empty($step->end_date) && $step->end_date < $today)
                         ? 'completed'
                         : ((!empty($step->start_date) && $step->start_date > $today) ? 'upcoming' : 'in_progress');
@@ -376,19 +377,14 @@
       }
     });
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('cycles.Are you sure, Delete current step and all its contents?') }}",
-      text: "{{ __('admin.Recover') }}",
-      icon: "warning",
-      showCancelButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton: 'btn btn-label-secondary',
-      },
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: "{{ __('admin.Recover') }}",
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.ajax({
           type: "POST",
           url: "/dashboard/cycles/modify",
@@ -398,13 +394,13 @@
           },
           success: function(response) {
             $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: '{{__('Deleted!')}}',
               message: '{{  $l == 'en' ? 'The screening step has been deleted successfully.' : 'تم حذف مرحلة التصفية بنجاح.' }}',
             });
           },
           error: function(error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}!",
               message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
             });

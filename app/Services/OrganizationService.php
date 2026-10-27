@@ -67,7 +67,7 @@ class OrganizationService
             $user->organization_id = $organization->id;
             $user->save();
 
-            Mail::to($user->email)->queue(new OrganizationCreatedMail($organization, $user, $password));
+            Mail::to($user->email)->queue(new OrganizationCreatedMail($organization, $user, $user->generateMagicLoginUrl()));
 
             return $organization;
         });

@@ -198,8 +198,8 @@
                     <div class="card-body">
                       <p class="card-text">{{ $step->description }}</p>
                       <small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
-                        {{ $step->cycle->start->format('d-m-Y') ?? '-' }} {{ __('dashboard.to') }}
-                        {{ $step->cycle->end->format('d-m-Y') ?? '-' }}</small>
+                        {{ $step->cycle->start?->format('d-m-Y') ?? '-' }} {{ __('dashboard.to') }}
+                        {{ $step->cycle->end?->format('d-m-Y') ?? '-' }}</small>
                     </div>
                     <div class="table-responsive">
                       <table class="table">
@@ -314,8 +314,8 @@
                     <div class="card-body">
                       <p class="card-text">{{ $step->description }}</p>
                       <small class="text-muted">{{ __('dashboard.This Cycle Start from') }}
-                        {{ $step->cycle->start->format('d-m-Y') ?? '-' }} {{ __('dashboard.to') }}
-                        {{ $step->cycle->end->format('d-m-Y') ?? '-' }}</small>
+                        {{ $step->cycle->start?->format('d-m-Y') ?? '-' }} {{ __('dashboard.to') }}
+                        {{ $step->cycle->end?->format('d-m-Y') ?? '-' }}</small>
                     </div>
                     <div class="table-responsive">
                       <table class="table">

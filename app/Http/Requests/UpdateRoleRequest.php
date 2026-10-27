@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Role;
 use App\Traits\ApiResponder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class UpdateRoleRequest extends FormRequest
 {
@@ -26,6 +28,7 @@ class UpdateRoleRequest extends FormRequest
 
         return [
             'name' => 'sometimes|required|string|min:2|max:100|regex:/^[A-Za-z0-9 _-]+$/|unique:roles,name,' . $roleId,
+            'default_for' => ['nullable', 'string', Rule::in(Role::DEFAULT_FOR_VALUES)],
             'permissions' => 'sometimes|array|min:1',
             'permissions_flat' => 'sometimes|array|min:1',
             'permissions_flat.*' => 'string|exists:permissions,name',

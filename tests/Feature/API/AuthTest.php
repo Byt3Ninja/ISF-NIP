@@ -6,12 +6,10 @@ use Tests\TestCase;
 use App\User;
 use App\Role;
 use App\Settings;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 class AuthTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function user_can_register_via_api()

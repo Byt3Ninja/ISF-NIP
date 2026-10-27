@@ -90,9 +90,6 @@
         ? ($isPassed ? 'تم اعتماد التسليم الخاص بك.' : 'يرجى مراجعة الملاحظات وتحديث التسليم.')
         : ($isPassed ? 'Your submission has been approved.' : 'Please review the feedback and update your submission.');
 
-    $cycleId = $task->mentorshipRequest?->cycle?->id ?? $task->program?->id ?? null;
-    $taskUrl = route('mentorshipTasks.index') . ($cycleId ? '?cycle_id=' . $cycleId : '?nav=menu');
-
     $setting      = \App\Settings::find(1);
     $platformName = $setting?->Platform_Name ?? config('app.name', 'Growth Labs');
 

@@ -684,7 +684,11 @@
           },
           error: function () {
             $('#inbox-loading').addClass('d-none');
-            Swal.fire({ icon: 'error', title: 'Error', text: LABELS.refreshError, timer: 3000 });
+            releaseAlert('danger', {
+              title: 'Error',
+              message: LABELS.refreshError,
+              autoClose: 3000
+            });
           }
         });
       }
@@ -700,18 +704,28 @@
           success: function (response) {
             $row.removeClass('opacity-50 pe-none');
             if (response.status) {
-              Swal.fire({ icon: 'success', title: response.title, text: response.message, timer: 2000, showConfirmButton: false });
+              releaseAlert('success', {
+                title: response.title,
+                message: response.message,
+                autoClose: 2000
+              });
               if (response.summary) updateSummaryWidgets(response.summary);
               fetchInbox();
               fetchActivity();
             } else {
-              Swal.fire({ icon: 'error', title: response.title || 'Error', text: response.message });
+              releaseAlert('danger', {
+                title: response.title || 'Error',
+                message: response.message
+              });
             }
           },
           error: function (xhr) {
             $row.removeClass('opacity-50 pe-none');
             var msg = xhr.responseJSON ? xhr.responseJSON.message : 'An error occurred';
-            Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            releaseAlert('danger', {
+              title: 'Error',
+              message: msg
+            });
           }
         });
       }
@@ -725,17 +739,27 @@
           data: { ids: ids, action: action, reason: reason, _token: CSRF_TOKEN },
           success: function (response) {
             if (response.status) {
-              Swal.fire({ icon: 'success', title: response.title, text: response.message, timer: 2000, showConfirmButton: false });
+              releaseAlert('success', {
+                title: response.title,
+                message: response.message,
+                autoClose: 2000
+              });
               if (response.summary) updateSummaryWidgets(response.summary);
               fetchInbox();
               fetchActivity();
             } else {
-              Swal.fire({ icon: 'error', title: response.title || 'Error', text: response.message });
+              releaseAlert('danger', {
+                title: response.title || 'Error',
+                message: response.message
+              });
             }
           },
           error: function (xhr) {
             var msg = xhr.responseJSON ? xhr.responseJSON.message : 'An error occurred';
-            Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            releaseAlert('danger', {
+              title: 'Error',
+              message: msg
+            });
             updateBulkButtons();
           }
         });
@@ -783,7 +807,11 @@
             $btn
               .prop('disabled', false)
               .html('<i class="ti ti-refresh me-1"></i> @lang("dashboard.sp_refresh")')
-            Swal.fire({ icon: 'error', title: 'Error', text: LABELS.refreshError, timer: 3000 });
+            releaseAlert('danger', {
+              title: 'Error',
+              message: LABELS.refreshError,
+              autoClose: 3000
+            });
           }
         });
       }

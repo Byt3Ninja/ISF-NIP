@@ -39,7 +39,7 @@
               </label>
             </div>
             <div class="col">
-              <select id="cstep" class="form-select"
+              <select id="cstep" class="form-select select2"
                 onchange="window.location.href='/dashboard/mentorship/view/'+this.value">
                 @forelse ($cycles as $cycle)
                 <option value="{{ $cycle->id }}" {{ $cycle->id == $id ? 'selected' : '' }}>
@@ -255,7 +255,7 @@ $(function () {
       const addFilter = (col, id, label, width = 180) => {
 
         const select = $(`
-          <select id="${id}" class="form-select" style="min-width:${width}px">
+          <select id="${id}" class="form-select filter-select2">
             <option value="">${label}</option>
           </select>
         `)
@@ -305,9 +305,33 @@ $(function () {
       setTimeout(() => {
         $('.form-control-sm, .form-select-sm')
           .removeClass('form-control-sm form-select-sm');
+        $('#usersTable_wrapper .filter-select2, #usersTable_wrapper .dataTables_length select').each(function () {
+          const $this = $(this);
+          if (!$this.hasClass('select2-hidden-accessible')) {
+            const isLength = $this.closest('.dataTables_length').length > 0;
+            $this.select2({
+              dropdownParent: $this.parent(),
+              width: 'resolve',
+              minimumResultsForSearch: Infinity,
+              allowClear: false
+            });
+            $this.next('.select2-container').css({
+              'min-width': isLength ? '70px' : '150px',
+              'max-width': isLength ? '90px' : '200px'
+            });
+          }
+        });
       }, 300);
     }
   };
+
+  $(document).ready(function() {
+    if ($('#cstep').length && !$('#cstep').hasClass('select2-hidden-accessible')) {
+      $('#cstep').select2({
+        width: '100%'
+      });
+    }
+  });
 
   const table = $('#usersTable').DataTable(dtConfig);
 

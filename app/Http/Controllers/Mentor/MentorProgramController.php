@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mentor;
 use App\User;
 use App\Cycle;
 use App\MentorshipRequest;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -18,7 +19,8 @@ class MentorProgramController extends Controller
       $cycles = $mentor->mentorCycles()->with(['mentorshipRequests.tasks'])->get();
 
       $upcomingSessions = MentorshipRequest::where('mentor_id', $mentor->id)
-          ->where('zoom_date', '>', now())
+          // GV-9566: zoom_date is platform wall-clock; bind the platform clock.
+          ->where('zoom_date', '>', TimezoneService::platformNow()->format('Y-m-d H:i:s'))
           ->get()
           ->each(function ($session) {
               $session->meeting_status = mentorshipMeetingStatus($session->zoom_date, $session->period);
@@ -29,9 +31,11 @@ class MentorProgramController extends Controller
 
           $totalSteps = $steps->count();
 
-          $totalStepsFinish = $steps->filter(function ($step) {
-              $now = now();
-              return $now >= $step->from && $now <= $step->to; 
+          // GV-9566: steps.from/to are inclusive DATEs in the organization's platform zone.
+          $today = TimezoneService::platformToday(TimezoneService::platform($cycle->organization_id ? (int) $cycle->organization_id : null));
+          $totalStepsFinish = $steps->filter(function ($step) use ($today) {
+              return $step->from && $step->to
+                  && $step->from->toDateString() <= $today && $today <= $step->to->toDateString();
           })->count();
 
           $sessionsWithoutTasks = $cycle->mentorshipRequests->where('zoom_date', '>', now())->filter(function ($request) {

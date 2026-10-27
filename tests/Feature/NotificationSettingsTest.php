@@ -4,12 +4,11 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 
 class NotificationSettingsTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     protected $user;
 

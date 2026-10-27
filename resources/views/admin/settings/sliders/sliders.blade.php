@@ -92,8 +92,7 @@
           @endif
           </td>
           <td><a href="/dashboard/edit_slide/{{ $slide->id }}"><i class="ti ti-edit text-info"> </i></a> |
-            <a onclick="return confirm('{{ __('settings.SureDelete') }}');"
-              href="{{ URL::to('dashboard/delete_slide/' . $slide->id ?? null) }}"><i class="ti ti-trash text-danger"> </i></a>
+            @include('partials.forms.confirm-action', ['formId' => 'delete-slide-' . $slide->id, 'action' => route('slides.delete', $slide->id), 'message' => __('settings.SureDelete'), 'label' => '<i class="ti ti-trash text-danger"> </i>'])
           </td>
           </tr>
           @endforeach

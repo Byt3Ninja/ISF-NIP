@@ -15,6 +15,8 @@ use App\Currency;
 use App\Messages;
 use App\Settings;
 use Carbon\Carbon;
+use DateTimeZone;
+use Illuminate\Validation\Rule;
 use App\Invitation;
 use App\Technology;
 use App\ReminderLog;
@@ -24,6 +26,7 @@ use App\MentorshipRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
@@ -31,8 +34,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Requests\UpdateSocialLoginRequest;
+use App\Http\Requests\UpdatePlatformBrandingRequest;
 use App\Notifications\UserInvitationNotification;
 use App\Services\EmailSettingsStore;
+use App\Services\PlatformBrandingService;
 use App\Services\FileManagerService;
 
 class SettingsController extends Controller
@@ -98,7 +103,9 @@ class SettingsController extends Controller
 				->with('Img2',$Img2)->with('Img3',$Img3)->with('Counters',$Counters)
 				->with('countries', $countries)->with('states', $states)->with('currencies',$currencies)
 				->with('settings', $settings)
-				->with('emailConfig', EmailSettingsStore::platform()->viewData());
+				->with('emailConfig', EmailSettingsStore::platform()->viewData())
+				// Re-open the tab that was just saved (or failed validation) instead of always "General".
+				->with('activeTab', session('settings_tab', old('settings_tab', 'general')));
 	}
 
 	public function update_settings(Request $request)
@@ -124,14 +131,22 @@ class SettingsController extends Controller
 		return redirect()->back()->with('message', 'StoredSuccessfully');
 	}
 
+	/** H1: the platform About / Contact pages are global settings rows, editable by admins only. */
+	private function authorizeAboutContactPages(): void
+	{
+		abort_unless(auth()->user()->hasRole('admin') && auth()->user()->ableTo('settings.system_general_update'), 403);
+	}
+
 	public function get_aboutus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allabout = Settings::findorfail('10');
 		return view('admin.settings.editaboutus')->with('allabout',$allabout);
 	}
 
 	public function update_aboutus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allabout = Settings::findorfail('10');
 		$allabout->title = $request->input('title');
 		$allabout->ar_title = $request->input('ar_title');
@@ -148,12 +163,14 @@ class SettingsController extends Controller
 
 	public function get_contactus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allcontact = Settings::findorfail('11');
 		return view('admin.settings.editcontactus')->with('allcontact',$allcontact);
 	}
 
 	public function update_contactus(Request $request)
 	{
+		$this->authorizeAboutContactPages();
 		$allcontact = Settings::findorfail('11');
 		$allcontact->title = $request->input('title');
 		$allcontact->ar_title = $request->input('ar_title');
@@ -373,6 +390,8 @@ class SettingsController extends Controller
 		$request->validate([
 			'terms_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
     		'privacy_url' => ['nullable', 'regex:/^https:\/\/(?!-)(?!.*--)(?!.*\.\.)(?!.*\/\/)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?<!-)(\/.*)?$/'],
+			// GV-9566: this is the platform zone every meeting and deadline is read in.
+			'timezone' => ['nullable', Rule::in(DateTimeZone::listIdentifiers(DateTimeZone::ALL_WITH_BC))],
 		]);
 
 		$id = $request->input('id');
@@ -773,10 +792,38 @@ class SettingsController extends Controller
         return redirect()->back()->with('message', 'StoredSuccessfully');
     }
 
+    /**
+     * Platform Branding (GV-9674). Validation and "#abc" -> "#aabbcc"
+     * normalization live in UpdatePlatformBrandingRequest; an empty gradient
+     * pair is stored as NULL, which renders the theme gradient.
+     */
+    public function updatePlatformBranding(UpdatePlatformBrandingRequest $request)
+    {
+        $settings = Settings::findOrFail(1);
+        foreach (PlatformBrandingService::FIELDS as $field => $column) {
+            $settings->{$column} = $request->input('branding_' . $field);
+        }
+        $settings->save();
+
+        return redirect()->back()->with('message', 'StoredSuccessfully')->with('settings_tab', 'branding');
+    }
+
+    /** Reset to Default: NULL every color so the stock theme applies again. */
+    public function resetPlatformBranding()
+    {
+        $settings = Settings::findOrFail(1);
+        foreach (PlatformBrandingService::FIELDS as $column) {
+            $settings->{$column} = null;
+        }
+        $settings->save();
+
+        return redirect()->back()->with('message', 'StoredSuccessfully')->with('settings_tab', 'branding');
+    }
+
     public function showSettings()
     {
         $user = auth()->user();
-        $organization = $user->organization ?? Organization::whereIn('id', $user->organizations_ids)->first();
+        $organization = $this->settingsOrganization();
         $currencies = Currency::where('enabled',1)->get();
         $timezones = collect(\DateTimeZone::listIdentifiers())
         ->mapWithKeys(function ($timezone) {
@@ -859,7 +906,7 @@ class SettingsController extends Controller
             'contact_email' => 'nullable|email',
             'contact_phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
-            'time_zone' => 'nullable|string|max:100',
+            'time_zone' => ['nullable', Rule::in(DateTimeZone::listIdentifiers(DateTimeZone::ALL_WITH_BC))],
             'currency_id' => 'nullable|exists:currencies,id',
         ]);
 
@@ -868,6 +915,7 @@ class SettingsController extends Controller
         if (!$organization) {
           return redirect()->back()->with('error', 'Organization not found.');
         }
+        abort_unless(auth()->user()->managesOrganization($organization->id), 403);
 
         $organization->name_en = $request->input('organization_name', $organization->name_en);
         $organization->contact_email = $request->input('contact_email', $organization->contact_email);
@@ -910,6 +958,7 @@ class SettingsController extends Controller
         if (!$organization) {
             return redirect()->back()->with('error', 'Organization not found.');
         }
+        abort_unless(auth()->user()->managesOrganization($organization->id), 403);
 
         $organization->meeting_platform = $request->input('meeting_platform');
         $organization->max_concurrent_sessions = $request->input('max_concurrent_sessions');
@@ -951,6 +1000,7 @@ class SettingsController extends Controller
         if (!$organization) {
             return redirect()->back()->with('error', 'Organization not found.');
         }
+        abort_unless(auth()->user()->managesOrganization($organization->id), 403);
 
         $organization->website_url = $request->input('website_url');
         $organization->facebook_page_url = $request->input('facebook_url');
@@ -974,11 +1024,18 @@ class SettingsController extends Controller
 			'first_name' => 'required|string',
 			'last_name' => 'required|string',
 			'email' => 'required|email|unique:users,email',
-			'role' => 'required|string|exists:roles,name',
+			// Only organization-manager invitations exist (team-members form); never admin/sub-admin.
+			'role' => ['required', 'string', Rule::exists('roles', 'name')->where('default_for', 'organizationmanager')],
 		]);
 	
 		if ($validator->fails()) {
 			return back()->with('message2', $validator->errors()->first())->withInput();
+		}
+
+		// Invite into the organization this Settings page manages, never the user's first one.
+		$organization = $this->settingsOrganization();
+		if (!$organization) {
+			return back()->with('message2', __('settings.no_organization_linked'))->withInput();
 		}
 
 		// Check if user already exists in another organization
@@ -990,40 +1047,61 @@ class SettingsController extends Controller
 		}
 
 		// Check for existing invitation and allow resending
-		$primaryOrgId = !empty($orgIds) ? $orgIds[0] : null;
 		$invitation = Invitation::where('email', $request->email)
-		->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-			return $q->whereIn('organization_id', $orgIds);
-		})
-		->first();
+			->where('organization_id', $organization->id)
+			->first();
 
-		if ($invitation) {
-			$invitation->expires_at = now()->addDays(2);
-			$invitation->save();
-			Notification::route('mail', $request->email)
-                ->notify(new UserInvitationNotification($invitation));
-			return back()->with('message', 'InvitationSent');
+		if (!$invitation) {
+			$invitation = new Invitation();
+			$invitation->email = $request->email;
+			$invitation->role = $request->role;
+			$invitation->organization_id = $organization->id;
 		}
 
-				$invitation = new Invitation();
-				$invitation->first_name = $request->first_name;
-				$invitation->last_name = $request->last_name;
-				$invitation->email = $request->email;
-				$invitation->role = $request->role;
-				$invitation->organization_id = $primaryOrgId ?? auth()->user()->organization_id;
-				$invitation->expires_at = now()->addDays(2);
-				$invitation->save();
+		$invitation->first_name = $request->first_name;
+		$invitation->last_name = $request->last_name;
+		$invitation->expires_at = now()->addDays(2);
+		$invitation->save();
 
-				// Send invitation email
-				Notification::route('mail', $request->email)
-                ->notify(new UserInvitationNotification($invitation));
+		$this->sendInvitation($invitation);
 
-				return back()->with('message', 'InvitationSent');
+		return back()->with('message', 'InvitationSent');
+	}
+
+	/**
+	 * The organization the Settings page shows and manages for the current user.
+	 */
+	private function settingsOrganization(): ?Organization
+	{
+		$user = auth()->user();
+
+		return $user->organization ?? Organization::whereIn('id', $user->organizations_ids)->first();
+	}
+
+	/**
+	 * Email the invitation. Sent only after it is saved; a mail/queue failure is
+	 * logged and must not undo the invitation (it can be resent from the list).
+	 */
+	private function sendInvitation(Invitation $invitation): void
+	{
+		try {
+			Notification::route('mail', $invitation->email)
+				->notify(new UserInvitationNotification($invitation));
+		} catch (\Throwable $e) {
+			Log::error('UserInvitationNotification failed: ' . $e->getMessage(), [
+				'invitation_id' => $invitation->id,
+				'organization_id' => $invitation->organization_id,
+			]);
+		}
 	}
 	 
 	public function showSetPasswordForm($invitationId)
 	{
 		$invitation = Invitation::findOrFail($invitationId);
+
+		if ($invitation->status !== 'pending') {
+			return redirect()->route('login')->with('message2', __('admin.invitationAlreadyUsed'));
+		}
 
 		if ($invitation->expires_at < now()) {
 			return redirect()->route('login')->with('message2', __('admin.invitationExpired'));
@@ -1038,7 +1116,12 @@ class SettingsController extends Controller
 			'password' => 'required|min:8|confirmed',
 		]);
 
-		$invitation = Invitation::find($invitationId);
+		$invitation = Invitation::findOrFail($invitationId);
+
+		// Single use: an accepted or cancelled invitation cannot create another account.
+		if ($invitation->status !== 'pending') {
+			return redirect()->route('login')->with('message2', __('admin.invitationAlreadyUsed'));
+		}
 
 		// If the invitation has expired
 		if ($invitation->expires_at < now()) {
@@ -1054,9 +1137,16 @@ class SettingsController extends Controller
 			'first_name_en' => $invitation->first_name,
 			'last_name_en' => $invitation->last_name,
 			'email' => $invitation->email,
-			'organization_id' => $invitation->organization_id,
 			'password' => bcrypt($request->password),
 		]);
+		// organization_id is not mass-assignable on User (GV-2017), so create() silently dropped it.
+		$user->organization_id = $invitation->organization_id;
+		// The signed link was opened from the invited mailbox, so the address is verified.
+		$user->email_verified_at = now();
+		$user->save();
+
+		// Same membership as a manager created or assigned in the organization wizard.
+		$user->organizations()->syncWithoutDetaching([$invitation->organization_id]);
 
 		 $role = Role::where('name', $invitation->role)->first();
 		 if ($role) {
@@ -1069,7 +1159,7 @@ class SettingsController extends Controller
 
 		$user->assignRole($invitation->role);
 
-		$uniqueCode = rand(100000, 999999); 
+		$uniqueCode = random_int(100000, 999999);
 
 		$invitation->update([
 			'user_id' => $user->id,
@@ -1077,12 +1167,17 @@ class SettingsController extends Controller
 			'status' => 'accepted',
 		]);
 
+		// "Accept Invitation" ends on the invitee's own dashboard, already signed in.
+		Auth::login($user);
+		$request->session()->regenerate();
+
 		return redirect()->route('core.dashboard_view')->with('message', __('admin.accountCreated'));
 	}
 
 	public function resendInvitation($invitationId)
 	{
 		$invitation = Invitation::findOrFail($invitationId);
+		abort_unless(auth()->user()->managesOrganization($invitation->organization_id), 403);
 
 		// Prevent resending if invitation is expired
 		if ($invitation->expires_at < now()) {
@@ -1097,8 +1192,7 @@ class SettingsController extends Controller
 		$invitation->expires_at = now()->addDays(2);
 		$invitation->save();
 
-		        Notification::route('mail', $invitation->email)
-            ->notify(new UserInvitationNotification($invitation));
+		$this->sendInvitation($invitation);
 
 		return back()->with('message', 'InvitationResent');
 	}
@@ -1106,6 +1200,7 @@ class SettingsController extends Controller
 	public function cancelInvitation($invitationId)
 	{
 		$invitation = Invitation::findOrFail($invitationId);
+		abort_unless(auth()->user()->managesOrganization($invitation->organization_id), 403);
 		$invitation->delete();
 
 		return back()->with('message', 'InvitationCanceled');

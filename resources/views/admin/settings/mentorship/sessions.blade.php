@@ -1,10 +1,5 @@
 @extends('layouts.admin')
 
-@section('style')
-  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify.min.css">
-  <link rel="stylesheet" type="text/css" href="/app-assets/plugins/alertify/alertify-bootstrap.min.css">
-@stop
-
 @section('content')
   <!-- BEGIN: Content-->
   <div class="">
@@ -139,7 +134,7 @@
                           </div>
 
                           @if($session->rate_comment)
-                            <p class="small text-muted d-block">{!! $session->rate_comment !!}</p>
+                            <p class="small text-muted d-block">{!! nl2br(e($session->rate_comment)) !!}</p>
                           @else
                             <small class="text-muted block">{{ __('admin.No comment provided') }}</small>
                           @endif
@@ -188,12 +183,24 @@
                           </span>
                         </td>
                         <td class="text-nowrap" style="min-width: 150px;">
-                          <small>{{ $session->zoom_date ? $session->zoom_date->format('d-m-Y') : '' }}</small>
-                          <small class="d-block">{{ $session->zoom_date ? $session->zoom_date->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
+                          @php $shownAt = \App\Services\TimezoneService::forViewer($session->zoom_date, $_user); @endphp
+                          <small>{{ $shownAt ? $shownAt->format('d-m-Y') : '' }}</small>
+                          <small class="d-block">{{ $shownAt ? $shownAt->format('H:i:s') : '' }} ({{ $session->period ?? '' }}M)</small>
                         </td>
                         <td class="text-nowrap" style="min-width: 150px;">
-                          @if($session->comment)
-                            <p class="small text-muted mb-0">{!! $session->comment !!}</p>
+                          @if($session->comment || $session->admin_comment)
+                            @if($session->comment)
+                              <div>
+                                <span class="badge bg-label-primary">{{ __('cycles.Founder_Comment') }}</span>
+                                <p class="small text-muted mb-0 mt-1">{!! nl2br(e($session->comment)) !!}</p>
+                              </div>
+                            @endif
+                            @if($session->admin_comment)
+                              <div class="{{ $session->comment ? 'mt-2' : '' }}">
+                                <span class="badge bg-label-warning">{{ __('cycles.Admin_Comment') }}</span>
+                                <p class="small text-muted mb-0 mt-1">{{ $session->admin_comment }}</p>
+                              </div>
+                            @endif
                           @else
                             <small class="text-muted">{{ __('admin.No comment provided') }}</small>
                           @endif
@@ -575,7 +582,7 @@
             </div>
             <div class="form-group mt-4">
               <label class="mb-2">{{ __('cycles.Add a session note') }}:</label>
-              <textarea class="form-control" id="notes" name='notes' rows="4"
+              <textarea class="form-control" id="notes" name='notes' rows="4" maxlength="{{ $mentorshipNotesMaxLength }}"
                 placeholder="{{ __('cycles.Write your note here') }}"></textarea>
             </div>
             <div class="checkbox mt-4">
@@ -599,22 +606,17 @@
   </div>
 @stop
 
-@section('scripts')
-  <script src="/app-assets/plugins/alertify/alertify.min.js"></script>
-@stop
-
 @section('pagescripts')
   <script>
     var is_submitting = false;
     $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
-      alertify.defaults.transition = 'zoom';
-      alertify.defaults.theme.ok = 'btn btn-sm btn-danger';
-      alertify.defaults.theme.cancel = 'btn btn-sm btn-info';
-      alertify.defaults.theme.input = 'form-control';
-
-      alertify.alert('Meeting Passcode', `The passcode for this meeting is: <strong>${passcode}</strong>`, function() {});
+      releaseAlert('copy', {
+        title: '{{ __('dashboard.meeting_passcode') }}',
+        message: `{!! __('dashboard.passcode_is', ['code' => '<strong>${passcode}</strong>']) !!}`,
+        copyText: passcode
+      });
     });
 
     $(document).on('click', '#submitModifyRequest', function(e) {
@@ -900,42 +902,9 @@
       $('#retryLoadBtn').on('click', () => fetchSessionData(currentSessionId));
     });
     $(document).ready(function() {
-    let mentorshipTable = $('#mentorship-sessions-table').DataTable({
-      "responsive": true,
-      "searching": true,
-      "order": [],
-      "columnDefs": [
-        {
-          "orderable": false,
-          "targets": [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        }
-      ],
-        "language": {
-          emptyTable: "{{ $l === 'ar' ? 'لا توجد جلسات ارشاد متاحة' : 'No Mentorship Sessions Found' }}",
-         @if ($l === 'ar')
-          "sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
-          "sLoadingRecords": "جارٍ التحميل...",
-          "sProcessing": "جارٍ التحميل...",
-          "sLengthMenu": "أظهر _MENU_ مدخلات",
-          "sZeroRecords": "لم يعثر على أية سجلات",
-          "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
-          "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
-          "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
-          "sInfoPostFix": "",
-          "sSearch": "ابحث:",
-          "sUrl": "",
-          "oPaginate": {
-            "sFirst": "الأول",
-            "sPrevious": "السابق",
-            "sNext": "التالي",
-            "sLast": "الأخير"
-          },
-          "oAria": {
-            "sSortAscending": ": تفعيل لترتيب العمود تصاعدياً",
-            "sSortDescending": ": تفعيل لترتيب العمود تنازلياً"
-          }
-      @endif
-       },
+      let mentorshipTable = $('#mentorship-sessions-table').DataTable({
+      ...getSharedDataTableConfig({ title: 'mentorship-sessions-table', descIndex: 0, actionsIndex: 11, withoutFilter: true }),
+      responsive: true,
       buttons: [
         { extend: 'csv', text: '<i class="ti ti-file-text me-1"></i>CSV', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 9] } },
         { extend: 'excel', text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel', className: 'd-none', title: `Mentorship_Sessions_Export_${new Date().toISOString().slice(0, 10)}`, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 9] } }
@@ -1075,8 +1044,13 @@
               }
             }
           });
+          // Slot-booked sessions take the slot's length (e.g. 15 min), which the fixed list lacks;
+          // selecting a missing value leaves the select empty and the form posts no period.
+          if (response.period && !$('#period option[value="' + response.period + '"]').length) {
+            $('#period').append($('<option>', { value: response.period, text: response.period + ' {{ __('cycles.Minutes') }}' }));
+          }
           $('#period').val(response.period);
-          $('#notes').val(response.notes);
+          $('#notes').val(response.admin_comment);
           $('#ModifyRequest').modal('show');
         },
         error: function(error) {
@@ -1203,30 +1177,42 @@
     }
 
     function approve(id, stat) {
-      if(stat == 'Yes'){
-      alert('{{ __('admin.Accepting_request') }}')
-      }else{
-        alert('{{ __('admin.Rejecting_request') }}')
-      }
-      $.ajaxSetup({
-        headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-      });
-      $.ajax({
-        type: "POST",
-        url: "/dashboard/mentors/modify",
-        data: {
-          "id": id,
-          "stat": stat,
-          'rtype': 6,
-        },
-        success: function(response) {
-          location.reload();
-        },
-        error: function(error) {
-          console.log(error);
-          alert("Error Occurred, Try again!");
+      const isApproving = stat === 'Yes';
+      const successMessage = isApproving
+        ? "{{ __('admin.mentorship_session_approved_successfully') }}"
+        : "{{ __('admin.mentorship_session_rejected_successfully') }}";
+      const failureMessage = isApproving
+        ? "{{ __('admin.mentorship_session_approve_failed') }}"
+        : "{{ __('admin.mentorship_session_reject_failed') }}";
+
+      releaseAlert('warning', {
+        title: isApproving ? "{{ __('admin.Approve') }}" : "{{ __('admin.Disapprove') }}",
+        message: (isApproving ? "{{ __('admin.Accepting_request') }}" : "{{ __('admin.Rejecting_request') }}").trim(),
+        confirmText: "{{ __('admin.Confirm') }}",
+        cancelText: "{{ __('admin.Cancel') }}",
+        confirmColor: isApproving ? 'success' : 'danger',
+        onConfirm: function () {
+          $.ajaxSetup({
+            headers: {
+              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+          });
+          $.ajax({
+            type: "POST",
+            url: "/dashboard/mentors/modify",
+            data: {
+              "id": id,
+              "stat": stat,
+              'rtype': 6,
+            },
+            success: function (response) {
+              toastr.success(successMessage);
+              setTimeout(function () { location.reload(); }, 1500);
+            },
+            error: function (xhr) {
+              toastr.error(xhr.responseJSON?.message || failureMessage);
+            }
+          });
         }
       });
     }

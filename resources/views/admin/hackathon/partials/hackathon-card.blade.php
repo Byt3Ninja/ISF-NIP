@@ -212,7 +212,9 @@
         </div>
       @endif
 
-      @if (now()->isBefore($hackathon['cycle_end']))
+      {{-- GV-9566: open through its last (inclusive) day in the platform zone; `status`
+           is computed that way in the controller (isBefore() closed it on its last morning). --}}
+      @if (($hackathon['status'] ?? null) !== 'Finished')
         <small class="text-muted text-center d-block fw-medium mt-2">
           {{ $l == 'en' ? 'Applications open until ' . $hackathon['cycle_end']->format('F j, Y') : 'التقديم مفتوح حتى ' .
           $hackathon['cycle_end']->format('F j, Y') }}

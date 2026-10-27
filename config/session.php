@@ -128,7 +128,7 @@ return [
         'SESSION_COOKIE',
         Str::slug(env('APP_NAME', 'laravel'), '_').'_session'
     ),
-    'secure' => env('SESSION_SECURE_COOKIE', true),
+
     /*
     |--------------------------------------------------------------------------
     | Session Cookie Path
@@ -194,6 +194,6 @@ return [
     |
     */
 
-    'same_site' => null,
+    'same_site' => 'lax',
 
 ];

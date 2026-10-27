@@ -97,12 +97,13 @@
                                             <div class="col-12 d-flex justify-content-end">
                                                 <button type="submit"
                                                     class="btn btn-primary mr-1 mb-1">{{__('admin.Update')}}</button>
-                                                <a onclick="return confirm('{{__('admin.Sure del cal')}}');" href="{{URL::to('dashboard/calendar/'.$cal->id.'/delete')}}" >
-                                                    <button type="button" class="btn btn-danger mr-1 mb-1">{{__('admin.Delete')}}</button> </a>
+                                                {{-- The delete form is rendered after this update form closes (forms cannot nest). --}}
+                                                @include('partials.forms.confirm-action', ['part' => 'button', 'formId' => 'delete-calendar-' . $cal->id, 'action' => route('calendar.events_delete', $cal->id), 'message' => __('admin.Sure del cal'), 'label' => e(__('admin.Delete')), 'class' => 'btn btn-danger mr-1 mb-1'])
                                             </div>
                                         </div>
                                 </div>
                                 </form>
+                                @include('partials.forms.confirm-action', ['part' => 'form', 'formId' => 'delete-calendar-' . $cal->id, 'action' => route('calendar.events_delete', $cal->id)])
                             </div>
                         </div>
                     </div>

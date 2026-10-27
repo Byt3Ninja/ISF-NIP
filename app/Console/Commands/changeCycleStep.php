@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\{Company, TeamFormation};
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use App\Services\TimezoneService;
 use Carbon\Carbon;
 use stdClass;
 
@@ -34,6 +35,7 @@ class changeCycleStep extends Command
         $cycles = DB::table('cycles AS c')
             ->select([
                 'c.id',
+                'c.organization_id',
                 'c.start',
                 'c.end',
                 's.id AS step_id',
@@ -46,8 +48,11 @@ class changeCycleStep extends Command
             ->whereNull('c.deleted_at')
             ->get();
 
-        $cycles = $cycles->groupBy('id')->map(function ($groupedCycle) use ($now) {
+        $cycles = $cycles->groupBy('id')->map(function ($groupedCycle) {
             $c = $groupedCycle->first();
+            // GV-9566: step dates are days in the program's platform zone, so "now"
+            // is that zone's wall-clock, not the server clock (hourly cron).
+            $now = TimezoneService::platformNow(TimezoneService::platform($c->organization_id ? (int) $c->organization_id : null))->format('Y-m-d H:i:s');
             $cycle = new stdClass;
             $cycle->id = $c->id;
             $cycle->start = Carbon::parse($c->start)->format('Y-m-d 00:00:00');
@@ -61,7 +66,7 @@ class changeCycleStep extends Command
                 return $s;
             })->sortBy('from')->values();
             $cycle->eligible_steps = $cycle->steps->filter(function( $step ) use ( $now ) {
-                return $now >= $step->from && $now < $step->to;
+                return $now >= $step->from && $now <= $step->to;
             });
             return $cycle;
         })->values();

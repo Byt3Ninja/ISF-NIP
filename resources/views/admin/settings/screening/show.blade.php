@@ -196,21 +196,21 @@
             </div>
 
             <!-- Judges -->
-            <div class="col-lg-6">
+            <div class="col-lg-6 d-flex flex-column">
               <div class="border-start border-dark border-4 ps-3 mb-3">
                 <h6 class="text-dark fw-bold small mb-0">
                   <i class="ti ti-user-check me-2"></i>{{ __('cycles.Assigned Judges') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
+              <div class="screening-assignees p-3 bg-light-subtle rounded-2 border flex-grow-1">
                 <div id="assigned-judges" class="d-flex flex-wrap gap-2">
                   @forelse ($visibleJudgeIds as $judgeId)
                     @php $judge = $judges->find($judgeId); @endphp
 
                     @if ($judge)
                       <a href="/dashboard/users/{{ $judge->id }}/edit"
-                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center">
-                        <div class="avatar avatar-xs me-2">
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center mw-100">
+                        <div class="avatar avatar-xs flex-shrink-0 me-2">
                           @if ($judge->img_url)
                             <img src="/191014/{{ $judge->img_url }}" alt="img" class="rounded-circle object-fit-cover">
                           @else
@@ -219,7 +219,8 @@
                             </div>
                           @endif
                         </div>
-                        {{ $judge->{'first_name_' . $l} }} {{ $judge->{'last_name_' . $l} }}
+                        @php $judgeName = $judge->{'first_name_' . $l} . ' ' . $judge->{'last_name_' . $l}; @endphp
+                        <span class="text-truncate" title="{{ $judgeName }}">{{ $judgeName }}</span>
                       </a>
                     @endif
                   @empty
@@ -241,21 +242,21 @@
             </div>
 
             <!-- Companies -->
-            <div class="col-lg-6">
+            <div class="col-lg-6 d-flex flex-column">
               <div class="border-start border-dark border-4 ps-3 mb-3">
                 <h6 class="text-dark fw-bold small mb-0">
                   <i class="ti ti-building-skyscraper me-2"></i>{{ __('admin.assigned_startups') }}
                 </h6>
               </div>
-              <div class="p-3 bg-light-subtle rounded-2 border h-px-150">
+              <div class="screening-assignees p-3 bg-light-subtle rounded-2 border flex-grow-1">
                 <div id="assigned-companies" class="d-flex flex-wrap gap-2">
                   @forelse ($visibleCompanyIds as $companyId)
                     @php $company = $companiesById[$companyId] ?? null; @endphp
 
                     @if ($company)
                       <a href="/dashboard/companyProfile/{{ $company->id }}"
-                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center">
-                        <div class="avatar avatar-xs me-2">
+                        class="badge text-dark bg-card border px-3 py-1_5 rounded-pill d-flex align-items-center mw-100">
+                        <div class="avatar avatar-xs flex-shrink-0 me-2">
                           @if ($company->logo)
                             <img src="{{ $company->logo }}" alt="logo" class="rounded-circle object-fit-cover">
                           @else
@@ -264,7 +265,7 @@
                             </div>
                           @endif
                         </div>
-                        {{ $company->{'name_' . $l} }}
+                        <span class="text-truncate" title="{{ $company->{'name_' . $l} }}">{{ $company->{'name_' . $l} }}</span>
                       </a>
                     @endif
                   @empty
@@ -305,7 +306,7 @@
       <!--/ Navigation Pills -->
 
       <!-- Tab Content -->
-      <div class="tab-content bg-card shadow">
+      <div class="tab-content bg-card shadow p-4 p-sm-6">
         <!-- Judging Panels Tab -->
         <div class="tab-pane fade show active" id="judging_panels" role="tabpanel" aria-labelledby="judging_panels-tab">
           @include('partials.judging-panels', ['id' => $id, 'screening_type' => 'initial'])
@@ -428,6 +429,19 @@
     </div>
   @endif
 @endif
+
+<!-- Guidelines Editor Modal -->
+<div class="modal fade" id="guidelines-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title mb-6">{{ __('admin.screening_guidelines') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0" id="guidelines-modal-body"></div>
+    </div>
+  </div>
+</div>
 @stop
 
 @section('scripts')
@@ -442,16 +456,27 @@
 @stop
 
 @section('pagescripts')
+@include('admin.settings.screening-guidelines-scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    const $editorTextarea = $('#screening-guidelines-editor');
     // Get initial content before initializing Summernote
     const initialContent = $('#screening-guidelines-editor').val() || '';
 
-    // Initialize Summernote editor
-    const locale = '{{ app()->getLocale() }}';
+    // Custom "expand" button that replaces the built-in fullscreen
+    const ExpandButton = function (context) {
+      const ui = $.summernote.ui;
+      return ui.button({
+        contents: '<i class="ti ti-arrows-maximize"></i>',
+        tooltip: '{{ __('admin.fullscreen') }}',
+        click: function () {
+          guidelinesModal.show();
+        }
+      }).render();
+    };
 
-    $('#screening-guidelines-editor').summernote({
-      lang: locale === 'ar' ? 'ar-AR' : 'en-US',
+    $editorTextarea.summernote({
+      lang: "{{ $l }}" === 'ar' ? 'ar-AR' : 'en-US',
       placeholder: '{{ __('admin.screening_guidelines_placeholder') }}',
       tabsize: 2,
       height: 200,
@@ -462,18 +487,37 @@
         ['para', ['ul', 'ol', 'paragraph']],
         ['table', ['table']],
         ['insert', ['link', 'picture', 'video']],
-        ['view', ['fullscreen', 'codeview', 'help']]
+        ['view', ['expand', 'codeview', 'help']]   // 'fullscreen' swapped for 'expand'
       ],
+      buttons: { expand: ExpandButton },
       dialogsInBody: true,
+      callbacks: {
+        onImageUpload: function (files) {
+          uploadScreeningGuidelinesImage(files[0], $editorTextarea);
+        }
+      }
     });
-
-    // Set the initial content after Summernote is initialized
+    
+      // Set the initial content after Summernote is initialized
     if (initialContent.trim() !== '') {
       setTimeout(() => {
         $('#screening-guidelines-editor').summernote('code', initialContent);
       }, 100);
     }
 
+    // Move the editor into the modal and back
+    const guidelinesModalEl = document.getElementById('guidelines-modal');
+    // focus:false so Bootstrap's focus trap doesn't block Summernote's link/picture dialogs
+    const guidelinesModal = new bootstrap.Modal(guidelinesModalEl, { focus: false });
+
+    guidelinesModalEl.addEventListener('show.bs.modal', function () {
+      $('#guidelines-modal-body').append($editorTextarea.next('.note-editor.note-frame'));
+    });
+
+    guidelinesModalEl.addEventListener('hidden.bs.modal', function () {
+      // the editor now lives in the modal body, so find it there and put it back after the textarea
+      $editorTextarea.after($('#guidelines-modal-body > .note-editor.note-frame'));
+    });
   });
 
   $('.edit-step-btn').on('click', function () {
@@ -566,19 +610,14 @@
       }
     });
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('cycles.Are you sure, Delete current step and all its contents?') }}",
-      text: "{{ __('admin.Recover') }}",
-      icon: "warning",
-      showCancelButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton: 'btn btn-label-secondary',
-      },
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: "{{ __('admin.Recover') }}",
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.ajax({
           type: "POST",
           url: "/dashboard/cycles/modify",
@@ -588,14 +627,14 @@
           },
           success: function (response) {
             $('[data-step-id="' + stepId + '"]').closest('.col-xl-4').remove();
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: '{{__('Deleted!')}}',
               message: '{{  $l == 'en' ? 'The screening step has been deleted successfully.' : 'تم حذف مرحلة التصفية بنجاح.' }}',
             });
             window.location.href = "/dashboard/screening";
           },
           error: function (error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}!",
               message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
             });
@@ -685,22 +724,21 @@
         },
         success: function (response) {
           if (response.status) {
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: '{{ __('admin.success') }}',
               message: response.message ? response.message : 'admin.Screening guidelines saved successfully',
             });
           } else {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: '{{ __('admin.Error') }}',
               message: response.message ? response.message : '{{ __('admin.unexpected_error') }}',
             });
           }
         },
         error: function (xhr) {
-          const errorMessage = xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}';
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: '{{ __('admin.Error') }}',
-            message: errorMessage,
+            message: screeningGuidelinesSaveErrorMessage(xhr),
           });
         }
       });
@@ -722,10 +760,10 @@
           success: function (response) {
             if (response.success) {
               lastFormSelectValue = formId;
-              releaseSuccessAlert({ title: '{{ __("admin.success") }}', message: response.message });
+              releaseAlert('success', { title: '{{ __("admin.success") }}', message: response.message });
             } else if (response.needs_confirmation) {
               const count = response.counts ? response.counts.total : 0;
-              releaseWarningAlert({
+              releaseAlert('warning', {
                 title: '{{ __("admin.step_form_change_warning_title") }}',
                 message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', count),
                 confirmText: '{{ __("admin.Yes") }}',
@@ -740,7 +778,7 @@
           },
           error: function (xhr) {
             $select.val(lastFormSelectValue).trigger('change.select2');
-            releaseFailureAlert({ title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
+            releaseAlert('danger', { title: '{{ __("admin.Error") }}', message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}' });
           }
         });
       };

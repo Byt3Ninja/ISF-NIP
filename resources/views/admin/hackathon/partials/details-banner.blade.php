@@ -11,7 +11,7 @@
     <i class="ti ti-calendar-event me-2"></i>
     {{ $l == 'en' ? $currentHackathon['date'] : $currentHackathon['date'] }}
     <span class="mx-3">|</span>
-    <i class="ti ti-map-pin me-2"></i>
+    <i class="ti ti-building me-2"></i>
     {{ $l == 'en' ? $currentHackathon['location'] : $currentHackathon['location'] }}
   </p>
   <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">

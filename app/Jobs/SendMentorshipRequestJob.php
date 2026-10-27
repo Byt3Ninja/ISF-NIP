@@ -25,6 +25,8 @@ use App\Notifications\MentorNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipNotification;
 use App\Notifications\StartupNotifyMentorshipApprovalNotification;
 use App\Notifications\StartupNotifyMentorshipRejectionNotification;
+use App\Services\TimezoneService;
+use App\Support\NotificationClaim;
 
 class SendMentorshipRequestJob implements ShouldQueue
 {
@@ -90,24 +92,8 @@ class SendMentorshipRequestJob implements ShouldQueue
                 // $mentor->notify(new MentorshipRequestNotification($data));
                 $startupFullName_user = $startup->name;
 
-                $session_date = strtotime($session->zoom_date);
-                $start = Carbon::parse($session->zoom_date);
-                $end = $start->copy()->addMinutes($session->period);
-                $sessionDate = date('Y-m-d', $session_date);
-
-                $sessionTimeMentor = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp);
-                if( $mentorLocale == 'ar' )
-                {
-                    $sessionTimeMentor = str_replace('AM', 'صباحاً', $sessionTimeMentor);
-                    $sessionTimeMentor = str_replace('PM', 'مساءاً', $sessionTimeMentor);
-                }
-
-                $sessionTimeStartup = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp);
-                if( $startupLocale == 'ar' )
-                {
-                    $sessionTimeStartup = str_replace('AM', 'صباحاً', $sessionTimeStartup);
-                    $sessionTimeStartup = str_replace('PM', 'مساءاً', $sessionTimeStartup);
-                }
+                [$sessionDateMentor, $sessionTimeMentor] = $this->sessionWindowFor($session->zoom_date, $session->period, $session->organization_id, $mentor, $mentorLocale);
+                [$sessionDateStartup, $sessionTimeStartup] = $this->sessionWindowFor($session->zoom_date, $session->period, $session->organization_id, $startup, $startupLocale);
 
                 // ======> notify Mentor <=================
                 $mentorMessage = [
@@ -118,22 +104,20 @@ class SendMentorshipRequestJob implements ShouldQueue
                         : __("messages.denied_message", ['other_party' => $startupFullName_user], $mentorLocale),
                     "/dashboard",
                     $this->stat == 'Yes'
-                        ? __("messages.mentorship_session_notification_message", ['name' => $startupFullName_user, 'session_date' => $sessionDate, 'session_time' => $sessionTimeMentor], $mentorLocale)
+                        ? __("messages.mentorship_session_notification_message", ['name' => $startupFullName_user, 'session_date' => $sessionDateMentor, 'session_time' => $sessionTimeMentor], $mentorLocale)
                         : __("messages.mentorship_session_action", ['action' => __('messages.Rejected', [], $mentorLocale), 'name' => $startupFullName_user], $mentorLocale),
                 ];
-                // Atomically claim the "notify mentor of booked session" step so a
-                // retry of this job never double-emails the mentor.
-                $claimedMentorNotify = MentorshipRequest::where('id', $session->id)
-                    ->whereNull('mentor_notified_at')
-                    ->update(['mentor_notified_at' => now()]);
-
-                if ($claimedMentorNotify) {
-                    $mentor->notify(
-                        new MentorNotifyMentorshipNotification(
+                // Claim the "notify mentor of booked session" step so a retry of this job
+                // never double-emails the mentor; a failed send gives the claim back.
+                $claimedMentorNotify = NotificationClaim::on('mentorship_requests', ['id' => $session->id], 'mentor_notified_at')
+                    ->run(fn (NotificationClaim $claim) => $mentor->notify(
+                        (new MentorNotifyMentorshipNotification(
                             $mentorMessage,
                             $session
-                        )
-                    );
+                        ))->withClaim($claim)
+                    ));
+
+                if ($claimedMentorNotify) {
                     log::info('Sent New Mentorship Request notification to ' . $mentor->email);
                 }
 
@@ -143,21 +127,18 @@ class SendMentorshipRequestJob implements ShouldQueue
                     __("messages.dear", ['name' => $startupFullName_user], $startupLocale),
                     __("messages.approved_message", ['other_party' => $mentorFullName], $startupLocale),
                     "/dashboard",
-                    __("messages.mentorship_session_notification_message", ['name' => $mentorFullName, 'session_date' => $sessionDate, 'session_time' => $sessionTimeStartup], $startupLocale),
+                    __("messages.mentorship_session_notification_message", ['name' => $mentorFullName, 'session_date' => $sessionDateStartup, 'session_time' => $sessionTimeStartup], $startupLocale),
                 ];
-                // Atomically claim the "notify founder of scheduled session" step
-                // so a retry of this job never double-emails the founder.
-                $claimedFounderNotify = MentorshipRequest::where('id', $session->id)
-                    ->whereNull('founder_notified_at')
-                    ->update(['founder_notified_at' => now()]);
-
-                if ($claimedFounderNotify) {
-                    $startup->notify(
-                        new StartupNotifyMentorshipNotification(
+                // Same for the "notify founder of scheduled session" step.
+                $claimedFounderNotify = NotificationClaim::on('mentorship_requests', ['id' => $session->id], 'founder_notified_at')
+                    ->run(fn (NotificationClaim $claim) => $startup->notify(
+                        (new StartupNotifyMentorshipNotification(
                             $userMessage,
                             $session
-                        )
-                    );
+                        ))->withClaim($claim)
+                    ));
+
+                if ($claimedFounderNotify) {
                     log::info('Sent New Mentorship Request notification to ' . $startup->email);
                 }
             } catch (\Throwable $th) {
@@ -180,64 +161,18 @@ class SendMentorshipRequestJob implements ShouldQueue
             $startup_owner = User::findOrFail($this->userId);
             $startup_owner_name = $startup_owner->name;
 
-            $mentorLocale = $mentor->preferredLocale();
             $startupLocale = $startup_owner->preferredLocale();
 
             $session = MentorshipRequest::with('cycle', 'orgnization')->find($this->id);
-            $is_hackathon = $session && $session->cycle ? (strtolower($session->cycle->type) === 'hackathon') : false;
+            $sessionOrganizationId = $session->organization_id ?? null;
 
-            $session_date = strtotime($this->date);
-            $start = Carbon::parse($this->date);
-            $end = $start->copy()->addMinutes($this->period ?? 60);
-            $sessionDate = date('Y-m-d', $session_date);
-            
-            $sessionTime = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp) . ' (AM/PM)';
-            if ($mentorLocale == 'ar') {
-                $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
-                $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
-            }
-
-            $user = new User();
-            $user->email = $mentor->email;
-            $user->id = $mentor->id;
-
-            $mentorSubject = $mentorLocale === 'ar' ? "جلسة إرشاد مع {$startup_owner_name}." : "Mentorship Session with {$startup_owner_name}.";
-            $mentorMessage = [
-                'subject' => $mentorSubject,
-                'title' => $mentorSubject,
-                'mentorName' => $mentor_name,
-                'mentorGender' => $mentor->gender ?? '',
-                'startupOwnerName' => $startup_owner_name,
-                'startupName' => $startup_owner->company->name_en ?? '',
-                'sessionDate' => $sessionDate,
-                'sessionTime' => $sessionTime,
-                'is_hackathon' => $is_hackathon,
-                'duration' => $this->period ?? '60 min',
-                'sessionType' => $this->onlineMeeting ? 'Online' : 'Offline',
-                'meetingLink' => $this->onlineMeeting['data']['join_url'] ?? '',
-                'meetingPass' => $this->onlineMeeting['data']['password'] ?? '',
-                'location' => $session->orgnization->address ?? '',
-                'mapLink' => $session->orgnization->google_map_url ?? '',
-                'notes' => '',
-                'attachments' => [],
-                'status' => 'Yes',
-                'action' => 'add',
-                'user' => 'mentor',
-                'lang' => $mentorLocale,
-            ];
-            $MSG = new MentorshipSessionMentor($mentorMessage);
-
+            // The mentor's "new session" email is sent by MentorsController@add
+            // (MentorshipSessionMentorBookingNotification); only WhatsApp here.
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
-                try {
-                    $user->notify($MSG);
-                } catch (\Throwable $th) {
-                    // throw $th;
-                    Log::error('add Notification Error 1: ' . $th->getMessage());
-                }
                 $phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
                 $Massage = "Dear " . $mentor_name . ", 
                 This Is notification new mentorship session with '" . $startup_owner_name . "',
-                Session will start:" . $this->date . ",
+                Session will start:" . $this->sessionStartFor($this->date, $sessionOrganizationId, $startup_owner) . ",
                 Check your account to join the session ";
                 $whatsAppService = app()->make(\App\Services\WhatsAppService::class);
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -251,16 +186,17 @@ class SendMentorshipRequestJob implements ShouldQueue
 
             $userSubject = $startupLocale === 'ar' ? "جلسة إرشاد مع {$mentor_name}." : "Mentorship Session with {$mentor_name}.";
             $userMessage = [
+                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
                 'subject' => $userSubject,
                 'title' => $userSubject,
                 'mentorName' => $mentor_name,
                 'startupOwnerName' => $startup_owner_name,
                 'startupName' => $startup_owner->company->name_en ?? '',
-                'sessionDate' => $this->date,
+                'sessionDate' => $this->sessionStartFor($this->date, $sessionOrganizationId, $startup_owner),
                 'duration' => $this->period ?? '60 min',
                 'sessionType' => $this->onlineMeeting ? 'Online' : 'Offline',
                 'meetingLink' => $this->onlineMeeting['data']['join_url'] ?? '',
-                'meetingPass' => $this->onlineMeeting['data']['password'] ?? '',
+                'meetingPass' => $this->onlineMeeting['data']['passcode'] ?? '',
                 'location' => '',
                 'notes' => '',
                 'attachments' => [],
@@ -282,7 +218,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $phoneNumber = $startup_owner->country_code_w_a . $startup_owner->whatsapp;
                 $Massage = "Dear " . $startup_owner->name . ",
                 This Is notification new mentorship session with '" . $startup_owner_name . "',
-                Session will start: " . $this->date . ",
+                Session will start: " . $this->sessionStartFor($this->date, $sessionOrganizationId, $startup_owner) . ",
                 Session Link: " . ($this->onlineMeeting['data']['join_url'] ?? '') . ",
                 Thanks from " . env('APP_NAME');
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -313,18 +249,10 @@ class SendMentorshipRequestJob implements ShouldQueue
 
             $is_hackathon = $session->cycle ? (strtolower($session->cycle->type) === 'hackathon') : false;
 
-            $session_date = strtotime($session->zoom_date);
-            $start = Carbon::parse($session->zoom_date);
-            $end = $start->copy()->addMinutes($session->period ?? 60);
-            $sessionDate = date('Y-m-d', $session_date);
-            
-            $sessionTime = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp) . ' (AM/PM)';
-            if ($mentorLocale == 'ar') {
-                $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
-                $sessionTime = str_replace('PM', 'مساءاً', $sessionTime);
-            }
+            [$sessionDate, $sessionTime] = $this->sessionWindowFor($session->zoom_date, $session->period ?? 60, $session->organization_id, $rName, $mentorLocale);
 
             $mentorMessage =[
+                'organizationId' => $session->cycle->organization_id ?? $session->organization_id,
                 'subject' => $mentorSubject,
                 'title' => $mentorSubject,
                 'mentorName' => $rFullName,
@@ -343,7 +271,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'location' => $session->cycle->offline_location_address ?? '',
                 'address' => $session->orgnization->address ?? '',
                 'mapLink' => $session->cycle->offline_location_map ?? $session->orgnization->google_map_url ?? '',
-                'notes' => $session->comment ?? '',
+                'notes' => $session->admin_comment ?: ($session->comment ?? ''),
                 'attachments' => $session->fileurl ? [['url' => env('APP_URL').'/dashboard/uploads/InviteMentor/'.$session->fileurl, 'name' => basename($session->fileurl), 'path' => $session->fileurl]] : [],
                 'status' => $session->approved ?? '',
                 'action' => 'modifySession',
@@ -354,25 +282,17 @@ class SendMentorshipRequestJob implements ShouldQueue
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
                     // Claim this specific update -- a later reschedule bumps
-                    // updated_at again, so this comparison lets it notify again.
-                    $claimedMentorUpdateNotify = DB::table('mentorship_requests')->where('id', $session->id)
-                        ->where(function ($q) use ($mentorUpdateVersion) {
-                            $q->whereNull('mentor_update_notified_at')
-                              ->orWhere('mentor_update_notified_at', '!=', $mentorUpdateVersion);
-                        })
-                        ->update(['mentor_update_notified_at' => $mentorUpdateVersion]);
-
-                    if ($claimedMentorUpdateNotify) {
-                        $rName->notify($MSGM);
-                    }
+                    // updated_at again, so a versioned claim lets it notify again.
+                    NotificationClaim::on('mentorship_requests', ['id' => $session->id], 'mentor_update_notified_at', $mentorUpdateVersion, true)
+                        ->run(fn (NotificationClaim $claim) => $rName->notify($MSGM->withClaim($claim)));
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 1: ' . $th->getMessage());
                 }
                 $phoneNumber = $rName->country_code_w_a . $rName->whatsapp;
                 $Massage = "Dear " . $rName->name . ",
-				you have a new mentorship session with '" . $rFullName . "',
-				Session will start:" . $this->date . ",
+				you have a new mentorship session with '" . $rFullName_usr . "',
+				Session will start:" . $this->sessionStartFor($this->date, $session->organization_id, $rName) . ",
 				Check your account to join the session,
 				Thanks from " . env('APP_NAME');
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -383,11 +303,7 @@ class SendMentorshipRequestJob implements ShouldQueue
             $user->email = $rName_usr->email;
             $user->id = $rName_usr->id;
             $userSubject = $userLocale === 'ar' ? "جلسة إرشاد مع {$rFullName}." : "Mentorship Session with {$rFullName}.";
-            $userSessionTime = date('h:i A', $session_date) . ' – ' . date('h:i A', $end->timestamp) . ' (AM/PM)';
-            if ($userLocale == 'ar') {
-                $userSessionTime = str_replace('AM', 'صباحاً', $userSessionTime);
-                $userSessionTime = str_replace('PM', 'مساءاً', $userSessionTime);
-            }
+            [$userSessionDate, $userSessionTime] = $this->sessionWindowFor($session->zoom_date, $session->period ?? 60, $session->organization_id, $rName_usr, $userLocale);
 
             $message = [
                 'subject' => $userSubject,
@@ -395,7 +311,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 'mentorName' => $rFullName,
                 'startupOwnerName' => $rFullName_usr,
                 'startupName' => $session->user->company->name_en ?? '',
-                'sessionDate' => $sessionDate,
+                'sessionDate' => $userSessionDate,
                 'sessionTime' => $userSessionTime,
                 'duration' => $session->period ?? '60 min',
                 'sessionType' => $session->session_type ?? 'Online',
@@ -431,25 +347,11 @@ class SendMentorshipRequestJob implements ShouldQueue
             $MSG = new MentorshipSession($message);
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
-                    // Claim this specific update -- a later reschedule bumps
-                    // updated_at again, so this comparison lets it notify again.
-                    // Uses the query builder: an Eloquent update() would itself
-                    // bump updated_at and make a retry look like a new update.
-                    $claimedFounderUpdateNotify = DB::table('mentorship_requests')->where('id', $session->id)
-                        ->where(function ($q) use ($mentorUpdateVersion) {
-                            $q->whereNull('founder_update_notified_at')
-                              ->orWhere('founder_update_notified_at', '!=', $mentorUpdateVersion);
-                        })
-                        ->update(['founder_update_notified_at' => $mentorUpdateVersion]);
-
-                    if ($claimedFounderUpdateNotify) {
-                        try {
-                            $rName_usr->notify($MSG);
-                        } catch (\Throwable $th) {
-                            DB::table('mentorship_requests')->where('id', $session->id)->update(['founder_update_notified_at' => null]);
-                            throw $th;
-                        }
-                    }
+                    // Claim this specific update (versioned, like the mentor's above). The
+                    // claim writes through the query builder, so it never bumps updated_at
+                    // and a retry can't look like a new update.
+                    NotificationClaim::on('mentorship_requests', ['id' => $session->id], 'founder_update_notified_at', $mentorUpdateVersion, true)
+                        ->run(fn (NotificationClaim $claim) => $rName_usr->notify($MSG->withClaim($claim)));
                 } catch (\Throwable $th) {
                     // throw $th;
                     Log::error('modify session Notification Error 2: ' . $th->getMessage());
@@ -457,7 +359,7 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $phoneNumber = $rName_usr->country_code_w_a . $rName_usr->whatsapp;
                 $Massage = "Dear " . $rName_usr->name . ",
 				you have a new mentorship session with '" . $rFullName . "',
-				Session will start:" . $this->date . ",
+				Session will start:" . $this->sessionStartFor($this->date, $session->organization_id, $rName_usr) . ",
 				Check your account to join the session,
 				Thanks from " . env('APP_NAME');
                 $result = $whatsAppService->sendMessage($phoneNumber, $Massage);
@@ -494,8 +396,9 @@ class SendMentorshipRequestJob implements ShouldQueue
                     : __("messages.mentorship_session_action", ['action' => __('messages.Rejected', [], $mentorLocale), 'name' => $startupFullName_user], $mentorLocale),
             ];
             $MSG = new MentorshipSession($mentorMessage);
-            $phoneNumber = $startup_user->country_code_w_a . $startup_user->whatsapp;
-            $Massage = "Dear " . $mentorFullName . ", you have a new mentorship session with '" . $startupFullName_user . "',is Rejected Thanks from " . env('APP_NAME');
+            $decision = strtolower((string) $this->stat) == 'yes' ? 'Approved' : 'Rejected';
+            $phoneNumber = $mentor_user->country_code_w_a . $mentor_user->whatsapp;
+            $Massage = "Dear " . $mentorFullName . ", your mentorship session with '" . $startupFullName_user . "' is " . $decision . ". Thanks from " . env('APP_NAME');
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
                     // $mentor_user->notify($MSG);
@@ -526,44 +429,33 @@ class SendMentorshipRequestJob implements ShouldQueue
             ];
             $MSG = new MentorshipSession($userMessage);
             $phoneNumber = $startup_user->country_code_w_a . $startup_user->whatsapp;
-            $Massage = "Dear " . $startupFullName_user . ",you have a new mentorship session with '" . $mentorFullName . "',is Rejected Thanks from " . env('APP_NAME');
+            $Massage = "Dear " . $startupFullName_user . ", your mentorship session with '" . $mentorFullName . "' is " . $decision . ". Thanks from " . env('APP_NAME');
             if (!in_array(env('APP_ENV', 'local'), ['local'])) {
                 try {
                     // $startup_user->notify($MSG);
                     $status = strtolower( (string) $this->stat ) == 'yes' ? true : false;
                     if( $status )
                     {
-                        // Atomically claim the "notify founder of approval" step
-                        // so a retry of this job never double-emails the founder.
-                        $claimedApprovalNotify = MentorshipRequest::where('id', $session->id)
-                            ->whereNull('approval_notified_at')
-                            ->update(['approval_notified_at' => now()]);
-
-                        if ($claimedApprovalNotify) {
-                            $startup_user->notify(
-                                new StartupNotifyMentorshipApprovalNotification(
+                        // Claim the "notify founder of approval" step so a retry of this
+                        // job never double-emails the founder; a failed send gives it back.
+                        NotificationClaim::on('mentorship_requests', ['id' => $session->id], 'approval_notified_at')
+                            ->run(fn (NotificationClaim $claim) => $startup_user->notify(
+                                (new StartupNotifyMentorshipApprovalNotification(
                                     $userMessage,
                                     $session
-                                )
-                            );
-                        }
+                                ))->withClaim($claim)
+                            ));
                     }
                     else
                     {
-                        // Atomically claim the "notify founder of decline" step
-                        // so a retry of this job never double-emails the founder.
-                        $claimedRejectionNotify = MentorshipRequest::where('id', $session->id)
-                            ->whereNull('rejection_notified_at')
-                            ->update(['rejection_notified_at' => now()]);
-
-                        if ($claimedRejectionNotify) {
-                            $startup_user->notify(
-                                new StartupNotifyMentorshipRejectionNotification(
+                        // Same for the "notify founder of decline" step.
+                        NotificationClaim::on('mentorship_requests', ['id' => $session->id], 'rejection_notified_at')
+                            ->run(fn (NotificationClaim $claim) => $startup_user->notify(
+                                (new StartupNotifyMentorshipRejectionNotification(
                                     $userMessage,
                                     $session
-                                )
-                            );
-                        }
+                                ))->withClaim($claim)
+                            ));
                     }
                 } catch (\Throwable $th) {
                     Log::error('modify user Notification Error: ' . $th->getMessage());
@@ -582,5 +474,44 @@ class SendMentorshipRequestJob implements ShouldQueue
                 $this->stat
             ));
         }
+    }
+
+    /**
+     * The session's date and "h:i A – h:i A" window as $recipient should read it:
+     * the platform wall-clock converted to their own timezone (GV-9566).
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function sessionWindowFor($startsAt, $period, $organizationId, $recipient, string $locale): array
+    {
+        $start = $this->sessionStartInstant($startsAt, $organizationId, $recipient);
+
+        if (is_null($start)) {
+            return ['', ''];
+        }
+
+        $time = $start->format('h:i A') . ' – ' . $start->copy()->addMinutes((int) $period)->format('h:i A');
+
+        if ($locale == 'ar') {
+            $time = str_replace(['AM', 'PM'], ['صباحاً', 'مساءاً'], $time);
+        }
+
+        return [$start->format('Y-m-d'), $time];
+    }
+
+    /** "Y-m-d H:i" of the session start in $recipient's own timezone (GV-9566). */
+    private function sessionStartFor($startsAt, $organizationId, $recipient): string
+    {
+        $start = $this->sessionStartInstant($startsAt, $organizationId, $recipient);
+
+        return $start ? $start->format('Y-m-d H:i') : (string) $startsAt;
+    }
+
+    private function sessionStartInstant($startsAt, $organizationId, $recipient): ?Carbon
+    {
+        return TimezoneService::forViewer(
+            TimezoneService::wallClock($startsAt, TimezoneService::platform($organizationId ? (int) $organizationId : null)),
+            $recipient
+        );
     }
 }

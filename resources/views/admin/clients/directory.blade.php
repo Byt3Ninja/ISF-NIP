@@ -209,8 +209,8 @@
     $('#date').flatpickr({
       enableTime: true,
       dateFormat: "Y-m-d H:i",
-      minDate: "{{ date('Y-m-d H:i', strtotime('+1 hour')) }}", // Minimum date is 1 hour from now
-      maxDate: "{{ date('Y-m-d H:i', strtotime('+1 year')) }}", // Maximum date is 1 year from now
+      minDate: "{{ \App\Services\TimezoneService::platformNow()->addHour()->format('Y-m-d H:i') }}", // Minimum date is 1 hour from now
+      maxDate: "{{ \App\Services\TimezoneService::platformNow()->addYear()->format('Y-m-d H:i') }}", // Maximum date is 1 year from now
       // time_24hr: true,
     });
 
@@ -253,17 +253,13 @@
           }
           else
           {
-						Swal.fire({
-							icon: 'warning',
-							title: res.title || 'Failed',
-							html: res.message || 'Something went wrong',
-							timer: 2500,
-							timerProgressBar: true,
-							showCancelButton: false,
-							confirmButtonText: 'OK',
-							customClass: {
-								confirmButton: 'btn mx-1 bg-primary text-white',
-							}
+						releaseAlert('warning', {
+						  title: res.title || 'Failed',
+						  message: res.message || 'Something went wrong',
+						  confirmText: 'OK',
+						  confirmColor: 'primary',
+						  hideCancel: true,
+						  autoClose: 2500
 						});
           }
         },
@@ -310,17 +306,11 @@
 
     function displayMessage(message) {
       //toastr.success(message, '{{ __('admin.Service request') }}');
-      Swal.fire({
+      releaseAlert('success', {
         title: '{{ __('admin.Service request') }}',
-        text: message,
-        icon: 'success',
-        showCancelButton: false,
-        showConfirmButton: true,
-        confirmButtonText: "{{ __('admin.OK') }}",
-        customClass: {
-            confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: message,
+        confirmText: "{{ __('admin.OK') }}",
+        confirmColor: 'primary'
       });
     }
 </script>

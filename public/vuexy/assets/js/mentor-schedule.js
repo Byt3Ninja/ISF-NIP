@@ -451,19 +451,13 @@ function mentorSchedule(type, id, stat) {
       } else if (type === 2) {
         location.reload();
       } else if (type === 3) {
-        Swal.fire({
+        releaseAlert('success', {
           title: __('Deleted'),
-          text: __('ScheduleDeleted'),
-          icon: 'success',
-          showCancelButton: false,
-          showConfirmButton: true,
-          confirmButtonText: __('OK'),
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
+          message: __('ScheduleDeleted'),
+          confirmText: __('OK'),
+          confirmColor: 'primary'
+        }).then((ok) => {
+          if (ok) {
             location.reload();
           }
         });

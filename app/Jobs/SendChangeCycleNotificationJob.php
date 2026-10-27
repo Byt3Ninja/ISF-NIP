@@ -42,13 +42,15 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $program = $this->program ?? null;
         // log::info("notifying data: " . $this->company );
         if($this->step != "0"){
-            $cstep = Step::findOrFail($this->step);
+            $cstep = Step::with('cycle.organization')->findOrFail($this->step);
         }
         $company = Company::with('user')->findOrFail($this->company);
         $data = [];
 
 		$start_date = '-';
+		$end_date = '-';
 		if( $cstep && $cstep->from ) { $start_date = Carbon::parse($cstep->from)->format('Y-m-d'); }
+		if( $cstep && $cstep->to ) { $end_date = Carbon::parse($cstep->to)->format('Y-m-d'); }
         $company_owner = $company->user;
         $data['new_step'] = $this->new_step ?? null;
         $data['last_step'] = $this->last_step ?? null;
@@ -61,8 +63,14 @@ class SendChangeCycleNotificationJob implements ShouldQueue
         $data['emailCompany'] = $company_owner->email;
         $data['status'] = $this->step != "0" ? 'in' : 'out';
         $data['start_date'] = $start_date;
+        $data['end_date'] = $end_date;
+        $data['phase_description'] = $cstep?->description ?? null;
+        $data['program_name'] = $cstep?->cycle?->title ?? null;
+        $data['program_id'] = $cstep?->cycle?->id ?? null;
+        // A disapproval has no step, so fall back to the program it came from.
+        $data['organization'] = $cstep?->cycle?->organization ?? $program?->organization;
         $data['preferred_language'] = $company_owner->language;
-        $data['program'] = $program;
+        $data['program'] = $program ?? $cstep?->cycle;
 
         // Log::info("notifying data: ", $data); 
         // // إرسال الحدث بالبث
@@ -74,12 +82,33 @@ class SendChangeCycleNotificationJob implements ShouldQueue
 		$recipients = $recipients->flatMap(function ($role) {
 			return $role->users;
 		})->where('email', $company_owner->email)->values();
-    
+
+        // Claim this exact phase move so a retry never double-emails the
+        // founder; moving to a DIFFERENT phase later is allowed to notify
+        // again. Disapproval ($data['status'] === 'out') has no phase to
+        // claim and keeps using its own (unrelated) email entirely.
+        $claimed = true;
+        if ($data['status'] === 'in') {
+            $claimed = Company::where('id', $this->company)
+                ->where(function ($q) {
+                    $q->whereNull('phase_notified_step_id')
+                      ->orWhere('phase_notified_step_id', '!=', $this->step);
+                })
+                ->update(['phase_notified_step_id' => $this->step]) > 0;
+        }
+
+        if (!$claimed) {
+            return;
+        }
+
         foreach ($recipients as $recipient) {
             try {
                 $data['preferred_language'] = $recipient->language;
                 $recipient->notify(new ChangeCycle( $data ) );
             } catch (\Throwable $th) {
+                if ($data['status'] === 'in') {
+                    Company::where('id', $this->company)->update(['phase_notified_step_id' => null]);
+                }
                 // يمكنك التسجيل هنا بدلاً من الرمي
                 Log::error("Error notifying user: " . $th->getMessage());
             }

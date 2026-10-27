@@ -7,6 +7,8 @@ use App\Step;
 use Carbon\Carbon;
 use App\Traits\Auditable;
 use App\Traits\HasFileCleanup;
+use App\Services\TimezoneService;
+use App\Services\PlatformBrandingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
@@ -131,9 +133,12 @@ class Cycle extends Model
     {
         return date('Y-m-d',strtotime($this->attributes['end']));
     }
+    // GV-9566: `end` is an inclusive DATE in the program's platform zone;
+    // isPast() on its midnight expired the program on the morning of its last day.
     public function getIsExpiredAttribute()
     {
-        return $this->end && $this->end->isPast();
+        return $this->end
+            && $this->end->format('Y-m-d') < TimezoneService::platformToday(TimezoneService::platform($this->organization_id));
     }
 
     public function getLogoAttribute()
@@ -168,16 +173,20 @@ class Cycle extends Model
     {
         return app(\App\Services\FileManagerService::class)->getUrl($this->delegation_file, 'public_uploads');
     }
+
     // =============> Relations <========================
     public function organization(){
         return $this->belongsTo(Organization::class,'organization_id');
     }
+
     public function companies(){
         return $this->hasMany(Company::class,'cycle');
     }
+
     public function mentors(){
         return $this->belongsToMany(User::class, 'cycles_mentors', 'cycle_id', 'user_id');
     }
+
     public function CalenderSync()
     {
         return $this->morphMany(CalenderSync::class, 'calenderable');
@@ -199,9 +208,9 @@ class Cycle extends Model
     }
 
     public function trainingSessions()
-   {
-      return $this->hasManyThrough(TrainingSession::class, Step::class);
-   }
+    {
+        return $this->hasManyThrough(TrainingSession::class, Step::class);
+    }
 
     public function surveyResponses()
     {
@@ -244,7 +253,9 @@ class Cycle extends Model
     {
         $totalSteps = Step::where('cycle_id', $this->id)->count();
 
-        $totalStepsFinish = \App\Step::where('to', '>', Carbon::now())->where('cycle_id', $this->id)->count();
+        // GV-9566: a step is still running through its `to` day in the platform zone.
+        $today = TimezoneService::platformToday(TimezoneService::platform($this->organization_id));
+        $totalStepsFinish = \App\Step::where('to', '>=', $today)->where('cycle_id', $this->id)->count();
 
         return $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
     }
@@ -275,16 +286,21 @@ class Cycle extends Model
 
     public function getStartColorAttribute($value)
     {
-        return $value ?: '#6366f114';
+        return $value ?: PlatformBrandingService::programDefaults()['start_color'];
     }
 
     public function getEndColorAttribute($value)
     {
-        return $value ?: '#0891b214';
+        return $value ?: PlatformBrandingService::programDefaults()['end_color'];
     }
 
     public function getMainColorAttribute($value)
     {
-        return $value ?: '#6366f1';
+        return $value ?: PlatformBrandingService::programDefaults()['main_color'];
+    }
+
+    public function mentorshipSchedules()
+    {
+        return $this->hasMany(MentorshipSchedule::class, 'cycle_id');
     }
 }

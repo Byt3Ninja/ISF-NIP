@@ -248,7 +248,7 @@ class DashboardService
 
         $completedSessions = DB::table('mentorship_requests')->whereNull('deleted_at')
         ->whereNotNull('start_url')
-        ->whereDate('zoom_date', '<=', now()->toDateString())
+        ->whereDate('zoom_date', '<=', TimezoneService::platformToday())
         ->select('done')
         ->get();
 
@@ -334,7 +334,8 @@ class DashboardService
             ->where('mentor_id', $mentorId)
             ->whereNotNull('zoom_date')
             ->where('approved', 'yes')
-            ->where('zoom_date', '>=', Carbon::now())
+            // GV-9566: zoom_date is platform wall-clock; bind the platform clock.
+            ->where('zoom_date', '>=', TimezoneService::platformNow()->format('Y-m-d H:i:s'))
             ->count();
 
         $schedules = DB::table('schedules')
@@ -357,11 +358,12 @@ class DashboardService
             ->where('mr.mentor_id', $mentorId)
             ->whereNotNull('mr.zoom_date')
             ->where('mr.approved', 'Yes')
-            ->where('mr.zoom_date', '>=', Carbon::now())
+            ->where('mr.zoom_date', '>=', TimezoneService::platformNow()->format('Y-m-d H:i:s'))
             ->orderBy('mr.zoom_date', 'asc')
             ->select(
                 'mr.id',
                 'mr.zoom_date as date',
+                'mr.organization_id',
                 'mr.comment as notes',
                 'mr.start_url as meeting_link',
                 'u.first_name_en',
@@ -369,14 +371,19 @@ class DashboardService
                 'c.name_en as company',
                 'c.logo as company_logo'
             )
-            ->get()
-            ->map(function ($session) {
+            ->get();
+
+        // Display only: the session instant in the mentor's own timezone.
+        $viewer = User::find($mentorId);
+        $nextSessions = $nextSessions
+            ->map(function ($session) use ($viewer) {
+                $at = TimezoneService::wallClock($session->date, TimezoneService::platform($session->organization_id ? (int) $session->organization_id : null));
                 return [
                     'id' => $session->id,
                     'companyLogo' => $session->company_logo,
                     'company' => $session->company,
                     'user' => trim($session->first_name_en . ' ' . $session->last_name_en),
-                    'date' => Carbon::parse($session->date)->format('Y-m-d H:i'),
+                    'date' => optional(TimezoneService::forViewer($at, $viewer))->format('Y-m-d H:i'),
                     'notes' => $session->notes,
                     'meetingLink' => $session->meeting_link,
                 ];
@@ -397,7 +404,7 @@ class DashboardService
             ->where('mentor_id', $mentorId)
             ->whereNull('deleted_at')
             ->whereNotNull('start_url')
-            ->whereDate('zoom_date', '<=', now()->toDateString())
+            ->whereDate('zoom_date', '<=', TimezoneService::platformToday())
             ->select('done')
             ->get();
 
@@ -426,7 +433,7 @@ class DashboardService
         ->selectRaw("MONTH(zoom_date) as month, COUNT(*) as sessions, SUM(period) as total_minutes")
         ->where('mentor_id', $mentorId)
         ->whereNotNull('zoom_date')
-        ->whereYear('zoom_date', now()->year)
+        ->whereYear('zoom_date', TimezoneService::platformNow()->year)
         ->groupBy(DB::raw('MONTH(zoom_date)'))
         ->orderBy(DB::raw('MONTH(zoom_date)'))
         ->get()
@@ -694,7 +701,7 @@ class DashboardService
         ->where('users.organization_id', $organizationId)
         ->whereNull('mentorship_requests.deleted_at')
         ->whereNotNull('start_url')
-        ->whereDate('zoom_date', '<=', now()->toDateString())
+        ->whereDate('zoom_date', '<=', TimezoneService::platformToday())
         ->select('done')->get();
 
     $totalSessionsAttended = $completedSessions->count();
@@ -800,7 +807,8 @@ public function judgerDashboard(): array
     $lang = app()->getLocale();
     $orgIds = $user->organizations_ids;
     $hasOrg = !empty($orgIds);
-    $inputs = [now()->format('Y-m-d'), $judgerId];
+    // GV-9566: steps.from/to are platform DATEs.
+    $inputs = [TimezoneService::platformToday(), $judgerId];
 
     $getNotEvaluatedCompanies = collect(DB::select("
         SELECT results.id AS result_id, results.evaluation_id, eval.step_id, results.company_id, results.status
@@ -1104,7 +1112,8 @@ public function startupDashboard($userId)
     if ($cycle->start && $cycle->end) {
         $start = Carbon::parse($cycle->start);
         $end = Carbon::parse($cycle->end);
-        $today = Carbon::today();
+        // GV-9566: cycle dates are platform DATEs.
+        $today = Carbon::parse(TimezoneService::platformToday(TimezoneService::platform($cycle->organization_id ? (int) $cycle->organization_id : null)));
 
         $totalDays = $start->diffInDays($end);
         $passedDays = $start->diffInDays(min($today, $end));
@@ -1212,11 +1221,13 @@ public function startupDashboard($userId)
     ->join('users as m', 'm.id', '=', 'mr.mentor_id')
     ->where('mr.user_id', $userId)
     ->whereNotNull('mr.zoom_date')
-    ->where('mr.zoom_date', '>=', Carbon::now())
+    // GV-9566: zoom_date is platform wall-clock; bind the platform clock.
+    ->where('mr.zoom_date', '>=', TimezoneService::platformNow()->format('Y-m-d H:i:s'))
     ->orderBy('mr.zoom_date', 'asc')
     ->select(
         'mr.id',
         'mr.zoom_date as zoom_date',
+        'mr.organization_id',
         'mr.period',
         'mr.mentor_id',
         'mr.comment as notes',
@@ -1225,8 +1236,12 @@ public function startupDashboard($userId)
         'm.img_url as mentor_img'
     )
     ->get()
-    ->map(function ($session) {
-        $zoomDate = Carbon::parse($session->zoom_date);
+    ->map(function ($session) use ($user) {
+        // Display only: the session instant in the founder's own timezone.
+        $zoomDate = TimezoneService::forViewer(
+            TimezoneService::wallClock($session->zoom_date, TimezoneService::platform($session->organization_id ? (int) $session->organization_id : null)),
+            $user
+        );
 
         return [
             'sessionId' => $session->id,
@@ -1299,7 +1314,8 @@ public function startupDashboard($userId)
 
      $latestEvents = DB::table('calendars')
         ->select('id', 'title', 'start','allDay')
-        ->whereDate('start', '>=', now()->format('Y-m-d'))
+        // GV-9566: calendars.start is platform wall-clock.
+        ->whereDate('start', '>=', TimezoneService::platformToday())
         ->where(function ($query) use ($user) {
             $query->where('user_id', $user->id);
         })
@@ -1330,7 +1346,7 @@ public function startupDashboard($userId)
         $completedSessions = DB::table('mentorship_requests')
             ->where('user_id', $user->id)
             ->whereNotNull('start_url')
-            ->whereDate('zoom_date', '<=', now()->toDateString())
+            ->whereDate('zoom_date', '<=', TimezoneService::platformToday())
             ->select('done')
             ->get();
 
@@ -1338,7 +1354,7 @@ public function startupDashboard($userId)
         $totalMentorshipMinutes = DB::table('mentorship_requests')
         ->where('user_id', $user->id)
         ->whereNotNull('start_url') 
-        ->whereDate('zoom_date', '<=', now()->toDateString())
+        ->whereDate('zoom_date', '<=', TimezoneService::platformToday())
         ->sum('period');
 
      $mentorshipHours = round($totalMentorshipMinutes / 60, 2);

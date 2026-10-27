@@ -1,8 +1,9 @@
 /*
- * Auth pages — login, founder/mentor register, service-provider register.
+ * Auth pages — login, founder/mentor register, service-provider register,
+ * forgot password.
  * GV-8956 / GV-8957 / GV-8958
  *
- * Shared by all three views so the brand lockup, the cover panel and the form
+ * Shared by all these views so the brand lockup, the cover panel and the form
  * rhythm cannot drift apart. Everything here is expressed in Vuexy's own custom
  * properties (--bs-primary-rgb, --bs-body-bg, ...) so the pages follow whichever
  * theme and light/dark style the customizer has applied, instead of pinning a
@@ -171,7 +172,7 @@ html.dark-style .authentication-cover .authentication-inner .auth-cover-bg {
   max-width: 100%;
   padding: 0.75rem 2.5rem;
   border: 1.5px solid rgba(255, 255, 255, 0.75);
-  border-radius: 999px;
+  border-radius: 8px;
   background: transparent;
   color: #fff;
   font-size: 0.75rem;

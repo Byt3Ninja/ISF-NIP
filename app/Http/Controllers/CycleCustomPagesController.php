@@ -17,6 +17,7 @@ class CycleCustomPagesController extends Controller
 	public function add(Request $request, $id)
 	{
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
 		{
 			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
@@ -49,6 +50,7 @@ class CycleCustomPagesController extends Controller
 	public function view(Request $request, $id)
 	{
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
 		{
 			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
@@ -67,6 +69,7 @@ class CycleCustomPagesController extends Controller
 	public function update(Request $request, $id)
 	{
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
 		{
 			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
@@ -95,6 +98,7 @@ class CycleCustomPagesController extends Controller
 	public function reorder(Request $request, $id)
 	{
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
 		{
 			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
@@ -129,6 +133,7 @@ class CycleCustomPagesController extends Controller
 	public function toggle_status(Request $request, $id)
 	{
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
 		{
 			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
@@ -152,6 +157,7 @@ class CycleCustomPagesController extends Controller
 	public function toggle_visibility(Request $request, $id)
 	{
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
 		{
 			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
@@ -176,6 +182,7 @@ class CycleCustomPagesController extends Controller
 	public function delete(Request $request, $id)
 	{
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if( !$user->ableToAny(['programs.create', 'programs.edit']) )
 		{
 			return response()->json(['status' => false, 'message' => __('cycles.custom_pages_permissions')], 401);
@@ -209,6 +216,7 @@ class CycleCustomPagesController extends Controller
 	{
 		// Verify cycle ID matches route parameter
 		$user = auth()->user();
+		$this->authorizeProgram($id);
 		if ($id != $request->cycle_id ) {
 			return response()->json([
 				'status' => false,
@@ -276,6 +284,12 @@ class CycleCustomPagesController extends Controller
 	 * @param string $filename
 	 * @return \Illuminate\Http\Response
 	 */
+	/** N7: custom pages belong to the program; only staff of its organization may change them. */
+	private function authorizeProgram($cycleId): void
+	{
+		abort_unless(auth()->user()->managesOrganization(Cycle::whereKey($cycleId)->value('organization_id')), 403);
+	}
+
 	public function serveImage(Request $request, $cycle_id, $filename)
 	{
 		$user = auth()->user();

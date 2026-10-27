@@ -8,14 +8,12 @@ use App\User;
 use App\Settings;
 use App\Role;
 use App\UsersBio;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AuthServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected AuthService $authService;
 

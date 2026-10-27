@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Settings;
 use Carbon\Carbon;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -14,10 +16,11 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
 use Throwable;
+use App\Services\TimezoneService;
 
 class StartupNotifyMentorshipApprovalNotification extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -63,7 +66,7 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -112,21 +115,25 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 
         $mentorship_session = $this->mentorship_session;
         $cycle = $mentorship_session->cycle;
-        $session_date = strtotime($mentorship_session->zoom_date);
-        $start = Carbon::parse($mentorship_session->zoom_date);
-        $end = $start->copy()->addMinutes($mentorship_session->period);
-        $sessionDate = date('Y-m-d', $session_date);
-        $sessionTime = date('h:i A', $session_date) . ' - ' . date('h:i A', $end->timestamp);
+        // GV-9566: the session instant, shown in the recipient's own timezone.
+        $start = TimezoneService::forViewer(
+            TimezoneService::wallClock($mentorship_session->zoom_date, TimezoneService::platform($mentorship_session->organization_id)),
+            $notifiable
+        );
+        $sessionDate = $start ? $start->format('Y-m-d') : '';
+        $sessionTime = $start
+            ? $start->format('h:i A') . ' - ' . $start->copy()->addMinutes((int) $mentorship_session->period)->format('h:i A')
+            : '';
         if( app()->getLocale() == 'ar' )
         {
             $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
@@ -203,6 +210,7 @@ class StartupNotifyMentorshipApprovalNotification extends Notification implement
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('MentorshipSession notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

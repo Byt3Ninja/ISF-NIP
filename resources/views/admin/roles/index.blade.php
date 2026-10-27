@@ -235,11 +235,10 @@
                 '_token': token
               },
               function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.FileDeleted') }}.',
-                  'success'
-                );
+                releaseAlert('success', {
+                  title: '{{ __('admin.Deleted') }}!',
+                  message: '{{ __('admin.FileDeleted') }}.'
+                });
 
                 location.reload();
               }

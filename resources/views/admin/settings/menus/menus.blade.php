@@ -76,9 +76,7 @@
                                     <td>{{ $getMenusA->target }}</td>
                                     <td><a href="/dashboard/edit_menu/{{ $getMenusA->id }}"><i class="ti ti-edit">
                                         </i></a> |
-                                      <a onclick="return confirm('{{ __('settings.SureDelete') }}');"
-                                        href="{{ URL::to('/dashboard/delete_menu/' . $getMenusA->id ?? null) }}"><i
-                                          class="ti ti-trash text-danger"> </i></a>
+                                      @include('partials.forms.confirm-action', ['formId' => 'delete-menu-' . $getMenusA->id, 'action' => route('menus.delete', $getMenusA->id), 'message' => __('settings.SureDelete'), 'label' => '<i class="ti ti-trash text-danger"> </i>'])
                                     </td>
                               </tr>
                             @else
@@ -87,9 +85,7 @@
                               <td>{{ $getMenusA->url }}</td>
                               <td>{{ $getMenusA->target }}</td>
                               <td><a href="/edit_menu/{{ $getMenusA->id }}"><i class="ti ti-edit text-info"> </i></a> |
-                                <a onclick="return confirm('{{ __('settings.SureDelete') }}');"
-                                  href="{{ URL::to('/dashboard/delete_menu/' . $getMenusA->id ?? null) }}"><i
-                                    class="ti ti-trash text-danger"> </i></a>
+                                @include('partials.forms.confirm-action', ['formId' => 'delete-menu-' . $getMenusA->id, 'action' => route('menus.delete', $getMenusA->id), 'message' => __('settings.SureDelete'), 'label' => '<i class="ti ti-trash text-danger"> </i>'])
                               </td>
                               </tr>
                               @foreach ($getMenusA->children->sortby('order') as $subMenuItem)
@@ -104,9 +100,7 @@
                                     <a href="/edit_menu/{{ $subMenuItem->id }}">
                                       <i class="ti ti-edit text-info"></i>
                                     </a> |
-                                    <a onclick="return confirm('{{ __('settings.SureDelete') }}');"
-                                      href="{{ URL::to('/dashboard/delete_menu/' . $subMenuItem->id ?? null) }}"><i
-                                        class="ti ti-trash text-danger"> </i></a>
+                                    @include('partials.forms.confirm-action', ['formId' => 'delete-menu-' . $subMenuItem->id, 'action' => route('menus.delete', $subMenuItem->id), 'message' => __('settings.SureDelete'), 'label' => '<i class="ti ti-trash text-danger"> </i>'])
                                   </td>
                                 </tr>
                               @endforeach
@@ -152,10 +146,7 @@
                   <td>{{ $getMenusA->url }}</td>
                   <td>{{ $getMenusA->target }}</td>
                   <td><a href="/dashboard/edit_menu/{{ $getMenusA->id }}"><i class="ti ti-edit"> </i></a> |
-                    <a onclick="return confirm('{{ __('settings.SureDelete') }}');"
-                      href="{{ URL::to('/dashboard/delete_menu/' . $getMenusA->id ?? null) }}"><i
-                        class="ti ti-trash text-danger">
-                      </i></a>
+                    @include('partials.forms.confirm-action', ['formId' => 'delete-menu-' . $getMenusA->id, 'action' => route('menus.delete', $getMenusA->id), 'message' => __('settings.SureDelete'), 'label' => '<i class="ti ti-trash text-danger"> </i>'])
                   </td>
                 </tr>
               @endforeach
@@ -169,10 +160,7 @@
                   <td>{{ $getMenusA->url }}</td>
                   <td>{{ $getMenusA->target }}</td>
                   <td><a href="edit_menu/{{ $getMenusA->id }}"><i class="ti ti-edit"> </i></a> |
-                    <a onclick="return confirm('{{ __('settings.SureDelete') }}');"
-                      href="{{ URL::to('/dashboard/delete_menu/' . $getMenusA->id ?? null) }}"><i
-                        class="ti ti-trash text-danger">
-                      </i></a>
+                    @include('partials.forms.confirm-action', ['formId' => 'delete-menu-' . $getMenusA->id, 'action' => route('menus.delete', $getMenusA->id), 'message' => __('settings.SureDelete'), 'label' => '<i class="ti ti-trash text-danger"> </i>'])
                   </td>
                 </tr>
               @endforeach

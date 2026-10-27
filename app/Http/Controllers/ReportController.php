@@ -11,6 +11,7 @@ use App\Company;
 use App\FinalData;
 use App\Screening;
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use App\SurveyScopes;
 use App\Finalscreening;
 use App\SurveyResponses;
@@ -248,7 +249,8 @@ class ReportController extends Controller
         $approvedSessions = $sessions->where('approved', 'Yes');
         $data['approved_sessions_count'] = $approvedSessions->count();
         $data['pending_sessions_count'] = $approvedSessions->filter(fn($s) => is_null($s->done) || $s->done != 1)->count();
-        $data['done_sessions_count'] = $approvedSessions->filter(fn($s) => $s->zoom_date && Carbon::parse($s->zoom_date)->lt(now()))->count();
+        // GV-9566: zoom_date is cast to a real instant (PlatformDateTime).
+        $data['done_sessions_count'] = $approvedSessions->filter(fn($s) => $s->zoom_date && $s->zoom_date->isPast())->count();
         $data['disapproved_sessions_count'] = $sessions->where('approved', 'No')->count();
         $data['new_sessions_count'] = $sessions->whereNull('approved')->count();
         $data['cycle_mentors_count'] = count($data['cycle_mentors']);
@@ -1091,12 +1093,15 @@ class ReportController extends Controller
             $q->whereIn('organization_id', $orgIds);
         })->get();
 
-        $ongoingCycles = $cycles->where('start', '<=', now())
-            ->where('end', '>=', now())
+        // GV-9566: start/end are inclusive days in each program's platform zone;
+        // comparing their midnights with now() ended a program on its last morning.
+        $cycleToday = fn ($c) => TimezoneService::platformToday(TimezoneService::platform($c->organization_id));
+        $ongoingCycles = $cycles->filter(fn ($c) => $c->start?->format('Y-m-d') <= $cycleToday($c)
+            && $c->end?->format('Y-m-d') >= $cycleToday($c))
             ->values();
 
-        $completedCycles = $cycles->where('end', '<', now())->values();
-        $notStartedCycles = $cycles->where('start', '>', now())->values();
+        $completedCycles = $cycles->filter(fn ($c) => $c->end?->format('Y-m-d') < $cycleToday($c))->values();
+        $notStartedCycles = $cycles->filter(fn ($c) => $c->start?->format('Y-m-d') > $cycleToday($c))->values();
 
         // OVERALL KPIs — will be derived from batch data below (after batch queries)
         // Placeholder variables for readability
@@ -1194,7 +1199,8 @@ class ReportController extends Controller
                     'id' => $session->id,
                     'mentor' => $session->mentor->name ?? '-',
                     'startup' => optional(optional($session->user)->company)->{'name_' . $l} ?? '-',
-                    'zoom_date' => $session->zoom_date ? Carbon::parse($session->zoom_date)->format('Y-m-d H:i') : '-',
+                    // GV-9566: the session instant in the viewer's own timezone.
+                    'zoom_date' => $session->zoom_date ? TimezoneService::forViewer(TimezoneService::wallClock($session->zoom_date, TimezoneService::platform($session->organization_id ?? null)), Auth::user())->format('Y-m-d H:i') : '-',
                     'duration_minutes' => $durationMinutes,
                     'duration_formatted' => $this->formatMinutesToHoursMinutes($durationMinutes),
                 ];

@@ -44,7 +44,10 @@ class ImportOrchestrator
      */
     public function run(ImporterSession $session, int $orgId, bool $acceptedWarnings = false, ?array $reachableOrgIds = null): ImporterResult
     {
-        $this->svc->transitionTo($session, ImporterSession::STATUS_IMPORTING);
+        // The controller claims the session atomically (ImporterSessionService::claimForImport).
+        if ($session->status !== ImporterSession::STATUS_IMPORTING) {
+            $this->svc->transitionTo($session, ImporterSession::STATUS_IMPORTING);
+        }
 
         $fallbackOrg = Organization::findOrFail($orgId);
 
@@ -140,7 +143,9 @@ class ImportOrchestrator
             $imported++;
         }
 
-        // 6. Dispatch mail outside any DB transaction.
+        // 6. Dispatch mail outside any DB transaction. A row whose email failed was still
+        // imported, so it is counted apart from failed rows (it used to be counted twice).
+        $emailFailed = 0; $emailFailedRows = [];
         foreach ($dispatchPayloads as $p) {
             $mail = $this->emailDispatcher->dispatch(
                 $p['was_created'],
@@ -150,12 +155,12 @@ class ImportOrchestrator
                 $p['password']
             );
             if ($mail['status'] !== 'sent') {
-                $failedRows[] = $this->reason(
+                $emailFailedRows[] = $this->reason(
                     $p['row'],
                     'Email failed: ' . $mail['reason'],
                     'فشل إرسال البريد: ' . $mail['reason']
                 );
-                $failed++;
+                $emailFailed++;
             }
         }
 
@@ -167,7 +172,9 @@ class ImportOrchestrator
             $skipped,
             $failed,
             $failedRows,
-            $skippedRows
+            $skippedRows,
+            $emailFailed,
+            $emailFailedRows
         );
     }
 

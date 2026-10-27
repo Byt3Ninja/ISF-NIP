@@ -11,6 +11,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Throwable;
+use App\Services\TimezoneService;
 
 class TemplateNotification extends Notification implements ShouldQueue
 {
@@ -232,15 +233,18 @@ class TemplateNotification extends Notification implements ShouldQueue
             ];
         }
 
+        // GV-9566: "now" as the recipient reads it (their zone, else the platform's).
+        $recipientNow = now()->setTimezone(TimezoneService::viewer($notifiable) ?? TimezoneService::platform());
+
         // Add system data
         $systemData = [
             'system' => [
                 'app_name' => config('app.name', 'VI Portal'),
                 'app_url' => config('app.url'),
                 'support_email' => config('mail.support_address', 'support@viportal.com'),
-                'date' => now()->format('Y-m-d'),
-                'time' => now()->format('H:i:s'),
-                'datetime' => now()->format('Y-m-d H:i:s')
+                'date' => $recipientNow->format('Y-m-d'),
+                'time' => $recipientNow->format('H:i:s'),
+                'datetime' => $recipientNow->format('Y-m-d H:i:s')
             ]
         ];
 

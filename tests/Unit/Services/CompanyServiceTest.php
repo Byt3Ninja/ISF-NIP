@@ -9,13 +9,11 @@ use App\Company;
 use App\User;
 use App\Team_member;
 use App\Milestone;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 
 class CompanyServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected CompanyService $companyService;
     protected $companyRepositoryMock;

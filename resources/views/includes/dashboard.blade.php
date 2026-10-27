@@ -20,6 +20,12 @@
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
+<style>
+	/* GV-9570: Responsive's child-row list is inline-block, so it shrank to its
+	   content and its dividers stopped short of the card on phones. */
+	table.dataTable > tbody > tr.child ul.dtr-details { display: block; width: 100%; }
+	table.dataTable > tbody > tr.child ul.dtr-details > li.dtr-hide-title > .dtr-title { display: none; }
+</style>
 @stop
 @section('content')
 @if (!$_user->first_name_ar)
@@ -619,9 +625,10 @@
 											<tr>
 												<td>
 													<div class="d-flex align-items-center">
-														<a class="media-left" href="/dashboard/users/{{ $final->company->user->id }}/edit">
-															<img src="{{ $final->company->user->image_url }}" alt="avatar"
-																class="rounded-circle me-3" height="40" width="40">
+														<a class="media-left flex-shrink-0" href="/dashboard/users/{{ $final->company->user->id }}/edit">
+															<img src="{{ $final->company->user->image_url }}" alt=""
+																onerror="this.onerror=null;this.src='/images/user-placeholder.jpeg'"
+																class="rounded-circle object-fit-cover me-3" height="40" width="40">
 														</a>
 														<a href="/dashboard/users/{{ $final->company->user->id }}/edit">
 															<div class="media-body">
@@ -636,10 +643,9 @@
 													@include('includes.partials.judges-cell', ['judges' => $final->judges])
 												</td>
 												@php
-													// GV-8363: compare in the viewer's own timezone. Slots are stored as
-													// bare wall-clock times, so comparing them against the raw server
-													// clock opened/closed the window at the wrong moment for anyone whose
-													// profile timezone differed from the server's.
+													// GV-9566: slots are real instants in the panel's platform zone, so the
+													// window opens at the same moment for everyone, whatever their profile
+													// timezone or the server's.
 													// GV-7381: session_start/session_end are resolved in the controller so
 													// the schedule, the Completed flag and the Join window all agree --
 													// previously the end time was derived from the floored `duration`.
@@ -647,7 +653,7 @@
 													$endTime = $final->session_end;
 													// Join Now + passcode unlock 10 minutes before the slot starts
 													// and stay available until an hour after it ends.
-													$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, $_user, 'founder' );
+													$canJoin = \App\Services\MeetingWindowService::isOpen( $startTime, $endTime, 'founder' );
 												@endphp
 												{{-- GV-3321: per-startup slot derived from the panel interval.
 													 GV-7381: both branches render d-m-Y + a formatted time. The fallback
@@ -666,11 +672,10 @@
 														-
 													@endif
 												</td>
-												{{-- GV-7381: a session is Completed once its end time passes, read in the
-													 viewer's timezone. This used to compare the raw `datetime` (the session
+												{{-- GV-7381: a session is Completed once its end time passes. This used to compare the raw `datetime` (the session
 													 START, and NULL for unscheduled rows -- where `null < now()` is true in
 													 PHP, so every such row reported "Yes"). --}}
-												<td> {{ \App\Services\MeetingWindowService::hasEnded( $endTime, $_user ) ? __('Yes') : __('No') }} </td>
+												<td> {{ \App\Services\MeetingWindowService::hasEnded( $endTime ) ? __('Yes') : __('No') }} </td>
 												<td>
 													{{-- GV-9620: the meeting row is shown even when the online-meeting
 														 link failed to generate (ScreeningController catches and logs the
@@ -687,7 +692,7 @@
 																<i class="ti ti-key"></i>
 															</button>
 														@endif
-													@elseif( \App\Services\MeetingWindowService::hasExpired( $endTime, $_user ) )
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $endTime ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -700,7 +705,7 @@
 								</div>
 								@else
 								<div class="text-center">
-									<h3>{{__('dashboard.Your final session will start soon')}}.</h3>
+									<h6 class="text-secondary">{{__('dashboard.Your final session will start soon')}}.</h6>
 								</div>
 								@endif
 							</div>
@@ -746,9 +751,10 @@
 											<tr>
 												<td>
 													<div class="d-flex align-items-center">
-														<a class="media-left" href="/dashboard/users/{{ $_user->id }}/edit">
-															<img src="{{ $_user->image_url }}" alt="avatar"
-																class="rounded-circle me-3" height="40" width="40">
+														<a class="media-left flex-shrink-0" href="/dashboard/users/{{ $_user->id }}/edit">
+															<img src="{{ $_user->image_url }}" alt=""
+																onerror="this.onerror=null;this.src='/images/user-placeholder.jpeg'"
+																class="rounded-circle object-fit-cover me-3" height="40" width="40">
 														</a>
 														<a href="/dashboard/users/{{ $_user->id }}/edit">
 															<div class="media-body">
@@ -773,19 +779,23 @@
 														-
 													@endif
 												</td>
-												<td> {{ !is_null( $screening->dateTime ) && $screening->dateTime < now() ? __('Yes') : __('No') }} </td>
+												@php
+													// GV-9566: slots are real instants in the panel's platform zone.
+													// Rows without a derived slot fall back to the raw panel times, read
+													// in that same zone -- never against the server clock.
+													$slotZone = \App\Services\TimezoneService::forStep( $screening->step_id );
+													$slotStart = $screening->meeting_start
+														?? \App\Services\TimezoneService::wallClock( $screening->dateTime, $slotZone );
+													$slotEnd = $screening->meeting_end
+														?? \App\Services\TimezoneService::wallClock( $screening->endTime, $slotZone );
+													// GV-8363: Join Now + passcode unlock 10 minutes before the slot
+													// starts and stay available until an hour after it ends.
+													$canJoin = !is_null( $screening->meeting_link )
+														&& \App\Services\MeetingWindowService::isOpen( $slotStart, $slotEnd, 'founder' );
+												@endphp
+												{{-- GV-9566: Done once the session ends, the same rule as the Final Session table (GV-7381) --}}
+												<td> {{ \App\Services\MeetingWindowService::hasEnded( $slotEnd ) ? __('Yes') : __('No') }} </td>
 												<td>
-													@php
-														$slotStart = $screening->meeting_start
-															?? ( !is_null( $screening->dateTime ) ? \Carbon\Carbon::parse( $screening->dateTime ) : null );
-														$slotEnd = $screening->meeting_end
-															?? ( !is_null( $screening->endTime ) ? \Carbon\Carbon::parse( $screening->endTime ) : null );
-														// GV-8363: Join Now + passcode unlock 10 minutes before the slot
-														// starts and stay available until an hour after it ends, compared
-														// in the viewer's own timezone rather than the server clock.
-														$canJoin = !is_null( $screening->meeting_link )
-															&& \App\Services\MeetingWindowService::isOpen( $slotStart, $slotEnd, $_user, 'founder' );
-													@endphp
 													@if( $canJoin )
 														<a href="{{ $screening->meeting_link }}" target="_blank">({{__('dashboard.Join now')}})</a>
 														@if( !empty( $screening->meeting_password ) )
@@ -795,7 +805,7 @@
 																<i class="ti ti-key"></i>
 															</button>
 														@endif
-													@elseif( \App\Services\MeetingWindowService::hasExpired( $slotEnd, $_user ) )
+													@elseif( \App\Services\MeetingWindowService::hasExpired( $slotEnd ) )
 														<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
 													@else
 														<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
@@ -893,9 +903,9 @@
 						<div class="col-md-12">
 							<div class="card mb-6">
 								<div class="card-header border-bottom">
-									<div class="d-flex justify-content-between align-items-center">
+									<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 										<h5 class="card-title mb-0">{{ __("dashboard.UpcomingMentorsSession") }} <small class="text-muted"> ( {{ __('dashboard.next_two_weeks') }} ) </small> </h5>
-										<a class="btn btn-sm btn-primary" href="/dashboard/mentorship/mine">
+										<a class="btn btn-sm btn-primary text-nowrap" href="/dashboard/mentorship/mine">
 											<i class="ti ti-eye me-2 ti-16px"></i>
 											{{__('cycles.showAll')}}
 										</a>
@@ -948,8 +958,8 @@
 												</td>
 												@if ($_user->hasRole('Admin'))
 												<td> <small> {!! $session->rate_comment ? str_repeat('<i class="bx bxs-star"
-															style="color: #fc960f;"></i>', $session->rating) . '<br>' . $session->rate_comment :
-														$session->comment !!} </small> </td>
+															style="color: #fc960f;"></i>', $session->rating) . '<br>' . e($session->rate_comment) :
+														e($session->comment) !!} </small> </td>
 												@endif
 												<td> {{ $session->zoom_date }} <br> ({{ $session->period }}M) </td>
 												<td>
@@ -1202,27 +1212,65 @@
 								<tr>
 									<td> {{ $loop->iteration }} </td>
 									<td>
-										@if( $_user->ableTo('company.profile_view', $permissions) )<a class="text-dark"
-											href="/dashboard/companyProfile/{{ $session->user->company->id }}">@endif
-											<img src="{{ $session->user->company->logo_url }}" alt="avatar" class="rounded-circle"
-												height="40" width="40">
-											<span class="fw-medium"> {{ $session->user->company->name }}</span>
-											@if( $_user->ableTo('company.profile_view', $permissions) )</a>@endif
-									</td>
+                    @if ($_user->ableTo('company.profile_view', $permissions))
+                      <a
+                        href="/dashboard/companyProfile/{{ $session->user->company->id }}"
+                        class="d-flex align-items-center gap-2 text-dark"
+                      >
+                    @else
+                      <div class="d-flex align-items-center gap-2">
+                    @endif
+
+                      <img
+                        src="{{ $session->user->company->logo_url }}"
+                        alt="{{ $session->user->company->name }}"
+                        class="rounded-circle flex-shrink-0 border w-px-40 h-px-40"
+                      >
+
+                      <span class="fw-medium text-truncate">
+                        {{ $session->user->company->name }}
+                      </span>
+
+                    @if ($_user->ableTo('company.profile_view', $permissions))
+                      </a>
+                    @else
+                      </div>
+                    @endif
+                  </td>
 									<td>
-										@if( $_user->ableTo('users.edit', $permissions) )<a
-											class="text-dark d-flex align-items-center gap-2"
-											href="/dashboard/users/{{ $session->user->id }}/edit">@endif
-											<img src="{{ $session->user->image_url }}" alt="avatar" class="rounded-circle"
-												height="35" width="35" style="border: 2px solid #ddd;">
-											<div class="media-body">
-												<h6 class="media-heading mb-0" style="font-size: 14px;">{{ $session->user->name }}
-												</h6>
-												<span class="font-small-2" style="font-size:11px;">{{ $session->user->title }}</span>
-											</div>
-											@if( $_user->ableTo('users.edit', $permissions) )
-										</a>@endif
-									</td>
+                    @if ($_user->ableTo('users.edit', $permissions))
+                      <a
+                        href="/dashboard/users/{{ $session->user->id }}/edit"
+                        class="d-flex align-items-center gap-2 text-body"
+                      >
+                    @else
+                      <div class="d-flex align-items-center gap-2">
+                    @endif
+
+                      <img
+                        src="{{ $session->user->image_url }}"
+                        alt="{{ $session->user->name }}"
+                        class="rounded-circle flex-shrink-0 border w-px-40 h-px-40"
+                      >
+
+                      <div class="min-w-0">
+                        <h6 class="mb-0 text-truncate">
+                          {{ $session->user->name }}
+                        </h6>
+
+                        @if (!empty($session->user->title))
+                          <span class="text-muted text-truncate d-block">
+                            {{ $session->user->title }}
+                          </span>
+                        @endif
+                      </div>
+
+                    @if ($_user->ableTo('users.edit', $permissions))
+                      </a>
+                    @else
+                      </div>
+                    @endif
+                  </td>
 									<td> {{ FormatDate($session->zoom_date, 'Y-m-d H:i A') }} ({{ $session->period }}M) </td>
 									<td>
 										{{ $session->session_type ?? '' }}
@@ -1250,12 +1298,12 @@
 											@else
 											
 												<span class="warning">
-													<a class="btn btn-sm btn-label-success" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
+													<a class="btn btn-sm btn-label-primary" href="{{ $session->organization->google_map_url ?? '#' }}" target="_blank">
 														<i class="ti ti-map me-2"></i>
-														{{ __('admin.Location') }}
+														{{ __('cycles.View_Location') }}
 													</a>
 													<div class="mt-3">
-														<small> <i class="fas fa-map-marker-alt"></i> {{ $session->organization->address }} </small>
+														<small> <i class="ti ti-map-pin me-1"></i> {{ $session->organization->address }} </small>
 													</div>
 												</span>
 											@endif
@@ -1388,18 +1436,21 @@
 															</td>
 															<td>
 																{{-- GV-8361/8364: Join Now opens 24h before the judge's slot and
-																	 closes an hour after it ends, compared in the viewer's own
-																	 timezone. The old gate used an unbounded subDay() on the
+																	 closes an hour after it ends -- the same real moment for every
+																	 viewer (GV-9566). The old gate used an unbounded subDay() on the
 																	 server clock, so it stayed visible past the end time. --}}
 																@if( !empty( $company->join_url )
-																	&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																	&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
 																	<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																		<i class="ti ti-video"></i> {{ __('dashboard.Join') }}
 																	</a>
-																@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end ) )
 																	<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+																@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
+																	{{-- GV-9564: inside the join window but no link was generated --}}
+																	<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
 																@else
-																	-
+																	<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
 																@endif
 															</td>
 														</tr>
@@ -1528,11 +1579,11 @@
 																		</td>
 																		<td>
 																			{{-- GV-8364: Join Now opens 24h before the judge's slot and closes
-																				 an hour after it ends, in the viewer's own timezone. The old gate
+																				 an hour after it ends, the same real moment for every viewer (GV-9566). The old gate
 																				 fell open whenever meeting_start was missing and used an
 																				 unbounded subDay() on the server clock. --}}
 																			@if( $company->join_url
-																				&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, $_user, 'judge' ) )
+																				&& \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
 																				<a href="{{ $company->join_url }}" target="_blank" class="btn btn-primary btn-sm">
 																					<i class="ti ti-user"></i> {{ __('dashboard.Join') }}
 																				</a>
@@ -1546,10 +1597,13 @@
 																					<i class="ti ti-file"></i> {{ __('dashboard.Open form') }}
 																				</a>
 																				@endif  --}}
-																			@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end, $_user ) )
+																			@elseif( \App\Services\MeetingWindowService::hasExpired( $company->meeting_end ) )
 																				<span class="text-muted">{{ $l == 'ar' ? 'انتهت الجلسة' : 'Session Completed' }}</span>
+																			@elseif( \App\Services\MeetingWindowService::isOpen( $company->meeting_start, $company->meeting_end, 'judge' ) )
+																				{{-- GV-9565: inside the join window but no link was generated --}}
+																				<span class="text-muted">{{ __('dashboard.Meeting link unavailable') }}</span>
 																			@else
-																				{{ __('dashboard.Not started') }}
+																				<span class="text-muted">{{ $l == 'ar' ? 'لم تبدأ الجلسة بعد' : 'Session Not Started Yet' }}</span>
 																			@endif
 																		</td>
 																	</tr>
@@ -1577,15 +1631,15 @@
 		</div>
 		
 		<div class="row">
-			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions) && $notrated_mens)
+			@if( $_user->ableTo('mentorship.sessions_Rate', $permissions) && $notrated_mens->isNotEmpty() )
 			<div class="col-12">
 				<div class="card mb-6">
 					<div class="card-header border-bottom d-flex justify-content-between align-items-center">
 						<h5 class="card-title mb-0">
-							{{__('dashboard.Rate mentorship session with')}}
-							<span class="fw-bold">
-								{{$notrated_men->{'first_name_'.$l} ?? '' }} {{$notrated_men->{'last_name_'.$l} ?? ''}}
-							</span>
+							{{-- GV-9570: the header used to append $notrated_men's name, but that is only
+								 defined inside the row loop below, so the title always ended in a dangling
+								 "with". Each row already names its mentor. --}}
+							{{ __('dashboard.Rate your mentorship sessions') }}
 						</h5>
 					</div>
 					<div class="card-datatable table-responsive">
@@ -1603,56 +1657,63 @@
 							<tbody>
 								@foreach ($notrated_mens as $notrated_men)
 								<tr class="border-bottom">
-									<form method="post" action="/dashboard/mentorship/rate" enctype="multipart/form-data" autocomplete="off"
-										class="row g-3">
-										@csrf
-										<input type="hidden" name="id" value="{{$notrated_men->mr_id}}">
-										<input type="hidden" name="rate" value="0" id="rate">
-										<td class="align-middle">
-											<div class="d-flex align-items-center">
-												<div
-													class="avatar avatar-sm me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center">
-													<span class="text-white fw-bold">{{substr($notrated_men->{'MentorName_'.$l}, 0, 1)}}</span>
-												</div>
-												<div>
-													<p class="mb-0 fw-semibold">{{$notrated_men->{'MentorName_'.$l} }}</p>
-													<small class="text-muted">ID: {{ $notrated_men->mr_id }}</small>
-												</div>
+									{{-- GV-9570: a <form> can't sit directly in a <tr> -- the parser empties it
+										 and its fields only attach by accident, so once Responsive moves them
+										 into the mobile child row, Submit posts nothing. The form now lives in
+										 the first cell and every field joins it through form="". --}}
+									<td class="align-middle">
+										<form id="rateForm-{{ $notrated_men->mr_id }}" method="post" action="/dashboard/mentorship/rate"
+											enctype="multipart/form-data" autocomplete="off">
+											@csrf
+											<input type="hidden" name="id" value="{{$notrated_men->mr_id}}">
+											<input type="hidden" name="rate" value="0" id="rate-{{ $notrated_men->mr_id }}">
+										</form>
+										<div class="d-flex align-items-center">
+											<div
+												class="avatar avatar-sm me-2 flex-shrink-0 bg-primary rounded-circle d-flex align-items-center justify-content-center">
+												<span class="text-white fw-bold">{{ mb_substr($notrated_men->{'MentorName_'.$l}, 0, 1) }}</span>
 											</div>
-										</td>
-										<td class="align-middle">
-											<div class="d-flex align-items-center">
-												<i class="bx bx-time-five me-2 text-muted"></i>
-												<span>{{$notrated_men->zoom_date}}</span>
+											<div>
+												<p class="mb-0 fw-semibold">{{$notrated_men->{'MentorName_'.$l} }}</p>
+												<small class="text-muted">ID: {{ $notrated_men->mr_id }}</small>
 											</div>
-										</td>
-										<td class="align-middle">
-											<div class="form-check form-check-inline">
-												<input class="form-check-input" type="radio" name="done" id="doneyes-{{$notrated_men->mr_id}}"
-													checked="">
-												<label class="form-check-label" for="doneyes-{{$notrated_men->mr_id}}">{{__('Yes')}}</label>
-											</div>
-											<div class="form-check form-check-inline">
-												<input class="form-check-input" type="radio" name="done" id="doneno-{{$notrated_men->mr_id}}">
-												<label class="form-check-label" for="doneno-{{$notrated_men->mr_id}}">{{__('No')}}</label>
-											</div>
-										</td>
-										<td class="align-middle">
-											<div class="full-star-ratings" data-rateyo-full-star="true" data-rateyo-rating="0"
-												data-rateyo-num-stars="5" data-rateyo-star-width="24px"></div>
-										</td>
-										<td class="align-middle">
-											<textarea class="form-control form-control-sm border-1" id="comment-{{$notrated_men->mr_id}}"
-												name="comment" rows="3" required
-												placeholder="{{ __('dashboard.Write your notes here') }}..."></textarea>
-										</td>
-										<td class="align-middle text-center">
-											<button type="submit" class="btn btn-primary btn-sm px-3">
-												<i class="bx bx-check me-1"></i>
-												<span>{{__('dashboard.Submit')}}</span>
-											</button>
-										</td>
-									</form>
+										</div>
+									</td>
+									<td class="align-middle">
+										<div class="d-flex align-items-center">
+											<i class="bx bx-time-five me-2 text-muted"></i>
+											<span class="text-nowrap">{{$notrated_men->zoom_date}}</span>
+										</div>
+									</td>
+									<td class="align-middle">
+										{{-- GV-9570: without values both radios posted "on", so "No" was saved as done --}}
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="done" value="1" form="rateForm-{{ $notrated_men->mr_id }}"
+												id="doneyes-{{$notrated_men->mr_id}}" checked="">
+											<label class="form-check-label" for="doneyes-{{$notrated_men->mr_id}}">{{__('Yes')}}</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="done" value="0" form="rateForm-{{ $notrated_men->mr_id }}"
+												id="doneno-{{$notrated_men->mr_id}}">
+											<label class="form-check-label" for="doneno-{{$notrated_men->mr_id}}">{{__('No')}}</label>
+										</div>
+									</td>
+									<td class="align-middle">
+										<div class="full-star-ratings" data-rate-input="#rate-{{ $notrated_men->mr_id }}"
+											data-rateyo-full-star="true" data-rateyo-rating="0"
+											data-rateyo-num-stars="5" data-rateyo-star-width="24px"></div>
+									</td>
+									<td class="align-middle">
+										<textarea class="form-control form-control-sm border-1" id="comment-{{$notrated_men->mr_id}}"
+											name="comment" rows="3" required form="rateForm-{{ $notrated_men->mr_id }}"
+											placeholder="{{ __('dashboard.Write your notes here') }}..."></textarea>
+									</td>
+									<td class="align-middle text-center">
+										<button type="submit" class="btn btn-primary btn-sm px-3" form="rateForm-{{ $notrated_men->mr_id }}">
+											<i class="bx bx-check me-1"></i>
+											<span>{{__('dashboard.Submit')}}</span>
+										</button>
+									</td>
 								</tr>
 								@endforeach
 							</tbody>
@@ -1822,6 +1883,9 @@
 </div>
 <!-- / Content Wrapper -->
 
+{{-- GV-9570: the full judges list behind the Screening / Final Session avatar stacks --}}
+@include('includes.partials.judges-panel')
+
 @if( $_user->ableTo('mentors.settings_modify', $permissions) &&
 array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_null( $cycle_id ) )
 <!--  Edit SP Modal -->
@@ -1843,18 +1907,18 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 	.hxi-head {
 		position: relative; text-align: center; padding: 30px 28px 0;
-		background: radial-gradient(120% 120% at 50% -20%, rgba(115,103,240,.16), transparent 62%);
+		background: radial-gradient(120% 120% at 50% -20%, rgba(var(--bs-primary-rgb), .16), transparent 62%);
 	}
 	.hxi-medallion {
 		position: relative; width: 76px; height: 76px; margin: 0 auto;
 		border-radius: 22px; display: grid; place-items: center;
-		background: linear-gradient(145deg, #7367f0, #5a4fd6);
+		background: linear-gradient(145deg, var(--bs-primary), color-mix(in srgb, var(--bs-primary) 80%, #000));
 		color: #fff; font-size: 30px; font-weight: 800;
-		box-shadow: 0 10px 22px -6px rgba(115,103,240,.55);
+		box-shadow: 0 10px 22px -6px rgba(var(--bs-primary-rgb), .55);
 	}
 	.hxi-medallion::after {
 		content: ""; position: absolute; inset: -5px; border-radius: 26px;
-		border: 2px solid #7367f0; opacity: .22;
+		border: 2px solid var(--bs-primary); opacity: .22;
 	}
 	.hxi-initial { position: relative; z-index: 0; }
 	/* An uploaded image overlays the initial; a broken one is caught by onerror. */
@@ -1873,7 +1937,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 
 	.hxi-eyebrow {
 		margin: 16px 0 0; font-size: 11.5px; font-weight: 700;
-		letter-spacing: .12em; text-transform: uppercase; color: #7367f0;
+		letter-spacing: .12em; text-transform: uppercase; color: var(--bs-primary);
 	}
 	.hxi-team {
 		margin: 5px 0 0; font-size: 23px; font-weight: 800; line-height: 1.2;
@@ -1890,7 +1954,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 	}
 	.hxi-who {
 		width: 24px; height: 24px; border-radius: 50%;
-		background: rgba(115,103,240,.14); color: #7367f0;
+		background: rgba(var(--bs-primary-rgb), .14); color: var(--bs-primary);
 		display: grid; place-items: center; font-weight: 800; font-size: 12px;
 	}
 	.hxi-inviter strong { color: var(--bs-heading-color, #2f2b3d); font-weight: 700; }
@@ -1934,7 +1998,7 @@ array_intersect(['dashboard.widgets_tables_mentors_view'], $permissions) && !is_
 		box-shadow: inset 0 0 0 1px rgba(234,84,85,.24);
 	}
 	.hxi-btn-reject:hover { transform: translateY(-1px); background: rgba(234,84,85,.16); }
-	.hxi-btn:focus-visible { outline: 3px solid #7367f0; outline-offset: 2px; }
+	.hxi-btn:focus-visible { outline: 3px solid var(--bs-primary); outline-offset: 2px; }
 
 	.hxi-expiry {
 		margin: 16px 0 0; font-size: 12px; color: var(--bs-tertiary-color, #a5a3ae);
@@ -2281,16 +2345,15 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 	<script>
-		// Initialize DataTable with pagination configuration
-		$(document).on('click', '.show-passcode', function(e) {
+	  $(document).on('click', '.show-passcode', function(e) {
       e.preventDefault();
       let passcode = $(this).data('passcode');
-      releaseAlert({
-        icon: 'info',
+      releaseAlert('copy', {
         title: '{{ __('dashboard.meeting_passcode') }}',
         message: `{!! __('dashboard.passcode_is', ['code' => '<strong>${passcode}</strong>']) !!}`,
+        copyText: passcode
       });
-		});
+    });
     
 		// Initialize DataTable with pagination configuration
 		$(document).ready(function() {
@@ -2300,7 +2363,15 @@ document.addEventListener('DOMContentLoaded', function() {
 				"searching": true,
 				"ordering": true,
 				"info": true,
-				"responsive": true,
+				// GV-9570: the default renderer copies the cells' startup HTML into the
+				// mobile child row -- no rateYo stars and form-less inputs. Move the
+				// live nodes instead so the stars and the form fields keep working.
+				"responsive": {
+					"details": { "renderer": $.fn.dataTable.Responsive.renderer.listHiddenNodes() }
+				},
+				// GV-9570: the Submit column's heading repeats the button's own label
+				// ("Submit  [Submit]") once it collapses into the child row.
+				"columnDefs": [ { "targets": -1, "className": "dtr-hide-title" } ],
 				@if( $l == 'ar' )
 				"language": {
 					"sEmptyTable": "ليست هناك بيانات متاحة في الجدول",
@@ -2415,10 +2486,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		$(function () {
 			var isRtl = $('html').attr('data-textdirection') === 'rtl';
-			var fullStar = $('.full-star-ratings');
-			var instance = fullStar.rateYo({rtl: isRtl});
-			// Rating onSet Event
-			if( instance.length ) { instance.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $('#rate').val(data.rating); }); }
+			// GV-9570: each row writes to its own hidden input -- a shared #rate sent
+			// every rating to the first row's form.
+			$('.full-star-ratings').each(function () {
+				var $stars = $(this);
+				$stars.rateYo({rtl: isRtl}).on('rateyo.set', function (e, data) { $($stars.data('rate-input')).val(data.rating); });
+			});
 
 			var fullServiceStar = $('.full-services-star-ratings');
 			fullServiceStar.each(function (index, oneInstance) {
@@ -2629,20 +2702,15 @@ document.addEventListener('DOMContentLoaded', function() {
 			console.log('Deleting slot ID:', slotId);
 			console.log('rowElement', rowElement);
 
-		  Swal.fire({
-				title: "{{__('mentor.delete_slot_confirm')}}",
-				text: "{{__('admin.Recover')}}",
-				showCancelButton: true,
-				confirmButtonText: "{{ __('admin.DYes') }}",
-				cancelButtonText: "{{ __('admin.No') }}",
-				reverseButtons: true,
-				customClass: {
-					confirmButton: 'btn btn-danger me-2',
-					cancelButton: 'btn btn-label-secondary',
-				},
-				buttonsStyling: false,
-		  }).then((result) => {
-				if (result.isConfirmed) {
+		  releaseAlert('info', {
+		    title: "{{__('mentor.delete_slot_confirm')}}",
+		    message: "{{__('admin.Recover')}}",
+		    confirmText: "{{ __('admin.DYes') }}",
+		    cancelText: "{{ __('admin.No') }}",
+		    confirmColor: 'danger',
+		    hideCancel: false
+		  }).then((ok) => {
+				if (ok) {
 					// Show loading state
 					buttonElement.prop('disabled', true).html('<i class="ti ti-loader ti-spin"></i>');
 					
@@ -2657,7 +2725,7 @@ document.addEventListener('DOMContentLoaded', function() {
 							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
 							rowElement.remove(); // Remove the row from the table immediately
 							
-							releaseSuccessAlert({
+							releaseAlert('success', {
 								title: response?.title || "{{ __('admin.Deleted') }}!",
 								message:response?.message || "{{ __('admin.DeletedSuccessfully') }}.",
 							});
@@ -2665,7 +2733,7 @@ document.addEventListener('DOMContentLoaded', function() {
 						error: function(jqXHR, statusText, error) {
 							buttonElement.prop('disabled', false).html('<i class="ti ti-trash ti-16px"></i>');
 
-							releaseFailureAlert({
+							releaseAlert('danger', {
 								title: jqXHR.responseJSON?.title || "{{ __('admin.Error') }}!",
 								message: jqXHR.responseJSON?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
 							});
@@ -2678,7 +2746,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @if( array_intersect(['dashboard.widgets_tables_my_current_schedule_view'], $permissions) )
 @if( $_user->ableTo('slots.index', $permissions) )
-@if ( isset($$my_schedules) && count( $$my_schedules ) > 0 )
+@if ( isset($my_schedules) && count( $my_schedules ) > 0 )
 	<script>
 		$(document).ready(function () {
 			// Initialize slots DataTable

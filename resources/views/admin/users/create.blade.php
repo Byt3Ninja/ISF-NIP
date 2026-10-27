@@ -116,8 +116,8 @@
                   </option>
 
                   @foreach ($roles as $role)
-                    <option value="{{ $role['name'] }}"
-                        {{ request('role') === 'mentor' && $role['name'] === 'mentor' ? 'selected' : '' }}>
+                    <option value="{{ $role['default_for'] }}"
+                        {{ request('role') === 'mentor' && $role['default_for'] === 'mentor' ? 'selected' : '' }}>
                         {{ __('admin.' . $role['name']) }}
                     </option>
                   @endforeach
@@ -156,11 +156,11 @@
                 <input type="hidden" name="country_code" id="phone_code" value="20" />
 
                 @error('phone')
-                  <small class="invalid-feedback">{{ $message }}</small>
+                  <small class="invalid-feedback" data-server-error>{{ $message }}</small>
                 @enderror
 
                 @error('phone_code')
-                  <small class="invalid-feedback">{{ $message }}</small>
+                  <small class="invalid-feedback" data-server-error>{{ $message }}</small>
                 @enderror
               </div>
             </div>
@@ -487,6 +487,22 @@
       autoFocus: new FormValidation.plugins.AutoFocus(),
       trigger: new FormValidation.plugins.Trigger(),
     }
+  });
+</script>
+
+<script>
+  // Server-rendered validation fallbacks are shown once, on a full page load,
+  // and would otherwise sit next to a field the user has already corrected.
+  // Drop them as soon as any field in the form is edited.
+  //
+  // Only elements carrying [data-server-error] are touched, so the messages
+  // that FormValidation's bootstrap5 plugin injects (which also use
+  // .invalid-feedback) are left to the library to manage on its own.
+  $(document).on('input change', 'form [name]', function () {
+    const $group = $(this).closest('.form-group');
+
+    $group.find('[data-server-error]').text('').hide();
+    $group.find('.is-invalid').removeClass('is-invalid');
   });
 </script>
 @endsection

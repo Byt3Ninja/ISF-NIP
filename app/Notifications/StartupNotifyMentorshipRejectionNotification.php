@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -16,7 +18,7 @@ use Throwable;
 
 class StartupNotifyMentorshipRejectionNotification extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -53,6 +55,12 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
     {
         $this->Message = $Message;
         $this->mentorship_session = $mentorship_session;
+
+        // The decline email follows the platform default language from the
+        // general settings, not the founder's own profile language (GV-10028).
+        // Laravel renders the whole notification (subject, view, layout) in it.
+        $setting = Settings::first();
+        $this->locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
     }
 
     /**
@@ -62,7 +70,7 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -111,11 +119,11 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 
@@ -149,10 +157,11 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
     public function toWhatsapp(object $notifiable): string
     {
         // Expecting $this->Message indices: [0]=subject/title, [1]=greeting, [2]=line, [3]=url, [4]=database message
+        // $this->Message is built in the founder's language, so wrap it in the same one.
         return __('notifications.mentorship_session.whatsapp', [
             'greeting' => $this->Message[1] ?? '',
             'line' => $this->Message[2] ?? '',
-        ]);
+        ], $notifiable->preferredLocale());
     }
 
     /**
@@ -160,9 +169,11 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
+        $locale = $notifiable->preferredLocale();
+
         return new BroadcastMessage([
-            'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => '']),
-            'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? '']),
+            'subject' => $this->Message[0] ?? __('notifications.mentorship_session.broadcast', ['title' => ''], $locale),
+            'message' => __('notifications.mentorship_session.broadcast', ['title' => $this->Message[0] ?? ''], $locale),
             'time' => now()->toDateTimeString(),
         ]);
     }
@@ -175,10 +186,12 @@ class StartupNotifyMentorshipRejectionNotification extends Notification implemen
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('MentorshipSession notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
             'message' => $this->Message,
         ]);
     }
+
 }

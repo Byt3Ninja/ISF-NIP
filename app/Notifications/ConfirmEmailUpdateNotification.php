@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -16,7 +17,7 @@ use Throwable;
 
 class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -55,6 +56,15 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
     }
 
     /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
+    }
+
+    /**
      * Get the mail representation of the notification.
      */
     public function toMail($notifiable)
@@ -64,7 +74,7 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
 
         // Platform-branded email (platform logo/name); the org only routes SMTP.
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData(null);
+        $orgData = $this->emailBrandingData();
 
         // Follow the platform's default language (General Settings).
         $setting = Settings::first();
@@ -123,6 +133,7 @@ class ConfirmEmailUpdateNotification extends Notification implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('ConfirmEmailUpdateNotification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

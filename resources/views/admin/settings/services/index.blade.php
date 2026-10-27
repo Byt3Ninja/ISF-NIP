@@ -144,7 +144,8 @@
                     <img 
                       src="{{ Storage::disk('public_uploads')->url($service->img_url) }}" 
                       alt="{{ $service->name_en }}" 
-                      class="w-100 h-100"
+                      class="w-100 h-100 object-fit-cover"
+                      style="object-position: center;"
                       onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none')"
                     />
                   @endif
@@ -218,7 +219,7 @@
                     <div></div>
                   @endif
 
-                  <p class="mt-1">{!! Str::limit($service->description ?? 'No description available', 100) !!}</p>
+                  <p class="mt-1">{{ Str::limit($service->description ?? 'No description available', 100) }}</p>
                   @if($_user->hasAnyRole(['admin', 'serviceProvider', 'organizationManager', 'subadmin']))
                   @php
                     $visibleOrgs = $_user->hasAnyRole(['admin', 'serviceProvider'])
@@ -354,25 +355,18 @@
       var id = $(this).data('id');
       var token = '{{ csrf_token() }}';
 
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{__('admin.SureDelete')}}",
-        text: "{{__('admin.Recover')}}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
+        message: "{{__('admin.Recover')}}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
       })
-      .then((result) => {
-        if (result.value) {
+      .then((ok) => {
+        if (ok) {
           $.post(url, {'_method': 'DELETE' , '_token': token},
             function(response) {
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: "{{ __('admin.Deleted') }}!",
                 message: "{{ __('admin.DeletedSuccessfully') }}.",
               });
@@ -382,7 +376,7 @@
               });
             }
           ).fail(function(error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}!",
               message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
             });

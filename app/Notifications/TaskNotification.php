@@ -2,8 +2,15 @@
 
 namespace App\Notifications;
 
+use Carbon\Carbon;
+use App\MentorshipTask;
+use App\ProgramTask;
+use App\Services\FileManagerService;
 use App\Services\GlobalNotificationSettingsService;
+use App\Settings;
+use App\TodoList;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,10 +21,12 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Broadcasting\WhatsAppChannel;
 use Throwable;
+use App\Services\ProtectedFiles\ProtectedFiles;
+use App\Enums\ProtectedFileSet;
 
 class TaskNotification extends Notification implements ShouldQueue
 {
-    use Queueable, ConfiguresSmtp;
+    use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization;
 
     /**
      * The number of times the job may be attempted.
@@ -67,7 +76,7 @@ class TaskNotification extends Notification implements ShouldQueue
             }
         }
 
-        $org = $notifiable->organization;
+        $org = $this->taskOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
 
         // Organization channel toggles (default to true when not configured)
@@ -111,15 +120,26 @@ class TaskNotification extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        App::setLocale($notifiable->language ?? 'en');
-
-        $org          = $notifiable->organization;
+        $org          = $this->taskOrganization($notifiable);
         $smtpSettings = $org?->organizationSettings;
 
         $this->configureSmtp($smtpSettings);
 
         $from    = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
+
+        $action = $this->data['action'] ?? 'add';
+        if ($action === 'add' && $notifiable->hasRole('registered')) {
+            return $this->toFounderAssignedMail($notifiable, $from, $orgData);
+        }
+        if ($action === 'archive' && $notifiable->hasRole('registered')) {
+            return $this->toFounderArchivedMail($notifiable, $from, $orgData);
+        }
+        if ($action === 'reopen' && $notifiable->hasRole('registered')) {
+            return $this->toFounderReopenedMail($notifiable, $from, $orgData);
+        }
+
+        App::setLocale($notifiable->language ?? 'en');
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])
@@ -128,6 +148,146 @@ class TaskNotification extends Notification implements ShouldQueue
                 'data'       => $this->data,
                 'notifiable' => $notifiable,
                 'action'     => $this->data['action'],
+                'taskUrl'    => $this->taskBoardUrl(),
+            ], $orgData));
+    }
+
+    /**
+     * Founder "task assigned" email: platform default language, and a
+     * View Task link to the program's task board (taskBoardUrl).
+     */
+    protected function toFounderAssignedMail($notifiable, array $from, array $orgData): MailMessage
+    {
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $task = $this->data['task'];
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $notifiable->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+            $lastName = trim((string) $notifiable->last_name_en);
+        }
+
+        $dueDate = $task->due_date ? Carbon::parse($task->due_date)->format('Y-m-d') : '';
+
+        $fileManager = app(FileManagerService::class);
+        if ($task instanceof ProgramTask) {
+            $attachments = collect($task->attachments ?? [])
+                ->filter(fn ($a) => ($a['status'] ?? 'attachment') !== 'submission')
+                ->map(fn ($a) => [
+                    'name' => $a['name'] ?? basename($a['path'] ?? ''),
+                    // the authorized file route (the recipient logs in and must be allowed to open it)
+                    'url'  => app(ProtectedFiles::class)->urlFor(ProtectedFileSet::TASK_ATTACHMENT, $a['path'] ?? null),
+                ])
+                ->values()->all();
+        } else {
+            $attachments = $task->files()->get()->map(fn ($f) => [
+                'name' => $f->file_name ?: basename($f->file),
+                'url'  => $fileManager->getUrl($f->file, 'mentorship_tasks'),
+            ])->all();
+        }
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
+            ->subject(__('email.task_assigned_email.subject', [], $locale))
+            ->view('emails.task_assigned_founder', array_merge([
+                'taskLocale' => $locale,
+                'taskRecipientName' => trim($firstName . ' ' . $lastName),
+                'taskOrgName' => $orgName,
+                'taskTitle' => $task->title ?? '',
+                'taskDueDate' => $dueDate,
+                'taskDescription' => trim((string) ($task->description ?? '')),
+                'taskViewUrl' => $this->taskBoardUrl(),
+                'taskAttachments' => $attachments,
+            ], $orgData));
+    }
+
+    /**
+     * Founder "task archived" email: platform default language, and a
+     * View Task link to the program's task board (taskBoardUrl).
+     */
+    protected function toFounderArchivedMail($notifiable, array $from, array $orgData): MailMessage
+    {
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $task = $this->data['task'];
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $notifiable->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+            $lastName = trim((string) $notifiable->last_name_en);
+        }
+
+        $programName = $task instanceof ProgramTask
+            ? ($task->program?->title ?? '')
+            : ($task->mentorshipRequest?->cycle?->title ?? '');
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
+            ->subject(__('email.task_archived_email.subject', ['title' => $task->title ?? ''], $locale))
+            ->view('emails.task_archived_founder', array_merge([
+                'taskLocale' => $locale,
+                'taskRecipientName' => trim($firstName . ' ' . $lastName),
+                'taskOrgName' => $orgName,
+                'taskTitle' => $task->title ?? '',
+                'taskDescription' => trim((string) ($task->description ?? '')),
+                'taskProgramName' => $programName,
+                'taskViewUrl' => $this->taskBoardUrl(),
+            ], $orgData));
+    }
+
+    /**
+     * Founder "task reopened" email: platform default language, and a
+     * View Task link to the program's task board (taskBoardUrl).
+     */
+    protected function toFounderReopenedMail($notifiable, array $from, array $orgData): MailMessage
+    {
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+
+        $task = $this->data['task'];
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $notifiable->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+            $lastName = trim((string) $notifiable->last_name_en);
+        }
+
+        $programName = $task instanceof ProgramTask
+            ? ($task->program?->title ?? '')
+            : ($task->mentorshipRequest?->cycle?->title ?? '');
+
+        $dueDate = $task->due_date ? Carbon::parse($task->due_date)->format('Y-m-d') : '';
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
+        return (new MailMessage)
+            ->from($from['address'], $from['name'])
+            ->subject(__('email.task_reopened_email.subject', ['title' => $task->title ?? ''], $locale))
+            ->view('emails.task_reopened_founder', array_merge([
+                'taskLocale' => $locale,
+                'taskRecipientName' => trim($firstName . ' ' . $lastName),
+                'taskOrgName' => $orgName,
+                'taskTitle' => $task->title ?? '',
+                'taskDescription' => trim((string) ($task->description ?? '')),
+                'taskProgramName' => $programName,
+                'taskDueDate' => $dueDate,
+                'taskViewUrl' => $this->taskBoardUrl(),
             ], $orgData));
     }
 
@@ -258,5 +418,35 @@ class TaskNotification extends Notification implements ShouldQueue
             'trace' => $exception->getTraceAsString(),
             'data' => $this->data,
         ]);
+    }
+
+    /**
+     * The View Task link for every task email: the program's task board,
+     * filtered to the task's cycle when one can be resolved.
+     */
+    protected function taskBoardUrl(): string
+    {
+        $task = $this->data['task'] ?? null;
+        $cycleId = $task?->mentorshipRequest?->cycle?->id ?? $task?->program?->id ?? null;
+
+        return route('mentorshipTasks.index') . ($cycleId ? '?cycle_id=' . $cycleId : '?nav=menu');
+    }
+
+    /**
+     * The organization the task belongs to (through its mentorship session or
+     * cycle), not the recipient's own organization_id.
+     */
+    protected function taskOrganization($notifiable)
+    {
+        $task = $this->data['task'] ?? null;
+        $session = $task instanceof MentorshipTask ? $task->mentorshipRequest : null;
+        $cycle = match (true) {
+            $task instanceof MentorshipTask => $task->company?->cycledata,
+            $task instanceof TodoList => $task->cycle,
+            $task instanceof ProgramTask => $task->program,
+            default => null,
+        };
+
+        return $this->sessionOrganization($notifiable, $session, $cycle?->organization_id);
     }
 }

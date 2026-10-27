@@ -112,41 +112,28 @@
         e.preventDefault();
         var url = $(this).data('url');
         var token = '{{ csrf_token() }}';
-        Swal.fire({
+        releaseAlert('warning', {
           title: "{{__('admin.SureDelete')}}",
-          text: "{{__('admin.Recover')}}",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}",
-          reverseButtons: true,
-          customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-          },
-          buttonsStyling: false,
+          message: "{{__('admin.Recover')}}",
+          confirmText: "{{ __('admin.DYes') }}",
+          cancelText: "{{ __('admin.No') }}",
+          confirmColor: 'danger'
         })
-        .then((result) => {
-          if (result.value) {
+        .then((ok) => {
+          if (ok) {
             $.post(url, {'_method': 'DELETE' , '_token': token},
               function(response) {
-                Swal.fire({
-                  icon: 'success',
+                releaseAlert('success', {
                   title: "{{ __('admin.Deleted') }}!",
-                  html: "{{ __('admin.FileDeleted') }}.",
-                  showCancelButton: false,
-                  showConfirmButton: true,
-                  confirmButtonText: "{{ __('admin.OK') }}",
-                  customClass: {
-                      confirmButton: 'btn btn-primary',
-                  },
-                  buttonsStyling: false,
+                  message: "{{ __('admin.FileDeleted') }}.",
+                  confirmText: "{{ __('admin.OK') }}",
+                  confirmColor: 'primary'
                 });
                 // Remove the row from DataTable if still on same page
                 $('#rooms-list-datatable').DataTable().row($(e.target).closest('tr')).remove().draw();
               }
             ).fail(function(error) {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}!",
                 message: error?.message || "{{ __('admin.An unexpected error occurred, please try again later') }}",
               });

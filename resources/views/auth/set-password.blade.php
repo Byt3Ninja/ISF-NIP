@@ -92,6 +92,9 @@
 
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="/vuexy/assets/js/config.js"></script>
+  <!-- BEGIN: Custom CSS-->
+  @include('admin.includes.branding-styles')
+  <!-- END: Custom CSS-->
 </head>
 <!-- END: Head-->
 <!-- BEGIN: Body-->
@@ -191,7 +194,7 @@
                 </div>
             @endif
            
-            <form action="{{ route('invitations.accept', $invitation->id) }}" method="POST">
+            <form action="{{ $invitation->acceptUrl() }}" method="POST">
                 @csrf
               <div class="mb-6 form-password-toggle">
                 <label class="form-label" for="password">{{__('admin.Password')}}</label>

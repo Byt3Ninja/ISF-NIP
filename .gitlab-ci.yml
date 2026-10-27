@@ -27,8 +27,9 @@ beta:
         sed -i \"s/^APP_BUILD=.*/APP_BUILD=$CI_PIPELINE_IID/\" .env || echo \"APP_BUILD=$CI_PIPELINE_IID\" >> .env &&
         sed -i \"s/^APP_GIT_SHA=.*/APP_GIT_SHA=$CI_COMMIT_SHORT_SHA/\" .env || echo \"APP_GIT_SHA=$CI_COMMIT_SHORT_SHA\" >> .env &&
 
-        php artisan migrate --force &&
-        php artisan db:seed --class=defaultRolesPermissionSeeder
+        chown -R www-data:www-data storage bootstrap/cache &&
+        runuser -u www-data -- php artisan migrate --force &&
+        runuser -u www-data -- php artisan db:seed --class=defaultRolesPermissionSeeder
       "
   only:
     - beta
@@ -47,8 +48,9 @@ testing:
         sed -i \"s/^APP_BUILD=.*/APP_BUILD=$CI_PIPELINE_IID/\" .env || echo \"APP_BUILD=$CI_PIPELINE_IID\" >> .env &&
         sed -i \"s/^APP_GIT_SHA=.*/APP_GIT_SHA=$CI_COMMIT_SHORT_SHA/\" .env || echo \"APP_GIT_SHA=$CI_COMMIT_SHORT_SHA\" >> .env &&
 
-        php artisan migrate --force &&
-        php artisan db:seed --class=defaultRolesPermissionSeeder
+        chown -R www-data:www-data storage bootstrap/cache &&
+        runuser -u www-data -- php artisan migrate --force &&
+        runuser -u www-data -- php artisan db:seed --class=defaultRolesPermissionSeeder
       "
   only:
     - testing
@@ -67,8 +69,9 @@ dev:
         sed -i \"s/^APP_BUILD=.*/APP_BUILD=$CI_PIPELINE_IID/\" .env || echo \"APP_BUILD=$CI_PIPELINE_IID\" >> .env &&
         sed -i \"s/^APP_GIT_SHA=.*/APP_GIT_SHA=$CI_COMMIT_SHORT_SHA/\" .env || echo \"APP_GIT_SHA=$CI_COMMIT_SHORT_SHA\" >> .env &&
 
-        php artisan migrate --force &&
-        php artisan db:seed --class=defaultRolesPermissionSeeder
+        chown -R www-data:www-data storage bootstrap/cache &&
+        runuser -u www-data -- php artisan migrate --force &&
+        runuser -u www-data -- php artisan db:seed --class=defaultRolesPermissionSeeder
       "
   only:
     - dev

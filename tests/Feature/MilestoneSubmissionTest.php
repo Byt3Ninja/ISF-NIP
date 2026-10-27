@@ -8,7 +8,6 @@ use App\Company;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class MilestoneSubmissionTest extends TestCase
 {

@@ -6,7 +6,6 @@ use Tests\TestCase;
 use App\Services\CurrencyService;
 use App\Repositories\CurrencyRepository;
 use App\Currency;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
@@ -14,7 +13,6 @@ use Mockery;
 
 class CurrencyServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected CurrencyService $currencyService;
     protected $currencyRepoMock;

@@ -74,21 +74,14 @@ function confirmDeleteWithSweetAlert(formId, formName, buttonElement) {
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
   // Show SweetAlert confirmation
-  Swal.fire({
+  releaseAlert('warning', {
     title: '{{ __('admin.SureDelete') }}',
-    text: '{{ __('admin.Recover') }}',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: '{{ __('admin.DYes') }}',
-    cancelButtonText: '{{ __('admin.Cancel') }}',
-    reverseButtons: lang === 'ar',
-    customClass: {
-      confirmButton: 'btn btn-danger me-2',
-      cancelButton: 'btn btn-label-secondary'
-    },
-    buttonsStyling: false
-  }).then((result) => {
-    if (result.isConfirmed) {
+    message: '{{ __('admin.Recover') }}',
+    confirmText: '{{ __('admin.DYes') }}',
+    cancelText: '{{ __('admin.Cancel') }}',
+    confirmColor: 'danger'
+  }).then((ok) => {
+    if (ok) {
       // Disable the delete button to prevent multiple clicks
       const deleteButton = buttonElement;
       deleteButton.disabled = true;
@@ -111,7 +104,7 @@ function confirmDeleteWithSweetAlert(formId, formName, buttonElement) {
           // Show success message
           const successMessage = lang === 'ar' ? data.message_ar : data.message_en;
 
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title: '{{ __('admin.Success') }}',
             message: successMessage,
           });
@@ -126,7 +119,7 @@ function confirmDeleteWithSweetAlert(formId, formName, buttonElement) {
           // Show error message
           const errorMessage = lang === 'ar' ? data.message_ar : data.message_en;
 
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: '{{ __('admin.Error') }}',
             message: errorMessage || '{{ __('admin.unexpected_error') }}',
           });
@@ -137,7 +130,7 @@ function confirmDeleteWithSweetAlert(formId, formName, buttonElement) {
         }
       })
       .catch(error => {
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: '{{ __('admin.Error') }}',
           message: error instanceof Error ? error?.message : '{{ __('admin.unexpected_error') }}',
         });

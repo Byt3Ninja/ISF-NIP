@@ -93,25 +93,22 @@
     $(document).on("click", "#deleteAction", function (e) {
         var url = $(this).data('url');
         var token = '{{ csrf_token() }}';
-        Swal.fire({
-            title: "{{__('admin.SureDelete')}}",
-            text: "{{__('admin.Recover')}}",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonClass: "btn-danger",
-            confirmButtonText: "{{__('admin.DYes')}}",
-            cancelButtonText: "{{__('admin.No')}}!",
+        releaseAlert('warning', {
+          title: "{{__('admin.SureDelete')}}",
+          message: "{{__('admin.Recover')}}",
+          confirmText: "{{__('admin.DYes')}}",
+          cancelText: "{{__('admin.No')}}!",
+          confirmColor: 'danger'
         })
-        .then((result) => {
-            if (result.value) {
+        .then((ok) => {
+            if (ok) {
 
                 $.post(url, {'_method':'DELETE' , '_token':token},
                     function(response){
-                        Swal.fire(
-                        '{{__('admin.Deleted')}}!',
-                        '{{__('admin.FileDeleted')}}.',
-                        'success'
-                        );
+                        releaseAlert('success', {
+                          title: '{{__('admin.Deleted')}}!',
+                          message: '{{__('admin.FileDeleted')}}.'
+                        });
 
                         location.reload();
                     }

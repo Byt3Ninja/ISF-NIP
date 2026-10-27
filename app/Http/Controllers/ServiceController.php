@@ -285,6 +285,7 @@ class ServiceController extends Controller
 	 */
 	public function edit(Service $service)
 	{
+		$this->authorizeService($service);
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
 		$serviceCategories = ServiceCategory::with(['organization', 'creator', 'creator.roles', 'creator.organizations'])
@@ -340,6 +341,7 @@ class ServiceController extends Controller
 	
 	public function update(UpdateServiceRequest $request, Service $service)
 	{
+		$this->authorizeService($service);
 		
 		$request->merge([
 			'status' => $request->has('status') ? 1 : 0
@@ -428,6 +430,7 @@ class ServiceController extends Controller
 	 */
 	public function destroy(Service $service)
 	{
+		$this->authorizeService($service);
 		$service->delete();
 		return response()->json(['state' => 'success'], 200);
 	}
@@ -532,7 +535,10 @@ class ServiceController extends Controller
 			->get();
 
 		// Map to the structure the blade expects
-		$requests = $rows->map(function ($row) {
+		\Carbon\Carbon::setLocale($locale);
+		$currencyMap = \App\Currency::all()->keyBy('currency_code');
+
+		$requests = $rows->map(function ($row) use ($currencyMap, $locale) {
 			// Determine display status
 			if ($row->done == 1) {
 				$status = 'Completed';
@@ -544,20 +550,48 @@ class ServiceController extends Controller
 				$status = 'Pending';
 			}
 
+			$currencyLabel = $row->currency;
+			if ($row->currency && isset($currencyMap[$row->currency])) {
+				$currency = $currencyMap[$row->currency];
+				$currencyLabel = $locale === 'ar' && $currency->currency_name_ar
+					? $currency->currency_name_ar
+					: ($currency->currency_name ?? $currency->currency_symbol ?? $row->currency);
+			}
+
+			$dateFormatted = '—';
+			if ($row->date_time) {
+				$carbonDate = \Carbon\Carbon::parse($row->date_time);
+				if ($locale === 'ar') {
+					$dateFormatted = $carbonDate->translatedFormat('d F Y • H:i');
+				} else {
+					$dateFormatted = $carbonDate->format('M d, Y • H:i');
+				}
+			}
+
+			$reviewedAtFormatted = null;
+			if ($row->reviewed_at) {
+				$carbonReviewed = \Carbon\Carbon::parse($row->reviewed_at);
+				if ($locale === 'ar') {
+					$reviewedAtFormatted = $carbonReviewed->translatedFormat('d F Y');
+				} else {
+					$reviewedAtFormatted = $carbonReviewed->format('M d, Y');
+				}
+			}
+
 			return [
 				'id'                  => $row->id,
 				'title'               => $row->service_name,
-				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
+				'date'                => $dateFormatted,
 				'description'         => $row->comment ?? '—',
 				'service_description' => $row->service_description ?? '—',
 				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/team/3.png',
 				'status'              => $status,
 				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
-				'currency'            => $row->currency,
+				'currency'            => $currencyLabel,
 				'rating'              => $row->rate,
 				'review_title'        => $row->review_title,
 				'review_body'         => $row->review_body,
-				'reviewed_at'         => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
+				'reviewed_at'         => $reviewedAtFormatted,
 				'has_review'          => !is_null($row->rate),
 				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/icons/account.svg',
 				'founder_name'        => $row->founder_name ?? 'N/A',
@@ -1650,5 +1684,26 @@ class ServiceController extends Controller
 			];
 		}
 		return $stats;
+	}
+
+	/**
+	 * H8: an existing service may be changed only by an admin, the provider that owns it,
+	 * or staff managing an organization the service is offered in.
+	 */
+	private function authorizeService(Service $service): void
+	{
+		$user = auth()->user();
+		if ($user->hasRole('admin')) {
+			return;
+		}
+
+		if ($user->hasRole('serviceProvider')) {
+			$providerId = $user->service_provider?->id;
+			abort_unless($providerId && (int) $service->service_provider_id === (int) $providerId, 403);
+			return;
+		}
+
+		$organizationIds = $service->organizations()->pluck('organizations.id')->push($service->organization_id)->filter();
+		abort_unless($organizationIds->contains(fn ($id) => $user->managesOrganization($id)), 403);
 	}
 }

@@ -5,6 +5,8 @@ namespace App\Notifications;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
@@ -16,7 +18,7 @@ use Throwable;
 
 class MentorshipSessionMentor extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -68,7 +70,7 @@ class MentorshipSessionMentor extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -115,8 +117,7 @@ class MentorshipSessionMentor extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $org = $notifiable->organization;
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
         $this->data['orgName'] = $orgData['org_name'] ?? config('app.name');
 
             $mail = (new MailMessage)
@@ -228,6 +229,7 @@ if (!empty($attachments)) {
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('MentorshipSessionMentor notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

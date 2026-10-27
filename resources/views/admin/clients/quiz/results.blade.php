@@ -6,10 +6,10 @@
 		.result-summary {
 			padding: 1.5rem;
 			border-radius: 10px;
-			background: linear-gradient(to right, #7367f0, #9e95f5);
+			background: linear-gradient(to right, var(--bs-primary), color-mix(in srgb, var(--bs-primary) 70%, #fff));
 			color: white;
 			margin-bottom: 1.5rem;
-			box-shadow: 0 4px 10px rgba(115, 103, 240, 0.4);
+			box-shadow: 0 4px 10px rgba(var(--bs-primary-rgb), 0.4);
 		}
 	</style>
 @endsection
