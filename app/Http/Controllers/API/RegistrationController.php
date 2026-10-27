@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use URL;
 use App\User;
 use App\Company;
+use App\Notifications\WelcomeUserNotification;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -75,7 +76,8 @@ class RegistrationController extends Controller
 							$gender = 'Female';
 						}
 					}
-					$password = Str::random(6);
+					// Never returned or mailed: the welcome email signs the founder in with a magic link.
+					$password = Str::random(40);
 					$user = new User();
 					$user->fill([
 						'email' => $request->input('personal.email'),
@@ -126,6 +128,7 @@ class RegistrationController extends Controller
 					$user->HaveCompany = true;
 					$user->save();
 					DB::commit();
+					$user->notify(new WelcomeUserNotification($user));
 					return response()->json([
 						'status' => true,
 						'code' => 200,
@@ -136,7 +139,6 @@ class RegistrationController extends Controller
 								'last_name' => $request->input('personal.last_name'),
 								'guardian' => $user->guardian,
 								'email' => $user->email,
-								'password' => $password,
 								'phone' => $user->phone,
 								'age' => $user->age,
 								'gender' => $user->gender,

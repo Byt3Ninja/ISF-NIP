@@ -436,15 +436,12 @@
           submitBtn.innerHTML = originalText;
 
           // Show alert
-          Swal.fire({
+          releaseAlert('warning', {
             title: "{{ __('admin.NoQuestionsSelected') }}",
-            text: "{{ __('admin.PleaseSelectQuestions') }}",
-            icon: "warning",
-            confirmButtonText: "{{ __('admin.Ok') }}",
-            customClass: {
-              confirmButton: 'btn btn-primary'
-            },
-            buttonsStyling: false
+            message: "{{ __('admin.PleaseSelectQuestions') }}",
+            confirmText: "{{ __('admin.Ok') }}",
+            confirmColor: 'primary',
+            hideCancel: true
           });
           return;
         }
@@ -585,21 +582,14 @@
 
     document.getElementById('bulk-delete-btn').addEventListener('click',
       function() {
-        Swal.fire({
+        releaseAlert('warning', {
           title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}",
-          reverseButtons: true,
-          customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-          },
-          buttonsStyling: false,
-        }).then((result) => {
-          if (result.isConfirmed) {
+          message: "{{ __('admin.Recover') }}",
+          confirmText: "{{ __('admin.DYes') }}",
+          cancelText: "{{ __('admin.No') }}",
+          confirmColor: 'danger'
+        }).then((ok) => {
+          if (ok) {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action =
@@ -630,21 +620,14 @@
     $(document).on('click', '.delete-question', function(e) {
       e.preventDefault();
       const questionId = $(this).data('id');
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{ __('admin.SureDelete') }}",
-        text: "{{ __('admin.Recover') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-          confirmButton: 'btn btn-danger me-2',
-          cancelButton: 'btn btn-label-secondary'
-        },
-        buttonsStyling: false
-      }).then((result) => {
-        if (result.isConfirmed) {
+        message: "{{ __('admin.Recover') }}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
+      }).then((ok) => {
+        if (ok) {
           const form = document.createElement('form');
           form.method = 'POST';
           form.action =

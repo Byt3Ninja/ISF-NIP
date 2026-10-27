@@ -6,11 +6,9 @@ use Tests\TestCase;
 use App\Policies\CurrencyPolicy;
 use App\User;
 use App\Currency;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CurrencyPolicyTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected CurrencyPolicy $policy;
 

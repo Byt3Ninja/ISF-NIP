@@ -56,6 +56,9 @@
       }
     }
   </style>
+  <!-- BEGIN: Custom CSS-->
+  @include('admin.includes.branding-styles')
+  <!-- END: Custom CSS-->
 </head>
 @php
     $heading = $l == 'en' ? 'Reset Password' : 'اعادة تعيين كلمة المرور';
@@ -76,8 +79,8 @@
     @php
         $setting = App\Settings::findorfail(1)->first();
     @endphp
-    <a class="app-brand auth-cover-brand bg-label-secondary p-4 rounded" href="/dashboard">
-      <img src="{{ $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png') }} " alt="avatar" height="50" width="150">
+    <a class="app-brand auth-cover-brand" href="/dashboard">
+      <img src="{{ $setting ? asset('images/logo/' . $setting->Logo) : asset('images/background/logo.png') }} " alt="logo" class="w-px-50 h-px-50 rounded-circle bg-card border object-contain">
     </a>
     <!-- /Logo -->
     <div class="authentication-inner row m-0">

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Startup;
 
 use App\Events\WebMessage;
-use App\FundingRound;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Startup\FundingStoreRequest;
 use Illuminate\Http\Request;
@@ -45,7 +44,8 @@ class FundingRoundController extends Controller
      */
     public function show(string $id)
     {
-        $round = FundingRound::findOrFail($id);
+        // H3: only the user's own startup's rounds (as update() already did).
+        $round = auth()->user()->company?->fundingRounds()->findOrFail($id) ?? abort(404);
         return response()->json($round);
     }
 
@@ -84,7 +84,7 @@ class FundingRoundController extends Controller
 //                    return response()->json(['state' => 'failed'], 500);
 //                }
 //            }
-            FundingRound::findOrFail($id)->delete();
+            (auth()->user()->company?->fundingRounds()->findOrFail($id) ?? abort(404))->delete();
             return response()->json(['state' => 'success'], 200);
 
     }

@@ -933,16 +933,16 @@
                       </p>
                     @endif
                     
-                    @if($member['city'] || $member['state'] || $member['country'])
-                      <p class="text-muted small mb-3">
-                        <i class="ti ti-map-pin me-1"></i>
-                        {{ $member['city'] ?? '' }}
-                        @if($member['city'] && ($member['state'] || $member['country'])), @endif
-                        {{ $member['state'] ?? '' }}
-                        @if($member['state'] && $member['country']), @endif
-                        {{ $member['country'] ?? '' }}
-                      </p>
-                    @endif
+                    @php
+                      $locationParts = collect([$member['city'] ?? null, $member['state'] ?? null, $member['country'] ?? null])
+                        ->map(fn ($part) => is_string($part) ? trim($part) : $part)
+                        ->reject(fn ($part) => $part === null || $part === '' || mb_strtolower((string) $part) === 'n/a')
+                        ->values();
+                    @endphp
+                    <p class="text-muted small mb-3">
+                      <i class="ti ti-map-pin me-1"></i>
+                      {{ $locationParts->isEmpty() ? ($l == 'ar' ? 'غير متاح' : 'Not available') : $locationParts->implode(', ') }}
+                    </p>
                     
                     <button 
                       type="button" 
@@ -1376,13 +1376,11 @@
           if (data.success) {
             form.reset();
             applyInviteResult(data);
-            Swal.fire({
-              icon: 'success',
+            releaseAlert('success', {
               title: LANG === 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!',
-              text: data.message,
-              confirmButtonText: LANG === 'en' ? 'OK' : 'موافق',
-              customClass: { confirmButton: 'btn btn-primary' },
-              buttonsStyling: false,
+              message: data.message,
+              confirmText: LANG === 'en' ? 'OK' : 'موافق',
+              confirmColor: 'primary'
             });
           } else {
             showInviteError(data);
@@ -1408,31 +1406,21 @@
       // Submit form
       $.post($(this).attr('action'), $(this).serialize())
         .done(function(response) {
-          Swal.fire({
-            icon: 'success',
+          releaseAlert('success', {
             title: '{{ $l == 'en' ? 'Project Updated!' : 'تم تحديث المشروع!' }}',
-            text: '{{ $l == 'en' ? 'Project idea updated successfully.' : 'تم تحديث فكرة المشروع بنجاح.' }}',
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: '{{ $l == 'en' ? 'Project idea updated successfully.' : 'تم تحديث فكرة المشروع بنجاح.' }}',
+            confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmColor: 'primary'
           }).then(() => {
             window.location.reload();
           });
         })
         .fail(function(error) {
-          Swal.fire({
-            icon: 'error',
+          releaseAlert('danger', {
             title: '{{ $l == 'en' ? 'Error!' : 'خطأ!' }}',
-            text: '{{ $l == 'en' ? 'There was an error updating the project.' : 'حدث خطأ أثناء تحديث المشروع.' }}',
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: '{{ $l == 'en' ? 'There was an error updating the project.' : 'حدث خطأ أثناء تحديث المشروع.' }}',
+            confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmColor: 'primary'
           });
         })
         .always(function() {
@@ -1475,17 +1463,11 @@
             $('#team-image-preview').attr('src', '/icons/team-default.svg');
           }
           
-          Swal.fire({
-            icon: 'success',
+          releaseAlert('success', {
             title: '{{ $l == 'en' ? 'Team Info Updated!' : 'تم تحديث معلومات الفريق!' }}',
-            text: '{{ $l == 'en' ? 'Team information updated successfully.' : 'تم تحديث معلومات الفريق بنجاح.' }}',
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: '{{ $l == 'en' ? 'Team information updated successfully.' : 'تم تحديث معلومات الفريق بنجاح.' }}',
+            confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmColor: 'primary'
           }).then(() => {
             // Close the modal instead of reloading the page
             $('#editTeamInfoModal').modal('hide');
@@ -1498,15 +1480,11 @@
           });
         },
         error: function(error) {
-          Swal.fire({
-            icon: 'error',
+          releaseAlert('danger', {
             title: '{{ $l == 'en' ? 'Error!' : 'خطأ!' }}',
-            text: error?.message || '{{ $l == 'en' ? 'There was an error updating the team information.' : 'حدث خطأ أثناء تحديث معلومات الفريق.' }}',
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: error?.message || '{{ $l == 'en' ? 'There was an error updating the team information.' : 'حدث خطأ أثناء تحديث معلومات الفريق.' }}',
+            confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmColor: 'primary'
           });
         },
         complete: function() {
@@ -1563,47 +1541,28 @@
     
     $('#editProjectIdeaModal').modal('hide');
     
-    Swal.fire({
-      icon: 'success',
+    releaseAlert('success', {
       title: '{{ $l == 'en' ? 'Project Idea Saved!' : 'تم حفظ فكرة المشروع!' }}',
-      text: '{{ $l == 'en' ? 'Project idea saved successfully.' : 'تم حفظ فكرة المشروع بنجاح.' }}',
-      confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-      showCancelButton: false,
-      showConfirmButton: true,
-      customClass: {
-        confirmButton: 'btn btn-primary',
-      },
-      buttonsStyling: false,
+      message: '{{ $l == 'en' ? 'Project idea saved successfully.' : 'تم حفظ فكرة المشروع بنجاح.' }}',
+      confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+      confirmColor: 'primary'
     });
   }
 
   function confirmLeaveTeam() {
-    Swal.fire({
+    releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Are you sure?' : 'هل أنت متأكد؟' }}',
-      text: '{{ $l == 'en' ? 'Are you sure you want to leave this team?' : 'هل أنت متأكد أنك تريد مغادرة هذا الفريق؟' }}',
-      icon: 'warning',
-      confirmButtonText: '{{ $l == 'en' ? 'Yes, leave team' : 'نعم، مغادرة الفريق' }}',
-      cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
-      showCancelButton: true,
-      showConfirmButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          icon: 'success',
+      message: '{{ $l == 'en' ? 'Are you sure you want to leave this team?' : 'هل أنت متأكد أنك تريد مغادرة هذا الفريق؟' }}',
+      confirmText: '{{ $l == 'en' ? 'Yes, leave team' : 'نعم، مغادرة الفريق' }}',
+      cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
+        releaseAlert('success', {
           title: '{{ $l == 'en' ? 'Team Left!' : 'تم مغادرة الفريق!' }}',
-          text: '{{ $l == 'en' ? 'You have left the team.' : 'لقد غادرت الفريق.' }}',
-          confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: '{{ $l == 'en' ? 'You have left the team.' : 'لقد غادرت الفريق.' }}',
+          confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+          confirmColor: 'primary'
         }).then(() => {
           window.location.href = `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}&applied=true`;
         });
@@ -1615,42 +1574,28 @@
     var url = '{{ route('hackathon.getOutTeam') }}';
     var token = '{{ csrf_token() }}';
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Remove Team Member?' : 'إزالة عضو الفريق؟' }}',
-      text: `{{ $l == 'en' ? 'Are you sure you want to remove' : 'هل أنت متأكد أنك تريد إزالة' }} ${memberName} {{ $l == 'en' ? 'from the team?' : 'من الفريق؟' }}`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '{{ $l == 'en' ? 'Yes, remove member' : 'نعم، إزالة العضو' }}',
-      cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
-      showCancelButton: true,
-      showConfirmButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: `{{ $l == 'en' ? 'Are you sure you want to remove' : 'هل أنت متأكد أنك تريد إزالة' }} ${memberName} {{ $l == 'en' ? 'from the team?' : 'من الفريق؟' }}`,
+      confirmText: '{{ $l == 'en' ? 'Yes, remove member' : 'نعم، إزالة العضو' }}',
+      cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.post(url, {'_method': 'POST' , '_token': token, 'id': id},
           function(response) {
-            Swal.fire({
-              icon: 'success',
+            releaseAlert('success', {
               title: '{{ $l == 'en' ? 'Member Removed!' : 'تم إزالة العضو!' }}',
-              text: `${memberName} {{ $l == 'en' ? 'has been removed from the team.' : 'تم إزالته من الفريق.' }}`,
-              confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: `${memberName} {{ $l == 'en' ? 'has been removed from the team.' : 'تم إزالته من الفريق.' }}`,
+              confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+              confirmColor: 'primary'
             }).then(() => {
               $('#Member'+id).remove();
               const currentCount = parseInt($('#member-count').text());
               $('#member-count').text(currentCount - 1);
             });
           }).fail(function(error) { 
-            releaseFailureAlert({
+            releaseAlert('danger', {
 							title: "{{ __('admin.Error') }}!",
 							message: error?.message || "{{ __('admin.DeleteFailed') }}",
 						});
@@ -1679,32 +1624,24 @@
             }
             if (btn) { btn.remove(); }
           }
-          Swal.fire({
-            icon: 'success',
+          releaseAlert('success', {
             title: '{{ $l == 'en' ? 'Invitation Resent!' : 'تم إعادة إرسال الدعوة!' }}',
-            text: data.message,
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: data.message,
+            confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmColor: 'primary'
           });
         } else {
           if (btn) { btn.disabled = false; }
-          Swal.fire({
-            icon: 'error',
+          releaseAlert('danger', {
             title: "{{ __('admin.Error') }}!",
-            text: data.message || "{{ __('admin.retry_invitation') }}",
-            confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-            customClass: { confirmButton: 'btn btn-primary' },
-            buttonsStyling: false,
+            message: data.message || "{{ __('admin.retry_invitation') }}",
+            confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+            confirmColor: 'primary'
           });
         }
       }).fail(function(error) {
         if (btn) { btn.disabled = false; }
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: "{{ __('admin.Error') }}!",
           message: error?.responseJSON?.message || "{{ __('admin.retry_invitation') }}",
         });
@@ -1728,20 +1665,14 @@
     // Dismiss the Cancel button's hover tooltip before the dialog opens.
     dismissTooltips(document.querySelector('#pendingMember' + id + ' [data-bs-toggle="tooltip"]'));
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Cancel Invitation?' : 'إلغاء الدعوة؟' }}',
-      text: `{{ $l == 'en' ? 'Are you sure you want to cancel the invitation sent to' : 'هل أنت متأكد أنك تريد إلغاء الدعوة المرسلة إلى' }} ${email}{{ $l == 'en' ? '?' : '؟' }}`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '{{ $l == 'en' ? 'Yes, cancel invitation' : 'نعم، إلغاء الدعوة' }}',
-      cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
-      customClass: {
-        confirmButton: 'btn btn-warning me-2',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: `{{ $l == 'en' ? 'Are you sure you want to cancel the invitation sent to' : 'هل أنت متأكد أنك تريد إلغاء الدعوة المرسلة إلى' }} ${email}{{ $l == 'en' ? '?' : '؟' }}`,
+      confirmText: '{{ $l == 'en' ? 'Yes, cancel invitation' : 'نعم، إلغاء الدعوة' }}',
+      cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      confirmColor: 'warning'
+    }).then((ok) => {
+      if (ok) {
         $.post(url, {'_method': 'POST' , '_token': token, 'id': id})
           .done(function(data) {
             if (data.success) {
@@ -1750,27 +1681,21 @@
               dismissTooltips(); // clear any tooltip orphaned by the removed row
               updateSeatUI(data);
               resetInviteCard(data.member_id);
-              Swal.fire({
-                icon: 'success',
+              releaseAlert('success', {
                 title: '{{ $l == 'en' ? 'Invitation Cancelled!' : 'تم إلغاء الدعوة!' }}',
-                text: `{{ $l == 'en' ? 'The invitation to' : 'الدعوة إلى' }} ${email} {{ $l == 'en' ? 'has been cancelled.' : 'تم إلغاؤها.' }}`,
-                confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-                showCancelButton: false,
-                showConfirmButton: true,
-                customClass: {
-                  confirmButton: 'btn btn-primary',
-                },
-                buttonsStyling: false,
+                message: `{{ $l == 'en' ? 'The invitation to' : 'الدعوة إلى' }} ${email} {{ $l == 'en' ? 'has been cancelled.' : 'تم إلغاؤها.' }}`,
+                confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+                confirmColor: 'primary'
               });
             } else {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}!",
                 message: data.message || "{{ __('admin.CancelFailed') }}",
               });
             }
           }).fail(function(error) {
             console.log(error);
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}!",
               message: error?.message || "{{ __('admin.CancelFailed') }}",
             });
@@ -1780,31 +1705,19 @@
   }
 
   function confirmDisbandTeam() {
-    Swal.fire({
+    releaseAlert('warning', {
       title: '{{ $l == 'en' ? 'Are you sure?' : 'هل أنت متأكد؟' }}',
-      text: '{{ $l == 'en' ? 'Are you sure you want to disband this team? This action cannot be undone and will remove all members.' : 'هل أنت متأكد أنك تريد حل هذا الفريق؟ هذا الإجراء لا يمكن التراجع عنه وسيؤدي إلى إزالة جميع الأعضاء.' }}',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '{{ $l == 'en' ? 'Yes, disband team' : 'نعم، حل الفريق' }}',
-      cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          icon: 'success',
+      message: '{{ $l == 'en' ? 'Are you sure you want to disband this team? This action cannot be undone and will remove all members.' : 'هل أنت متأكد أنك تريد حل هذا الفريق؟ هذا الإجراء لا يمكن التراجع عنه وسيؤدي إلى إزالة جميع الأعضاء.' }}',
+      confirmText: '{{ $l == 'en' ? 'Yes, disband team' : 'نعم، حل الفريق' }}',
+      cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
+        releaseAlert('success', {
           title: '{{ $l == 'en' ? 'Team Disbanded!' : 'تم حل الفريق!' }}',
-          text: '{{ $l == 'en' ? 'Team has been disbanded successfully.' : 'تم حل الفريق بنجاح.' }}',
-          confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: '{{ $l == 'en' ? 'Team has been disbanded successfully.' : 'تم حل الفريق بنجاح.' }}',
+          confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+          confirmColor: 'primary'
         }).then(() => {
           window.location.href = `/dashboard/hackathon/details?id=${HACKATHON_ID_TEAM_PAGE}&applied=true`;
         });
@@ -1905,33 +1818,24 @@
     }
 
     if (isInvited) {
-      Swal.fire({
-        icon: 'info',
+      releaseAlert('info', {
         title: '{{ $l == 'en' ? 'Invitation Already Sent' : 'تم إرسال الدعوة بالفعل' }}',
-        text: `{{ $l == 'en' ? 'An invitation has already been sent to' : 'تم إرسال دعوة بالفعل إلى' }} ${name} (${email}).`,
-        confirmButtonText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: `{{ $l == 'en' ? 'An invitation has already been sent to' : 'تم إرسال دعوة بالفعل إلى' }} ${name} (${email}).`,
+        confirmText: '{{ $l == 'en' ? 'OK' : 'موافق' }}',
+        confirmColor: 'primary'
       });
       return;
     }
 
-    Swal.fire({
+    releaseAlert('info', {
       title: '{{ $l == 'en' ? 'Send Invitation?' : 'إرسال دعوة؟' }}',
-      text: `{{ $l == 'en' ? 'Send invitation to' : 'إرسال دعوة إلى' }} ${name} (${email}){{ $l == 'en' ? '?' : '؟' }}`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: '{{ $l == 'en' ? 'Yes, send invitation' : 'نعم، إرسال دعوة' }}',
-      cancelButtonText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
-      customClass: {
-        confirmButton: 'btn btn-primary me-2',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: `{{ $l == 'en' ? 'Send invitation to' : 'إرسال دعوة إلى' }} ${name} (${email}){{ $l == 'en' ? '?' : '؟' }}`,
+      confirmText: '{{ $l == 'en' ? 'Yes, send invitation' : 'نعم، إرسال دعوة' }}',
+      cancelText: '{{ $l == 'en' ? 'Cancel' : 'إلغاء' }}',
+      confirmColor: 'primary',
+      hideCancel: false
+    }).then((ok) => {
+      if (ok) {
         const button = $(`.invite-member-btn[data-member-id="${id}"]`);
         button.prop('disabled', true);
         button.find('.btn-text').addClass('d-none');
@@ -1943,13 +1847,11 @@
               // applyInviteResult() flips this card (button + border + badge) to
               // the invited state via markInviteCard(data.member.user_id).
               applyInviteResult(data);
-              Swal.fire({
-                icon: 'success',
+              releaseAlert('success', {
                 title: LANG === 'en' ? 'Invitation Sent!' : 'تم إرسال الدعوة!',
-                text: `${LANG === 'en' ? 'Invitation sent to' : 'تم إرسال دعوة إلى'} ${name}.`,
-                confirmButtonText: LANG === 'en' ? 'OK' : 'موافق',
-                customClass: { confirmButton: 'btn btn-primary' },
-                buttonsStyling: false,
+                message: `${LANG === 'en' ? 'Invitation sent to' : 'تم إرسال دعوة إلى'} ${name}.`,
+                confirmText: LANG === 'en' ? 'OK' : 'موافق',
+                confirmColor: 'primary'
               });
               button.prop('disabled', true); // keep disabled after success
             } else {
@@ -2029,16 +1931,15 @@
       document.body.removeChild(a);
     })
     .catch(() => {
-      if (typeof releaseFailureAlert === 'function') {
-        releaseFailureAlert({
+      if (typeof releaseAlert === 'function') {
+        releaseAlert('danger', {
           title: l === 'en' ? 'Error' : 'خطأ',
           message: l === 'en' ? 'File download failed. Please try again.' : 'فشل تحميل الملف. يرجى المحاولة مرة أخرى.',
         });
       } else if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: l === 'en' ? 'Error' : 'خطأ',
-          text: l === 'en' ? 'File download failed. Please try again.' : 'فشل تحميل الملف. يرجى المحاولة مرة أخرى.',
+          message: l === 'en' ? 'File download failed. Please try again.' : 'فشل تحميل الملف. يرجى المحاولة مرة أخرى.'
         });
       }
     });
@@ -2172,13 +2073,13 @@
       uploadFileBtnSpinner.classList.add('d-none');
       is_upload_in_progress = false;
       if (data.status === 'success') {
-        releaseSuccessAlert({
+        releaseAlert('success', {
           title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
           message: l === 'en' ? "Your file has been uploaded successfully." : "تم رفع الملف بنجاح.",
         });
         createListItem(file, data);
       } else {
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: l === 'en' ? "Error" : "خطأ",
           message: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
         });
@@ -2188,7 +2089,7 @@
       uploadFileBtnText.classList.remove('d-none');
       uploadFileBtnSpinner.classList.add('d-none');
       is_upload_in_progress = false;
-      releaseFailureAlert({
+      releaseAlert('danger', {
         title: l === 'en' ? "Error" : "خطأ",
         message: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
       });
@@ -2227,21 +2128,14 @@
       return;
     }
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-      text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
-      icon: 'warning',
-      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
-      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
-      showCancelButton: true,
-      showConfirmButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
+      confirmText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
+      cancelText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
           method: 'DELETE',
           headers: {
@@ -2267,44 +2161,26 @@
               placeholder.style.display = '';
             }
 
-            Swal.fire({
+            releaseAlert('success', {
               title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-              text: '{{ $l == "en" ? "File removed successfully." : "تم حذف الملف بنجاح." }}',
-              icon: 'success',
-              confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: '{{ $l == "en" ? "File removed successfully." : "تم حذف الملف بنجاح." }}',
+              confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              confirmColor: 'primary'
             });
           } else {
-            Swal.fire({
+            releaseAlert('danger', {
               title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-              text: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
-              icon: 'error',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+              confirmColor: 'primary'
             });
           }
         })
         .catch(err => {
           console.error(err);
-          Swal.fire({
+          releaseAlert('danger', {
             title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-            text: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
-            icon: 'error',
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
+            confirmColor: 'primary'
           });
         });
       }
@@ -2320,33 +2196,23 @@
     const taskStatus = document.getElementById('taskStatus').value;
 
     if (!taskTitle) {
-      Swal.fire({
-        icon: 'warning',
+      releaseAlert('warning', {
         title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
-        text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
+        confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        confirmColor: 'primary',
+        hideCancel: true
       });
       return;
     }
 
     if (!taskAssignee) {
-      Swal.fire({
-        icon: 'warning',
+      releaseAlert('warning', {
         title: '{{ $l == "en" ? "Assignee Required" : "المسؤول مطلوب" }}',
-        text: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
+        confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        confirmColor: 'primary',
+        hideCancel: true
       });
       return;
     }
@@ -2374,17 +2240,11 @@
     .then(response => response.json())
     .then(data => {
       if (data.success === true) {
-        Swal.fire({
-          icon: 'success',
+        releaseAlert('success', {
           title: '{{ $l == "en" ? "Task Added!" : "تمت إضافة المهمة!" }}',
-          text: data.message || '{{ $l == "en" ? "Task added successfully." : "تمت إضافة المهمة بنجاح." }}',
-          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: data.message || '{{ $l == "en" ? "Task added successfully." : "تمت إضافة المهمة بنجاح." }}',
+          confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          confirmColor: 'primary'
         }).then(() => {
           window.location.reload();
         });
@@ -2394,33 +2254,21 @@
         document.getElementById('taskForm').reset();
 
       } else {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-          text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
-          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+          confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          confirmColor: 'primary'
         });
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      Swal.fire({
-        icon: 'error',
+      releaseAlert('danger', {
         title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-        text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+        confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        confirmColor: 'primary'
       });
     });
   }
@@ -2464,33 +2312,23 @@
     const editingTaskId = taskModal.getAttribute('data-editing-task');
 
     if (!taskTitle) {
-      Swal.fire({
-        icon: 'warning',
+      releaseAlert('warning', {
         title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
-        text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
+        confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        confirmColor: 'primary',
+        hideCancel: true
       });
       return;
     }
 
     if (!taskAssignee) {
-      Swal.fire({
-        icon: 'warning',
+      releaseAlert('warning', {
         title: '{{ $l == "en" ? "Assignee Required" : "المسؤول مطلوب" }}',
-        text: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '{{ $l == "en" ? "Please select an assignee for the task." : "يرجى اختيار مسؤول للمهمة." }}',
+        confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        confirmColor: 'primary',
+        hideCancel: true
       });
       return;
     }
@@ -2533,17 +2371,11 @@
       console.log('Response data:', data);
       
       if (data.success === true) {
-        Swal.fire({
-          icon: 'success',
+        releaseAlert('success', {
           title: '{{ $l == "en" ? "Task Updated!" : "تم تعديل المهمة!" }}',
-          text: data.message || '{{ $l == "en" ? "Task updated successfully." : "تم تعديل المهمة بنجاح." }}',
-          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: data.message || '{{ $l == "en" ? "Task updated successfully." : "تم تعديل المهمة بنجاح." }}',
+          confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          confirmColor: 'primary'
         }).then(() => {
           window.location.reload();
         });
@@ -2553,17 +2385,11 @@
         taskModal.removeAttribute('data-editing-task');
 
       } else {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-          text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
-          confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-          showCancelButton: false,
-          showConfirmButton: true,
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
+          message: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+          confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+          confirmColor: 'primary'
         });
       }
     })
@@ -2571,17 +2397,11 @@
       console.error('Fetch error details:', error);
       console.error('Error message:', error.message);
       
-      Swal.fire({
-        icon: 'error',
+      releaseAlert('danger', {
         title: '{{ $l == "en" ? "Connection Error" : "خطأ في الاتصال" }}',
-        text: '{{ $l == "en" ? "Failed to connect to the server. Please check your internet connection and try again." : "فشل الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى." }}',
-        confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-        showCancelButton: false,
-        showConfirmButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary',
-        },
-        buttonsStyling: false,
+        message: '{{ $l == "en" ? "Failed to connect to the server. Please check your internet connection and try again." : "فشل الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى." }}',
+        confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+        confirmColor: 'primary'
       });
     });
   }
@@ -2595,21 +2415,14 @@
       return;
     }
 
-    Swal.fire({
-      icon: 'warning',
+    releaseAlert('warning', {
       title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-      text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
-      confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
-      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
-      showCancelButton: true,
-      showConfirmButton: true,
-      customClass: {
-        confirmButton: 'btn btn-danger',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
+      confirmText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
+      cancelText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
           method: 'DELETE',
           headers: {
@@ -2622,47 +2435,29 @@
         .then(data => {
           console.log('data', data);
           if (data.success) {
-            Swal.fire({
-              icon: 'success',
+            releaseAlert('success', {
               title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-              text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
-              confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
+              confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              confirmColor: 'primary'
             }).then(() => {
               // Remove deleted task
               $(`#task-${taskId}`).remove();
             });
           } else {
-            Swal.fire({
+            releaseAlert('danger', {
               title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-              text: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
-              icon: 'error',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+              confirmColor: 'primary'
             });
           }
         })
         .catch(error => {
           console.error(error);
-          Swal.fire({
+          releaseAlert('danger', {
             title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-            text: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
-            icon: 'error',
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
+            confirmColor: 'primary'
           });
         });
       }
@@ -2680,21 +2475,14 @@
 
     const status = isChecked ? 'DONE' : 'TODO';
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-      text: `{{ $l == "en" ? "Do you want to mark the task as: " : "هل تريد وضع علامة على المهمة كـ: " }}${status}"?`,
-      icon: 'warning',
-      confirmButtonText: '{{ $l == "en" ? "Yes, update it!" : "نعم، قم بتحديثها!" }}',
-      cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
-      showCancelButton: true,
-      showConfirmButton: true,
-      customClass: {
-        confirmButton: 'btn btn-primary',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      buttonsStyling: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
+      message: `{{ $l == "en" ? "Do you want to mark the task as: " : "هل تريد وضع علامة على المهمة كـ: " }}${status}"?`,
+      confirmText: '{{ $l == "en" ? "Yes, update it!" : "نعم، قم بتحديثها!" }}',
+      cancelText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+      confirmColor: 'primary'
+    }).then((ok) => {
+      if (ok) {
         fetch("{{ url('/dashboard/hackathon/EdittodoListStatus') }}", {
           method: 'POST',
           headers: {
@@ -2707,17 +2495,11 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            Swal.fire({
+            releaseAlert('success', {
               title: '{{ $l == "en" ? "Updated!" : "تم التحديث!" }}',
-              text: data.message || '{{ $l == "en" ? "Task status has been updated." : "تم تحديث حالة المهمة." }}',
-              icon: 'success',
-              confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: data.message || '{{ $l == "en" ? "Task status has been updated." : "تم تحديث حالة المهمة." }}',
+              confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              confirmColor: 'primary'
             }).then(() => {
               // Get current task checkbox and label
               const currentTaskCheckbox = $(`#task${taskId}-checkbox`);
@@ -2728,31 +2510,19 @@
               currentTaskLabel.css('text-decoration', isChecked ? 'line-through' : 'none');
             });
           } else {
-            Swal.fire({
+            releaseAlert('danger', {
               title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-              text: data.message || '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
-              icon: 'error',
-              showCancelButton: false,
-              showConfirmButton: true,
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: data.message || '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
+              confirmColor: 'primary'
             });
           }
         })
         .catch(error => {
           console.error(error);
-          Swal.fire({
+          releaseAlert('danger', {
             title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-            text: '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
-            icon: 'error',
-            showCancelButton: false,
-            showConfirmButton: true,
-            customClass: {
-              confirmButton: 'btn btn-primary',
-            },
-            buttonsStyling: false,
+            message: '{{ $l == "en" ? "Could not update the task." : "تعذر تحديث المهمة." }}',
+            confirmColor: 'primary'
           });
         });
       }

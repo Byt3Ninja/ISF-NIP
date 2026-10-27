@@ -380,7 +380,7 @@ class ScreeningEvaluationResults extends Model
 							foreach( $company->results as $results_key => $result )
 							{
 								if( !isset( $result->weighted_score ) ) { $result->weighted_score = 0; }
-								if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria->parent_id; }
+								if( !isset( $result->parent_criteria ) ) { $result->parent_criteria = $result->criteria?->parent_id; }
 								$getResult = $subCriteria->where('id', $result->criteria_id)->first();
 								if( !empty( $getResult ) )
 								{
@@ -413,7 +413,8 @@ class ScreeningEvaluationResults extends Model
 					$evaluation_status = $judger_evaluation->status;
 					$score = $judger_evaluation->results->groupBy('parent_criteria')->sum( function( $grouped ) use ( $evaluation ) {
 						$parent_id = $grouped->first()->parent_criteria;
-						$groupWeight = $evaluation->categories->where('id', $grouped->first()->parent_criteria)->first()->weight;
+						// A result whose criterion is no sub-criterion of this evaluation has no category weight.
+						$groupWeight = $evaluation->categories->where('id', $grouped->first()->parent_criteria)->first()?->weight ?? 0;
 						return $groupWeight * $grouped->sum('weighted_score');
 					});
 					$judger_score = round( ( $score * 100 ) );

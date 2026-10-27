@@ -79,6 +79,7 @@ return [
 	'validate_phone_format' => 'The phone number is not a valid E164 format.',
 	'validate_terms_agreement_required' => 'You must agree to the terms and conditions',
 	'validate_terms_agreement_in' => 'You must agree to the terms and conditions',
+	'provider_registration_rejected' => 'Your service provider application was not approved, so this account cannot sign in. Please contact the platform team for details.',
 	'provider_registration_recorded' => 'Your registration has been recorded. Please wait for admin approval. You will receive an email when approved.',
 	'submittedAt' => 'Submitted At',
 	'ActionTaken' => 'Action Taken',
@@ -113,7 +114,7 @@ return [
 	'registeringAs' => 'I\'m registering as',
 	'area_of_expertise' => 'Area of expertise',
 	'linkedin_profile' => 'LinkedIn Profile',
-	'create_account' => 'Create your account',
+	'create_account' => 'Create account',
 	'sign_up_subheading' => 'Sign up to unlock your dashboard, community and more.',
 	'welcome_community' => 'Welcome to the community',
 	'connect_text' => 'Connect with founders, mentors and service providers who are shaping the future of work.',
@@ -122,4 +123,9 @@ return [
 
 	'founder_or_mentor_q' => 'Are you a founder or mentor?',
 	'register_as_founder_mentor' => 'Register as founder or mentor',
+
+	'reset_password_subheading' => 'Enter your email and we will send you a link to reset your password.',
+	'reset_password_cover_title' => 'Remembered your password?',
+	'reset_password_cover_text' => 'No need to reset it. Sign in with your current password and continue where you left off.',
+	'Back to login' => 'Back to login',
 ];

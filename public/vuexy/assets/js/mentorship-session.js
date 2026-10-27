@@ -3,548 +3,323 @@
 const currentLang = document.documentElement.lang;
 const en = currentLang === 'en';
 
-document.addEventListener('DOMContentLoaded', function () {
-  var timeFromSelect = $('#timeFrom');
-  var timeToSelect = $('#timeTo');
-
-  // Populate timeFromSelect and timeToSelect with 30-minute intervals
-  for (var i = 0; i < 48; i++) {
-    var time = moment()
-      .startOf('day')
-      .add(i * 30, 'minutes');
-    var timeFormatted = time.format('hh:mm A');
-    var option = $('<option>').val(time.format('HH:mm:ss')).text(timeFormatted);
-    timeFromSelect.append(option.clone());
-    timeToSelect.append(option.clone());
-  }
-});
-
-let responseData = [];
-
-function normalizeResponseDays(response) {
-  return response.map(item => {
-    if (typeof item.days === 'string') {
-      // Convert single string in dddd format to ddd format array
-      const dayInDdd = moment(item.days, 'dddd').format('ddd');
-      item.days = [dayInDdd];
-    } else if (Array.isArray(item.days)) {
-      // Convert each day in the array to ddd format
-      item.days = item.days.map(day => moment(day, 'ddd').format('ddd'));
-    }
-    return item;
-  });
-}
+let allSlots = [];
+let blockedIntervals = [];
+let offlineAllowed = false;
+let startups = [];
+let flatpickrInstance = null;
 
 function request(id, mentor, organization_id = null, cycle_id = null) {
-  
   $('#mentorid').val(id);
   $('#rname').html(mentor);
-  
-    const url = new URL(window.location);
-    url.searchParams.set('id', cycle_id);
-    history.pushState({}, '', url); // This updates the URL without reload
+
+  const url = new URL(window.location);
+  url.searchParams.set('id', cycle_id);
+  history.pushState({}, '', url);
 
   let _token = $('meta[name="csrf-token"]').attr('content');
   $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': _token } });
+  
+  // Fetch predefined slots for the mentor
   $.ajax({
-    type: 'POST',
-    url: '/dashboard/mentors/modify',
-    data: { id: id, rtype: 5, _token: _token },
+    type: 'GET',
+    url: `/dashboard/availability/slots/${id}?cycle_id=${cycle_id}&organization_id=${organization_id}`,
     success: function (response) {
-      responseData = normalizeResponseDays(response); // Normalize days
-      // console.log('response', responseData);
+      if (response.success) {
+        allSlots = response.data;
+        blockedIntervals = response.blocked_intervals || [];
+        offlineAllowed = response.offline_allowed;
+        startups = response.startups || [];
 
-      $('#addOrganizationID').val(organization_id);
-      $('#addCycleID').val(cycle_id);
+        $('#addOrganizationID').val(organization_id);
+        $('#addCycleID').val(cycle_id);
 
-      onSuccess(responseData);
+        onSuccess(response);
+      } else {
+        showError(en ? 'Error loading slots.' : 'حدث خطأ أثناء تحميل المواعيد.');
+      }
     },
     error: function (error) {
-      // console.log(error);
-      alert(en ? 'Error Occurred, Try again!' : 'حدث خطأ، حاول مرة أخرى!');
+      showError(en ? 'Error Occurred, Try again!' : 'حدث خطأ، حاول مرة أخرى!');
     }
   });
 }
 
 function onSuccess(response) {
   $('#SendRequest').modal('show');
-  $('#SendRequest li').remove();
-
-  // Clear date value when modal shows
-  $('#flatpickr-datetimeLimit').val('').removeClass('is-invalid');
+  
+  // Hide legacy schedule container
+  $('#mentor-schedule-container').hide();
+  
+  // Reset validation and container states
+  $('#flatpickr-datetimeLimit').val('');
   $('.date-error').hide();
-  
-  // Clear time dropdowns
-  $('#timeFrom').empty();
-  $('#timeTo').empty();
-  
-  // Hide duration container and feedback messages
-  $('#duration-container').removeClass('d-flex').addClass('d-none');
-  $('#time-feedback').hide();
+  $('.slots-error').hide();
+  $('#slots-container').removeClass('border-danger').html(`
+    <p class="text-muted mb-0 text-center py-4">
+      ${en ? 'Please select a date to view available slots' : 'الرجاء اختيار تاريخ لعرض المواعيد المتاحة'}
+    </p>
+  `);
 
-  renderScheduleData(response);
+  // Handle Startup selection dropdown for Admins/Tenant Admins
+  const startupContainer = $('#startup-select-container');
+  const startupSelect = $('#startup_user_id');
+  startupSelect.empty().append(`<option value="">${en ? 'Select a startup' : 'اختر شركة ناشئة'}</option>`);
+
+  if (startups && startups.length > 0) {
+    startupContainer.removeClass('d-none');
+    startups.forEach(startup => {
+      startupSelect.append(`<option value="${startup.id}">${startup.name}</option>`);
+    });
+    $('#addUserID').prop('disabled', true);
+    startupSelect.prop('disabled', false).prop('required', true);
+  } else {
+    startupContainer.addClass('d-none');
+    $('#addUserID').prop('disabled', false);
+    startupSelect.prop('disabled', true).prop('required', false);
+  }
+
+  // Initialize inline Flatpickr calendar
+  if (flatpickrInstance) {
+    flatpickrInstance.destroy();
+  }
+
+  flatpickrInstance = flatpickr('#inline-calendar', {
+    inline: true,
+    dateFormat: 'Y-m-d',
+    minDate: 'today',
+    enable: [
+      function (date) {
+        const dateStr = moment(date).format('YYYY-MM-DD');
+        return getAvailableSlotsForDate(dateStr).length > 0;
+      }
+    ],
+    onChange: function(selectedDates, dateStr) {
+      $('#flatpickr-datetimeLimit').val(dateStr);
+      $('.date-error').hide();
+      renderSlotsForDate(dateStr);
+    }
+  });
 }
 
-function renderScheduleData(response) {
-  var flatpickrDateTimeLimit = $('#flatpickr-datetimeLimit');
-  if (response && response.length > 0) {
-    // Date
-    $.each(response, function (i, item) {
-      if (flatpickrDateTimeLimit) {
-        var enabledDays = response.reduce((acc, item) => {
-          return acc.concat(item?.days?.filter(day => day !== undefined && day !== null));
-        }, []);
-
-        // console.log('enabledDays', enabledDays);
-
-        flatpickrDateTimeLimit.flatpickr({
-          dateFormat: 'Y-m-d',
-          minDate: 'today',
-          enable: [
-            function (date) {
-              return enabledDays.includes(date.toLocaleString('en-US', { weekday: 'short' }));
-            }
-          ]
-        });
-      }
-
-      let note = '';
-      let time = item.tfrom + (en ? ' To ' : ' الي ') + item.tto;
-      if (item.notes) {
-        note = item.notes;
-      }
-      switch (item.type) {
-        case 'OneDay':
-          $('<li>')
-        .html('<b>' + item.dfrom + '</b> (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').')
-        .appendTo('#schedule');
-          break;
-        case 'Weekly':
-          $('<li>')
-        .html('<b>' + (en ? 'Weekly' : 'أسبوعي') + '</b> (' + item.days.join(', ') + ') - (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').')
-        .appendTo('#schedule');
-          break;
-        case 'WorkingDays':
-          $('<li>')
-        .html('<b>' + (en ? 'All working days' : 'جميع أيام العمل') + '</b> (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').')
-        .appendTo('#schedule');
-          break;
-        case 'Period':
-          $('<li>')
-        .html(
-          '<b>' + (en ? 'From ' : 'من ') + item.dfrom + (en ? ' To ' : ' إلى ') + item.dto + '</b> (' + moment(item.tfrom, 'HH:mm:ss').format('hh:mm A') + ' - ' + moment(item.tto, 'HH:mm:ss').format('hh:mm A') + ').'
-        )
-        .appendTo('#schedule');
-          break;
-        default:
-      }
-    });
-  } else {
-    $('<li>')
-      .html(en ? 'No records saved.' : 'لا توجد سجلات محفوظة.')
-      .appendTo('#schedule');
-
-    // Date
-    if (flatpickrDateTimeLimit) {
-      flatpickrDateTimeLimit.flatpickr({
-        dateFormat: 'Y-m-d',
-        minDate: 'today'
-      });
-    }
-  }
-}
-
-$('#session-form').on('submit', e => {
-  const selectedDateValue = $('#flatpickr-datetimeLimit').val();
-  const timeFromValue = $('#timeFrom').val();
-  const timeToValue = $('#timeTo').val();
-
-  // Validate date selection
-  if (!selectedDateValue) {
-    e.preventDefault();
-    $('#flatpickr-datetimeLimit').addClass('is-invalid').trigger('focus');
-    $('.date-error')
-      .text(en ? 'Please select a date.' : 'يرجى اختيار تاريخ.')
-      .show();
-    return;
-  }
-
-  // Validate time selection
-  if (!timeFromValue || !timeToValue) {
-    e.preventDefault();
-    $('#time-feedback').text(en ? 'Please select both start and end times.' : 'يرجى اختيار وقت البدء والانتهاء.').show();
-    return;
-  }
-
-  // Ensure that timeToValue is greater than timeFromValue
-  if (moment(timeToValue, 'HH:mm:ss').isSameOrBefore(moment(timeFromValue, 'HH:mm:ss'))) {
-    e.preventDefault();
-    $('#time-feedback').text(en ? 'End time must be after start time.' : 'يجب أن يكون وقت الانتهاء بعد وقت البدء.').show();
-    return;
-  }
-
-  // Ensure minimum duration (at least 30 minutes)
-  const duration = moment.duration(moment(timeToValue, 'HH:mm:ss').diff(moment(timeFromValue, 'HH:mm:ss')));
-  const minutes = duration.asMinutes();
+function getAvailableSlotsForDate(dateStr) {
+  const dayName = moment(dateStr, 'YYYY-MM-DD').format('dddd');
+  const dayShort = moment(dateStr, 'YYYY-MM-DD').format('ddd');
   
-  if (minutes < 30) {
-    e.preventDefault();
-    $('#time-feedback').text(en ? 'Session must be at least 30 minutes long.' : 'يجب أن تكون الجلسة 30 دقيقة على الأقل.').show();
-    return;
-  }
-
-  // Hide any error messages if validation passes
-  $('#time-feedback').hide();
-  $('.date-error').hide();
-});
-
-$('#flatpickr-datetimeLimit').on('change', e => {
-  // console.log('responseData', responseData);
-  // console.log('changed', e.target.value);
-  $('#flatpickr-datetimeLimit').removeClass('is-invalid');
-  $('.date-error').hide();
-
-  // Get the day name of the selected date
-  const selectedDate = e.target.value;
-  const dayName = moment(selectedDate, 'YYYY-MM-DD').format('ddd');
-  // console.log('Day Name:', dayName);
-
-  // Find ALL schedule entries for the selected day (not just the first one)
-  const filteredDateObjs = responseData.filter(item => {
-    const modifiedDays = item?.days?.filter((day) => day !== undefined && day !== null);
-    // console.log('item.days', modifiedDays);
-    return modifiedDays && modifiedDays.includes(dayName);
-  });
-  // console.log('filteredDateObjs', filteredDateObjs);
-
-  // Find booked sessions for the selected date
-  const bookedSessions = responseData.filter(item => {
-    return item.type === 'Session' && item.date === selectedDate;
-  });
-  // console.log('bookedSessions', bookedSessions);
-
-  // Always clear time options when date changes, regardless of availability
-  const timeFromSelect = $('#timeFrom');
-  const timeToSelect = $('#timeTo');
-  
-  // Clear previous options
-  timeFromSelect.empty();
-  timeToSelect.empty();
-
-  if (filteredDateObjs.length > 0) {
-
-    // Merge and sort time periods
-    const mergedPeriods = mergeTimePeriods(filteredDateObjs);
-    // console.log('mergedPeriods', mergedPeriods);
-
-    // Check if selected date is today
-    const isToday = moment(selectedDate, 'YYYY-MM-DD').isSame(moment(), 'day');
-    
-    // Generate time slots for "From" dropdown (excludes end times)
-    let fromTimeSlots = generateFromTimeSlots(mergedPeriods);
-    
-    // Filter out booked session times
-    fromTimeSlots = filterOutBookedTimes(fromTimeSlots, bookedSessions);
-    
-    // Filter out past times if the selected date is today
-    if (isToday) {
-      const currentTime = moment();
-      fromTimeSlots = fromTimeSlots.filter(slot => 
-        slot.moment.isAfter(currentTime)
-      );
-    }
-    // console.log('fromTimeSlots', fromTimeSlots);
-
-    // Populate timeFrom dropdown with available slots (no end times)
-    fromTimeSlots.forEach((timeSlot, index) => {
-      const option = $('<option>').val(timeSlot.value).text(timeSlot.display);
-      timeFromSelect.append(option);
-    });
-
-    // Auto-select first option in timeFrom
-    if (fromTimeSlots.length > 0) {
-      timeFromSelect.val(fromTimeSlots[0].value);
-      // Update timeTo options based on first timeFrom selection
-      updateTimeToOptions(fromTimeSlots[0].value);
-      
-      // Auto-select the first available option in timeTo
-      if (timeToSelect.children().length > 0) {
-        timeToSelect.val(timeToSelect.find('option:first').val()).trigger('change');
+  // Filter slots matching this date
+  let matchingSlots = allSlots.filter(slot => {
+    if (slot.weekly) {
+      const match = (slot.weekday === dayName || slot.weekday === dayShort);
+      if (match && slot.starts_from) {
+        return moment(dateStr).isSameOrAfter(moment(slot.starts_from, 'YYYY-MM-DD'));
       }
-    }
-  } else {
-    // No availability found - show message that no times are available
-    $('<option>')
-      .val('')
-      .text(en ? 'No available times for this date' : 'لا توجد أوقات متاحة لهذا التاريخ')
-      .prop('disabled', true)
-      .appendTo(timeFromSelect);
-      
-    $('<option>')
-      .val('')
-      .text(en ? 'No available times for this date' : 'لا توجد أوقات متاحة لهذا التاريخ')
-      .prop('disabled', true)
-      .appendTo(timeToSelect);
-  }
-});
-
-// Function to merge overlapping or consecutive time periods
-function mergeTimePeriods(periods) {
-  if (periods.length === 0) return [];
-
-  // Convert periods to moments and sort by start time
-  const sortedPeriods = periods
-    .filter(period => period.tfrom && period.tto)
-    .map(period => ({
-      start: moment(period.tfrom, 'HH:mm:ss'),
-      end: moment(period.tto, 'HH:mm:ss')
-    }))
-    .sort((a, b) => a.start.diff(b.start));
-
-  const merged = [];
-  let current = sortedPeriods[0];
-
-  for (let i = 1; i < sortedPeriods.length; i++) {
-    const next = sortedPeriods[i];
-    
-    // Check if periods overlap or are consecutive (touching)
-    if (current.end.isSameOrAfter(next.start)) {
-      // Merge periods by extending the end time
-      current.end = moment.max(current.end, next.end);
+      return match;
     } else {
-      // No overlap, add current period to merged and move to next
-      merged.push(current);
-      current = next;
-    }
-  }
-  
-  // Add the last period
-  merged.push(current);
-  
-  return merged;
-}
-
-// Function to filter out booked session times from available time slots
-function filterOutBookedTimes(timeSlots, bookedSessions) {
-  if (!bookedSessions || bookedSessions.length === 0) {
-    return timeSlots;
-  }
-
-  return timeSlots.filter(slot => {
-    const slotTime = moment(slot.value, 'HH:mm:ss');
-    
-    // Check if this time slot conflicts with any booked session
-    const hasConflict = bookedSessions.some(session => {
-      const sessionStart = moment(session.tfrom, 'HH:mm:ss');
-      const sessionEnd = moment(session.tto, 'HH:mm:ss');
-      
-      // Check if the slot time falls within the booked session time range
-      // We need to ensure the slot doesn't start during an existing session
-      return slotTime.isSameOrAfter(sessionStart) && slotTime.isBefore(sessionEnd);
-    });
-    
-    return !hasConflict;
-  });
-}
-
-// Function to generate time slots for "From" dropdown (excludes end times)
-function generateFromTimeSlots(mergedPeriods) {
-  const allSlots = [];
-  
-  mergedPeriods.forEach(period => {
-    let currentTime = period.start.clone();
-    
-    // Generate 30-minute intervals within this period, but exclude the very end
-    while (currentTime.isBefore(period.end)) {
-      allSlots.push({
-        value: currentTime.format('HH:mm:ss'),
-        display: currentTime.format('hh:mm A'),
-        moment: currentTime.clone()
-      });
-      currentTime.add(30, 'minutes');
+      return slot.date === dateStr;
     }
   });
-  
-  // Remove duplicates and sort
-  const uniqueSlots = allSlots.filter((slot, index, self) => 
-    index === self.findIndex(s => s.value === slot.value)
-  ).sort((a, b) => a.moment.diff(b.moment));
-  
-  return uniqueSlots;
-}
 
-// Function to generate time slots for "To" dropdown (includes end times)
-function generateToTimeSlots(mergedPeriods) {
-  const allSlots = [];
-  
-  mergedPeriods.forEach(period => {
-    let currentTime = period.start.clone();
+  // Filter out blocked/booked slots
+  return matchingSlots.filter(slot => {
+    const slotStart = moment(dateStr + ' ' + slot.start_time, 'YYYY-MM-DD HH:mm').unix();
+    const slotEnd = moment(dateStr + ' ' + slot.end_time, 'YYYY-MM-DD HH:mm').unix();
     
-    // Generate 30-minute intervals within this period
-    while (currentTime.isBefore(period.end)) {
-      allSlots.push({
-        value: currentTime.format('HH:mm:ss'),
-        display: currentTime.format('hh:mm A'),
-        moment: currentTime.clone()
-      });
-      currentTime.add(30, 'minutes');
-    }
-    
-    // Always add the end time for "To" options
-    allSlots.push({
-      value: period.end.format('HH:mm:ss'),
-      display: period.end.format('hh:mm A'),
-      moment: period.end.clone()
+    const isBlocked = blockedIntervals.some(blocked => {
+      return slotStart < blocked.end && slotEnd > blocked.start;
     });
+    
+    return !isBlocked;
   });
-  
-  // Remove duplicates and sort
-  const uniqueSlots = allSlots.filter((slot, index, self) => 
-    index === self.findIndex(s => s.value === slot.value)
-  ).sort((a, b) => a.moment.diff(b.moment));
-  
-  return uniqueSlots;
 }
 
-// Function to update timeTo options based on selected timeFrom
-function updateTimeToOptions(timeFromValue) {
-  const timeToSelect = $('#timeTo');
-  const selectedDate = $('#flatpickr-datetimeLimit').val();
-  
-  if (!selectedDate || !timeFromValue) return;
+function renderSlotsForDate(dateStr) {
+  const container = $('#slots-container');
+  container.empty();
+  $('.slots-error').hide();
 
-  const dayName = moment(selectedDate, 'YYYY-MM-DD').format('ddd');
-  const filteredDateObjs = responseData.filter(item => item.days && item.days.includes(dayName));
-  
-  if (filteredDateObjs.length === 0) return;
+  const availableSlots = getAvailableSlotsForDate(dateStr);
 
-  // Find booked sessions for the selected date
-  const bookedSessions = responseData.filter(item => {
-    return item.type === 'Session' && item.date === selectedDate;
-  });
-
-  // Clear current options
-  timeToSelect.empty();
-
-  // Merge time periods and generate all slots for "To" (includes end times)
-  const mergedPeriods = mergeTimePeriods(filteredDateObjs);
-  let allToTimeSlots = generateToTimeSlots(mergedPeriods);
-
-  // Parse the selected from time
-  const selectedFromTime = moment(timeFromValue, 'HH:mm:ss');
-
-  // Check if selected date is today
-  const isToday = moment(selectedDate, 'YYYY-MM-DD').isSame(moment(), 'day');
-  
-  // Filter out past times if the selected date is today
-  if (isToday) {
-    const currentTime = moment();
-    allToTimeSlots = allToTimeSlots.filter(slot => 
-      slot.moment.isAfter(currentTime)
-    );
+  if (availableSlots.length === 0) {
+    container.html(`
+      <p class="text-muted mb-0 text-center py-4">
+        ${en ? 'No available slots for this date' : 'لا توجد مواعيد متاحة لهذا التاريخ'}
+      </p>
+    `);
+    return;
   }
 
-  // Find valid end times (at least 30 minutes after the selected from time)
-  let validEndSlots = allToTimeSlots.filter(slot => 
-    slot.moment.isAfter(selectedFromTime.clone().add(29, 'minutes'))
-  );
-
-  // Filter out times that would conflict with booked sessions
-  // We need to ensure the entire session (from timeFrom to timeTo) doesn't overlap with existing sessions
-  validEndSlots = validEndSlots.filter(slot => {
-    const proposedEndTime = moment(slot.value, 'HH:mm:ss');
+  availableSlots.forEach(slot => {
+    const startTime12 = moment(slot.start_time, 'HH:mm').format('hh:mm A');
+    const endTime12 = moment(slot.end_time, 'HH:mm').format('hh:mm A');
+    const duration = moment(slot.end_time, 'HH:mm').diff(moment(slot.start_time, 'HH:mm'), 'minutes');
     
-    // Check if the proposed session time range conflicts with any booked session
-    const hasConflict = bookedSessions.some(session => {
-      const sessionStart = moment(session.tfrom, 'HH:mm:ss');
-      const sessionEnd = moment(session.tto, 'HH:mm:ss');
-      
-      // Check for any overlap between proposed session and existing session
-      return (selectedFromTime.isBefore(sessionEnd) && proposedEndTime.isAfter(sessionStart));
+    const slotValue = JSON.stringify({
+      date: dateStr,
+      time_from: slot.start_time + ':00',
+      time_to: slot.end_time + ':00',
+      session_type: slot.session_type
     });
+
+    const isOffline = slot.session_type === 'Offline';
+    const addressText = slot.Address || '-';
     
-    return !hasConflict;
-  });
+    const mapsLinkHtml = (isOffline && slot.location) ? `
+      <div class="mt-2">
+        <a href="${slot.location}" target="_blank" class="btn btn-xs btn-label-primary">
+          <i class="ti ti-map-pin me-1"></i> ${en ? 'Google Maps' : 'خرائط جوجل'}
+        </a>
+      </div>
+    ` : '';
 
-  // Populate timeTo dropdown with valid options
-  validEndSlots.forEach(slot => {
-    const option = $('<option>').val(slot.value).text(slot.display);
-    timeToSelect.append(option);
-  });
+    const locationHtml = isOffline ? `
+      <div class="mt-2 pt-2 border-top small text-muted">
+        <div><strong>${en ? 'Address:' : 'العنوان:'}</strong> ${addressText}</div>
+        ${mapsLinkHtml}
+      </div>
+    ` : '';
 
-  // Auto-select the first available option if none is selected
-  if (timeToSelect.val() === null && timeToSelect.children().length > 0) {
-    timeToSelect.val(timeToSelect.find('option:first').val());
+    const slotCard = $(`
+      <div class="card border mb-2 p-2 shadow-none hover-elevation-sm">
+        <div class="form-check d-flex align-items-start m-0">
+          <input class="form-check-input slot-checkbox me-2 mt-1" type="checkbox" id="slot_${slot.id}_${dateStr}" value='${slotValue}'>
+          <label class="form-check-label w-100 cursor-pointer" for="slot_${slot.id}_${dateStr}">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-semibold text-dark">${startTime12} - ${endTime12}</span>
+              <span class="badge bg-label-secondary small">${duration} ${en ? 'mins' : 'دقيقة'}</span>
+            </div>
+            <div>
+              <span class="badge ${slot.session_type === 'Online' ? 'bg-label-success' : 'bg-label-warning'}">${slot.session_type}</span>
+            </div>
+            ${locationHtml}
+          </label>
+        </div>
+      </div>
+    `);
+
+    container.append(slotCard);
+  });
+}
+
+function showError(message) {
+  if (typeof Swal !== 'undefined') {
+    releaseAlert('danger', {
+      title: en ? 'Error' : 'خطأ',
+      message: message,
+      confirmText: en ? 'OK' : 'موافق'
+    });
+  } else {
+    alert(message);
   }
 }
 
-$('#timeFrom').on('change', (e) => {
-  const timeFromValue = e.target.value;
-  const timeToValue = $('#timeTo').val();
-  const timeToSelect = $('#timeTo');
-
-  if (!timeFromValue) return;
-
-  // Update the timeTo options to only show times after timeFrom
-  updateTimeToOptions(timeFromValue);
-
-  // Check if current timeTo value is still valid (after timeFrom)
-  if (timeToValue && moment(timeFromValue, 'HH:mm:ss').isSameOrAfter(moment(timeToValue, 'HH:mm:ss'))) {
-    // Find the next available time slot (at least 30 minutes after timeFrom)
-    const nextAvailableTime = moment(timeFromValue, 'HH:mm:ss').add(30, 'minutes');
-    const nextOption = timeToSelect.find(`option[value="${nextAvailableTime.format('HH:mm:ss')}"]`);
-    
-    if (nextOption.length > 0) {
-      timeToSelect.val(nextAvailableTime.format('HH:mm:ss')).trigger('change');
+// Form validation and submission
+$(document).ready(function() {
+  $('#session-form').off('submit').on('submit', function(e) {
+    // 1. Validate startup selection for admins
+    const startupSelect = $('#startup_user_id');
+    if (startupSelect.is(':visible') && !startupSelect.val()) {
+      e.preventDefault();
+      startupSelect.addClass('is-invalid');
+      $('.startup-error').show();
+      return;
     } else {
-      // If no exact match, select the first available option
-      const firstOption = timeToSelect.find('option:first');
-      if (firstOption.length > 0) {
-        timeToSelect.val(firstOption.val()).trigger('change');
+      startupSelect.removeClass('is-invalid');
+      $('.startup-error').hide();
+    }
+
+    // 2. Validate slot selection
+    const checkedSlots = $('.slot-checkbox:checked');
+    if (checkedSlots.length === 0) {
+      e.preventDefault();
+      const errorMsg = en ? 'Please select an available time slot.' : 'يرجى اختيار موعد متاح';
+      $('.slots-error').text(errorMsg).show();
+      $('#slots-container').addClass('border-danger');
+      showError(errorMsg);
+      return;
+    } else {
+      $('.slots-error').hide();
+      $('#slots-container').removeClass('border-danger');
+    }
+
+    // 3. Validate file format and size
+    const fileInput = $('#inputGroupFile01')[0];
+    if (fileInput && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const allowedExtensions = /(\.pdf|\.doc|\.docx|\.ppt|\.xls|\.png|\.jpeg)$/i;
+      
+      if (!allowedExtensions.exec(file.name)) {
+        e.preventDefault();
+        showError(en 
+          ? 'Unsupported file format. Allowed formats: PDF, DOC, DOCX, PPT, XLS, PNG, JPEG.' 
+          : 'صيغة الملف غير مدعومة. الصيغ المسموح بها:\n PDF, DOC, DOCX, PPT, XLS, PNG, JPEG'
+        );
+        return;
+      }
+      
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        e.preventDefault();
+        showError(en
+          ? 'File size exceeds the 10MB limit.'
+          : 'يتجاوز حجم الملف الحد الأقصى 10 ميجابايت'
+        );
+        return;
       }
     }
-    $('#time-feedback').hide();
-  } else {
-    $('#time-feedback').hide();
-  }
-});
 
-$('#timeTo').on('change', (e) => {
-  const timeFromValue = $('#timeFrom').val();
-  const timeToValue = e.target.value;
+    // 4. Append selected_dates to form
+    $('#session-form').find('input[name^="selected_dates"]').remove();
+    
+    checkedSlots.each((index, el) => {
+      const slotData = JSON.parse($(el).val());
+      $('<input>').attr({
+        type: 'hidden',
+        name: `selected_dates[${index}][date]`,
+        value: slotData.date
+      }).appendTo('#session-form');
+      
+      $('<input>').attr({
+        type: 'hidden',
+        name: `selected_dates[${index}][time_from]`,
+        value: slotData.time_from
+      }).appendTo('#session-form');
+      
+      $('<input>').attr({
+        type: 'hidden',
+        name: `selected_dates[${index}][time_to]`,
+        value: slotData.time_to
+      }).appendTo('#session-form');
+      
+      $('<input>').attr({
+        type: 'hidden',
+        name: `selected_dates[${index}][session_type]`,
+        value: slotData.session_type
+      }).appendTo('#session-form');
+    });
 
-  if (!timeFromValue || !timeToValue) return;
+    // Populate legacy parameters using the first slot for compatibility
+    const firstSlotData = JSON.parse(checkedSlots.first().val());
+    $('#flatpickr-datetimeLimit').val(firstSlotData.date);
+    
+    const appendOrSet = (name, value) => {
+      if ($(`input[name="${name}"]`).length === 0) {
+        $('<input>').attr({
+          type: 'hidden',
+          name: name,
+          value: value
+        }).appendTo('#session-form');
+      } else {
+        $(`input[name="${name}"]`).val(value);
+      }
+    };
 
-  // Ensure that timeToValue is greater than timeFromValue
-  if (moment(timeToValue, 'HH:mm:ss').isSameOrBefore(moment(timeFromValue, 'HH:mm:ss'))) {
-    $('#time-feedback').show();
-    // Reset to first available option
-    const firstOption = $('#timeTo').find('option:first');
-    if (firstOption.length > 0) {
-      $('#timeTo').val(firstOption.val());
-      // Trigger change again with the corrected value
-      setTimeout(() => $('#timeTo').trigger('change'), 100);
-    }
-    return;
-  } else {
-    $('#time-feedback').hide();
-  }
+    appendOrSet('timeFrom', firstSlotData.time_from);
+    appendOrSet('timeTo', firstSlotData.time_to);
+    appendOrSet('session_start_time', firstSlotData.time_from);
+    appendOrSet('session_end_time', firstSlotData.time_to);
+    appendOrSet('session_type', firstSlotData.session_type);
 
-  // Calculate and display duration
-  const duration = moment.duration(moment(timeToValue, 'HH:mm:ss').diff(moment(timeFromValue, 'HH:mm:ss')));
-  const minutes = duration.asMinutes();
-
-  $('#duration-container').removeClass('d-none').addClass('d-flex');
-  $('#duration').html(`${minutes} ${en ? 'minutes' : 'دقائق'}`);
-
-  // Update period select if it exists
-  const periodSelect = $('#period');
-  if (periodSelect.length > 0) {
-    const matchingOption = periodSelect.find(`option[value="${minutes}"]`);
-    if (matchingOption.length > 0) {
-      periodSelect.val(minutes).trigger('change');
-    } else {
-      periodSelect.val(30).trigger('change'); // Default to 30 minutes
-    }
-  }
+    const duration = moment(firstSlotData.time_to, 'HH:mm:ss').diff(moment(firstSlotData.time_from, 'HH:mm:ss'), 'minutes');
+    appendOrSet('period', duration);
+  });
 });

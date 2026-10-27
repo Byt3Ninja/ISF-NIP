@@ -19,7 +19,8 @@
                     </h2>
 
                     @if(!empty($messageBody))
-                        <p style="margin: 0 0 16px;">{{ $messageBody }}</p>
+                        {{-- Sanitized rich-text HTML (RichTextSanitizer) from the invitation editor. --}}
+                        <div style="margin: 0 0 16px;">{!! $messageBody !!}</div>
                     @else
                         <p style="margin: 0 0 16px;">{{ $isRtl ? 'تمت دعوتك للانضمام كمرشد.' : 'You have been invited to join as a mentor.' }}</p>
                     @endif
@@ -62,9 +63,9 @@
                     <p style="margin: 0;">{{ $isRtl ? 'مع أطيب التحيات،' : 'Best regards,' }}</p>
                     <p style="margin: 0; font-weight: 600;">
                         @if($isRtl)
-                            فريق {{ $invitePlatformName ?? config('app.name', 'GrowthLabs') }}
+                            فريق {{ $org_name ?? $invitePlatformName ?? config('app.name', 'GrowthLabs') }}
                         @else
-                            {{ $invitePlatformName ?? config('app.name', 'GrowthLabs') }} Team
+                            {{ $org_name ?? $invitePlatformName ?? config('app.name', 'GrowthLabs') }} Team
                         @endif
                     </p>
                 </div>

@@ -133,16 +133,13 @@ window.KanbanConfig = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const showAlert = (title, text, icon, confirmBtnText = 'Yes', showCancel = true) =>
-  Swal.fire({
-    title, text, icon,
-    showCancelButton: showCancel,
-    confirmButtonText: confirmBtnText,
-    cancelButtonText: icon === 'error' ? '' : '{{ __('admin.No') }}',
-    customClass: {
-      confirmButton: `btn btn-${icon === 'warning' ? 'danger' : 'primary'} me-3`,
-      cancelButton: showCancel ? 'btn btn-label-secondary' : ''
-    },
-    buttonsStyling: false
+  releaseAlert(icon === 'error' ? 'danger' : icon, {
+    title,
+    message: text,
+    confirmText: confirmBtnText,
+    cancelText: icon === 'error' ? '' : '{{ __('admin.No') }}',
+    confirmColor: icon === 'warning' ? 'danger' : 'primary',
+    hideCancel: !showCancel,
   });
 
 const exportFormat = (inner) => {
@@ -346,6 +343,7 @@ $(function () {
       ]
     }],
     initComplete: function () {
+      const $wrapper = $(this.api().table().container());
       const api            = this.api();
       const $filterWrap    = $('<div class="d-flex flex-wrap flex-md-nowrap gap-3 ms-3"></div>');
       $('.dataTables_length').after($filterWrap);
@@ -398,6 +396,28 @@ $(function () {
         $('.dataTables_filter .form-control').removeClass('form-control-sm');
         $('.dataTables_length .form-select').removeClass('form-select-sm');
       }, 300);
+      
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
     }
   });
 
@@ -413,14 +433,20 @@ $(function () {
   // ─── Delete Record ────────────────────────────────────────────────────────
   $table.on('click', 'tbody .delete-record', function () {
     const $row = resolveRow($(this));
-    if (!$row) return Swal.fire('Error!', 'Could not identify the task.', 'error');
+    if (!$row) return releaseAlert('danger', {
+      title: 'Error!',
+      message: 'Could not identify the task.'
+    });
 
     const rowData = window.dt_task.row($row).data();
-    if (!rowData?.id) return Swal.fire('Error!', 'Could not identify the task.', 'error');
+    if (!rowData?.id) return releaseAlert('danger', {
+      title: 'Error!',
+      message: 'Could not identify the task.'
+    });
 
     showAlert('{{ __('admin.SureDelete') }}', '{{ __('admin.Recover') }}', 'warning', '{{ __('admin.DYes') }}')
-      .then(result => {
-        if (!result.isConfirmed) return;
+      .then(ok => {
+        if (!ok) return;
         $.ajax({
           url: `/dashboard/tasks/${rowData.id}`,
           method: 'DELETE',
@@ -445,31 +471,25 @@ $(function () {
     const isArchived   = rowData.overallStatus === 'archived';
     const newStatus    = isArchived ? 'pending' : 'archived';
     const actionLabel  = isArchived ? '{{ __('admin.reopen_task') }}' : '{{ __('admin.archive_task') }}';
-    const actionIcon   = isArchived ? 'ti-refresh' : 'ti-archive';
     const actionColor  = isArchived ? 'btn-warning' : 'btn-secondary';
     const bodyText     = isArchived
       ? '{{ __('admin.reopen_task_confirm') }}'
       : '{{ __('admin.archive_task_confirm') }}';
 
-    Swal.fire({
+    releaseAlert('info', {
       title: actionLabel,
-      html: `<p class="mb-0">${bodyText}</p>
+      message: `<p class="mb-0">${bodyText}</p>
              <div class="mt-3">
                <span class="badge bg-label-secondary me-1">
                  <i class="ti ti-clipboard-text ti-xs me-1"></i>${rowData.title}
                </span>
              </div>`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: `<i class="ti ${actionIcon} me-1"></i>${actionLabel}`,
-      cancelButtonText: '{{ __('admin.Cancel') }}',
-      customClass: {
-        confirmButton: `btn ${actionColor} me-3`,
-        cancelButton: 'btn btn-label-secondary'
-      },
-      buttonsStyling: false
-    }).then(result => {
-      if (!result.isConfirmed) return;
+      confirmText: actionLabel,
+      cancelText: '{{ __('admin.Cancel') }}',
+      confirmColor: actionColor.replace(/^btn-/, ''),
+      hideCancel: false
+    }).then(ok => {
+      if (!ok) return;
 
       $.ajax({
         url: `/dashboard/tasks/${rowData.id}`,
@@ -480,16 +500,12 @@ $(function () {
         success: function (response) {
           rowData.overallStatus = newStatus;
           window.dt_task.row($row).data(rowData).draw(false);
-          Swal.fire({
+          releaseAlert('success', {
             title: '{{ __('admin.Done') }}',
-            text: response.message || '{{ __('admin.Task_updated_successfully.') }}',
-            icon: 'success',
-            showCancelButton: false,
-            confirmButtonText: '{{ __('admin.Ok') }}',
-            customClass: { confirmButton: 'btn btn-primary' },
-            buttonsStyling: false,
-            timer: 2500,
-            timerProgressBar: true
+            message: response.message || '{{ __('admin.Task_updated_successfully.') }}',
+            confirmText: '{{ __('admin.Ok') }}',
+            confirmColor: 'primary',
+            autoClose: 2500
           });
         },
         error: xhr => toastr.error(xhr.responseJSON?.message || '{{ __('admin.unexpected_error') }}')
@@ -1250,7 +1266,10 @@ $(function () {
       formData.delete('taskAssignees[]');
       ($('#task-assignees').val() || []).forEach(id => formData.append('assignees[]', id));
 
-      if (!window.dt_task) return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+      if (!window.dt_task) return releaseAlert('danger', {
+        title: '{{ __('admin.error') }}',
+        message: '{{ __('admin.table_not_initialized') }}'
+      });
 
       const $editRow = $(form).data('edit-row');
       const taskId   = $editRow ? window.dt_task.row($editRow).data().id : null;

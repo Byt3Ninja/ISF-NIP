@@ -718,20 +718,14 @@
     // Delete expertise
     $(document).on('click', '.delete-expertise', async function () {
       const id = $(this).data('id');
-      Swal.fire({
+      releaseAlert('warning', {
         title: isRtl ? 'هل أنت متأكد؟' : 'Are you sure?',
-        text: isRtl ? 'سيؤدي هذا أيضاً إلى حذف جميع التخصصات المرتبطة!' : 'This will also delete all related specializations!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: isRtl ? 'نعم، احذف!' : 'Yes, delete it!',
-        cancelButtonText: isRtl ? 'إلغاء' : 'Cancel',
-        customClass: {
-          confirmButton: 'btn btn-danger me-3',
-          cancelButton: 'btn btn-label-secondary'
-        },
-        buttonsStyling: false
-      }).then(async function (result) {
-        if (result.value) {
+        message: isRtl ? 'سيؤدي هذا أيضاً إلى حذف جميع التخصصات المرتبطة!' : 'This will also delete all related specializations!',
+        confirmText: isRtl ? 'نعم، احذف!' : 'Yes, delete it!',
+        cancelText: isRtl ? 'إلغاء' : 'Cancel',
+        confirmColor: 'danger'
+      }).then(async function (ok) {
+        if (ok) {
           const deleteResult = await api.delete(API_ENDPOINTS.expertise.delete(id));
           
           if (deleteResult.success) {
@@ -753,19 +747,15 @@
               dt_specialization.draw();
             }
             
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: isRtl ? 'تم الحذف!' : 'Deleted!',
               message: isRtl ? 'تم حذف مجال الخبرة.' : 'Area of expertise has been deleted.',
             });
           } else {
-            Swal.fire({
-              icon: 'error',
+            releaseAlert('danger', {
               title: isRtl ? 'خطأ' : 'Error',
-              text: deleteResult.error?.message || (isRtl ? 'فشل حذف مجال الخبرة' : 'Failed to delete expertise'),
-              customClass: {
-                confirmButton: 'btn btn-primary'
-              },
-              buttonsStyling: false
+              message: deleteResult.error?.message || (isRtl ? 'فشل حذف مجال الخبرة' : 'Failed to delete expertise'),
+              confirmColor: 'primary'
             });
           }
         }
@@ -777,20 +767,14 @@
       const id = $(this).data('id');
       const specialization = specializationData.find(s => s.id == id);
       
-      Swal.fire({
+      releaseAlert('warning', {
         title: isRtl ? 'هل أنت متأكد؟' : 'Are you sure?',
-        text: isRtl ? 'لن تتمكن من التراجع عن هذا!' : 'You won\'t be able to revert this!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: isRtl ? 'نعم، احذف!' : 'Yes, delete it!',
-        cancelButtonText: isRtl ? 'إلغاء' : 'Cancel',
-        customClass: {
-          confirmButton: 'btn btn-danger me-3',
-          cancelButton: 'btn btn-label-secondary'
-        },
-        buttonsStyling: false
-      }).then(async function (result) {
-        if (result.value) {
+        message: isRtl ? 'لن تتمكن من التراجع عن هذا!' : 'You won\'t be able to revert this!',
+        confirmText: isRtl ? 'نعم، احذف!' : 'Yes, delete it!',
+        cancelText: isRtl ? 'إلغاء' : 'Cancel',
+        confirmColor: 'danger'
+      }).then(async function (ok) {
+        if (ok) {
           const deleteResult = await api.delete(API_ENDPOINTS.specialization.delete(id));
           
           if (deleteResult.success) {
@@ -815,19 +799,15 @@
             dt_specialization.rows.add(specializationData);
             dt_specialization.draw();
             
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: isRtl ? 'تم الحذف!' : 'Deleted!',
               message: isRtl ? 'تم حذف التخصص.' : 'Specialization has been deleted.',
             });
           } else {
-            Swal.fire({
-              icon: 'error',
+            releaseAlert('danger', {
               title: isRtl ? 'خطأ' : 'Error',
-              text: deleteResult.error?.message || (isRtl ? 'فشل حذف التخصص' : 'Failed to delete specialization'),
-              customClass: {
-                confirmButton: 'btn btn-primary'
-              },
-              buttonsStyling: false
+              message: deleteResult.error?.message || (isRtl ? 'فشل حذف التخصص' : 'Failed to delete specialization'),
+              confirmColor: 'primary'
             });
           }
         }
@@ -928,21 +908,17 @@
         $('#expertiseForm button[type="submit"]').text(isRtl ? 'إضافة' : 'Add');
 
         // Show success message
-        releaseSuccessAlert({
+        releaseAlert('success', {
           title: isRtl ? 'نجاح!' : 'Success!',
           message: isEditing ? 
             (isRtl ? 'تم تحديث مجال الخبرة بنجاح.' : 'Area of expertise updated successfully.') : 
             (isRtl ? 'تم إضافة مجال الخبرة بنجاح.' : 'Area of expertise added successfully.'),
         });
       } else {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: isRtl ? 'خطأ' : 'Error',
-          text: result.error?.message || (isRtl ? 'فشل حفظ مجال الخبرة' : 'Failed to save expertise'),
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          message: result.error?.message || (isRtl ? 'فشل حفظ مجال الخبرة' : 'Failed to save expertise'),
+          confirmColor: 'primary'
         });
       }
     }
@@ -1088,21 +1064,17 @@
         $('#specializationForm button[type="submit"]').text(isRtl ? 'إضافة' : 'Add');
 
         // Show success message
-        releaseSuccessAlert({
+        releaseAlert('success', {
           title: isRtl ? 'نجاح!' : 'Success!',
           message: isEditing ? 
             (isRtl ? 'تم تحديث التخصص بنجاح.' : 'Specialization updated successfully.') : 
             (isRtl ? 'تم إضافة التخصص بنجاح.' : 'Specialization added successfully.'),
         });
       } else {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: isRtl ? 'خطأ' : 'Error',
-          text: result.error?.message || (isRtl ? 'فشل حفظ التخصص' : 'Failed to save specialization'),
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          message: result.error?.message || (isRtl ? 'فشل حفظ التخصص' : 'Failed to save specialization'),
+          confirmColor: 'primary'
         });
       }
     }
@@ -1161,14 +1133,10 @@
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith('.json')) {
-      Swal.fire({
-        icon: 'error',
+      releaseAlert('danger', {
         title: isRtl ? 'خطأ' : 'Error',
-        text: isRtl ? 'نوع الملف غير مدعوم. يرجى تحميل ملف بصيغة JSON فقط' : 'Unsupported file type. Please upload a JSON file only.',
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        },
-        buttonsStyling: false
+        message: isRtl ? 'نوع الملف غير مدعوم. يرجى تحميل ملف بصيغة JSON فقط' : 'Unsupported file type. Please upload a JSON file only.',
+        confirmColor: 'primary'
       });
       event.target.value = '';
       return;
@@ -1216,19 +1184,16 @@
               message += isRtl ? `. تم تخطي ${skippedCount} عنصر` : `. ${skippedCount} items skipped.`;
             }
             
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: isRtl ? 'نجاح!' : 'Success!',
               message: message
             });
           } else if (skippedCount > 0) {
-            Swal.fire({
-              icon: 'warning',
+            releaseAlert('warning', {
               title: isRtl ? 'تحذير' : 'Warning',
-              text: isRtl ? 'تم تخطي جميع العناصر' : 'All items were skipped.',
-              customClass: {
-                confirmButton: 'btn btn-primary'
-              },
-              buttonsStyling: false
+              message: isRtl ? 'تم تخطي جميع العناصر' : 'All items were skipped.',
+              confirmColor: 'primary',
+              hideCancel: true
             });
           }
         } else {
@@ -1236,14 +1201,10 @@
         }
 
       } catch (error) {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: isRtl ? 'خطأ' : 'Error',
-          text: error.message || (isRtl ? 'ملف غير صالح أو فارغ' : 'Invalid or empty file'),
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          message: error.message || (isRtl ? 'ملف غير صالح أو فارغ' : 'Invalid or empty file'),
+          confirmColor: 'primary'
         });
       }
     };
@@ -1256,14 +1217,10 @@
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith('.json')) {
-      Swal.fire({
-        icon: 'error',
+      releaseAlert('danger', {
         title: isRtl ? 'خطأ' : 'Error',
-        text: isRtl ? 'نوع الملف غير مدعوم. يرجى تحميل ملف بصيغة JSON فقط' : 'Unsupported file type. Please upload a JSON file only.',
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        },
-        buttonsStyling: false
+        message: isRtl ? 'نوع الملف غير مدعوم. يرجى تحميل ملف بصيغة JSON فقط' : 'Unsupported file type. Please upload a JSON file only.',
+        confirmColor: 'primary'
       });
       event.target.value = '';
       return;
@@ -1330,19 +1287,16 @@
               message += isRtl ? `. تم تخطي ${skippedCount} عنصر` : `. ${skippedCount} items skipped.`;
             }
             
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: isRtl ? 'نجاح!' : 'Success!',
               message: message
             });
           } else if (skippedCount > 0) {
-            Swal.fire({
-              icon: 'warning',
+            releaseAlert('warning', {
               title: isRtl ? 'تحذير' : 'Warning',
-              text: isRtl ? 'تم تخطي جميع العناصر' : 'All items were skipped.',
-              customClass: {
-                confirmButton: 'btn btn-primary'
-              },
-              buttonsStyling: false
+              message: isRtl ? 'تم تخطي جميع العناصر' : 'All items were skipped.',
+              confirmColor: 'primary',
+              hideCancel: true
             });
           }
         } else {
@@ -1350,14 +1304,10 @@
         }
 
       } catch (error) {
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: isRtl ? 'خطأ' : 'Error',
-          text: error.message || (isRtl ? 'ملف غير صالح أو فارغ' : 'Invalid or empty file'),
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          message: error.message || (isRtl ? 'ملف غير صالح أو فارغ' : 'Invalid or empty file'),
+          confirmColor: 'primary'
         });
       }
     };

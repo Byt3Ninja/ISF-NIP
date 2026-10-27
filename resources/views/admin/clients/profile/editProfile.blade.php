@@ -293,7 +293,7 @@
 <script>
   const lang = $('html').attr('lang') || 'en';
   function submitFormData() {
-    releaseSuccessAlert({
+    releaseAlert('success', {
       title: lang === 'ar' ? 'تم!' : 'Done!',
       message: lang === 'ar' ? 'تم حفظ الملف الشخصي بنجاح' : 'Profile saved successfully',
     });

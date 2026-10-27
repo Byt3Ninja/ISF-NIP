@@ -15,6 +15,12 @@
 	<style>
 		:root {
 			--primary: {{ $program->main_color }};
+			/* The program's own color wins over Platform Branding: re-point the branding variables
+			   (admin/includes/branding-styles) so every themed element follows the program. */
+			--theme-main: var(--primary);
+			@if ($program->main_rgb)
+			--theme-main-rgb: {{ $program->main_rgb }};
+			@endif
 			--on-primary: #ffffff;
 			--background: #f8fafc;
 			--surface: #ffffff;
@@ -24,6 +30,8 @@
 			--secondary: #0891b2;
 			--tertiary: #d97706;
 			--outline: #e2e8f0;
+			/* Strength of the program's gradient start/end blobs in the hero. */
+			--hero-tint: 0.3;
 		}
 
 		/* Override default theme purple/primary colors with the customized main color */
@@ -77,8 +85,8 @@
 		}
 
 		.hero-gradient {
-			background: radial-gradient(circle at 20% 30%, {{ $program->start_color }} 0%, transparent 50%),
-						radial-gradient(circle at 80% 70%, {{ $program->end_color }} 0%, transparent 50%);
+			background: radial-gradient(circle at 20% 30%, rgba({{ $program->start_rgb }}, var(--hero-tint)) 0%, transparent 80%),
+						radial-gradient(circle at 80% 70%, rgba({{ $program->end_rgb }}, var(--hero-tint)) 0%, transparent 80%);
 		}
 
 		.btn-primary-custom {
@@ -1112,30 +1120,17 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									initApplicationWizard();
 									stepper.to(3);
 								} else {
-									Swal.fire({ 
-										icon: 'error',
-										title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
-										text: response.message,
-										showCancelButton: false,
-										showConfirmButton: true,
-										customClass: {
-											confirmButton: 'btn btn-primary',
-											cancelButton: 'btn btn-label-secondary'
-										},
-										buttonsStyling: false,
+									releaseAlert('danger', {
+									  title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+									  message: response.message,
+									  confirmColor: 'primary'
 									});
 								}
 							} else {
-								Swal.fire({ 
-									icon: 'error',
-									title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
-									text: response.message,
-									showCancelButton: false,
-									showConfirmButton: true,
-									customClass: {
-										confirmButton: 'btn btn-primary',
-									},
-									buttonsStyling: false,
+								releaseAlert('danger', {
+								  title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+								  message: response.message,
+								  confirmColor: 'primary'
 								});
 							}
 						},
@@ -1152,16 +1147,10 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 								$('#initial-email').addClass('is-invalid');
 								return;
 							}
-							Swal.fire({
-								icon: 'error',
-								title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
-								text: 'Error validating email. Please try again.',
-								showCancelButton: false,
-								showConfirmButton: true,
-								customClass: {
-									confirmButton: 'btn btn-primary',
-								},
-								buttonsStyling: false,
+							releaseAlert('danger', {
+							  title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+							  message: 'Error validating email. Please try again.',
+							  confirmColor: 'primary'
 							});
 						},
 						// Always release the lock: this step advances the stepper on
@@ -1209,34 +1198,22 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 						window.location.href = response.url;
 					} else {
 						unlockButton($btn);
-						Swal.fire({
-							title: '{{ $l == "ar" ? "خطأ" : "Authentication Failed" }}',
-							text: response.message,
-							icon: 'error',
-							showCancelButton: false,
-							showConfirmButton: true,
-							confirmButtonText: '{{ $l == "ar" ? "حسناً" : "OK" }}',
-							customClass: {
-								confirmButton: 'btn btn-primary',
-							},
-							buttonsStyling: false,
+						releaseAlert('danger', {
+						  title: '{{ $l == "ar" ? "خطأ" : "Authentication Failed" }}',
+						  message: response.message,
+						  confirmText: '{{ $l == "ar" ? "حسناً" : "OK" }}',
+						  confirmColor: 'primary'
 						});
 					}
 				},
 				error: function(error) {
 					console.log(error);
 					unlockButton($btn);
-					Swal.fire({
-						title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
-					 	text: '{{ $l == "ar" ? "حدث خطأ أثناء المصادقة. يرجى المحاولة مرة أخرى." : "An error occurred during authentication. Please try again." }}',
-					  icon: 'error',
-						showCancelButton: false,
-						showConfirmButton: true,
-						confirmButtonText: '{{ $l == "ar" ? "حسناً" : "OK" }}',
-						customClass: {
-							confirmButton: 'btn btn-primary',
-						},
-						buttonsStyling: false,
+					releaseAlert('danger', {
+					  title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+					  message: '{{ $l == "ar" ? "حدث خطأ أثناء المصادقة. يرجى المحاولة مرة أخرى." : "An error occurred during authentication. Please try again." }}',
+					  confirmText: '{{ $l == "ar" ? "حسناً" : "OK" }}',
+					  confirmColor: 'primary'
 					});
 				}
 			});
@@ -1588,17 +1565,12 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 			if (!isValid) {
 				$skippedInputs.each(function(i) { this.disabled = previouslyDisabled[i]; });
-				Swal.fire({
-					title: '{{ $l == "ar" ? "نموذج غير مكتمل" : "Incomplete Form" }}',
-					text: '{{ $l == "ar" ? "يرجى ملء جميع الحقول المطلوبة." : "Please fill out all required fields." }}',
-					icon: 'warning',
-					showCancelButton: false,
-					showConfirmButton: true,
-					confirmButtonText: "{{ __('admin.OK') }}",
-					customClass: {
-						confirmButton: 'btn btn-primary',
-					},
-					buttonsStyling: false,
+				releaseAlert('warning', {
+				  title: '{{ $l == "ar" ? "نموذج غير مكتمل" : "Incomplete Form" }}',
+				  message: '{{ $l == "ar" ? "يرجى ملء جميع الحقول المطلوبة." : "Please fill out all required fields." }}',
+				  confirmText: "{{ __('admin.OK') }}",
+				  confirmColor: 'primary',
+				  hideCancel: true
 				});
 				return;
 			}
@@ -1674,17 +1646,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 						@endif
 					} else {
 						unlockButton($btn);
-						Swal.fire({
-							title: '{{ $l == "ar" ? "خطأ في التسجيل" : "Registration Error" }}',
-							text: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
-							icon: 'error',
-							showCancelButton: false,
-							showConfirmButton: true,
-							confirmButtonText: '{{ $l == "ar" ? "حسناً" : "OK" }}',
-							customClass: {
-								confirmButton: 'btn btn-primary',
-							},
-							buttonsStyling: false,
+						releaseAlert('danger', {
+						  title: '{{ $l == "ar" ? "خطأ في التسجيل" : "Registration Error" }}',
+						  message: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
+						  confirmText: '{{ $l == "ar" ? "حسناً" : "OK" }}',
+						  confirmColor: 'primary'
 						});
 					}
 				},
@@ -1730,17 +1696,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 					}
 					else
 					{
-						Swal.fire({ 
-							title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
-							text: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
-							icon: 'error',
-							showCancelButton: false,
-							showConfirmButton: true,
-							confirmButtonText: "{{ __('admin.OK') }}",
-							customClass: {
-								confirmButton: 'btn btn-primary',
-							},
-							buttonsStyling: false,
+						releaseAlert('danger', {
+						  title: '{{ $l == "ar" ? "خطأ" : "Error" }}',
+						  message: '{{ $l == "ar" ? "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى." : "An error occurred during registration. Please try again." }}',
+						  confirmText: "{{ __('admin.OK') }}",
+						  confirmColor: 'primary'
 						});
 					}
 				}

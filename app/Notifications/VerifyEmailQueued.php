@@ -18,10 +18,6 @@ class VerifyEmailQueued extends VerifyEmail implements ShouldQueue
 
     protected $user = null;
 
-    protected $organization = null;
-
-    protected $orgData = [];
-
 
     // Nothing else needs to go here unless you want to customize
     // the notification in any way.
@@ -29,6 +25,15 @@ class VerifyEmailQueued extends VerifyEmail implements ShouldQueue
     {
         $this->data['name'] = $name;
         $this->data['url'] = static::$createUrlCallback;
+    }
+
+    /**
+     * Platform-branded email: the platform logo and name, never an
+     * organization's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        return null;
     }
 
     /**
@@ -43,11 +48,10 @@ class VerifyEmailQueued extends VerifyEmail implements ShouldQueue
         $smtpSettings = $org?->organizationSettings;
 
         $this->user = $notifiable;
-        $this->organization = $org;
 
+        // The organization only routes SMTP; the email is platform-branded.
         $this->configureSmtp($smtpSettings);
         $from = $this->getFromAddress($smtpSettings);
-        $this->orgData = $this->buildEmailOrganizationData($org);
 
         return parent::toMail($notifiable);
     }
@@ -58,13 +62,9 @@ class VerifyEmailQueued extends VerifyEmail implements ShouldQueue
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
         $platformName = $setting?->Platform_Name ?: config('app.name');
 
-        // Enrolled founders are branded with their organization, others with the platform.
-        $orgData = $this->orgData ?? [];
-        $hasOrg = ! empty($this->organization);
-        $senderName = $hasOrg ? ($this->organization->name ?: $platformName) : $platformName;
-        if (! $hasOrg) {
-            $orgData = $this->buildEmailOrganizationData(null);
-        }
+        // Platform-branded for everyone, including enrolled founders.
+        $orgData = $this->emailBrandingData();
+        $senderName = $platformName;
 
         $firstName = $locale === 'ar' ? trim((string) $this->user?->first_name_ar) : '';
         if ($firstName === '') {

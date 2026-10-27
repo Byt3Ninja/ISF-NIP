@@ -461,14 +461,14 @@
     // Global export sessions function
     window.exportSessions = function (format) {
       if (!sessionsTable) {
-        releaseFailureAlert({ message: 'No data available to export' });
+        releaseAlert('danger', { message: 'No data available to export' });
         return;
       }
       try {
         sessionsTable.button(`.buttons-${format}`).trigger();
       } catch (error) {
         console.error('Export error:', error);
-        releaseFailureAlert({ message: 'Failed to export data. Please try again.' });
+        releaseAlert('danger', { message: 'Failed to export data. Please try again.' });
       }
     }
   });

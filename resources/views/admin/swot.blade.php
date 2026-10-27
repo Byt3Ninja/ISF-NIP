@@ -199,27 +199,18 @@
           btn.innerHTML = '<i class="ti ti-sparkles me-2"></i>{{ __('admin.generate') }}';
 
           if (data.error) {
-            Swal.fire({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error!') }}",
-              text: data.error + (data.missing_fields ? "\n" + data.missing_fields.join(", ") : ""),
-              icon: "error",
-              confirmButtonText: "OK",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: data.error + (data.missing_fields ? "\n" + data.missing_fields.join(", ") : ""),
+              confirmText: "OK",
+              confirmColor: 'primary'
             });
           } else {
-            Swal.fire({
+            releaseAlert('info', {
               title: "{{ __('admin.Success!') }}",
-              html: "{{ __('admin.swot_generated') }}",
-              showCancelButton: false,
-              showConfirmButton: true,
-              confirmButtonText: "{{ __('admin.OK') }}",
-              customClass: {
-                confirmButton: 'btn btn-primary',
-              },
-              buttonsStyling: false,
+              message: "{{ __('admin.swot_generated') }}",
+              confirmText: "{{ __('admin.OK') }}",
+              confirmColor: 'primary'
             }).then(() => {
               location.reload();
             });

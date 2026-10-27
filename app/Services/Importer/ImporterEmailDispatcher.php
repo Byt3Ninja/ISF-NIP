@@ -3,10 +3,13 @@
 namespace App\Services\Importer;
 
 use App\Cycle;
+use Carbon\Carbon;
 use App\Organization;
 use App\User;
 use App\Mail\ImporterFounderCredentialsMail;
 use App\Mail\ImporterFounderEnrolledMail;
+use App\Settings;
+use App\Traits\ConfiguresSmtp;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -15,6 +18,8 @@ use Illuminate\Support\Facades\Mail;
  */
 class ImporterEmailDispatcher
 {
+    use ConfiguresSmtp;
+
     /**
      * @return array{status: string, reason: ?string}
      */
@@ -26,20 +31,29 @@ class ImporterEmailDispatcher
         ?string $plainPassword
     ): array {
         try {
-            $locale = $this->resolveLocale($user, $org);
-            $payload = [
+            $locale = $this->resolveLocale();
+            $orgData = $this->buildEmailOrganizationData($org);
+
+            $payload = array_merge([
                 'founder_name'   => trim(($user->first_name_en ?? '') . ' ' . ($user->last_name_en ?? '')),
+                'founder_gender' => strtolower(trim((string) $user->gender)),
+                // Brands the email with the program's organization (EmailBranding).
+                'program_id'     => $cycle->id,
                 'program_name'   => $cycle->title,
-                'program_type'   => $cycle->type,
-                'start_date'     => $cycle->start,
-                'end_date'       => $cycle->end,
+                'program_type'   => __('cycles.' . $cycle->type, [], $locale),
+                'start_date'     => $cycle->start ? Carbon::parse($cycle->start)->format('Y-m-d') : null,
+                'end_date'       => $cycle->end ? Carbon::parse($cycle->end)->format('Y-m-d') : null,
                 'organization'   => $locale === 'ar'
                     ? ($org->name_ar ?? $org->name_en)
                     : ($org->name_en ?? $org->name_ar),
                 'email'          => $user->email,
-                'password'       => $plainPassword,
                 'locale'         => $locale,
-            ];
+                // A brand-new founder has never seen their (randomly
+                // generated) password, so they get a one-time sign-in link
+                // instead of the credentials themselves. An existing founder
+                // already has a password, so they get the normal login page.
+                'login_url'      => $wasCreated ? $user->generateMagicLoginUrl() : route('login'),
+            ], $orgData);
 
             $mailable = $wasCreated
                 ? new ImporterFounderCredentialsMail($payload)
@@ -52,14 +66,14 @@ class ImporterEmailDispatcher
         }
     }
 
-    private function resolveLocale(User $user, Organization $org): string
+    /**
+     * Follow the platform's default language (General Settings), matching
+     * every other transactional email -- not the recipient's own locale.
+     */
+    private function resolveLocale(): string
     {
-        if (!empty($user->locale)) {
-            return $user->locale;
-        }
-        if (!empty($org->default_locale)) {
-            return $org->default_locale;
-        }
-        return config('app.locale', 'en');
+        $setting = Settings::first();
+
+        return in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
     }
 }

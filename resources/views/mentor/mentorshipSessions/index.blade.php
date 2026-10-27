@@ -226,7 +226,10 @@
         if (isEdit && !window.dt_task) {
           isSubmitting = false;
           $btn.prop('disabled', false).html('{{ __('admin.Submit') }}');
-          return Swal.fire('{{ __('admin.error') }}', '{{ __('admin.table_not_initialized') }}', 'error');
+          return releaseAlert('danger', {
+            title: '{{ __('admin.error') }}',
+            message: '{{ __('admin.table_not_initialized') }}'
+          });
         }
 
         const taskId = isEdit ? window.dt_task.row($editRow).data().id : null;

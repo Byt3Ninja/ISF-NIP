@@ -28,11 +28,13 @@ class OnlineMeetingFactory
 
         $platform = strtolower($platform);
 
+        // Resolved through the container (same objects as `new`) so tests can
+        // bind a fake and never reach the real Zoom / Teams APIs.
         switch ($platform) {
             case 'zoom':
-                return new ZoomService();
+                return app(ZoomService::class);
             case 'teams':
-                return new TeamsService();
+                return app(TeamsService::class);
             default:
                 throw new \Exception("Unsupported online meeting service: $platform");
         }

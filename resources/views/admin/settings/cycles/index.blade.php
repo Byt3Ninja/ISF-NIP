@@ -5,30 +5,9 @@
 <link rel="stylesheet" type="text/css" href="/app-assets/css/plugins/extensions/drag-and-drop.css">
 <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.min.css">
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/bootstrap-select/bootstrap-select.css" />
 <style>
-
-  .daterangepicker {
-    margin-top: 2rem !important;
-  }
-
-  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
-     stays fully visible no matter where in the list the row sits. */
-  .daterangepicker.drp-viewport-fixed {
-    margin-top: 0 !important;
-    position: fixed !important;
-    z-index: 1080;
-  }
-
-  /* Edit-step picker is positioned via JS using viewport-fixed coords so it
-     stays fully visible no matter where in the list the row sits. */
-  .daterangepicker.drp-viewport-fixed {
-    margin-top: 0 !important;
-    position: fixed !important;
-    z-index: 1080;
-  }
 
   #mob {
     display: flex;
@@ -329,7 +308,8 @@
             <label for="bs-rangepicker-basic" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input id='start' name='start' type="hidden" />
             <input id='end' name='end' type="hidden" />
-            <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range" />
+            <input type="text" id="bs-rangepicker-basic" class="form-control" name="date_range"
+              placeholder="YYYY-MM-DD - YYYY-MM-DD" />
           </div>
           <div class="mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Cycle title') }}: </label>
@@ -381,7 +361,11 @@
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <form id="addStepForm" class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off" 
+        autocomplete="off"
+        {{-- Native validation dies with "invalid form control ... is not focusable"
+             when a required field sits behind a hidden menu; validateStepForm()
+             owns every rule instead. --}}
+        novalidate
         {{-- onsubmit="disableSubmitButton()" --}}
         >
         {!! csrf_field() !!}
@@ -423,7 +407,8 @@
             <label for="stepFormRamgePicker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="fromDate" name="fromDate" />
             <input type="hidden" id="toDate" name="toDate" />
-            <input type="text" id="stepFormRamgePicker" class="form-control" name="date_range" required />
+            <input type="text" id="stepFormRamgePicker" class="form-control" name="date_range"
+              placeholder="YYYY-MM-DD - YYYY-MM-DD" required />
           </div>
           <div class="form-group mb-4">
             <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Step Title') }}: </label>
@@ -478,7 +463,7 @@
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form class="form" action="{{ URL::to('dashboard/cycles/modify') }}" method="POST" enctype="multipart/form-data"
-        autocomplete="off" id="editStepForm">
+        autocomplete="off" id="editStepForm" novalidate>
         {!! csrf_field() !!}
         <div class="modal-header">
           <h4 class="modal-title" id="myModalLabel33">{{ __('cycles.Modify current step') }}</h4>
@@ -531,7 +516,8 @@
             <label for="step-range-picker" class="form-label fs-6 fw-semibold mb-1">{{ __('admin.Start_Date') }} - {{ __('admin.End_Date') }}:</label>
             <input type="hidden" id="mfromDate" name="fromDate" />
             <input type="hidden" id="mtoDate" name="toDate" />
-            <input type="text" id="step-range-picker" class="form-control" name="date_range" required />
+            <input type="text" id="step-range-picker" class="form-control" name="date_range"
+              placeholder="YYYY-MM-DD - YYYY-MM-DD" required />
           </div>
           {{-- <label class="form-label fs-6 fw-semibold mb-1">{{ __('cycles.Valid from') }}: </label>
           <div class="mb-4">
@@ -578,7 +564,6 @@
 {{-- <script src="/vuexy/assets/js/pages-account-settings-account.js"></script> --}}
 <script src="/vuexy/assets/vendor/libs/moment/moment.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
-<script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
 @stop
 
 
@@ -595,7 +580,9 @@
     title: currentLang == 'en' ? 'Step title is required.' : 'عنوان الخطوة مطلوب.',
     description: currentLang == 'en' ? 'Step description is required.' : 'وصف الخطوة مطلوب.',
     descriptionMaxLength: currentLang == 'en' ? 'Description must not exceed 100 characters.' : 'يجب ألا يتجاوز الوصف 100 حرف.', 
-    teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.'
+    teamNumber: currentLang == 'en' ? 'Team number must be at least 1.' : 'عدد الفرق يجب أن يكون على الأقل 1.',
+    dateRange: currentLang == 'en' ? 'Start and end dates are required.' : 'تاريخ البداية والنهاية مطلوب.',
+    formSelect: currentLang == 'en' ? 'Please select a form.' : 'يرجى اختيار النموذج.'
   };
 
  function validateStepForm(form, mode = 'add') {
@@ -605,6 +592,7 @@
   const teamNumberInput = form.querySelector(`${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`);
   const formSelect = form.querySelector(`${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`);
   const screeningSelect = form.querySelector(`${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`);
+  const dateRange = form.querySelector('[name="date_range"]');
 
   // Remove any previous error messages
   const existingErrors = form.querySelectorAll('.invalid-feedback');
@@ -622,6 +610,10 @@
     element.insertAdjacentElement('afterend', errorSpan);
   };
 
+  // A control behind a hidden menu is not focusable, so the browser can neither
+  // report nor clear an error on it. Only ever validate what is on screen.
+  const isShown = (element) => !!element && element.offsetParent !== null;
+
   // Validation checks
   if (!stepTitle.value.trim()) {
     showError(stepTitle, errors.title);
@@ -638,8 +630,21 @@
     return false;
   }
 
+  if (isShown(dateRange) && !dateRange.value.trim()) {
+    showError(dateRange, errors.dateRange);
+    return false;
+  }
+
+  // The form picker is required only while it is visible (add flow sets the
+  // attribute once #menu1 is shown); the edit flow allows "— No form —".
+  if (isShown(formSelect) && formSelect.required && !formSelect.value) {
+    showError(formSelect, errors.formSelect);
+    return false;
+  }
+
   // Check for conditional required fields based on step type
-  // Form is optional: a step may intentionally have no form ("— No form —").
+  // The edit flow may intentionally have no form ("— No form —"); the add flow
+  // requires one only while its picker is on screen (checked above).
 
   /* if (stepType.value === '2' && screeningSelect && screeningSelect.hasAttribute('required') && !screeningSelect.value) {
     showError(screeningSelect, currentLang == 'en' ? 'Please select a screening type.' : 'يرجى اختيار نوع الفحص.');
@@ -652,7 +657,7 @@
   }
 
   // Clear any invalid styling
-  [stepTitle, stepDescription, teamNumberInput, formSelect, screeningSelect].forEach(input => {
+  [stepTitle, stepDescription, teamNumberInput, formSelect, screeningSelect, dateRange].forEach(input => {
     if (input) input.classList.remove('is-invalid');
   });
 
@@ -700,7 +705,7 @@ if (editStepForm) {
     const formChanged = mFormSelect && editStepOriginalFormId !== null && mFormSelect.value !== editStepOriginalFormId;
 
     if (formChanged && stepHasSubmissions > 0 && $('#confirm_form_change').val() !== '1') {
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: '{{ __("admin.step_form_change_warning_title") }}',
         message: '{{ __("admin.step_form_change_confirm") }}'.replace(':count', stepHasSubmissions),
         confirmText: '{{ __("admin.Yes") }}',
@@ -719,40 +724,37 @@ if (editStepForm) {
     editStepForm.submit();
   });
 }
+
+function clearFieldError(input) {
+  if (!input) return;
+  input.classList.remove('is-invalid');
+
+  // Remove the next sibling if it's an error message
+  const next = input.nextElementSibling;
+  if (next && next.classList.contains('invalid-feedback')) {
+    next.remove();
+  }
+}
+
 function clearValidationOnChange(form, mode = 'add') {
   const fields = [
     `${mode === 'add' ? '#title' : '#mtitle'}`,
     `${mode === 'add' ? '#description' : '#mdescription'}`,
     `${mode === 'add' ? '#count_team_number' : '#mcount_team_number'}`,
     `${mode === 'add' ? '#FormSelect' : '#mFormSelect'}`,
-    `${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`
+    `${mode === 'add' ? '#ScreeningSelect' : '#mScreeningSelect'}`,
+    '[name="date_range"]'
   ];
 
   fields.forEach(selector => {
     const input = form.querySelector(selector);
     if (!input) return;
 
-    input.addEventListener('input', () => {
-      input.classList.remove('is-invalid');
-
-      // Remove the next sibling if it's an error message
-      const next = input.nextElementSibling;
-      if (next && next.classList.contains('invalid-feedback')) {
-        next.remove();
-      }
-    });
+    input.addEventListener('input', () => clearFieldError(input));
 
     // Also listen for change events on select elements
     if (input.tagName === 'SELECT') {
-      input.addEventListener('change', () => {
-        input.classList.remove('is-invalid');
-
-        // Remove the next sibling if it's an error message
-        const next = input.nextElementSibling;
-        if (next && next.classList.contains('invalid-feedback')) {
-          next.remove();
-        }
-      });
+      input.addEventListener('change', () => clearFieldError(input));
     }
   });
 }
@@ -788,17 +790,75 @@ if (editStepForm) {
 //     document.getElementById("submitBtn").disabled = true;
 // }
     // console.log('loaded');
-    const stepFormRamgePicker = $('#stepFormRamgePicker'); // Change to jQuery selector
-    // console.log('stepFormRamgePicker', stepFormRamgePicker);
-
-    if (stepFormRamgePicker.length) {
-      stepFormRamgePicker.daterangepicker({
-        opens: isRtl ? 'left' : 'right',
-      }).on('apply.daterangepicker', function(ev, picker) {
-        $('#fromDate').val(picker.startDate.format('YYYY-MM-DD'));
-        $('#toDate').val(picker.endDate.format('YYYY-MM-DD'));
-      });
+    // Every date range on this page is a flatpickr range picker writing the picked
+    // range into a visible "date_range" field plus the two hidden fields the
+    // controller reads (start/end for a program, fromDate/toDate for a step).
+    // The visible value must stay "m/d/Y - m/d/Y" because
+    // CyclesController::modify() explodes on ' - ' and parses each part as m/d/Y.
+    const RANGE_PICKER_CONFIG = {
+      mode: 'range',
+      monthSelectorType: 'static',
+      dateFormat: 'm/d/Y',
+      // flatpickr's Arabic locale uses " إلى " as the range separator.
+      locale: { rangeSeparator: ' - ' },
     };
+
+    function syncRangeToHiddenFields(picker, fromSelector, toSelector) {
+      // flatpickr writes the visible value itself and never fires an input event,
+      // so drop any "dates required" error the last submit attempt left behind.
+      clearFieldError(picker.input);
+      const dates = picker.selectedDates;
+      if (dates.length < 2) return;
+      $(fromSelector).val(picker.formatDate(dates[0], 'Y-m-d'));
+      $(toSelector).val(picker.formatDate(dates[1], 'Y-m-d'));
+    }
+
+    // flatpickr replaces the instance when the input is already picked, so calling
+    // this again (as the edit flows do) hands back a usable instance for the input.
+    function initRangePicker(selector, fromSelector, toSelector) {
+      const input = document.querySelector(selector);
+      if (!input) return null;
+
+      return flatpickr(input, Object.assign({}, RANGE_PICKER_CONFIG, {
+        onChange: function (selectedDates, dateStr, instance) {
+          syncRangeToHiddenFields(instance, fromSelector, toSelector);
+        },
+        onClose: function (selectedDates, dateStr, instance) {
+          syncRangeToHiddenFields(instance, fromSelector, toSelector);
+        }
+      }));
+    }
+
+    // Model dates arrive as "Y-m-d"; build a local-midnight Date so the calendar
+    // shows the stored day instead of shifting it by the browser timezone.
+    function toLocalDate(value) {
+      if (!value) return null;
+      const parts = String(value).slice(0, 10).split('-');
+      if (parts.length !== 3) return null;
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    }
+
+    function setRangePickerValue(picker, fromValue, toValue, fromSelector, toSelector) {
+      if (!picker) return;
+
+      const from = toLocalDate(fromValue);
+      const to = toLocalDate(toValue);
+
+      if (from && to) {
+        picker.setDate([from, to], false);
+      } else if (from || to) {
+        picker.setDate(from || to, false);
+      } else {
+        picker.clear();
+        $(fromSelector).val('');
+        $(toSelector).val('');
+        return;
+      }
+
+      syncRangeToHiddenFields(picker, fromSelector, toSelector);
+    }
+
+    initRangePicker('#stepFormRamgePicker', '#fromDate', '#toDate');
 
     // $('.date').datetimepicker({
     //   timepicker: false,
@@ -864,20 +924,8 @@ if (editStepForm) {
               $('#cycleid').val(cycle);
               $('#type').val(CYCLE_MODIFY_ACTION.EDIT_CYCLE);
 
-              var bsRangePickerBasic = $('#bs-rangepicker-basic');
-              // $('#start').val(response.start);
-              // $('#end').val(response.end);
-
-              if (bsRangePickerBasic.length) {
-                bsRangePickerBasic.daterangepicker({
-                  opens: isRtl ? 'left' : 'right',
-                  startDate: response.start ? moment(response.start) : null,
-                  endDate: response.end ? moment(response.end) : null,
-                }).on('apply.daterangepicker', function(ev, picker) {
-                  $('#start').val(picker.startDate.format('YYYY-MM-DD'));
-                  $('#end').val(picker.endDate.format('YYYY-MM-DD'));
-                });
-              }
+              const cycleRangePicker = initRangePicker('#bs-rangepicker-basic', '#start', '#end');
+              setRangePickerValue(cycleRangePicker, response.start, response.end, '#start', '#end');
 
               $('#organization_id').val(response.organization_id)
               if (response.private) {
@@ -899,18 +947,8 @@ if (editStepForm) {
           $('#cycleid').val('');
           $('#type').val(CYCLE_MODIFY_ACTION.SAVE_CYCLE_NOOP);
 
-          var bsRangePickerBasic = $('#bs-rangepicker-basic');
-          // $('#start').val(response.start);
-          // $('#end').val(response.end);
-
-          if (bsRangePickerBasic.length) {
-            bsRangePickerBasic.daterangepicker({
-              opens: isRtl ? 'left' : 'right',
-            }).on('apply.daterangepicker', function(ev, picker) {
-              $('#start').val(picker.startDate.format('YYYY-MM-DD'));
-              $('#end').val(picker.endDate.format('YYYY-MM-DD'));
-            });
-          }
+          const newCycleRangePicker = initRangePicker('#bs-rangepicker-basic', '#start', '#end');
+          setRangePickerValue(newCycleRangePicker, null, null, '#start', '#end');
 
           $('#customSwitch3').removeAttr('checked');
           $('#cycleForm').modal('show');
@@ -950,16 +988,20 @@ if (editStepForm) {
           if(step === '6'){
             $('#team_number').show();
           }
-          if (menu !== null) {
+          // jQuery returns an empty set (never null) for #menu2/#menu3/#menu4/#menu6,
+          // which don't exist any more. Only require FormSelect when its picker is
+          // actually on screen, otherwise native validation blocks the submit with
+          // "An invalid form control with name='FormSelect' is not focusable."
+          if (menu.length) {
             $.ajax({
               url: '{{ url('dashboard/builder/organization/') }}' + '/' + $("#ccycle option:selected").data(
                 'organization'),
               success: function(response) {
                 $('#FormSelect').empty()
                 $('#FormSelect').append(response.appear)
-                // Add required attribute only if this menu is shown
-                $('#FormSelect').attr('required', 'required');
                 menu.show();
+                // Add required attribute only once the picker is visible
+                $('#FormSelect').attr('required', 'required');
               },
               error: function(error) {
                 console.log(error);
@@ -975,9 +1017,9 @@ if (editStepForm) {
               success: function(response) {
                 $('#FormSelect').empty()
                 $('#FormSelect').append(response.appear)
-                // Add required attribute for step 5
-                $('#FormSelect').attr('required', 'required');
                 $('#menu1').show();
+                // Add required attribute for step 5 once the picker is visible
+                $('#FormSelect').attr('required', 'required');
               },
               error: function(error) {
                 console.log(error);
@@ -992,12 +1034,6 @@ if (editStepForm) {
           }
           $('#stype').val(step);
           $('#formtitle').text(steptxt);
-          // var bsRangePickerBasic = $('#bs-rangepicker-basic');
-          // if (bsRangePickerBasic.length) {
-          //   bsRangePickerBasic.daterangepicker({
-          //     opens: isRtl ? 'left' : 'right',
-          //   });
-     
           $('#stepForm').modal('show');
           break;
       }
@@ -1103,17 +1139,8 @@ if (editStepForm) {
               $('#mdescription').val(response.description);
               $('#mcount_team_number').val(response.count_team_number);
               
-              const $stepRangeInput = $('#step-range-picker');
-              $stepRangeInput.daterangepicker({
-                opens: isRtl ? 'left' : 'right',
-                startDate: response?.from ? moment(response?.from) : null,
-                endDate: response?.to ? moment(response?.to) : null,
-              }).on('apply.daterangepicker', function(ev, picker) {
-                $('#mfromDate').val(picker.startDate.format('YYYY-MM-DD'));
-                $('#mtoDate').val(picker.endDate.format('YYYY-MM-DD'));
-              });
-
-              positionStepRangePicker($stepRangeInput);
+              const stepRangePicker = initRangePicker('#step-range-picker', '#mfromDate', '#mtoDate');
+              setRangePickerValue(stepRangePicker, response?.from, response?.to, '#mfromDate', '#mtoDate');
 
               // $('#mfromDate').val(response.from);
               // $('#mtoDate').val(response.to);
@@ -1161,11 +1188,6 @@ if (editStepForm) {
           }
         });
       }
-    }
-    // Viewport-fixed positioning now lives in /js/daterangepicker-viewport.js
-    // (loaded globally by the admin layout) so every modal picker behaves the same.
-    function positionStepRangePicker($input) {
-      window.attachViewportDateRangePicker($input);
     }
 
     $(document).on('change', '#is_public', function() {

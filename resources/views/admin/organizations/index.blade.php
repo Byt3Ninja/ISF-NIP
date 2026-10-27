@@ -62,8 +62,8 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                   </div>
                 </div>
                 <div class="col-6 col-lg-2">
-                  <select class="form-select" id="status-select" name="status">
-                    <option value="">{{ __('admin.All_statuses') }}</option>
+                  <select class="form-select select2" id="status-select" name="status">
+                    <option value="all">{{ __('admin.All_statuses') }}</option>
                     <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
                       {{ __('admin.Active') }}
                     </option>
@@ -73,8 +73,8 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                   </select>
                 </div>
                 <div class="col-6 col-lg-2">
-                  <select class="form-select" id="visibility-select" name="visibility">
-                    <option value="">{{ __('admin.all_visiblity') }}</option>
+                  <select class="form-select select2" id="visibility-select" name="visibility">
+                    <option value="all">{{ __('admin.all_visiblity') }}</option>
                     <option value="published" {{ request('visibility') == 'published' ? 'selected' : '' }}>
                       {{ __('admin.Published') }}
                     </option>
@@ -84,7 +84,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                   </select>
                 </div>
                 <div class="col-6 col-lg-2">
-                  <select class="form-select" id="sort-select" name="sort">
+                  <select class="form-select select2" id="sort-select" name="sort">
                     <option value="newest" {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>
                       {{ __('admin.Newest First') }}
                     </option>
@@ -274,29 +274,22 @@ $colors = ['primary', 'info', 'danger', 'warning'];
       $(document).on("click", "#deleteAction", function(e) {
         var url = $(this).data('url');
         var token = '{{ csrf_token() }}';
-        Swal.fire({
-        	title: "{{__('admin.SureDelete')}}",
-					text: "{{__('admin.Recover')}}",
-					icon: "warning",
-					showCancelButton: true,
-					confirmButtonText: "{{ __('admin.DYes') }}",
-					cancelButtonText: "{{ __('admin.No') }}",
-					reverseButtons: true,
-					customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-					},
-					buttonsStyling: false,
-      })
-          .then((result) => {
-            if (result.value) {
+        releaseAlert('warning', {
+          title: "{{__('admin.SureDelete')}}",
+          message: "{{__('admin.Recover')}}",
+          confirmText: "{{ __('admin.DYes') }}",
+          cancelText: "{{ __('admin.No') }}",
+          confirmColor: 'danger'
+        })
+          .then((ok) => {
+            if (ok) {
               $.post(url, {
                   '_method': 'DELETE',
                   '_token': token
                 },
                 function(response) {
                   if (response.success) {
-                    releaseSuccessAlert({
+                    releaseAlert('success', {
                       title: "{{ __('admin.Deleted') }}!",
                       message: "{{ __('admin.DeletedSuccessfully') }}.",
                     });
@@ -310,7 +303,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                     location.reload();
 
                   } else {
-                    releaseFailureAlert({
+                    releaseAlert('danger', {
                       title: "{{ __('admin.Error') }}",
                       message: response.message ? response.message : "{{ __('admin.DeleteFailed') }}"
                     });
@@ -321,7 +314,7 @@ $colors = ['primary', 'info', 'danger', 'warning'];
                 if (xhr.responseJSON && xhr.responseJSON.message) {
                   errorMessage = xhr.responseJSON.message;
                 }
-                releaseFailureAlert({
+                releaseAlert('danger', {
                   title: "{{ __('admin.Error') }}",
                   message: errorMessage
                 })

@@ -394,7 +394,7 @@ $(document).ready(function() {
 			return;
 		}
 
-		releaseWarningAlert({
+		releaseAlert('warning', {
 			title: '{{ __("startup.change_valuation_date") }}',
 			message: '{{ __("startup.change_valuation_date_warning") }}',
 			onConfirm: onConfirm,
@@ -550,7 +550,7 @@ $(document).ready(function() {
 		const currencyChanged = currentCurrency !== originalCurrency;
 		
 		if (currencyChanged && $currency.data('warn-confirmed') !== 'true' && !CONFIG.IS_CURRENCY_DISABLED) {
-			releaseWarningAlert({
+			releaseAlert('warning', {
 				title: '{{ __('admin.Warning') }}!',
 				message: '{{ __('admin.change_currency_warning') }}',
 				onConfirm: () => {
@@ -593,7 +593,7 @@ $(document).ready(function() {
 		})
 		.done(function(data) {
 			if (!data.success) {
-				releaseFailureAlert({
+				releaseAlert('danger', {
 					title: '{{ __("admin.Error") }}',
 					message: data.message ?? '{{ __("admin.unepxected_error") }}'
 				});
@@ -605,7 +605,7 @@ $(document).ready(function() {
 				$(`#${key}`).val((val == null) ? '-' : utils.formatNumber(val));
 			});
 
-			releaseSuccessAlert({
+			releaseAlert('success', {
 				title: '{{ __("admin.Success") }}',
 				message: data.message ?? '{{ __("admin.financial_data_saved") }}'
 			});
@@ -619,7 +619,7 @@ $(document).ready(function() {
 			}
 		})
 		.fail(function(err) {
-			releaseFailureAlert({
+			releaseAlert('danger', {
 				title: '{{ __("admin.Error") }}',
 				message: '{{ __("admin.save_failed") }}'
 			});
@@ -636,7 +636,7 @@ $(document).ready(function() {
 	// ═══════════════════════════════════════════════════════════════════════
 	function handleError(message) {
 		console.error('[FinancialProjection]', message);
-		releaseFailureAlert({
+		releaseAlert('danger', {
 			title: '{{ __("admin.Error") }}',
 			message: message || '{{ __("admin.unexpected_error") }}'
 		});
@@ -692,7 +692,8 @@ $(document).ready(function() {
 		e.preventDefault();
 
 		if (!$dateHidden.val()) {
-			releaseWarningAlert({
+			releaseAlert('warning', {
+				hideCancel: true,
 				title: '{{ __("startup.valuation_date_required") }}',
 				message: '{{ __("startup.please_select_valuation_date_before_saving") }}'
 			});

@@ -686,7 +686,8 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
           });
 
           if (missingScores) {
-            releaseWarningAlert({
+            releaseAlert('warning', {
+              hideCancel: true,
               title: '{{ __("admin.required_evaluation_scores_message") }}',
             });
             // Navigate to the criteria tab 
@@ -696,7 +697,8 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
 
           if (finalComments && finalComments.value.trim() === '') {
             finalComments.classList.add('is-invalid');
-            releaseWarningAlert({
+            releaseAlert('warning', {
+              hideCancel: true,
               title: '{{ __("admin.required_evaluation_comment_message") }}',
             });
             // Navigate to the final comments tab
@@ -749,7 +751,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
               : '{{ __("admin.Evaluation saved successfully") }}';
 
             if( response.status ) {
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: '{{ __("admin.Success") }}',
                 message: successMsg,
               });
@@ -757,7 +759,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
                 setTimeout(function() { window.location.reload(); }, 2500);
               }
             } else {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: '{{ __("admin.Error") }}',
                 message: response.message || '{{ __("admin.unexpected_error") }}',
               });
@@ -776,7 +778,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
               publishBtn.disabled = false;
             }
 
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: '{{ __("admin.Error") }}',
               message: errorMsg,
             });

@@ -5,6 +5,7 @@ use App\Settings;
 use App\Expertise;
 use Carbon\Carbon;
 use App\CyclesMentors;
+use App\Services\TimezoneService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -56,16 +57,21 @@ if (!function_exists('getPusherConfig')) {
 }
 
 if (!function_exists('mentorshipMeetingStatus')) {
-    // zoom_date is stored as local wall-clock time (see book-session-modal.blade.php),
-    // not UTC (app.timezone), so "now" must be computed in the same timezone.
-    function mentorshipMeetingStatus($zoomDate, $period)
+    // GV-9566: zoom_date is platform wall-clock. A cast MentorshipRequest value is
+    // already that instant; a raw row string is read in $timezone (default: the
+    // global platform zone). Compared as real instants, never in the viewer's zone.
+    function mentorshipMeetingStatus($zoomDate, $period, ?string $timezone = null)
     {
-        $now   = Carbon::now(config('app.user_timezone', 'Africa/Cairo'))->format('Y-m-d H:i');
-        $start = date('Y-m-d H:i', strtotime($zoomDate . ' -15 minutes'));
-        $end   = date('Y-m-d H:i', strtotime($zoomDate . ' +' . $period . ' minutes'));
+        $at = $zoomDate instanceof Carbon
+            ? $zoomDate
+            : TimezoneService::wallClock($zoomDate, $timezone ?? TimezoneService::platform());
 
-        if ($now < $start) return 'before';
-        if ($now > $end) return 'expired';
+        if (is_null($at)) return 'before';
+
+        $now = Carbon::now();
+
+        if ($now->lt($at->copy()->subMinutes(15))) return 'before';
+        if ($now->gt($at->copy()->addMinutes((int) $period))) return 'expired';
         return 'joinable';
     }
 }

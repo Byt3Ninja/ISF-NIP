@@ -58,6 +58,12 @@
                                                         <td style="padding-bottom: 0px; font-size: 14px; color: #6B7280;">رابط الاجتماع:</td>
                                                         <td style="padding-bottom: 0px; font-size: 14px; color: #4F46E5; font-weight: 600; text-align: left;"><a href="{{ $session['link'] }}" style="color: #4F46E5;">اضغط هنا للانضمام</a></td>
                                                     </tr>
+                                                    @if(!empty($session['passcode']))
+                                                        <tr>
+                                                            <td style="padding-bottom: 0px; padding-top: 10px; font-size: 14px; color: #6B7280;">{{ __('email.Passcode', [], 'ar') }}:</td>
+                                                            <td style="padding-bottom: 0px; padding-top: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $session['passcode'] }}</td>
+                                                        </tr>
+                                                    @endif
                                                 @endif
                                             </table>
                                         </td>
@@ -106,6 +112,12 @@
                                                         <td style="padding-bottom: 0px; font-size: 14px; color: #6B7280;">Meeting Link:</td>
                                                         <td style="padding-bottom: 0px; font-size: 14px; color: #4F46E5; font-weight: 600; text-align: right;"><a href="{{ $session['link'] }}" style="color: #4F46E5;">Join Meeting</a></td>
                                                     </tr>
+                                                    @if(!empty($session['passcode']))
+                                                        <tr>
+                                                            <td style="padding-bottom: 0px; padding-top: 10px; font-size: 14px; color: #6B7280;">{{ __('email.Passcode', [], 'en') }}:</td>
+                                                            <td style="padding-bottom: 0px; padding-top: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $session['passcode'] }}</td>
+                                                        </tr>
+                                                    @endif
                                                 @endif
                                             </table>
                                         </td>
@@ -116,7 +128,7 @@
 
                         <p style="margin-top: 30px; font-size: 14px; color: #6B7280;">
                             {{ $locale == 'ar' ? 'تحياتنا،' : 'Best regards,' }}<br>
-                            <strong>{{ env('APP_NAME') }}</strong>
+                            <strong>{{ $org_name ?? config('app.name') }}</strong>
                         </p>
                     </td>
                 </tr>

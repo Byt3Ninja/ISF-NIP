@@ -434,21 +434,14 @@
         var jobId = $(this).data('id');
         var row = table.row('#row_' + jobId);
 
-        Swal.fire({
-            title: "{{__('admin.SureDelete')}}",
-						text: "{{__('admin.Recover')}}",
-						icon: "warning",
-						showCancelButton: true,
-						confirmButtonText: "{{ __('admin.DYes') }}",
-						cancelButtonText: "{{ __('admin.No') }}",
-						reverseButtons: true,
-						customClass: {
-							confirmButton: 'btn btn-danger',
-							cancelButton: 'btn btn-label-secondary',
-						},
-						buttonsStyling: false,
-        }).then((result) => {
-					if (!result.isConfirmed) {
+        releaseAlert('warning', {
+          title: "{{__('admin.SureDelete')}}",
+          message: "{{__('admin.Recover')}}",
+          confirmText: "{{ __('admin.DYes') }}",
+          cancelText: "{{ __('admin.No') }}",
+          confirmColor: 'danger'
+        }).then((ok) => {
+					if (!ok) {
 						showErrorToast('{{ __("admin.Job_Deletion_Cancelled") }}');
 						return;
 					}
@@ -470,15 +463,10 @@
         var row = table.row('#row_' + jobId);
         var rowNode = row.node();
         
-				Swal.fire({
-						icon: 'info',
-						title: '{{ __("admin.Retrying_job") }}',
-						text: '{{ __("admin.Please_wait_while_the_job_is_being_re_queued") }}',
-						// didOpen: () => { Swal.showLoading() },
-						allowOutsideClick: false,
-						showCancelButton: false,
-						showConfirmButton: false,
-						buttonsStyling: false
+				releaseAlert('info', {
+				  title: '{{ __("admin.Retrying_job") }}',
+				  message: '{{ __("admin.Please_wait_while_the_job_is_being_re_queued") }}',
+				  autoClose: 1500
 				});
 
         // Simulate AJAX call to retry endpoint
@@ -487,7 +475,6 @@
             $(rowNode).find('td:eq(3) span').removeClass('bg-label-danger').addClass('bg-label-secondary').text('Pending');
             button.remove(); // Remove the retry button
             
-            Swal.close();
             showSuccessToast('{{ __("admin.Job_has_been_re_queued_successfully") }}');
         }, 1500);
     });

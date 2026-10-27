@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Settings;
 use App\Services\GlobalNotificationSettingsService;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
@@ -110,34 +111,56 @@ class ChangeCycle extends Notification implements ShouldQueue
         {
             $lang = $notifiable->language;
         }
-        $org = $notifiable->organization;
-        $smtpSettings = $org?->organizationSettings;
-        
-        // Get from address and name
-        $from = $this->getFromAddress($smtpSettings);
 
         if( $data['status'] == 'in' )
         {
-            $subject = $lang === 'en' ? "Congratulations! You've Advanced to the Next Phase" : "تهانينا! لقد انتقلت إلى المرحلة التالية";
+            // Follow the platform's default language (General Settings), not
+            // the recipient's own -- same rule as every other phase email.
+            $setting = Settings::first();
+            $lang = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : $lang;
+
+            // Organization::getNameAttribute() reads app()->getLocale(), so it
+            // must be switched before resolving org branding, not just when
+            // building this class's own strings via __($key, [], $lang).
+            app()->setLocale($lang);
+
+            // Branded with the organization running the program, not the
+            // recipient's own organization relation.
+            $programOrg = $data['organization'] ?? $notifiable->organization;
+            $smtpSettings = $programOrg?->organizationSettings;
+            $from = $this->getFromAddress($smtpSettings);
+            $orgData = $this->emailBrandingData();
+            $orgName = $orgData['org_name'] ?? ($setting?->Platform_Name ?: config('app.name'));
+
+            $data['preferred_language'] = $lang;
+            $data['organization_name'] = $orgName;
+
             return (new MailMessage)
                 ->from($from['address'], $from['name'])
-                // ->subject(__('email.change_cycle_subject'))
-                ->subject( $subject )
-                ->view('emails.change-cycle', [
+                ->subject(__('email.phase_advanced_email.subject', [], $lang))
+                ->view('emails.change-cycle', array_merge([
                     'data' => $data,
-                ]);
+                ], $orgData));
         }
         else
         {
+            // Branded with the organization running the program, as above.
+            $programOrg = $data['organization'] ?? $notifiable->organization;
+            $smtpSettings = $programOrg?->organizationSettings;
+
+            // Get from address and name
+            $from = $this->getFromAddress($smtpSettings);
+            $orgData = $this->emailBrandingData();
+
             $data['program_title'] = $data['program']->{'name_' . $lang} ?? '';
             $subject = $lang === 'en' ? "Update on Your {$data['program_title']} Application" : "تحديث بخصوص طلب انضمامكم إلى {$data['program_title']}";
 
             return (new MailMessage)
                 ->from($from['address'], $from['name'])
                 ->subject( $subject )
-                ->view('emails.disapprove-startup', [
+                ->view('emails.disapprove-startup', array_merge([
                     'data' => $data,
-                ]);
+                ], $orgData));
         }
     }
 

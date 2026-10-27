@@ -20,6 +20,10 @@ use Carbon\Carbon;
  *
  * Nothing here is persisted; windows are always derived from
  * (session_date, start_time, interval|end_time, startup count).
+ *
+ * Windows are real instants in the platform zone of the panel's organization
+ * (GV-9566), so they compare correctly with the clock and with panels of other
+ * organizations.
  */
 class PanelWindowService
 {
@@ -43,9 +47,10 @@ class PanelWindowService
     /**
      * Window for a submitted panel (raw request shape).
      *
+     * @param  string|null  $timezone  platform zone of the step, see TimezoneService::forStep()
      * @return array{start: Carbon, end: Carbon}|null  null when the panel books no time
      */
-    public static function fromInput(array $panel): ?array
+    public static function fromInput(array $panel, ?string $timezone = null): ?array
     {
         $date  = $panel['session_date'] ?? null;
         $start = $panel['start_time'] ?? null;
@@ -60,7 +65,7 @@ class PanelWindowService
 
         $companies = array_unique(array_map('intval', (array) ($panel['companies'] ?? [])));
 
-        return self::build($date, $start, $interval, $panel['end_time'] ?? null, count($companies));
+        return self::build($date, $start, $interval, $panel['end_time'] ?? null, count($companies), $timezone);
     }
 
     /**
@@ -87,7 +92,8 @@ class PanelWindowService
             $screening->start_time,
             $screening->interval !== null ? (int) $screening->interval : null,
             $screening->end_time,
-            count($companies)
+            count($companies),
+            TimezoneService::forStep($screening->step_id ?? null)
         );
     }
 
@@ -95,8 +101,10 @@ class PanelWindowService
      * @param  int  $companyCount  drives the derived end in interval mode
      * @return array{start: Carbon, end: Carbon}|null
      */
-    public static function build($date, $startTime, ?int $interval, $endTime, int $companyCount): ?array
+    public static function build($date, $startTime, ?int $interval, $endTime, int $companyCount, ?string $timezone = null): ?array
     {
+        $timezone = $timezone ?? TimezoneService::platform();
+
         if (empty($date) || empty($startTime)) {
             return null;
         }
@@ -106,14 +114,14 @@ class PanelWindowService
         }
 
         try {
-            $start = Carbon::parse($date . ' ' . $startTime);
+            $start = Carbon::parse($date . ' ' . $startTime, $timezone);
 
             if ($interval !== null) {
                 // At least one slot: a panel with no startups still books its
                 // first interval rather than collapsing to a zero-length window.
                 $end = (clone $start)->addMinutes(max($companyCount, 1) * $interval);
             } elseif (!empty($endTime)) {
-                $end = Carbon::parse($date . ' ' . $endTime);
+                $end = Carbon::parse($date . ' ' . $endTime, $timezone);
             } else {
                 // Neither interval nor end time stored. The panel is still
                 // scheduled — it has a date and a start — so it must eventually
@@ -135,9 +143,6 @@ class PanelWindowService
      * its first slot begins, leaving an admin unable to correct a startup
      * scheduled hours later in the same session.
      *
-     * Slot times are wall-clock with no stored offset, so both sides are read in
-     * the viewer's timezone via MeetingWindowService::inUserZone().
-     *
      * Deliberately NOT MeetingWindowService::hasExpired(): that adds a 60-minute
      * LATE_MINUTES grace so a running meeting stays joinable after it overruns.
      * That is right for a join button and wrong here — it would leave a finished
@@ -146,15 +151,9 @@ class PanelWindowService
      *
      * An unscheduled panel books no time and is never history.
      */
-    public static function isPast(?array $window, $user = null): bool
+    public static function isPast(?array $window): bool
     {
-        if (empty($window['end'])) {
-            return false;
-        }
-
-        $end = MeetingWindowService::inUserZone($window['end'], $user);
-
-        return $end !== null && MeetingWindowService::now($user)->greaterThan($end);
+        return !empty($window['end']) && Carbon::now()->greaterThan($window['end']);
     }
 
     /**
@@ -167,19 +166,10 @@ class PanelWindowService
      * meeting has FINISHED (and so may no longer be edited), which is why the two
      * cannot share a comparison.
      *
-     * Same wall-clock reading as isPast(): slot times carry no stored offset, so
-     * both sides are compared in the viewer's timezone.
-     *
      * An unscheduled panel books no time and is never in the past.
      */
-    public static function startsInPast(?array $window, $user = null): bool
+    public static function startsInPast(?array $window): bool
     {
-        if (empty($window['start'])) {
-            return false;
-        }
-
-        $start = MeetingWindowService::inUserZone($window['start'], $user);
-
-        return $start !== null && MeetingWindowService::now($user)->greaterThan($start);
+        return !empty($window['start']) && Carbon::now()->greaterThan($window['start']);
     }
 }

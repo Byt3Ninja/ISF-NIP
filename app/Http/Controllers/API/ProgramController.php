@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\User;
 use App\Messenger;
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use App\ScreeningEvaluation;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
@@ -184,26 +185,13 @@ class ProgramController extends Controller
             if ($request->hasFile('imgUrl')) {
                 $cycle->img_url = $fileManager->upload($request->file('imgUrl'), 'programs', 'public_uploads', 'image');
             }
-            if (auth()->user()->hasRole('OrganizationManager')) {
-
-                    $admin = User::role('Admin')->orderBy('id')->first();
-
-                    if ($admin) {
-
-                        \Illuminate\Support\Facades\Notification::route('mail', $admin->email)
-                            ->notify(new \App\Notifications\ProgramCreatedNotification($cycle, $admin));
-
-                        $messenger = new Messenger();
-                        $messenger->sender = auth()->id();
-                        $messenger->receiver = $admin->id;
-                        $messenger->subject = 'New Program Created';
-                        $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
-                        $messenger->read = 0;
-                        $messenger->save();
-                    }
-            }
-
             $cycle->save();
+
+            // Only after the program is actually persisted -- notifying
+            // before save() would email people about a program that might
+            // never have been created if save() failed.
+            app(\App\Services\ProgramCreatedNotifier::class)->notify($cycle);
+
             return $this->created(new ProgramResource($cycle),__('api.programCreated'),[], 201);
         });
         return $response;
@@ -467,7 +455,8 @@ public function index(Request $request)
        }
 
         if ($request->filled('status')) {
-         $now = Carbon::now();
+         // GV-9566: DATE columns vs the platform zone's today, not the server's.
+         $now = TimezoneService::platformToday();
          $status = $request->status;
 
         $query->where(function ($q) use ($status, $now) {
@@ -693,12 +682,13 @@ public function summary(string $programId)
             'description' => $cycle->description,
             'currentStage' => $currentStep->id
         ],
-        'programStages' => $cycle->steps->map(function ($step) use ($currentStep) {
-         $now = Carbon::now();
+        'programStages' => $cycle->steps->map(function ($step) use ($currentStep, $cycle) {
+         // GV-9566: step dates are inclusive days in the program's platform zone.
+         $today = TimezoneService::platformToday(TimezoneService::platform($cycle->organization_id));
          if ($step->from && $step->to) {
-         if ($now->lt($step->from)) {
+         if ($today < $step->from?->format('Y-m-d')) {
             $status = 'pending';
-          } elseif ($now->between($step->from, $step->to)) {
+          } elseif ($today <= $step->to?->format('Y-m-d')) {
             $status = 'in Progress';
           } else {
             $status = 'Completed';

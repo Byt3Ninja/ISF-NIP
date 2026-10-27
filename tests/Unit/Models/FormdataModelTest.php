@@ -8,11 +8,9 @@ use App\Company;
 use App\Step;
 use App\Formfield;
 use App\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class FormdataModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_fillable_attributes()

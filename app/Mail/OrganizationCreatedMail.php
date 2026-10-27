@@ -20,25 +20,25 @@ class OrganizationCreatedMail extends Mailable implements ShouldQueue
 
     public $organization;
     public $user;
-    public $password;
+    /** Single-use magic-login link; the password itself is never mailed or queued. */
+    public $loginUrl;
     /**
      * Create a new message instance.
      */
-    public function __construct(Organization $organization, User $user, $password)
+    public function __construct(Organization $organization, User $user, string $loginUrl)
     {
         $this->organization = $organization;
         $this->user = $user;
-        $this->password = $password;
+        $this->loginUrl = $loginUrl;
     }
 
      public function build()
     {
-        $orgData = $this->buildEmailOrganizationData($this->organization);
+        $orgData = $this->emailBrandingData();
 
         return $this->subject('New Organization Created')
                     ->view('emails.organization_created')
-                    ->with(array_merge(['organization' => $this->organization, 'user' => $this->user, 'password' => $this->password], $orgData));
-    // Log::info('Organization created email sent successfully', ['organization' => $this->organization, 'user' => $this->user, 'password' => $this->password]);
+                    ->with(array_merge(['organization' => $this->organization, 'user' => $this->user, 'loginUrl' => $this->loginUrl], $orgData));
     }
 
     /**

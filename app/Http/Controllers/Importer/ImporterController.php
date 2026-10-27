@@ -377,10 +377,8 @@ class ImporterController extends Controller
             }
         }
 
-        if (!in_array($session->status, [
-            ImporterSession::STATUS_VALIDATED,
-            ImporterSession::STATUS_CONFLICTS_REVIEWED,
-        ], true)) {
+        // Atomic claim: two concurrent executes can no longer both import the file.
+        if (!$svc->claimForImport($session)) {
             return response()->json([
                 'success' => false,
                 'errors' => [[

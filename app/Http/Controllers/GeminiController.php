@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ProtectedFiles\FileAccess;
 use App\SwotAnalysis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -174,6 +175,8 @@ class GeminiController extends Controller
         ]);
 
         $companyId = $validated['company_id'];
+        // H3: only someone who may manage this startup can overwrite its SWOT analysis.
+        abort_unless(app(FileAccess::class)->canManageCompany(auth()->user(), (int) $companyId), 403);
 
         $swotAnalysis = SwotAnalysis::firstOrNew(['company_id' => $companyId]);
 

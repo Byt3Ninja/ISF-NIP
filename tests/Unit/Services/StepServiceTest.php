@@ -10,12 +10,10 @@ use App\Cycle;
 use App\BuilderForm;
 use App\BuilderField;
 use App\Formfield;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 
 class StepServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected StepService $stepService;
     protected $stepRepoMock;

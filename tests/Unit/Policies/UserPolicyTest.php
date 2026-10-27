@@ -6,11 +6,9 @@ use Tests\TestCase;
 use App\Policies\UserPolicy;
 use App\User;
 use App\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UserPolicyTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected UserPolicy $policy;
 

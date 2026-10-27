@@ -2,6 +2,7 @@
 
 @section('vendorstyle')
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 @stop
 
 @section('style')
@@ -19,6 +20,7 @@ $title = $l == 'en' ? 'Settings' : 'الإعدادات';
 
 $tabs = collect([
   ['general', 'ti-settings', __('settings.General Settings')],
+  ['branding', 'ti-palette', __('settings.branding_title')],
   ['analysis', 'ti-graph', __('settings.Analysis Settings')],
   ['SMTP', 'ti-mail', __('settings.Email Configuration')],
   ['app-identity', 'ti-id-badge', __('settings.Application Identity')],
@@ -69,7 +71,7 @@ $tabs = collect([
       <ul class="nav nav-pills flex-nowrap" role="tablist">
         @foreach ($tabs as $key => $tab)
         <li class="nav-item d-flex justify-content-center align-items-center">
-          <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }}"
+          <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $tab['target'] === $activeTab ? 'active' : '' }}"
             data-bs-toggle="tab" role="tab">
             <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
             {{ $tab['label'] }}
@@ -86,7 +88,7 @@ $tabs = collect([
           <ul class="nav nav-tabs nav-fill border-none m-auto" role="tablist">
             @foreach ($tabs as $key => $tab)
             <li class="nav-item bg-label-light mb-2 rounded overflow-x-hidden d-flex align-items-center">
-              <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $key == 0 ? 'active' : '' }} py-3"
+              <a href="#navs-left-{{ $tab['target'] }}" class="nav-link {{ $tab['target'] === $activeTab ? 'active' : '' }} py-3"
                 data-bs-toggle="tab" role="tab">
                 <i class="ti {{ $tab['icon'] }} me-2 fs-5"></i>
                 {{ $tab['label'] }}
@@ -101,10 +103,12 @@ $tabs = collect([
       <div class="col-lg-9">
         <div class="tab-content p-0 overflow-y-auto mb-6">
           @foreach ($tabs as $index => $tab)
-          <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
+          <div class="tab-pane fade {{ $tab['target'] === $activeTab ? 'show active' : '' }} mb-6" id="navs-left-{{ $tab['target'] }}">
             <div class="card mb-6">
             <div class="card-header">
-              @if($index !== 9)
+              {{-- Keyed on the target, not the index: the WhatsApp header has a subtitle,
+     and a positional check silently retargets when a tab is inserted. --}}
+              @if($tab['target'] !== 'WhatsApp')
               <h5 class="card-title pb-3 border-bottom">{{ $tab['label'] }}</h5>
               @else
               <div class="card-title pb-3 border-bottom">
@@ -117,6 +121,9 @@ $tabs = collect([
               @switch($tab['target'])
               @case('general')
               @include('partials.forms.general-settings-form')
+              @break
+              @case('branding')
+              @include('partials.forms.platform-branding-form')
               @break
               @case('analysis')
               @include('partials.forms.analysis-settings-form')
@@ -168,6 +175,7 @@ $tabs = collect([
 <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
 <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 @stop
 
 @section('pagescripts')

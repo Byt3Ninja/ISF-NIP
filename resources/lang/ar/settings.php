@@ -519,4 +519,24 @@ return [
 	'email_open_resend' => 'فتح نطاقات Resend',
 	'email_close' => 'إغلاق',
 	'email_show_password' => 'إظهار أو إخفاء',
+
+	// هوية المنصة (الإعدادات العامة). لونان التدرج اختياريان معاً،
+	// أما اللون الرئيسي ولون نص الأزرار فإلزاميان.
+	'branding_title' => 'هوية المنصة',
+	'branding_description' => 'حدد الألوان التي تستخدمها المنصة في الأزرار والعناصر المميزة والتدرجات.',
+	'branding_gradient_start' => 'لون بداية التدرج',
+	'branding_gradient_end' => 'لون نهاية التدرج',
+	'branding_main_color' => 'اللون الرئيسي',
+	'branding_button_text_color' => 'لون نص الأزرار',
+	'branding_optional' => 'اختياري',
+	'branding_use_theme_gradient' => 'استخدام تدرج النظام',
+	'branding_reset' => 'إعادة تعيين الافتراضي',
+	'branding_reset_confirm' => 'هل تريد إعادة تعيين ألوان المنصة إلى الوضع الافتراضي؟',
+	'branding_preview' => 'معاينة',
+	'branding_preview_button' => 'زر',
+	'branding_enter_end_color' => 'يرجى إدخال لون نهاية للتدرج',
+	'branding_enter_start_color' => 'يرجى إدخال لون بداية للتدرج',
+	'branding_valid_main_color' => 'يرجى إدخال لون صالح',
+	'branding_valid_button_text_color' => 'يرجى إدخال لون صالح لنص الأزرار',
+	'branding_valid_color' => 'يرجى إدخال لون صالح',
 ];

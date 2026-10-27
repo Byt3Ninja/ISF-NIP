@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\User;
+use App\Support\NotificationClaim;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -65,72 +66,75 @@ class SendServiceMessageEmailReminders extends Command
             $recipient = User::find($recipientId);
             if (!$recipient) continue;
 
-            $this->sendEmail($recipient, $thread);
+            // Claim these messages first (a concurrent run can't email them too) and give them
+            // back if the email fails -- immediately, or later on the queue worker -- so the
+            // next run retries instead of the reminder being silently lost.
+            $claim = NotificationClaim::on('service_request_messages', [
+                'service_request_id' => $thread->service_request_id,
+                'sender_id' => $thread->sender_id,
+                'read_at' => null,
+            ], 'emailed_at', $now);
 
-            // Mark these messages as emailed
-            DB::table('service_request_messages')
-                ->where('service_request_id', $thread->service_request_id)
-                ->where('sender_id', $thread->sender_id)
-                ->whereNull('read_at')
-                ->whereNull('emailed_at')
-                ->update(['emailed_at' => $now]);
-
-            $sentCount++;
+            try {
+                if ($claim->run(fn (NotificationClaim $claim) => $this->sendEmail($recipient, $thread, $claim))) {
+                    $sentCount++;
+                }
+            } catch (\Throwable $th) {
+                Log::error('Service message email reminder failed', [
+                    'error'      => $th->getMessage(),
+                    'recipient'  => $recipient->id,
+                    'request_id' => $thread->service_request_id,
+                ]);
+            }
         }
 
         $this->info("Processed {$sentCount} email reminder(s).");
     }
 
-    private function sendEmail(User $recipient, $thread): void
+    private function sendEmail(User $recipient, $thread, NotificationClaim $claim): void
     {
-        try {
-            $recipientLang = $recipient->language ?? 'en';
+        $recipientLang = $recipient->language ?? 'en';
 
-            $service = DB::table('services')
-                ->where('id', $thread->service_id)
-                ->select(['name_en', 'name_ar'])
-                ->first();
+        $service = DB::table('services')
+            ->where('id', $thread->service_id)
+            ->select(['name_en', 'name_ar'])
+            ->first();
 
-            $serviceName = $recipientLang === 'ar'
-                ? ($service->name_ar ?: $service->name_en)
-                : $service->name_en;
+        $serviceName = $recipientLang === 'ar'
+            ? ($service->name_ar ?: $service->name_en)
+            : $service->name_en;
 
-            $sender     = User::find($thread->sender_id);
-            $senderName = $sender
-                ? trim(($sender->{"first_name_{$recipientLang}"} ?? $sender->first_name_en) . ' ' . ($sender->{"last_name_{$recipientLang}"} ?? $sender->last_name_en))
-                : '';
+        $sender     = User::find($thread->sender_id);
+        $senderName = $sender
+            ? trim(($sender->{"first_name_{$recipientLang}"} ?? $sender->first_name_en) . ' ' . ($sender->{"last_name_{$recipientLang}"} ?? $sender->last_name_en))
+            : '';
 
-            $timestamp = Carbon::parse($thread->oldest_unread_at)->format('M d, H:i');
+        $timestamp = Carbon::parse($thread->oldest_unread_at)->format('M d, H:i');
 
-            $senderIsFounder = ((int) $thread->sender_id === (int) $thread->founder_id);
-            $actionUrl = $senderIsFounder
-                ? '/dashboard/requests/all?open_request=' . $thread->service_request_id . '&tab=messages'
-                : '/dashboard/requests/mine?open_request=' . $thread->service_request_id . '&tab=messages';
+        $senderIsFounder = ((int) $thread->sender_id === (int) $thread->founder_id);
+        $actionUrl = $senderIsFounder
+            ? '/dashboard/requests/all?open_request=' . $thread->service_request_id . '&tab=messages'
+            : '/dashboard/requests/mine?open_request=' . $thread->service_request_id . '&tab=messages';
 
-            $recipientFirstName = $recipient->{"first_name_{$recipientLang}"} ?? $recipient->first_name_en;
-            $recipientLastName  = $recipient->{"last_name_{$recipientLang}"} ?? $recipient->last_name_en;
+        $recipientFirstName = $recipient->{"first_name_{$recipientLang}"} ?? $recipient->first_name_en;
+        $recipientLastName  = $recipient->{"last_name_{$recipientLang}"} ?? $recipient->last_name_en;
 
-            $params = [
-                'sender_name'  => $senderName,
-                'timestamp'    => $timestamp,
-                'service_name' => $serviceName,
-            ];
+        $params = [
+            'sender_name'  => $senderName,
+            'timestamp'    => $timestamp,
+            'service_name' => $serviceName,
+        ];
 
-            $recipient->notify(new ServiceMessageEmailNotification([
-                'subject'    => __('admin.service_message_email_subject', $params, $recipientLang),
-                'greeting'   => __('admin.service_message_email_greeting', [
-                    'recipient_name' => trim($recipientFirstName . ' ' . $recipientLastName),
-                ], $recipientLang),
-                'body'       => __('admin.service_message_email_body', $params, $recipientLang),
-                'cta_text'   => __('admin.service_message_view_cta', [], $recipientLang),
-                'action_url' => $actionUrl,
-            ]));
-        } catch (\Throwable $th) {
-            Log::error('Service message email reminder failed', [
-                'error'      => $th->getMessage(),
-                'recipient'  => $recipient->id,
-                'request_id' => $thread->service_request_id,
-            ]);
-        }
+        $recipient->notify((new ServiceMessageEmailNotification([
+            'subject'    => __('admin.service_message_email_subject', $params, $recipientLang),
+            'greeting'   => __('admin.service_message_email_greeting', [
+                'recipient_name' => trim($recipientFirstName . ' ' . $recipientLastName),
+            ], $recipientLang),
+            'body'       => __('admin.service_message_email_body', $params, $recipientLang),
+            'cta_text'   => __('admin.service_message_view_cta', [], $recipientLang),
+            'action_url' => $actionUrl,
+            // Brands the email with the requesting startup's program (EmailBranding).
+            'service_request_id' => $thread->service_request_id,
+        ]))->withClaim($claim));
     }
 }

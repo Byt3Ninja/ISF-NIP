@@ -6,6 +6,7 @@ use App\Traits\RoutesTenantMail;
 use App\InviteMentor;
 use App\Organization;
 use App\Settings;
+use App\Services\RichTextSanitizer;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -27,24 +28,41 @@ class InviteMentorMail extends Mailable implements ShouldQueue
         $this->invitation = $invitation;
     }
 
+    /**
+     * An invitation to one specific organization carries that organization's
+     * logo and name; a public or multi-organization invitation carries the
+     * platform's (EmailBranding).
+     */
+    public function emailBranding()
+    {
+        $orgIds = $this->invitation->organization_ids ?? [];
+
+        if ($this->invitation->scope !== 'Organization' || count($orgIds) !== 1) {
+            return null;
+        }
+
+        return Organization::find(reset($orgIds));
+    }
+
     public function build()
     {
         $orgIds = $this->invitation->organization_ids ?? [];
 
-        // The invitation email always carries the platform's own branding
-        // (logo, name) -- never an organization's -- regardless of which
-        // organizations the invite is scoped to.
-        $orgData = $this->buildEmailOrganizationData(null);
+        // Logo, name and closing line follow emailBranding(): the invited
+        // organization, or the platform.
+        $orgData = $this->emailBrandingData();
 
         $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
         app()->setLocale($locale);
 
-        $platformName = $orgData['org_name'] ?? config('app.name');
+        $brandName = $orgData['org_name'] ?? config('app.name');
+        // The "Platform" detail row always names the platform itself.
+        $platformName = $setting?->Platform_Name ?? config('app.name');
 
         $defaultSubject = $locale === 'ar'
-            ? "تمت دعوتك للانضمام إلى {$platformName} كمرشد"
-            : "You're Invited to Join {$platformName} as a Mentor";
+            ? "تمت دعوتك للانضمام إلى {$brandName} كمرشد"
+            : "You're Invited to Join {$brandName} as a Mentor";
 
         // An admin-authored subject/message is optional; when provided it
         // replaces the platform's default template text entirely.
@@ -56,7 +74,7 @@ class InviteMentorMail extends Mailable implements ShouldQueue
                      ->view('emails.invite_mentor')
                      ->with(array_merge([
                          'name'          => $this->invitation->name,
-                         'messageBody'   => $this->invitation->message_content,
+                         'messageBody'   => app(RichTextSanitizer::class)->clean($this->invitation->message_content),
                          'scope'         => $this->invitation->scope,
                          'organizations' => $organizations,
                          // Named distinctly from 'platformName': a global view

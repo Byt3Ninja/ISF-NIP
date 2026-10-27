@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Cycle;
 use App\Traits\ConfiguresSmtp;
 use App\User;
 use Illuminate\Bus\Queueable;
@@ -19,9 +20,15 @@ class CustomEmailNotification extends Notification implements ShouldQueue
     protected $user;
     protected $resetUrl;
 
-    public function __construct(User $user)
+    /**
+     * The program whose founders are emailed; brands the email (EmailBranding).
+     */
+    protected $cycle;
+
+    public function __construct(User $user, ?Cycle $cycle = null)
     {
         $this->user = $user;
+        $this->cycle = $cycle;
         $token = Password::getRepository()->create($this->user);
         $this->resetUrl = url(route('password.reset', [
             'token' => $token,
@@ -67,7 +74,7 @@ class CustomEmailNotification extends Notification implements ShouldQueue
 
         $this->configureSmtp($smtpSettings);
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         return (new MailMessage)
             ->subject(__('notifications.custom_email.subject'))

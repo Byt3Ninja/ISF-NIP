@@ -2,11 +2,13 @@
 
 namespace App\Notifications;
 
+use App\Organization;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Services\TimezoneService;
 
 class MentorshipSessionMentorBookingNotification extends Notification implements ShouldQueue
 {
@@ -19,15 +21,24 @@ class MentorshipSessionMentorBookingNotification extends Notification implements
     public $sessions;
 
     /**
+     * The organization running the sessions; brands the email.
+     *
+     * @var Organization|null
+     */
+    public $organization;
+
+    /**
      * Create a new notification instance.
      *
      * @param \App\User $founder
      * @param array $sessions
+     * @param Organization|null $organization
      */
-    public function __construct(\App\User $founder, array $sessions)
+    public function __construct(\App\User $founder, array $sessions, ?Organization $organization = null)
     {
         $this->founder = $founder;
         $this->sessions = $sessions;
+        $this->organization = $organization;
     }
 
     /**
@@ -38,7 +49,7 @@ class MentorshipSessionMentorBookingNotification extends Notification implements
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->organization ?? $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
 
         // Configure SMTP if settings exist
@@ -72,7 +83,8 @@ class MentorshipSessionMentorBookingNotification extends Notification implements
             $founderName = $this->founder->name;
         }
 
-        $mappedSessions = array_map(function($session) use ($locale, $founderName) {
+        $mappedSessions = array_map(function($session) use ($locale, $founderName, $notifiable) {
+            $session = $this->forRecipient($session, $notifiable);
             $session['founder_name'] = $founderName;
 
             if ($this->founder->company) {
@@ -94,10 +106,30 @@ class MentorshipSessionMentorBookingNotification extends Notification implements
 
         return (new MailMessage)
             ->subject($subject)
-            ->view('emails.mentorship_session_mentor_booking', [
+            ->view('emails.mentorship_session_mentor_booking', array_merge([
                 'founderName' => $founderName,
                 'sessions' => $mappedSessions,
                 'locale' => $locale,
-            ]);
+            ], $this->emailBrandingData()));
+    }
+
+    /**
+     * A booked session's platform wall-clock date/start/end, shown in the
+     * recipient's own timezone (GV-9566).
+     */
+    protected function forRecipient(array $session, $notifiable): array
+    {
+        if (empty($session['date'])) {
+            return $session;
+        }
+
+        $start = TimezoneService::wallClockForViewer($session['date'], $session['start_time'] ?? '', $notifiable);
+        $end = TimezoneService::wallClockForViewer($session['date'], $session['end_time'] ?? '', $notifiable);
+
+        $session['date'] = $start['date'];
+        $session['start_time'] = $start['time'];
+        $session['end_time'] = $end['time'];
+
+        return $session;
     }
 }

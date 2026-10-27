@@ -100,8 +100,10 @@
     if( $_user->hasRole('Mentor') )
   {
     /// Rating
-    $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',date("Y-m-d 17:00:00"))->whereNull('rate')->first();
-    $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',date("Y-m-d 17:00:00"))->where('approved','Yes')->whereNull('rating')->first();
+    // GV-9566: date_time / zoom_date are platform wall-clock, so "today" is the platform day.
+    $platformToday = \App\Services\TimezoneService::platformToday();
+    $notrated_ser = \App\ServicesRequests::where('user_id', $user_id)->where('approved','Yes')->where('date_time','<',$platformToday . ' 17:00:00')->whereNull('rate')->first();
+    $notrated_men = \App\MentorshipRequest::where('user_id', $user_id)->where('zoom_date','<',$platformToday . ' 17:00:00')->where('approved','Yes')->whereNull('rating')->first();
     $available_surveys = collect([]);
     $surveyEligible = [];
     // load survey for mentor
@@ -116,9 +118,10 @@
       if( empty( $mentorship->zoom_date ) || empty( $mentorship->period ) ) { continue; }
       else
       {
-        $endAt = Carbon\carbon::parse($mentorship->zoom_date)->addMinutes($mentorship->period)->format('Y-m-d H:i:s');
+        // GV-9566: zoom_date is the cast instant; compare instants, not strings.
+        $endAt = $mentorship->zoom_date->copy()->addMinutes((int) $mentorship->period);
         
-        if( now() > $endAt )
+        if( now()->gt($endAt) )
         {
           $surveyEligible[] = [
             'triggered_on' => 'mentorship',
@@ -576,7 +579,7 @@
                       </a>
                     </td>
                     <td>
-                      {{ $session->zoom_date }} ({{ $session->period }}M)
+                      {{ optional(\App\Services\TimezoneService::forViewer($session->zoom_date, $_user))->format('Y-m-d H:i:s') }} ({{ $session->period }}M)
                     </td>
                     <td>
                       {{ $session->admin_comment ?? '...' }}
@@ -824,19 +827,13 @@
           } else if (type === 2) {
             location.reload();
             } else if (type === 3) {
-              Swal.fire({
-                icon: 'success',
+              releaseAlert('success', {
                 title: "{{ __('admin.Deleted') }}!",
-                html: "{{ __('admin.DeletedSuccessfully') }}.",
-                showCancelButton: false,
-                showConfirmButton: true,
-                confirmButtonText: "{{ __('admin.OK') }}",
-                customClass: {
-                  confirmButton: 'btn btn-primary',
-                },
-                buttonsStyling: false,
-            }).then((result) => {
-              if (result.isConfirmed) {
+                message: "{{ __('admin.DeletedSuccessfully') }}.",
+                confirmText: "{{ __('admin.OK') }}",
+                confirmColor: 'primary'
+              }).then((ok) => {
+              if (ok) {
                 location.reload();
               }
             });

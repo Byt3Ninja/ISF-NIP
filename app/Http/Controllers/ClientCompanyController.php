@@ -8,6 +8,7 @@ use App\Like;
 use App\Step;
 use App\User;
 use App\Cycle;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use App\Stage;
 use App\State;
 use App\Almuni;
@@ -47,6 +48,7 @@ use Illuminate\Http\Request;
 use App\StartupCustomerGrowth;
 use Illuminate\Validation\Rule;
 use App\Services\CompanyService;
+use App\Services\TimezoneService;
 use App\ScreeningEvaluationResults;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -97,6 +99,9 @@ class ClientCompanyController extends Controller
         {
             if( empty( $id ) ) { return abort(404); }
         }
+
+        // H3: only users related to this startup may open its profile.
+        abort_unless(app(FileAccess::class)->canViewCompanyProfile($user, (int) $id), 403);
 
         $company = $this->companyService->getCompanyRelation($id);
         if($company['type'] == 'not_found'){
@@ -290,7 +295,8 @@ class ClientCompanyController extends Controller
             // The company is still assigned to this cycle (hasn't moved to Almuni yet),
             // so it can only be 'upcoming' or 'ongoing' here — never 'completed'.
             // A cycle's calendar end date passing doesn't mean this company finished it.
-            $cycleStatus = ($startDate && Carbon::now()->lessThan($startDate)) ? 'upcoming' : 'ongoing';
+            // GV-9566: `start` is a day in the program's platform zone.
+            $cycleStatus = ($startDate && TimezoneService::platformToday(TimezoneService::platform($cycle->organization_id)) < $startDate->format('Y-m-d')) ? 'upcoming' : 'ongoing';
 
             $custom_form = $cycle->steps->sortBy('arr')->values()->where('stype', 1)->first();
             $submissions = Formdata::where('company_id', $company?->id)->where('step_id', $custom_form?->id)->orderBy('created_at', 'asc')->first();
@@ -966,32 +972,9 @@ class ClientCompanyController extends Controller
             }
             else
             {
-                if( $user->hasRole('registered') )
-                {
-                    if( $user->company_id != $id )
-                    {
-                        return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
-                    }
-                }
-                   
-                // if (!$user->hasAnyRole('Admin|organizationManager')) {
-                //     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
-                // }
-
-                if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
-                    $orgIds = $user->organizations_ids;
-                    $cycles = Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
-                    foreach ($cycles as $cycle) {
-                        foreach ($cycle->companies as $company) {
-                            if ($company->id == $id) {
-                                $id = $company->id;
-                                break;
-                            } else {
-                                $id = null;
-                            }
-                        }
-                    }
-                }
+                // H3: admin, the startup's own team, or staff of the organization running its
+                // current program (the old per-cycle loop let staff with no programs through).
+                abort_unless(app(FileAccess::class)->canManageCompany($user, (int) $id), 403);
                 if ($id == null) {
                     return redirect()->back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
                 }
@@ -1269,8 +1252,12 @@ class ClientCompanyController extends Controller
                 'hasAreasOfExpertise',
             ));
         } catch (Exception $e) {
+            // Let authorization/404 responses through instead of turning them into a 500
+            // (this catch used to dd() every exception to the browser).
+            if ($e instanceof HttpExceptionInterface) {
+                throw $e;
+            }
             //log what happend
-            dd($e);
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
         }
@@ -2556,6 +2543,8 @@ class ClientCompanyController extends Controller
      */
     public function likeService(Request $request)
     {
+        // H3: outside the try, so the 403 is not swallowed by the catch below.
+        $this->authorizedCompanyId($request->input('company_id'));
         try {
             $validator = Validator::make($request->all(), [
                 'company_id' => 'required|numeric',
@@ -2569,13 +2558,16 @@ class ClientCompanyController extends Controller
             $current_state = $request->current_state;
             $company_id = $request->company_id;
             $service_id = $request->service_id;
+            $result = null;
+            $rowId = null;
             if ($current_state == 'unliked') { //Like
                 $result = Like::updateOrCreate(
                     $request->only(['company_id', 'service_id']) + ['user_id' => $user],
-                    $request->all() + ['user_id' => $user]
+                    $request->only(['company_id', 'service_id', 'rate']) + ['user_id' => $user]
                 );
+                $rowId = $result->id;
             } elseif ($current_state == 'liked') { //Unlike
-                Like::where('company_id', $company_id)
+                $result = Like::where('company_id', $company_id)
                     ->where('service_id', $service_id)
                     ->where('user_id', $user)
                     ->delete();
@@ -2584,7 +2576,7 @@ class ClientCompanyController extends Controller
             $code = 200; //successful Request:
             $status = 'success';
             $message = "The data has been Deleted successfully";
-            $dataContent = ['row_id' => $result->id];
+            $dataContent = ['row_id' => $rowId];
             if ($result)
                 return $this->returnApiResult($code, $status, $message, $dataContent);
             else
@@ -2598,13 +2590,7 @@ class ClientCompanyController extends Controller
 
     public function AddTeams(Request $request, $id = null)
     {
-        if (isset($id) && !is_null($id)) {
-            $user = User::where('company_id', $id)->first();
-        } else {
-            $user = auth()->user();
-        }
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        $companyId = $this->authorizedCompanyId($id);
         if ($request->TeamsNo == "Founders") {
             $validator = Validator::make($request->all(), [
                 'founder_name'       => 'required|string|max:100',
@@ -2779,16 +2765,11 @@ class ClientCompanyController extends Controller
 
     public function EditTeams(Request $request, $id = null)
     {
-        if (isset($id) && !is_null($id)) {
-            $user = User::where('company_id', $id)->first();
-        } else {
-            $user = auth()->user();
-        }
-        // $user = Auth::user();
-        $companyId = $user->company_id;
+        $companyId = $this->authorizedCompanyId($id);
 
         // إنشاء وحفظ بيانات العضو في قاعدة البيانات
-        $teamMember = Team_member::where('id', $request->id)->first(); // افترض أن لديك موديل اسمه TeamMember
+        // Scoped to the authorized startup: the Shareholder/Investor branches below had no company check.
+        $teamMember = Team_member::where('id', $request->id)->where('Company_id', $companyId)->firstOrFail();
         if ($teamMember->TeamMember == "Founder") {
             // Company-scope guard: prevent cross-company tampering.
             if ((int) $teamMember->Company_id !== (int) $companyId) {
@@ -2938,20 +2919,7 @@ class ClientCompanyController extends Controller
 
     public function DeleteTeams(Request $request, $id = null)
     {
-        if (isset($id) && !is_null($id)) {
-            $user = User::where('company_id', $id)->first();
-        } else {
-            $user = auth()->user();
-        }
-
-        if (!$user) {
-            return response()->json([
-                'state' => false,
-                'message' => __('admin.no_Team_member')
-            ], 403);
-        }
-
-        $companyId = $user->company_id;
+        $companyId = $this->authorizedCompanyId($id);
 
         $teamMember = Team_member::where('id', $request->id)
             ->where('Company_id', $companyId)
@@ -3523,6 +3491,14 @@ class ClientCompanyController extends Controller
 
     public function companyAlumni(Request $request, $id, $cycle_id)
     {
+        // N8: the startup's own team, or staff of the organization that ran the snapshot's program.
+        $user = auth()->user();
+        abort_unless(
+            app(FileAccess::class)->isMember($user, (int) $id)
+                || $user->managesOrganization(Cycle::whereKey($cycle_id)->value('organization_id')),
+            403
+        );
+
         $almuni = Almuni::where('cycle_id', $cycle_id)->where('company_id', $id)->with(['company'])->first();
         if(empty($almuni)){
             return redirect()->back()->with('error', 'Alumni not found');
@@ -4189,16 +4165,22 @@ class ClientCompanyController extends Controller
                 'id.exists' => 'Employee not found'
             ]);
 
-        //     if ($validator->fails()) {
-        //         return response()->json([
-        //             'errors' => $validator->errors()
-        //         ], 422);
-        //     }
+            if ($validator->fails()) {
+                return response()->json([
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        //     $employee = Team_member::where('id', $request->id)
-        //                          ->where('Company_id', $id)
-        //                          ->where('TeamMember', 'Employee')
-        //                          ->firstOrFail();
+            // C2: the lookup was commented out, so every delete failed on an undefined $employee.
+            // Employees live in `employees` (what the validator and editEmployee use), scoped to this startup.
+            $employee = Employee::where('id', $employeeId)
+                ->where('company_id', $companyId)
+                ->first();
+            if (!$employee) {
+                return response()->json([
+                    'errors' => ['id' => ['Employee not found']]
+                ], 404);
+            }
 
             // Delete associated documents
             if ($employee->documents && is_array($employee->documents)) {
@@ -4246,6 +4228,11 @@ class ClientCompanyController extends Controller
             foreach ($companyIds as $id) {
                 $company = Company::find($id);
                 if (!$company) continue;
+                // N9: only staff of the organization running the startup's program.
+                if (!auth()->user()->managesOrganization($company->cycleData?->organization_id)) {
+                    $errors[] = $company->name_en . ': ' . __('admin.NoHavePermission');
+                    continue;
+                }
                 if($company->cycleData->allow_non_company == 0){
                     // Validation: Must have country
                     if ($company->country_id == null) {
@@ -4299,6 +4286,10 @@ class ClientCompanyController extends Controller
     {
         try {
             $company = Company::findOrFail($id);
+            // N9: only staff of the organization running the startup's program.
+            if (!auth()->user()->managesOrganization($company->cycleData?->organization_id)) {
+                return response()->json(['success' => false, 'message' => __('admin.NoHavePermission')], 403);
+            }
             
             if($company->cycleData->allow_non_company == 0){
                 // Validation: Must have country
@@ -4415,8 +4406,13 @@ class ClientCompanyController extends Controller
 
                 $startup_leader_information = [];
 
-                $hackathons = $team_leaders->where('TeamMember', 'hackathon')->values();
-                foreach ($hackathons as $leader) {
+                // C18: a startup's leaders are its Founder rows, or the flagged leader of a hackathon
+                // team -- not every hackathon member (and ordinary startups used to get none).
+                $leaders = $team_leaders->filter(function ($member) {
+                    return $member->TeamMember === 'Founder'
+                        || ($member->TeamMember === 'hackathon' && (int) $member->isTeamLeader === 1);
+                })->values();
+                foreach ($leaders as $leader) {
                     
                     $startup_leader_information[] = [
                         'ID' => $leader->id ?? '',
@@ -5102,31 +5098,12 @@ class ClientCompanyController extends Controller
             // ----------------------------------------------------------
             $user = auth()->user();
 
-            if ($user->hasRole('registered') && $user->company_id != $id) {
+            // N13: deny by default; admin, the startup's own team, or its program's staff.
+            if (!app(FileAccess::class)->canManageCompany($user, $id)) {
                 return response()->json([
                     'success' => false,
                     'message' => __('admin.NoHavePermission'),
                 ], 403);
-            }
-
-            if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
-                $orgIds = $user->organizations_ids;
-                $cycles = \App\Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
-                $hasAccess = false;
-                foreach ($cycles as $cycle) {
-                    foreach ($cycle->companies as $company) {
-                        if ($company->id == $id) {
-                            $hasAccess = true;
-                            break 2;
-                        }
-                    }
-                }
-                if (!$hasAccess) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => __('admin.NoHavePermission'),
-                    ], 403);
-                }
             }
 
             // ----------------------------------------------------------
@@ -5251,31 +5228,12 @@ class ClientCompanyController extends Controller
             // ----------------------------------------------------------
             $user = auth()->user();
 
-            if ($user->hasRole('registered') && $user->company_id != $id) {
+            // N13: deny by default; admin, the startup's own team, or its program's staff.
+            if (!app(FileAccess::class)->canManageCompany($user, $id)) {
                 return response()->json([
                     'success' => false,
                     'message' => __('admin.NoHavePermission'),
                 ], 403);
-            }
-
-            if ($user->hasAnyRole(['organizationManager', 'subadmin'])) {
-                $orgIds = $user->organizations_ids;
-                $cycles = \App\Cycle::whereIn('organization_id', $orgIds)->with('companies')->get();
-                $hasAccess = false;
-                foreach ($cycles as $cycle) {
-                    foreach ($cycle->companies as $company) {
-                        if ($company->id == $id) {
-                            $hasAccess = true;
-                            break 2;
-                        }
-                    }
-                }
-                if (!$hasAccess) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => __('admin.NoHavePermission'),
-                    ], 403);
-                }
             }
 
             // ----------------------------------------------------------
@@ -5470,13 +5428,7 @@ class ClientCompanyController extends Controller
 
     public function saveStatistics(Request $request, $id = null)
     {
-        if (isset($id) && !is_null($id)) {
-            $user = User::where('company_id', $id)->first();
-        } else {
-            $user = auth()->user();
-        }
-
-        $companyId = $user->company_id ?? null;
+        $companyId = $id ? (int) $id : (int) (auth()->user()->company_id ?? 0);
         if (!$companyId) {
             if ($request->ajax()) {
                 return response()->json([
@@ -5486,6 +5438,8 @@ class ClientCompanyController extends Controller
             }
             return redirect()->back()->with(['msg' => 'NoHaveCompany', 'class' => 'danger']);
         }
+
+        $this->authorizedCompanyId($companyId);
 
         $company = Company::find($companyId);
         if (!$company) {
@@ -5550,5 +5504,17 @@ class ClientCompanyController extends Controller
         }
 
         return redirect()->back()->with(['msg' => __('admin.employee_statistics_updated'), 'class' => 'success']);
+    }
+
+    /**
+     * H3: the startup a company-scoped write targets ($id, else the user's own startup);
+     * 403 unless the user may manage it (admin, its team, or its program's staff).
+     */
+    private function authorizedCompanyId($id): int
+    {
+        $companyId = $id ? (int) $id : (int) (auth()->user()->company_id ?? 0);
+        abort_unless(app(FileAccess::class)->canManageCompany(auth()->user(), $companyId), 403);
+
+        return $companyId;
     }
 }

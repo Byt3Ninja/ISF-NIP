@@ -246,6 +246,32 @@ $(function () {
         () => $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm'),
         300
       );
+      const $wrapper = $(this.api().table().container());
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
+
+      @if (request('role') === 'registered')
+        $('#filterRole').val('registered').trigger('change');
+      @endif
     }
   });
 
@@ -339,32 +365,25 @@ $(function () {
     const id    = $(this).data('id');
     const token = '{{ csrf_token() }}';
 
-    Swal.fire({
-      title:             '{{ __("admin.SureDelete") }}',
-      text:              '{{ __("admin.Recover") }}',
-      icon:              'warning',
-      showCancelButton:  true,
-      confirmButtonText: '{{ __("admin.DYes") }}',
-      cancelButtonText:  '{{ __("admin.No") }}',
-      reverseButtons:    true,
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton:  'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then(result => {
-      if (!result.value) return;
+    releaseAlert('warning', {
+      title: '{{ __("admin.SureDelete") }}',
+      message: '{{ __("admin.Recover") }}',
+      confirmText: '{{ __("admin.DYes") }}',
+      cancelText: '{{ __("admin.No") }}',
+      confirmColor: 'danger'
+    }).then(ok => {
+      if (!ok) return;
 
       $.post(url, { _method: 'DELETE', _token: token })
         .done(() => {
           table.row('#row_' + id).remove().draw();
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title:   '{{ __("admin.Deleted") }}!',
             message: '{{ __("admin.DeletedSuccessfully") }}.',
           });
         })
         .fail(xhr => {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title:   '{{ __("admin.Error") }}!',
             message: xhr.responseJSON?.message
                      || '{{ __("admin.An unexpected error occurred, please try again later") }}',
@@ -378,11 +397,11 @@ $(function () {
 
     let url = $(this).attr('href');
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('admin.Confirm Action') }}",
       message: "{{ __('admin.start_imperonation_message') }}",
-      confirmButtonText: "{{ __('admin.Yes') }}",
-      cancelButtonText: "{{ __('admin.cancel') }}",
+      confirmText: "{{ __('admin.Yes') }}",
+      cancelText: "{{ __('admin.cancel') }}",
       onConfirm: function() {
         window.location.href = url;
       }

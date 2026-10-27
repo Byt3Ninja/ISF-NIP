@@ -10,7 +10,6 @@ use App\User;
 use App\Role;
 use App\Cycle;
 use App\Company;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +18,6 @@ use Mockery;
 
 class OrganizationServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected OrganizationService $organizationService;
     protected $organizationRepoMock;

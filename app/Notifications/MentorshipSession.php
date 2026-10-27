@@ -5,7 +5,9 @@ namespace App\Notifications;
 use App\Organization;
 use App\Settings;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
 use Carbon\Carbon;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -15,10 +17,11 @@ use Illuminate\Notifications\Messages\BroadcastMessage;
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
 use Throwable;
+use App\Services\TimezoneService;
 
 class MentorshipSession extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -70,7 +73,7 @@ class MentorshipSession extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -121,7 +124,7 @@ class MentorshipSession extends Notification implements ShouldQueue
             return $this->toFounderUpdatedMail($notifiable);
         }
 
-        // $org = $notifiable->organization;
+        // $org = $this->sessionOrganization($notifiable, null, $this->data['organizationId'] ?? null);
         // $smtpSettings = $org?->organizationSettings;
         
         // // Get from address and name
@@ -135,9 +138,9 @@ class MentorshipSession extends Notification implements ShouldQueue
 
             $mail = (new MailMessage)
                 ->subject($this->data['subject'])
-                ->view('emails.mentorship_request_status', [
+                ->view('emails.mentorship_request_status', array_merge([
                     'data' => $this->data
-                ]);
+                ], $this->emailBrandingData()));
 
 
 foreach ($this->data['attachments'] ?? [] as $attachment) {
@@ -170,10 +173,7 @@ foreach ($this->data['attachments'] ?? [] as $attachment) {
         $platformName = $setting?->Platform_Name ?: config('app.name');
 
         $organization = ! empty($d['organizationId']) ? Organization::find($d['organizationId']) : null;
-        $orgData = $this->buildEmailOrganizationData($organization);
-        if ($organization && empty($organization->img_url)) {
-            $orgData['org_logo_url'] = null;
-        }
+        $orgData = $this->emailBrandingData();
         $orgName = $organization
             ? (trim((string) $organization->getAttribute('name_' . $locale)) ?: $organization->getAttribute('name_en'))
             : $platformName;
@@ -187,7 +187,11 @@ foreach ($this->data['attachments'] ?? [] as $attachment) {
             ? (trim((string) ($d['startupNameAr'] ?? '')) ?: trim((string) ($d['startupNameEn'] ?? '')))
             : trim((string) ($d['startupNameEn'] ?? ''));
 
-        $start = Carbon::parse($d['startAt']);
+        // GV-9566: startAt is platform wall-clock; show it in the founder's own timezone.
+        $start = TimezoneService::forViewer(
+            TimezoneService::wallClock($d['startAt'], TimezoneService::platform(! empty($d['organizationId']) ? (int) $d['organizationId'] : null)),
+            $notifiable
+        ) ?? Carbon::now();
         $end = $start->copy()->addMinutes((int) ($d['periodMinutes'] ?: 60));
         $sessionTime = $start->format('h:i A') . ' – ' . $end->format('h:i A');
         if ($isRtl) {
@@ -302,6 +306,7 @@ foreach ($this->data['attachments'] ?? [] as $attachment) {
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('MentorshipSessionMentor notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

@@ -117,6 +117,7 @@ $(function () {
     dom: '<"card-header d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-3" <"d-flex align-items-center gap-3" l <"dt-custom-filters d-flex gap-2">> f>t<"row mx-2"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
 
     initComplete: function () {
+      const $wrapper = $(this.api().table().container());
       const api = this.api();
       const filterContainer = $('.dt-custom-filters');
 
@@ -158,6 +159,28 @@ $(function () {
 
 			$('.dataTables_filter .form-control').removeClass('form-control-sm').css('width', '');
       $('.dataTables_length .form-select').removeClass('form-select-sm');
+      
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
     }
   });
 
@@ -170,16 +193,13 @@ $(function () {
     const btn = $(this);
     const url = btn.data('url');
 
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{__('admin.SureDelete')}}",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-      customClass: { confirmButton: 'btn btn-danger me-3', cancelButton: 'btn btn-label-secondary' },
-      buttonsStyling: false
-    }).then((result) => {
-      if (result.value) {
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (ok) {
         $.ajax({
           url: url,
           type: 'POST',

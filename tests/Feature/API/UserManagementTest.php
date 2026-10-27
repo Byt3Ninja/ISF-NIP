@@ -5,12 +5,10 @@ namespace Tests\Feature\API;
 use Tests\TestCase;
 use App\User;
 use App\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 class UserManagementTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected function setUp(): void
     {

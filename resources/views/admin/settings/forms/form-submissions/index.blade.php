@@ -338,32 +338,21 @@
         // Delete Record with SweetAlert warning
         $('.datatables-basic tbody').on('click', '.delete-record', function () {
           const row = $(this).parents('tr');
-          Swal.fire({
+          releaseAlert('info', {
             title: t.deleteRecord,
-            text: t.deleteConfirmation,
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonText: t.delete,
-            cancelButtonText: t.cancel,
-            customClass: {
-              confirmButton: 'btn btn-danger me-3',
-              cancelButton: 'btn btn-label-secondary'
-            },
-            buttonsStyling: false
-          }).then((result) => {
-            if (result.isConfirmed) {
+            message: t.deleteConfirmation,
+            confirmText: t.delete,
+            cancelText: t.cancel,
+            confirmColor: 'danger',
+            hideCancel: false
+          }).then((ok) => {
+            if (ok) {
               dt_basic.row(row).remove().draw();
-              Swal.fire({
+              releaseAlert('success', {
                 title: t.deleted,
-                text: t.deleteConfirmation,
-                icon: 'success',
-                showCancelButton: false,
-                showConfirmButton: true,
-                confirmButtonText: t.ok,
-                customClass: {
-                  confirmButton: 'btn btn-primary'
-                },
-                buttonsStyling: false
+                message: t.deleteConfirmation,
+                confirmText: t.ok,
+                confirmColor: 'primary'
               });
             }
           });

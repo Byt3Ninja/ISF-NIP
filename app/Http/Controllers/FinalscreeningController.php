@@ -17,6 +17,7 @@ use App\Services\PanelWindowService;
 use App\Step;
 use App\User;
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\App;
@@ -67,7 +68,8 @@ class FinalscreeningController extends Controller
 
 		if( $request->filled('status') && $request->input('status', 'all') != 'all')
 		{
-			$today = now()->toDateString();
+			// GV-9566: step DATE columns vs the platform zone's today, not the server's.
+			$today = TimezoneService::platformToday();
 			switch ($request->status)
 			{
 				case 'upcoming':
@@ -358,8 +360,7 @@ class FinalscreeningController extends Controller
 					'judges' => (array) ($panelData['judgers'] ?? []),
 					'companies' => (array) ($panelData['companies'] ?? []),
 					'is_history' => PanelWindowService::isPast(
-						PanelWindowService::fromScreening($screening),
-						auth()->user()
+						PanelWindowService::fromScreening($screening)
 					),
 					// The panel number this record is STORED under. Deleting an
 					// earlier panel renumbers the accordion, so the loop index is
@@ -557,7 +558,9 @@ class FinalscreeningController extends Controller
 			 "start_time" => $request->date,
 			  'duration' => $request->period,
 			   'host_video' => 1,
-				'participant_video' => 1
+				'participant_video' => 1,
+				// GV-9566: the typed time is platform wall-clock of the step's organization.
+				'timezone' => TimezoneService::forStep($request->step),
 			];
 			
 			$onlineMeeting = $this->meetingService->createMeeting($data);
@@ -935,6 +938,8 @@ class FinalscreeningController extends Controller
 		}
 
 		$step = Step::with('cycle')->find($stepId);
-		abort_unless($step && $step->cycle && $user->ownsOrganization($step->cycle->organization_id), 403);
+		// managesOrganization, not ownsOrganization: judges hold screening.update, and a judge with an
+		// organization_id (or a founder) "owns" that organization without being its staff.
+		abort_unless($step && $step->cycle && $user->managesOrganization($step->cycle->organization_id), 403);
 	}
 }

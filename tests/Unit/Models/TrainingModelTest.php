@@ -9,12 +9,10 @@ use App\TrainingContent;
 use App\TrainingCompleted;
 use App\Expertise;
 use App\Tags;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
 class TrainingModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_fillable_attributes()

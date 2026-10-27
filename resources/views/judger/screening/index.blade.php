@@ -378,8 +378,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
       // Warning icon: inform the judge the criteria aren't configured yet.
       $('.datatables-screening tbody').on('click', '.criteria-warning', function () {
-        if (typeof window.releaseWarningAlert === 'function') {
-          window.releaseWarningAlert({
+        if (typeof releaseAlert === 'function') {
+          window.releaseAlert('warning', {
+            hideCancel: true,
             title: t.criteriaNotConfiguredTitle,
             message: t.criteriaNotConfiguredMessage,
           });
@@ -390,8 +391,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
       // carries the full evaluation hierarchy, not just the visible columns.
       const runExport = (format) => {
         if (dt_screening.rows({ search: 'applied' }).count() === 0) {
-          if (typeof window.releaseWarningAlert === 'function') {
-            window.releaseWarningAlert({ title: t.export, message: t.noRowsToExport });
+          if (typeof releaseAlert === 'function') {
+            window.releaseAlert('warning', { hideCancel: true, title: t.export, message: t.noRowsToExport });
           }
           return;
         }

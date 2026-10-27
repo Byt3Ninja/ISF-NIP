@@ -4,6 +4,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
   <style>
     .ql-toolbar .ql-custom-button {
       width: auto !important;
@@ -103,6 +104,16 @@
     /* Keep the handle in step with the rest of an ended row's dimming */
     .program-row-ended td:first-child .program-drag-handle {
       opacity: 0.6;
+    }
+    /* Branding color swatches (Pickr) — sized to sit flush with the hex
+       field next to them. */
+    .lp-branding-pickr {
+      flex: 0 0 auto;
+    }
+    .lp-branding-pickr .pcr-button {
+      width: 2.4rem;
+      height: 2.35rem;
+      border-radius: 0.375rem;
     }
   </style>
 @endsection
@@ -293,16 +304,9 @@
                 {{-- Backend validation errors surfaced from the AJAX save --}}
                 <div class="alert alert-danger section-backend-errors d-none mb-4" role="alert"></div>
 
-                {{-- Save button, top-right of each section --}}
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                  <h5 class="mb-0">
-                    {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
-                  </h5>
-                  <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
-                    <i class="ti ti-device-floppy"></i>
-                    {{ __('landing.Save') }}
-                  </button>
-                </div>
+                <h5 class="mb-4">
+                  {{ $l == 'ar' ? $section['label_ar'] : $section['label_en'] }}
+                </h5>
 
                 <div class="row g-4">
                   @foreach ($section['fields'] as $field)
@@ -313,10 +317,14 @@
                       $colWidth   = $field['col'] ?? 12;
                     @endphp
                     <div class="col-md-{{ $colWidth }}">
-                      <label for="{{ $fieldId }}" class="form-label">
-                        {{ $fieldLabel }}
-                        @if(!empty($field['required'])) <span class="text-danger">*</span> @endif
-                      </label>
+                      {{-- Checkbox labels sit after the switch, so the block-level
+                           label above is suppressed for them. --}}
+                      @if($field['type'] !== 'checkbox')
+                        <label for="{{ $fieldId }}" class="form-label">
+                          {{ $fieldLabel }}
+                          @if(!empty($field['required'])) <span class="text-danger">*</span> @endif
+                        </label>
+                      @endif
 
                       @switch($field['type'])
                         @case('textarea')
@@ -368,7 +376,7 @@
                           @break
 
                         @case('checkbox')
-                          <div class="form-check form-switch">
+                          <div class="form-check form-switch d-flex align-items-center gap-2 mb-0">
                             <input
                               type="hidden"
                               name="{{ $fieldName }}"
@@ -382,6 +390,9 @@
                               class="form-check-input"
                               @checked(old($fieldName, $field['value']))
                             >
+                            <label class="form-check-label mb-0" for="{{ $fieldId }}">
+                              {{ $fieldLabel }}
+                            </label>
                           </div>
                           @break
 
@@ -441,6 +452,10 @@
                           >
                       @endswitch
 
+                      @if(!empty($field['hint_en']) || !empty($field['hint_ar']))
+                        <div class="form-text">{{ $l == 'ar' ? ($field['hint_ar'] ?? '') : ($field['hint_en'] ?? '') }}</div>
+                      @endif
+
                       @error($fieldName)
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                       @enderror
@@ -464,6 +479,11 @@
                     </button>
                   </div>
                   <div class="row g-4" id="aboutCardsContainer"></div>
+                  <div id="aboutCardsEmpty" class="text-center py-5 border border-dashed rounded">
+                    <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="text-muted mb-1">{{ __('landing.No_about_cards_yet') }}</h5>
+                    <p class="text-muted small mb-0">{{ __('landing.Add_about_cards_hint') }}</p>
+                  </div>
                 @endif
 
                 @if($section['key'] === 'programs')
@@ -683,11 +703,88 @@
                     </button>
                   </div>
                   <div class="row g-4" id="howStepsContainer"></div>
+                  <div id="howStepsEmpty" class="text-center py-5 border border-dashed rounded">
+                    <i class="ti ti-sitemap text-muted fs-1 mb-2 d-block"></i>
+                    <h5 class="text-muted mb-1">{{ __('landing.No_how_steps_yet') }}</h5>
+                    <p class="text-muted small mb-0">{{ __('landing.Add_how_steps_hint') }}</p>
+                  </div>
+                @endif
+
+                @if($section['key'] === 'branding')
+                  @php
+                    // Branding defaults — mirrored by lpBrandingDefaults in the
+                    // script below (section scopes are separate, so the two
+                    // cannot share one definition). Exception: the script's
+                    // button colors are Platform Branding (Reset to Default),
+                    // while these stay what /lp renders for a page that never
+                    // saved its own colors.
+                    $lpBrandingDefaults = [
+                      'gradient_start'  => '#030014',
+                      'gradient_middle' => '#0b0530',
+                      'gradient_end'    => '#2a1139',
+                      'button_bg'       => '#7367f0',
+                      'button_text'     => '#ffffff',
+                    ];
+                    $lpBrandingValues = [
+                      'gradient_start'  => $currentPage->branding_gradient_start ?? $lpBrandingDefaults['gradient_start'],
+                      'gradient_middle' => $currentPage->branding_gradient_middle ?? $lpBrandingDefaults['gradient_middle'],
+                      'gradient_end'    => $currentPage->branding_gradient_end ?? $lpBrandingDefaults['gradient_end'],
+                      'button_bg'       => $currentPage->branding_button_bg ?? $lpBrandingDefaults['button_bg'],
+                      'button_text'     => $currentPage->branding_button_text ?? $lpBrandingDefaults['button_text'],
+                    ];
+                  @endphp
+
+                  {{-- Colors only: the inputs post with this section's own form
+                       (action = the branding endpoint), and the tab's generic
+                       Save button at the bottom submits them. --}}
+                  <p class="text-muted small mb-3">
+                    {{ __('landing.Branding_Hint') }}
+                  </p>
+
+                  <div id="lpBrandingBlock" class="mb-4">
+                    <div class="row g-4">
+                      @foreach ([
+                        'gradient_start'  => __('landing.Gradient_Start_Color'),
+                        'gradient_middle' => __('landing.Gradient_Middle_Color'),
+                        'gradient_end'    => __('landing.Gradient_End_Color'),
+                        'button_bg'       => __('landing.Button_Background_Color'),
+                        'button_text'     => __('landing.Button_Text_Color'),
+                      ] as $brandingKey => $brandingLabel)
+                        <div class="col-md-6">
+                          <label class="form-label" for="branding_{{ $brandingKey }}_text">
+                            {{ $brandingLabel }}
+                            <span class="text-danger">*</span>
+                          </label>
+                          <div class="d-flex align-items-center gap-2">
+                            <div id="branding_{{ $brandingKey }}_picker" class="lp-branding-pickr"></div>
+                            <input
+                              type="text"
+                              class="form-control lp-branding-color-text"
+                              id="branding_{{ $brandingKey }}_text"
+                              name="branding[{{ $brandingKey }}]"
+                              value="{{ old('branding.' . $brandingKey, $lpBrandingValues[$brandingKey]) }}"
+                              maxlength="7"
+                              dir="ltr"
+                              spellcheck="false"
+                            >
+                          </div>
+                        </div>
+                      @endforeach
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                      <button type="button" class="btn btn-outline-secondary" id="lpBrandingReset">
+                        <i class="ti ti-refresh me-1"></i>
+                        {{ __('landing.Reset_to_Default') }}
+                      </button>
+                    </div>
+                  </div>
                 @endif
 
                 @if($section['key'] === 'custom')
                   <hr class="my-4">
-                  <div class="d-flex align-items-center justify-content-end mb-3">
+                  <div class="d-flex align-items-center justify-content-end mb-3 gap-2">
+                    <span id="customSectionCount" class="badge bg-label-primary rounded-pill" style="display:none">0 / 5</span>
                     <button
                       type="button"
                       class="btn btn-primary btn-sm d-flex align-items-center gap-1"
@@ -698,6 +795,9 @@
                     </button>
                   </div>
                   <div id="customSectionsContainer"></div>
+                  <div id="customSectionMaxHint" class="alert alert-warning py-2 small d-none" role="alert">
+                    {{ __('landing.Custom_Sections_Max_Hint') }}
+                  </div>
                   <div id="customSectionsEmpty" class="text-center py-5 border border-dashed rounded">
                     <i class="ti ti-layout-grid text-muted fs-1 mb-2 d-block"></i>
                     <h5 class="text-muted mb-1">
@@ -708,6 +808,14 @@
                     </p>
                   </div>
                 @endif
+
+                {{-- Save button, bottom of each section --}}
+                <div class="d-flex justify-content-end mt-4 pt-4 border-top">
+                  <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                    <i class="ti ti-device-floppy"></i>
+                    {{ __('landing.Save') }}
+                  </button>
+                </div>
               </form>
             </div>
           @endforeach
@@ -759,6 +867,7 @@
   <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
   <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
+  <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 @endsection
 
@@ -961,7 +1070,9 @@
             callback: {
               message: lpUrlI18n.taken,
               callback: function (input) {
-                const slug = (input.value || '').trim().toLowerCase();
+                // Raw value, not lowercased: an invalid format is the regexp
+                // validator's job to report, so just skip the lookup.
+                const slug = (input.value || '').trim();
                 if (!lpUrlIsValidSlug(slug)) return { valid: true };
                 if (!lpUrlSlugChecked) return { valid: true };
                 if (!lpUrlSlugAvailable) {
@@ -1000,22 +1111,31 @@
       // Always resolves with { valid, available, message }.
       const lpUrlCheckAvailability = function () {
         const $slug = $('#lpUrlSlug');
-        const slug = ($slug.val() || '').trim().toLowerCase();
+        // Raw value, not lowercased: lowercasing here would let "MyPage"
+        // pass as "mypage" and report it available, contradicting the
+        // format rule (and the server, which now validates the raw slug).
+        const slug = ($slug.val() || '').trim();
         const d = $.Deferred();
         lpUrlSlugChecked = false;
         lpUrlSlugAvailable = false;
 
+        // Empty / malformed values are field-level problems, and FormValidation
+        // already renders those messages in the field's .invalid-feedback. Keep
+        // them out of the availability line, otherwise the exact same string is
+        // printed twice. That line is reserved for availability status only.
         if (!slug) {
           lpUrlCheckErrorMessage = lpUrlI18n.slugRequired;
-          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlSetAvailability('', '');
           lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
           d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage, empty: true });
           return d.promise();
         }
         if (!lpUrlIsValidSlug(slug)) {
           lpUrlCheckErrorMessage = lpUrlI18n.slugInvalid;
-          lpUrlSetAvailability('taken', lpUrlCheckErrorMessage);
+          lpUrlSetAvailability('', '');
           lpUrlShowFieldError($slug, lpUrlCheckErrorMessage);
+          if (lpUrlFv) lpUrlFv.revalidateField('lpUrlSlug');
           d.resolve({ valid: false, available: false, message: lpUrlCheckErrorMessage });
           return d.promise();
         }
@@ -1112,7 +1232,7 @@
           lpUrlAjax("{{ route('landing-pages.url.save', $currentPage->id) }}", {
             // title: $title.val().trim(),
             // name: $name.val().trim(),
-            slug: ($slug.val() || '').trim().toLowerCase(),
+            slug: ($slug.val() || '').trim(),
             active: lpUrlActive ? 1 : 0,
           })
             .done(function (res) {
@@ -1120,7 +1240,7 @@
               lpUrlSlugChecked = true;
               lpUrlSlugAvailable = true;
               lpUrlRenderSavedLink();
-              {{--  releaseSuccessAlert({
+              {{--  releaseAlert('success', {
                 title: "{{ __('admin.success') }}",
                 message: res.message || lpUrlI18n.saved,
               });  --}}
@@ -1132,7 +1252,7 @@
             })
             .fail(function (xhr) {
               const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || lpUrlI18n.slugInvalid;
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}",
                 message: message,
               });
@@ -1160,7 +1280,7 @@
           }
 
           // Fallback when the FormValidation plugin is unavailable.
-          const slug = ($slug.val() || '').trim().toLowerCase();
+          const slug = ($slug.val() || '').trim();
           let firstError = null;
           const mark = function ($input, message) {
             lpUrlShowFieldError($input, message);
@@ -1192,7 +1312,7 @@
 
       $('#lpUrlPreviewBtn').on('click', function () {
         if (!lpUrlSavedSlug) {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: lpUrlI18n.activeStatus,
             message: lpUrlI18n.previewNotSaved,
           });
@@ -1224,6 +1344,9 @@
         heroImageRequired:  "{{ __('landing.validation.hero_image_required') }}",
         heroImageFormat:    "{{ __('landing.validation.image_format_invalid') }}",
         heroImageSize:      "{{ __('landing.validation.hero_image_size_exceeded') }}",
+        heroCtaText:        "{{ __('landing.validation.field_required') }}",
+        heroCtaTextArabic:  "{{ __('landing.validation.field_required') }}",
+        heroCtaLink:        "{{ __('landing.validation.link_invalid') }}",
         aboutTitle:         "{{ __('landing.validation.section_title_required') }}",
         aboutSubtitle:      "{{ __('landing.validation.section_subtitle_required') }}",
         aboutDescription:   "{{ __('landing.validation.section_description_required') }}",
@@ -1260,6 +1383,7 @@
         about:   "{{ __('landing.success.about_saved') }}",
         programs: "{{ __('landing.success.programs_saved') }}",
         how:      "{{ __('landing.success.how_saved') }}",
+        branding: "{{ __('landing.success.branding_saved') }}",
         custom:   "{{ __('landing.success.custom_saved') }}",
       };
 
@@ -1294,7 +1418,27 @@
         };
       };
 
+      // A Branding color field: required and hex-only (#abc or #aabbcc).
+      const lpHexField = function () {
+        return {
+          validators: {
+            notEmpty: { message: "{{ __('landing.validation.branding_color_required') }}" },
+            regexp: {
+              regexp: /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/,
+              message: "{{ __('landing.validation.branding_color_invalid') }}",
+            },
+          },
+        };
+      };
+
       const sectionFields = {
+        branding: {
+          'branding[gradient_start]': lpHexField(),
+          'branding[gradient_middle]': lpHexField(),
+          'branding[gradient_end]': lpHexField(),
+          'branding[button_bg]': lpHexField(),
+          'branding[button_text]': lpHexField(),
+        },
         general: {
           'general[title]': {
             validators: {
@@ -1347,6 +1491,24 @@
           'hero[description_ar]': {
             validators: {
               notEmpty: { message: validationMessages.descriptionArabic },
+            },
+          },
+          'hero[cta_text]': {
+            validators: {
+              notEmpty: { message: validationMessages.heroCtaText },
+            },
+          },
+          'hero[cta_text_ar]': {
+            validators: {
+              notEmpty: { message: validationMessages.heroCtaTextArabic },
+            },
+          },
+          'hero[cta_link]': {
+            validators: {
+              uri: {
+                protocol: 'http, https',
+                message: validationMessages.heroCtaLink,
+              },
             },
           },
           'hero[hero_image]': buildImageField(
@@ -1568,14 +1730,14 @@
                 </button>
               </div>
               <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-12">
                   <label class="form-label">${"{{ __('landing.Icon') }}"}</label>
                   <select name="about[cards][${id}][icon]" class="form-select" data-card-field>
                     <option value="">${"{{ __('landing.Select_an_icon') }}"}</option>
                     ${iconOptions}
                   </select>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Title') }}"}</label>
                   <input type="text" name="about[cards][${id}][title]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-card-field>
                 </div>
@@ -1600,6 +1762,8 @@
       const updateAboutCardButtons = function () {
         const count = $('#aboutCardsContainer .about-card').length;
         $('#aboutAddCard').prop('disabled', count >= aboutMaxCards);
+        $('#aboutCardsEmpty').toggleClass('d-none', count > 0);
+        $('#aboutCardsContainer').toggleClass('d-none', count === 0);
         $('#aboutCardsContainer .about-card').each(function (i) {
           $(this).find('.about-card-label').text(("{{ __('landing.Card') }}") + (i + 1));
         });
@@ -1661,7 +1825,11 @@
         programs: ['title', 'title_tag', 'description', 'title_ar', 'title_tag_ar', 'description_ar'],
       };
 
-      const setSectionRequiredState = function (sectionKey) {
+      // reveal = false only syncs which validators are active, so an enabled
+      // section starts the page clean instead of showing required-field
+      // messages for fields the user has not touched yet. Pass true on toggle
+      // and on submit, when the messages are actually wanted.
+      const setSectionRequiredState = function (sectionKey, reveal) {
         const fv = sectionValidations[sectionKey];
         if (!fv) return;
         const $switch = $('#' + sectionKey + '_is_enabled');
@@ -1673,14 +1841,14 @@
           } else {
             fv.disableValidator(fieldName, 'notEmpty');
           }
-          fv.revalidateField(fieldName);
+          if (reveal) fv.revalidateField(fieldName);
         });
       };
 
-      $('#about_is_enabled').on('change', function () { setSectionRequiredState('about'); });
-      $('#how_is_enabled').on('change', function () { setSectionRequiredState('how'); });
-      $('#programs_is_enabled').on('change', function () { setSectionRequiredState('programs'); });
-      ['about', 'how', 'programs'].forEach(setSectionRequiredState);
+      $('#about_is_enabled').on('change', function () { setSectionRequiredState('about', true); });
+      $('#how_is_enabled').on('change', function () { setSectionRequiredState('how', true); });
+      $('#programs_is_enabled').on('change', function () { setSectionRequiredState('programs', true); });
+      ['about', 'how', 'programs'].forEach(function (sectionKey) { setSectionRequiredState(sectionKey, false); });
 
       // ─────────────────────────────────────────────────────────────
       // How It Works section — process steps repeater (max 3 steps)
@@ -1728,14 +1896,14 @@
                 </button>
               </div>
               <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-12">
                   <label class="form-label">${"{{ __('landing.Icon') }}"}</label>
                   <select name="how[steps][${id}][icon]" class="form-select" data-step-field>
                     <option value="">${"{{ __('landing.Select_an_icon') }}"}</option>
                     ${iconOptions}
                   </select>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-6">
                   <label class="form-label">${"{{ __('landing.Step_Title') }}"}</label>
                   <input type="text" name="how[steps][${id}][title]" maxlength="{{ App\LandingPage::TITLE_MAX_LENGTH }}" class="form-control" data-step-field>
                 </div>
@@ -1760,6 +1928,8 @@
       const updateHowStepButtons = function () {
         const count = $('#howStepsContainer .how-step').length;
         $('#howAddStep').prop('disabled', count >= howMaxSteps);
+        $('#howStepsEmpty').toggleClass('d-none', count > 0);
+        $('#howStepsContainer').toggleClass('d-none', count === 0);
         $('#howStepsContainer .how-step').each(function (i) {
           $(this).find('.how-step-label').text(("{{ __('landing.Step') }}") + (i + 1));
         });
@@ -1924,8 +2094,8 @@
           if (!$switch.is(':checked')) return; // user changed their mind while checking
 
           $switch.prop('checked', false);
-          const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '#program-settings-visibility';
-          releaseWarningAlert({
+          const programSettingsUrl = "{{ url('dashboard/programlist/edit') }}/" + programId + '?tab=landing';
+          releaseAlert('warning', {
             title: "{{ __('admin.Warning') }}",
             message: "{{ __('landing.Program_not_public_hint') }}",
             confirmText: "{{ __('landing.Go_to_program_visibility') }}",
@@ -2000,7 +2170,7 @@
           .fail(function (xhr) {
             if (xhr.statusText === 'abort') return;
             const message = (xhr && xhr.responseJSON && xhr.responseJSON.message) || programsReorderErrorText;
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('admin.Error') }}",
               message: message,
             });
@@ -2133,17 +2303,18 @@
         });
       };
 
+      const isCustomSectionVisible = function ($card) {
+        return $card.find('.custom-visibility-switch').is(':checked');
+      };
+
       const validateCustomSection = function ($card) {
-        const used = customRequiredFields.some(function (field) {
+        // A section with its visibility switch off is never published, so its
+        // fields are left incomplete on purpose and must not be demanded. The
+        // length caps still apply, because the value is persisted either way
+        // and the server enforces them regardless of visibility.
+        const used = isCustomSectionVisible($card) && customRequiredFields.some(function (field) {
           return customFieldValue($card, field) !== '';
         });
-
-        if (!used) {
-          customRequiredFields.forEach(function (field) {
-            setCustomFieldError($card.find('.custom-field-group[data-field="' + field + '"]'), '');
-          });
-          return true;
-        }
 
         let valid = true;
         customRequiredFields.forEach(function (field) {
@@ -2151,7 +2322,7 @@
           const value = customFieldValue($card, field);
           const max = customFieldMaxLengths[field];
 
-          if (value === '') {
+          if (used && value === '') {
             setCustomFieldError($group, validationMessages.customRequired);
             valid = false;
             return;
@@ -2181,8 +2352,13 @@
         const count = $('#customSectionsContainer .custom-section-card').length;
         $('#customSectionsEmpty').toggle(count === 0);
         $('#customSectionCount').text(count + ' / ' + customMaxSections).toggle(count > 0);
-        $('#customAddSection').prop('disabled', count >= customMaxSections);
+        // The button stays enabled at the cap so clicking it can explain the
+        // limit (see the click handler) instead of silently doing nothing.
         $('#customSectionMaxHint').toggleClass('d-none', count < customMaxSections);
+      };
+
+      const customSectionsAtMax = function () {
+        return $('#customSectionsContainer .custom-section-card').length >= customMaxSections;
       };
 
       const updateCustomSectionLabels = function () {
@@ -2392,12 +2568,27 @@
         return id;
       };
 
-      $('#customAddSection').on('click', addCustomSection);
+      // The cap is enforced here rather than inside addCustomSection, because
+      // the same builder renders the already-saved sections on page load —
+      // refusing to build those would drop real data.
+      $('#customAddSection').on('click', function () {
+        if (customSectionsAtMax()) {
+          toastr.options = { "preventDuplicates": true };
+          toastr.warning("{{ __('landing.Custom_Sections_Max_Hint') }}");
+          return;
+        }
+        addCustomSection();
+      });
 
       $('#customSectionsContainer')
         .on('input change', '[data-custom-field]', function () {
           const $group = $(this).closest('.custom-field-group');
           if ($(this).val().trim()) setCustomFieldError($group, '');
+        })
+        .on('change', '.custom-visibility-switch', function () {
+          // Drop the "required" complaints the moment the section is hidden,
+          // so turning the switch off visibly clears them.
+          validateCustomSection($(this).closest('.custom-section-card'));
         })
         .on('click', '.remove-custom-section', function () {
           const $card = $(this).closest('.custom-section-card');
@@ -2413,7 +2604,7 @@
           };
 
           const flashDeleted = function (message) {
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: "{{ __('admin.success') }}",
               message: message || "{{ __('landing.success.custom_deleted') }}",
             });
@@ -2442,14 +2633,14 @@
               .fail(function (xhr) {
                 $btn.prop('disabled', false);
                 const res = xhr.responseJSON || {};
-                releaseFailureAlert({
+                releaseAlert('danger', {
                   title: "{{ __('admin.Error') }}",
                   message: res.message || "{{ __('landing.error.custom_delete_failed') }}",
                 });
               });
           };
 
-          releaseWarningAlert({
+          releaseAlert('warning', {
             title: "{{ __('landing.Delete_Custom_Section') }}",
             message: "{{ __('landing.Delete_Custom_Section_Confirm') }}",
             confirmText: "{{ __('landing.Delete') }}",
@@ -2505,6 +2696,133 @@
             quill.clipboard.dangerouslyPasteHTML(0, html, 'user');
             markCustomButtonAnchors(quill, html);
           }
+        });
+      });
+
+      // The repeaters above only run their update helpers when an item is
+      // added, so on initial load a section with zero items would never have
+      // its empty state reconciled. Force one pass now that the server data
+      // has been rendered.
+      updateAboutCardButtons();
+      updateHowStepButtons();
+
+      // ─────────────────────────────────────────────────────────────
+      // Branding tab — Pickr swatches that mirror the hex inputs. The tab's
+      // own section form (action = the branding endpoint) posts them and its
+      // generic Save button submits that form, so only the swatch plumbing
+      // and "Reset to Default" live here; the hex rules themselves are
+      // registered in sectionFields above.
+      // ─────────────────────────────────────────────────────────────
+      const lpBrandingDefaults = {
+        gradient_start: '#030014',
+        gradient_middle: '#0b0530',
+        gradient_end: '#2a1139',
+        // Reset to Default = Platform Branding (GV-9673).
+        button_bg: @json($_branding['main']),
+        button_text: @json($_branding['button_text']),
+      };
+
+      const lpBrandingKeys = Object.keys(lpBrandingDefaults);
+      const lpBrandingPickrs = {};
+      const lpBrandingHex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+      const lpBrandingNormalize = function (value) {
+        const raw = String(value || '').trim();
+        if (!lpBrandingHex.test(raw)) return '';
+        const hex = raw.replace('#', '').toLowerCase();
+        return '#' + (hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex);
+      };
+
+      // A failed save marks the field through the generic section handler
+      // (.is-invalid + a sibling feedback block); drop both when the color is
+      // corrected so the field stops looking broken before the next save.
+      const lpBrandingClearInvalid = function ($input) {
+        $input.removeClass('is-invalid backend-error-input').next('.backend-error-feedback').remove();
+      };
+
+      // Pushes a color into a Pickr instance without firing its events.
+      // setColor() only changes the picker's internal color; applyColor()
+      // is what updates the visible swatch button and the "previous color"
+      // shown in the popup.
+      const lpBrandingApplyToPicker = function (picker, value) {
+        if (!picker) return;
+        picker.setColor(value, true);
+        picker.applyColor(true);
+      };
+
+      const lpBrandingSetValue = function (key, value) {
+        $('#branding_' + key + '_text').val(value);
+        lpBrandingApplyToPicker(lpBrandingPickrs[key], value);
+      };
+
+      // A swatch next to every hex field; the text input stays authoritative
+      // (it is what gets posted), the swatch just mirrors it.
+      lpBrandingKeys.forEach(function (key) {
+        const el = document.getElementById('branding_' + key + '_picker');
+        const input = document.getElementById('branding_' + key + '_text');
+        const PickrLib = window.Pickr || window.pickr;
+        if (!el || !input || !PickrLib) return;
+
+        const initial = lpBrandingNormalize(input.value) || lpBrandingDefaults[key];
+        input.value = initial;
+
+        const picker = PickrLib.create({
+          el: el,
+          theme: 'classic',
+          default: initial,
+          swatches: ['#030014', '#0b0530', '#2a1139', '#7367f0', '#ffffff'],
+          components: {
+            preview: true,
+            opacity: false,
+            hue: true,
+            interaction: {
+              hex: true,
+              rgba: false,
+              hsla: false,
+              hsva: false,
+              cmyk: false,
+              input: true,
+              clear: false,
+              save: true,
+            },
+          },
+        });
+
+        const sync = function (color) {
+          if (!color) return;
+          input.value = color.toHEXA().toString().slice(0, 7).toLowerCase();
+          lpBrandingClearInvalid($(input));
+        };
+
+        picker
+          .on('change', sync)
+          .on('save', function (color) {
+            sync(color);
+            picker.hide();
+          });
+
+        lpBrandingPickrs[key] = picker;
+      });
+
+      // Typing a hex value straight into the field updates its swatch.
+      $('#lpBrandingBlock').on('input', '.lp-branding-color-text', function () {
+        lpBrandingClearInvalid($(this));
+        const key = this.id.replace(/^branding_/, '').replace(/_text$/, '');
+        const hex = lpBrandingNormalize(this.value);
+        if (hex && lpBrandingPickrs[key]) {
+          lpBrandingApplyToPicker(lpBrandingPickrs[key], hex);
+        }
+      });
+
+      // Reset to Default — puts the original gradient and every default
+      // color back into the form. Nothing is persisted until the tab's
+      // Save button is used.
+      $('#lpBrandingReset').on('click', function (e) {
+        e.preventDefault(); // in case the button sits inside the form without type="button"
+        $('#lpBrandingBlock .backend-error-feedback').remove();
+        $('#lpBrandingBlock .backend-error-input').removeClass('is-invalid backend-error-input');
+        lpBrandingKeys.forEach(function (key) {
+          lpBrandingSetValue(key, lpBrandingDefaults[key]);
         });
       });
 
@@ -2606,7 +2924,7 @@
               clearBackendFieldErrors();
               $backendErrorsBox.addClass('d-none').empty();
               if (successMessages[sectionKey]) {
-                releaseSuccessAlert({
+                releaseAlert('success', {
                   title: "{{ __('admin.success') }}",
                   message: successMessages[sectionKey],
                 });
@@ -2626,7 +2944,7 @@
               if (res.message) {
                 errorMessage = res.message;
               }
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title: "{{ __('admin.Error') }}",
                 message: errorMessage,
               });
@@ -2648,6 +2966,11 @@
         // while disabled: submit straight away so no required-field
         // messages surface for their empty main fields.
         if (sectionRequiredFields[sectionKey]) {
+          // Re-apply the required state from the switch as it stands right
+          // now, so the submit always matches what is on screen: the field
+          // validators are otherwise only kept in sync by the switch's
+          // change event, and a missed event would silently skip them.
+          setSectionRequiredState(sectionKey, true);
           const $sectionSwitch = $('#' + sectionKey + '_is_enabled');
           if ($sectionSwitch.length && !$sectionSwitch.is(':checked')) {
             submitViaAjax();

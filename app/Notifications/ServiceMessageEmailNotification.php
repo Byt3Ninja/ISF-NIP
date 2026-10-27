@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class ServiceMessageEmailNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ReleasesNotificationClaim;
 
     public $tries = 3;
     public $backoff = 60;
@@ -41,6 +42,7 @@ class ServiceMessageEmailNotification extends Notification implements ShouldQueu
 
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('ServiceMessageEmailNotification failed', [
             'error' => $exception->getMessage(),
             'data'  => $this->data,

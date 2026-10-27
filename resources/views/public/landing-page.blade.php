@@ -224,7 +224,7 @@
       @php
         $sectionTitle = $isAr ? $section->title_ar : $section->title;
         $sectionTitleTag = $isAr ? $section->title_tag_ar : $section->title_tag;
-        $sectionContent = $isAr ? $section->content_ar : $section->content;
+        $sectionContent = $isAr ? $section->safe_content_ar : $section->safe_content;
       @endphp
       @if($sectionTitle || $sectionContent)
         <section id="custom-{{ $section->id }}" class="section-py {{ $index % 2 == 0 ? 'bg-body' : '' }}">

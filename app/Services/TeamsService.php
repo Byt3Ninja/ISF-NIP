@@ -195,7 +195,13 @@ class TeamsService implements OnlineMeetingServiceInterface
         $user = Auth::user();
         $orgId = optional(optional($user)->organization)->id;
 
-        if (Settings::hasReachedMaxConcurrentSessions($data['start_time'] ?? null, $data['duration'] ?? null, $orgId)) {
+        // GV-9566: read the start in the meeting's own zone (the caller's step or
+        // organization), not the creating user's organization zone.
+        $startsAt = TimezoneService::wallClock($data['start_time'] ?? null, !empty($data['timezone']) && TimezoneService::isValid($data['timezone'])
+            ? $data['timezone']
+            : TimezoneService::platform($orgId));
+
+        if (Settings::hasReachedMaxConcurrentSessions($startsAt, $data['duration'] ?? null, $orgId)) {
             return [
                 'success' => false,
                 'data'    => __('settings.max_concurrent_sessions_reached'),
@@ -222,10 +228,14 @@ class TeamsService implements OnlineMeetingServiceInterface
             Log::error('TeamsService: Error retrieving Microsoft credentials for user.', ['user_id' => $user->id, 'error' => $e->getMessage()]);
         }
     
+        $meetingTimezone = !empty($data['timezone']) && TimezoneService::isValid($data['timezone'])
+            ? $data['timezone']
+            : TimezoneService::platform($orgId);
+
         $meeting = [
             'subject' => $data['topic'],
-            'startDateTime' => $this->toZoomTimeFormat($data['start_time']),
-            'endDateTime' => $this->toZoomTimeFormat($data['start_time'], $data['duration']),
+            'startDateTime' => $this->toZoomTimeFormat($data['start_time'], null, $meetingTimezone),
+            'endDateTime' => $this->toZoomTimeFormat($data['start_time'], $data['duration'], $meetingTimezone),
             "lobbyBypassSettings" => [
                 "scope" => "everyone",
                 "isDialInBypassEnabled" => true
@@ -561,13 +571,20 @@ class TeamsService implements OnlineMeetingServiceInterface
     }
 
 
-    public function toZoomTimeFormat($timestamp, $duration = null)
+    /**
+     * Teams wants a UTC instant (GV-9566). Accepts unix timestamps (training)
+     * and platform wall-clock strings (screening, mentorship) -- strings used to
+     * return null, so those meetings could not be created on Teams.
+     */
+    public function toZoomTimeFormat($timestamp, $duration = null, ?string $timezone = null)
     {
-        if (!is_numeric($timestamp)) {
+        $start = TimezoneService::wallClock($timestamp, $timezone ?? TimezoneService::platform());
+
+        if (is_null($start)) {
             return null;
         }
 
-        $start = Carbon::createFromTimestamp($timestamp)->utc();
+        $start = $start->copy()->utc();
 
         if ($duration) {
          return $start->copy()->addMinutes($duration)->toIso8601String();

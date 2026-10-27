@@ -408,7 +408,7 @@ $(function () {
         addRow(response.data);
       }
 
-      releaseSuccessAlert({
+      releaseAlert('success', {
         title: "{{ __('admin.Success') }}",
         message: response.message ?? "{{ __('admin.SavedSuccessfully') }}"
       });
@@ -417,7 +417,7 @@ $(function () {
 
       const errMsg = xhr?.responseJSON?.message || xhr?.responseText;
 
-      releaseFailureAlert({
+      releaseAlert('danger', {
         title: "{{ __('admin.Error') }}",
         message: errMsg || "{{ __('admin.unexpected_error') }}"
       });
@@ -433,7 +433,7 @@ $(function () {
     const url = $(this).data('url');
     const button = $(this);
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('admin.Warning') }}",
       message: "{{ __('admin.SureDelete') }}",
       confirmColor: 'danger',
@@ -453,7 +453,7 @@ $(function () {
 
       row.remove().draw(false);
 
-      releaseSuccessAlert({
+      releaseAlert('success', {
         title: "{{ __('admin.Deleted') }}",
         message: response.message ? response.message : "{{ __('admin.DeletedSuccessfully') }}"
       });
@@ -462,7 +462,7 @@ $(function () {
 
       const errMsg = xhr?.responseJSON?.message || xhr?.responseText;
 
-      releaseFailureAlert({
+      releaseAlert('danger', {
         title: "{{ __('admin.Error') }}",
         message: errMsg || "{{ __('admin.unexpected_error') }}",
       });

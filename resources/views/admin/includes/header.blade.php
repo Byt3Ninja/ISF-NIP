@@ -1139,8 +1139,8 @@ $menuItems = $menuItems->flatMap(function($item) {
     <div class="navbar-nav align-items-center w-100 w-md-px-300">
       <div class="nav-item navbar-search-wrapper mb-0 w-100">
         <button data-bs-toggle="modal" data-bs-target="#searchModal" class="w-100 nav-item nav-link search-toggler d-flex align-items-center justify-content-center justify-content-md-start px-2 px-md-0">
-          <i class="ti ti-search ti-md me-0 me-md-2 me-lg-4 ti-lg"></i>
-          <span class="d-none d-md-inline-block text-muted fw-normal">{{ __('admin.Search') }}</span>
+          <i class="ti ti-search ti-md me-0 me-md-2 me-lg-4"></i>
+          <span class="d-none d-md-inline-block text-muted fw-normal fs-6">{{ __('admin.Search') }}</span>
         </button>
       </div>
     </div>
@@ -1527,11 +1527,11 @@ document.addEventListener('DOMContentLoaded', function() {
   $(document).on('click', '#stop-impersonation', function(e) {
     e.preventDefault();
 
-    releaseWarningAlert({
+    releaseAlert('warning', {
       title: "{{ __('admin.Confirm Action') }}",
       message: "{{ __('admin.ConfirmStopImpersonationMessage') }}",
-      confirmButtonText: "{{ __('admin.Yes') }}",
-      cancelButtonText: "{{ __('admin.cancel') }}",
+      confirmText: "{{ __('admin.Yes') }}",
+      cancelText: "{{ __('admin.cancel') }}",
       onConfirm: function() {
         $("#stop-impersonation-form").submit();
       }

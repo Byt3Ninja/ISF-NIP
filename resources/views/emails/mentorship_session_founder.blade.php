@@ -16,6 +16,9 @@
                             <p style="margin: 5px 0 0 0;">الموقع: {{ $location }}.</p>
                         @elseif($sessionType === 'Online' && !empty($meetingLink))
                             <p style="margin: 5px 0 0 0;">رابط الاجتماع: {{ $meetingLink }}.</p>
+                            @if(!empty($passcode))
+                                <p style="margin: 5px 0 0 0;">{{ __('email.Passcode', [], 'ar') }}: {{ $passcode }}.</p>
+                            @endif
                         @endif
                         <p style="margin: 5px 0 0 0;">الإجراء: تفاصيل الجلسة.</p>
                         <p style="margin: 15px 0px;"></p>
@@ -33,6 +36,9 @@
                             <p style="margin: 5px 0 0 0;">Location: {{ $location }}.</p>
                         @elseif($sessionType === 'Online' && !empty($meetingLink))
                             <p style="margin: 5px 0 0 0;">Meeting Link: {{ $meetingLink }}.</p>
+                            @if(!empty($passcode))
+                                <p style="margin: 5px 0 0 0;">{{ __('email.Passcode', [], 'en') }}: {{ $passcode }}.</p>
+                            @endif
                         @endif
                         <p style="margin: 15px 0px;"></p>
                         <p style="margin: 0;">

@@ -1,33 +1,27 @@
-<!DOCTYPE html>
-<html lang="{{ $l }}">
-<html lang="{{ $l }}" dir={{ $l == 'ar' ? 'rtl' : 'ltr' }}
-  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
-  class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-theme="theme-default"
-  data-assets-path="/vuexy/assets/" data-template="vertical-menu-template" data-style="light">
+<!doctype html>
+
+<html lang="{{ $l }}" dir="{{ $l == 'ar' ? 'rtl' : 'ltr' }}"
+  class="light-style layout-wide customizer-hide" data-theme="theme-default"
+  data-assets-path="/vuexy/assets/" data-template="vertical-menu-template" data-style="light"
+  data-textdirection="{{ $l == 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-  <meta name="description" content="VI Login">
+  <meta name="description" content="Reset your password">
   <meta name="author" content="info@growthlabs.app">
-  <title>{{ __('Reset Password') }} - {{ App\Settings::findorfail(1)->first('title')->title }} - v1</title>
+  <title>
+    {{ $l == 'en' ? 'Forgot Password' : 'استعادة كلمة المرور' }}
+  </title>
   <link rel="apple-touch-icon" href="/app-assets/images/ico/apple-icon-120.png">
   <link rel="shortcut icon" type="image/x-icon" href="/app-assets/images/ico/favicon.ico">
-  
+
   <!-- Fonts -->
-  @if ($l == 'ar')
-    <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
-  @else
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
-      rel="stylesheet"
-    />
-  @endif
-  <!-- End Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
 
   <!-- Icons -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/fonts/fontawesome.css" />
@@ -52,6 +46,8 @@
   <!-- Page CSS -->
   <!-- Page -->
   <link rel="stylesheet" href="/vuexy/assets/vendor/css/pages/page-auth.css" />
+  <!-- Shared auth-page styles (login + register pages + forgot password) -->
+  <link rel="stylesheet" href="{{ asset('css/auth-pages.css') }}" />
 
   <!-- Helpers -->
   <script src="/vuexy/assets/vendor/js/helpers.js"></script>
@@ -62,87 +58,145 @@
 
   <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
   <script src="/vuexy/assets/js/config.js"></script>
+  
+  <!-- BEGIN: Custom CSS-->
+  @include('admin.includes.branding-styles')
+  <!-- END: Custom CSS-->
 </head>
 
 <body>
+  @php
+    // brandLogo() falls back when the configured file is missing from disk, so the
+    // page can never paint the <img> alt text where the logo should be.
+    $logo = brandLogo();
+    $appName = brandName();
+  @endphp
   <!-- Content -->
 
   <div class="authentication-wrapper authentication-cover">
-    <!-- Logo -->
-    <a href="/dashboard" class="app-brand auth-cover-brand">
-      <img 
-        src="/images/logo/{{ $_settings->Logo }}" 
-        alt="logo"
-        {{-- class="object-fit-contain me-2 rounded-circle border p-1 bg-card" --}}
-        class="object-fit-contain me-2 rounded"
-        style="width: 75px; height: 75px;"
-      />
-      {{-- <span class="app-brand-logo demo">
-        <img src="/app-assets/images/ico/favicon.ico" alt="avatar" height="25" width="25">
-      </span> --}}
-      {{-- <span class="app-brand-text demo text-heading fw-bold">{{ $brandName }}</span> --}}
-    </a>
-    <!-- /Logo -->
-    <div class="authentication-inner row m-0">
-      <!-- /Left Text -->
-      <div class="d-none d-lg-flex col-lg-8 p-0">
-        <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
-          <img src="/vuexy/assets/img/illustrations/auth-forgot-password-illustration-light.png"
-            alt="auth-forgot-password-cover" class="my-5 auth-illustration d-lg-block d-none"
-            data-app-light-img="illustrations/auth-forgot-password-illustration-light.png"
-            data-app-dark-img="illustrations/auth-forgot-password-illustration-dark.png" />
-
-          <img src="/vuexy/assets/img/illustrations/bg-shape-image-light.png" alt="auth-forgot-password-cover"
-            class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png"
-            data-app-dark-img="illustrations/bg-shape-image-dark.png" />
-        </div>
+    <!-- Language & Style Switchers -->
+    <div class="d-flex align-items-center gap-2 position-fixed top-0 end-0 p-4 p-sm-6" style="z-index: 1200">
+      <!-- Language -->
+      <div class="dropdown-language dropdown">
+        <a class="btn btn-primary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
+          data-bs-toggle="dropdown">
+          <i class="ti ti-language ti-md text-white"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          @if ($l == 'ar')
+            <a class="dropdown-item" href="/lang/en">
+              <i class="flag-icon flag-icon-us"></i>
+              <span class="selected-language">English</span>
+            </a>
+          @else
+            <a class="dropdown-item" href="/lang/ar">
+              <i class="flag-icon flag-icon-sa"></i>
+              <span class="selected-language">عربي</span>
+            </a>
+          @endif
+        </ul>
       </div>
-      <!-- /Left Text -->
+      <!--/ Language -->
 
-      <!-- Forgot Password -->
-      <div class="d-flex col-12 col-lg-4 align-items-center authentication-bg p-sm-12 p-6">
-        <div class="w-px-400 mx-auto mt-12 mt-5">
-          <h4 class="mb-1">{{ __('Forgot Password?') }} 🔒</h4>
-          <p class="mb-6">
-            {{ __('Enter your mail to change your current password') }}
-          </p>
-          <div>
-            @if (session('status'))
-              <div class="alert alert-success" role="alert">
-                {{ session('status') }}
-              </div>
-            @endif
+      <!-- Style Switcher -->
+      <div class="dropdown-style-switcher dropdown">
+        <a class="btn btn-primary btn-icon rounded-pill dropdown-toggle hide-arrow" href="javascript:void(0);"
+          data-bs-toggle="dropdown">
+          <i class="ti ti-md text-white"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+              <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+              <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
+              <span class="align-middle"><i class="ti ti-device-desktop-analytics ti-md me-3"></i>System</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <!--/ Style Switcher -->
+    </div>
+    <!--/ Language & Style Switchers -->
+
+    <div class="authentication-inner row m-0">
+      <!-- /Forgot Password -->
+      <div class="d-flex col-12 col-lg-7 align-items-center authentication-bg auth-form-col p-sm-12 p-6">
+        <div class="auth-form-inner">
+
+          <!-- Logo, centered above the form heading -->
+          <a href="/dashboard" class="auth-brand">
+            <img src="{{ $logo }}" alt="{{ $appName }}">
+          </a>
+
+          <div class="auth-form-heading">
+            <h4>{{ __('auth.Forgot') }}</h4>
+            <p>{{ __('auth.reset_password_subheading') }}</p>
           </div>
-          <form class="mb-2" method="post" action="{{ route('password.email') }}">
+
+          @if (session('status'))
+            <div class="row">
+              <div class="col-md-12">
+                <div class="alert alert-success">
+                  <ul class="mb-0">
+                    <li>{{ session('status') }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          @endif
+
+          <form id="formAuthentication" class="mb-0" method="POST" action="{{ route('password.email') }}">
             @csrf
-            <div class="mb-6">
+
+            <!-- Email -->
+            <div class="form-group-tight">
               <label for="email" class="form-label">{{ __('auth.E-Mail') }}</label>
-              <input 
-                id="email" 
-                type="email" 
-                class="form-control @error('email') is-invalid @enderror"
-                name="email" 
-                value="{{ old('email') }}" 
-                placeholder="{{ $l == 'ar' ? 'ادخل بريدك الإلكتروني' : 'Enter you email'}}"
-                autocomplete="email" 
-                required 
-                autofocus
-              />
+              <div class="input-group input-group-merge">
+                <span class="input-group-text"><i class="ti ti-mail"></i></span>
+                <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email"
+                  value="{{ old('email') }}" placeholder="{{ __('auth.placeholder_email') }}" autocomplete="email"
+                  required autofocus />
+              </div>
               @error('email')
-                <span class="text-danger mt-3">{{ $message }}</span>
+                <div class="invalid-feedback d-block server-error">{{ $message }}</div>
               @enderror
             </div>
-            <button type="submit" class="btn btn-primary d-grid w-100">{{ __('Send Password Reset Link') }}</button>
+
+            <button type="submit" class="btn btn-primary btn-lg d-grid w-100">
+              {{ __('auth.SendPassword') }}
+            </button>
           </form>
-          <div class="text-center">
-            <a href="/login" class="d-flex align-items-center justify-content-center">
+
+          <p class="text-center mt-6">
+            <a href="{{ route('login') }}">
               <i class="ti ti-chevron-left scaleX-n1-rtl me-1_5"></i>
-              {{ $l == 'ar' ? 'تسجيل الدخول' : 'Back to login' }}
+              <span>{{ __('auth.Back to login') }}</span>
             </a>
-          </div>
+          </p>
         </div>
       </div>
       <!-- /Forgot Password -->
+
+      <!-- /Right Text -->
+      <div class="d-none d-lg-flex col-lg-5 p-0">
+        <div class="auth-cover-bg d-flex align-items-center p-6">
+          <div class="auth-cover-content">
+            <h2 class="auth-cover-title">{{ __('auth.reset_password_cover_title') }}</h2>
+            <span class="auth-cover-rule" aria-hidden="true"></span>
+            <p class="auth-cover-text">{{ __('auth.reset_password_cover_text') }}</p>
+            <a href="{{ route('login') }}" class="auth-cover-btn">{{ __('auth.Sign In') }}</a>
+          </div>
+        </div>
+      </div>
+      <!-- /Right Text -->
     </div>
   </div>
 
@@ -171,7 +225,71 @@
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
 
-  <!-- Page JS -->
-  <script src="/vuexy/assets/js/pages-auth.js"></script>
+  <!-- Forgot Password Form Validation -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const formAuthentication = document.getElementById('formAuthentication');
+      if (!formAuthentication) { return; }
+
+      const emailField = document.getElementById('email');
+
+      // Re-validate as soon as the visitor starts fixing a value the server
+      // rejected, so the server-side message can be dropped the moment it goes.
+      if (emailField) {
+        emailField.addEventListener('input', function() {
+          const group = emailField.closest('.form-group-tight');
+          if (!group || !group.querySelector('.is-invalid')) { return; }
+
+          const validator = FormValidation.getInstance(formAuthentication);
+          if (!validator) { return; }
+
+          validator.refreshField('email').then(function() {
+            if (group.querySelector('.is-invalid')) { return; }
+
+            const serverError = group.querySelector('.server-error');
+            if (serverError) { serverError.remove(); }
+            emailField.classList.remove('is-invalid');
+          });
+        });
+      }
+
+      FormValidation.formValidation(formAuthentication, {
+        fields: {
+          email: {
+            validators: {
+              notEmpty: {
+                message: '{{ __('auth.validate_email_required') }}'
+              },
+              regexp: {
+                regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
+                message: '{{ __('auth.validate_email_email') }}'
+              }
+            }
+          }
+        },
+        plugins: {
+          trigger: new FormValidation.plugins.Trigger(),
+          bootstrap5: new FormValidation.plugins.Bootstrap5({
+            eleValidClass: '',
+            eleInvalidClass: 'is-invalid',
+            rowSelector: '.form-group-tight'
+          }),
+          submitButton: new FormValidation.plugins.SubmitButton(),
+          defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+          autoFocus: new FormValidation.plugins.AutoFocus()
+        },
+        init: instance => {
+          // The message is appended after the .input-group, so it lands below
+          // the whole control instead of inside it.
+          instance.on('plugins.message.placed', function (e) {
+            if (e.element.parentElement.classList.contains('input-group')) {
+              e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+            }
+          });
+        }
+      });
+    });
+  </script>
 </body>
+
 </html>

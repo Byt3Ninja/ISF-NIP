@@ -6,6 +6,7 @@ use App\Like;
 use stdClass;
 use Carbon\Carbon;
 use App\Traits\Auditable;
+use App\Services\TimezoneService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -97,9 +98,9 @@ class SurveyResponses extends Model
 		$company = $user->company;
 		$steps = collect([]);
 		$organization_id = null;
-		$default_tz = env('APP_TIMEZONE', 'Africa/Cairo');
-		$user_tz = $user->timezone ? $user->timezone : $default_tz;
-		$now = Carbon::now()->timezone( $user_tz );
+		// GV-9566: every "is it over yet" check below compares real instants; the
+		// viewer's own timezone must not move when a survey becomes due.
+		$now = Carbon::now();
 		if( $company && $company->cycledata )
 		{
 			$cycle_id = $company->cycle;
@@ -137,9 +138,11 @@ class SurveyResponses extends Model
 		if( $cycle_id != 0 || $cycle_idMentor != 0 )
 		{
 			$surveyEligible = [];
+			// steps.to is a DATE in the platform zone, inclusive: due once that whole day is over.
+			$stepZone = TimezoneService::platform($organization_id);
 			foreach( $steps as $step )
 			{
-				if( ( optional($step)->stype == 3 || optional($step)->stype == 4 ) && $now->gt( Carbon::parse($step->to)->timezone( $user_tz ) ) )
+				if( ( optional($step)->stype == 3 || optional($step)->stype == 4 ) && !empty($step->to) && $now->gt( TimezoneService::wallClock($step->to, $stepZone)->endOfDay() ) )
 				{
 					$surveyEligible[] = [
 						'triggered_on' => $step->stype == 3 ? 'mentorship' : 'training',
@@ -158,6 +161,7 @@ class SurveyResponses extends Model
 							'mr.id',
 							'mr.period',
 							'mr.zoom_date',
+							'mr.organization_id',
 							'mr.created_at'
 						])
 						->whereRaw('1 = 0')
@@ -170,6 +174,7 @@ class SurveyResponses extends Model
 							'mr.id',
 							'mr.period',
 							'mr.zoom_date',
+							'mr.organization_id',
 							'mr.created_at'
 						])
 						->where('mr.mentor_id', $user->id)
@@ -185,6 +190,7 @@ class SurveyResponses extends Model
 						'mr.id',
 						'mr.period',
 						'mr.zoom_date',
+						'mr.organization_id',
 						'mr.created_at'
 					])
 					->join('attendance_training_offline as ato', function ($join) use ($user) {
@@ -199,10 +205,12 @@ class SurveyResponses extends Model
 				->get();
 			}
 
-			$my_mentorship_requests = $my_mentorship_requests->map(function ( $item ) use ( $user_tz ) {
-				$item->end_at = ( !empty($item->zoom_date) && !empty($item->period) )
-					? Carbon::parse($item->zoom_date)->timezone( $user_tz )->addMinutes($item->period)
+			$my_mentorship_requests = $my_mentorship_requests->map(function ( $item ) {
+				// zoom_date is wall-clock in the organization's platform zone (raw row, not cast).
+				$start = ( !empty($item->zoom_date) && !empty($item->period) )
+					? TimezoneService::wallClock($item->zoom_date, TimezoneService::platform($item->organization_id ? (int) $item->organization_id : null))
 					: null;
+				$item->end_at = $start ? $start->addMinutes($item->period) : null;
 				$item->added_at = $item->created_at;
 				return $item;
 			})->filter(function ($item) use ($now) {
@@ -228,14 +236,14 @@ class SurveyResponses extends Model
 					->where('s.cycle_id', $cycle_id)
 				->get();
 
-				$my_trainings = $my_trainings->map(function ( $item ) use ( $user_tz ) {
+				$my_trainings = $my_trainings->map(function ( $item ) {
 					$item->end_at = null;
 					$item->added_at = $item->created_at;
 					if( $item->type == 'sessions' && !empty($item->datetime) && !empty($item->duration) ) {
-						$sessionStart = Carbon::createFromTimestamp($item->datetime)->timezone( $user_tz );
+						$sessionStart = Carbon::createFromTimestamp($item->datetime);
 						$item->end_at = $sessionStart->copy()->addMinutes($item->duration);
 					} elseif( in_array($item->type, ['online', 'offline']) && !empty($item->datetime) ) {
-						$item->end_at = Carbon::createFromTimestamp($item->datetime)->timezone( $user_tz );
+						$item->end_at = Carbon::createFromTimestamp($item->datetime);
 					}
 					return $item;
 				})->filter(function ($item) use ( $now ) {
@@ -246,6 +254,7 @@ class SurveyResponses extends Model
 					->select([
 						'q.id',
 						'q.end',
+						'q.organization_id',
 						'q.attempts',
 						'q.passing_criteria AS criteria',
 						'qr.id AS attempt_id',
@@ -261,12 +270,13 @@ class SurveyResponses extends Model
 					})
 				->get();
 
-				$my_quizzes = $my_quizzes->groupBy('id')->map(function ( $items ) use ( $user_tz ) {
+				$my_quizzes = $my_quizzes->groupBy('id')->map(function ( $items ) {
 					$item = $items->first();
 					$quiz = new stdClass;
 					$quiz->id = $item->id;
 					$quiz->criteria = $item->criteria;
-					$quiz->end = Carbon::parse($item->end)->timezone( $user_tz );
+					// quizzes.end is wall-clock in the organization's platform zone (raw row, not cast).
+					$quiz->end = TimezoneService::wallClock($item->end, TimezoneService::platform($item->organization_id ? (int) $item->organization_id : null));
 					$quiz->trials = $item->attempts;
 					$quiz->attempts = $items->map(function ($result) {
 						$attempt = new stdClass;
@@ -282,7 +292,7 @@ class SurveyResponses extends Model
 						if (
 							$attempts->where('score', '>=', $quiz->criteria)->count() >= 1
 							|| $attempts->where('score', '<', $quiz->criteria)->count() >= $quiz->trials
-							|| $now->gt($quiz->end)
+							|| ( $quiz->end && $now->gt($quiz->end) )
 						) {
 							return true;
 						} else {
@@ -373,9 +383,9 @@ class SurveyResponses extends Model
 
 					// Filter sessions: must be added after survey creation AND session must have ended
 					$surveyCreatedAt = $survey_scope->created_at;
-					$mentorshipFiltered = $mentorshipFiltered->filter(function ($item) use ($surveyCreatedAt, $now, $user_tz) {
+					$mentorshipFiltered = $mentorshipFiltered->filter(function ($item) use ($surveyCreatedAt, $now) {
 						// Session must be added to system after survey scope creation
-						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->timezone( $user_tz )->lte( Carbon::parse($surveyCreatedAt)->timezone( $user_tz ) ) ) { return false; }
+						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->lte( Carbon::parse($surveyCreatedAt) ) ) { return false; }
 						// Session must have ended
 						if( !empty($item['end_at']) && $now->lte( $item['end_at'] ) ) { return false; }
 						return true;
@@ -416,9 +426,9 @@ class SurveyResponses extends Model
 					}
 					// Filter sessions: must be added after survey creation AND session must have ended
 					$surveyCreatedAt = $survey_scope->created_at;
-					$trainingFiltered = $trainingFiltered->filter(function ($item) use ($surveyCreatedAt, $now, $user_tz) {
+					$trainingFiltered = $trainingFiltered->filter(function ($item) use ($surveyCreatedAt, $now) {
 						// Session must be added to system after survey scope creation
-						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->timezone( $user_tz )->lte( Carbon::parse($surveyCreatedAt)->timezone( $user_tz ) ) ) { return false; }
+						if( !empty($item['added_at']) && Carbon::parse($item['added_at'])->lte( Carbon::parse($surveyCreatedAt) ) ) { return false; }
 						// Session must have ended
 						if( !empty($item['end_at']) && $now->lte( $item['end_at'] ) ) { return false; }
 						return true;

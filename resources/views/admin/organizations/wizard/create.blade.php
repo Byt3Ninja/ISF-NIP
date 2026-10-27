@@ -565,20 +565,15 @@
 
         if (action === 'publish') {
           if (typeof Swal !== 'undefined') {
-            Swal.fire({
+            releaseAlert('info', {
               title: config.translations.publishTitle,
-              text: config.translations.publishText,
-              icon: 'question',
-              showCancelButton: true,
-              confirmButtonText: config.translations.yesPublish,
-              cancelButtonText: config.translations.cancel,
-              customClass: {
-                confirmButton: 'btn btn-success me-2',
-                cancelButton: 'btn btn-label-secondary'
-              },
-              buttonsStyling: false
-            }).then(result => {
-              if (result.isConfirmed) $('#publishForm').submit();
+              message: config.translations.publishText,
+              confirmText: config.translations.yesPublish,
+              cancelText: config.translations.cancel,
+              confirmColor: 'success',
+              hideCancel: false
+            }).then(ok => {
+              if (ok) $('#publishForm').submit();
             });
           } else {
             if (confirm(config.translations.publishText)) $('#publishForm').submit();

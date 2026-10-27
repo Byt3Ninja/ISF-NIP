@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Broadcasting\WhatsAppChannel;
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -57,10 +58,9 @@ class OrganizationAssignedNotification extends Notification implements ShouldQue
             $channels[] = 'broadcast';
         }
 
-        // Email if user accepts OR default to email if nothing else (besides database) selected
-        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database' present
-            $channels[] = 'mail';
-        }
+        // Always email: this is the invitation itself, so it must arrive
+        // whatever the user's channel preferences are.
+        $channels[] = 'mail';
 
         return $channels;
     }
@@ -70,7 +70,11 @@ class OrganizationAssignedNotification extends Notification implements ShouldQue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $this->withRecipientLocale($notifiable);
+        // The email follows the platform's default language (General Settings),
+        // not the recipient's personal preference or the admin's locale.
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        app()->setLocale($locale);
 
         $smtpSettings = $this->organization?->organizationSettings;
 
@@ -79,16 +83,27 @@ class OrganizationAssignedNotification extends Notification implements ShouldQue
 
         $this->configureSmtp($smtpSettings);
 
+        $orgName = $this->organizationName();
+
+        $inviteeName = $locale === 'ar'
+            ? trim(($notifiable->first_name_ar ?? '') . ' ' . ($notifiable->last_name_ar ?? ''))
+            : '';
+        if ($inviteeName === '') {
+            $inviteeName = trim(($notifiable->first_name_en ?? '') . ' ' . ($notifiable->last_name_en ?? ''))
+                ?: ($notifiable->name ?? '');
+        }
+
         return (new MailMessage)
             ->from($from['address'], $from['name'])
-            ->subject(__('email.org_assigned.subject', [
-                'organization_name' => $this->organizationName(),
-            ]))
+            ->subject(__('email.org_assignment_invite_email.subject', ['org_name' => $orgName], $locale))
             ->view('emails.organization_assigned', array_merge([
-                'user'           => $notifiable,
-                'organization'   => $this->organization,
-                'assignedByName' => $this->assignedByName(),
-                'dashboardUrl'   => url(\App\Providers\RouteServiceProvider::HOME),
+                'locale'         => $locale,
+                'inviteeName'    => $inviteeName,
+                // Named distinctly from 'platformName': a global view composer
+                // (AppServiceProvider) sets that key on every view and would
+                // silently override it.
+                'assignedOrgName' => $orgName,
+                'acceptUrl'      => url(\App\Providers\RouteServiceProvider::HOME),
             ], $orgData));
     }
 
@@ -180,7 +195,7 @@ class OrganizationAssignedNotification extends Notification implements ShouldQue
      */
     protected function platformName(): string
     {
-        $setting = \App\Settings::first();
+        $setting = Settings::first();
 
         return $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
     }

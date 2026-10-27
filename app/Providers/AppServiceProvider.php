@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Settings;
+use App\Enums\MentorshipTextLimit;
 use App\SurveyResponses;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
@@ -17,6 +18,9 @@ use Namu\WireChat\Models\Message;
 use App\Services\BreadcrumbService;
 use Illuminate\Support\Facades\Mail;
 use App\Services\TenantMailer;
+use App\Services\EmailBranding;
+use Illuminate\Mail\Mailable;
+use App\Services\PlatformBrandingService;
 use Resend;
 use Resend\Laravel\Transport\ResendTransportFactory;
 use App\Repositories\SettingRepository;
@@ -159,6 +163,44 @@ class AppServiceProvider extends ServiceProvider
             $view->with(['l' => $l, 'organization_id' => $organization_id, 'organization_ids' => $organization_ids, '_user' => $_user, 'permissions' => $permissions, '_settings' => $settings, 'platformName' => $platformName, 'is_profile_completed' => $profile_completed, 'is_company_completed' => $company_completed]);
         });
 
+        // Platform Branding (GV-9673): the theme overrides on every layout, the settings form, and the
+        // landing page editors (their button colors start from / reset to the platform's).
+        view()->composer(['admin.includes.branding-styles', 'partials.forms.platform-branding-form', 'admin.landing-pages.create', 'admin.landing-pages.edit'], function ($view) use (&$settings) {
+            $view->with([
+                '_branding' => PlatformBrandingService::palette($settings),
+                '_brandingSaved' => PlatformBrandingService::saved($settings),
+            ]);
+        });
+
+        // New programs (and the wizard's "Reset to Default") start from the platform colors.
+        view()->composer(['admin.programs.create', 'admin.programs.edit'], function ($view) use (&$settings) {
+            $view->with('_programBrandDefaults', PlatformBrandingService::programDefaults($settings));
+        });
+
+        // Email branding (logo, name, footer links) follows the organization
+        // the email is about, decided in one place: EmailBranding. Mailables
+        // are branded here as they render; notifications by
+        // ConfigureTenantMailTransport. 'mail::header' is the header of
+        // Laravel's default notification template.
+        Mailable::buildViewDataUsing(function (Mailable $mailable) {
+            EmailBranding::begin($mailable);
+
+            return [];
+        });
+        view()->composer(['emails.*', 'admin.emails.updateEmail', 'mail::header'], function ($view) {
+            EmailBranding::compose($view);
+        });
+
+        // Mentorship note fields share one limit with their server-side validation.
+        view()->composer([
+            'partials.book-session-modal',
+            'admin.clients.startup.partials._session_modal',
+            'admin.clients.startup.partials._mutiple_session_modal',
+            'admin.settings.mentorship.sessions',
+        ], function ($view) {
+            $view->with('mentorshipNotesMaxLength', MentorshipTextLimit::NOTES->value);
+        });
+
         view()->composer('partials.menu', function ($view) {
             $pendingRequestsCount = 0;
             if (auth()->check()) {
@@ -266,6 +308,7 @@ class AppServiceProvider extends ServiceProvider
                     }
                     if( $type == 'mentorship' )
                     {
+                        if( !$response->mentorship_session ) { continue; }
                         $metadata = [
                             'session' => $response->mentorship_session,
                             'step' => $response->mentorship_step,

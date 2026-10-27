@@ -2,8 +2,9 @@
 
 namespace App\Traits;
 
+use App\Organization;
+use App\Services\EmailBranding;
 use App\Services\TenantMailer;
-use App\Settings;
 
 /**
  * Applies the correct SMTP account for the organization involved in an email,
@@ -45,15 +46,21 @@ trait ConfiguresSmtp
     /**
      * Work out which organization a send belongs to.
      *
-     * Callers usually pass an OrganizationSettings model, but it is null
-     * whenever the organization could not be determined locally (most often
-     * for on-demand notifiables). In that case fall back to the organization
-     * the send is already running under.
+     * The organization the email is about decides, as it does for the
+     * branding and in ConfigureTenantMailTransport. Callers often pass the
+     * recipient's own OrganizationSettings, which must not switch the send to
+     * another account (configureSmtp() runs again inside many toMail()s).
+     * Without one, the settings passed in, and then the organization the send
+     * is already running under, are used.
      *
      * @param  mixed  $smtpSettings
      */
     protected function resolveSendingOrganization($smtpSettings)
     {
+        if ($organization = EmailBranding::forMail($this)) {
+            return $organization;
+        }
+
         if ($organization = ($smtpSettings?->organization ?? null)) {
             return $organization;
         }
@@ -69,42 +76,45 @@ trait ConfiguresSmtp
     /**
      * Build the organization data array for email template branding.
      *
+     * During a send the email layout is branded by {@see EmailBranding}
+     * whatever is passed here. Emails use emailBrandingData() instead, so
+     * their own text (sign-off, organization name) matches the logo.
+     *
      * @param  mixed  $organization
      */
     protected function buildEmailOrganizationData($organization): array
     {
-        try {
-            $setting = Settings::first();
-        } catch (\Throwable $e) {
-            $setting = null;
-        }
-
-        $defaultName = $setting ? ($setting->Platform_Name ?? config('app.name')) : config('app.name');
-
-        return [
-            'org_name'      => $organization?->name ?? $defaultName,
-            'org_logo_url'  => $organization?->image_url ?? null,
-            'org_address'   => $organization?->address ?? null,
-            'org_website'   => $organization?->website_url ?? null,
-            'org_linkedin'  => $organization?->linkedin_company_url ?? null,
-            'org_twitter'   => $organization?->twitter_handle ?? null,
-            'org_facebook'  => $organization?->facebook_page_url ?? null,
-            'org_instagram' => $organization?->instagram_profile_url ?? null,
-        ];
+        return EmailBranding::data($organization instanceof Organization ? $organization : null);
     }
 
     /**
-     * Get the from address and name the email should be sent with.
+     * The organization this email is branded with: the one running the
+     * program it is about, never the recipient's own (see EmailBranding).
+     */
+    protected function brandingOrganization(): ?Organization
+    {
+        return EmailBranding::forMail($this);
+    }
+
+    /**
+     * The email layout variables (logo, org_name, footer links) for this
+     * email, the same ones the layout itself is branded with during a send.
+     */
+    protected function emailBrandingData(): array
+    {
+        return EmailBranding::data($this->brandingOrganization());
+    }
+
+    /**
+     * Get the from address and name the email should be sent with: the
+     * sender of the account that sends it.
      *
      * @param  mixed  $smtpSettings
      * @return array{address: string|null, name: string|null}
      */
     protected function getFromAddress($smtpSettings): array
     {
-        $organization = $smtpSettings?->organization
-            ?? TenantMailer::resolveOrganization($smtpSettings);
-
-        $config = TenantMailer::configForOrganization($organization)
+        $config = TenantMailer::configForOrganization($this->resolveSendingOrganization($smtpSettings))
             ?? TenantMailer::globalConfig();
 
         return [

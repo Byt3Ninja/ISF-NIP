@@ -24,6 +24,7 @@ use App\Messenger;
 use App\Screening;
 use App\TeamFormation;
 use Carbon\Carbon;
+use App\Services\TimezoneService;
 use Carbon\Exceptions\InvalidFormatException;
 use App\BuilderForm;
 use App\BuilderField;
@@ -45,7 +46,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
-use App\Mail\ProgramCreatedNotification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -57,6 +57,7 @@ use App\Enums\ProtectedFileSet;
 
 class CyclesController extends Controller
 {
+
     use \App\Traits\ValidatesUrlDomains;
     use \App\Traits\ManagesStepForm;
 
@@ -153,6 +154,20 @@ class CyclesController extends Controller
         ]);
         $checkget = $request->input('checkget');
         $compid = $request->input('compid');
+
+        // H1: the target step must be in a program this user manages, and every startup
+        // moved must already be enrolled in that same program.
+        $user = auth()->user();
+        $stepCycleId = Step::whereKey($checkget)->value('cycle_id');
+        abort_unless(
+            $user->ableTo('cycles.users_manage')
+            && $stepCycleId
+            && $user->managesOrganization(Cycle::whereKey($stepCycleId)->value('organization_id'))
+            && Company::whereIn('id', $compid)->where('cycle', '!=', $stepCycleId)->doesntExist()
+            && Company::whereIn('id', $compid)->whereNull('cycle')->doesntExist(),
+            403
+        );
+
         foreach ($compid as $index => $id) {
             $company = Company::where('id', $id)->first();
             if ($company) {
@@ -1016,24 +1031,10 @@ class CyclesController extends Controller
                             'message2' => __('missing_mail_settings', ['fields' => implode(', ', $missing)]),
                             'class' => 'danger'
                         ]);
-                    }  
-
-                    $admin = User::role('Admin')->orderBy('id')->first();
-
-                    if ($admin) {
-
-                        \Illuminate\Support\Facades\Notification::route('mail', $admin->email)
-                            ->notify(new \App\Notifications\ProgramCreatedNotification($cycle, $admin));
-
-                        $messenger = new Messenger();
-                        $messenger->sender = auth()->id();
-                        $messenger->receiver = $admin->id;
-                        $messenger->subject = 'New Program Created';
-                        $messenger->message = "A new Program Titled \"{$cycle->title}\" has been created.";
-                        $messenger->read = 0;
-                        $messenger->save();
                     }
                 }
+
+                app(\App\Services\ProgramCreatedNotifier::class)->notify($cycle);
             });
             // return redirect()->route('programs.edit', ['id' => $cycle->id])->with('message', 'Saved');
             return redirect()->route('programlist.index')->with('message', 'Saved');
@@ -1168,7 +1169,8 @@ class CyclesController extends Controller
             if( $step?->stype != 1 ) {
                 return redirect()->route('core.dashboard_view')->with(['msg' => 'The selected cycle doesn\'t contain a data form.', 'class' => 'danger']);
             }
-            if( $step->to < now()->format('Y-m-d') ) {
+            // GV-9566: `to` is an inclusive day in the program's platform zone.
+            if( $step->to?->format('Y-m-d') < TimezoneService::platformToday(TimezoneService::platform($private->organization_id)) ) {
                 return redirect()->route('core.dashboard_view')->with(['msg' => 'Error can\'t open form, Registration timed out.', 'class' => 'danger']);
             }
 
@@ -1406,6 +1408,28 @@ class CyclesController extends Controller
         return view('admin.settings.cycles.form', $data)->with('data', $data)->with('step', $step)->with('c', $step->cycle_id)->with('answers', $answers);
     }
 
+    /**
+     * A founder may submit the form of their startup's current step, or the first step of a
+     * program the startup is joining (not enrolled anywhere else) -- the two forms that
+     * view() and my() / the hackathon project tab render.
+     */
+    private function founderMaySubmitStep(User $user, Step $step): bool
+    {
+        $company = $user->company;
+        if (!$company) {
+            return false;
+        }
+
+        if ((int) $company->step === (int) $step->id) {
+            return true;
+        }
+
+        $joining = !$company->cycle || (int) $company->cycle === (int) $step->cycle_id;
+        $firstStepId = Step::where('cycle_id', $step->cycle_id)->orderBy('arr')->value('id');
+
+        return $joining && (int) $firstStepId === (int) $step->id;
+    }
+
     public function saveForm(Request $request)
     {
         $id = $request->id;
@@ -1417,6 +1441,10 @@ class CyclesController extends Controller
             'field_ids' => 'required|string',
         ]);
         abort_if($validator->fails(), 422, "Data error");
+
+        // H1: the company is moved to the posted cycle/step below, so only accept the
+        // company's current step or the application (first) step of the program it joins.
+        abort_unless((int) $step->cycle_id === (int) $request->cycle && $this->founderMaySubmitStep($user, $step), 403);
 
         $field_map_ids = array_filter(array_map('intval', explode(",", $request->input('field_ids'))));
 
@@ -1715,125 +1743,134 @@ class CyclesController extends Controller
         $dynamic_validator = Validator::make($request->all(), $rules_array, $custom_messages);
         if( $dynamic_validator->fails() ) { return redirect()->back()->withErrors($dynamic_validator)->withInput(); }
 
-        // update cycle & step
-        $company->update(['cycle' => $request->cycle, 'step' => $request->id]);
-        $company = Company::with(['stepdata', 'cycledata'])->find($cid);
+        // All-or-nothing: moving the startup into the program, its answers and the pruning
+        // commit together, so a failure part-way can't leave a half-saved application.
+        $toRetire = [];
+        DB::transaction(function () use ($request, &$company, $cid, $id, $uid, $active_fields, $my_submissions, $inactive_fields, &$toRetire) {
+            // update cycle & step
+            $company->update(['cycle' => $request->cycle, 'step' => $request->id]);
+            $company = Company::with(['stepdata', 'cycledata'])->find($cid);
 
-        // gather the form data as field_name => [ label, data ]
-        /* foreach ($field_map_ids as $fid)
-        {
-            $checkExistance = $get_fields_data->where('id', $fid)->first();
-            if( !$checkExistance ) { continue; }
-            $field_options = $checkExistance->options;
-            $field_name = 'field_' . $fid;
-
-            $verifyInput = $field_mapper->where('id', $fid)->first();
-
-            if( $verifyInput && $verifyInput['type'] == 'file' )
+            // gather the form data as field_name => [ label, data ]
+            /* foreach ($field_map_ids as $fid)
             {
-                if ($request->hasFile($field_name))
+                $checkExistance = $get_fields_data->where('id', $fid)->first();
+                if( !$checkExistance ) { continue; }
+                $field_options = $checkExistance->options;
+                $field_name = 'field_' . $fid;
+
+                $verifyInput = $field_mapper->where('id', $fid)->first();
+
+                if( $verifyInput && $verifyInput['type'] == 'file' )
                 {
-                    $file = $request->file($field_name);
-                    // Whitelist + real-content check; server-generated name (the client name could
-                    // carry any extension and silently overwrote an earlier file of the same name).
-                    $imageName = app(FileManagerService::class)->validatedSafeName($file, 'common');
-                    $file->move(public_path('formsubmissions/'), $imageName);
-                    $request->{$field_name} = 'formsubmissions/' . $imageName;
+                    if ($request->hasFile($field_name))
+                    {
+                        $file = $request->file($field_name);
+                        // Whitelist + real-content check; server-generated name (the client name could
+                        // carry any extension and silently overwrote an earlier file of the same name).
+                        $imageName = app(FileManagerService::class)->validatedSafeName($file, 'common');
+                        $file->move(public_path('formsubmissions/'), $imageName);
+                        $request->{$field_name} = 'formsubmissions/' . $imageName;
+                    }
+                    else
+                    {
+                        $request->{$field_name} = $my_submissions->where('field_id', $fid)->first()?->answer ?? null;
+                    }
                 }
-                else
+
+                if( $verifyInput && $verifyInput['type'] == 'checkboxes' && is_array($request->{$field_name}) )
                 {
-                    $request->{$field_name} = $my_submissions->where('field_id', $fid)->first()?->answer ?? null;
+                    $request->{$field_name} = json_encode($request->{$field_name});
                 }
+
+                Formdata::where('field_id', $fid)->where('company_id', $cid)->delete();
+                Formdata::updateOrInsert([
+                    'field_id' => $fid,
+                    'company_id' => $cid,
+                    'user_id' => $uid,
+                    'form_id' => $id,
+                    'step_id' => Auth::user()->company->step,
+                    'question' => $field_options->label,
+                    'answer' => $request->{$field_name},
+                    'screening' => '{}',
+                    'comments' => '{}',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            } */
+
+            foreach( $active_fields as $field )
+            {
+                $field_name = 'field_' . $field['id'];
+                if( $field['type'] == 'file' )
+                {
+                    $previousAnswer = $my_submissions->where('field_id', $field['id'])->first()?->answer ?? null;
+                    if ($request->hasFile($field_name))
+                    {
+                        // Whitelist + real-content check, server-generated name, stored privately and
+                        // recorded against this startup and the program the form belongs to.
+                        $protectedFiles = app(ProtectedFiles::class);
+                        $record = $protectedFiles->store($request->file($field_name), ProtectedFileSet::FORM_ANSWER, '', [
+                            'owner_type' => 'company', 'owner_id' => $cid, 'company_id' => $cid,
+                            'cycle_id' => Step::whereKey($id)->value('cycle_id'), 'field' => $field_name,
+                        ], 'common');
+                        $request->{$field_name} = 'formsubmissions/' . $record->path;
+                        // Moving the old file to the trash can't be rolled back, so it happens after commit.
+                        $toRetire[] = $previousAnswer;
+                    }
+                    else
+                    {
+                        // No new upload: keep the saved file (taken from the database, never from the request).
+                        $request->{$field_name} = $previousAnswer;
+                    }
+                }
+                if( $field['type'] == 'checkboxes' && is_array($request->{$field_name}) )
+                {
+                    $request->{$field_name} = json_encode($request->{$field_name});
+                }
+
+                // Scope the delete to THIS step (form_data.form_id holds the step id).
+                // The same BuilderForm — and therefore the same field_id values — can
+                // be assigned to multiple steps (e.g. a Custom Form step and a Final
+                // Screening step). Deleting by field_id + company_id alone would wipe
+                // the other step's answers for the shared fields, so re-submitting one
+                // step destroyed the other's saved data (GV-3226). This mirrors the
+                // form_id scoping already used by the inactive-fields cleanup below.
+                Formdata::where('field_id', $field['id'])->where('company_id', $cid)->where('form_id', $id)->delete();
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                Formdata::updateOrInsert([
+                    'field_id' => $field['id'],
+                    'company_id' => $cid,
+                    'user_id' => $uid,
+                    'form_id' => $id,
+                    'step_id' => $company->step,
+                    'question' => $field['label'],
+                    'answer' => is_array( $request->{$field_name} ) ? json_encode( $request->{$field_name} ) : $request->{$field_name},
+                    'screening' => '{}',
+                    'comments' => '{}',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             }
 
-            if( $verifyInput && $verifyInput['type'] == 'checkboxes' && is_array($request->{$field_name}) )
+            // Clear answers for fields that are NOT on the active navigation path
+            // (e.g. a logic branch the founder did not take). This is intentional
+            // pruning, but it is destructive — it is only reached because the
+            // `field_ids` list was validated above to be non-empty and to contain
+            // only IDs that belong to this form. The delete is further scoped to
+            // this company AND this form so it can never touch unrelated answers.
+            $inactive_ids = $inactive_fields->pluck('id')->toArray();
+            if( !empty($inactive_ids) )
             {
-                $request->{$field_name} = json_encode($request->{$field_name});
+                Formdata::whereIn('field_id', $inactive_ids)
+                    ->where('company_id', $cid)
+                    ->where('form_id', $id)
+                    ->delete();
             }
-
-            Formdata::where('field_id', $fid)->where('company_id', $cid)->delete();
-            Formdata::updateOrInsert([
-                'field_id' => $fid,
-                'company_id' => $cid,
-                'user_id' => $uid,
-                'form_id' => $id,
-                'step_id' => Auth::user()->company->step,
-                'question' => $field_options->label,
-                'answer' => $request->{$field_name},
-                'screening' => '{}',
-                'comments' => '{}',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        } */
-
-        foreach( $active_fields as $field )
-        {
-            $field_name = 'field_' . $field['id'];
-            if( $field['type'] == 'file' )
-            {
-                $previousAnswer = $my_submissions->where('field_id', $field['id'])->first()?->answer ?? null;
-                if ($request->hasFile($field_name))
-                {
-                    // Whitelist + real-content check, server-generated name, stored privately and
-                    // recorded against this startup and the program the form belongs to.
-                    $protectedFiles = app(ProtectedFiles::class);
-                    $record = $protectedFiles->store($request->file($field_name), ProtectedFileSet::FORM_ANSWER, '', [
-                        'owner_type' => 'company', 'owner_id' => $cid, 'company_id' => $cid,
-                        'cycle_id' => Step::whereKey($id)->value('cycle_id'), 'field' => $field_name,
-                    ], 'common');
-                    $request->{$field_name} = 'formsubmissions/' . $record->path;
-                    $protectedFiles->retireValue(ProtectedFileSet::FORM_ANSWER, $previousAnswer, ['company_id' => $cid]);
-                }
-                else
-                {
-                    // No new upload: keep the saved file (taken from the database, never from the request).
-                    $request->{$field_name} = $previousAnswer;
-                }
-            }
-            if( $field['type'] == 'checkboxes' && is_array($request->{$field_name}) )
-            {
-                $request->{$field_name} = json_encode($request->{$field_name});
-            }
-
-            // Scope the delete to THIS step (form_data.form_id holds the step id).
-            // The same BuilderForm — and therefore the same field_id values — can
-            // be assigned to multiple steps (e.g. a Custom Form step and a Final
-            // Screening step). Deleting by field_id + company_id alone would wipe
-            // the other step's answers for the shared fields, so re-submitting one
-            // step destroyed the other's saved data (GV-3226). This mirrors the
-            // form_id scoping already used by the inactive-fields cleanup below.
-            Formdata::where('field_id', $field['id'])->where('company_id', $cid)->where('form_id', $id)->delete();
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            Formdata::updateOrInsert([
-                'field_id' => $field['id'],
-                'company_id' => $cid,
-                'user_id' => $uid,
-                'form_id' => $id,
-                'step_id' => $company->step,
-                'question' => $field['label'],
-                'answer' => is_array( $request->{$field_name} ) ? json_encode( $request->{$field_name} ) : $request->{$field_name},
-                'screening' => '{}',
-                'comments' => '{}',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        }
-
-        // Clear answers for fields that are NOT on the active navigation path
-        // (e.g. a logic branch the founder did not take). This is intentional
-        // pruning, but it is destructive — it is only reached because the
-        // `field_ids` list was validated above to be non-empty and to contain
-        // only IDs that belong to this form. The delete is further scoped to
-        // this company AND this form so it can never touch unrelated answers.
-        $inactive_ids = $inactive_fields->pluck('id')->toArray();
-        if( !empty($inactive_ids) )
-        {
-            Formdata::whereIn('field_id', $inactive_ids)
-                ->where('company_id', $cid)
-                ->where('form_id', $id)
-                ->delete();
+        });
+        foreach ($toRetire as $previousAnswer) {
+            app(ProtectedFiles::class)->retireValue(ProtectedFileSet::FORM_ANSWER, $previousAnswer, ['company_id' => $cid]);
         }
 
         $data = [];
@@ -1862,7 +1899,9 @@ class CyclesController extends Controller
                 }
                 log::info('Sent notification to ' . $user->email);
             } catch (\Throwable $th) {
-                throw $th;
+                // The application is saved; a failed notification must not turn that into a
+                // 500 (the "already submitted" guard would then block the founder's retry).
+                report($th);
             }
 
             $phoneNumber = $user->country_code_w_a . $user->whatsapp;
@@ -1879,17 +1918,17 @@ class CyclesController extends Controller
     }
 
     function normalizeFieldName($fieldName)
-{
-    if (preg_match('/^field_\d+_(\d+)$/', $fieldName, $matches)) {
-        return 'field_' . intval($matches[1]);
-    }
+    {
+        if (preg_match('/^field_\d+_(\d+)$/', $fieldName, $matches)) {
+            return 'field_' . intval($matches[1]);
+        }
 
-    if (preg_match('/^field_(\d+)$/', $fieldName, $matches)) {
-        return 'field_' . intval($matches[1]);
-    }
+        if (preg_match('/^field_(\d+)$/', $fieldName, $matches)) {
+            return 'field_' . intval($matches[1]);
+        }
 
-    return $fieldName;
-}
+        return $fieldName;
+    }
 
     public function testSend(Request $request)
     {

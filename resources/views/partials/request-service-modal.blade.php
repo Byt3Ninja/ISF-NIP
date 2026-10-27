@@ -119,8 +119,8 @@ $(function () {
   const fp = $dateInput.flatpickr({
     enableTime: true,
     dateFormat: "Y-m-d H:i",
-    minDate: "{{ date('Y-m-d H:i', strtotime('+1 hour')) }}",
-    maxDate: "{{ date('Y-m-d H:i', strtotime('+1 year')) }}",
+    minDate: "{{ \App\Services\TimezoneService::platformNow()->addHour()->format('Y-m-d H:i') }}",
+    maxDate: "{{ \App\Services\TimezoneService::platformNow()->addYear()->format('Y-m-d H:i') }}",
   });
 
   // Toggle button state and validation on change
@@ -253,12 +253,12 @@ $(function () {
         $modal.modal('hide');
 
         if (res.state) {
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title: "{{ __('admin.Success') }}!",
             message: res.message || "{{ __('admin.service_request_submitted_successfully') }}",
           });
         } else {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: "{{ __('admin.Error') }}!",
             message: res.message || "{{ __('admin.unexpected_error') }}",
           });
@@ -273,7 +273,7 @@ $(function () {
           errorMsg = Object.values(errors).flat().join('\n');
         }
 
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: "{{ __('admin.Error') }}!",
           message: errorMsg,
         });

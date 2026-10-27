@@ -254,34 +254,27 @@ $(document).ready(function() {
       var id = $(this).data('id');
       var token = '{{ csrf_token() }}';
       
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{ __('notification_templates.are_you_sure') }}",
-        text: "{{ __('notification_templates.delete_warning') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('notification_templates.yes_delete') }}",
-        cancelButtonText: "{{ __('notification_templates.no_cancel') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
+        message: "{{ __('notification_templates.delete_warning') }}",
+        confirmText: "{{ __('notification_templates.yes_delete') }}",
+        cancelText: "{{ __('notification_templates.no_cancel') }}",
+        confirmColor: 'danger'
       })
-      .then((result) => {
-        if (result.value) {
+      .then((ok) => {
+        if (ok) {
           $.post(url, {'_method': 'DELETE' , '_token': token},
             function(response) {
               // Remove the row from DataTable
               templatesTable.row('#row_' + id).remove().draw();
 
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: "{{ __('notification_templates.deleted') }}",
                 message: "{{ __('notification_templates.delete_success') }}",
               });
             }
           ).fail(function(error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('notification_templates.error') }}",
               message: error?.message || "{{ __('notification_templates.unexpected_error') }}",
             });

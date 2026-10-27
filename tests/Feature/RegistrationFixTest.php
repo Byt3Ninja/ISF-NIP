@@ -2,14 +2,20 @@
 
 namespace Tests\Feature;
 
+use Tests\Support\FakesOutboundServices;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\User;
 
 class RegistrationFixTest extends TestCase
 {
-    // use RefreshDatabase; // Be careful with this on existing DB
+    use FakesOutboundServices;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->fakeOutboundServices();
+    }
 
     public function test_registration_validation_errors_are_present_in_session()
     {
@@ -27,7 +33,7 @@ class RegistrationFixTest extends TestCase
 
     public function test_registration_with_valid_founder_data()
     {
-        // Mock data for Founder (Role ID 3)
+        // The form posts the role label; RegisterController maps Founder -> registered.
         $data = [
             'first_name' => 'Test',
             'last_name' => 'Founder',
@@ -35,7 +41,7 @@ class RegistrationFixTest extends TestCase
             'phone' => '1234567890' . time(),
             'password' => 'password123',
             'password_confirmation' => 'password123',
-            'role' => '3', // Founder
+            'role' => 'Founder',
             'gender' => 'Male',
             'country_code' => '20',
         ];

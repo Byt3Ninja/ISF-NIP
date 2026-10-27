@@ -87,7 +87,7 @@
                                                                                             <div class="col-md-3">
                                                                                                 <img class="round" src="/191014/{{$roomImage->img_url}}"
                                                                                                      height="150" width="100%"/>
-                                                                                               <a style="display:block;text-align: center;margin-top: 10px;" href="{{route('rooms.images_delete', ['id' => $roomImage->id])}}">Delete</a>
+                                                                                               @include('partials.forms.confirm-action', ['formId' => 'delete-room-image-' . $roomImage->id, 'action' => route('rooms.images_delete', ['id' => $roomImage->id]), 'message' => __('settings.SureDelete'), 'label' => 'Delete', 'class' => 'btn btn-link d-block w-100 text-center mt-2'])
                                                                                             </div>
                                                                                         @endforeach
                                                                                     </div>

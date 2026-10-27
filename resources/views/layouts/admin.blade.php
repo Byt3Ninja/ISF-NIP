@@ -505,82 +505,6 @@
         });
       }
 
-      // Global SweetAlert2 configuration
-      window.releaseSuccessAlert = ({title, message}) => {
-        Swal.fire({
-          icon: 'success',
-          title: title || '',
-          html: message,
-          showCancelButton: false,
-          showConfirmButton: true,
-          confirmButtonText: "{{ __('admin.OK') }}",
-          customClass: {
-              confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
-          timer: 2000,
-          timerProgressBar: true,
-        });
-      }
-
-      window.releaseWarningAlert = ({title, message, html, onConfirm, onCancel, confirmText, cancelText, confirmColor}) => {
-        Swal.fire({
-          icon: 'warning',
-          title: title || '',
-          text: message,
-          html: html,
-          showCancelButton: onConfirm ? true : false,
-          showConfirmButton: true,
-          confirmButtonText: onConfirm ? (confirmText || "{{ __('admin.Confirm') }}") : "{{ __('admin.OK') }}",
-          cancelButtonText: onConfirm ? cancelText || "{{ __('admin.Cancel') }}" : '',
-          customClass: {
-            confirmButton: `btn btn-${confirmColor || 'primary'} ms-3`,
-            cancelButton: onConfirm ? 'btn btn-label-secondary' : '',
-          },
-          buttonsStyling: false,
-          reverseButtons: true,
-        }).then((result) => {
-          if (!result.isConfirmed) {
-            if (onCancel) onCancel();
-            return;
-          }
-
-          if (onConfirm) onConfirm();
-        }).catch((error) => {
-          console.error('Error in warning alert:', error);
-        });
-      }
-
-      window.releaseFailureAlert = ({title, message}) => {
-        Swal.fire({
-          icon: 'error',
-          title: title || '',
-          html: message,
-          showCancelButton: false,
-          showConfirmButton: true,
-          confirmButtonText: "{{ __('admin.OK') }}",
-          customClass: {
-              confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
-        });
-      }
-      
-      window.releaseAlert = ({icon, title, message}) => {
-        Swal.fire({
-          icon,
-          title: title || '',
-          html: message,
-          showCancelButton: false,
-          showConfirmButton: true,
-          confirmButtonText: "{{ __('admin.OK') }}",
-          customClass: {
-            confirmButton: 'btn btn-primary',
-          },
-          buttonsStyling: false,
-        });
-      }
-
       window.getSharedDataTableConfig = ({ title, pageLength, descIndex, actionsIndex, withoutFilter = false }) => {
         const config = {
           responsive: true,
@@ -630,10 +554,31 @@
 
         if (withoutFilter) {
           config.initComplete = function () {
-            setTimeout(() => {
-              $('.dataTables_filter .form-control').removeClass('form-control-sm');
-              $('.dataTables_length .form-select').removeClass('form-select-sm');
-            }, 300);
+            $('.dataTables_filter .form-control').removeClass('form-control-sm');
+            $('.dataTables_length .form-select').removeClass('form-select-sm');
+            
+            const $wrapper = $(this.api().table().container());
+            $wrapper.find('.form-select, .dataTables_length select').each(function () {
+              const $this = $(this);
+              if ($this.hasClass('select2-hidden-accessible')) return;
+
+              const isLength = $this.closest('.dataTables_length').length > 0;
+
+              $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+              $this.select2({
+                dropdownParent: $this.parent(),
+                width: isLength ? '80px' : '100%',
+                minimumResultsForSearch: Infinity,
+              });
+
+              if (!isLength) {
+                $this.next('.select2-container').css({
+                  'min-width': '150px',
+                  'max-width': '200px'
+                });
+              }
+            });
           };
         }
 
@@ -696,6 +641,8 @@
         }
       });
     </script>
+    
+    @include('partials.alert-modals')
 
     @stack('scripts')
     <!-- END: Page JS-->

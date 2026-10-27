@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
+use App\Settings;
 use App\Traits\ConfiguresSmtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,8 +32,7 @@ class ProgramCreatedNotification extends Notification implements ShouldQueue
     public $backoff = 60;
 
     public function __construct(
-        public $cycle,
-        public $admin
+        public $cycle
     ) {
     }
 
@@ -92,16 +92,37 @@ class ProgramCreatedNotification extends Notification implements ShouldQueue
     {
         $org = $notifiable->organization;
         $smtpSettings = $org?->organizationSettings;
-        
+
         // Get from address and name
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
 
+        // Branded with the organization that owns the program, not the
+        // recipient's own organization relation.
+        $orgData = $this->emailBrandingData();
+
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+        $platformName = $setting?->Platform_Name ?: config('app.name');
+        $orgName = $orgData['org_name'] ?? $platformName;
+
+        $firstName = $locale === 'ar' ? trim((string) $notifiable->first_name_ar) : '';
+        $lastName = $locale === 'ar' ? trim((string) $notifiable->last_name_ar) : '';
+        if ($firstName === '') {
+            $firstName = trim((string) $notifiable->first_name_en);
+            $lastName = trim((string) $notifiable->last_name_en);
+        }
+
+        // Keys are named distinctly from 'platformName': a global view composer
+        // (AppServiceProvider) sets that key on every view and would override it.
         return (new MailMessage)
-            ->subject(__('notifications.program_created.subject'))
+            ->subject(__('email.program_created_email.subject', ['title' => $this->cycle->title], $locale))
             ->view('emails.program-created', array_merge([
-                'cycle' => $this->cycle,
-                'admin' => $this->admin,
+                'programLocale' => $locale,
+                'programRecipientName' => trim($firstName . ' ' . $lastName),
+                'programRecipientGender' => strtolower(trim((string) $notifiable->gender)),
+                'programOrgName' => $orgName,
+                'programTitle' => $this->cycle->title,
+                'programViewUrl' => route('programlist.show', $this->cycle->id),
             ], $orgData));
     }
 
@@ -110,7 +131,6 @@ class ProgramCreatedNotification extends Notification implements ShouldQueue
         return [
             'type' => 'program_created',
             'cycle_id' => $this->cycle->id ?? null,
-            'admin_id' => $this->admin->id ?? null,
         ];
     }
 
@@ -126,7 +146,6 @@ class ProgramCreatedNotification extends Notification implements ShouldQueue
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
             'cycle_id' => $this->cycle->id ?? null,
-            'admin_id' => $this->admin->id ?? null,
         ]);
     }
 }

@@ -2,10 +2,14 @@
 
 namespace App\Listeners;
 
+use App\Services\EmailBranding;
 use App\Services\TenantMailer;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Symfony\Component\Mime\Address;
 
 /**
  * Applies the sending organization's mail transport globally, so every email
@@ -33,6 +37,10 @@ class ConfigureTenantMailTransport
         TenantMailer::applyFor(
             $this->organizationFor($event->notification, $event->notifiable)
         );
+
+        // Brand the email (logo, name, footer) with the organization it is
+        // about, before toMail() builds and the layout renders it.
+        EmailBranding::begin($event->notification);
     }
 
     /**
@@ -46,6 +54,7 @@ class ConfigureTenantMailTransport
         }
 
         TenantMailer::restore();
+        EmailBranding::end();
     }
 
     /**
@@ -55,6 +64,11 @@ class ConfigureTenantMailTransport
      */
     public function messageSending(MessageSending $event): void
     {
+        // The message is fully rendered by now: stop branding, so nothing
+        // rendered later in the same worker inherits this email's brand, even
+        // if the send itself fails.
+        EmailBranding::end();
+
         $from = config('mail.from.address');
         $name = config('mail.from.name');
 
@@ -62,21 +76,52 @@ class ConfigureTenantMailTransport
             return;
         }
 
-        $current = $event->message->getFrom();
+        $current = $event->message->getFrom()[0] ?? null;
 
-        // Only stamp when the message has no explicit sender of its own.
-        if (empty($current)) {
-            $event->message->from(new \Symfony\Component\Mime\Address($from, (string) $name));
+        // Stamp a message with no sender of its own, and replace a sender on
+        // another domain than the account sending it: Resend refuses a domain
+        // that is not verified on that account, and SMTP receivers treat it
+        // as spoofed (SPF/DMARC).
+        $replaced = $current && !$this->sameDomain($current->getAddress(), $from);
+
+        if (!$current || $replaced) {
+            $event->message->from(new Address($from, $current?->getName() ?: (string) $name));
         }
+
+        $config = TenantMailer::currentConfig();
+
+        Log::info('Mail sending', [
+            'source'          => $config['source'] ?? 'boot',
+            'transport'       => config('mail.default'),
+            'organization_id' => $config['organization_id'] ?? null,
+            'from'            => $event->message->getFrom()[0]->toString(),
+            'replaced_from'   => $replaced ? $current->getAddress() : null,
+            'subject'         => $event->message->getSubject(),
+        ]);
+    }
+
+    protected function sameDomain(string $address, string $other): bool
+    {
+        return strcasecmp(Str::afterLast($address, '@'), Str::afterLast($other, '@')) === 0;
     }
 
     /**
-     * Resolve the organization an email belongs to: an explicit organization
-     * exposed by the notification wins, otherwise fall back to the notifiable
-     * (user, or recipient address for anonymous notifiables).
+     * Resolve the organization an email belongs to: the one it is about (the
+     * same rule that brands it and picks its From, see EmailBranding) wins,
+     * then an explicit organization exposed by the notification, otherwise
+     * the notifiable (user, or recipient address for anonymous notifiables).
+     *
+     * The recipient must not decide first: founders, mentors and judges
+     * usually have no organization of their own, so their emails would go out
+     * on the platform account with the program organization's From, which
+     * Resend rejects and SMTP receivers flag as spoofed.
      */
     protected function organizationFor($notification, $notifiable)
     {
+        if ($organization = EmailBranding::forMail($notification)) {
+            return $organization;
+        }
+
         foreach (['organization', 'org'] as $property) {
             if (isset($notification->{$property})) {
                 $organization = TenantMailer::resolveOrganization($notification->{$property});

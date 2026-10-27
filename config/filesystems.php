@@ -184,7 +184,7 @@ return [
         'organizations' => [
             'driver' => 'local',
             'root' => storage_path('app/organizations'),
-            'url' => env('APP_URL') . '/dashboard/organizations/logo',
+            'url' => env('APP_URL') . '/organizations/logo',
             'visibility' => 'private',
         ],
 

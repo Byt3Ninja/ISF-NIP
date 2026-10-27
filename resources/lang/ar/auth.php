@@ -78,6 +78,7 @@ return [
 	'validate_phone_format' => 'رقم الهاتف ليس بصيغة E164 صالحة.',
 	'validate_terms_agreement_required' => 'يجب الموافقة على شروط الخدمة',
 	'validate_terms_agreement_in' => 'يجب الموافقة على شروط الخدمة',
+	'provider_registration_rejected' => 'لم تتم الموافقة على طلبك كمزود خدمة، لذلك لا يمكن تسجيل الدخول بهذا الحساب. يرجى التواصل مع فريق المنصة لمزيد من التفاصيل.',
 	'provider_registration_recorded' => 'تم تسجيل طلبك بنجاح. يرجى الانتظار حتى يتم الموافقة عليه. سوف تتلقى بريد الكتروني عند الموافقة.',
 	'submittedAt' => 'وقت تقديم الطلب',
 	'ActionTaken' => 'الإجراء المتخذ',
@@ -121,4 +122,9 @@ return [
 
 	'founder_or_mentor_q' => 'هل أنت مؤسس أو موجه؟',
 	'register_as_founder_mentor' => 'سجّل كمؤسس أو موجه',
+
+	'reset_password_subheading' => 'أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.',
+	'reset_password_cover_title' => 'هل تذكرت كلمة مرورك؟',
+	'reset_password_cover_text' => 'لا حاجة لإعادة تعيينه. سجّل الدخول باستخدام كلمة مرورك الحالية وتابع من حيث توقفت.',
+	'Back to login' => 'العودة لتسجيل الدخول',
 ];

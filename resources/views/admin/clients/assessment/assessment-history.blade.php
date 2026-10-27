@@ -34,7 +34,7 @@
     gap: 0.125rem;
     min-width: 6.5rem;
     padding-inline-end: 1.5rem;
-    border-inline-end: 1px solid var(--bs-border-color);
+    /* border-inline-end: 1px solid var(--bs-border-color); */
   }
 
   .history-card__score-value {

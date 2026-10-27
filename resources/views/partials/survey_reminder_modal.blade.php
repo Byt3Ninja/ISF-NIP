@@ -1,6 +1,5 @@
 {{-- Survey Reminder Modal Partial --}}
 
-
 {{-- Only show the modal if there are pending surveys and user is not on the survey taking page --}}
 @if(auth()->user()->hasAnyRole(['Registered','Mentor']) && Route::currentRouteName() !== 'surveys.take')
   <!-- Survey Reminder Modal -->

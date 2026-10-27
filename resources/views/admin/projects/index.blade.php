@@ -200,21 +200,14 @@
     $('.delete-button').on('click', function(e) {
       e.preventDefault();
       var form = $(this).closest('form');
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{__('admin.SureDelete')}}",
-        text: "{{__('admin.Recover')}}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('admin.DYes') }}",
-        cancelButtonText: "{{ __('admin.No') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-      }).then((result) => {
-          if (result.isConfirmed) {
+        message: "{{__('admin.Recover')}}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}",
+        confirmColor: 'danger'
+      }).then((ok) => {
+          if (ok) {
             form.submit();
           }
         });

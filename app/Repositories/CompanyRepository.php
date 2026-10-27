@@ -13,7 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class CompanyRepository
 {
-    public function getCompanies(array $filters, bool $isApi = true): LengthAwarePaginator|Collection
+    public function getCompanies(array $filters, bool $isApi = true, bool $paginate = true): LengthAwarePaginator|Collection
     {
         $locale = app()->getLocale();
         $nameField = $locale == 'ar' ? 'name_ar' : 'name_en';
@@ -34,7 +34,6 @@ class CompanyRepository
             $orgIds = $user->organizations_ids;
             if (!empty($orgIds)) {
                 $isAlumni = !empty($filters['status']) && $filters['status'] === 'alumni';
-                $isApplied = !empty($filters['status']) && $filters['status'] === 'applied';
                 if ($isAlumni) {
                     $query->whereIn('id', function ($q) use ($orgIds) {
                         $q->select('company_id')
@@ -44,13 +43,6 @@ class CompanyRepository
                                 $q2->select('id')->from('cycles')
                                     ->whereIn('organization_id', $orgIds);
                             });
-                    });
-                } elseif ($isApplied) {
-                    // "Applied" spans a company's whole application history, including
-                    // after disapproval nulls out its cycle, so org scoping here must
-                    // key off the applicant's own organization rather than the cycle.
-                    $query->whereHas('user', function ($q) use ($orgIds) {
-                        $q->whereIn('organization_id', $orgIds);
                     });
                 } else {
                     $query->whereHas('cycleRelation.organization', function ($q) use ($orgIds) {
@@ -131,7 +123,7 @@ class CompanyRepository
         if (!empty($filters['programId'])) {
             $query->where('cycle', $filters['programId']);
         }
-    
+
         if(!empty($filters['status'])){
             if($filters['status'] == 'alumni') {
                 $query->whereIn('id', function ($q) {
@@ -143,14 +135,11 @@ class CompanyRepository
                 $query->whereNotNull('cycle')->whereHas('stepdata', function ($q) {
                     $q->where('stype', '!=', 1);
                 });
-            } elseif($filters['status'] == 'applied') {
-                // "Applied" = startups that actually submitted an application to a
-                // program, ever — regardless of current stage/approval status. A
-                // form_data row is written the moment a founder submits (see
-                // ExternalCyclesController::registerUser(), CyclesController::saveForm())
-                // and survives disapproval nulling out cycle/step, so its existence is
-                // what distinguishes "applied" from "registered but never applied".
-                $query->whereHas('formData');
+            } elseif($filters['status'] == 'enrolled') {
+                // "Enrolled" = currently in a program, at any phase. Disapproval nulls
+                // companies.cycle (ScreeningController::changestep()), so rejected
+                // startups drop out.
+                $query->whereHas('cycleRelation');
             }
 
         }
@@ -163,6 +152,11 @@ class CompanyRepository
                     ->orWhereHas('city', fn($q) => $q->where("name_{$locale}", 'like', "%{$search}%"))
                     ->orWhereHas('teamMembers', fn($q) => $q->where('Name', 'like', "%{$search}%"));
             });
+        }
+
+        // Exports need every matching row, not the 9-per-page listing (C5).
+        if (!$paginate) {
+            return $query->get();
         }
 
         return $isApi

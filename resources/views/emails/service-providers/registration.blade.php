@@ -39,10 +39,6 @@
 																			<td>Login Email</td>
 																			<td> {{ $email }} </td>
 																		</tr>
-																		<tr>
-																			<td>Temporary Password</td>
-																			<td> {{ $password }} </td>
-																		</tr>
 																	</table>
 																</p>
 																<p style="margin: 0;"> </p>
@@ -51,7 +47,7 @@
 																	<a href="{{ $login_url }}" target="_blank"> Log In to Your Dashboard </a>
 																</p>
 																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">For security, we recommend updating your password after your first login.</p>
+																<p style="margin: 0;">This sign-in link works once and is valid for 24 hours. After signing in, set your password from your profile.</p>
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">Best regards,</p>
 															</div>
@@ -96,10 +92,6 @@
 																			<td>البريد الإلكتروني للدخول:</td>
 																			<td> {{ $email }} </td>
 																		</tr>
-																		<tr>
-																			<td>كلمة المرور المؤقتة</td>
-																			<td> {{ $password }} </td>
-																		</tr>
 																	</table>
 																</p>
 																<p style="margin: 0;"> </p>
@@ -108,7 +100,7 @@
 																	<a href="{{ $login_url }}" target="_blank"> تسجيل الدخول إلى لوحة التحكم </a>
 																</p>
 																<p style="margin: 0;"> </p>
-																<p style="margin: 0;">لأغراض الأمان، نوصي بتحديث كلمة المرور بعد تسجيل الدخول لأول مرة.</p>
+																<p style="margin: 0;">يعمل رابط تسجيل الدخول هذا مرة واحدة وهو صالح لمدة 24 ساعة. بعد تسجيل الدخول، عيّن كلمة المرور من ملفك الشخصي.</p>
 																<p style="margin: 0;"> </p>
 																<p style="margin: 0;">أطيب التحيات،</p>
 															</div>

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\TemplateEmail;
+use App\Services\MessagingRecipients;
 use Illuminate\Support\Facades\Auth;
 use stdClass;
 
@@ -448,6 +449,7 @@ class MessengerController extends Controller
             {
                 return redirect()->back()->with('error', 'Receiver not specified');
             }
+            abort_unless(app(MessagingRecipients::class)->canMessage($user, User::find($receiverId)), 403);
 
             $new = new Messenger();
             $new->sender = $senderId;
@@ -533,47 +535,35 @@ class MessengerController extends Controller
         
         $users = $mentors = $cycles = $organizations = null;
         $authUser = Auth::user();
+        // Recipient lists come from MessagingRecipients, which every send endpoint also enforces.
+        $recipients = app(MessagingRecipients::class);
         if ($authUser->hasAnyRole('Admin|OrganizationManager|subadmin')) {
-            if ($authUser->hasRole('Admin')) {
-                $cycles = Cycle::select('id', 'title')->get();
-                $users = Company::get();
-                $organizations = Organization::all();
-            } else {
-                $orgIds = $authUser->organizations_ids;
-                $cycles = Cycle::whereIn('organization_id', $orgIds)->select('id', 'title')->get();
-                $users = Company::whereIn('organization_id', $orgIds)->get();
-                $organizations = Organization::whereIn('id', $orgIds)->get();
-            }
-
-            // $mentors = User::join('model_has_roles', 'id', 'model_id')->where('role_id', 6)->get();
-			$mentors = User::join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
-				->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-				->where('roles.default_for', 'mentor')
-				->select('users.*')
-				->get();
-            if ($request->has('cycle_id') && !empty($request->cycle_id)) {
+            $cycleIds = $recipients->cycleIds($authUser);
+            $cycles = Cycle::whereIn('id', $cycleIds)->select('id', 'title')->get();
+            $users = $recipients->companiesQuery($authUser)->get();
+            $organizations = Organization::whereIn('id', $recipients->organizationIds($authUser))->get();
+            $mentors = $recipients->mentorsQuery($authUser)->get();
+            if ($request->has('cycle_id') && !empty($request->cycle_id) && in_array((int) $request->cycle_id, $cycleIds, true)) {
                 $users = Company::where('cycle', $request->cycle_id)
                     ->whereHas('user', function ($query) {
                         $query->role('Registered');
                     })->get();
             }
-            if ($request->has('organization_id') && !empty($request->organization_id)) {
-                $users = Company::where('organization_id', $request->organization_id)->get();
+            if ($request->has('organization_id') && !empty($request->organization_id) && in_array((int) $request->organization_id, $recipients->organizationIds($authUser), true)) {
+                // companies carry no organization_id; a startup belongs to its program's organization.
+                $users = Company::whereIn('cycle', Cycle::where('organization_id', $request->organization_id)->select('id'))->get();
             }
         } elseif (Auth::user()->hasRole('Mentor')) {
-            $cycles = CyclesMentors::where('user_id', Auth::id())->get(['cycle_id'])->toArray();
-            $users = Company::whereIn('cycle', array_values($cycles))->get();
+            $users = $recipients->companiesQuery($authUser)->get();
             $mentors = null;
         } elseif (Auth::user()->company) {
             if (Auth::user()->company->approved) {
-                $users = Company::where('cycle', Auth::user()->company->cycle)
-                    ->where('id', '!=', Auth::user()->company->id)
+                $users = $recipients->companiesQuery($authUser)
                     ->whereHas('user', function ($query) {
                         $query->role('Registered');
                     })->get();
 
-                $mentors = User::join('cycles_mentors', 'users.id', 'user_id')
-                    ->where('cycle_id', Auth::user()->company->cycle)
+                $mentors = $recipients->mentorsQuery($authUser)
                     ->get(['users.id', 'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en']);
             }
         }
@@ -583,8 +573,12 @@ class MessengerController extends Controller
 
     public function getUsersByProgram(Request $request)
     {
-        $cycleId = $request->input('id');
-       
+        // The compose screen sends cycle_id; `id` is kept for older callers.
+        $cycleId = (int) $request->input('cycle_id', $request->input('id'));
+        if (!in_array($cycleId, app(MessagingRecipients::class)->cycleIds(Auth::user()), true)) {
+            return response()->json(['users' => []]);
+        }
+
         $users = Company::where('cycle', $cycleId)
             ->whereHas('user', function ($query) {
                 $query->role('Registered');
@@ -608,6 +602,16 @@ class MessengerController extends Controller
         // if ($request->draftsNumber > 0) {
         //     DB::table('message_drafts')->where('drafts', $request->draftsNumber)->delete();
         // }
+        $recipients = app(MessagingRecipients::class);
+        if ($request->type == 1 || $request->type == 2) {
+            foreach ((array) ($request->type == 1 ? $request->users : $request->mentors) as $rec) {
+                abort_unless($recipients->canMessage($cuser, User::find($rec)), 403);
+            }
+        } elseif ($request->type == 3) {
+            foreach ((array) $request->organizations as $orgId) {
+                abort_unless(in_array((int) $orgId, $recipients->organizationIds($cuser), true), 403);
+            }
+        }
         if ($request->type == 1) {
             if (!$request->users) {
                 return redirect('/dashboard')->with(['msg' => 'MessageError', 'class' => 'danger']);
@@ -1079,6 +1083,8 @@ class MessengerController extends Controller
                 403
             );
         }
+        $isOtherParty = isset($original) && in_array((int) $request->message_receiver, [(int) $original->sender, (int) $original->receiver], true);
+        abort_unless($isOtherParty || app(MessagingRecipients::class)->canMessage(auth()->user(), User::find($request->message_receiver)), 403);
 
         $message = Messenger::create([
             'subject' => $request->message_subject,

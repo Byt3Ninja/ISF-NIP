@@ -6,6 +6,7 @@ use App\Like;
 
 use App\Traits\Auditable;
 use App\Traits\HasFileCleanup;
+use App\Services\TimezoneService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -72,6 +73,14 @@ class Organization extends Model
 		'is_draft' => 'boolean',
 		'status' => 'boolean',
 	];
+
+	protected static function booted()
+	{
+		// TimezoneService caches each organization's zone (GV-9566).
+		static::saved(fn ($organization) => TimezoneService::forgetOrganization($organization->id));
+		static::deleted(fn ($organization) => TimezoneService::forgetOrganization($organization->id));
+	}
+
 	public static function image_handler($img)
 	{
 		if (!$img) {

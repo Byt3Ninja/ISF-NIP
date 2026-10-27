@@ -24,8 +24,10 @@ class NextSessionsService
     public function getUpcomingSessions(int $days = 14, string $l = 'ar', int $user_id = null, int $cycle_id = null)
     {
         $days = (int) request()->query('days', 14);
-        $start = Carbon::now()->startOfDay();
-        $end = Carbon::now()->addDays($days)->endOfDay();
+        // GV-9566: zoom_date is platform wall-clock; the window is platform days.
+        $platformNow = TimezoneService::platformNow();
+        $start = $platformNow->copy()->startOfDay()->format('Y-m-d H:i:s');
+        $end = $platformNow->copy()->addDays($days)->endOfDay()->format('Y-m-d H:i:s');
 
         $query = DB::table('mentorship_requests as mr')
             ->leftJoin('users as m', 'm.id', '=', 'mr.mentor_id')
@@ -35,7 +37,7 @@ class NextSessionsService
             ->select([
                 'mr.id', 'mr.mentor_id', 'mr.user_id', 'mr.comment', 'mr.approved',
                 'mr.rating', 'mr.join_url', 'mr.zoom_date', 'mr.period',
-                'mr.rate_comment', 'mr.done', 'mr.cycle_id',
+                'mr.rate_comment', 'mr.done', 'mr.cycle_id', 'mr.organization_id',
                 'u.img_url as user_img_url',
                 'u.first_name_en as user_first_name_en', 'u.first_name_ar as user_first_name_ar',
                 'u.last_name_en as user_last_name_en', 'u.last_name_ar as user_last_name_ar',
@@ -77,6 +79,7 @@ class NextSessionsService
             $session->rate_comment = $_session->rate_comment;
             $session->done = $_session->done;
             $session->cycle_id = $_session->cycle_id;
+            $session->organization_id = $_session->organization_id;
 
             $user = new stdClass;
             $user->id = $_session->user_id;

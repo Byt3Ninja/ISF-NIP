@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\User;
 use App\Messenger;
+use App\Services\MessagingRecipients;
 use Carbon\Carbon;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
@@ -96,6 +97,8 @@ class MessageController extends Controller
        }
 
       $recipients = collect();
+      // Same recipient rule as the web Messenger (MessengerController::savemessage).
+      $allowed = app(MessagingRecipients::class);
 
       if ($request->userTypeValue == 1) {
         $recipients = User::whereHas('company')
@@ -109,19 +112,30 @@ class MessageController extends Controller
 
       } elseif ($request->userTypeValue == 3) {
         // "Whole organization" sends: a non-admin may only address organizations in their scope.
-        $targetOrgIds = $request->userId ?? [];
-        if (!$sender->hasRole('admin')) {
-            $targetOrgIds = array_values(array_filter($targetOrgIds, fn ($orgId) => $sender->ownsOrganization($orgId)));
-        }
+        $targetOrgIds = array_values(array_intersect(array_map('intval', $request->userId ?? []), $allowed->organizationIds($sender)));
         $recipients = User::whereIn('organization_id', $targetOrgIds)->get();
 
       } else {
         // A non-admin with no organizations reaches nobody (this used to fall through to every user).
         $user = auth()->user();
-        $orgIds = $user->organizations_ids;
+        $orgIds = $allowed->organizationIds($user);
         $recipients = User::when(!$user->hasRole('admin'), function ($q) use ($orgIds) {
             return $q->whereIn('organization_id', $orgIds);
         })->get();
+      }
+
+      // Named recipients (types 1 and 2) must each be someone the sender may message;
+      // an open type-1 audience ("all startups") is narrowed to those people.
+      if (!$sender->hasRole('admin') && in_array((int) $request->userTypeValue, [1, 2], true)) {
+        if (!empty($request->userId)) {
+          foreach ($recipients as $receiver) {
+            if (!$allowed->canMessage($sender, $receiver)) {
+              return $this->forbidden(__('api.forbidden'));
+            }
+          }
+        } else {
+          $recipients = $recipients->filter(fn ($receiver) => $allowed->canMessage($sender, $receiver))->values();
+        }
       }
 
       if ($recipients->isEmpty()) {

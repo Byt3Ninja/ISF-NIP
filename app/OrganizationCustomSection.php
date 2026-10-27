@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Model;
 
 class OrganizationCustomSection extends Model
@@ -78,5 +79,11 @@ class OrganizationCustomSection extends Model
         ];
 
         return $labels[$this->visibility] ?? $this->visibility;
+    }
+
+    /** Rich-text body for {!! !!} output; also cleans rows saved before sanitize-on-write. */
+    public function getSafeContentAttribute(): string
+    {
+        return HtmlSanitizer::clean($this->content);
     }
 }

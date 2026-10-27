@@ -467,20 +467,14 @@
   });
 
   $('#reset-company-logo').on('click', function () {
-  Swal.fire({
+  releaseAlert('warning', {
     title: "{{__('startup.startup_logo_delete_confirm')}}",
-    text: "{{__('admin.Recover')}}",
-    icon: "warning",
-    reverseButtons: true,
-    showCancelButton: true,
-    confirmButtonText: "{{ __('admin.DYes') }}",
-    cancelButtonText: "{{ __('admin.No') }}",
-    customClass: {
-      confirmButton: "btn btn-danger",
-      cancelButton: "btn btn-label-secondary"
-    }
-  }).then(function (result) {
-    if (result.isConfirmed) {
+    message: "{{__('admin.Recover')}}",
+    confirmText: "{{ __('admin.DYes') }}",
+    cancelText: "{{ __('admin.No') }}",
+    confirmColor: 'danger'
+  }).then(function (ok) {
+    if (ok) {
 
       $.ajax({
         url: "{{ route('company.profile_images_delete', $client->company->id ?? 0) }}",
@@ -489,7 +483,7 @@
           "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
         },
         success: function (data) {
-         releaseSuccessAlert({
+         releaseAlert('success', {
             title: "{{ __('admin.Deleted') }}",
             message: "{{ __('startup.startup_logo_deleted') }}",
           });
@@ -499,7 +493,7 @@
         },
 
         error: function (xhr) {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: "{{ __('admin.Failed') }}",
             message: xhr?.responseJSON?.message ? xhr?.responseJSON?.message : "{{ __('startup.startup_logo_delete_failed') }}",
           });

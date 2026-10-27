@@ -6,11 +6,9 @@ use Tests\TestCase;
 use App\Screening;
 use App\Step;
 use App\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ScreeningModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_fillable_attributes()

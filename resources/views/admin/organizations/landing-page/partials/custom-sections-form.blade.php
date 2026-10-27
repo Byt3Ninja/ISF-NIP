@@ -41,9 +41,6 @@
         {{ $sectionCount >= $maxSections ? 'disabled' : '' }}>
         <i class="ti ti-plus me-1"></i>{{ __('admin.Add Custom Section') }}
       </button>
-      <button type="submit" class="btn btn-primary">
-        <i class="ti ti-device-floppy me-1"></i>{{ __('admin.Save') }}
-      </button>
     </div>
   </div>
 
@@ -146,6 +143,13 @@
     <p class="text-muted small mb-3">{{ __('admin.Add custom sections to enrich your landing page') }}</p>
     <button type="button" class="btn btn-primary" id="cs-add-first-btn">
       <i class="ti ti-plus me-1"></i>{{ __('admin.Add Your First Section') }}
+    </button>
+  </div>
+
+  {{-- Save button, bottom of the form --}}
+  <div class="d-flex justify-content-end mt-4 pt-4 border-top">
+    <button type="submit" class="btn btn-primary">
+      <i class="ti ti-device-floppy me-1"></i>{{ __('admin.Save') }}
     </button>
   </div>
 

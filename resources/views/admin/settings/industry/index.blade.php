@@ -228,7 +228,7 @@ if (AJAX_CONFIG.csrfToken) {
 // AJAX Request Function
 function makeAjaxRequest(action, params, callback) {
   if (!navigator.onLine) {
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No internet connection. Please check your network and try again.' : 'لا يوجد اتصال بالإنترنت. يرجى فحص شبكتك والمحاولة مرة أخرى.' }}' });
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'No internet connection. Please check your network and try again.' : 'لا يوجد اتصال بالإنترنت. يرجى فحص شبكتك والمحاولة مرة أخرى.' }}' });
     callback(false, { error: '{{ $l == 'en' ? 'No internet connection' : 'لا يوجد اتصال بالإنترنت' }}' });
     return;
   }
@@ -247,7 +247,7 @@ function makeAjaxRequest(action, params, callback) {
   const config = actionConfig[action];
   if (!config) {
     console.error('Unknown action:', action);
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Invalid operation requested' : 'طلب عملية غير صحيح' }}' });
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'Invalid operation requested' : 'طلب عملية غير صحيح' }}' });
     callback(false, { error: 'Unknown action' });
     return;
   }
@@ -279,12 +279,12 @@ function makeAjaxRequest(action, params, callback) {
         // CRUD operations will show their own translated messages
         const crudActions = ['add-industry', 'add-sector', 'add-technology', 'industry-delete', 'sector-delete', 'tech-delete', 'edit'];
         if (!crudActions.includes(action)) {
-          releaseSuccessAlert({ message: data.message || '{{ $l == 'en' ? 'Operation successful' : 'تمت العملية بنجاح' }}' });
+          releaseAlert('success', { message: data.message || '{{ $l == 'en' ? 'Operation successful' : 'تمت العملية بنجاح' }}' });
           setTimeout(() => $(".alert-success").fadeOut(), 2000);
         }
 
       } else {
-        releaseFailureAlert({ message: data.message || '{{ $l == 'en' ? 'Operation failed' : 'فشلت العملية' }}' });
+        releaseAlert('danger', { message: data.message || '{{ $l == 'en' ? 'Operation failed' : 'فشلت العملية' }}' });
         setTimeout(() => $(".alert-danger").fadeOut(), 2500);
         callback(false, { ...params, error: data.message || '{{ $l == 'en' ? 'Operation failed' : 'فشلت العملية' }}' });
       }
@@ -298,7 +298,7 @@ function makeAjaxRequest(action, params, callback) {
       else if (error.message.includes('HTTP error')) errorMessage = `{{ $l == 'en' ? 'Server error:' : 'خطأ في الخادم:' }} ${error.message}`;
       else if (error.message.includes('Failed to fetch')) errorMessage = '{{ $l == 'en' ? 'Network connection failed' : 'فشل في الاتصال بالشبكة' }}';
 
-      releaseFailureAlert({ message: errorMessage });
+      releaseAlert('danger', { message: errorMessage });
       setTimeout(() => $(".alert-danger").fadeOut(), 2500);
       callback(false, { ...params, error: errorMessage });
     });
@@ -674,9 +674,9 @@ function handleAddAction(type, newName, industryId, newNameAr = '') {
           break;
       }
       dump();
-      releaseSuccessAlert({ message: getTranslatedMessage('added', type) });
+      releaseAlert('success', { message: getTranslatedMessage('added', type) });
     } else {
-      releaseFailureAlert({ message: getTranslatedMessage('add_failed', type) });
+      releaseAlert('danger', { message: getTranslatedMessage('add_failed', type) });
     }
   });
 }
@@ -735,9 +735,9 @@ function handleEditAction(type, id, oldName, newName, industryId, newNameAr = ''
           break;
       }
       dump();
-      releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Changes saved successfully' : 'تم حفظ التغييرات بنجاح' }}' });
+      releaseAlert('success', { message: '{{ $l == 'en' ? 'Changes saved successfully' : 'تم حفظ التغييرات بنجاح' }}' });
     } else {
-      releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to save changes' : 'فشل في حفظ التغييرات' }}' });
+      releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to save changes' : 'فشل في حفظ التغييرات' }}' });
     }
   });
 }
@@ -791,21 +791,14 @@ function handleDeleteConfirmation(type, id, industryId = null) {
     tech: '{{ __('settings.Delete_Technology_Confirmation') }}'
   };
 
-  Swal.fire({
+  releaseAlert('warning', {
     title: titleMap[type],
-    text: textMap[type],
-    icon: 'warning',
-    showCancelButton: true,
-    buttonStyling: false,
-    showConfirmButton: true,
-    confirmButtonText: '{{ __('settings.Delete') }}',
-    cancelButtonText: '{{ __('settings.Cancel') }}',
-    customClass: {
-      confirmButton: 'btn btn-danger me-3',
-      cancelButton: 'btn btn-label-secondary'
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
+    message: textMap[type],
+    confirmText: '{{ __('settings.Delete') }}',
+    cancelText: '{{ __('settings.Cancel') }}',
+    confirmColor: 'danger'
+  }).then((ok) => {
+    if (ok) {
       makeAjaxRequest(`${type}-delete`, { id: id, industryId: industryId }, (success, result) => {
         if (success) {
           switch (type) {
@@ -834,9 +827,9 @@ function handleDeleteConfirmation(type, id, industryId = null) {
               break;
           }
           dump();
-          releaseSuccessAlert({ message: getTranslatedMessage('deleted', type) });
+          releaseAlert('success', { message: getTranslatedMessage('deleted', type) });
         } else {
-          releaseFailureAlert({ message: getTranslatedMessage('delete_failed', type) });
+          releaseAlert('danger', { message: getTranslatedMessage('delete_failed', type) });
         }
       });
     }
@@ -872,17 +865,17 @@ document.getElementById('addOtherSector').addEventListener('click', () => {
         renderSectors();
         renderPreview();
         dump();
-        releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Other sector added successfully' : 'تمت إضافة قطاع "أخرى" بنجاح' }}' });
+        releaseAlert('success', { message: '{{ $l == 'en' ? 'Other sector added successfully' : 'تمت إضافة قطاع "أخرى" بنجاح' }}' });
       } else {
-        releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to add Other sector' : 'فشل في إضافة قطاع "أخرى"' }}' });
+        releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to add Other sector' : 'فشل في إضافة قطاع "أخرى"' }}' });
       }
     });
   } else if (industry && industry.sectors.find(s => s.name === 'Other')) {
     // Show warning that "Other" sector already exists
-    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Other sector already exists in this industry' : 'قطاع "أخرى" موجود بالفعل في هذه الصناعة' }}' });
+    releaseAlert('warning', { hideCancel: true, message: '{{ $l == 'en' ? 'Other sector already exists in this industry' : 'قطاع "أخرى" موجود بالفعل في هذه الصناعة' }}' });
   } else if (!industry) {
     // Show warning that no industry is selected
-    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Please select an industry first' : 'يرجى اختيار صناعة أولاً' }}' });
+    releaseAlert('warning', { hideCancel: true, message: '{{ $l == 'en' ? 'Please select an industry first' : 'يرجى اختيار صناعة أولاً' }}' });
   }
 });
 
@@ -903,14 +896,14 @@ document.getElementById('addOtherTech').addEventListener('click', () => {
         TECHNOLOGIES.push({ id: newTechId, name: 'Other', created_at: new Date().toISOString() });
         renderTech();
         dump();
-        releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Other technology added successfully' : 'تمت إضافة تكنولوجيا "أخرى" بنجاح' }}' });
+        releaseAlert('success', { message: '{{ $l == 'en' ? 'Other technology added successfully' : 'تمت إضافة تكنولوجيا "أخرى" بنجاح' }}' });
       } else {
-        releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to add Other technology' : 'فشل في إضافة تكنولوجيا "أخرى"' }}' });
+        releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to add Other technology' : 'فشل في إضافة تكنولوجيا "أخرى"' }}' });
       }
     });
   } else {
     // Show warning that "Other" technology already exists
-    releaseWarningAlert({ message: '{{ $l == 'en' ? 'Other technology already exists' : 'تكنولوجيا "أخرى" موجودة بالفعل' }}' });
+    releaseAlert('warning', { hideCancel: true, message: '{{ $l == 'en' ? 'Other technology already exists' : 'تكنولوجيا "أخرى" موجودة بالفعل' }}' });
   }
 });
 
@@ -966,13 +959,13 @@ document.getElementById('importJson').addEventListener('click', () => {
             renderIndustries();
             renderTech();
             dump();
-            releaseSuccessAlert({ message: '{{ $l == 'en' ? 'JSON imported successfully' : 'تم استيراد JSON بنجاح' }}' });
+            releaseAlert('success', { message: '{{ $l == 'en' ? 'JSON imported successfully' : 'تم استيراد JSON بنجاح' }}' });
           } else {
-            releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to import JSON data' : 'فشل في استيراد بيانات JSON' }}' });
+            releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to import JSON data' : 'فشل في استيراد بيانات JSON' }}' });
           }
         });
       } catch (e) {
-        releaseFailureAlert({ message: '{{ $l == 'en' ? 'Invalid JSON file format' : 'تنسيق ملف JSON غير صحيح' }}' });
+        releaseAlert('danger', { message: '{{ $l == 'en' ? 'Invalid JSON file format' : 'تنسيق ملف JSON غير صحيح' }}' });
         console.error('JSON parse error:', e);
       }
     };
@@ -987,13 +980,13 @@ document.getElementById('saveAll').addEventListener('click', () => {
       elements.jsonOut.textContent = JSON.stringify({ industries: DATA, technologies: TECHNOLOGIES }, null, 2);
       elements.statusBtn.textContent = 'Saved';
       elements.statusBtn.className = 'btn btn-sm btn-label-success';
-      releaseSuccessAlert({ message: '{{ $l == 'en' ? 'All changes saved successfully' : 'تم حفظ جميع التغييرات بنجاح' }}' });
+      releaseAlert('success', { message: '{{ $l == 'en' ? 'All changes saved successfully' : 'تم حفظ جميع التغييرات بنجاح' }}' });
       setTimeout(() => {
         elements.statusBtn.textContent = 'All saved';
         elements.statusBtn.className = 'btn btn-sm btn-label-success';
       }, 1200);
     } else {
-      releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to save changes' : 'فشل في حفظ التغييرات' }}' });
+      releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to save changes' : 'فشل في حفظ التغييرات' }}' });
     }
   });
 });
@@ -1001,40 +994,40 @@ document.getElementById('saveAll').addEventListener('click', () => {
 // Global Export Functions
 window.exportIndustries = function (format) {
   if (!industriesTable) { 
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
     return; 
   }
   try { 
     industriesTable.button(`.buttons-${format}`).trigger(); 
   } catch (error) { 
     console.error('Export error:', error); 
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
   }
 }
 
 window.exportSectors = function (format) {
   if (!sectorsTable) { 
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
     return; 
   }
   try { 
     sectorsTable.button(`.buttons-${format}`).trigger(); 
   } catch (error) { 
     console.error('Export error:', error); 
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
   }
 }
 
 window.exportTechnologies = function (format) {
   if (!techTable) { 
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}' }); 
     return; 
   }
   try { 
     techTable.button(`.buttons-${format}`).trigger(); 
   } catch (error) { 
     console.error('Export error:', error); 
-    releaseFailureAlert({ message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
+    releaseAlert('danger', { message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}' }); 
   }
 }
 
@@ -1042,11 +1035,11 @@ window.exportTechnologies = function (format) {
 let isOnline = navigator.onLine;
 window.addEventListener('online', () => {
   isOnline = true;
-  releaseSuccessAlert({ message: '{{ $l == 'en' ? 'Connection Restored' : 'تمت استعادة الاتصال' }}' });
+  releaseAlert('success', { message: '{{ $l == 'en' ? 'Connection Restored' : 'تمت استعادة الاتصال' }}' });
 });
 window.addEventListener('offline', () => {
   isOnline = false;
-  releaseFailureAlert({ message: '{{ $l == 'en' ? 'Connection lost - changes will be saved when connection is restored' : 'فقد الاتصال - سيتم حفظ التغييرات عند استعادة الاتصال' }}' });
+  releaseAlert('danger', { message: '{{ $l == 'en' ? 'Connection lost - changes will be saved when connection is restored' : 'فقد الاتصال - سيتم حفظ التغييرات عند استعادة الاتصال' }}' });
 });
 
 // Retry Mechanism
@@ -1058,7 +1051,7 @@ function retryFailedRequest(action, params, maxRetries = 3, currentRetry = 0) {
         retryFailedRequest(action, params, maxRetries, currentRetry + 1);
       }, 1000 * Math.pow(2, currentRetry));
     } else if (!success) {
-      releaseFailureAlert({ message: '{{ $l == 'en' ? 'Request failed after multiple attempts' : 'فشل الطلب بعد محاولات متعددة' }}' });
+      releaseAlert('danger', { message: '{{ $l == 'en' ? 'Request failed after multiple attempts' : 'فشل الطلب بعد محاولات متعددة' }}' });
     }
   });
 }

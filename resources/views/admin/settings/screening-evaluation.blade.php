@@ -526,7 +526,7 @@
           // Remove all alerts
           document.querySelectorAll('.alert').forEach(div => div.remove());
 
-          releaseWarningAlert({
+          releaseAlert('warning', {
             title: '{{ __('admin.confirm_publication') }}',
             message: '{{ __('admin.evaulation_publish_note') }}',
             onConfirm: publishModel,
@@ -552,7 +552,7 @@
             evaluationModelData.categories = response.data;
 
             // Show success alert
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: '{{ __('admin.success') }}',
               message: '{{ __('cycles.Model published successfully!') }}'
             });
@@ -564,7 +564,7 @@
             $('#draft-model-btn').removeClass('d-flex').addClass('d-none');
             
           } else {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: '{{ __('admin.error') }}',
               message: response.message ? response.message : '{{ __('admin.unexpected_error') }}'
             });
@@ -572,7 +572,7 @@
         },
         error: function(xhr, status, error) {
           const errMsg = xhr.responseJSON?.message ? xhr.responseJSON.message : '{{ __('admin.unexpected_error') }}';
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: '{{ __('admin.error') }}',
             message: errMsg
           });
@@ -587,7 +587,7 @@
       // saved), but the name cap is a hard limit, so it is enforced here too.
       const tooLong = findNameOverLimit();
       if (tooLong) {
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title: '{{ __('admin.error') }}',
           message: tooLong
         });
@@ -606,12 +606,12 @@
         success: function(response) {
           if (response.status) {
             evaluationModelData.categories = response.data;
-            releaseSuccessAlert({
+            releaseAlert('success', {
               title: '{{ __('admin.success') }}',
               message: '{{ __('cycles.Draft saved successfully!') }}'
             });
           } else {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: '{{ __('admin.error') }}',
               message: response.message ? response.message : '{{ __('admin.unexpected_error') }}'
             });
@@ -619,7 +619,7 @@
         },
         error: function(xhr, status, error) {
           const errMsg = xhr.responseJSON?.message ? xhr.responseJSON.message : '{{ __('admin.unexpected_error') }}';
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title: '{{ __('admin.error') }}',
             message: errMsg
           });

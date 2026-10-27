@@ -6,11 +6,9 @@ use Tests\TestCase;
 use App\Role;
 use App\User;
 use App\Permission;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RoleModelTest extends TestCase
 {
-    use RefreshDatabase;
 
     /** @test */
     public function it_has_fillable_attributes()

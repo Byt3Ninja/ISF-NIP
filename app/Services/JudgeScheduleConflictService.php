@@ -6,6 +6,7 @@ use App\Screening;
 use App\Step;
 use App\User;
 use App\Services\PanelWindowService;
+use App\Services\TimezoneService;
 use Carbon\Carbon;
 
 /**
@@ -42,7 +43,7 @@ class JudgeScheduleConflictService
      */
     public static function detect(int $stepId, array $panels): array
     {
-        $windows = self::buildWindows($panels);
+        $windows = self::buildWindows($panels, TimezoneService::forStep($stepId));
 
         if (empty($windows)) {
             return [];
@@ -70,7 +71,7 @@ class JudgeScheduleConflictService
      *
      * @return array<int, array{panel:int, judges:int[], start:Carbon, end:Carbon, date:string}>
      */
-    private static function buildWindows(array $panels): array
+    private static function buildWindows(array $panels, string $timezone): array
     {
         $windows = [];
 
@@ -91,7 +92,7 @@ class JudgeScheduleConflictService
             // Shared derivation (PanelWindowService) so conflict detection,
             // history locking and change notification all measure a panel
             // identically. Returns null when the panel books no time.
-            $window = PanelWindowService::fromInput($panel);
+            $window = PanelWindowService::fromInput($panel, $timezone);
             if ($window === null) {
                 continue;
             }

@@ -12,7 +12,7 @@ return [
      *
      * In case you need your users to be asked for a new one time passwords from time to time.
      */
-    'lifetime' => env('OTP_LIFETIME', 0), // 0 = eternal
+    'lifetime' => env('OTP_LIFETIME', 120), // minutes; renewed on activity (keep_alive). 0 = eternal
 
     /*
      * Renew lifetime at every new request.

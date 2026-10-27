@@ -31,7 +31,7 @@
                                                              <p style="margin: 0;">Organization name is: {{ $organization->name_en }}</p>
 
                                                             <p style="margin: 0;">Email is: {{ $user->email }}</p>
-                                                            <p style="margin: 0;">password is: {{ $password }}</p>
+                                                            <p style="margin: 0;">Sign in with this link (valid for 24 hours), then set your password from your profile: <a href="{{ $loginUrl }}">Sign in</a></p>
 
                                                             <p style="margin: 0;"> </p>
                                                             <p style="margin: 0;">Best regards,</p>
@@ -58,7 +58,7 @@
 
 
                                                             <p style="margin: 0;">البريد الالكترونى : {{ $user->email }}</p>
-                                                            <p style="margin: 0;">كلمة المرور : {{ $password }}</p>
+                                                            <p style="margin: 0;">سجّل الدخول من خلال هذا الرابط (صالح لمدة 24 ساعة)، ثم عيّن كلمة المرور من ملفك الشخصي: <a href="{{ $loginUrl }}">تسجيل الدخول</a></p>
 
                                                             <p style="margin: 0;"> </p>
                                                             <p style="margin: 0;">أطيب التحيات،</p>

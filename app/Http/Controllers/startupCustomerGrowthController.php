@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\StartupCustomerGrowth;
+use App\Services\ProtectedFiles\FileAccess;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +18,6 @@ class startupCustomerGrowthController extends Controller
 {
 	public function addRecord(Request $request)
 	{
-		$user = auth()->user();
 		$current_year = date('Y');
 		$years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
 		$months = range(0, 12);
@@ -35,13 +35,7 @@ class startupCustomerGrowthController extends Controller
 			"add_growth_new_customers.lte" => __('startup.New customers cannot exceed total customers')
 		]);
 
-		if( $user->hasRole('registered') )
-		{
-			if( $user->company_id != $request->company_id )
-			{
-				return back()->with(['error' => 'NoHavePermission', 'class' => 'danger']);
-			}
-		}
+		$this->authorizeCompany($request->company_id);
 
 		$record = StartupCustomerGrowth::where('company_id', $request->company_id)->where('year', $request->add_growth_year)->where('month', $request->add_growth_month)->first();
 		if( $record ) { return back()->with(['error' => __('startup.customer_growth_already_exist')]); }
@@ -63,7 +57,6 @@ class startupCustomerGrowthController extends Controller
 
 	public function updateRecord(Request $request)
 	{
-		$user = auth()->user();
 		$current_year = date('Y');
 		$years = array_merge(range($current_year - 10, $current_year), range($current_year + 1, $current_year + 10));
 		$months = range(0, 12);
@@ -82,15 +75,12 @@ class startupCustomerGrowthController extends Controller
 			"add_growth_new_customers.lte" => __('startup.New customers cannot exceed total customers')
 		]);
 
+		$this->authorizeCompany($request->company_id);
+
 		$record = StartupCustomerGrowth::where('id', $request->record_id)
 			->where('company_id', $request->company_id)
 			->first();
 		if( !$record ) { return back()->with(['error' => __('startup.startup_not_found')]); }
-
-		if( $user->hasRole('registered') && $user->company_id != $request->company_id )
-		{
-			return back()->with(['error' => 'NoHavePermission', 'class' => 'danger']);
-		}
 
 		$duplicate = StartupCustomerGrowth::where('company_id', $request->company_id)
 			->where('year', $request->add_growth_year)
@@ -112,16 +102,8 @@ class startupCustomerGrowthController extends Controller
 
 	public function deleteRecord($id)
 	{
-		$user = auth()->user();
 		$record = StartupCustomerGrowth::findOrFail($id);
-
-		if( $user->hasRole('registered') )
-		{
-			if( $user->company_id != $record->company_id )
-			{
-				return back()->with(['msg' => 'NoHavePermission', 'class' => 'danger']);
-			}
-		}
+		$this->authorizeCompany($record->company_id);
 
 		$record->delete();
 
@@ -130,14 +112,7 @@ class startupCustomerGrowthController extends Controller
 
 	public function exportRecords(Request $request, $company_id)
 	{
-		$user = auth()->user();
-		if( $user->hasRole('registered') )
-		{
-			if( $user->company_id != $company_id )
-			{
-				return abort(403, 'Unauthorized');
-			}
-		}
+		$this->authorizeCompany($company_id);
 
 		$records_metadata = StartupCustomerGrowth::records($company_id);
 		$records = collect($records_metadata['records']);
@@ -193,5 +168,11 @@ class startupCustomerGrowthController extends Controller
 		};
 
 		return response()->stream($callback, 200, $headers);
+	}
+
+	/** Admin, the startup's own team, or staff of the organization running its current program. */
+	private function authorizeCompany($companyId): void
+	{
+		abort_unless(app(FileAccess::class)->canManageCompany(auth()->user(), (int) $companyId), 403);
 	}
 }

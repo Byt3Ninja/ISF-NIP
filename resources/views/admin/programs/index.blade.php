@@ -90,26 +90,31 @@
           @php
             $totalSteps = $cycle->steps->count();
 
+            // GV-9566: a step is finished once its last (inclusive) day has passed
+            // in the program's platform zone.
+            $cycleToday = \App\Services\TimezoneService::platformToday(\App\Services\TimezoneService::platform($cycle->organization_id));
             $totalStepsFinish = $cycle->steps
-              ->where('from', '<=', Carbon\Carbon::now())
-              ->where('to', '<=', Carbon\Carbon::now())
+              ->filter(fn ($s) => $s->from && $s->to
+                && $s->from->format('Y-m-d') <= $cycleToday && $s->to->format('Y-m-d') < $cycleToday)
               ->count();
             $presSteps = $totalSteps > 0 ? ($totalStepsFinish / $totalSteps) * 100 : 0;
           @endphp
           <div class="col-md-4">
             <div class="card h-100 shadow-sm">
               <div class="card-header d-flex align-items-center justify-content-between pb-3">
-                <div class="w-px-52 h-px-52 bg-white rounded overflow-hidden me-2 border shadow-xs d-flex justify-content-center align-items-center">
-                  @if ($cycle->logo)
-                    <img 
-                      src="{{ $cycle->logo }}"
-                      alt="{{ __('admin.Logo') }}"
-                      onerror="this.src = '/images/logo-placeholder.png';"
-                      class="img-fluid w-100 h-100 object-cover"
-                    />
-                  @else
-                    <i class="ti ti-components text-primary ti-lg"></i>
-                  @endif
+                <div class="w-px-52 h-px-52 flex-shrink-0 d-flex justify-content-center align-items-center">
+                  <img
+                    src="{{ $cycle->logo }}"
+                    alt="{{ __('admin.Logo') }}"
+                    onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');"
+                    class="w-100 h-100 object-fit-contain {{ $cycle->logo ? '' : 'd-none' }}"
+                  >
+
+                  <span class="avatar {{ $cycle->logo ? 'd-none' : '' }}">
+                    <div class="avatar-initial w-px-52 h-px-52 bg-label-primary rounded">
+                      <i class="ti ti-rocket ti-lg"></i>
+                    </div>
+                  </span>
                 </div>
 
                 <div class="d-flex align-items-center">
@@ -157,6 +162,14 @@
                             href="/dashboard/programlist/edit/{{ $cycle->id }}"
                           >
                             <i class="ti ti-pencil me-1"></i> {{ __('cycles.Edit_Program') }}
+                          </a>
+                        </li>
+                        <li>
+                          <a 
+                            class="dropdown-item" 
+                            href="/dashboard/programlist/edit/{{ $cycle->id }}?tab=landing"
+                          >
+                            <i class="ti ti-eye-check me-1"></i> {{ __('cycles.Landing Page Visibility') }}
                           </a>
                         </li>
                       @endif
@@ -270,7 +283,7 @@
                 </div>
 
                 {{-- Progress --}}
-                <div class="d-flex flex-column mb-2">
+                {{-- <div class="d-flex flex-column mb-2">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <span>{{ __('admin.Progress') }}</span>
                     <strong>{{ number_format($presSteps, 0) }}%</strong>
@@ -283,7 +296,7 @@
                       aria-valuemin="0" aria-valuemax="100">
                     </div>
                   </div>
-                </div>
+                </div> --}}
 
                   {{-- Date --}}
                 <p class="text-muted mb-6 d-flex align-items-center gap-2">
@@ -459,7 +472,7 @@
       document.execCommand("copy");
       document.body.removeChild(tempInput);
 
-      releaseSuccessAlert({
+      releaseAlert('success', {
         title: "{{ __('admin.Copied') }}",
         message: successMsg,
       });

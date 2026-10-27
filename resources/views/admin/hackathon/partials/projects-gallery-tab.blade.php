@@ -34,7 +34,7 @@
         </div>
         <div class="col-md-4">
           <div class="row">
-            <div class="col-7">
+            <div class="col-12">
               <div class="input-group input-group-merge">
                 <span class="input-group-text">
                   <i class="ti ti-search text-muted"></i>
@@ -48,7 +48,7 @@
                 >
               </div>
             </div>
-            <div class="col-4 col-lg-5">
+            {{-- <div class="col-4 col-lg-5">
               <select class="form-select" id="region-filter" onchange="filterByRegion(this.value)">
                 <option value="all">{{ $l == 'en' ? 'All Regions' : 'جميع المناطق' }}</option>
                 <option value="riyadh">{{ $l == 'en' ? 'Riyadh' : 'الرياض' }}</option>
@@ -56,7 +56,7 @@
                 <option value="dammam">{{ $l == 'en' ? 'Dammam' : 'الدمام' }}</option>
                 <option value="makkah">{{ $l == 'en' ? 'Makkah' : 'مكة' }}</option>
               </select>
-            </div>
+            </div> --}}
           </div>
         </div>
       </div>

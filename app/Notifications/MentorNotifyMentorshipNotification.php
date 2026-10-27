@@ -2,9 +2,12 @@
 
 namespace App\Notifications;
 
+use App\Enums\MentorshipApproval;
 use App\Settings;
 use Carbon\Carbon;
 use App\Traits\ConfiguresSmtp;
+use App\Traits\ResolvesMentorshipOrganization;
+use App\Support\ReleasesNotificationClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Notification;
@@ -15,10 +18,11 @@ use App\Broadcasting\WhatsAppChannel;
 use App\Services\GlobalNotificationSettingsService;
 use App\Services\FileManagerService;
 use Throwable;
+use App\Services\TimezoneService;
 
 class MentorNotifyMentorshipNotification extends Notification implements ShouldQueue
 {
-  use Queueable, ConfiguresSmtp;
+  use Queueable, ConfiguresSmtp, ResolvesMentorshipOrganization, ReleasesNotificationClaim;
 
     /**
      * The number of times the job may be attempted.
@@ -64,7 +68,7 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
      */
     public function via(object $notifiable): array
     {
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
         
         // Configure SMTP if settings exist
@@ -113,21 +117,25 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
     {
         $setting = Settings::first();
         $platformName = $setting ? ( $setting->Platform_Name ?? config('app.name') ) : config('app.name');
-        $org = $notifiable->organization;
+        $org = $this->sessionOrganization($notifiable, $this->mentorship_session);
         $smtpSettings = $org?->organizationSettings;
 
         $from = $this->getFromAddress($smtpSettings);
-        $orgData = $this->buildEmailOrganizationData($org);
+        $orgData = $this->emailBrandingData();
 
         $this->configureSmtp($smtpSettings);
 
         $mentorship_session = $this->mentorship_session;
         $cycle = $mentorship_session->cycle;
-        $session_date = strtotime($mentorship_session->zoom_date);
-        $start = Carbon::parse($mentorship_session->zoom_date);
-        $end = $start->copy()->addMinutes($mentorship_session->period);
-        $sessionDate = date('Y-m-d', $session_date);
-        $sessionTime = date('h:i A', $session_date) . ' - ' . date('h:i A', $end->timestamp);
+        // GV-9566: the session instant, shown in the recipient's own timezone.
+        $start = TimezoneService::forViewer(
+            TimezoneService::wallClock($mentorship_session->zoom_date, TimezoneService::platform($mentorship_session->organization_id)),
+            $notifiable
+        );
+        $sessionDate = $start ? $start->format('Y-m-d') : '';
+        $sessionTime = $start
+            ? $start->format('h:i A') . ' - ' . $start->copy()->addMinutes((int) $mentorship_session->period)->format('h:i A')
+            : '';
         if( app()->getLocale() == 'ar' )
         {
             $sessionTime = str_replace('AM', 'صباحاً', $sessionTime);
@@ -151,10 +159,13 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
 
         $founder = $mentorship_session?->user;
         $startup = $founder?->company;
-        $founderName = $founder?->name ?? '';
-        $subject = app()->getLocale() === 'ar'
-            ? "جلسة إرشاد مع {$founderName}."
-            : "Upcoming Mentorship Session with {$founderName}";
+        // The founder's name in the email's language, falling back to the
+        // English name so the subject never ends up with a blank name.
+        $founderName = trim(($founder?->{'first_name_' . app()->getLocale()} ?? '') . ' ' . ($founder?->{'last_name_' . app()->getLocale()} ?? ''));
+        if ($founderName === '') {
+            $founderName = trim(($founder?->first_name_en ?? '') . ' ' . ($founder?->last_name_en ?? ''));
+        }
+        $subject = __('email.mentor_notify_email.subject', ['name' => $founderName]);
 
         return (new MailMessage)
             ->from($from['address'], $from['name'])
@@ -175,7 +186,10 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
                 'mapLink'           => $mapLink,
                 'address'           => $address,
                 'attachments'       => $attachments,
-                'viewSessionUrl'    => route('mentorships.sessions_list_detailed'),
+                // A declined session has no meeting: hide its link / location.
+                'isRejected'        => $mentorship_session?->approved === MentorshipApproval::REJECTED->value,
+                // 'viewSessionUrl'    => route('mentorships.sessions_list_detailed'),
+                'viewSessionUrl'    => route('mentorships.sessions'),
             ], $orgData));
 
     }
@@ -224,6 +238,7 @@ class MentorNotifyMentorshipNotification extends Notification implements ShouldQ
      */
     public function failed(Throwable $exception): void
     {
+        $this->releaseClaim();
         Log::error('MentorshipSession notification failed after all retries', [
             'error' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),

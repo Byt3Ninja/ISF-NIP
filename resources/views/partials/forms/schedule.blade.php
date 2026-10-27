@@ -350,16 +350,12 @@ $(document).ready(function() {
         $('#scheduleModal').modal('hide');
         
         // Show success message with SweetAlert
-        Swal.fire({
-          text: currentScheduleId 
+        releaseAlert('success', {
+          message: currentScheduleId 
             ? '{{ $l == 'en' ? 'Schedule updated successfully' : 'تم تحديث الجدول بنجاح' }}' 
             : '{{ $l == 'en' ? 'Schedule added successfully' : 'تم إضافة الجدول بنجاح' }}',
-          icon: 'success',
-          confirmButtonText: '{{ __('admin.OK') }}',
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          confirmText: '{{ __('admin.OK') }}',
+          confirmColor: 'primary'
         });
         
         // Update table in real-time
@@ -379,15 +375,11 @@ $(document).ready(function() {
         displayValidationErrors(errors);
         
         // Show error with SweetAlert
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: '{{ $l == 'en' ? 'Error saving schedule' : 'خطأ في حفظ الجدول' }}',
-          text: xhr.responseJSON?.message || '{{ $l == 'en' ? 'Please check your input and try again' : 'يرجى التحقق من المدخلات والمحاولة مرة أخرى' }}',
-          confirmButtonText: '{{ __('admin.OK') }}',
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          message: xhr.responseJSON?.message || '{{ $l == 'en' ? 'Please check your input and try again' : 'يرجى التحقق من المدخلات والمحاولة مرة أخرى' }}',
+          confirmText: '{{ __('admin.OK') }}',
+          confirmColor: 'primary'
         });
       },
       complete: function() {
@@ -432,15 +424,11 @@ $(document).ready(function() {
         // Revert checkbox state
         checkbox.prop('checked', !checkbox.is(':checked'));
         
-        Swal.fire({
-          icon: 'error',
+        releaseAlert('danger', {
           title: '{{ $l == 'en' ? 'Error updating schedule status' : 'خطأ في تحديث حالة الجدول' }}',
-          text: xhr.responseJSON?.message || '{{ $l == 'en' ? 'Please try again' : 'يرجى المحاولة مرة أخرى' }}',
-          confirmButtonText: '{{ __('admin.OK') }}',
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false
+          message: xhr.responseJSON?.message || '{{ $l == 'en' ? 'Please try again' : 'يرجى المحاولة مرة أخرى' }}',
+          confirmText: '{{ __('admin.OK') }}',
+          confirmColor: 'primary'
         });
       }
     });
@@ -452,21 +440,14 @@ $(document).ready(function() {
     const row = schedulesTable ? schedulesTable.row($(this).closest('tr')) : null;
     const value = $(this).closest('tr').find('td:first').text().trim();
     
-    Swal.fire({
+    releaseAlert('warning', {
       title: "{{ __('admin.SureDelete') }}",
-      html: `{{__('admin.SureDelete')}}: <strong>${value}</strong>`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "{{ __('admin.DYes') }}",
-      cancelButtonText: "{{ __('admin.No') }}",
-      reverseButtons: true,
-      customClass: {
-        confirmButton: 'btn btn-danger',
-        cancelButton: 'btn btn-label-secondary'
-      },
-      buttonsStyling: false
-    }).then((result) => {
-      if (!result.isConfirmed) return;
+      message: `{{__('admin.SureDelete')}}: <strong>${value}</strong>`,
+      confirmText: "{{ __('admin.DYes') }}",
+      cancelText: "{{ __('admin.No') }}",
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (!ok) return;
       
       $.ajax({
         url: "{{ route('mentorship.schedule_destroy') }}",
@@ -484,14 +465,10 @@ $(document).ready(function() {
           }
           
           // Show success message
-          Swal.fire({
-            text: response.message || "{{ $l == 'en' ? 'Schedule deleted successfully' : 'تم حذف الجدول بنجاح' }}",
-            icon: "success",
-            confirmButtonText: "{{ __('admin.OK') }}",
-            customClass: {
-              confirmButton: 'btn btn-primary'
-            },
-            buttonsStyling: false
+          releaseAlert('success', {
+            message: response.message || "{{ $l == 'en' ? 'Schedule deleted successfully' : 'تم حذف الجدول بنجاح' }}",
+            confirmText: "{{ __('admin.OK') }}",
+            confirmColor: 'primary'
           });
           
           // Check if table is empty and show empty state if needed
@@ -500,14 +477,10 @@ $(document).ready(function() {
           }
         },
         error: function(xhr) {
-          Swal.fire({
-            icon: 'error',
+          releaseAlert('danger', {
             title: xhr.responseJSON?.message || '{{ $l == 'en' ? 'Error deleting schedule' : 'خطأ في حذف الجدول' }}',
-            confirmButtonText: '{{ __('admin.OK') }}',
-            customClass: {
-              confirmButton: 'btn btn-primary'
-            },
-            buttonsStyling: false
+            confirmText: '{{ __('admin.OK') }}',
+            confirmColor: 'primary'
           });
         }
       });
@@ -665,15 +638,11 @@ $(document).ready(function() {
   // Export Functions
   window.exportSchedules = function(format) {
     if (!schedulesTable) {
-      Swal.fire({
-        icon: 'error',
+      releaseAlert('danger', {
         title: '{{ $l == 'en' ? 'Export Error' : 'خطأ في التصدير' }}',
-        text: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}',
-        confirmButtonText: '{{ __('admin.OK') }}',
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        },
-        buttonsStyling: false
+        message: '{{ $l == 'en' ? 'No data available to export' : 'لا توجد بيانات متاحة للتصدير' }}',
+        confirmText: '{{ __('admin.OK') }}',
+        confirmColor: 'primary'
       });
       return;
     }
@@ -697,32 +666,23 @@ $(document).ready(function() {
 
       // Show success message
       setTimeout(() => {
-        Swal.fire({
-          text: format === 'csv' 
+        releaseAlert('success', {
+          message: format === 'csv' 
             ? '{{ $l == 'en' ? 'CSV file has been downloaded successfully.' : 'تم تنزيل ملف CSV بنجاح.' }}'
             : '{{ $l == 'en' ? 'Excel file has been downloaded successfully.' : 'تم تنزيل ملف Excel بنجاح.' }}',
-          icon: 'success',
-          confirmButtonText: '{{ __('admin.OK') }}',
-          customClass: {
-            confirmButton: 'btn btn-primary'
-          },
-          buttonsStyling: false,
-          timer: 3000,
-          timerProgressBar: true
+          confirmText: '{{ __('admin.OK') }}',
+          confirmColor: 'primary',
+          autoClose: 3000
         });
       }, 500);
 
     } catch (error) {
       console.error('Export error:', error);
-      Swal.fire({
-        icon: 'error',
+      releaseAlert('danger', {
         title: '{{ $l == 'en' ? 'Export Error' : 'خطأ في التصدير' }}',
-        text: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}',
-        confirmButtonText: '{{ __('admin.OK') }}',
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        },
-        buttonsStyling: false
+        message: '{{ $l == 'en' ? 'Failed to export data. Please try again.' : 'فشل في تصدير البيانات. يرجى المحاولة مرة أخرى.' }}',
+        confirmText: '{{ __('admin.OK') }}',
+        confirmColor: 'primary'
       });
     }
 

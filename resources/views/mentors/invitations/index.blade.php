@@ -212,7 +212,7 @@ $tabs = [
 </div>
 
 {{-- New Invitation Offcanvas --}}
-<div class="offcanvas offcanvas-end w-px-600" tabindex="-1" id="newInvitationOffcanvas" aria-labelledby="newInvitationOffcanvasLabel">
+<div class="offcanvas offcanvas-end w-px-800" tabindex="-1" id="newInvitationOffcanvas" aria-labelledby="newInvitationOffcanvasLabel">
   <div class="offcanvas-header border-bottom">
     <div class="d-flex justify-content-between w-100">
       <h5 class="offcanvas-title" id="newInvitationOffcanvasLabel">@lang('admin.new_invitation')</h5>
@@ -312,6 +312,7 @@ $tabs = [
             name="invitation_message"
             maxlength="10000"
           ></textarea>
+          <div class="text-muted mt-3"> {{ __('admin.Accepted formats') }}: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX | {{ __('admin.Max size') }}: 10MB </div>
           <div class="invalid-feedback" id="invitationMessageError"></div>
         </div>
 
@@ -424,7 +425,7 @@ $(function () {
       const totalSize = files.reduce((sum, f) => sum + f.size, 0);
 
       if (totalSize > 10 * 1024 * 1024) {
-        return releaseFailureAlert({
+        return releaseAlert('danger', {
           title:   '{{ __("admin.Error") }}!',
           message: '{{ __("admin.file_exceeds_10_limit") }}'
         });
@@ -484,7 +485,7 @@ $(function () {
 
   function handleUploadError(range, loadingText, message) {
     quill.deleteText(range.index, loadingText.length + 1);
-    releaseFailureAlert({
+    releaseAlert('danger', {
       title:   '{{ __("admin.Error") }}!',
       message: message || '{{ __("admin.unexpected_error") }}'
     });
@@ -523,7 +524,7 @@ $(function () {
               $('#uploadedAttachments').val(JSON.stringify(cur.filter(u => u !== url)));
             },
             error(xhr) {
-              releaseFailureAlert({
+              releaseAlert('danger', {
                 title:   '{{ __("admin.Error") }}!',
                 message: xhr.responseJSON?.message || '{{ __("admin.File upload failed") }}'
               });
@@ -531,7 +532,7 @@ $(function () {
           });
         });
     } catch (e) {
-      releaseFailureAlert({
+      releaseAlert('danger', {
         title:   '{{ __("admin.Error") }}!',
         message: e?.message || '{{ __("admin.File upload failed") }}'
       });
@@ -590,6 +591,28 @@ $(function () {
         () => $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm'),
         300
       );
+      const $wrapper = $(this.api().table().container());
+      $wrapper.find('.form-select, .dataTables_length select').each(function () {
+        const $this = $(this);
+        if ($this.hasClass('select2-hidden-accessible')) return;
+
+        const isLength = $this.closest('.dataTables_length').length > 0;
+
+        $this.wrap('<div class="position-relative' + (isLength ? ' d-inline-block' : '') + '"></div>');
+
+        $this.select2({
+          dropdownParent: $this.parent(),
+          width: isLength ? '80px' : '100%',
+          minimumResultsForSearch: Infinity,
+        });
+
+        if (!isLength) {
+          $this.next('.select2-container').css({
+            'min-width': '150px',
+            'max-width': '200px'
+          });
+        }
+      });
     }
   });
 
@@ -795,7 +818,7 @@ $(function () {
         // handled the case where the server returns a non-boolean truthy value.
         // Normalise with a loose truthy check covering both.
         if (response.success) {
-          releaseSuccessAlert({
+          releaseAlert('success', {
             title:   '{{ __("admin.success") }}',
             message: '{{ app()->getLocale() === "ar" ? "تم إرسال الدعوة بنجاح" : "Invitation sent successfully." }}'
           });
@@ -803,14 +826,14 @@ $(function () {
           resetForm();
           if (response.data?.[0]) addInvitationToTable(response.data[0]);
         } else {
-          releaseFailureAlert({
+          releaseAlert('danger', {
             title:   '{{ __("admin.error") }}',
             message: response.message || '{{ __("admin.unexpected_error") }}'
           });
         }
       },
       error(xhr) {
-        releaseFailureAlert({
+        releaseAlert('danger', {
           title:   '{{ __("admin.error") }}',
           message: xhr.responseJSON?.message || '{{ __("admin.unexpected_error") }}'
         });

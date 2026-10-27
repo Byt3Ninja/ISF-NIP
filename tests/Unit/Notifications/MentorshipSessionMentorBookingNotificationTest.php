@@ -5,12 +5,10 @@ namespace Tests\Unit\Notifications;
 use App\Company;
 use App\User;
 use App\Notifications\MentorshipSessionMentorBookingNotification;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class MentorshipSessionMentorBookingNotificationTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_it_sends_english_email_when_mentors_preferred_language_is_english()
     {

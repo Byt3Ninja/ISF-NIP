@@ -444,16 +444,10 @@
                         success: function(response) {
                             if( response.status )
                             {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '{{ $l == 'ar' ? 'تم إنشاء الصفحة بنجاح' : 'Page Created Successfully' }}',
-                                    showCancelButton: false,
-                                    showConfirmButton: true,
-                                    confirmButtonText: "{{ __('admin.OK') }}",
-                                    customClass: {
-                                        confirmButton: 'btn btn-primary',
-                                    },
-                                    buttonsStyling: false,
+                                releaseAlert('success', {
+                                  title: '{{ $l == 'ar' ? 'تم إنشاء الصفحة بنجاح' : 'Page Created Successfully' }}',
+                                  confirmText: "{{ __('admin.OK') }}",
+                                  confirmColor: 'primary'
                                 });
                                 $('#createPageModal').modal('hide');
                                 // Reset form fields
@@ -467,33 +461,21 @@
                             }
                             else
                             {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                    text: response.message,
-                                    showCancelButton: false,
-                                    showConfirmButton: true,
-                                    confirmButtonText: "{{ __('admin.OK') }}",
-                                    customClass: {
-                                        confirmButton: 'btn btn-primary',
-                                    },
-                                    buttonsStyling: false,
+                                releaseAlert('danger', {
+                                  title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                  message: response.message,
+                                  confirmText: "{{ __('admin.OK') }}",
+                                  confirmColor: 'primary'
                                 });
                             }
                         },
                         error: function(error) {
                             console.log(error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                text: error?.message || '{{ $l == 'ar' ? 'خطأ في إنشاء الصفحة. يرجى المحاولة مرة أخرى.' : 'Error creating page. Please try again.' }}',
-                                showCancelButton: false,
-                                showConfirmButton: true,
-                                confirmButtonText: "{{ __('admin.OK') }}",
-                                customClass: {
-                                    confirmButton: 'btn btn-primary',
-                                },
-                                buttonsStyling: false,
+                            releaseAlert('danger', {
+                              title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                              message: error?.message || '{{ $l == 'ar' ? 'خطأ في إنشاء الصفحة. يرجى المحاولة مرة أخرى.' : 'Error creating page. Please try again.' }}',
+                              confirmText: "{{ __('admin.OK') }}",
+                              confirmColor: 'primary'
                             });
                         }
                     });
@@ -554,16 +536,10 @@
                         success: function(response) {
                             if( response.status )
                             {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '{{ $l == 'ar' ? 'تم تحديث الصفحة بنجاح' : 'Page Updated Successfully' }}',
-                                    showCancelButton: false,
-                                    showConfirmButton: true,
-                                    confirmButtonText: "{{ __('admin.OK') }}",
-                                    customClass: {
-                                        confirmButton: 'btn btn-primary',
-                                    },
-                                    buttonsStyling: false,
+                                releaseAlert('success', {
+                                  title: '{{ $l == 'ar' ? 'تم تحديث الصفحة بنجاح' : 'Page Updated Successfully' }}',
+                                  confirmText: "{{ __('admin.OK') }}",
+                                  confirmColor: 'primary'
                                 });
                                 $('#editPageModal').modal('hide');
                                 // Reset form fields
@@ -578,48 +554,31 @@
                             }
                             else
                             {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                    text: response.message,
-                                    showCancelButton: false,
-                                    showConfirmButton: true,
-                                    confirmButtonText: "{{ __('admin.OK') }}",
-                                    customClass: {
-                                        confirmButton: 'btn btn-primary',
-                                    },
-                                    buttonsStyling: false,
+                                releaseAlert('danger', {
+                                  title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                  message: response.message,
+                                  confirmText: "{{ __('admin.OK') }}",
+                                  confirmColor: 'primary'
                                 });
                             }
                         },
                         error: function(error) {
                             console.log(error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                text: '{{ $l == 'ar' ? 'خطأ في تحديث الصفحة. يرجى المحاولة مرة أخرى.' : 'Error updating page. Please try again.' }}',
-                                showCancelButton: false,
-                                showConfirmButton: true,
-                                confirmButtonText: "{{ __('admin.OK') }}",
-                                customClass: {
-                                    confirmButton: 'btn btn-primary',
-                                },
-                                buttonsStyling: false,
+                            releaseAlert('danger', {
+                              title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                              message: '{{ $l == 'ar' ? 'خطأ في تحديث الصفحة. يرجى المحاولة مرة أخرى.' : 'Error updating page. Please try again.' }}',
+                              confirmText: "{{ __('admin.OK') }}",
+                              confirmColor: 'primary'
                             });
                         }
                     });
                 } else { 
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
-                        text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
-                        showCancelButton: false,
-                        showConfirmButton: true,
-                        confirmButtonText: "{{ __('admin.OK') }}",
-                        customClass: {
-                            confirmButton: 'btn btn-primary',
-                        },
-                        buttonsStyling: false,
+                    releaseAlert('warning', {
+                      title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                      message: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                      confirmText: "{{ __('admin.OK') }}",
+                      confirmColor: 'primary',
+                      hideCancel: true
                     });
                 }
             });
@@ -668,49 +627,31 @@
                             }
                             else
                             {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                    text: response.message,
-                                    showCancelButton: false,
-                                    showConfirmButton: true,
-                                    confirmButtonText: "{{ __('admin.OK') }}",
-                                    customClass: {
-                                        confirmButton: 'btn btn-primary',
-                                    },
-                                    buttonsStyling: false,
+                                releaseAlert('danger', {
+                                  title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                  message: response.message,
+                                  confirmText: "{{ __('admin.OK') }}",
+                                  confirmColor: 'primary'
                                 });
                             }
                         },
                         error: function(error) {
                             console.log(error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                text: '{{ $l == 'ar' ? 'خطأ في جلب بيانات الصفحة. يرجى المحاولة مرة أخرى.' : 'Error fetching page data. Please try again.' }}',
-                                showCancelButton: false,
-                                showConfirmButton: true,
-                                confirmButtonText: "{{ __('admin.OK') }}",
-                                customClass: {
-                                    confirmButton: 'btn btn-primary',
-                                },
-                                buttonsStyling: false,
+                            releaseAlert('danger', {
+                              title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                              message: '{{ $l == 'ar' ? 'خطأ في جلب بيانات الصفحة. يرجى المحاولة مرة أخرى.' : 'Error fetching page data. Please try again.' }}',
+                              confirmText: "{{ __('admin.OK') }}",
+                              confirmColor: 'primary'
                             });
                         }
                     });
                 } else { 
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
-                        text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
-                        showCancelButton: false,
-                        showConfirmButton: true,
-                        confirmButtonText: "{{ __('admin.OK') }}",
-                        customClass: {
-                            confirmButton: 'btn btn-primary',
-                        },
-                        buttonsStyling: false,
-
+                    releaseAlert('warning', {
+                      title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                      message: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                      confirmText: "{{ __('admin.OK') }}",
+                      confirmColor: 'primary',
+                      hideCancel: true
                     });
                 }
             });
@@ -721,20 +662,14 @@
                 var custom_page_id = $(this).data('page-id');
                 if( program_id )
                 {
-                    Swal.fire({
-                        title: '{{ $l == "ar" ? "تأكيد تغيير الحالة" : "Confirm Toggle Status" }}',
-                        text: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد تغيير حالة هذه الصفحة؟" : "Are you sure you want to toggle the status of this page?" }}',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: '{{ $l == "ar" ? "نعم، قم بالتغيير" : "Yes, toggle it!" }}',
-                        cancelButtonText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
-                        customClass: {
-                            confirmButton: 'btn btn-primary',
-                            cancelButton: 'btn btn-label-secondary ms-2'
-                        },
-                        buttonsStyling: false
-                    }).then((result) => {
-                        if (result.isConfirmed) {
+                    releaseAlert('warning', {
+                      title: '{{ $l == "ar" ? "تأكيد تغيير الحالة" : "Confirm Toggle Status" }}',
+                      message: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد تغيير حالة هذه الصفحة؟" : "Are you sure you want to toggle the status of this page?" }}',
+                      confirmText: '{{ $l == "ar" ? "نعم، قم بالتغيير" : "Yes, toggle it!" }}',
+                      cancelText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
+                      confirmColor: 'primary'
+                    }).then((ok) => {
+                        if (ok) {
                             let data = {
                                 page_id: custom_page_id,
                                 cycleId: program_id
@@ -751,65 +686,42 @@
                                 success: function(response) {
                                     if( response.status )
                                     {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: '{{ $l == 'ar' ? 'تم تحديث حالة الصفحة بنجاح' : 'Page Status Updated Successfully' }}',
-                                            showCancelButton: false,
-                                            showConfirmButton: true,
-                                            confirmButtonText: "{{ __('admin.OK') }}",
-                                            customClass: {
-                                                confirmButton: 'btn btn-primary',
-                                            },
-                                            buttonsStyling: false,
+                                        releaseAlert('success', {
+                                          title: '{{ $l == 'ar' ? 'تم تحديث حالة الصفحة بنجاح' : 'Page Status Updated Successfully' }}',
+                                          confirmText: "{{ __('admin.OK') }}",
+                                          confirmColor: 'primary'
                                         });
                                         populate_pages_table(response.pages, '{{ $l }}');
                                     }
                                     else
                                     {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                            text: response.message,
-                                            showCancelButton: false,
-                                            showConfirmButton: true,
-                                            confirmButtonText: "{{ __('admin.OK') }}",
-                                            customClass: {
-                                                confirmButton: 'btn btn-primary',
-                                            },
-                                            buttonsStyling: false,
+                                        releaseAlert('danger', {
+                                          title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                          message: response.message,
+                                          confirmText: "{{ __('admin.OK') }}",
+                                          confirmColor: 'primary'
                                         });
                                     }
                                 },
                                 error: function(error) {
                                     console.log(error);
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                        text: '{{ $l == 'ar' ? 'خطأ في تغيير الحالة. يرجى المحاولة مرة أخرى.' : 'Error toggling status. Please try again.' }}',
-                                        showCancelButton: false,
-                                        showConfirmButton: true,
-                                        confirmButtonText: "{{ __('admin.OK') }}",
-                                        customClass: {
-                                            confirmButton: 'btn btn-primary',
-                                        },
-                                        buttonsStyling: false,
+                                    releaseAlert('danger', {
+                                      title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                      message: '{{ $l == 'ar' ? 'خطأ في تغيير الحالة. يرجى المحاولة مرة أخرى.' : 'Error toggling status. Please try again.' }}',
+                                      confirmText: "{{ __('admin.OK') }}",
+                                      confirmColor: 'primary'
                                     });
                                 }
                             });
                         }
                     });
                 } else { 
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
-                        text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
-                        showCancelButton: false,
-                        showConfirmButton: true,
-                        confirmButtonText: "{{ __('admin.OK') }}",
-                        customClass: {
-                            confirmButton: 'btn btn-primary',
-                        },
-                        buttonsStyling: false,
+                    releaseAlert('warning', {
+                      title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                      message: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                      confirmText: "{{ __('admin.OK') }}",
+                      confirmColor: 'primary',
+                      hideCancel: true
                     });
                 }
             });
@@ -820,20 +732,14 @@
                 var custom_page_id = $(this).data('page-id');
                 if( program_id )
                 {
-                    Swal.fire({
-                        title: '{{ $l == "ar" ? "تأكيد تغيير الظهور" : "Confirm Toggle Visibility" }}',
-                        text: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد تغيير ظهور هذه الصفحة؟" : "Are you sure you want to toggle the visibility of this page?" }}',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: '{{ $l == "ar" ? "نعم، قم بالتغيير" : "Yes, toggle it!" }}',
-                        cancelButtonText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
-                        customClass: {
-                            confirmButton: 'btn btn-primary',
-                            cancelButton: 'btn btn-label-secondary ms-2'
-                        },
-                        buttonsStyling: false
-                    }).then((result) => {
-                        if(result.isConfirmed) {
+                    releaseAlert('warning', {
+                      title: '{{ $l == "ar" ? "تأكيد تغيير الظهور" : "Confirm Toggle Visibility" }}',
+                      message: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد تغيير ظهور هذه الصفحة؟" : "Are you sure you want to toggle the visibility of this page?" }}',
+                      confirmText: '{{ $l == "ar" ? "نعم، قم بالتغيير" : "Yes, toggle it!" }}',
+                      cancelText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
+                      confirmColor: 'primary'
+                    }).then((ok) => {
+                        if(ok) {
                             let data = {
                                 page_id: custom_page_id,
                                 cycleId: program_id,
@@ -851,65 +757,42 @@
                                 success: function(response) {
                                     if( response.status )
                                     {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: '{{ $l == 'ar' ? 'تم تحديث ظهور الصفحة بنجاح' : 'Page Visibility Updated Successfully' }}',
-                                            showCancelButton: false,
-                                            showConfirmButton: true,
-                                            confirmButtonText: "{{ __('admin.OK') }}",
-                                            customClass: {
-                                                confirmButton: 'btn btn-primary',
-                                            },
-                                            buttonsStyling: false,
+                                        releaseAlert('success', {
+                                          title: '{{ $l == 'ar' ? 'تم تحديث ظهور الصفحة بنجاح' : 'Page Visibility Updated Successfully' }}',
+                                          confirmText: "{{ __('admin.OK') }}",
+                                          confirmColor: 'primary'
                                         });
                                         populate_pages_table(response.pages, '{{ $l }}');
                                     }
                                     else
                                     {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                            text: response.message,
-                                            showCancelButton: false,
-                                            showConfirmButton: true,
-                                            confirmButtonText: "{{ __('admin.OK') }}",
-                                            customClass: {
-                                                confirmButton: 'btn btn-primary',
-                                            },
-                                            buttonsStyling: false,
+                                        releaseAlert('danger', {
+                                          title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                          message: response.message,
+                                          confirmText: "{{ __('admin.OK') }}",
+                                          confirmColor: 'primary'
                                         });
                                     }
                                 },
                                 error: function(error) {
                                     console.log(error);
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                        text: '{{ $l == 'ar' ? 'خطأ في تغيير الظهور. يرجى المحاولة مرة أخرى.' : 'Error toggling visibility. Please try again.' }}',
-                                        showCancelButton: false,
-                                        showConfirmButton: true,
-                                        confirmButtonText: "{{ __('admin.OK') }}",
-                                        customClass: {
-                                            confirmButton: 'btn btn-primary',
-                                        },
-                                        buttonsStyling: false,
+                                    releaseAlert('danger', {
+                                      title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                      message: '{{ $l == 'ar' ? 'خطأ في تغيير الظهور. يرجى المحاولة مرة أخرى.' : 'Error toggling visibility. Please try again.' }}',
+                                      confirmText: "{{ __('admin.OK') }}",
+                                      confirmColor: 'primary'
                                     });
                                 }
                             });
                         }
                     });
                 } else { 
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
-                        text: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
-                        showCancelButton: false,
-                        showConfirmButton: true,
-                        confirmButtonText: "{{ __('admin.OK') }}",
-                        customClass: {
-                            confirmButton: 'btn btn-primary',
-                        },
-                        buttonsStyling: false,
+                    releaseAlert('warning', {
+                      title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                      message: '{{ $l == 'ar' ? 'يرجى اختيار دورة أولاً' : 'Please select a cycle first' }}',
+                      confirmText: "{{ __('admin.OK') }}",
+                      confirmColor: 'primary',
+                      hideCancel: true
                     });
                 }
             });
@@ -920,20 +803,14 @@
                 if( program_id )
                 {
                     let custom_page_id = $(this).data('page-id');
-                    Swal.fire({
-                        title: '{{ $l == "ar" ? "تأكيد الحذف" : "Confirm Delete" }}',
-                        text: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد حذف هذه الصفحة؟" : "Are you sure you want to delete this page?" }}',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: '{{ $l == "ar" ? "نعم، قم بالحذف" : "Yes, delete it!" }}',
-                        cancelButtonText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
-                        customClass: {
-                            confirmButton: 'btn btn-danger',
-                            cancelButton: 'btn btn-label-secondary ms-2'
-                        },
-                        buttonsStyling: false
-                    }).then((result) => {
-                        if (result.isConfirmed) {
+                    releaseAlert('warning', {
+                      title: '{{ $l == "ar" ? "تأكيد الحذف" : "Confirm Delete" }}',
+                      message: '{{ $l == "ar" ? "هل أنت متأكد أنك تريد حذف هذه الصفحة؟" : "Are you sure you want to delete this page?" }}',
+                      confirmText: '{{ $l == "ar" ? "نعم، قم بالحذف" : "Yes, delete it!" }}',
+                      cancelText: '{{ $l == "ar" ? "إلغاء" : "Cancel" }}',
+                      confirmColor: 'danger'
+                    }).then((ok) => {
+                        if (ok) {
                             let send_data = {
                                 page_id: custom_page_id,
                                 cycleId: program_id
@@ -950,66 +827,43 @@
                                 success: function(response) {
                                     if( response.status )
                                     {
-                                        Swal.fire({
-                                        icon: 'success',
-                                            title: "{{ __('admin.Deleted') }}!",
-                                            html: "{{ __('admin.DeletedSuccessfully') }}.",
-                                            showCancelButton: false,
-                                            showConfirmButton: true,
-                                            confirmButtonText: "{{ __('admin.OK') }}",
-                                            customClass: {
-                                                confirmButton: 'btn btn-primary',
-                                            },
-                                            buttonsStyling: false,
+                                        releaseAlert('success', {
+                                          title: "{{ __('admin.Deleted') }}!",
+                                          message: "{{ __('admin.DeletedSuccessfully') }}.",
+                                          confirmText: "{{ __('admin.OK') }}",
+                                          confirmColor: 'primary'
                                         });
                                         populate_pages_table(response.pages, '{{ $l }}');
                                     }
                                     else
                                     {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                            text: response.message,
-                                            showCancelButton: false,
-                                            showConfirmButton: true,
-                                            confirmButtonText: "{{ __('admin.OK') }}",
-                                            customClass: {
-                                                confirmButton: 'btn btn-primary',
-                                            },
-                                            buttonsStyling: false,
+                                        releaseAlert('danger', {
+                                          title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                          message: response.message,
+                                          confirmText: "{{ __('admin.OK') }}",
+                                          confirmColor: 'primary'
                                         });
                                     }
                                 },
                                 error: function(error) {
                                     console.log(error);
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                        text: '{{ $l == 'ar' ? 'خطأ في حذف الصفحة. يرجى المحاولة مرة أخرى.' : 'Error deleting page. Please try again.' }}',
-                                        showCancelButton: false,
-                                        showConfirmButton: true,
-                                        confirmButtonText: "{{ __('admin.OK') }}",
-                                        customClass: {
-                                            confirmButton: 'btn btn-primary',
-                                        },
-                                        buttonsStyling: false,
+                                    releaseAlert('danger', {
+                                      title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                      message: '{{ $l == 'ar' ? 'خطأ في حذف الصفحة. يرجى المحاولة مرة أخرى.' : 'Error deleting page. Please try again.' }}',
+                                      confirmText: "{{ __('admin.OK') }}",
+                                      confirmColor: 'primary'
                                     });
                                 }
                             });
                         }
                     });
                 } else { 
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
-                        text: '{{ $l == 'ar' ? 'يرجى تحديد دورة أولاً' : 'Please select a cycle first' }}',
-                        showCancelButton: false,
-                        showConfirmButton: true,
-                        confirmButtonText: "{{ __('admin.OK') }}",
-                        customClass: {
-                            confirmButton: 'btn btn-primary',
-                        },
-                        buttonsStyling: false,
+                    releaseAlert('warning', {
+                      title: '{{ $l == 'ar' ? 'تنبيه' : 'Warning' }}',
+                      message: '{{ $l == 'ar' ? 'يرجى تحديد دورة أولاً' : 'Please select a cycle first' }}',
+                      confirmText: "{{ __('admin.OK') }}",
+                      confirmColor: 'primary',
+                      hideCancel: true
                     });
                 }
             });
@@ -1137,26 +991,19 @@
                             }
                             else
                             {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                    text: response.message
+                                releaseAlert('danger', {
+                                  title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                                  message: response.message
                                 });
                             }
                         },
                         error: function(error) {
                             console.log(error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
-                                text: '{{ $l == 'ar' ? 'خطأ في إعادة ترتيب الصفحات. يرجى المحاولة مرة أخرى.' : 'Error resorting pages. Please try again.' }}',
-                                showCancelButton: false,
-                                showConfirmButton: true,
-                                confirmButtonText: "{{ __('admin.OK') }}",
-                                customClass: {
-                                    confirmButton: 'btn btn-primary',
-                                },
-                                buttonsStyling: false,
+                            releaseAlert('danger', {
+                              title: '{{ $l == 'ar' ? 'خطأ' : 'Error' }}',
+                              message: '{{ $l == 'ar' ? 'خطأ في إعادة ترتيب الصفحات. يرجى المحاولة مرة أخرى.' : 'Error resorting pages. Please try again.' }}',
+                              confirmText: "{{ __('admin.OK') }}",
+                              confirmColor: 'primary'
                             });
                         }
                     });

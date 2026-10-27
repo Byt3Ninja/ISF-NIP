@@ -517,11 +517,10 @@
         })
         .catch(() => {
             if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-                    text: '{{ $l == "en" ? "File download failed. Please try again." : "فشل تحميل الملف. يرجى المحاولة مرة أخرى." }}',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                releaseAlert('danger', {
+                  title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                  message: '{{ $l == "en" ? "File download failed. Please try again." : "فشل تحميل الملف. يرجى المحاولة مرة أخرى." }}',
+                  confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
                 });
             }
         });
@@ -606,29 +605,26 @@
             })
             .then(data => {
                 if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
-                        text: data.message,
-                        confirmButtonText: l === 'en' ? "OK" : "موافق"
+                    releaseAlert('success', {
+                      title: l === 'en' ? "File Uploaded!" : "تم رفع الملف!",
+                      message: data.message,
+                      confirmText: l === 'en' ? "OK" : "موافق"
                     });
                     createListItem(file, data);
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: l === 'en' ? "Error" : "خطأ",
-                        text: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
-                        confirmButtonText: l === 'en' ? "OK" : "موافق"
+                    releaseAlert('danger', {
+                      title: l === 'en' ? "Error" : "خطأ",
+                      message: data.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+                      confirmText: l === 'en' ? "OK" : "موافق"
                     });
                 }
             })
             .catch(error => {
                 console.error('Upload error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: l === 'en' ? "Error" : "خطأ",
-                    text: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
-                    confirmButtonText: l === 'en' ? "OK" : "موافق"
+                releaseAlert('danger', {
+                  title: l === 'en' ? "Error" : "خطأ",
+                  message: error.message || (l === 'en' ? "Upload failed" : "فشل رفع الملف"),
+                  confirmText: l === 'en' ? "OK" : "موافق"
                 });
             })
             .finally(() => {
@@ -640,11 +636,11 @@
                 if (form && typeof form.reset === 'function') form.reset();
             });
         } else {
-            Swal.fire({
-                icon: 'warning',
-                title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
-                text: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً.",
-                confirmButtonText: l === 'en' ? "OK" : "موافق"
+            releaseAlert('warning', {
+              title: l === 'en' ? "No File Selected" : "لم يتم اختيار ملف",
+              message: l === 'en' ? "Please choose a file first." : "يرجى اختيار ملف أولاً.",
+              confirmText: l === 'en' ? "OK" : "موافق",
+              hideCancel: true
             });
         }
     }
@@ -658,17 +654,14 @@
             return;
         }
 
-        Swal.fire({
-            title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-            text: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
-            cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        releaseAlert('warning', {
+          title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+          message: '{{ $l == "en" ? "Do you want to delete this file?" : "هل تريد حذف هذا الملف؟" }}',
+          confirmText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفه!" }}',
+          cancelText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+          confirmColor: 'danger'
+        }).then((ok) => {
+            if (ok) {
                 fetch("{{ url('/dashboard/hackathon/deleteSharedFile') }}/" + fileId, {
                     method: 'DELETE',
                     headers: {
@@ -687,26 +680,23 @@
                         const fileElement = buttonElement.closest('li');
                         if (fileElement) fileElement.remove();
 
-                        Swal.fire({
-                            title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-                            text: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
-                            icon: 'success',
-                            confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                        releaseAlert('success', {
+                          title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+                          message: '{{ $l == "en" ? "File has been deleted." : "تم حذف الملف." }}',
+                          confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
                         });
                     } else {
-                        Swal.fire({
-                            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                            text: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
-                            icon: 'error'
+                        releaseAlert('danger', {
+                          title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                          message: data.message || '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}'
                         });
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    Swal.fire({
-                        title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                        text: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}',
-                        icon: 'error'
+                    releaseAlert('danger', {
+                      title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                      message: '{{ $l == "en" ? "Could not delete file." : "تعذر حذف الملف." }}'
                     });
                 });
             }
@@ -723,17 +713,14 @@
             return;
         }
 
-        Swal.fire({
-            title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
-            text: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
-            cancelButtonText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        releaseAlert('warning', {
+          title: '{{ $l == "en" ? "Are you sure?" : "هل أنت متأكد؟" }}',
+          message: `{{ $l == "en" ? "Do you want to delete the task: " : "هل تريد حذف المهمة: " }}"${taskTitle}"?`,
+          confirmText: '{{ $l == "en" ? "Yes, delete it!" : "نعم، احذفها!" }}',
+          cancelText: '{{ $l == "en" ? "Cancel" : "إلغاء" }}',
+          confirmColor: 'danger'
+        }).then((ok) => {
+            if (ok) {
                 fetch("{{ url('/dashboard/hackathon/deleteTodoList') }}/" + taskId, {
                     method: 'DELETE',
                     headers: {
@@ -745,29 +732,26 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success' || data.message?.toLowerCase().includes('successfully')) {
-                        Swal.fire({
-                            title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
-                            text: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
-                            icon: 'success',
-                            confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                        releaseAlert('success', {
+                          title: '{{ $l == "en" ? "Deleted!" : "تم الحذف!" }}',
+                          message: data.message || '{{ $l == "en" ? "Task has been deleted." : "تم حذف المهمة." }}',
+                          confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
                         }).then(() => {
                             // Reload the page after pressing OK
                             location.reload();
                         });
                     } else {
-                        Swal.fire({
-                            title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                            text: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
-                            icon: 'error'
+                        releaseAlert('danger', {
+                          title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                          message: data.message || '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}'
                         });
                     }
                 })
                 .catch(error => {
                     console.error(error);
-                    Swal.fire({
-                        title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
-                        text: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}',
-                        icon: 'error'
+                    releaseAlert('danger', {
+                      title: '{{ $l == "en" ? "Error!" : "خطأ!" }}',
+                      message: '{{ $l == "en" ? "Could not delete the task." : "تعذر حذف المهمة." }}'
                     });
                 });
             }
@@ -810,11 +794,11 @@
         const editingTaskId = taskModal.getAttribute('data-editing-task');
 
         if (!taskTitle) {
-            Swal.fire({
-                icon: 'warning',
-                title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
-                text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+            releaseAlert('warning', {
+              title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
+              message: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
+              confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              hideCancel: true
             });
             return;
         }
@@ -837,11 +821,10 @@
         .then(response => response.json())
         .then(data => {
             if (data.success === true) {
-                Swal.fire({
-                    icon: 'success',
-                    title: '{{ $l == "en" ? "Task Added!" : "تمت إضافة المهمة!" }}',
-                    text: data.message || '{{ $l == "en" ? "Task added successfully." : "تمت إضافة المهمة بنجاح." }}',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                releaseAlert('success', {
+                  title: '{{ $l == "en" ? "Task Added!" : "تمت إضافة المهمة!" }}',
+                  message: data.message || '{{ $l == "en" ? "Task added successfully." : "تمت إضافة المهمة بنجاح." }}',
+                  confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
                 });
 
                 const taskList = document.getElementById('taskList');
@@ -869,21 +852,19 @@
                 document.getElementById('taskForm').reset();
 
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-                    text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                releaseAlert('danger', {
+                  title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                  message: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+                  confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
                 });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-                text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+            releaseAlert('danger', {
+              title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+              message: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+              confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
             });
         });
     }
@@ -898,11 +879,11 @@
         const editingTaskId = taskModal.getAttribute('data-editing-task');
 
         if (!taskTitle) {
-            Swal.fire({
-                icon: 'warning',
-                title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
-                text: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+            releaseAlert('warning', {
+              title: '{{ $l == "en" ? "Task Title Required" : "عنوان المهمة مطلوب" }}',
+              message: '{{ $l == "en" ? "Please enter a task title." : "يرجى إدخال عنوان للمهمة." }}',
+              confirmText: '{{ $l == "en" ? "OK" : "موافق" }}',
+              hideCancel: true
             });
             return;
         }
@@ -926,11 +907,10 @@
         .then(response => response.json())
         .then(data => {
             if (data.success === true) {
-                Swal.fire({
-                    icon: 'success',
-                    title: '{{ $l == "en" ? "Task Updated!" : "تم تعديل المهمة!" }}',
-                    text: data.message || '{{ $l == "en" ? "Task updated successfully." : "تم تعديل المهمة بنجاح." }}',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                releaseAlert('success', {
+                  title: '{{ $l == "en" ? "Task Updated!" : "تم تعديل المهمة!" }}',
+                  message: data.message || '{{ $l == "en" ? "Task updated successfully." : "تم تعديل المهمة بنجاح." }}',
+                  confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
                 }).then(() => {
                     window.location.reload();
                 });
@@ -954,21 +934,19 @@
                 
 
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-                    text: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
-                    confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+                releaseAlert('danger', {
+                  title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+                  message: data.message || '{{ $l == "en" ? "Something went wrong." : "حدث خطأ ما." }}',
+                  confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
                 });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: '{{ $l == "en" ? "Error" : "خطأ" }}',
-                text: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
-                confirmButtonText: '{{ $l == "en" ? "OK" : "موافق" }}'
+            releaseAlert('danger', {
+              title: '{{ $l == "en" ? "Error" : "خطأ" }}',
+              message: '{{ $l == "en" ? "Failed to connect to the server." : "فشل الاتصال بالخادم." }}',
+              confirmText: '{{ $l == "en" ? "OK" : "موافق" }}'
             });
         });
     }

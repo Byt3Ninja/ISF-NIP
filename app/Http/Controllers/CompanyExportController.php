@@ -35,14 +35,20 @@ class CompanyExportController extends Controller
             unset($filters['programFilter']);
         }
 
-        $companies = $this->companyService->getCompanies($filters, isApi: false);
+        // C17: the companies screen posts `orgnization`; the repository filters on `organization`.
+        if (isset($filters['orgnization'])) {
+            $filters['organization'] = $filters['orgnization'];
+            unset($filters['orgnization']);
+        }
+
+        $companies = $this->companyService->getCompanies($filters, isApi: false, paginate: false);
 
         if (empty($companies) || (is_countable($companies) && count($companies) === 0)) {
             return redirect()->back()->with(['message2' => 'No_Startups_To_Export']);
         }
 
         // Prepare rows
-        $rows = collect( collect( $companies )['data'] )->map(function($c){
+        $rows = collect( $companies->toArray() )->map(function($c){
             $company = (object) $c;
             return $company;
         })->map(function($c){

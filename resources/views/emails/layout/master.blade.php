@@ -3,6 +3,7 @@
 @php
     $setting = \App\Settings::find(1);
     $org_logo_url = $org_logo_url ?? null;
+    $org_logo_path = $org_logo_path ?? null;
     $org_address = $org_address ?? null;
     $org_website = $org_website ?? null;
     $org_linkedin = $org_linkedin ?? null;
@@ -58,9 +59,10 @@
                                                 <tr>
                                                     <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
                                                         <div align="center" class="alignment" style="line-height:10px">
-                                                            @if(!empty($setting->Logo))
+                                                            {{-- Organization logo when the email is about a program/organization that has one, else the platform logo (App\Services\EmailBranding). --}}
+                                                            @if(!empty($email_logo['url']))
                                                                 <div style="max-width: 280px; padding: 20px 0;">
-                                                                    <img alt="{{ $setting->Logo }}" height="auto" src="{{ asset('/images/logo/' . $setting->Logo) }}" style="display: block; height: auto; border: 0; max-height: 80px; width: auto; margin: 0 auto;" title="{{ $org_name }}"/>
+                                                                    <img alt="{{ $org_name }}" src="{{ !empty($email_logo['path']) && isset($message) ? $message->embed($email_logo['path']) : $email_logo['url'] }}" style="display: block; height: auto !important; width: auto !important; max-height: 80px !important; max-width: 100% !important; object-fit: contain !important; border: 0; margin: 0 auto;" title="{{ $org_name }}"/>
                                                                 </div>
                                                             @endif
                                                         </div>

@@ -97,10 +97,18 @@ class ProgramService
         ->get()
         ->groupBy('mentor_id');
 
+    // One query each for the users (with roles) and the program counts, not three per mentor.
+    $users = User::with('roles')->whereIn('id', $mentorIds)->get()->keyBy('id');
+    $programCounts = DB::table('cycles_mentors')
+        ->whereIn('user_id', $mentorIds)
+        ->select('user_id', DB::raw('COUNT(*) as total'))
+        ->groupBy('user_id')
+        ->pluck('total', 'user_id');
+
     $finalMentors = collect();
 
     foreach ($mentors as $mentor) {
-        $user = User::find($mentor->id);
+        $user = $users->get($mentor->id);
 
         $name = trim($mentor->first_name_en . ' ' . $mentor->last_name_en);
         $imgUrl = $mentor?->img_url
@@ -119,7 +127,7 @@ class ProgramService
             'joinedAt' => \Carbon\Carbon::parse($mentor->joinedAt)->toISOString(),
             'rating' => $mentor->rating ? round($mentor->rating, 1) : null,
             'mentorExpertises' => $expertiseMap->get($mentor->id)?->pluck('title')->toArray() ?? [],
-            'programCount' => DB::table('cycles_mentors')->where('user_id', $mentor->id)->count(),
+            'programCount' => (int) ($programCounts[$mentor->id] ?? 0),
             'role' => $user?->getRoleNames()->first(),
         ];
 
@@ -153,13 +161,14 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
     ->where('cycle', $programId);
 
     if ($search) {
+        // One nested group, so the sector OR cannot escape where('cycle', $programId).
         $query->where(function ($q) use ($search) {
             $q->where('name_en', 'like', "%$search%")
-              ->orWhere('name_ar', 'like', "%$search%");
-        })
-        ->orWhereHas('sectoR', function ($q) use ($search) {
-            $q->where('name_en', 'like', "%$search%")
-              ->orWhere('name_ar', 'like', "%$search%");
+              ->orWhere('name_ar', 'like', "%$search%")
+              ->orWhereHas('sectoR', function ($q) use ($search) {
+                  $q->where('name_en', 'like', "%$search%")
+                    ->orWhere('name_ar', 'like', "%$search%");
+              });
         });
     }
     $allowedSorts = ['id', 'name_en', 'name_ar', 'est_date', 'created_at'];

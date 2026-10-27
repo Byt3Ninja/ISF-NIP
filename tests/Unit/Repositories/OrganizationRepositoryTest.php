@@ -8,11 +8,9 @@ use App\Organization;
 use App\User;
 use App\Cycle;
 use App\Company;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class OrganizationRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected OrganizationRepository $organizationRepository;
 

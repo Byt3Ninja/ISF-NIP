@@ -1,5 +1,5 @@
 @php($gtag = $_settings?->url ?? null)
-@php( $platformName = $_settings ? ( $_settings->Platform_Name ?? config('app.name') ) : config('app.name') )
+@php( $platformName = $_settings ? ($_settings->Platform_Name ?? config('app.name')) : config('app.name') )
 
 <!-- Goggle Tag Manger -->
 @if ($gtag)
@@ -130,9 +130,6 @@
 </style>
 <!-- END: Page CSS-->
 
-<!-- BEGIN: Custom CSS-->
-<!-- END: Custom CSS-->
-
 <!-- Jquery Js -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -145,3 +142,7 @@
 
 <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
 <script src="/vuexy/assets/js/config.js"></script>
+
+<!-- BEGIN: Custom CSS-->
+@include('admin.includes.branding-styles')
+<!-- END: Custom CSS-->

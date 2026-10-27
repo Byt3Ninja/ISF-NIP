@@ -8,13 +8,11 @@ use App\Repositories\ProgramRepository;
 use App\Cycle;
 use App\User;
 use App\Company;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 
 class ProgramServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected ProgramService $programService;
     protected $programRepoMock;

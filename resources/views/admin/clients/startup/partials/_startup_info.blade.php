@@ -7,11 +7,19 @@
           <div class="d-flex flex-column flex-md-row align-items-start" style="gap: 1.5rem;">
             <div class="flex-shrink-0">
               <div class="company-logo me-4 me-md-0 shadow-xs border rounded">
-                <img 
-                  src="{{ $company->logo ? asset( $company->logo) : '/images/logo-placeholder.png' }}"
-                  onerror="this.src='/images/logo-placeholder.png'" 
-                  class="rounded-3" alt="Company Logo" 
-                  style="width: 170px; height: 150px; object-fit: cover;" />
+                @if($company->logo)
+                  <img 
+                    src="{{ $company->logo ? asset( $company->logo) : '' }}"
+                    onerror="this.style.display='none';this.parentElement.querySelector('.placeholder-icon').classList.remove('d-none');"
+                    class="rounded-3" alt="Startup Logo" 
+                    style="width: 170px; height: 150px; object-fit: cover;" />
+                @endif
+                <div class="avatar placeholder-icon {{ $company->logo ? 'd-none' : '' }}"
+                  style="width:150px;height:150px;cursor:default;">
+                  <div class="avatar-initial">
+                    <i class="ti ti-building-skyscraper ti-xl text-dark"></i>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="flex-grow-1">
@@ -221,7 +229,11 @@
                         </a>
                       @else
                         <span class="text-secondary">
-                          {{ optional($company->state)->{'name_' . $l} }}, {{ optional($company->city)->{'name_' . $l} }}, {{ optional($company->country)->{'name_' . $l} }}
+                          {{ collect([
+                            optional($company->state)->{'name_' . $l},
+                            optional($company->city)->{'name_' . $l},
+                            optional($company->country)->{'name_' . $l},
+                          ])->filter()->implode(', ') ?: 'N/A' }}
                         </span>
                       @endif
                     </div>

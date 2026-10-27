@@ -273,7 +273,7 @@
             }
           });
           $('#period').val(response.period);
-          $('#notes').val(response.notes);
+          $('#notes').val(response.admin_comment);
           $('#ModifyRequest').modal('show');
         },
         error: function(error) {
@@ -429,26 +429,24 @@
     function deleteme(id) {
       let url = '/dashboard/mentorship/delsession/' + id;
       let token = '{{ csrf_token() }}';
-      Swal.fire({
-          title: "{{ __('admin.SureDelete') }}",
-          text: "{{ __('admin.Recover') }}",
-          type: "warning",
-          showCancelButton: true,
-          confirmButtonClass: "btn-label-danger",
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}!",
-        })
-        .then((result) => {
-          if (result.value) {
+      releaseAlert('warning', {
+        title: "{{ __('admin.SureDelete') }}",
+        message: "{{ __('admin.Recover') }}",
+        confirmText: "{{ __('admin.DYes') }}",
+        cancelText: "{{ __('admin.No') }}!",
+        confirmColor: 'label'
+      })
+        .then((ok) => {
+          if (ok) {
             $.post(url, {
                 '_method': 'POST',
                 '_token': token
               },
               function(response) {
-                Swal.fire(
-                  '{{ __('admin.Deleted') }}!',
-                  '{{ __('admin.Session Deleted') }}.',
-                  'success');
+                releaseAlert('success', {
+                  title: '{{ __('admin.Deleted') }}!',
+                  message: '{{ __('admin.Session Deleted') }}.'
+                });
                 window.location.href = '/dashboard/mentorship/sessions?show=all';
               }).fail(function(error) {
               console.log(error);

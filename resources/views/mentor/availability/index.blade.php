@@ -627,21 +627,14 @@
               $(popoverTip).find('.delete-event-action').on('click', () => {
                   const id = event.extendedProps.id;
 
-                  Swal.fire({
+                  releaseAlert('warning', {
                       title: "{{__('mentor.delete_slot_confirm')}}",
-                      text: "{{__('admin.Recover')}}",
-                      icon: 'warning',
-                      showCancelButton: true,
-                      confirmButtonText: "{{ __('admin.DYes') }}",
-                      cancelButtonText: "{{ __('admin.No') }}",
-                      reverseButtons: true,
-                      customClass: {
-                        confirmButton: 'btn btn-danger me-2',
-                        cancelButton: 'btn btn-label-secondary',
-                      },
-                      buttonsStyling: false,
-                  }).then((result) => {
-                      if (result.isConfirmed) {
+                      message: "{{__('admin.Recover')}}",
+                      confirmText: "{{ __('admin.DYes') }}",
+                      cancelText: "{{ __('admin.No') }}",
+                      confirmColor: 'danger'
+                  }).then((ok) => {
+                      if (ok) {
                           if (id) {
                               fetch(`/dashboard/availability/slots/${id}`, {
                                   method: 'DELETE',
@@ -702,21 +695,14 @@
   $(document).off('click.delete-slot-override').on('click.delete-slot-override', '.delete-slot', function() {
       const { type, key, index, id } = $(this).data();
 
-      Swal.fire({
+      releaseAlert('warning', {
           title: "{{__('mentor.delete_slot_confirm')}}",
-          text: "{{__('admin.Recover')}}",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: "{{ __('admin.DYes') }}",
-          cancelButtonText: "{{ __('admin.No') }}",
-          reverseButtons: true,
-          customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-          },
-          buttonsStyling: false,
-      }).then((result) => {
-          if (result.isConfirmed) {
+          message: "{{__('admin.Recover')}}",
+          confirmText: "{{ __('admin.DYes') }}",
+          cancelText: "{{ __('admin.No') }}",
+          confirmColor: 'danger'
+      }).then((ok) => {
+          if (ok) {
               availabilityData[type][key].splice(index, 1);
               if (availabilityData[type][key].length === 0) {
                   delete availabilityData[type][key];
@@ -791,7 +777,8 @@
       const { mergedStart, mergedEnd, idsToDelete, idxToDelete, conflictSlot } = computeMerge(type, key, slot.start, slot.end);
 
       if (conflictSlot) {
-          releaseWarningAlert({
+          releaseAlert('warning', {
+              hideCancel: true,
               title: '{{ __('admin.Not_Available') }}',
               message: '{{ __('mentor.overlap', ['date' => ':date','from' => ':from', 'to' => ':to']) }}'
                            .replace(':date', conflictSlot.date || weekdayTranslations[conflictSlot.weekday] || conflictSlot.weekday)
@@ -1072,7 +1059,8 @@
       const { mergedStart, mergedEnd, idsToDelete, idxToDelete, conflictSlot } = computeMerge('weekly', day, start, end);
 
       if (conflictSlot) {
-          releaseWarningAlert({
+          releaseAlert('warning', {
+              hideCancel: true,
               title: '{{ __('admin.Not_Available') }}',
               message: '{{ __('mentor.overlap', ['date' => ':date', 'from' => ':from', 'to' => ':to']) }}'
                            .replace(':date', conflictSlot.date || weekdayTranslations[conflictSlot.weekday] || conflictSlot.weekday)

@@ -183,21 +183,14 @@
         return;
       }
 
-      Swal.fire({
+      releaseAlert('warning', {
         title: '{{ __('settings.navigation.unsaved_changes') }}',
-        text: '{{ __('settings.navigation.unsaved_changes_message') }}',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
-        cancelButtonText: '{{ __('settings.navigation.stay') }}',
-        customClass: {
-          confirmButton: 'btn btn-primary ms-3',
-          cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-        reverseButtons: true,
-      }).then(r => {
-        if (r.isConfirmed) {
+        message: '{{ __('settings.navigation.unsaved_changes_message') }}',
+        confirmText: '{{ __('settings.navigation.leaveanyway') }}',
+        cancelText: '{{ __('settings.navigation.stay') }}',
+        confirmColor: 'primary'
+      }).then(ok => {
+        if (ok) {
           navigationAllowed = true;
           window.history.back();
         }
@@ -234,21 +227,14 @@
       e.preventDefault();
       e.stopPropagation();
 
-      Swal.fire({
+      releaseAlert('warning', {
         title: '{{ __('settings.navigation.unsaved_changes') }}',
-        text: '{{ __('settings.navigation.unsaved_changes_message') }}',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
-        cancelButtonText: '{{ __('settings.navigation.stay') }}',
-        customClass: {
-          confirmButton: 'btn btn-primary ms-3',
-          cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
-        reverseButtons: true,
-      }).then(r => {
-        if (r.isConfirmed) {
+        message: '{{ __('settings.navigation.unsaved_changes_message') }}',
+        confirmText: '{{ __('settings.navigation.leaveanyway') }}',
+        cancelText: '{{ __('settings.navigation.stay') }}',
+        confirmColor: 'primary'
+      }).then(ok => {
+        if (ok) {
           navigationAllowed = true;
           window.location.href = link.href;
         }
@@ -272,21 +258,14 @@
       if (isPageDirty() && !formSubmitting && !navigationAllowed) {
         e.preventDefault();
         
-        Swal.fire({
+        releaseAlert('warning', {
           title: '{{ __('settings.navigation.unsaved_changes') }}',
-          text: '{{ __('settings.navigation.unsaved_changes_message') }}',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: '{{ __('settings.navigation.leaveanyway') }}',
-          cancelButtonText: '{{ __('settings.navigation.stay') }}',
-          customClass: {
-            confirmButton: 'btn btn-primary ms-3',
-            cancelButton: 'btn btn-label-secondary',
-          },
-          buttonsStyling: false,
-          reverseButtons: true,
-        }).then(r => {
-          if (r.isConfirmed) {
+          message: '{{ __('settings.navigation.unsaved_changes_message') }}',
+          confirmText: '{{ __('settings.navigation.leaveanyway') }}',
+          cancelText: '{{ __('settings.navigation.stay') }}',
+          confirmColor: 'primary'
+        }).then(ok => {
+          if (ok) {
             navigationAllowed = true;
             window.location.reload();
           } else {

@@ -93,7 +93,7 @@
   const TRANSLATIONS = {
     en: {
       noResults: (term) => `No results for "${term}"`,
-      noFounders: "No founders added yet",
+      noFounders: "No Cofounders added yet",
       foundersEmptyDesc:
         "Add your founding team to showcase the people behind your startup.",
       noInvestors: "No Investors Listed",
@@ -135,7 +135,7 @@
     },
     ar: {
       noResults: (term) => `لا توجد نتائج لـ "${term}"`,
-      noFounders: "لم تتم إضافة مؤسسين بعد",
+      noFounders: "لم تتم إضافة شركاء مؤسسين بعد",
       foundersEmptyDesc:
         "أضف فريق المؤسسين لعرض الأشخاص الذين يقفون خلف شركتك الناشئة.",
       noInvestors: "لم يتم إضافة مستثمرين",
@@ -345,7 +345,7 @@
     };
 
     const icons = {
-      founder: "ti-users",
+      founder: "ti-user-plus",
       investor: "ti-building-bank",
       shareholder: "ti-users-group",
     };
@@ -353,7 +353,7 @@
     return `
       <div class="col-12">
         <div class="text-center py-5 my-4 border rounded-3 border-dashed bg-light-subtle empty-state">
-          <i class="ti ${icons[type]} text-secondary" style="font-size: 5rem; line-height: 1;"></i>
+          <i class="ti ${icons[type]} text-secondary" style="font-size: 3.5rem; line-height: 1;"></i>
           <h5 class="mb-2 fw-semibold mt-4">${titles[type]}</h5>
           <p class="text-secondary mb-4">
             ${
@@ -741,7 +741,7 @@
         }
       });
     } else {
-      releaseWarningAlert({
+      releaseAlert('warning', {
         title: `${t.delete} ${t[type]}`,
         message: `${t.deleteMsg.replace("${name}", escapeHtml(name))}`,
         confirmText: `${t.yesDelete}`,

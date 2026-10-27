@@ -779,7 +779,34 @@ $(function () {
       buildDateFilter('date-to',   'dt-filter--date-to',   "{{ __('cycles.End_Date') }}",   'to');
       // Normalise sizes injected by DataTables
       $('.dataTables_filter .form-control').removeClass('form-control-sm').css('width', '');
-      $('.dataTables_length .form-select').removeClass('form-select-sm');
+      $('.dataTables_length .form-select').removeClass('form-select-sm').css('width', 'auto');
+
+      // Initialize Select2 for filter selects
+      setTimeout(function() {
+        $('#tblTraining_wrapper .filter-select2, #tblTraining_wrapper .dataTables_length select').each(function () {
+          const $this = $(this);
+          if (!$this.hasClass('select2-hidden-accessible')) {
+            const isLength = $this.closest('.dataTables_length').length > 0;
+            const $parent = isLength ? $this.parent() : ($this.closest('.dt-filter').length ? $this.closest('.dt-filter') : $('body'));
+            $this.css('visibility', 'hidden');
+            $this.select2({
+              dropdownParent: $parent,
+              width: 'resolve',
+              minimumResultsForSearch: Infinity,
+              allowClear: false
+            });
+            $this.next('.select2-container').css({
+              'min-width': isLength ? '70px' : '150px',
+              'max-width': isLength ? '90px' : '200px'
+            });
+            setTimeout(function() { $this.css('visibility', 'visible'); }, 0);
+          }
+        });
+      }, 200);
+
+      $('#tblTraining_wrapper .dt-filter input[type="text"]').each(function() {
+        $(this).wrap('<div class="position-relative"></div>');
+      });
     },
   });
 
@@ -815,6 +842,8 @@ $(function () {
       .appendTo(`#tblTraining_wrapper .${containerClass}`);
 
     $input[0]._flatpickr && $input[0]._flatpickr.destroy();
+    $input.addClass('form-control');
+    $input.css({ 'min-width': '150px', 'max-width': '200px' });
     $input.flatpickr({
       monthSelectorType: 'static',
       dateFormat: 'Y-m-d',
@@ -838,7 +867,7 @@ $(function () {
   }
 
   function buildSelect(id, placeholder, containerClass) {
-    return $(`<select id="${id}" class="form-select" style="min-width:120px; max-width:150px;"><option value="">${placeholder}</option></select>`)
+    return $(`<select id="${id}" class="form-select filter-select2"><option value="">${placeholder}</option></select>`)
       .appendTo(`#tblTraining_wrapper .${containerClass}`);
   }
 
@@ -848,7 +877,7 @@ $(function () {
       table.button(`.buttons-${format}`).trigger();
     } catch (err) {
       console.error('Export error:', err);
-      releaseFailureAlert({ message: 'Failed to export data. Please try again.' });
+      releaseAlert('danger', { message: 'Failed to export data. Please try again.' });
     }
   };
 
@@ -956,7 +985,7 @@ $(function () {
       },
       error(err) {
         console.error(err);
-        releaseFailureAlert({ message: '{{ __('admin.error_fetching_data') }}' });
+        releaseAlert('danger', { message: '{{ __('admin.error_fetching_data') }}' });
         $offcanvas.offcanvas('hide');
       }
     });
@@ -1133,36 +1162,26 @@ $(function () {
    * Delete Session
    * ============================================================== */
   window.deleteme = function (id) {
-    Swal.fire({
-      title:             '{{ __('admin.SureDelete') }}',
-      text:              '{{ __('admin.Recover') }}',
-      icon:              'warning',
-      showCancelButton:  true,
-      confirmButtonText: '{{ __('admin.DYes') }}',
-      cancelButtonText:  '{{ __('admin.No') }}',
-      reverseButtons:    true,
-      customClass: {
-        confirmButton: 'btn btn-danger me-2',
-        cancelButton:  'btn btn-label-secondary',
-      },
-      buttonsStyling: false,
-    }).then(({ isConfirmed }) => {
-      if (!isConfirmed) return;
+    releaseAlert('warning', {
+      title: '{{ __('admin.SureDelete') }}',
+      message: '{{ __('admin.Recover') }}',
+      confirmText: '{{ __('admin.DYes') }}',
+      cancelText: '{{ __('admin.No') }}',
+      confirmColor: 'danger'
+    }).then((ok) => {
+      if (!ok) return;
 
       $.post(ROUTES.delete(id), { _token: CSRF })
         .done(() => {
-          Swal.fire({
-            title:            '{{ __('admin.Deleted') }}!',
-            text:             '{{ __('admin.Course Deleted') }}.',
-            icon:             'success',
-            confirmButtonText:'{{ __('admin.OK') }}',
-            customClass:      { confirmButton: 'btn btn-primary' },
-            buttonsStyling:   false,
-            timer:            1500,
-            timerProgressBar: true,
+          releaseAlert('success', {
+            title: '{{ __('admin.Deleted') }}!',
+            message: '{{ __('admin.Course Deleted') }}.',
+            confirmText: '{{ __('admin.OK') }}',
+            confirmColor: 'primary',
+            autoClose: 1500
           }).then(() => window.location.reload());
         })
-        .fail(() => releaseFailureAlert({ message: '{{ __('admin.unexpected_error') }}' }));
+        .fail(() => releaseAlert('danger', { message: '{{ __('admin.unexpected_error') }}' }));
     });
   };
 
@@ -1175,11 +1194,11 @@ $(function () {
       url:  ROUTES.qr,
       data: { id },
       success(response) {
-        releaseSuccessAlert({ message: response.massege || '{{ __('admin.success') }}' });
+        releaseAlert('success', { message: response.massege || '{{ __('admin.success') }}' });
       },
       error(err) {
         console.error(err);
-        releaseFailureAlert({ message: '{{ __('admin.unexpected_error') }}' });
+        releaseAlert('danger', { message: '{{ __('admin.unexpected_error') }}' });
       }
     });
   };

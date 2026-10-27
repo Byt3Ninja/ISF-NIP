@@ -257,32 +257,25 @@ $(document).ready(function() {
       var id = $(this).data('id');
       var token = '{{ csrf_token() }}';
       
-      Swal.fire({
+      releaseAlert('warning', {
         title: "{{ __('notification_triggers.are_you_sure') }}",
-        text: "{{ __('notification_triggers.delete_warning') }}",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "{{ __('notification_triggers.yes_delete') }}",
-        cancelButtonText: "{{ __('notification_triggers.no_cancel') }}",
-        reverseButtons: true,
-        customClass: {
-            confirmButton: 'btn btn-danger me-2',
-            cancelButton: 'btn btn-label-secondary',
-        },
-        buttonsStyling: false,
+        message: "{{ __('notification_triggers.delete_warning') }}",
+        confirmText: "{{ __('notification_triggers.yes_delete') }}",
+        cancelText: "{{ __('notification_triggers.no_cancel') }}",
+        confirmColor: 'danger'
       })
-      .then((result) => {
-        if (result.value) {
+      .then((ok) => {
+        if (ok) {
           $.post(url, {'_method': 'DELETE' , '_token': token},
             function(response) {
               triggersTable.row('#row_' + id).remove().draw();
-              releaseSuccessAlert({
+              releaseAlert('success', {
                 title: "{{ __('notification_triggers.deleted') }}",
                 message: "{{ __('notification_triggers.delete_success') }}",
               });
             }
           ).fail(function(error) {
-            releaseFailureAlert({
+            releaseAlert('danger', {
               title: "{{ __('notification_triggers.error') }}",
               message: error?.message || "{{ __('notification_triggers.unexpected_error') }}",
             });

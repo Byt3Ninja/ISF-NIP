@@ -110,7 +110,7 @@ class WhatsAppService
      *
      * @param string $sessionId
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return array{success: bool} Same shape as sendOTP(); callers only log it.
      */
     public function sendMessage($phoneNumber, $message, $userOrganization = null)
     {
@@ -122,12 +122,12 @@ class WhatsAppService
             if ($settings && $settings->whatsApp_Status_Session == 1) {
                 $sessionId = $settings->whatsApp_SESSION_ID;
             } else {
-                return response()->json([
+                return [
                     'success' => false,
                     'error' => 'Session is not connectedddd.',
                     'api_status' => 500,
                     'api_error' => 'Session is not connectedddd.'
-                ], 500);
+                ];
             }
         }
         // $sessionId = 147;
@@ -139,26 +139,26 @@ class WhatsAppService
                 'content' => $message
             ]);
             $response->throw();
-            return response()->json([
+            return [
                 'success' => true,
                 'message' => 'Message sent successfully.',
                 'api_response' => $response->json()
-            ]);
+            ];
         } catch (RequestException $e) {
             Log::error("WhatsApp API error sending message from session {$sessionId}: " . $e->getMessage());
-            return response()->json([
+            return [
                 'success' => false,
                 'error' => 'Failed to send message.',
-                'api_status' => $e->response?->status(),
+                'api_status' => $e->response?->status() ?? 500,
                 'api_error' => $e->response?->json()['error'] ?? $e->getMessage()
-            ], $e->response?->status() ?? 500);
+            ];
         } catch (\Exception $e) {
             Log::error("General error sending WhatsApp message from session {$sessionId}: " . $e->getMessage());
 
-            return response()->json([
+            return [
                 'success' => false,
                 'error' => 'An unexpected error occurred while sending the message.'
-            ], 500);
+            ];
         }
     }
 
