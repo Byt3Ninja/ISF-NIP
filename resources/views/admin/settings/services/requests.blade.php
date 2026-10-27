@@ -206,7 +206,7 @@ $config = [
             <div class="d-flex flex-column flex-grow-1">
 
               {{-- Founder & Startup --}}
-              <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+              <div class="d-flex flex-column gap-3 mb-3">
                 <div class="d-flex align-items-center gap-2">
                   <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-label-primary text-primary req-icon">
                     <i class="ti ti-user"></i>
@@ -230,14 +230,18 @@ $config = [
 
               {{-- Note from Founder --}}
               @php($founderNote = trim($request['description'] ?? ''))
-              <div class="bg-label-warning border rounded p-3 mb-3">
+              <div class="bg-label-warning border rounded p-3 mb-3" style="min-height: 125px;">
                 <div class="d-flex align-items-center gap-1 mb-1">
                   <i class="ti ti-note text-warning"></i>
                   <span class="fw-bold text-uppercase small text-dark">{{ __('admin.note_from_founder') }}</span>
                 </div>
                 @if($founderNote !== '' && $founderNote !== '—')
                 <p class="mb-0 small text-body founder-note founder-note-clamp" style="white-space: pre-wrap;">{{ $founderNote }}</p>
-                <button type="button" class="btn btn-link btn-sm p-0 mt-1 note-toggle d-none">{{ __('admin.see_more') }}</button>
+                  @if(mb_strlen($founderNote) > 177)
+                    <button type="button" class="btn btn-link btn-sm p-0 mt-1 note-toggle d-none">
+                      {{ __('admin.see_more') }}
+                    </button>
+                  @endif
                 @else
                 <p class="mb-0 small text-muted fst-italic">{{ __('admin.no_notes_provided') }}</p>
                 @endif
