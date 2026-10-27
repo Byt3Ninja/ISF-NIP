@@ -535,7 +535,10 @@ class ServiceController extends Controller
 			->get();
 
 		// Map to the structure the blade expects
-		$requests = $rows->map(function ($row) {
+		\Carbon\Carbon::setLocale($locale);
+		$currencyMap = \App\Currency::all()->keyBy('currency_code');
+
+		$requests = $rows->map(function ($row) use ($currencyMap, $locale) {
 			// Determine display status
 			if ($row->done == 1) {
 				$status = 'Completed';
@@ -547,20 +550,48 @@ class ServiceController extends Controller
 				$status = 'Pending';
 			}
 
+			$currencyLabel = $row->currency;
+			if ($row->currency && isset($currencyMap[$row->currency])) {
+				$currency = $currencyMap[$row->currency];
+				$currencyLabel = $locale === 'ar' && $currency->currency_name_ar
+					? $currency->currency_name_ar
+					: ($currency->currency_name ?? $currency->currency_symbol ?? $row->currency);
+			}
+
+			$dateFormatted = '—';
+			if ($row->date_time) {
+				$carbonDate = \Carbon\Carbon::parse($row->date_time);
+				if ($locale === 'ar') {
+					$dateFormatted = $carbonDate->translatedFormat('d F Y • H:i');
+				} else {
+					$dateFormatted = $carbonDate->format('M d, Y • H:i');
+				}
+			}
+
+			$reviewedAtFormatted = null;
+			if ($row->reviewed_at) {
+				$carbonReviewed = \Carbon\Carbon::parse($row->reviewed_at);
+				if ($locale === 'ar') {
+					$reviewedAtFormatted = $carbonReviewed->translatedFormat('d F Y');
+				} else {
+					$reviewedAtFormatted = $carbonReviewed->format('M d, Y');
+				}
+			}
+
 			return [
 				'id'                  => $row->id,
 				'title'               => $row->service_name,
-				'date'                => $row->date_time ? \Carbon\Carbon::parse($row->date_time)->format('M d, Y • H:i') : '—',
+				'date'                => $dateFormatted,
 				'description'         => $row->comment ?? '—',
 				'service_description' => $row->service_description ?? '—',
 				'image_url'           => $row->service_img ? '/191014/' . $row->service_img : '/images/team/3.png',
 				'status'              => $status,
 				'price'               => !$row->hide_price && $row->price > 0 ? $row->price : null,
-				'currency'            => $row->currency,
+				'currency'            => $currencyLabel,
 				'rating'              => $row->rate,
 				'review_title'        => $row->review_title,
 				'review_body'         => $row->review_body,
-				'reviewed_at'         => $row->reviewed_at ? \Carbon\Carbon::parse($row->reviewed_at)->format('M d, Y') : null,
+				'reviewed_at'         => $reviewedAtFormatted,
 				'has_review'          => !is_null($row->rate),
 				'founder_img'         => $row->founder_img ? '/191014/' . $row->founder_img : '/icons/account.svg',
 				'founder_name'        => $row->founder_name ?? 'N/A',
