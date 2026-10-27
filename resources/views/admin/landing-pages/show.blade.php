@@ -659,7 +659,7 @@
         @endif
         @php $customSectionContent = ($l == 'ar' ? $customSection->content_ar : $customSection->content) ?: $customSection->content; @endphp
         <div class="mt-3 lp-rich lp-rich-clamp" data-lp-clamp style="white-space:pre-wrap;">
-          {!! $customSectionContent !!}
+          {!! preg_replace('/(<\/(?:ul|ol)>)/i', '$1<br />', $customSectionContent) !!}
         </div>
         <button type="button" class="btn btn-link lp-read-more d-none mt-2 px-0" data-lp-clamp-toggle
           data-more-label="{{ __('admin.read_more') }}" data-less-label="{{ __('admin.read_less') }}">
