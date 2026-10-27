@@ -26,6 +26,7 @@ use App\MentorshipRequest;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use App\Notifications\TemplateEmail;
 use Illuminate\Support\Facades\Mail;
@@ -822,7 +823,7 @@ class SettingsController extends Controller
     public function showSettings()
     {
         $user = auth()->user();
-        $organization = $user->organization ?? Organization::whereIn('id', $user->organizations_ids)->first();
+        $organization = $this->settingsOrganization();
         $currencies = Currency::where('enabled',1)->get();
         $timezones = collect(\DateTimeZone::listIdentifiers())
         ->mapWithKeys(function ($timezone) {
@@ -1031,6 +1032,12 @@ class SettingsController extends Controller
 			return back()->with('message2', $validator->errors()->first())->withInput();
 		}
 
+		// Invite into the organization this Settings page manages, never the user's first one.
+		$organization = $this->settingsOrganization();
+		if (!$organization) {
+			return back()->with('message2', __('settings.no_organization_linked'))->withInput();
+		}
+
 		// Check if user already exists in another organization
 		$user = auth()->user();
 		$orgIds = $user->organizations_ids;
@@ -1040,35 +1047,52 @@ class SettingsController extends Controller
 		}
 
 		// Check for existing invitation and allow resending
-		$primaryOrgId = !empty($orgIds) ? $orgIds[0] : null;
 		$invitation = Invitation::where('email', $request->email)
-		->when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
-			return $q->whereIn('organization_id', $orgIds);
-		})
-		->first();
+			->where('organization_id', $organization->id)
+			->first();
 
-		if ($invitation) {
-			$invitation->expires_at = now()->addDays(2);
-			$invitation->save();
-			Notification::route('mail', $request->email)
-                ->notify(new UserInvitationNotification($invitation));
-			return back()->with('message', 'InvitationSent');
+		if (!$invitation) {
+			$invitation = new Invitation();
+			$invitation->email = $request->email;
+			$invitation->role = $request->role;
+			$invitation->organization_id = $organization->id;
 		}
 
-				$invitation = new Invitation();
-				$invitation->first_name = $request->first_name;
-				$invitation->last_name = $request->last_name;
-				$invitation->email = $request->email;
-				$invitation->role = $request->role;
-				$invitation->organization_id = $primaryOrgId ?? auth()->user()->organization_id;
-				$invitation->expires_at = now()->addDays(2);
-				$invitation->save();
+		$invitation->first_name = $request->first_name;
+		$invitation->last_name = $request->last_name;
+		$invitation->expires_at = now()->addDays(2);
+		$invitation->save();
 
-				// Send invitation email
-				Notification::route('mail', $request->email)
-                ->notify(new UserInvitationNotification($invitation));
+		$this->sendInvitation($invitation);
 
-				return back()->with('message', 'InvitationSent');
+		return back()->with('message', 'InvitationSent');
+	}
+
+	/**
+	 * The organization the Settings page shows and manages for the current user.
+	 */
+	private function settingsOrganization(): ?Organization
+	{
+		$user = auth()->user();
+
+		return $user->organization ?? Organization::whereIn('id', $user->organizations_ids)->first();
+	}
+
+	/**
+	 * Email the invitation. Sent only after it is saved; a mail/queue failure is
+	 * logged and must not undo the invitation (it can be resent from the list).
+	 */
+	private function sendInvitation(Invitation $invitation): void
+	{
+		try {
+			Notification::route('mail', $invitation->email)
+				->notify(new UserInvitationNotification($invitation));
+		} catch (\Throwable $e) {
+			Log::error('UserInvitationNotification failed: ' . $e->getMessage(), [
+				'invitation_id' => $invitation->id,
+				'organization_id' => $invitation->organization_id,
+			]);
+		}
 	}
 	 
 	public function showSetPasswordForm($invitationId)
@@ -1117,7 +1141,12 @@ class SettingsController extends Controller
 		]);
 		// organization_id is not mass-assignable on User (GV-2017), so create() silently dropped it.
 		$user->organization_id = $invitation->organization_id;
+		// The signed link was opened from the invited mailbox, so the address is verified.
+		$user->email_verified_at = now();
 		$user->save();
+
+		// Same membership as a manager created or assigned in the organization wizard.
+		$user->organizations()->syncWithoutDetaching([$invitation->organization_id]);
 
 		 $role = Role::where('name', $invitation->role)->first();
 		 if ($role) {
@@ -1137,6 +1166,10 @@ class SettingsController extends Controller
 			'code' => $uniqueCode,
 			'status' => 'accepted',
 		]);
+
+		// "Accept Invitation" ends on the invitee's own dashboard, already signed in.
+		Auth::login($user);
+		$request->session()->regenerate();
 
 		return redirect()->route('core.dashboard_view')->with('message', __('admin.accountCreated'));
 	}
@@ -1159,8 +1192,7 @@ class SettingsController extends Controller
 		$invitation->expires_at = now()->addDays(2);
 		$invitation->save();
 
-		        Notification::route('mail', $invitation->email)
-            ->notify(new UserInvitationNotification($invitation));
+		$this->sendInvitation($invitation);
 
 		return back()->with('message', 'InvitationResent');
 	}

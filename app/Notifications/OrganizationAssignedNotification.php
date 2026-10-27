@@ -58,10 +58,9 @@ class OrganizationAssignedNotification extends Notification implements ShouldQue
             $channels[] = 'broadcast';
         }
 
-        // Email if user accepts OR default to email if nothing else (besides database) selected
-        if (!empty($notifiable->accept_email) || count($channels) === 1) { // only 'database' present
-            $channels[] = 'mail';
-        }
+        // Always email: this is the invitation itself, so it must arrive
+        // whatever the user's channel preferences are.
+        $channels[] = 'mail';
 
         return $channels;
     }
@@ -104,7 +103,7 @@ class OrganizationAssignedNotification extends Notification implements ShouldQue
                 // (AppServiceProvider) sets that key on every view and would
                 // silently override it.
                 'assignedOrgName' => $orgName,
-                'dashboardUrl'   => url(\App\Providers\RouteServiceProvider::HOME),
+                'acceptUrl'      => url(\App\Providers\RouteServiceProvider::HOME),
             ], $orgData));
     }
 
