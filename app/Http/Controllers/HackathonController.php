@@ -360,6 +360,10 @@ class HackathonController extends Controller
         $existInTeam = Team_member::where('TeamMember', 'hackathon')->where('acceptInvition', 'accepted')->pluck('user_id')->toArray();
         $pendingInvites = Team_member::where('TeamMember', 'hackathon')
             ->whereIn('acceptInvition', ['pending', 'join', 'failed'])->get();
+        $existInTeam = array_filter($existInTeam, function ($value) {
+            return $value !== null;
+        });
+        $existInTeam = array_values( array_unique($existInTeam) );
         $placeholders = implode(',', array_fill(0, count($existInTeam), '?'));
 
         $viewMember_q = "SELECT
