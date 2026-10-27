@@ -19,6 +19,10 @@ use App\Support\NotificationClaim;
 class AuthService
 {
     use ApiResponder;
+
+    /** API register role (RegisterUserRequest) => roles.default_for. */
+    private const REGISTER_ROLES = ['Mentor' => 'mentor', 'Registered' => 'registered'];
+
     public function attemptLogin(string $email, string $password): User
     {
         $user = User::where('email', $email)->first();
@@ -65,7 +69,8 @@ class AuthService
         try {
             $user = User::create($userData);
 
-            $role = Role::where('name', $data['role'])->firstOrFail();
+            // Role names can be renamed; default_for is the stable key.
+            $role = Role::where('default_for', self::REGISTER_ROLES[$data['role']])->firstOrFail();
 
             DB::table('model_has_roles')->insert([
                 'role_id'    => $role->id,
@@ -73,7 +78,7 @@ class AuthService
                 'model_id'   => $user->id,
              ]);
 
-           if ($role->name === 'Mentor') {
+           if ($role->default_for === 'mentor') {
                 UsersBio::create([
                     'user_id'  => $user->id,
                     'bio_en'   => $data['userbio'] ?? null,
