@@ -11,6 +11,7 @@ use Illuminate\Bus\Queueable;
 use Throwable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -146,6 +147,21 @@ class WelcomeMentorNotification extends Notification implements ShouldQueue
         'best'    => __('emails.welcome_email.best_regards'),
         'time'    => now()->toDateTimeString(),
     ]);
+    }
+
+    /**
+     * Get the database representation of the notification ('database' is always in via()).
+     */
+    public function toArray(object $notifiable): array
+    {
+        // Follow the platform's default language, like the mail.
+        $setting = Settings::first();
+        $locale = in_array($setting?->Default_Language, ['en', 'ar'], true) ? $setting->Default_Language : 'en';
+
+        return [
+            'message' => Lang::get('notifications.welcome.database', [], $locale),
+            'user_id' => $notifiable->id,
+        ];
     }
 
     /** Queued: when the worker gives up, free the welcome slot so it can be sent again. */
