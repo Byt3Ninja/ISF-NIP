@@ -190,6 +190,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     {
         // The judge welcome email follows the platform's default language
         // (General Settings), not the recipient's personal preference.
+        $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
             ? $setting->Default_Language
             : 'en';
@@ -212,6 +213,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     {
         // The judge welcome email follows the platform's default language
         // (General Settings), not the recipient's personal preference.
+        $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
             ? $setting->Default_Language
             : 'en';
@@ -233,6 +235,7 @@ class WelcomeJudgerNotification extends Notification implements ShouldQueue
     {
         // The judge welcome email follows the platform's default language
         // (General Settings), not the recipient's personal preference.
+        $setting = Settings::first();
         $locale = in_array($setting?->Default_Language, ['en', 'ar'], true)
             ? $setting->Default_Language
             : 'en';
