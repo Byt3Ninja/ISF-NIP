@@ -251,8 +251,10 @@
           </div>
 
           <div class="mb-4 col-md-6">
-            <label for="national_id" class="form-label fs-6 fw-bold">{{ __('admin.national_id') }}</label>
-            <input type="text" class="form-control" id="national_id" name="national_id" placeholder="{{ __('admin.national_id') }}" value="{{ old('national_id', $client->national_id ?? '') }}" oninput="this.value = this.value.trim()" autocomplete="off" />
+            <label for="national_id" class="form-label fs-6 fw-bold">
+              {{ __('admin.national_id') }} @if(config('app.national_id_required'))<span class="text-danger">*</span>@endif
+            </label>
+            <input type="text" class="form-control" id="national_id" name="national_id" placeholder="{{ __('admin.national_id') }}" value="{{ old('national_id', $client->national_id ?? '') }}" oninput="this.value = this.value.trim()" autocomplete="off" @if(config('app.national_id_required')) required @endif />
             <span class="invalid-feedback" id="national-id-error" style="display: none;"></span>
           </div>
         @endif

@@ -3776,6 +3776,7 @@ return [
 	'employee_statistics_updated' => 'Employee statistics updated successfully.',
 	'no_company_associated' => 'No company is associated with this account.',
 	'invalid_national_id' => 'Enter a valid National ID.',
+	'national_id_is_required' => 'National ID is required.',
 	'dob_future_not_allowed' => 'Date of birth cannot be in the future.',
 	'company_registration_type' => 'Company Registration Type',
 	'company_registration_type_placeholder' => 'Select Company Registration Type',

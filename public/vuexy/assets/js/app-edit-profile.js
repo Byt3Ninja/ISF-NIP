@@ -50,7 +50,7 @@
       address: { stringLength: 'Address should be between 2 and 100 characters' },
       academic_stat: { notEmpty: 'Please select your education status' },
       dob: { notEmpty: 'Please enter your date of birth', invalid: 'Please enter a valid date of birth' },
-      national_id: { invalidFormat: 'Invalid National ID format for the selected country', noCountry: 'Please select country first', noRule: 'National ID validation is not available for this country' },
+      national_id: { notEmpty: 'Please enter your National ID', invalidFormat: 'Invalid National ID format for the selected country', noCountry: 'Please select country first', noRule: 'National ID validation is not available for this country' },
       country_id: { notEmpty: 'Please select your country' },
       Please_enter_otp: 'Please enter OTP',
       Please_enter_valid_whatsapp_number: 'Please enter a valid WhatsApp number',
@@ -65,7 +65,7 @@
       address: { stringLength: 'يجب أن يكون العنوان بين 2 و 100 حرفًا' },
       academic_stat: { notEmpty: 'يرجى اختيار الحالة الدراسية' },
       dob: { notEmpty: 'يرجى إدخال تاريخ الميلاد', invalid: 'يرجى إدخال تاريخ ميلاد صحيح' },
-      national_id: { invalidFormat: 'صيغة رقم الهوية غير صحيحة', noCountry: 'يرجى اختيار الدولة أولاً', noRule: 'التحقق من رقم الهوية غير متاح لهذه الدولة' },
+      national_id: { notEmpty: 'يرجى إدخال الرقم القومي', invalidFormat: 'صيغة رقم الهوية غير صحيحة', noCountry: 'يرجى اختيار الدولة أولاً', noRule: 'التحقق من رقم الهوية غير متاح لهذه الدولة' },
       country_id: { notEmpty: 'يرجى اختيار الدولة' },
       Please_enter_otp: 'يرجى إدخال OTP',
       Please_enter_valid_whatsapp_number: 'يرجى إدخال رقم واتساب صحيح',
@@ -95,7 +95,8 @@
     return {
       callback: function (input) {
         const value = (input.value || '').trim();
-        if (value.length === 0) return { valid: true };
+        // The view marks the field `required` when NATIONAL_ID_REQUIRED is on.
+        if (value.length === 0) return input.element.required ? { valid: false, message: t('national_id', 'notEmpty') } : { valid: true };
         const iso2 = getSelectedCountryIso2();
         const rule = nationalIdRules[iso2];
         if (!rule) return { valid: false, message: t('national_id', 'noRule') };

@@ -242,4 +242,10 @@ return [
     'version' => env('APP_VERSION', '1.0.0'),
     'build' => env('APP_BUILD', '0'),
     'git_sha' => env('APP_GIT_SHA', ''),
+
+    // Permission-gated combined dashboard for every role; off = legacy per-role dashboards.
+    'new_dashboard' => env('NEW_DASHBOARD', false),
+
+    // Founders must fill in their National ID on the edit-profile form; off = optional.
+    'national_id_required' => env('NATIONAL_ID_REQUIRED', false),
 ];

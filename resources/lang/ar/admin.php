@@ -3826,6 +3826,7 @@ return [
 	'employee_statistics_updated' => 'تم تحديث إحصائيات الموظفين بنجاح.',
 	'no_company_associated' => 'لا توجد شركة مرتبطة بهذا الحساب.',
 	'invalid_national_id' => 'يرجى إدخال رقم هوية / رقم قومي صحيح.',
+	'national_id_is_required' => 'الرقم القومي مطلوب.',
 	'dob_future_not_allowed' => 'تاريخ الميلاد لا يمكن أن يكون في المستقبل.',
 	'company_registration_type' => 'نوع تسجيل الشركة',
 	'company_registration_type_placeholder' => 'حدد نوع تسجيل الشركة',
