@@ -39,7 +39,7 @@
                                                             <p style="margin: 0;">Request Details: -</p>
                                                             <p style="margin: 0;">Requested by: {{ $requester->first_name_en }} {{ $requester->last_name_en }}</p>
                                                             <p style="margin: 0;">Email: {{ $requester->email }}</p>
-                                                            <p style="margin: 0;">Organization: {{ !is_null( $organization ) ? $organization->name_en : '-' }}</p>
+                                                            <p style="margin: 0;">{{ __('email.organization', [], 'en') }}: {{ !is_null( $organization ) ? $organization->name_en : '-' }}</p>
                                                             <p style="margin: 0;">Requested Date: {{ $request->date_time }}</p>
                                                             <p style="margin: 0;"> Service Description: {{ $service->description_en }}</p>
                                                             <p style="margin: 0;">Additional Notes: {{ $request->comment }}</p>

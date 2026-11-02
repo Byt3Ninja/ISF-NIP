@@ -235,7 +235,7 @@
                           style="width:28px;height:28px;">
                           <i class="ti ti-user-off ti-xs text-muted"></i>
                         </div>
-                        <span class="small text-muted ms-2">{{ $l == 'en' ? 'No founders listed' : 'لم يتم إدراج أي مؤسسين' }}</span>
+                        <span class="small text-muted ms-2">{{ __('admin.no_founders_listed') }}</span>
                       </div>
                     @endif
                   </div>

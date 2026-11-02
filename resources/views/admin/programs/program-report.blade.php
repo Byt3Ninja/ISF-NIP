@@ -305,7 +305,7 @@
                     ctx.fillText(totalStartups, centerX, centerY - 8);
                     ctx.font = '0.9rem Cairo, Arial, sans-serif';
                     ctx.fillStyle = '#6c757d';
-                    const label = document.documentElement.lang === 'ar' ? 'إجمالي الشركات' : 'Total Startups';
+                    const label = @json(__('admin.Total Startups'));
                     ctx.fillText(label, centerX, centerY + 14);
                     ctx.restore();
                   }
@@ -647,7 +647,7 @@
                             data: {
                                 labels: Object.keys(statusCounts),
                                 datasets: [{
-                                    label: 'عدد الشركات',
+                                    label: @json(__('admin.company_counts')),
                                     data: Object.values(statusCounts),
                                     backgroundColor: [chartColors[1], chartColors[0], chartColors[5]], // Success, Primary, Danger
                                     borderColor: chartBorderColors,
@@ -703,9 +703,9 @@
                     }
 
                  // Update summary list counts
-                  document.getElementById('summaryTopCompanies').innerHTML = `<i class="fas fa-trophy"></i> Highest Rated: ${statusCounts['Highest Rated']} companies`;
-                  document.getElementById('summaryGoodCompanies').innerHTML = `<i class="fas fa-thumbs-up"></i> Good Performance: ${statusCounts['Good Performance']} companies`;
-                  document.getElementById('summaryImprovementCompanies').innerHTML = `<i class="fas fa-flag"></i> Needs Improvement: ${statusCounts['Needs Improvement']} companies`;
+                  document.getElementById('summaryTopCompanies').innerHTML = `<i class="fas fa-trophy"></i> ${@json(__('admin.summary_highest_rated_companies')).replace(':count', statusCounts['Highest Rated'])}`;
+                  document.getElementById('summaryGoodCompanies').innerHTML = `<i class="fas fa-thumbs-up"></i> ${@json(__('admin.summary_good_performance_companies')).replace(':count', statusCounts['Good Performance'])}`;
+                  document.getElementById('summaryImprovementCompanies').innerHTML = `<i class="fas fa-flag"></i> ${@json(__('admin.summary_needs_improvement_companies')).replace(':count', statusCounts['Needs Improvement'])}`;
               }
 
             // --- Initialize all reports ---

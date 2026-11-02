@@ -30,7 +30,7 @@
 </head>
 <body>
     
-    <p><strong>Company Name:</strong> {{ $companyName }}</p>
+    <p><strong>{{ __('forms.startup_name', [], 'en') }}:</strong> {{ $companyName }}</p>
     <p><strong>Assessment Start Date:</strong> {{ \Carbon\Carbon::parse($start_date)->format('Y-m-d') }}</p>
     <p><strong>Assessment End Date:</strong> {{ \Carbon\Carbon::parse($end_date)->format('Y-m-d') }}</p>
     <p><strong>Overall Weighted Score:</strong> {{ number_format($scoresTotals, 2) }}</p>

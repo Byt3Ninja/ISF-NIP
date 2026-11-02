@@ -43,7 +43,7 @@ $menuItems = [
 
     // My Company (for users without company)
     [
-        'label' => $l == 'en' ? 'Create Company' : 'إنشاء شركة',
+        'label' => __('admin.menu_create_company'),
         'icon' => 'ti-building me-3',
         'route' => 'company.profile_view_mine',
         'permission' => ['company.profile_view', 'assessments.results_analysis_view', 'swot.view'],
@@ -68,14 +68,14 @@ $menuItems = [
 
     // My Company (for users with company)
     [
-        'label' => $l == 'en' ? 'My Company' : 'شركتي',
+        'label' => __('breadcrumb.my_company'),
         'icon' => 'ti ti-building me-3 ti-md',
         'route' => null,
         'permission' => ['company.profile_view', 'assessments.results_analysis_view', 'swot.view'],
         'isVisible' => $_user->HaveCompany != 0 && $_user->company,
         'subItems' => [
             [
-                'label' => $l == 'en' ? 'My Startup Profile' : 'ملف شركتي الناشئة',
+                'label' => __('admin.menu_my_startup_profile'),
                 'icon' => 'ti-building-skyscraper',
                 'route' => 'company.profile_view',
                 'permission' => 'company.profile_view',
@@ -368,7 +368,7 @@ $menuItems = [
 
     // Organization Types (Admin)
     [
-        'label' => $l == 'en' ? 'Organization Types' : 'أنواع المؤسسات',
+        'label' => __('admin.Organization Types'),
         'icon' => 'ti ti-category',
         'route' => 'organization-types.index',
         'permission' => null,
@@ -461,7 +461,7 @@ $menuItems = [
                 'isVisible' => true
             ],
             [
-                'label' => $l == 'en' ? 'Program Startups' : 'برنامج الشركات الناشئة',
+                'label' => __('admin.menu_program_startups'),
                 'icon' => 'ti ti-rocket',
                 'route' => '/dashboard/cycles/0/registered',
                 'permission' => 'cycles.users_manage',
@@ -553,7 +553,7 @@ $menuItems = [
         'isVisible' => $_user->ableToAny(["mentorships.requests_list", "mentorships.requests_view", "mentorships.sessions_list"], $permissions),
         'subItems' => [
             [
-              'label' => $l == 'en' ? 'Programs Mentors' : 'مرشدو البرامج',
+              'label' => __('admin.menu_programs_mentors'),
               'icon' => 'ti ti-school',
               'route' => '/dashboard/mentorship/assign',
               'permission' => 'mentorships.requests_list',
@@ -839,7 +839,7 @@ $menuItems = [
 
     // Organization Settings
     [
-        'label' => $l == 'en' ? 'Organization Settings' : 'إعدادات المنظمة',
+        'label' => __('admin.menu_organization_settings'),
         'icon' => 'ti ti-settings',
         'route' => 'settings.organization_manage',
         'permission' => 'settings.organization_manage',

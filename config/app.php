@@ -97,6 +97,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Localization Overlay Path
+    |--------------------------------------------------------------------------
+    |
+    | Folder name inside resources/lang/{locale}/ whose files override the
+    | normal translations key by key (e.g. "isf" reads resources/lang/en/isf/
+    | first). Missing keys and files fall back to the normal translations.
+    | Null keeps the default wording.
+    |
+    */
+
+    'localization_path' => env('LOCALIZATION_PATH'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Faker Locale
     |--------------------------------------------------------------------------
     |
@@ -158,7 +172,7 @@ return [
         Illuminate\Redis\RedisServiceProvider::class,
         Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
         Illuminate\Session\SessionServiceProvider::class,
-        Illuminate\Translation\TranslationServiceProvider::class,
+        App\Providers\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,

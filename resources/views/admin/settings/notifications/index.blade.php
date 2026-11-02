@@ -34,7 +34,7 @@
                     @endif
 
                     <p class="text-muted mb-4">
-                        Configure which notification channels are enabled globally for all users and organizations.
+                        {{ __('admin.notification_channels_global_description') }}
                     </p>
 
                     <form action="{{ route('settings.notification_update') }}" method="POST">

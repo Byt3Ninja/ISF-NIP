@@ -829,4 +829,11 @@ return [
 
     'mentor_invite_supported_mimes' => 'The file format is not supported. accepted formats: jpg, png, pdf, doc, docx, xls, xlsx, ppt, pptx.',
     'mentor_invite_max_file_size' => 'The file size exceeds the maximum limit of 10MB.',
+    'program_title_in_arabic' => 'Program Title in Arabic',
+    'select_program_type' => 'Select Program Type',
+    'program_cover' => 'Program Cover',
+    'program_description_in_arabic' => 'Description in Arabic',
+    'program_title_required' => 'Program title is required',
+    'program_title_ar_required' => 'Program Title in Arabic is required.',
+    'program_description_ar_required' => 'Description in Arabic is required.',
 ];
