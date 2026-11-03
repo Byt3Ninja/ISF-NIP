@@ -60,9 +60,9 @@ const translations = {
     actions: 'Actions',
     search: 'Search',
     view: 'View Details',
-    programName: 'Program Name',
+    programName: @json(__('admin.Program Name')),
     stepName: 'Step Name',
-    startupName: 'Startup Name',
+    startupName: @json(__('forms.startup_name')),
     status: 'Status',
     detailsOf: 'Details of',
     show: 'Show',
@@ -73,7 +73,7 @@ const translations = {
     filtered: 'filtered',
     noMatchingRecords: 'No matching records found',
     noDataAvailable: 'No data available in table',
-    allPrograms: 'All Programs',
+    allPrograms: @json(__('admin.All_Programs')),
     allSteps: 'All Steps',
     allStatus: 'All Status',
     pending: 'Pending',
@@ -84,9 +84,9 @@ const translations = {
     notstarted: 'Not Started',
     inprogress: 'In Progress',
     completed: 'Completed',
-    programType: 'Program Type',
+    programType: @json(__('admin.Program Type')),
     stepType: 'Step Type',
-    allProgramTypes: 'All Program Types',
+    allProgramTypes: @json(__('admin.All Program Types')),
     allStepTypes: 'All Step Types',
     // Step-type filter labels. The option VALUE stays the raw 'initial'/'final'
     // so search and the server-side export keep matching. (GV-9492)
@@ -102,9 +102,9 @@ const translations = {
     actions: 'الإجراءات',
     search: 'بحث',
     view: 'عرض التفاصيل',
-    programName: 'اسم البرنامج',
+    programName: @json(__('admin.Program Name')),
     stepName: 'اسم  المرحلة',
-    startupName: 'اسم الشركة الناشئة',
+    startupName: @json(__('forms.startup_name')),
     status: 'الحالة',
     detailsOf: 'تفاصيل',
     show: 'عرض',
@@ -115,7 +115,7 @@ const translations = {
     filtered: 'مصفاة',
     noMatchingRecords: 'لا توجد سجلات مطابقة',
     noDataAvailable: 'لا توجد بيانات متاحة في الجدول',
-    allPrograms: 'جميع البرامج',
+    allPrograms: @json(__('admin.All_Programs')),
     allSteps: 'جميع المراحل',
     allStatus: 'جميع الحالات',
     pending: 'معلق',
@@ -126,9 +126,9 @@ const translations = {
     notstarted: 'لم تبدأ',
     inprogress: 'قيد التنفيذ',
     completed: 'مكتمل',
-    programType: 'نوع البرنامج',
+    programType: @json(__('admin.Program Type')),
     stepType: 'نوع المرحلة',
-    allProgramTypes: 'جميع أنواع البرامج',
+    allProgramTypes: @json(__('admin.All Program Types')),
     allStepTypes: 'جميع أنواع المراحل',
     initial: 'التقييم الأولي',
     final: 'التقييم النهائي',
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                         <img src="${full.startup_logo}" 
                              onerror="this.src='/images/logo-placeholder.png'"
                              class="rounded-circle me-2" 
-                             width="32" height="32" alt="Company Logo">
+                             width="32" height="32" alt="{{ __('admin.company_logo') }}">
                         <span>${data}</span>
                       </div>`;
             }

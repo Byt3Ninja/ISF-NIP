@@ -681,7 +681,7 @@
                   </div>
                   <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2 mt-3">
                     <small class="text-muted" id="programsPaginationInfo"></small>
-                    <nav aria-label="Programs pagination" id="programsPaginationNav">
+                    <nav aria-label="{{ __('landing.programs_pagination') }}" id="programsPaginationNav">
                       <ul class="pagination justify-content-center mb-0" id="programsPaginationList"></ul>
                     </nav>
                   </div>

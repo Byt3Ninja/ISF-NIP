@@ -110,7 +110,7 @@
 								@if($cycle->organization->img_url)
 									<img
 										src="{{ route('organizations.logo', $cycle->organization->img_url ?? '') }}"
-										alt="Organization Logo"
+										alt="{{ __('admin.Organization Logo') }}"
 										class="img-fluid rounded"
 										style="max-width: 120px; max-height: 120px; object-fit: contain; background: rgba(255,255,255,0.1); padding: 1rem;"
 									/>
@@ -276,7 +276,7 @@
 								<td class="text-center">
 									<span class="survey-type-badge">
 										<i class="ti ti-{{ $survey_scope->type == 'mentor' ? 'user-star' : ($survey_scope->type == 'startup' ? 'rocket' : 'users') }} me-1"></i>
-										{{ ucfirst($survey_scope->type) }}
+										{{ $survey_scope->type == 'startup' ? __('admin.survey_audience_startup') : ucfirst($survey_scope->type) }}
 									</span>
 								</td>
 								<td class="text-center">
@@ -416,7 +416,7 @@
 									<select class="form-select" id="type" name="type" required>
 										<option value="" selected disabled> {{ $l == 'ar' ? 'اختر الجمهور المستهدف' : 'Select Target Audience' }} </option>
 										<option value="mentor"> {{ $l == 'ar' ? 'مرشد' : 'Mentor' }} </option>
-										<option value="startup"> {{ $l == 'ar' ? 'مؤسس' : 'StartUp' }} </option>
+										<option value="startup"> {{ __('admin.survey_audience_startup') }} </option>
 										<option value="both"> {{ $l == 'ar' ? 'الاثنين' : 'Both' }} </option>
 									</select>
 									<div class="form-text">{{ __('admin.Select who should receive this survey') }}</div>

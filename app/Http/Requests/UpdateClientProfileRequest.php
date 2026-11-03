@@ -52,7 +52,7 @@ class UpdateClientProfileRequest extends FormRequest
         if (Auth::user()->hasAnyRole(['Registered', 'registered'])) {
             $rules['academic_stat'] = 'required|in:Graduate,Student';
             $rules['dob']           = 'required|date|before:today';
-            $rules['national_id']   = 'nullable|alpha_num|max:50';
+            $rules['national_id']   = (config('app.national_id_required') ? 'required' : 'nullable') . '|alpha_num|max:50';
         }
 
         return $rules;
@@ -67,6 +67,7 @@ class UpdateClientProfileRequest extends FormRequest
             'dob.required'          => __('admin.this_field_is_required'),
             'dob.date'              => __('admin.dob_future_not_allowed'),
             'dob.before'            => __('admin.dob_future_not_allowed'),
+            'national_id.required'  => __('admin.national_id_is_required'),
             'national_id.alpha_num' => __('admin.invalid_national_id'),
             'national_id.max'       => __('admin.invalid_national_id'),
         ];

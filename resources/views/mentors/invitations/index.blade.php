@@ -981,7 +981,7 @@ $(function () {
         )
       );
     } else {
-      $body.text('No organizations found.');
+      $body.text(@json(__('admin.No Organizations')));
     }
   });
 

@@ -64,11 +64,11 @@
 
     $actionSentence = $isMentor
         ? match($action) {
-            'add'     => $isAr ? 'تمت إضافة مهمة جديدة إلى الشركات الناشئة التالية:'    : 'A new task has been added for the following startups:',
-            'update'  => $isAr ? 'تم تحديث مهمة للشركات الناشئة التالية:'                : 'A task has been updated for the following startups:',
-            'archive' => $isAr ? 'تمت أرشفة مهمة للشركات الناشئة التالية:'               : 'A task has been archived for the following startups:',
-            'reopen'  => $isAr ? 'أصبحت المهمة نشطة مرة أخرى للشركات الناشئة التالية:' : 'A task has been reopened for the following startups:',
-            default   => $isAr ? 'تحديث على مهمة للشركات الناشئة التالية:'               : 'An update on a task for the following startups:',
+            'add'     => __('email.task_added_for_startups'),
+            'update'  => __('email.task_updated_for_startups'),
+            'archive' => __('email.task_archived_for_startups'),
+            'reopen'  => __('email.task_reopened_for_startups'),
+            default   => __('email.task_update_for_startups'),
         }
         : match($action) {
             'add'     => $isAr ? "تم إسناد مهمة جديدة إليك على منصة {$platformName}." : "You have been assigned a new task on {$platformName}.",
@@ -199,7 +199,7 @@
                 <tr>
                     <td style="padding:14px 20px 0;" dir="{{ $dir }}">
                         <p style="margin:0;font-family:{{ $font }};font-size:11px;font-weight:600;letter-spacing:0.5px;color:#94a3b8;text-transform:uppercase;text-align:{{ $align }};">
-                            {{ $isAr ? 'البرنامج' : 'Program' }}
+                            {{ __('admin.program') }}
                         </p>
                         <p style="margin:4px 0 0;font-family:{{ $font }};font-size:14px;color:#1a1a2e;text-align:{{ $align }};">
                             {{ $programName }}

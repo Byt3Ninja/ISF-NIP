@@ -219,7 +219,7 @@ if ($user->hasRole('Admin')) {
 
 					// Create organization filter
 					$('<select id="orgFilter" class="form-select form-select-sm" style="width: auto; max-width: 150px;">' +
-            '<option value="">{{ $l == "en" ? "All Organizations" : "كل المنظمات" }}</option>' +
+            '<option value="">{{ __('admin.All_Organizations') }}</option>' +
             '@foreach ($organizations as $organization)' +
             '<option value="{{ $organization->{'name_' . $l} }}">{{ $organization->{'name_' . $l} }}</option>' +
             '@endforeach' +
@@ -232,7 +232,7 @@ if ($user->hasRole('Admin')) {
 
 					// Create program filter
 					$('<select id="programFilter" class="form-select form-select-sm" style="width: auto; max-width: 150px;">' +
-            '<option value="">{{ $l == "en" ? "All Programs" : "كل البرامج" }}</option>' +
+            '<option value="">{{ __('admin.All_Programs') }}</option>' +
             '@foreach ($cycles as $cycle)' +
             '<option value="{{ $cycle->title }}">{{ $cycle->title }}</option>' +
             '@endforeach' +
