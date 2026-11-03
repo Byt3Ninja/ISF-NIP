@@ -349,7 +349,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 
 				<div class="glass-card p-4 p-lg-5">
 					<h3 class="mb-4 fw-bold">
-						{{ __('admin.apply_to_the_program') }}
+						{{ $l == 'ar' ? 'التقديم على البرنامج' : 'Apply to the Program' }}
 					</h3>
 					<div id="stepper-form" class="bs-stepper">
 						<div class="bs-stepper-header" role="tablist">

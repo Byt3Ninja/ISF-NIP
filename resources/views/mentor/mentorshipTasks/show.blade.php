@@ -73,9 +73,9 @@
                                                                             {{ $task['assignee']['name'] }}
                                                                         </div>
                                                                         <div class="media-left mr-50">
-                                                                            <img src="#" alt="{{ __('admin.company_logo') }}" class="rounded-circle" height="40" width="40">
+                                                                            <img src="#" alt="company avatar" class="rounded-circle" height="40" width="40">
                                                                         </div>
-                                                                        <div class="d-flex align-items-center gap-1"> {{ __('admin.Startup Name') }} </div>
+                                                                        <div class="d-flex align-items-center gap-1"> company name </div>
                                                                     </div>
                                                                     </a>
                                                                 </div>

@@ -17,7 +17,7 @@
         </div>
         <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
           <div class="text-center mb-6">
-            <p class="text-muted">{{ __('admin.profile_company_incomplete') }}</p>
+            <p class="text-muted">{{ $l == 'ar' ?  'لم يتم استكمال الملف الشخصي / ملف الشركة بعد، يرجى التأكد من استكمال جميع البيانات المطلوبة في كليهما' : 'Your Profile/Company data is not yet completed, make sure that you filled out all required data' }}</p>
           </div>
           <div class="row g-4">
             @if( $is_profile_completed == false )
@@ -38,7 +38,7 @@
             <div class="col-12">
               <div class="row">
                 <div class="col-10">
-                  {{ __('admin.Complete Startup/Idea') }}
+                  {{ $l == 'ar' ? 'استكمال ملف الشركة' : 'Complete Company Profile' }}
                 </div>
                 <div class="col-2">
                   <a href="{{ route('company.profile_view_mine') }}" class="btn btn-primary w-100">

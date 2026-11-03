@@ -87,7 +87,7 @@
 									<div class="col-12">
 										<div class="form-group mb-4">
 											<label class="form-label mb-1" for="organization_id">
-												{{ __('admin.Organizations') }}
+												{{ $l == 'en' ? 'Organizations' : 'المنظمات' }}
 											</label>
 											<select class="form-control form-select select2" name="organization_id[]" id="organization_id" multiple required>
 												@foreach ($organizations as $organization)
@@ -97,7 +97,7 @@
 													</option>
 												@endforeach
 											</select>
-											<div class="invalid-feedback">{{ __('admin.organizations_select_required') }}</div>
+											<div class="invalid-feedback">{{ $l == 'en' ? 'Please select at least one organization.' : 'يرجى اختيار منظمة واحدة على الأقل.' }}</div>
 										</div>
 									</div>
 

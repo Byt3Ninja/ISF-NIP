@@ -51,7 +51,7 @@
 						@endif
 						</h5>
 						@if(request('program_id'))
-						<p class="text-muted mb-0 small">{{ __('admin.viewing_screening_results_for_program') }}</p>
+						<p class="text-muted mb-0 small">{{ $l == 'en' ? 'Viewing screening results for selected program' : 'عرض نتائج الفحص للبرنامج المحدد' }}</p>
 						@endif
 					</div>
 					<div class="d-flex flex-wrap gap-2 align-items-center">            

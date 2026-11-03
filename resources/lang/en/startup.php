@@ -677,5 +677,4 @@ return [
   'no_feedback_provided_yet' => 'No feedback provided yet.',
   'all_segments' => 'All Segments',
   'none' => 'None',
-  'startup_all_categories' => 'All Categories',
 ];

@@ -252,6 +252,4 @@ return [
     'footer_privacy' => 'الخصوصية',
     'footer_rights_reserved' => 'جميع الحقوق محفوظة',
     'footer_built_for_founders' => 'صُنع من قبل المؤسسين، للمؤسسين.',
-    'past_programs' => 'البرامج السابقة',
-    'programs_pagination' => 'ترقيم صفحات البرامج',
 ];

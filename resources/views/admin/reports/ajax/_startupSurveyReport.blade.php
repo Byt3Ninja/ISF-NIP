@@ -260,7 +260,7 @@
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
             return `startup_surveys_report_${timestamp}`;
           },
-          title: @json(__('admin.startup_surveys_report')),
+          title: 'Startup Surveys Report',
           exportOptions: {
             columns: [0, 1, 2, 3, 4, 5], // Exclude action column
             format: {
@@ -288,7 +288,7 @@
             const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
             return `startup_surveys_report_${timestamp}`;
           },
-          title: @json(__('admin.startup_surveys_report')),
+          title: 'Startup Surveys Report',
           exportOptions: {
             columns: [0, 1, 2, 3, 4, 5], // Exclude action column
             format: {

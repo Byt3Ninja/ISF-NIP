@@ -43,7 +43,7 @@
   $showSupportTab = isset($hasAreasOfExpertise) ? (bool) $hasAreasOfExpertise : false;
 
   $tabs = collect([
-      ['company-info', 'ti-building-skyscraper', __('admin.startup_info')],
+      ['company-info', 'ti-building-skyscraper', $l == 'en' ? 'Startup Info' : 'معلومات الشركة'],
       ['industry-sectors', 'ti-apps', $l == 'en' ? 'Industry / Sectors' : ' الصناعة / القطاعات'],
       ['company-contact', 'ti-phone', $l == 'en' ? 'Contact Info' : 'معلومات الاتصال'],
       ['company-desc', 'ti-file-description', __('admin.about_or_description')],

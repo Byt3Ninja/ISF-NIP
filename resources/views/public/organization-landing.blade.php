@@ -580,7 +580,7 @@
       @else
         <div class="text-center py-8">
           <h5 class="text-muted mb-0">
-            {{ __('landing.No_Programs') }}
+            {{ $l == 'ar' ? 'لا توجد برامج متاحة حالياً.' : 'No programs are available right now.' }}
           </h5>
         </div>
       @endif

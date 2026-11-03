@@ -77,7 +77,7 @@
 														<img
 															src="{{ $organization->imageUrl }}"
 															onerror="this.src='/images/logo-placeholder.png'"
-															alt="{{ __('admin.Organization Logo') }}"
+															alt="Organization Logo"
 															class="rounded img-fluid border shadow-sm"
 															style="height: 140px; width: 200px; object-fit: cover;"
 														/>

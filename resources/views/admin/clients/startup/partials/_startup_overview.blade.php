@@ -964,7 +964,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg">
         <div class="modal-header">
-          <h5 class="modal-title">{{ __('startup.startup_all_categories') }}</h5>
+          <h5 class="modal-title">{{ $isEn ? 'All Categories' : 'فئات الشركة' }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">

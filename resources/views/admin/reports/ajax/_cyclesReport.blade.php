@@ -27,7 +27,7 @@
 <div class="col-12 mt-6">
   <div class="card border">
     <div class="card-header d-md-flex justify-content-between border-bottom pb-3 mb-6">
-      <h5 class="card-title mb-3 mb-md-0">{{ __('admin.programs_overview') }}</h5>
+      <h5 class="card-title mb-3 mb-md-0">{{ $l == 'en' ? 'Programs Overview' : 'نظرة عامة على البرامج' }}</h5>
       <div class="d-flex align-items-center gap-3">
         <div class="btn-group">
           <button type="button" class="btn btn-label-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -231,7 +231,7 @@
       const $orgSelect = $('<select/>', {
         id: 'orgFilterSelect',
         class: 'form-select form-select-sm',
-        'aria-label': @json(__('admin.organization_filter'))
+        'aria-label': 'Organization filter'
       });
       $orgCol.append($orgSelect);
 

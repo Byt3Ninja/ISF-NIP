@@ -49,7 +49,7 @@
                   id="debounced-search" 
                   class="form-control"
                   placeholder="{{ __('admin.Search') }} {{ __('admin.Cycles') }}" 
-                  aria-label="{{ __('admin.Search programs') }}"
+                  aria-label="Search programs"
                   aria-describedby="search-programs"
                   value="{{ request('search') ? request('search') : '' }}"
                 />

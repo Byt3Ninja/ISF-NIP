@@ -649,12 +649,4 @@ return [
         'regards' => 'مع أطيب التحيات،',
         'team' => 'فريق :org',
     ],
-        'organization_created_heading' => 'دعوة منظمة جديدة',
-        'organization_created_welcome' => 'مرحباً بكم كمؤسسة في منصتنا.',
-        'organization_created_name_is' => 'اسم المنظمة: :name',
-        'task_added_for_startups' => 'تمت إضافة مهمة جديدة إلى الشركات الناشئة التالية:',
-        'task_updated_for_startups' => 'تم تحديث مهمة للشركات الناشئة التالية:',
-        'task_archived_for_startups' => 'تمت أرشفة مهمة للشركات الناشئة التالية:',
-        'task_reopened_for_startups' => 'أصبحت المهمة نشطة مرة أخرى للشركات الناشئة التالية:',
-        'task_update_for_startups' => 'تحديث على مهمة للشركات الناشئة التالية:',
 ];

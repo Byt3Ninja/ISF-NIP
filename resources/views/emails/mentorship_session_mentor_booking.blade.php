@@ -27,12 +27,12 @@
                                         <td style="padding: 20px; direction: rtl; text-align: right;">
                                             <table width="100%" cellspacing="0" cellpadding="0" border="0">
                                                 <tr>
-                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">{{ __('email.founder_name', [], 'ar') }}:</td>
+                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">اسم المؤسس:</td>
                                                     <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $session['founder_name'] }}</td>
                                                 </tr>
                                                 @if(!empty($session['startup_name']) && !$session['is_hackathon'])
                                                     <tr>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">{{ __('email.startup_name', [], 'ar') }}:</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">اسم الشركة الناشئة:</td>
                                                         <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: left;">{{ $session['startup_name'] }}</td>
                                                     </tr>
                                                 @endif
@@ -81,12 +81,12 @@
                                         <td style="padding: 20px; direction: ltr; text-align: left;">
                                             <table width="100%" cellspacing="0" cellpadding="0" border="0">
                                                 <tr>
-                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">{{ __('email.founder_name', [], 'en') }}:</td>
+                                                    <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">Founder name:</td>
                                                     <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $session['founder_name'] }}</td>
                                                 </tr>
                                                 @if(!empty($session['startup_name']) && !$session['is_hackathon'])
                                                     <tr>
-                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">{{ __('email.startup_name', [], 'en') }}:</td>
+                                                        <td style="padding-bottom: 10px; font-size: 14px; color: #6B7280;">Startup name:</td>
                                                         <td style="padding-bottom: 10px; font-size: 14px; color: #111827; font-weight: 600; text-align: right;">{{ $session['startup_name'] }}</td>
                                                     </tr>
                                                 @endif

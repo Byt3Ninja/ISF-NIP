@@ -26,7 +26,7 @@
                   id="company-logo" 
                   src="{{ $client->company ? asset($client->company->logo) : '/images/logo-placeholder.png' }}" 
                   onerror="this.src = '/images/logo-placeholder.png';"
-                  alt="{{ __('admin.company_logo') }}" 
+                  alt="Company logo" 
                   class="img-fluid rounded border w-px-100 h-px-100" 
                 />
                 <i class="ti ti-camera-plus position-absolute bottom-0 end-0 p-2"></i>

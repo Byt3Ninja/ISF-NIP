@@ -667,12 +667,4 @@ return [
         'regards' => 'Best regards,',
         'team' => ':org Team',
     ],
-        'organization_created_heading' => 'New Organization invitation',
-        'organization_created_welcome' => 'Welcome Organization to our platform.',
-        'organization_created_name_is' => 'Organization name is: :name',
-        'task_added_for_startups' => 'A new task has been added for the following startups:',
-        'task_updated_for_startups' => 'A task has been updated for the following startups:',
-        'task_archived_for_startups' => 'A task has been archived for the following startups:',
-        'task_reopened_for_startups' => 'A task has been reopened for the following startups:',
-        'task_update_for_startups' => 'An update on a task for the following startups:',
 ];

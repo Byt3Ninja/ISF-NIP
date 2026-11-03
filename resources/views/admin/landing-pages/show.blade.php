@@ -445,7 +445,7 @@
                   'items' => $openPrograms,
               ],
               [
-                  'label' => __('landing.past_programs'),
+                  'label' => $l == 'ar' ? 'البرامج السابقة' : 'Past Programs',
                   'icon' => 'ti-history',
                   'items' => $pastPrograms,
               ],

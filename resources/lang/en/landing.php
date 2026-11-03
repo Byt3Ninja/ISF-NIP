@@ -252,6 +252,4 @@ return [
     'footer_privacy' => 'Privacy',
     'footer_rights_reserved' => 'All rights reserved',
     'footer_built_for_founders' => 'Built for founders, by founders.',
-    'past_programs' => 'Past Programs',
-    'programs_pagination' => 'Programs pagination',
 ];

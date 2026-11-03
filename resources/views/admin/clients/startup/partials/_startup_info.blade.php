@@ -11,7 +11,7 @@
                   <img 
                     src="{{ $company->logo ? asset( $company->logo) : '' }}"
                     onerror="this.style.display='none';this.parentElement.querySelector('.placeholder-icon').classList.remove('d-none');"
-                    class="rounded-3" alt="{{ __('startup.edit_profile.startup_logo') }}" 
+                    class="rounded-3" alt="Startup Logo" 
                     style="width: 170px; height: 150px; object-fit: cover;" />
                 @endif
                 <div class="avatar placeholder-icon {{ $company->logo ? 'd-none' : '' }}"

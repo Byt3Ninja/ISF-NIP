@@ -824,11 +824,4 @@ return [
 
     'mentor_invite_supported_mimes' => 'نوع الملف غير مدعوم. أنواع الملفات المدعومة: jpg, png, pdf, doc, docx, xls, xlsx, ppt, pptx.',
     'mentor_invite_max_file_size' => 'حجم الملف يتجاوز الحد الأقصى المسموح به وهو 10MB.',
-    'program_title_in_arabic' => 'عنوان البرنامج باللغة العربية',
-    'select_program_type' => 'اختر نوع البرنامج',
-    'program_cover' => 'غلاف البرنامج',
-    'program_description_in_arabic' => 'وصف البرنامج باللغة العربية',
-    'program_title_required' => 'عنوان البرنامج مطلوب',
-    'program_title_ar_required' => 'عنوان البرنامج باللغة العربية مطلوب.',
-    'program_description_ar_required' => 'وصف البرنامج باللغة العربية مطلوب.',
 ];

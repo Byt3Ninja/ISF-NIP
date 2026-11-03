@@ -97,20 +97,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Localization Overlay Path
-    |--------------------------------------------------------------------------
-    |
-    | Folder name inside resources/lang/{locale}/ whose files override the
-    | normal translations key by key (e.g. "isf" reads resources/lang/en/isf/
-    | first). Missing keys and files fall back to the normal translations.
-    | Null keeps the default wording.
-    |
-    */
-
-    'localization_path' => env('LOCALIZATION_PATH'),
-
-    /*
-    |--------------------------------------------------------------------------
     | Faker Locale
     |--------------------------------------------------------------------------
     |
@@ -172,7 +158,7 @@ return [
         Illuminate\Redis\RedisServiceProvider::class,
         Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
         Illuminate\Session\SessionServiceProvider::class,
-        App\Providers\TranslationServiceProvider::class,
+        Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
@@ -256,10 +242,4 @@ return [
     'version' => env('APP_VERSION', '1.0.0'),
     'build' => env('APP_BUILD', '0'),
     'git_sha' => env('APP_GIT_SHA', ''),
-
-    // Permission-gated combined dashboard for every role; off = legacy per-role dashboards.
-    'new_dashboard' => env('NEW_DASHBOARD', false),
-
-    // Founders must fill in their National ID on the edit-profile form; off = optional.
-    'national_id_required' => env('NATIONAL_ID_REQUIRED', false),
 ];

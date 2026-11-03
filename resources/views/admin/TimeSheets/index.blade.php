@@ -302,8 +302,8 @@
 									<div class="col-12 col-md-{{ $_user->hasAnyRole('Admin|organizationManager|manager') ? '6' : '12' }}">
 										<div class="form-group mb-4">
 											<label class="form-label"> {{ __('admin.Program') }} <span class="text-danger">*</span></label>
-											<select class="select2 form-select" id="program" name="program" dropdownParent="#CreateTimeSheet" data-placeholder="{{ __('admin.Select Program') }}">
-												<option value="" disabled selected> {{ __('admin.Select Program') }} </option>
+											<select class="select2 form-select" id="program" name="program" dropdownParent="#CreateTimeSheet" data-placeholder="{{ $l == 'en' ? 'Select program' : 'اختر البرنامج' }}">
+												<option value="" disabled selected> {{ $l == 'en' ? 'Select program' : 'اختر البرنامج' }} </option>
 												@foreach ($cycles as $cycle)
 													<option value="{{ $cycle->id }}"> {{ $cycle->title }} </option>
 												@endforeach

@@ -57,9 +57,9 @@
                 </div>
               @endif
               @if ($users)
-                <label class="form-label fs-6 fw-semibold mb-1" for="users">{{ __('admin.select_startups') }}:</label>
+                <label class="form-label fs-6 fw-semibold mb-1" for="users">{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}:</label>
                 <select class="select2 form-select" name="users[]"
-                  data-placeholder="{{ __('admin.select_startups') }}" multiple>
+                  data-placeholder="{{ $l == 'ar' ? 'اختر الشركات' : 'Select companies' }}" multiple>
                   @foreach ($users as $index => $user)
                     @if ($user->user)
                       <option value="{{ $user->user->id }}" {{ $index === 0 ? 'selected' : '' }}>

@@ -13,7 +13,7 @@
             <div class="card h-100 border-0 shadow">
               <!-- Header -->
               <div class="card-header bg-light border-0 d-flex align-items-center py-3">
-                <img src="{{ $winner->logo ?? '/images/logo-placeholder.png' }}" class="rounded-circle me-3 border shadow-xs" alt="{{ __('startup.edit_profile.startup_logo') }}" width="45" height="45">
+                <img src="{{ $winner->logo ?? '/images/logo-placeholder.png' }}" class="rounded-circle me-3 border shadow-xs" alt="Startup Logo" width="45" height="45">
                 <div>
                   <h6 class="mb-0 fw-bold text-dark">{{ $winner?->name ?? '-' }}</h6>
                   <small class="text-dark">{{ $winner?->teamName ?? '-' }}</small>

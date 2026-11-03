@@ -65,14 +65,14 @@
   <div class="col-md-6">
     <div class="form-group mb-4">
       <label for="title_ar" class="form-label fs-6 fw-semibold">
-        {{ __('cycles.program_title_in_arabic') }}
+        {{ $l == 'en' ? 'Program Title in Arabic' : 'عنوان البرنامج باللغة العربية' }}
       </label>
       <input 
         type="text" 
         class="form-control" 
         id="title_ar" 
         name="title_ar" 
-        placeholder="{{ __('cycles.program_title_in_arabic') }}"
+        placeholder="{{ $l == 'en' ? 'Program Title in Arabic' : 'عنوان البرنامج باللغة العربية' }}"
         oninput="this.value = this.value.trimStart()" 
         value="{{ isset($ccycle) ? $ccycle->title_ar : '' }}"
         maxlength="{{ \App\Cycle::TITLE_MAX_LENGTH }}"
@@ -92,10 +92,10 @@
         class="form-select select2"
         name="program_type" 
         id="program_type" 
-        data-placeholder="{{ __('cycles.select_program_type') }}"
+        data-placeholder="{{ $l == 'en' ? 'Select Program Type' : 'اختر نوع البرنامج' }}"
         {{ isset($id) ? 'disabled' : '' }}
       >
-        <option value="">{{ __('cycles.select_program_type') }}</option>
+        <option value="">{{ $l == 'en' ? 'Select Program Type' : 'اختر نوع البرنامج' }}</option>
         @foreach(\App\Cycle::programTypes() as $value => $label)
         <option value="{{ $value }}" {{ $selectedType==$value ? 'selected' : '' }}>
           {{ $label }}
@@ -146,7 +146,7 @@
   <div class="col-md-6">
     <div class="form-group mb-4">
       <label class="form-label fs-6 fw-semibold">
-        {{ __('cycles.Program Logo') }}
+        {{ $l == 'en' ? 'Program Logo' : 'شعار البرنامج' }}
       </label>
       <input 
         class="form-control" 
@@ -164,7 +164,7 @@
   <div class="col-md-6">
     <div class="form-group mb-4">
       <label class="form-label fs-6 fw-semibold">
-        {{ __('cycles.program_cover') }}
+        {{ $l == 'en' ? 'Program Cover' : 'غلاف البرنامج' }}
       </label>
       <input 
         class="form-control" 
@@ -218,13 +218,13 @@
   <div class="col-12">
     <div class="form-group mb-4">
       <label for="description_ar" class="form-label fs-6 fw-semibold">
-        {{ __('cycles.program_description_in_arabic') }}
+        {{ $l == 'en' ? 'Description in Arabic' : 'وصف البرنامج باللغة العربية' }}
       </label>
       <textarea 
         class="form-control" 
         id="description_ar" 
         name="description_ar" 
-        placeholder="{{ __('cycles.program_description_in_arabic') }}"
+        placeholder="{{ $l == 'en' ? 'Description in Arabic' : 'وصف البرنامج باللغة العربية' }}"
         oninput="this.value = this.value.trimStart()" 
         maxlength="250"
         rows="3">{{ isset($ccycle) ? $ccycle->description_ar : '' }}</textarea>
@@ -300,7 +300,7 @@ $(document).ready(function() {
       if (select2Container.length) {
         select2Container.addClass('is-invalid');
       }
-      orgSelect.closest('.form-group').find('.invalid-feedback').text(@json(__('admin.Please select an organization'))).addClass('d-block');
+      orgSelect.closest('.form-group').find('.invalid-feedback').text('{{ $l == "en" ? "Please select an organization" : "يرجى اختيار المنظمة" }}').addClass('d-block');
       isValid = false;
     }
 
@@ -313,7 +313,7 @@ $(document).ready(function() {
       if (select2Container.length) {
         select2Container.addClass('is-invalid');
       }
-      programType.closest('.form-group').find('.invalid-feedback').text(@json(__('cycles.Please select a program type'))).addClass('d-block');
+      programType.closest('.form-group').find('.invalid-feedback').text('{{ $l == "en" ? "Please select a program type" : "يرجى اختيار نوع البرنامج" }}').addClass('d-block');
       isValid = false;
     }
 
@@ -321,7 +321,7 @@ $(document).ready(function() {
     const title = $('#title');
     if (!title.val().trim()) {
       title.addClass('is-invalid');
-      title.next('.invalid-feedback').text(@json(__('cycles.program_title_required')));
+      title.next('.invalid-feedback').text('{{ $l == "en" ? "Program title is required" : "عنوان البرنامج مطلوب" }}');
       isValid = false;
     } else if (title.val().trim().length < 3) {
       title.addClass('is-invalid');
@@ -337,7 +337,7 @@ $(document).ready(function() {
     const title_ar = $('#title_ar');
     if (!title_ar.val().trim()) {
       title_ar.addClass('is-invalid');
-      title_ar.next('.invalid-feedback').text(@json(__('cycles.program_title_ar_required')));
+      title_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Program Title in Arabic is required." : "عنوان البرنامج باللغة العربية مطلوب." }}');
       isValid = false;
     } else if (title_ar.val().length > {{ \App\Cycle::TITLE_MAX_LENGTH }} ) {
       title_ar.addClass('is-invalid');
@@ -390,7 +390,7 @@ $(document).ready(function() {
     const description_ar = $('#description_ar');
     if (!description_ar.val().trim()) {
       description_ar.addClass('is-invalid');
-      description_ar.next('.invalid-feedback').text(@json(__('cycles.program_description_ar_required')));
+      description_ar.next('.invalid-feedback').text('{{ $l == "en" ? "Description in Arabic is required." : "وصف البرنامج باللغة العربية مطلوب." }}');
       isValid = false;
     } else if (description_ar.val().length > 250) {
       description_ar.addClass('is-invalid');
