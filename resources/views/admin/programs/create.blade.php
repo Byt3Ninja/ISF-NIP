@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/dropzone/dropzone.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/flatpickr/flatpickr.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
 @stop
 
 @section('style')
@@ -379,9 +379,9 @@ HTML;
 <script src="/vuexy/assets/vendor/libs/sortablejs/sortable.js"></script>
 <script src="/vuexy/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
 @stop
 
 @section('pagescripts')

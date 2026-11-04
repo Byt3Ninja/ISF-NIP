@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/pickr/pickr-themes.css" />
 @stop
 
@@ -172,9 +172,9 @@ $tabs = collect([
 @stop
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
 <script src="/vuexy/assets/vendor/libs/pickr/pickr.js"></script>
 @stop
 

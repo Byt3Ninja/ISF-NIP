@@ -31,7 +31,7 @@
   <link href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" rel="stylesheet" />
   <link href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" rel="stylesheet" />
   <!-- Vendor -->
-  <link href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" rel="stylesheet" />
+  <link href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" rel="stylesheet" />
   <!-- Page CSS -->
   <link href="/vuexy/assets/vendor/css/pages/page-auth.css" rel="stylesheet" />
   <!-- Helpers -->
@@ -219,9 +219,9 @@
   <script src="/vuexy/assets/vendor/js/menu.js"></script>
   <!-- endbuild -->
   <!-- Vendors JS -->
-  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
   <!-- Main JS -->
   <script src="/vuexy/assets/js/main.js"></script>
   <!-- Page JS -->

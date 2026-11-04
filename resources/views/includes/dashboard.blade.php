@@ -2155,9 +2155,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script src="/vuexy/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 <script src="/vuexy/assets/vendor/libs/chartjs/chartjs.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
 <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
 <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
 <script src="/vuexy/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>

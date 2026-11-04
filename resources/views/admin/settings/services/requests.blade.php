@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('style')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
 <style>
   #historyTabs .nav-item .nav-link { font-size: 12px; }
 
@@ -686,9 +686,9 @@ $config = [
 @stop
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
 
 <script>
 const statuses = {

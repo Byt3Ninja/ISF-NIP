@@ -4,7 +4,7 @@
 @section('subTitle', __('admin.Organization Types`s List'))
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
 <style>
   .dataTables_wrapper .dataTables_filter,
   .dataTables_wrapper .dataTables_length {
@@ -181,9 +181,9 @@
 @stop
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
 @stop
 
 @section('pagescripts')

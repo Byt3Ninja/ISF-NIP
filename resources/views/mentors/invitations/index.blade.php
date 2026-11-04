@@ -10,7 +10,7 @@ $tabs = [
 @endphp
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 
@@ -352,9 +352,9 @@ $tabs = [
 @endsection
 
 @section('scripts')
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
 <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
 <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
 <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>

@@ -41,7 +41,7 @@
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/typeahead-js/typeahead.css" />
   <!-- Vendor -->
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/select2/select2.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.css" />
 
@@ -462,9 +462,9 @@
 
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
 
   <!-- Main JS -->

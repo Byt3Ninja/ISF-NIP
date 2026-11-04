@@ -181,9 +181,9 @@
 @section('scripts')
   <!-- Vendors JS -->
   <script src="/vuexy/assets/vendor/libs/select2/select2.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave.js"></script>
   <script src="/vuexy/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
   <script src="/vuexy/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>

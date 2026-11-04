@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('vendorstyle')
-<link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+<link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/typography.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
 <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
@@ -53,9 +53,9 @@
 @section('scripts')
 <script src="/vuexy/assets/vendor/libs/sortablejs/sortable.js"></script>
 <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-<script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+<script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
 <script src="/js/kanban/kanban-utils.js?v={{ filemtime(public_path('js/kanban/kanban-utils.js')) }}"></script>
 <script src="/js/kanban/kanban-renderers.js?v={{ filemtime(public_path('js/kanban/kanban-renderers.js')) }}"></script>
 <script src="/js/kanban/kanban-board.js?v={{ filemtime(public_path('js/kanban/kanban-board.js')) }}"></script>

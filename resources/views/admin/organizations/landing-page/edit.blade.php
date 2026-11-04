@@ -4,7 +4,7 @@
 @section('subTitle', $organization->{'name_' . $l})
 
 @section('style')
-  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/@form-validation/form-validation.css" />
+  <link rel="stylesheet" href="/vuexy/assets/vendor/libs/form-validation/form-validation.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/katex.css" />
   <link rel="stylesheet" href="/vuexy/assets/vendor/libs/quill/editor.css" />
 @stop
@@ -314,9 +314,9 @@
 @endsection
 
 @section('scripts')
-  <script src="/vuexy/assets/vendor/libs/@form-validation/popular.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/bootstrap5.js"></script>
-  <script src="/vuexy/assets/vendor/libs/@form-validation/auto-focus.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/popular.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/bootstrap5.js"></script>
+  <script src="/vuexy/assets/vendor/libs/form-validation/auto-focus.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/katex.js"></script>
   <script src="/vuexy/assets/vendor/libs/quill/quill.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
