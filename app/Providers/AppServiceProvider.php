@@ -23,6 +23,8 @@ use Illuminate\Mail\Mailable;
 use App\Services\PlatformBrandingService;
 use Resend;
 use Resend\Laravel\Transport\ResendTransportFactory;
+use Symfony\Component\Mailer\Transport\Smtp\SmtpTransport;
+use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 use App\Repositories\SettingRepository;
 use App\AttendanceTrainingOffline;
 use App\ServicesRequests;
@@ -52,35 +54,10 @@ class AppServiceProvider extends ServiceProvider
             try {
                 $settings = Settings::find(1);
 
-                if ($settings) {
-                    if (TenantMailer::resendConnected($settings)) {
-                        $data = [
-                            'transport' => 'resend',
-                            'api_key' => $settings->resend_api_key,
-                            'from_address' => $settings->resend_from_address,
-                            'from_name' => $settings->resend_from_name ?: ($settings->title ?? config('mail.from.name')),
-                        ];
-                        MailConfig::set($data);
-                    } else {
-                        Config::set('mail.default', 'smtp');
-                        Config::set('mail.mailers.smtp.host', $settings->host ?? env('MAIL_HOST'));
-                        Config::set('mail.mailers.smtp.port', $settings->Port ?? env('MAIL_PORT'));
-                        Config::set('mail.mailers.smtp.username', $settings->Mail ?? env('MAIL_USERNAME'));
-                        Config::set('mail.mailers.smtp.password', $settings->Mailpassword ?? env('MAIL_PASSWORD'));
-                        Config::set('mail.mailers.smtp.encryption', $settings->encryption ?? env('MAIL_ENCRYPTION'));
-                        Config::set('mail.from.address',
-                            ( !empty( $settings->mail_from_address ) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL ) )
-                            ? $settings->mail_from_address
-                            : (
-                                !empty($settings->Mail) && filter_var($settings->Mail, FILTER_VALIDATE_EMAIL)
-                                ? $settings->Mail
-                                : env('MAIL_FROM_ADDRESS')
-                            )
-                        );
-                        Config::set('mail.from.name', 
-                            $settings->mail_from_name ?? ( $settings->title ?? env('MAIL_FROM_NAME', config('app.name')) )
-                        );
-                    }
+                // Same platform config TenantMailer falls back to, so a send
+                // outside TenantMailer (plain Mail::) uses the same transport.
+                if ($settings && $config = TenantMailer::globalConfig($settings)) {
+                    MailConfig::set($config);
                 }
             } catch (\Exception $e) {
                 $settings = null;
@@ -97,6 +74,23 @@ class AppServiceProvider extends ServiceProvider
                 Resend::client((string) config('resend.api_key')),
                 $config['options'] ?? []
             );
+        });
+
+        // Internal relay (SMTP preset "relay"): HELO, never STARTTLS or AUTH.
+        // Laravel's smtp transport is EsmtpTransport, which upgrades to TLS on
+        // its own whenever the server offers it.
+        Mail::extend('relay', function (array $config = []) {
+            $stream = (new SocketStream())
+                ->setHost((string) $config['host'])
+                ->setPort((int) $config['port'])
+                ->disableTls();
+
+            if (!empty($config['timeout'])) {
+                $stream->setTimeout((float) $config['timeout']);
+            }
+
+            return (new SmtpTransport($stream))
+                ->setLocalDomain($config['local_domain'] ?? config('mail.mailers.smtp.local_domain', 'localhost'));
         });
         view()->composer('*', function ($view) use (&$settings) {
             $_user = auth()->user();

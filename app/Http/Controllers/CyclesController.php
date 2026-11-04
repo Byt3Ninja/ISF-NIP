@@ -1015,10 +1015,13 @@ class CyclesController extends Controller
                 }
 
                 if (auth()->user()->hasRole('OrganizationManager')) {
-                    $requiredFields = ['host', 'mail', 'mailpassword', 'port', 'encryption'];
-                    $missing = [];
-
                     $setting = Settings::first();
+
+                    // An internal relay sends without a login or encryption.
+                    $requiredFields = $setting?->smtp_preset === 'relay'
+                        ? ['host', 'port']
+                        : ['host', 'mail', 'mailpassword', 'port', 'encryption'];
+                    $missing = [];
 
                     foreach ($requiredFields as $field) {
                         if (!$setting || is_null($setting->$field) || $setting->$field === '') {

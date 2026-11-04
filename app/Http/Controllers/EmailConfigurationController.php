@@ -57,7 +57,7 @@ class EmailConfigurationController extends Controller
 
         try {
             TenantMailer::apply([
-                'transport'    => 'smtp',
+                'transport'    => EmailSettingsStore::transportFor($smtp['preset']),
                 'host'         => $smtp['host'],
                 'port'         => (int) $smtp['port'],
                 'encryption'   => $smtp['encryption'],
@@ -218,6 +218,13 @@ class EmailConfigurationController extends Controller
                 'encryption'   => ['nullable', Rule::in(['tls', 'ssl', 'none'])],
                 'username'     => ['required', 'string', 'max:191'],
                 'password'     => ['required', 'string', 'max:191'],
+                'from_address' => ['required', 'email', 'max:191'],
+                'from_name'    => $fromName,
+            ]),
+            // Internal relay: no login and no encryption (fixed by the preset).
+            'relay' => $request->validate([
+                'host'         => ['required', 'string', 'max:191'],
+                'port'         => ['required', 'integer', 'between:1,65535'],
                 'from_address' => ['required', 'email', 'max:191'],
                 'from_name'    => $fromName,
             ]),

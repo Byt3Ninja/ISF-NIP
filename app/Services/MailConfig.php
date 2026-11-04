@@ -20,9 +20,13 @@ class MailConfig
             Config::set('mail.from.address', $smtp['from_address'] ?? config('mail.from.address'));
             Config::set('mail.from.name', $smtp['from_name'] ?? config('mail.from.name'));
         } else {
-            Config::set('mail.driver', 'smtp');
+            // The smtp mailer keeps its name; only an internal relay swaps the
+            // transport. With mail.driver set, Laravel builds the mailer from the
+            // top-level mail.* keys and takes the transport from mail.driver.
+            $transport = ($smtp['transport'] ?? 'smtp') === 'relay' ? 'relay' : 'smtp';
+            Config::set('mail.driver', $transport);
             Config::set('mail.default', 'smtp');
-            Config::set('mail.mailers.smtp.transport', 'smtp');
+            Config::set('mail.mailers.smtp.transport', $transport);
             Config::set('mail.host', $smtp['host']);
             Config::set('mail.port', (int) ($smtp['port'] ?? 587));
             Config::set('mail.username', $smtp['username']);

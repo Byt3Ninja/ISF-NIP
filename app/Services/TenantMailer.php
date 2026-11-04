@@ -135,7 +135,7 @@ class TenantMailer
         }
 
         return [
-            'transport'    => 'smtp',
+            'transport'    => EmailSettingsStore::transportFor($settings->smtp_preset),
             'host'         => $settings->smtp_host,
             'port'         => (int) ($settings->smtp_port ?: 587),
             'encryption'   => $settings->smtp_encryption,
@@ -151,12 +151,13 @@ class TenantMailer
     }
 
     /**
-     * Build the platform-wide mail config from the `settings` table.
+     * Build the platform-wide mail config from the `settings` table. Boot
+     * passes the row it already loaded.
      */
-    public static function globalConfig(): ?array
+    public static function globalConfig(?Settings $setting = null): ?array
     {
         try {
-            $setting = Settings::first();
+            $setting ??= Settings::first();
         } catch (\Throwable $e) {
             return null;
         }
@@ -180,7 +181,7 @@ class TenantMailer
         }
 
         return [
-            'transport'    => 'smtp',
+            'transport'    => EmailSettingsStore::transportFor($setting->smtp_preset),
             'host'         => $setting->host,
             'port'         => (int) ($setting->Port ?: 587),
             'encryption'   => $setting->encryption,
@@ -291,7 +292,8 @@ class TenantMailer
 
     /**
      * Send using the organization's transport, falling back to the platform
-     * transport if the organization's transport fails.
+     * transport if the organization's transport fails, or to the boot (.env)
+     * transport when the platform has no setup either.
      *
      * @param  mixed     $source    Organization, model, notifiable or email address.
      * @param  callable  $send      Performs the actual send.
@@ -327,9 +329,12 @@ class TenantMailer
 
                 $global = static::globalConfig();
 
-                // Nothing to fall back to: surface the original failure.
+                // No platform setup: retry on the transport boot left in place
+                // (config/mail.php, i.e. .env), the last step of the chain.
                 if (!$global) {
-                    throw $e;
+                    static::restore();
+
+                    return $send();
                 }
 
                 static::apply($global);

@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
  * hides that so the controller and the Blade form treat them alike.
  *
  * Providers:
- *   - smtp   with a preset: gmail | resend | custom
+ *   - smtp   with a preset: gmail | resend | custom | relay
  *   - resend (API) — only live once a test email has gone through
  */
 class EmailSettingsStore
@@ -26,6 +26,8 @@ class EmailSettingsStore
         'gmail'  => ['host' => 'smtp.gmail.com', 'port' => 587, 'encryption' => 'tls'],
         'resend' => ['host' => 'smtp.resend.com', 'port' => 465, 'encryption' => 'ssl', 'username' => 'resend'],
         'custom' => [],
+        // Internal relay that accepts this server's IP: no login, no encryption.
+        'relay'  => ['encryption' => null, 'username' => null, 'password' => null],
     ];
 
     public const VERIFY_DOMAIN_VIDEO = 'https://cdn.resend.com/posts/tutorial-video-generic-provider.mp4';
@@ -80,6 +82,16 @@ class EmailSettingsStore
             ?? new OrganizationSettings(['organization_id' => $organization->id]);
 
         return new self($settings, 'organization');
+    }
+
+    /**
+     * Mailer transport an SMTP preset sends with. A relay uses the plain SMTP
+     * transport (HELO, never STARTTLS or AUTH); EsmtpTransport would upgrade
+     * to TLS on its own whenever the server offers it.
+     */
+    public static function transportFor(?string $preset): string
+    {
+        return $preset === 'relay' ? 'relay' : 'smtp';
     }
 
     public function smtp(string $field): mixed

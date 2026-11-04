@@ -10,13 +10,14 @@
     'smtp_gmail'  => ['bg-label-success', 'email_status_smtp_gmail'],
     'smtp_resend' => ['bg-label-success', 'email_status_smtp_resend'],
     'smtp_custom' => ['bg-label-success', 'email_status_smtp_custom'],
+    'smtp_relay'  => ['bg-label-success', 'email_status_smtp_relay'],
   ];
   $badge = $statusBadges[$e['active']] ?? ($e['scope'] === 'organization'
     ? ['bg-label-info', 'email_status_platform']
     : ['bg-label-secondary', 'email_status_none']);
   $ecText = collect([
     'email_status_resend', 'email_status_smtp_gmail', 'email_status_smtp_resend', 'email_status_smtp_custom',
-    'email_status_platform', 'email_status_none', 'field_required', 'invalid_email', 'invalid_port',
+    'email_status_smtp_relay', 'email_status_platform', 'email_status_none', 'field_required', 'invalid_email', 'invalid_port',
     'api_key_required', 'api_key_too_long', 'domain_required', 'domain_invalid', 'sender_local_invalid',
     'email_config_connect_failed', 'email_key_receipt', 'email_saved_key_receipt', 'email_domain_receipt',
     'email_step3_body', 'email_test_receipt', 'email_choose_domain', 'email_how_verify',
@@ -94,6 +95,8 @@
           <label for="ec-preset-resend"><i class="ti ti-send"></i>Resend</label>
           <input type="radio" class="btn-check" name="smtp_preset" id="ec-preset-custom" value="custom" @checked($e['preset'] === 'custom')>
           <label for="ec-preset-custom"><i class="ti ti-adjustments-horizontal"></i>{{ __('settings.email_preset_custom') }}</label>
+          <input type="radio" class="btn-check" name="smtp_preset" id="ec-preset-relay" value="relay" @checked($e['preset'] === 'relay')>
+          <label for="ec-preset-relay"><i class="ti ti-route"></i>{{ __('settings.email_preset_relay') }}</label>
         </div>
       </div>
 
@@ -205,6 +208,34 @@
           <div class="col-md-6">
             <label class="form-label" for="ec-custom-from-name">{{ __('settings.email_sender_name') }}</label>
             <input id="ec-custom-from-name" name="from_name" type="text" class="form-control" maxlength="191" value="{{ $saved('custom', 'from_name') }}">
+          </div>
+        </div>
+      </div>
+
+      {{-- Internal relay: no login, no encryption (EmailSettingsStore::PRESETS['relay']) --}}
+      <div class="ec-preset" data-preset="relay" @if ($e['preset'] !== 'relay') hidden @endif>
+        <div class="alert alert-info ec-alert mb-4" role="note">
+          <i class="ti ti-info-circle ti-md"></i><span>{{ __('settings.email_relay_help') }}</span>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-9">
+            <label class="form-label" for="ec-relay-host">{{ __('settings.email_smtp_host') }} <span class="text-danger">*</span></label>
+            <input id="ec-relay-host" name="host" type="text" class="form-control" data-rule="required" maxlength="191" dir="ltr"
+              value="{{ $saved('relay', 'host') }}" placeholder="10.0.0.25">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label" for="ec-relay-port">{{ __('settings.email_port') }} <span class="text-danger">*</span></label>
+            <input id="ec-relay-port" name="port" type="text" inputmode="numeric" class="form-control" data-rule="port" dir="ltr"
+              value="{{ $saved('relay', 'port', '25') }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="ec-relay-from">{{ __('settings.email_sender_email') }} <span class="text-danger">*</span></label>
+            <input id="ec-relay-from" name="from_address" type="email" class="form-control" data-rule="email" maxlength="191"
+              value="{{ $saved('relay', 'from_address') }}" placeholder="no-reply@yourdomain.com">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="ec-relay-from-name">{{ __('settings.email_sender_name') }}</label>
+            <input id="ec-relay-from-name" name="from_name" type="text" class="form-control" maxlength="191" value="{{ $saved('relay', 'from_name') }}">
           </div>
         </div>
       </div>
@@ -454,6 +485,7 @@
       smtp_gmail: ['bg-label-success', 'email_status_smtp_gmail'],
       smtp_resend: ['bg-label-success', 'email_status_smtp_resend'],
       smtp_custom: ['bg-label-success', 'email_status_smtp_custom'],
+      smtp_relay: ['bg-label-success', 'email_status_smtp_relay'],
     };
     const DOMAIN_BADGE = {
       verified: 'bg-label-success', pending: 'bg-label-warning', not_started: 'bg-label-secondary',
