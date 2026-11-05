@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\{Validator, DB, Mail};
 use App\BuilderForm;
 use App\BuilderField;
 use App\Field;
+use App\Services\FormSectionStructurer;
 
 class FormBuilderController extends Controller
 {
@@ -192,6 +193,8 @@ class FormBuilderController extends Controller
                 return [
                     'id' => $field->id,
                     'section' => $section,
+                    'section_key' => FormSectionStructurer::sectionKey($options),
+                    'section_logic' => FormSectionStructurer::sectionLogic($options),
                     'description' => $description,
                     'label' => $options->label ?? '',
                     'is_required' => intval($options->validation->required ?? 0) === 1,
@@ -228,15 +231,13 @@ class FormBuilderController extends Controller
 
             // Group by section
             $grouped_data = $field_data
-                ->groupBy('section')
-                ->map(function ($fields, $section_title) {
+                ->groupBy('section_key')
+                ->map(function ($fields) {
                     $first = $fields->first();
                     return [
-                        'title' => $section_title,
+                        'title' => $first['section'],
                         'description' => $first['description'] ?? '',
-                        'logic' => is_array($first['logic'])
-                            ? ($first['logic']['section'] ?? 'continue')
-                            : ($first['logic'] ?? 'continue'),
+                        'logic' => $first['section_logic'],
                         'questions' => $fields->map(function ($f) {
                             return [
                                 'id' => $f['id'],
@@ -258,19 +259,7 @@ class FormBuilderController extends Controller
             $grouped_data = [];
         }
 
-        // Load builder forms list
-        if ($user->hasRole('admin')) {
-            $builderForms = BuilderForm::all();
-        } else {
-            $builderForms = BuilderForm::whereIn('organization_id', $orgIds)->get();
-        }
-
-        if ($request->org_id) {
-            $builderForms = BuilderForm::where('organization_id', $request->org_id)->get();
-        }
-
         $data = [
-            'builderForms' => $builderForms,
             'title' => 'form builder',
             'builder_data' => $grouped_data,
             
@@ -305,6 +294,8 @@ class FormBuilderController extends Controller
                 'label'         => $options['label'] ?? '',
                 'description'   => $options['description'] ?? '',
                 'section'       => $options['section'] ?? 'بدون قسم',
+                'section_key'   => FormSectionStructurer::sectionKey($options),
+                'section_logic' => FormSectionStructurer::sectionLogic($options),
                 'type'          => $options['type'] ?? null,
                 'is_required'   => (bool)($options['validation']['required'] ?? 0),
                 'options'       => form_field_options($options['values'] ?? null),
@@ -316,15 +307,15 @@ class FormBuilderController extends Controller
                 'label_high'    => $options['label_high'] ?? '',
             ];
         })
-        ->groupBy('section')
-        ->map(function ($questions, $section_title) {
+        ->groupBy('section_key')
+        ->map(function ($questions) {
             // نحاول نجيب description و logic من أول سؤال في القسم إن وجد
             $first = $questions->first();
 
             return [
-                'title'       => $section_title,
+                'title'       => $first['section'],
                 'description' => $first['description'] ?? '',
-                'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
+                'logic'       => $first['section_logic'],
                 'questions'   => $questions->values()->map(function ($q) {
                     return [
                         'id'          => $q['id'],
@@ -586,6 +577,7 @@ class FormBuilderController extends Controller
                 $section_title = null; 
                 $questions = [$item]; 
                 $description = null;
+                $section_keys = [];
             }
             elseif (($item['type'] ?? null) === 'section') {
                 $section_index++;
@@ -595,12 +587,18 @@ class FormBuilderController extends Controller
                 }
                 $description = $item['description'] ?? null;
                 $questions = $item['questions'] ?? [];
+                // GV-10420: the section's position identifies it (titles may repeat or be
+                // blank), and its "After this section" target travels with its questions.
+                $section_keys = [
+                    'section_index' => $section_index - 1,
+                    'section_logic' => FormSectionStructurer::normalizeLogic($item['logic'] ?? 'continue'),
+                ];
             }
             else {
                 return []; 
             }
 
-            return collect($questions)->map(function ($question) use ($fields, $section_title, $description, $normalizeOptions) {
+            return collect($questions)->map(function ($question) use ($fields, $section_title, $description, $section_keys, $normalizeOptions) {
                 $field_type = $question['question_type'] ?? 'short_answer';
 
                 switch ($field_type) {
@@ -719,7 +717,7 @@ class FormBuilderController extends Controller
                         'other_required' => !empty($question['other_required']) ? 1 : 0,
                     ],
                     'logic' => $question['logic'] ?? [],
-                ];
+                ] + $section_keys;
 
                 return [
                     'field' => $field_id,
@@ -923,139 +921,6 @@ class FormBuilderController extends Controller
                 'message_ar' => 'حدث خطأ أثناء حذف النموذج',
                 'error' => $e->getMessage()
             ], 500);
-        }
-    }
-
-    /**
-     * Reorder sections for a form.
-     *
-     * Payload (POST JSON):
-     *   {
-     *     "sections": [
-     *       { "title": "Section Name", "question_ids": [1, 5, 2] },
-     *       ...
-     *     ]
-     *   }
-     *
-     * Sections are purely logical groupings stored as the `section` key in
-     * each builder_field's options JSON. To persist a new section order, we
-     * process each section sequentially, assigning contiguous sort_orders
-     * and updating the `options.section` string value for all its questions.
-     */
-    public function reorderSections($id, Request $request)
-    {
-        $request->validate([
-            'sections'                => 'required|array',
-            'sections.*.title'        => 'nullable|string',
-            'sections.*.question_ids' => 'required|array',
-        ]);
-
-        $this->authorizeOrganization(BuilderForm::findOrFail($id)->organization_id);
-
-        $sectionsPayload = $request->input('sections');
-
-        try {
-            DB::transaction(function () use ($id, $sectionsPayload) {
-                $sortOrder = 1;
-                foreach ($sectionsPayload as $sec) {
-                    $title = $sec['title'] ?? '';
-                    $qids  = array_values(array_filter($sec['question_ids'], fn($v) => is_numeric($v)));
-                    
-                    foreach ($qids as $qid) {
-                        $field = BuilderField::where('id', $qid)
-                            ->where('builder_form_id', $id)
-                            ->first();
-                            
-                        if ($field) {
-                            $options = json_decode($field->getRawOriginal('options') ?? '{}', true) ?? [];
-                            $options['section'] = $title;
-                            
-                            $field->fill([
-                                'options'    => json_encode($options),
-                                'sort_order' => $sortOrder++
-                            ])->save();
-                        }
-                    }
-                }
-            });
-
-            return response()->json(['status' => 'success']);
-
-        } catch (\Throwable $e) {
-            report($e);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-        }
-    }
-
-    /**
-     * Reorder questions within a section (and optionally move between sections).
-     *
-     * Payload (POST JSON):
-     *   {
-     *     "section_title": "Section Title" | null,
-     *     "question_ids":  [3, 1, 7, ...]        ← builder_fields primary keys
-     *   }
-     *
-     * When section_title is provided and differs from a question's current
-     * options.section, the question's options JSON is updated so it belongs
-     * to the new section (cross-section drag-and-drop support).
-     */
-    public function reorderQuestions($id, Request $request)
-    {
-        $request->validate([
-            'question_ids'   => 'required|array',
-            'question_ids.*' => 'nullable',
-            'section_title'  => 'nullable|string',
-        ]);
-
-        $this->authorizeOrganization(BuilderForm::findOrFail($id)->organization_id);
-
-        $questionIds  = array_values(array_filter(
-            $request->input('question_ids'),
-            fn($v) => is_numeric($v)
-        ));
-        $sectionTitle = $request->input('section_title');
-
-        if (empty($questionIds)) {
-            return response()->json(['status' => 'success', 'message' => 'no db ids']);
-        }
-
-        try {
-            DB::transaction(function () use ($id, $questionIds, $sectionTitle) {
-                // Find the minimum sort_order slot occupied by these questions
-                // so we don't disturb the sort_order of other sections.
-                $minOrder = BuilderField::where('builder_form_id', $id)
-                    ->whereIn('id', $questionIds)
-                    ->min('sort_order') ?? 1;
-
-                $sortOrder = $minOrder;
-                foreach ($questionIds as $qid) {
-                    $field = BuilderField::where('id', $qid)
-                        ->where('builder_form_id', $id)
-                        ->first();
-
-                    if (!$field) {
-                        $sortOrder++;
-                        continue;
-                    }
-
-                    // Decode options to potentially update the section name.
-                    $options = json_decode($field->getRawOriginal('options') ?? '{}', true) ?? [];
-
-                    if ($sectionTitle !== null && ($options['section'] ?? null) !== $sectionTitle) {
-                        $options['section'] = $sectionTitle;
-                        $field->fill(['options' => json_encode($options)]);
-                    }
-
-                    $field->fill(['sort_order' => $sortOrder++])->save();
-                }
-            });
-
-            return response()->json(['status' => 'success']);
-
-        } catch (\Throwable $e) {
-            report($e);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 }

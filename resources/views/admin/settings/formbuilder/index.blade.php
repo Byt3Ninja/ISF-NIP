@@ -10,58 +10,165 @@
     position: relative;
   }
   .section-questions {
-    border-left: 3px solid var(--bs-primary);
+    border-inline-start: 3px solid var(--bs-primary);
     min-height: 48px; /* ensures empty sections can be drop targets */
-    transition: background-color 0.2s ease;
   }
 
-  /* ── Drag states ── */
-  .dragging {
-    opacity: 0.4;
-    box-shadow: 0 8px 24px rgba(0,0,0,.18) !important;
-  }
-  .drag-handle {
-    cursor: grab;
-    touch-action: none;
-  }
-  .drag-handle:active {
-    cursor: grabbing;
-  }
-
-  /* Drop-placeholder that shows insertion point */
-  .drop-placeholder {
-    border: 2px dashed var(--bs-primary);
-    border-radius: .375rem;
-    background: rgba(var(--bs-primary-rgb), .06);
-    pointer-events: none;
-    transition: height .15s ease;
-  }
-
-  /* Item cards: smooth lift on hover */
+  /* Item cards: lift on hover. No transform transition: SortableJS animates
+     the cards it shifts with transforms. */
   .item-card {
-    transition: box-shadow .15s ease, transform .15s ease;
+    transition: box-shadow .15s ease;
   }
-  .item-card:not(.dragging):hover {
+  .item-card:hover {
     box-shadow: 0 4px 16px rgba(0,0,0,.09);
   }
 
-  /* Section questions zone highlight while something hovers over it */
-  .section-questions.drag-active {
-    background: rgba(var(--bs-primary-rgb), .04);
+  /* ── Grip: the only place a drag starts (also ArrowUp / ArrowDown) ── */
+  .fb-handle {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
     border-radius: .375rem;
+    color: var(--bs-secondary-color);
+    font-size: 1.125rem;
+    cursor: grab;
+    touch-action: none;
+    transition: background-color .15s ease, color .15s ease;
+  }
+  .fb-handle:hover {
+    background-color: rgba(var(--bs-primary-rgb), .1);
+    color: var(--bs-primary);
+  }
+  .fb-handle:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+  }
+  body.fb-dragging,
+  body.fb-dragging * {
+    cursor: grabbing !important;
+    user-select: none;
+  }
+
+  /* ── Outline: while an item is held, every card folds to one line ── */
+  .fb-outline-row {
+    display: none;
+  }
+  .fb-outline .fb-outline-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-height: 2.25rem;
+  }
+  .fb-outline .item-card > .card-body {
+    padding: .5rem 1rem;
+  }
+  .fb-outline .item-card > .card-body > :not(.fb-outline-row),
+  .fb-outline .section-wrapper > .btn,
+  .fb-outline--sections .section-questions {
+    display: none !important;
+  }
+  .fb-outline .section-wrapper {
+    margin-bottom: 1.25rem !important;
+  }
+  .fb-outline .section-card {
+    margin-bottom: .5rem !important;
+  }
+  .fb-outline .section-card .fb-outline-row {
+    padding-top: .375rem;
+  }
+  .fb-outline--questions .section-questions {
+    gap: .5rem !important;
+    margin-bottom: 0 !important;
+  }
+  .fb-outline--questions .section-questions:empty::before {
+    content: attr(data-drop-hint);
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+    border: 1px dashed var(--bs-border-color);
+    border-radius: .375rem;
+    color: var(--bs-secondary-color);
+    font-size: .8125rem;
+  }
+  .fb-outline-row > .ti {
+    color: var(--bs-secondary-color);
+    font-size: 1.125rem;
+  }
+  .fb-outline-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--bs-heading-color);
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .section-card .fb-outline-title {
+    font-weight: 600;
+  }
+  .fb-outline-meta {
+    flex: none;
+    color: var(--bs-secondary-color);
+    font-size: .8125rem;
+  }
+
+  /* Where the held item will land */
+  .fb-slot {
+    border-radius: .5rem;
+    outline: 2px dashed var(--bs-primary);
+    outline-offset: -2px;
+    background-color: rgba(var(--bs-primary-rgb), .08) !important;
+    box-shadow: none !important;
+  }
+  .fb-slot > * {
+    visibility: hidden;
+  }
+
+  /* The copy that follows the pointer */
+  .fb-drag-proxy {
+    opacity: 1 !important;
+  }
+  .fb-drag-proxy.question-card,
+  .fb-drag-proxy .section-card {
+    box-shadow: 0 0 0 1px rgba(var(--bs-primary-rgb), .5), var(--bs-box-shadow-lg) !important;
+  }
+
+  /* Brief ring on the item that just moved */
+  @keyframes fb-moved {
+    from { box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), .45); }
+    to   { box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0); }
+  }
+  .question-card.fb-moved,
+  .fb-moved > .section-card {
+    animation: fb-moved .9s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fb-handle { transition: none; }
+    .question-card.fb-moved,
+    .fb-moved > .section-card { animation: none; }
   }
 </style>
 @stop
 
 @php
   $user = Auth::user();
+  // Only what the "Switch form" list shows. Full rows put every organization's
+  // credentials (password, api_token, Zoom/Microsoft secrets) into the page
+  // source and weighed ~4 KB per form.
+  $switcherColumns   = ['id', 'form_name', 'organization_id'];
+  $switcherRelations = ['organization:id,name_en,name_ar', 'cycles:cycles.id,cycles.title'];
   if ($user->hasRole('Admin')) {
     $organizations   = App\Organization::all();
-    $allBuilderForms = App\BuilderForm::with('organization', 'cycles')->get();
+    $allBuilderForms = App\BuilderForm::with($switcherRelations)->get($switcherColumns);
   } elseif ($user->hasRole('organizationManager') || $user->isSubAdmin()) {
     $orgIds          = $user->organizations_ids;
     $organizations   = App\Organization::whereIn('id', $orgIds)->get();
-    $allBuilderForms = App\BuilderForm::whereIn('organization_id', $orgIds)->with('organization', 'cycles')->get();
+    $allBuilderForms = App\BuilderForm::whereIn('organization_id', $orgIds)->with($switcherRelations)->get($switcherColumns);
   } else {
     $organizations   = collect();
     $allBuilderForms = collect();
@@ -310,9 +417,7 @@
     formData: @json($title),
     allForms: @json($allBuilderForms),
     routes: {
-      saveForm:         '{{ route("forms.design_save",       ["id" => isset($title->id) ? $title->id : "0"]) }}',
-      reorderSections:  '{{ route("forms.reorder_sections",  ["id" => isset($title->id) ? $title->id : "0"]) }}',
-      reorderQuestions: '{{ route("forms.reorder_questions", ["id" => isset($title->id) ? $title->id : "0"]) }}'
+      saveForm:         '{{ route("forms.design_save",       ["id" => isset($title->id) ? $title->id : "0"]) }}'
     },
     translations: {
       /* ── structural ── */
@@ -330,6 +435,8 @@
       submit_form:                  '{{ __("builder.Submit_form") }}',
       add_question_section:         '{{ __("builder.Add_Question_Section") }}',
       delete_section_questions:     '{{ __("builder.Delete_section_questions") }}',
+      questions_count:              '{{ __("builder.Questions_count") }}',
+      drop_question_here:           '{{ __("builder.Drop_question_here") }}',
       /* ── question card ── */
       question:                     '{{ __("builder.Question") }}',
       required:                     '{{ __("builder.Required") }}',
@@ -410,5 +517,7 @@
 @stop
 
 @section('pagescripts')
-<script src="/vuexy/assets/js/app-form-builder.js"></script>
+<script src="/vuexy/assets/vendor/libs/sortablejs/sortable.js"></script>
+{{-- Versioned so a deploy reaches open builders: a cached copy of the old script kept posting to removed endpoints. --}}
+<script src="/vuexy/assets/js/app-form-builder.js?v={{ @filemtime(public_path('vuexy/assets/js/app-form-builder.js')) }}"></script>
 @stop

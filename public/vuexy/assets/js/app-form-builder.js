@@ -4,14 +4,16 @@
  * All user-facing strings come from FB_CONFIG.translations (set in the Blade
  * @section('scripts') block). There are zero {{ __(...) }} calls in this file.
  *
- * Drag-and-drop strategy
+ * Drag-and-drop strategy (GV-10420)
  * ──────────────────────
- * • Sections  : draggable within #itemsContainer via the grip handle.
- * • Questions : draggable within their own .section-questions zone; a question
- *               can also be dragged from one section to another.
- * • draggable=true is set only while the grip handle is pressed, so normal
- *   form interactions (clicks, selects, inputs) are never accidentally captured.
- * • A live "placeholder" div shows the precise insertion point.
+ * • SortableJS (vendor/libs/sortablejs) in pointer "fallback" mode: one list for
+ *   the sections (#itemsContainer) and one per .section-questions zone, all
+ *   sharing a group so a question can move to any section.
+ * • Only the grip (.fb-handle) starts a drag; it also moves with ArrowUp/Down.
+ * • While an item is held the builder folds to an outline (one line per section
+ *   and question), so every target is on screen without scrolling.
+ * • A move only changes the page. "Save" persists the layout, like every other
+ *   edit in the builder.
  */
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -21,16 +23,26 @@
 let itemCounter      = 0;
 let questionCounters = {};   // sectionId → count (kept for compat)
 
-/* Active drag bookkeeping */
-const drag = {
-  el:          null,   // the element being dragged
-  placeholder: null,   // the ghost insertion indicator
-  type:        null,   // 'section' | 'question'
-  sourceList:  null,   // original parent list
+/* Drag & drop */
+const DRAG_TOLERANCE = 4;    // px the pointer must travel before a press becomes a drag
+
+/* forceFallback drags a light copy with pointer events instead of the browser's
+   native drag, which painted the whole section as a translucent screenshot,
+   could not scroll the page and showed a "no drop" cursor between sections. */
+const SORT_OPTIONS = {
+  animation:            window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180,
+  forceFallback:        true,
+  fallbackTolerance:    DRAG_TOLERANCE,
+  scroll:               true,
+  scrollSensitivity:    96,
+  scrollSpeed:          18,
+  emptyInsertThreshold: 24,
+  ghostClass:           'fb-slot',
+  fallbackClass:        'fb-drag-proxy',
 };
 
-/* Reorder debounce timers */
-const _reorderTimers = { sections: null, questions: null };
+let sectionOrderAtGrab = [];      // section wrappers as they were when a section was picked up
+let disarmFold         = () => {};
 
 /* Convenience alias – assigned inside the IIFE once FB_CONFIG is live */
 let t;   // = FB_CONFIG.translations
@@ -49,6 +61,7 @@ let isBuilderFormDirty = false;
   }
 
   /* ─── Bootstrap the form ────────────────────────────────────────── */
+  initSorting();
   if (FB_CONFIG.mode === 'ADD') {
     addSection();
   } else {
@@ -61,8 +74,6 @@ let isBuilderFormDirty = false;
 
   let initialState = $('#builder-form').serialize();
   isBuilderFormDirty = false;
-
-  console.log('builder-form', $('#builder-form'));
 
   $('#builder-form').on('input change', function () {
     isBuilderFormDirty = initialState !== $(this).serialize();
@@ -152,263 +163,241 @@ let isBuilderFormDirty = false;
 })(jQuery);
 
 /* ═══════════════════════════════════════════════════════════════════
-   DRAG & DROP – SECTIONS
-   Sections live inside #itemsContainer.
+   DRAG & DROP
+   Sections live inside #itemsContainer; questions inside .section-questions.
 ══════════════════════════════════════════════════════════════════ */
-function setupSectionDrag(sectionWrapper) {
-  const handle = sectionWrapper.querySelector('.section-card .drag-handle');
-  if (!handle) return;
-
-  handle.addEventListener('mousedown',  () => { sectionWrapper.draggable = true; });
-  handle.addEventListener('touchstart', () => { sectionWrapper.draggable = true; }, { passive: true });
-  document.addEventListener('mouseup',  () => { sectionWrapper.draggable = false; });
-
-  sectionWrapper.addEventListener('dragstart', onSectionDragStart);
-  sectionWrapper.addEventListener('dragend',   onSectionDragEnd);
-}
-
-function onSectionDragStart(e) {
-  drag.el          = this;
-  drag.type        = 'section';
-  drag.sourceList  = document.getElementById('itemsContainer');
-  drag.placeholder = createPlaceholder(this.offsetHeight);
-
-  this.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-
-  drag.sourceList.addEventListener('dragover',  onContainerDragOver);
-  drag.sourceList.addEventListener('dragleave', onContainerDragLeave);
-  drag.sourceList.addEventListener('drop',      onContainerDrop);
-}
-
-function onSectionDragEnd() {
-  this.classList.remove('dragging');
-  this.draggable = false;
-  removePlaceholder();
+function initSorting() {
   const container = document.getElementById('itemsContainer');
-  container.removeEventListener('dragover',  onContainerDragOver);
-  container.removeEventListener('dragleave', onContainerDragLeave);
-  container.removeEventListener('drop',      onContainerDrop);
-  drag.el = null;
-}
 
-/* ═══════════════════════════════════════════════════════════════════
-   DRAG & DROP – QUESTIONS
-   Questions live inside .section-questions divs.
-══════════════════════════════════════════════════════════════════ */
-function setupQuestionDrag(questionCard) {
-  const handle = questionCard.querySelector('.drag-handle');
-  if (!handle) return;
+  Sortable.create(container, {
+    ...SORT_OPTIONS,
+    draggable:  '.section-wrapper',
+    handle:     '.fb-section-handle',
+    onChoose:   e => { sectionOrderAtGrab = getSectionWrappers(); armFold(e, true); },
+    onUnchoose: e => unfoldBuilder(e.item),
+    onEnd:      e => { if (e.oldIndex !== e.newIndex) afterSectionMove(e.item, sectionOrderAtGrab); },
+  });
 
-  handle.addEventListener('mousedown',  () => { questionCard.draggable = true; });
-  handle.addEventListener('touchstart', () => { questionCard.draggable = true; }, { passive: true });
-  document.addEventListener('mouseup',  () => { questionCard.draggable = false; });
+  container.addEventListener('keydown', onHandleKeydown);
 
-  questionCard.addEventListener('dragstart', onQuestionDragStart);
-  questionCard.addEventListener('dragend',   onQuestionDragEnd);
-}
-
-function onQuestionDragStart(e) {
-  drag.el          = this;
-  drag.type        = 'question';
-  drag.sourceList  = this.closest('.section-questions');
-  drag.placeholder = createPlaceholder(this.offsetHeight);
-
-  this.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.stopPropagation();
-
-  document.querySelectorAll('.section-questions').forEach(zone => {
-    zone.addEventListener('dragover',  onQuestionZoneDragOver);
-    zone.addEventListener('dragleave', onQuestionZoneDragLeave);
-    zone.addEventListener('drop',      onQuestionZoneDrop);
-    zone.classList.add('drag-active');
+  // A user's jump choice must survive the panel rebuilds a move triggers.
+  container.addEventListener('change', e => {
+    if (!e.target.matches('.logic-options select')) return;
+    const card = e.target.closest('.item-card');
+    card._savedLogic = captureCurrentLogic(card);
   });
 }
 
-function onQuestionDragEnd() {
-  this.classList.remove('dragging');
-  this.draggable = false;
-  removePlaceholder();
-  document.querySelectorAll('.section-questions').forEach(zone => {
-    zone.removeEventListener('dragover',  onQuestionZoneDragOver);
-    zone.removeEventListener('dragleave', onQuestionZoneDragLeave);
-    zone.removeEventListener('drop',      onQuestionZoneDrop);
-    zone.classList.remove('drag-active');
-  });
-  drag.el = null;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   SHARED DRAG-OVER / DROP HELPERS
-══════════════════════════════════════════════════════════════════ */
-function getDragAfterElement(list, pointerY) {
-  const draggables = [...list.children].filter(
-    c => !c.classList.contains('drop-placeholder') && c !== drag.el
-  );
-  return draggables.reduce((closest, child) => {
-    const box    = child.getBoundingClientRect();
-    const offset = pointerY - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset, element: child };
-    }
-    return closest;
-  }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
-}
-
-/* ── Section container ── */
-function onContainerDragOver(e) {
-  if (drag.type !== 'section') return;
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  const after = getDragAfterElement(this, e.clientY);
-  after ? this.insertBefore(drag.placeholder, after) : this.appendChild(drag.placeholder);
-}
-function onContainerDragLeave(e) {
-  if (!this.contains(e.relatedTarget)) removePlaceholder();
-}
-function onContainerDrop(e) {
-  e.preventDefault();
-  if (drag.type !== 'section' || !drag.el) return;
-  this.insertBefore(drag.el, drag.placeholder);
-  removePlaceholder();
-  updateSectionNumbers();
-  updateAllLogicPanels();
-  reorderSections();
-}
-
-/* ── Question zones ── */
-function onQuestionZoneDragOver(e) {
-  if (drag.type !== 'question') return;
-  e.preventDefault();
-  e.stopPropagation();
-  e.dataTransfer.dropEffect = 'move';
-  const after = getDragAfterElement(this, e.clientY);
-  after ? this.insertBefore(drag.placeholder, after) : this.appendChild(drag.placeholder);
-}
-function onQuestionZoneDragLeave(e) {
-  if (!this.contains(e.relatedTarget)) removePlaceholder();
-}
-function onQuestionZoneDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  if (drag.type !== 'question' || !drag.el) return;
-
-  const sourceSection = drag.sourceList ? drag.sourceList.closest('.section-wrapper') : null;
-  const targetSection = this.closest('.section-wrapper');
-
-  this.insertBefore(drag.el, drag.placeholder);
-  removePlaceholder();
-
-  if (sourceSection && sourceSection !== targetSection) {
-    // GV-8347: the card changed owning section, so the section it may no
-    // longer target (and the one it now may) both changed. Rebuild its panel.
-    refreshLogicPanels();
-    reorderQuestions([targetSection, sourceSection]);
-  } else {
-    reorderQuestions(targetSection);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   PLACEHOLDER ELEMENT
-══════════════════════════════════════════════════════════════════ */
-function createPlaceholder(height = 60) {
-  removePlaceholder();
-  const ph = document.createElement('div');
-  ph.className    = 'drop-placeholder';
-  ph.style.height = Math.max(height, 48) + 'px';
-  drag.placeholder = ph;
-  return ph;
-}
-function removePlaceholder() {
-  if (drag.placeholder?.parentNode) {
-    drag.placeholder.parentNode.removeChild(drag.placeholder);
-  }
-  drag.placeholder = null;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   REORDER API CALLS
-══════════════════════════════════════════════════════════════════ */
-function reorderSections() {
-  clearTimeout(_reorderTimers.sections);
-
-  _reorderTimers.sections = setTimeout(() => {
-    const elements = [...document.querySelectorAll('#itemsContainer > .section-wrapper')];
-
-    // Construct robust sections payload containing the section title (or fallback)
-    // and the list of question DB IDs inside it. This makes section reordering
-    // 100% resilient against empty, duplicate, or renamed titles!
-    const sectionsPayload = elements.map((el, index) => {
-      const titleInput = el.querySelector('.section-title');
-      const title = (titleInput && titleInput.value.trim()) 
-        ? titleInput.value.trim() 
-        : `${t.section} ${index + 1}`;
-      
-      const qids = [...el.querySelectorAll('.question-card')]
-        .map(q => q.dataset.dbId || null)
-        .filter(id => id !== null && !isNaN(id));
-        
-      return {
-        title: title,
-        question_ids: qids
-      };
-    });
-
-    _reorderPost(FB_CONFIG.routes.reorderSections, {
-      sections: sectionsPayload,
-    });
-  }, 400);
-}
-
-function reorderQuestions(targetSections = null) {
-  clearTimeout(_reorderTimers.questions);
-
-  _reorderTimers.questions = setTimeout(() => {
-    let sections;
-    if (targetSections) {
-      sections = Array.isArray(targetSections) ? targetSections : [targetSections];
-    } else {
-      sections = [...document.querySelectorAll('#itemsContainer .section-wrapper')];
-    }
-
-    sections.forEach(section => {
-      // Use numeric DB ids for questions (builder_fields.id).
-      const ids = [...section.querySelectorAll('.question-card')]
-        .map(el => el.dataset.dbId || null)
-        .filter(id => id !== null && !isNaN(id));
-
-      if (!ids.length) return;
-
-      // Send the section title so the backend can update options.section
-      // for any question that was moved from another section.
-      const titleInput = section.querySelector('.section-title');
-      const sectionTitle = (titleInput && titleInput.value.trim()) ? titleInput.value.trim() : null;
-
-      _reorderPost(FB_CONFIG.routes.reorderQuestions, {
-        section_title: sectionTitle,
-        question_ids:  ids,
-      });
-    });
-  }, 400);
-}
-
-function _reorderPost(url, payload) {
-  // console.log('[REORDER]', url, payload); // 👈 DEBUG
-
-  fetch(url, {
-    method:  'POST',
-    headers: {
-      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      'Content-Type': 'application/json',
+function initQuestionSorting(zone) {
+  Sortable.create(zone, {
+    ...SORT_OPTIONS,
+    group:      'fb-questions',
+    draggable:  '.question-card',
+    handle:     '.fb-question-handle',
+    onChoose:   e => armFold(e, false),
+    onUnchoose: e => unfoldBuilder(e.item),
+    onEnd:      e => {
+      if (e.from !== e.to || e.oldIndex !== e.newIndex) afterQuestionMove(e.item, e.from !== e.to);
     },
-    body: JSON.stringify(payload),
-  })
-    .then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    })
-    .catch(err => console.warn('[FormBuilder] reorder failed:', err));
+  });
+}
+
+function getSectionWrappers() {
+  return [...document.querySelectorAll('#itemsContainer > .section-wrapper')];
+}
+
+/* ── Outline mode ──
+   Folding waits for the press to become a drag (a plain click on the grip
+   changes nothing) and runs in the capture phase, i.e. before SortableJS
+   measures the item to build the copy that follows the pointer. */
+function armFold(evt, sectionsOnly) {
+  const start = evt.originalEvent.touches?.[0] ?? evt.originalEvent;
+  const onMove = move => {
+    if (Math.max(Math.abs(move.clientX - start.clientX), Math.abs(move.clientY - start.clientY)) < DRAG_TOLERANCE) return;
+    disarmFold();
+    foldBuilder(evt.item, sectionsOnly);
+  };
+  disarmFold();
+  document.addEventListener('pointermove', onMove, true);
+  disarmFold = () => document.removeEventListener('pointermove', onMove, true);
+}
+
+/** Collapse every section (and, for a question drag, every question) to one line. */
+function foldBuilder(item, sectionsOnly) {
+  const container = document.getElementById('itemsContainer');
+  const gripY     = midY(gripOf(item));
+
+  getSectionWrappers().forEach((section, index) => {
+    const count = section.querySelectorAll('.question-card').length;
+    section.querySelector('.section-card > .card-body').prepend(outlineRow(
+      section.querySelector('.section-title').value.trim() || `${t.section} ${index + 1}`,
+      t.questions_count.replace(':count', count)
+    ));
+  });
+
+  if (!sectionsOnly) {
+    container.querySelectorAll('.question-card').forEach(card => {
+      const type = card.querySelector('.question-type');
+      card.querySelector('.card-body').prepend(outlineRow(
+        card.querySelector('.question-title').value.trim() || t.question,
+        type.options[type.selectedIndex]?.text ?? ''
+      ));
+    });
+  }
+
+  // Hold the page height so the page cannot shrink under the pointer.
+  container.style.minHeight = container.offsetHeight + 'px';
+  container.classList.add('fb-outline', sectionsOnly ? 'fb-outline--sections' : 'fb-outline--questions');
+  document.body.classList.add('fb-dragging');
+
+  // Bring the held grip back under the pointer, or the item would start out
+  // somewhere else. Near the top of the page there is not enough room to
+  // scroll up, so pad the list from above for the length of the drag.
+  const lift = gripY - midY(gripOf(item));
+  if (lift > window.scrollY) container.style.paddingTop = (lift - window.scrollY) + 'px';
+  scrollGripTo(item, gripY);
+}
+
+function unfoldBuilder(item) {
+  disarmFold();
+  const container = document.getElementById('itemsContainer');
+  if (!container.classList.contains('fb-outline')) return;
+
+  const gripY = midY(gripOf(item));
+  container.querySelectorAll('.fb-outline-row').forEach(row => row.remove());
+  container.classList.remove('fb-outline', 'fb-outline--sections', 'fb-outline--questions');
+  container.style.minHeight = container.style.paddingTop = '';
+  document.body.classList.remove('fb-dragging');
+  // Keep the dropped item where it was let go.
+  scrollGripTo(item, gripY);
+}
+
+/** The grip of an item: its outline row's icon while folded, its handle otherwise. */
+function gripOf(item) {
+  return item.querySelector('.fb-outline-row > .ti') || item.querySelector('.fb-handle');
+}
+
+function midY(el) {
+  const rect = el.getBoundingClientRect();
+  return rect.top + rect.height / 2;
+}
+
+/** Scroll so the item's grip is at viewport `y`. Instant: Bootstrap makes page scrolling
+    smooth, and SortableJS places its drag copy from where the item is right now. */
+function scrollGripTo(item, y) {
+  window.scrollBy({ top: midY(gripOf(item)) - y, behavior: 'instant' });
+}
+
+function outlineRow(title, meta) {
+  const row = document.createElement('div');
+  row.className = 'fb-outline-row';
+  row.innerHTML = '<i class="ti ti-grip-vertical"></i><span class="fb-outline-title"></span><span class="fb-outline-meta"></span>';
+  row.querySelector('.fb-outline-title').textContent = title;
+  row.querySelector('.fb-outline-meta').textContent  = meta;
+  return row;
+}
+
+/* ── Keyboard: focus a grip, then ArrowUp / ArrowDown ── */
+function onHandleKeydown(e) {
+  const handle = e.target.closest('.fb-handle');
+  if (!handle || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+  e.preventDefault();
+
+  const up   = e.key === 'ArrowUp';
+  const item = handle.closest('.question-card') || handle.closest('.section-wrapper');
+  const moved = item.classList.contains('question-card')
+    ? moveQuestionByKey(item, up)
+    : moveSectionByKey(item, up);
+
+  if (moved) {
+    handle.focus({ preventScroll: true });
+    handle.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function moveSectionByKey(section, up) {
+  const sibling = up ? section.previousElementSibling : section.nextElementSibling;
+  if (!sibling?.classList.contains('section-wrapper')) return false;
+
+  const orderBefore = getSectionWrappers();
+  up ? sibling.before(section) : sibling.after(section);
+  afterSectionMove(section, orderBefore);
+  return true;
+}
+
+/** Within its section first; past the first/last question it moves into the neighbouring section. */
+function moveQuestionByKey(card, up) {
+  const sibling = up ? card.previousElementSibling : card.nextElementSibling;
+  if (sibling) {
+    up ? sibling.before(card) : sibling.after(card);
+    afterQuestionMove(card, false);
+    return true;
+  }
+
+  const sections = getSectionWrappers();
+  const target   = sections[sections.indexOf(card.closest('.section-wrapper')) + (up ? -1 : 1)];
+  if (!target) return false;
+
+  const zone = target.querySelector('.section-questions');
+  up ? zone.append(card) : zone.prepend(card);
+  afterQuestionMove(card, true);
+  return true;
+}
+
+/* ── After a move ── */
+function afterSectionMove(section, orderBefore) {
+  const sectionTargets = remapSectionTargets(orderBefore);
+  updateSectionNumbers();
+  updateAllLogicPanels(sectionTargets);
+  afterMove(section);
+}
+
+function afterQuestionMove(card, changedSection) {
+  // GV-8347: a question cannot jump to its own section, so its valid targets
+  // change with the section it lives in.
+  if (changedSection) refreshLogicPanels();
+  afterMove(card);
+}
+
+function afterMove(item) {
+  $('#builder-form').trigger('change');   // re-evaluates the unsaved-changes flag
+
+  item.classList.remove('fb-moved');
+  void item.offsetWidth;                  // restart the highlight on repeated moves
+  item.classList.add('fb-moved');
+  // animationcancel: folding hides cards, which cancels a running highlight.
+  const clear = () => item.classList.remove('fb-moved');
+  item.addEventListener('animationend', clear, { once: true });
+  item.addEventListener('animationcancel', clear, { once: true });
+}
+
+/**
+ * Jump targets are positional ("section-2" = third section). Moving or deleting
+ * a section shifts positions, so point every target back at the section it
+ * meant (a jump to a deleted section becomes "continue"); otherwise jumps
+ * silently land on whichever section took the old place.
+ *
+ * Question targets are remapped in place; the sections' own targets are
+ * returned (in current order) for updateAllLogicPanels(), because an old
+ * <select> may not offer the new value.
+ */
+function remapSectionTargets(orderBefore) {
+  const orderAfter = getSectionWrappers();
+  const remap = value => {
+    const match = /^section-(\d+)$/.exec(value ?? '');
+    const section = match && orderBefore[match[1]];
+    if (!section) return value;
+    const index = orderAfter.indexOf(section);
+    return index === -1 ? 'continue' : `section-${index}`;
+  };
+
+  document.querySelectorAll('.logic-panel').forEach(panel => {
+    const card = panel.closest('.item-card');
+    card._savedLogic = Object.fromEntries(
+      Object.entries(card._savedLogic || {}).map(([key, target]) => [key, remap(target)])
+    );
+  });
+  return [...document.querySelectorAll('.section-logic')].map(select => remap(select.value));
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -447,7 +436,8 @@ function getOwningSectionIndex(questionCard) {
   return [...document.querySelectorAll('.section-wrapper')].indexOf(wrapper);
 }
 
-function updateAllLogicPanels() {
+/** @param {string[]|null} sectionTargets "After this section" values in section order; default: keep current. */
+function updateAllLogicPanels(sectionTargets = null) {
   // GV-8351: rebuild via refreshLogicPanels() so each question replays its own
   // saved targets. The previous `addLogicPanel(qCard)` (no currentLogic) reset
   // every panel to `continue` — and addSection() calls this on every section
@@ -455,13 +445,16 @@ function updateAllLogicPanels() {
   refreshLogicPanels();
 
   const sections = getSectionsList();
-  document.querySelectorAll('.section-logic').forEach(select => {
-    const current = select.value;
+  document.querySelectorAll('.section-logic').forEach((select, ownIndex) => {
+    const current = sectionTargets ? sectionTargets[ownIndex] : select.value;
+    // A section cannot jump to itself: the applicant wizard treats that as a
+    // loop and ends the form there.
     select.innerHTML =
       `<option value="continue">${t.continue_next_section}</option>` +
-      sections.map(s => `<option value="section-${s.id}">${t.go_to} ${s.title}</option>`).join('') +
+      sections.filter(s => s.id !== ownIndex)
+        .map(s => `<option value="section-${s.id}">${t.go_to} ${s.title}</option>`).join('') +
       `<option value="submit">${t.submit_form}</option>`;
-    select.value = current;
+    select.value = select.querySelector(`option[value="${cssEscape(current)}"]`) ? current : 'continue';
   });
 }
 
@@ -494,15 +487,17 @@ function addSection(sectionData = null) {
   const badgeNum  = document.querySelectorAll('.section-wrapper').length + 1;
 
   const sectionHtml = `
-    <div class="section-wrapper mb-5 position-relative" data-item-id="${sectionId}" data-item-type="section">
+    <div class="section-wrapper mb-5" data-item-id="${sectionId}" data-item-type="section">
       <div class="position-absolute start-0 z-1" style="top:-0.5rem;">
         <span class="badge bg-primary">${t.section} ${badgeNum}</span>
       </div>
       <div class="item-card section-card card mb-3">
         <div class="card-body">
           <div class="d-flex align-items-start gap-3 mt-3">
-            <i class="ti ti-grip-vertical text-muted drag-handle cursor-move mt-1"
-               title="${t.drag_to_reorder}"></i>
+            <span class="fb-handle fb-section-handle mt-1" role="button" tabindex="0"
+              title="${t.drag_to_reorder}" aria-label="${t.drag_to_reorder}">
+              <i class="ti ti-grip-vertical"></i>
+            </span>
             <div class="flex-fill">
               <input type="text" name="sections[${sectionId}][title]" class="section-title form-control mb-2"
                 placeholder="${t.section_title_optional}"
@@ -529,7 +524,7 @@ function addSection(sectionData = null) {
         </div>
       </div>
 
-      <div class="section-questions d-flex flex-column gap-3 mb-4 px-4 ms-3"></div>
+      <div class="section-questions d-flex flex-column gap-3 mb-4 px-4 ms-3" data-drop-hint="${t.drop_question_here}"></div>
 
       <button type="button" onclick="addQuestionToSection(this)"
         class="btn btn-outline-primary border-2 border-dashed d-flex align-items-center justify-content-center gap-2 w-100 p-3">
@@ -543,13 +538,16 @@ function addSection(sectionData = null) {
   tempDiv.innerHTML = sectionHtml;
   const sectionEl = tempDiv.firstElementChild;
   container.appendChild(sectionEl);
-  setupSectionDrag(sectionEl);
+  initQuestionSorting(sectionEl.querySelector('.section-questions'));
 
   if (sectionData?.logic) {
     sectionEl.querySelector('.section-logic').value = sectionData.logic;
   }
 
   updateSectionNumbers();
+  // A section added by hand becomes a jump target for the others. (While a
+  // saved form loads, populateForm() rebuilds once every section exists.)
+  if (!sectionData) updateAllLogicPanels();
   return sectionEl;
 }
 
@@ -557,9 +555,12 @@ function deleteSection(button) {
   const wrapper      = button.closest('.section-wrapper');
   const hasQuestions = wrapper.querySelectorAll('.question-card').length > 0;
   if (hasQuestions && !confirm(t.delete_section_questions)) return;
+  const orderBefore = getSectionWrappers();
+  Sortable.get(wrapper.querySelector('.section-questions'))?.destroy();
   wrapper.remove();
+  const sectionTargets = remapSectionTargets(orderBefore);
   updateSectionNumbers();
-  updateAllLogicPanels();
+  updateAllLogicPanels(sectionTargets);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -571,8 +572,10 @@ function createQuestionHTML(itemId, inSection = false) {
          data-item-id="${itemId}" data-item-type="question">
       <div class="card-body">
         <div class="d-flex align-items-start gap-3">
-          <i class="ti ti-grip-vertical text-muted drag-handle cursor-move mt-1"
-             title="${t.drag_to_reorder}"></i>
+          <span class="fb-handle fb-question-handle mt-1" role="button" tabindex="0"
+            title="${t.drag_to_reorder}" aria-label="${t.drag_to_reorder}">
+            <i class="ti ti-grip-vertical"></i>
+          </span>
           <div class="flex-fill">
             <input type="text" name="questions[${itemId}][title]"
               class="question-title form-control form-control-lg border-bottom mb-4"
@@ -623,7 +626,6 @@ function addQuestionToSection(button) {
   tempDiv.innerHTML = createQuestionHTML(questionId, true);
   const qEl         = tempDiv.firstElementChild;
   questionsContainer.appendChild(qEl);
-  setupQuestionDrag(qEl);
 }
 
 function deleteItem(button) {
@@ -1050,7 +1052,6 @@ function saveForm() {
   // id-space. The old remap keyed itemIds, which after this change would
   // mistake a positional value for an itemId and rewrite it to a wrong section.
   Array.from(container.children).forEach(child => {
-    if (child.classList.contains('drop-placeholder')) return;
     const itemType = child.dataset.itemType;
 
     if (itemType === 'section') {
@@ -1166,10 +1167,11 @@ function populateForm(formData, builderData) {
   }
   if (Array.isArray(builderData)) {
     builderData.forEach(item => populateSection(item));
-    // GV-8351: a question in section 1 can target section 3, whose <option>
-    // did not exist while section 1 was being populated. Now that every
-    // section is in the DOM, replay the saved targets one final time.
-    refreshLogicPanels();
+    // GV-8351 / GV-10420: a question or a section can jump forward to a
+    // section whose <option> did not exist yet while it was being populated.
+    // Now that every section is in the DOM, rebuild the lists and replay the
+    // saved targets one final time.
+    updateAllLogicPanels(builderData.map(section => section.logic ?? 'continue'));
   }
 }
 
@@ -1187,7 +1189,6 @@ function populateSection(sectionData) {
       tempDiv.innerHTML = createQuestionHTML(questionId, true);
       const qEl         = tempDiv.firstElementChild;
       zone.appendChild(qEl);
-      setupQuestionDrag(qEl);
       populateQuestionData(qEl, qData);
     });
   }

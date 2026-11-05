@@ -25,7 +25,9 @@ class BuilderForm extends Model
      **/
     public function cycles()
     {
-        return $this->belongsToMany(Cycle::class, Step::class, 'data', 'cycle_id');
+        // One row per step that uses the form; a program with several such
+        // steps is still one program.
+        return $this->belongsToMany(Cycle::class, Step::class, 'data', 'cycle_id')->distinct();
     }
 
     public function organization(){

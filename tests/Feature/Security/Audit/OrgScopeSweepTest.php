@@ -160,7 +160,7 @@ class OrgScopeSweepTest extends TestCase
         $names = collect(json_decode(file_get_contents(base_path('database/dbFiles/rolesWithDefaultPermissions.json')), true))
             ->flatMap(fn ($group) => collect($group['permissions'])->pluck('name'));
 
-        foreach (['forms.reorder_questions', 'final.export_results', 'final.export_company_results'] as $name) {
+        foreach (['final.export_results', 'final.export_company_results'] as $name) {
             $this->assertTrue($names->contains($name), "{$name} missing from rolesWithDefaultPermissions.json");
         }
     }

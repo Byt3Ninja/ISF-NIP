@@ -641,8 +641,6 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('submit-form', 'FormBuilderController@handleFormRequest')->name('forms.submissions_create');
     Route::get('builder/organization/{id?}', 'FormBuilderController@builderByOrganization');
     Route::delete('form/{id}/delete', 'FormBuilderController@deleteForm')->name('forms.delete');
-    Route::post('form/{id}/reorder-sections', 'FormBuilderController@reorderSections')->name('forms.reorder_sections');
-    Route::post('form/{id}/reorder-questions', 'FormBuilderController@reorderQuestions')->name('forms.reorder_questions');
     //Cycles
     Route::get('cycles/{id?}', 'CyclesController@index')->name('cycles.list');
     Route::get('cycles/{id}/registered', 'CyclesController@users')->name('cycles.users_manage');

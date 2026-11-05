@@ -52,6 +52,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Notifications\StartupJoiningNotification;
 use App\Services\FileManagerService;
+use App\Services\FormSectionStructurer;
 use App\Services\ProtectedFiles\ProtectedFiles;
 use App\Enums\ProtectedFileSet;
 
@@ -1201,6 +1202,8 @@ class CyclesController extends Controller
                     'label'       => $options['label'] ?? '',
                     'description' => $options['description'] ?? '',
                     'section'     => $options['section'] ?? 'N/A',
+                    'section_key' => FormSectionStructurer::sectionKey($options),
+                    'section_logic' => FormSectionStructurer::sectionLogic($options),
                     'type'        => $options['type'] ?? null,
                     'is_required' => (bool)($options['validation']['required'] ?? 0),
                     'options'     => form_field_options($options['values'] ?? null),
@@ -1212,14 +1215,14 @@ class CyclesController extends Controller
                     'label_high'  => $options['label_high'] ?? '',
                 ];
             })
-            ->groupBy('section')
-            ->map(function ($questions, $section_title) {
+            ->groupBy('section_key')
+            ->map(function ($questions) {
                 $first = $questions->first();
 
                 return [
-                    'title'       => $section_title,
+                    'title'       => $first['section'],
                     'description' => $first['description'] ?? '',
-                    'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
+                    'logic'       => $first['section_logic'],
                     'questions'   => $questions->values()->map(function ($q) {
                         return [
                             'id'          => $q['id'],
@@ -1328,6 +1331,8 @@ class CyclesController extends Controller
                 'label'       => $options['label'] ?? '',
                 'description' => $options['description'] ?? '',
                 'section'     => $options['section'] ?? 'N/A',
+                'section_key' => FormSectionStructurer::sectionKey($options),
+                'section_logic' => FormSectionStructurer::sectionLogic($options),
                 'type'        => $options['type'] ?? null,
                 'is_required' => (bool)($options['validation']->required ?? 0),
                 'options'     => form_field_options($options['values'] ?? null),
@@ -1340,13 +1345,13 @@ class CyclesController extends Controller
                 'label_high'  => $options['label_high'] ?? '',
             ];
         })
-        ->groupBy('section')
-        ->map(function ($questions, $section_title) {
+        ->groupBy('section_key')
+        ->map(function ($questions) {
             $first = $questions->first();
             return [
-                'title'       => $section_title,
+                'title'       => $first['section'],
                 'description' => $first['description'] ?? '',
-                'logic'       => is_array($first['logic']) ? ($first['logic']['section'] ?? 'continue') : ($first['logic'] ?? 'continue'),
+                'logic'       => $first['section_logic'],
                 'questions'   => $questions->values()->map(function ($q) {
                     return [
                         'id'          => $q['id'],

@@ -14,27 +14,66 @@ use Illuminate\Support\Collection;
  */
 class FormSectionStructurer
 {
+    /**
+     * Which section a question belongs to. The builder stores the section's
+     * position (`section_index`, GV-10420), so two sections sharing a title
+     * stay apart; rows saved before that only carry the title.
+     *
+     * @param array|object $options a question's options JSON
+     */
+    public static function sectionKey($options): string
+    {
+        $options = (array) $options;
+
+        return array_key_exists('section_index', $options)
+            ? 'index:' . (int) $options['section_index']
+            : 'title:' . trim((string) ($options['section'] ?? ''));
+    }
+
+    /**
+     * The section's "after this section" target, stored on each of its
+     * questions as `section_logic` (GV-10420). Older rows never had it saved;
+     * for them keep reading the first question's logic, as before.
+     *
+     * @param array|object $options a question's options JSON
+     */
+    public static function sectionLogic($options): string
+    {
+        $options = (array) $options;
+
+        if (array_key_exists('section_logic', $options)) {
+            return static::normalizeLogic($options['section_logic']);
+        }
+
+        $logic = $options['logic'] ?? 'continue';
+        if (is_object($logic)) {
+            $logic = (array) $logic;
+        }
+
+        return static::normalizeLogic(is_array($logic) ? ($logic['section'] ?? 'continue') : $logic);
+    }
+
     public static function structure(Collection $fields): array
     {
         $sections = [];
-        $sectionIndexByTitle = [];
+        $sectionIndexByKey = [];
 
         foreach ($fields as $field) {
             $options = $field->options;
-            $title = trim((string) ($options->section ?? ''));
+            $key = static::sectionKey($options);
 
-            if (!array_key_exists($title, $sectionIndexByTitle)) {
-                $sectionIndexByTitle[$title] = count($sections);
+            if (!array_key_exists($key, $sectionIndexByKey)) {
+                $sectionIndexByKey[$key] = count($sections);
                 $sections[] = [
                     'index' => count($sections),
-                    'title' => $title,
+                    'title' => trim((string) ($options->section ?? '')),
                     'description' => $options->description ?? '',
-                    'logic' => 'continue',
+                    'logic' => static::sectionLogic($options),
                     'questions' => [],
                 ];
             }
 
-            $sectionIndex = $sectionIndexByTitle[$title];
+            $sectionIndex = $sectionIndexByKey[$key];
 
             $optionValues = form_field_options($options->values ?? null);
 
@@ -53,15 +92,6 @@ class FormSectionStructurer
                 'is_required' => isset($options->validation->required) && $options->validation->required == 1,
                 'logic' => $logic,
             ];
-
-            // The section's own "after this section" default is taken from
-            // the FIRST question added to it — matches
-            // FormBuilderController::showForm()'s grouping convention.
-            if (count($sections[$sectionIndex]['questions']) === 1) {
-                $sections[$sectionIndex]['logic'] = is_array($logic)
-                    ? ($logic['section'] ?? 'continue')
-                    : ($logic ?: 'continue');
-            }
         }
 
         return $sections;
@@ -176,7 +206,7 @@ class FormSectionStructurer
      * (GV-8351); anything unrecognised must fall through to 'continue' rather
      * than be mistaken for a jump.
      */
-    private static function normalizeLogic($value): string
+    public static function normalizeLogic($value): string
     {
         $logic = is_string($value) ? trim($value) : '';
 
