@@ -170,17 +170,21 @@ $getSetting = App\Settings::find(1);
   <ul class="menu-inner py-1">
     <!-- Search Menu -->
     <li id="search-menu" class="menu-item px-3 mb-2 pb-4 pt-2 border-bottom">
-      <div class="input-group input-group-merge">
-        <div class="input-group-text">
-          <i class="ti ti-search text-muted"></i>
+      {{-- Own form so Chrome's password manager doesn't pick this field as the "username" of a formless password field on the page --}}
+      <form role="search" onsubmit="return false">
+        <div class="input-group input-group-merge">
+          <div class="input-group-text">
+            <i class="ti ti-search text-muted"></i>
+          </div>
+          <input
+            id="search-menu-input"
+            type="search"
+            class="form-control"
+            placeholder="{{ __('settings.navigation.search_menu') }}"
+            autocomplete="off"
+          />
         </div>
-        <input 
-          id="search-menu-input" 
-          type="search" 
-          class="form-control" 
-          placeholder="{{ __('settings.navigation.search_menu') }}" 
-        />
-      </div>
+      </form>
     </li>
     
     <li id="search-menu-icon" class="menu-item" style="display: none;">

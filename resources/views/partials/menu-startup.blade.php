@@ -75,12 +75,16 @@ $navigationIcons = [
   <ul class="startup-menu-inner menu-inner pt-2 pb-8">
 
     <li class="w-100 px-3 mb-2 pt-2">
-      <input 
-        id="search-menu-input" 
-        type="text" 
-        class="form-control" 
-        placeholder="{{ $l == 'en' ? 'Search in menu' : 'ابحث في القائمة' }}" 
-      />
+      {{-- Own form so Chrome's password manager doesn't pick this field as the "username" of a formless password field on the page --}}
+      <form role="search" onsubmit="return false">
+        <input
+          id="search-menu-input"
+          type="text"
+          class="form-control"
+          placeholder="{{ $l == 'en' ? 'Search in menu' : 'ابحث في القائمة' }}"
+          autocomplete="off"
+        />
+      </form>
     </li>
 
     @foreach ($navigationItems as $group => $item)

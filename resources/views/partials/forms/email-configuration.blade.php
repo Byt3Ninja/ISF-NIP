@@ -141,7 +141,7 @@
             <label class="form-label" for="ec-rsmtp-password">{{ __('settings.email_api_key') }} <span class="text-danger">*</span></label>
             <div class="input-group input-group-merge form-password-toggle">
               <input id="ec-rsmtp-password" name="password" type="password" class="form-control ec-mono-input" data-rule="required" maxlength="64"
-                value="{{ $saved('resend', 'password') }}" placeholder="re_xxxxxxxxxxxxxxxx" autocomplete="off" dir="ltr">
+                value="{{ $saved('resend', 'password') }}" placeholder="re_xxxxxxxxxxxxxxxx" autocomplete="new-password" dir="ltr">
               <span class="input-group-text cursor-pointer" title="{{ __('settings.email_show_password') }}"><i class="ti ti-eye-off"></i></span>
             </div>
           </div>
@@ -273,7 +273,7 @@
                 <div>
                   <div class="input-group input-group-merge form-password-toggle">
                     <input id="ec-api-key" name="api_key" type="password" class="form-control ec-mono-input" maxlength="64"
-                      placeholder="re_xxxxxxxxxxxxxxxx" autocomplete="off" dir="ltr">
+                      placeholder="re_xxxxxxxxxxxxxxxx" autocomplete="new-password" dir="ltr">
                     <span class="input-group-text cursor-pointer" title="{{ __('settings.email_show_password') }}"><i class="ti ti-eye-off"></i></span>
                   </div>
                 </div>
