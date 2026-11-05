@@ -55,7 +55,7 @@
   $isSubAdmin = $userRole && strtolower($userRole->default_for ?? '') === 'subadmin';
   if ($isSubAdmin) {
     $navPills['organizations'] = [
-      'title' => $l == 'en' ? 'Assigned Organizations' : 'المنظمات المعينة',
+      'title' => __('admin.Assigned Organizations'),
       'active' => false,
       'id' => 'nav-pills-organizations',
       'icon' => 'ti ti-building',
@@ -386,17 +386,17 @@
                 <div class="col-12">
                   <div class="form-group mb-4">
                     <label class="form-label" for="organization_ids">
-                      {{ $l == 'en' ? 'Assigned Organizations' : 'المنظمات المعينة' }}
+                      {{ __('admin.Assigned Organizations') }}
                     </label>
                     <p class="text-muted small mb-3">
-                      {{ $l == 'en' ? 'Select one or more organizations that this Sub-Admin can manage.' : 'اختر منظمة واحدة أو أكثر يمكن لهذا المسؤول الفرعي إدارتها.' }}
+                      {{ __('admin.select_subadmin_organizations_hint') }}
                     </p>
                     <select
                       class="form-select select2"
                       id="organization_ids"
                       name="organization_ids[]"
                       multiple="multiple"
-                      data-placeholder="{{ $l == 'en' ? 'Select Organizations' : 'اختر المنظمات' }}"
+                      data-placeholder="{{ __('admin.Select Organizations') }}"
                     >
                       @foreach($organizations as $org)
                         <option

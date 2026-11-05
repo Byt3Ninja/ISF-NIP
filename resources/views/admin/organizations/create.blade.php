@@ -56,7 +56,7 @@
 												style="height: 140px; cursor: pointer; width: 200px; margin: 0 auto;">
 												<img 
 													src="/images/logo-placeholder.png"
-													alt="Organization Logo" 
+													alt="{{ __('admin.Organization Logo') }}" 
 													class="rounded img-fluid border shadow-sm"
 													style="height: 140px; width: 200px; object-fit: cover;" 
 												/>

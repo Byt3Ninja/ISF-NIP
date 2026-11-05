@@ -1,0 +1,31 @@
+<?php
+
+return [
+    'organization_types' => 'Program Types',
+    'settings_organization_types_label' => 'Create and manage program types.',
+    'navigation' => [
+        'program_management' => 'Sub Program Management',
+        'programs' => 'Sub Programs',
+        'programlist' => 'Sub Programs',
+        'manage_program_steps' => 'Manage Sub Program Steps',
+        'new_program' => 'New Sub Program',
+        'edit_program' => 'Edit Sub Program',
+        'program_details' => 'Sub Program Details',
+        'people_and_organizations' => 'People & Programs',
+        'organization_types' => 'Program Types',
+        'organizations' => 'Programs',
+        'create_organization' => 'Create Program',
+        'edit_organization' => 'Edit Program',
+        'startups' => 'Ideas',
+        'startup_profile' => 'Idea Profile',
+        'edit_startup_profile' => 'Edit Idea Profile',
+        'my_company' => 'My Idea',
+        'startup_workspace' => 'Idea Workspace',
+        'startup_hub' => 'Idea Hub',
+    ],
+    'no_organization_linked' => 'You are not assigned to a program. Please contact the admin to assign you to a program.',
+    'org_using_platform_email' => 'This program is using the platform email configuration. Fill in your own email provider settings to set a custom configuration for this program.',
+    'org_email_failing' => 'This program\'s email configuration failed and messages are being sent using the platform configuration instead. Please check the settings below.',
+    'email_org_note' => 'Your program\'s emails go out through the platform email settings until you connect your own. If your connection stops working, emails switch back to the platform settings automatically.',
+    'email_gmail_limit' => 'Personal Gmail accounts can send about 500 emails a day. For sub programs with many applicants, use Resend.',
+];

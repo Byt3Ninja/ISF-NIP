@@ -472,7 +472,7 @@
 																	<div class="company-avatar me-3">
 																		<img
 																			src="{{ $company->logo_url }}"
-																			alt="Company Logo"
+																			alt="{{ __('admin.company_logo') }}"
 																			class="rounded-3 shadow-sm"
 																			height="50"
 																			width="50"

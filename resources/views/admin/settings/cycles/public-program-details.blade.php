@@ -409,10 +409,7 @@ $startDateForCountdown = $program->registration_starts_at?->toIso8601String();
 								</div>
 								<h4 class="fw-bold mb-2">{{ $l == 'en' ? 'Results Restricted' : 'النتائج مقيدة' }}</h4>
 								<p style="color:var(--on-surface-variant);" class="mb-4">
-									{{ $l == 'en'
-										? 'This program results have been announced, please login to view the winners and detailed results.'
-										: 'تم الإعلان عن نتائج هذا البرنامج، يرجى تسجيل الدخول لمشاهدة الفائزين والنتائج التفصيلية.'
-									}}
+									{{ __('admin.program_results_announced_login') }}
 								</p>
 								<div class="d-flex justify-content-center gap-3">
 									<a href="/login" class="btn btn-primary-custom"><i class="ti ti-login me-1"></i>{{ $l == 'en' ? 'Login to View Results' : 'تسجيل الدخول لمشاهدة النتائج' }}</a>

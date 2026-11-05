@@ -66,7 +66,7 @@
 												<span class="fs-6 mb-0 text-dark">{{ $assessment->user->company->{'name_'.app()->getLocale()} }}</span>
 											</a>
 										@else
-											<span class="text-muted">{{ $l == 'en' ? 'No Company' : 'لا توجد شركة' }}</span>
+											<span class="text-muted">{{ __('admin.no_company') }}</span>
 										@endif
 									</td>
 									<td>{{ $assessment->user->{'first_name_'.$l} }} {{ $assessment->user->{'last_name_'.$l} }}</td>

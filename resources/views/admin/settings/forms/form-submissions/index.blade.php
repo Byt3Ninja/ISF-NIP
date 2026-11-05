@@ -14,9 +14,9 @@
               <th class="text-nowrap"></th>
               <th class="text-nowrap">Submission Id</th>
               <th class="text-nowrap">Submitted By</th>
-              <th class="text-nowrap">Startup Name</th>
-              <th class="text-nowrap">Organization Name</th>
-              <th class="text-nowrap">Program Name</th>
+              <th class="text-nowrap">{{ __('forms.startup_name') }}</th>
+              <th class="text-nowrap">{{ __('forms.organization_name') }}</th>
+              <th class="text-nowrap">{{ __('forms.program_name') }}</th>
               <th class="text-nowrap">Created At</th>
               <th class="text-nowrap">Step Name</th>
             </tr>
@@ -47,7 +47,7 @@
       delete: 'Delete',
       formId: 'Form ID',
       formName: 'Form Name',
-      assignedOrganization: 'Assigned Organization',
+      assignedOrganization: @json(__('forms.assigned_organization')),
       submissions: 'Submissions',
       lastModified: 'Last Modified',
       createdDate: 'Created Date',
@@ -71,13 +71,13 @@
       deleteConfirmation: 'Record has been deleted successfully.',
       submissionId: 'Submission Id',
       submittedBy: 'Submitted By',
-      startupName: 'Startup Name',
-      organizationName: 'Organization Name',
-      programName: 'Program Name',
+      startupName: @json(__('forms.startup_name')),
+      organizationName: @json(__('forms.organization_name')),
+      programName: @json(__('forms.program_name')),
       createdAt: 'Created At',
       stepName: 'Step Name',
-      allOrganizations: 'All Organizations',
-      allPrograms: 'All Programs',
+      allOrganizations: @json(__('forms.all_organizations')),
+      allPrograms: @json(__('forms.all_programs')),
       allSteps: 'All Steps',
     },
     ar: {
@@ -90,7 +90,7 @@
       delete: 'حذف',
       formId: 'معرف النموذج',
       formName: 'اسم النموذج',
-      assignedOrganization: 'المنظمة المعينة',
+      assignedOrganization: @json(__('forms.assigned_organization')),
       submissions: 'الإرسالات',
       lastModified: 'آخر تعديل',
       createdDate: 'تاريخ الإنشاء',
@@ -114,13 +114,13 @@
       deleteConfirmation: 'تم حذف السجل بنجاح.',
       submissionId: 'معرف الإرسال',
       submittedBy: 'المقدم من',
-      startupName: 'اسم الشركة الناشئة',
-      organizationName: 'اسم المنظمة',
-      programName: 'اسم البرنامج',
+      startupName: @json(__('forms.startup_name')),
+      organizationName: @json(__('forms.organization_name')),
+      programName: @json(__('forms.program_name')),
       createdAt: 'تاريخ الإنشاء',
       stepName: 'اسم المرحلة',
-      allOrganizations: 'جميع المنظمات',
-      allPrograms: 'جميع البرامج',
+      allOrganizations: @json(__('forms.all_organizations')),
+      allPrograms: @json(__('forms.all_programs')),
       allSteps: 'جميع الخطوات',
     }
   };

@@ -672,4 +672,5 @@ return [
   'no_feedback_provided_yet' => 'لا يوجد تقييم بعد.',
   'all_segments' => 'جميع القطاعات',
   'none' => 'لا يوجد',
+  'startup_all_categories' => 'فئات الشركة',
 ];

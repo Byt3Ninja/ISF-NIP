@@ -3,6 +3,7 @@
 # /public
 /docs/tickets/*
 /docs/superpowers/*
+/graphify-out/*
 /tasks/*
 /public/storage
 /public/pitch_decks

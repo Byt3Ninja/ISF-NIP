@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'cantAccessAllCompanies' => 'You can not access all ideas',
+    'This Cycle Start from' => 'This Sub Program Start from',
+    'Company' => 'Idea',
+    'Cycle final screening' => 'Sub Program final screening',
+    'Founder' => 'Student',
+    'Program' => 'Sub Program',
+    'No Cycles started yet' => 'No Sub Programs started yet',
+    'My progress' => 'Current Enrolled Sub Program :: My Progress',
+    'Cycles' => 'Sub Programs',
+    'User' => 'Student',
+    'IncubationList' => 'Sub Programs List',
+    'Sorry your submitted data doesn\'t meet the Program requirements' => 'Sorry your submitted data doesn\'t meet the Sub Program requirements',
+    'to fill your data' => 'to fill your sub program required data, You can modify it any time between step dates',
+    'Please wait till Incubator team review your data to start the next Program step' => 'Please wait till Incubator team review your data to start the next Sub Program step',
+    'No Organization' => 'No Program',
+    'YouHaveNotCompany' => 'You do not have an idea currently',
+    'To join this program as a startup, please complete these requirements first:' => 'To join this sub program as an idea, please complete these requirements first:',
+    'To get started with this program, please complete your profile requirements:' => 'To get started with this sub program, please complete your profile requirements:',
+    'Completing these steps will help your startup get the most out of the program.' => 'Completing these steps will help your idea get the most out of the sub program.',
+    'Setting up your profile properly will ensure you have access to all program features.' => 'Setting up your profile properly will ensure you have access to all sub program features.',
+    'To join this program, you must complete the following prerequisites first:' => 'To join this sub program, you must complete the following prerequisites first:',
+    'Completion of all prerequisites is required before you can join the program.' => 'Completion of all prerequisites is required before you can join the sub program.',
+    'sp_startup_name' => 'Idea',
+];
