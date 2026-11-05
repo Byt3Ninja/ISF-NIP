@@ -734,12 +734,59 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         return true;
     }
 
+    /**
+     * Edit-profile fields that can be switched between required (true) and optional (false).
+     * This one list drives the form's asterisk + `required` attribute, the client validator
+     * (app-edit-profile.js), UpdateClientProfileRequest and hasCompletedProfile(), so a
+     * profile that saves is always a profile that counts as complete. Email is always
+     * required (it is the login) and is not listed. National ID is also required when
+     * NATIONAL_ID_REQUIRED=true.
+     */
+    public const PROFILE_REQUIRED_FIELDS = [
+        'first_name_en' => true,
+        'last_name_en'  => true,
+        'title_en'      => true,
+        'phone'         => true,
+        'country_id'    => true,
+        'state_id'      => true,
+        'address'       => true,
+        'timezone'      => true,
+        'academic_stat' => true,
+        'dob'           => true,
+        'national_id'   => false,
+    ];
+
+    // Fields the edit-profile form shows to founders only.
+    public const FOUNDER_ONLY_PROFILE_FIELDS = ['academic_stat', 'dob', 'national_id'];
+
+    /**
+     * The profile fields this user must fill in.
+     */
+    public function requiredProfileFields(): array
+    {
+        $required = self::PROFILE_REQUIRED_FIELDS;
+        $required['national_id'] = $required['national_id'] || config('app.national_id_required');
+        $isFounder = $this->hasRole('registered');
+
+        return array_keys(array_filter($required, function ($isRequired, $field) use ($isFounder) {
+            return $isRequired && ($isFounder || !in_array($field, self::FOUNDER_ONLY_PROFILE_FIELDS, true));
+        }, ARRAY_FILTER_USE_BOTH));
+    }
+
+    public function isProfileFieldRequired(string $field): bool
+    {
+        return in_array($field, $this->requiredProfileFields(), true);
+    }
+
     public function hasCompletedProfile(): bool
     {
-            return filled($this->phone)
-            && filled($this->country_id)
-            && filled($this->address)
-            && filled($this->timezone);
+        foreach ($this->requiredProfileFields() as $field) {
+            if (blank($this->{$field})) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function hasCompletedStartup(): bool

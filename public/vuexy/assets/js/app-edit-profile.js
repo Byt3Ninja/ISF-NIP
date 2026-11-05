@@ -47,11 +47,13 @@
       email: { notEmpty: 'Please enter your email', emailAddress: 'Please enter valid email address' },
       title_en: { notEmpty: 'Please enter job title', stringOnly: 'Job title accepts letters only' },
       zip_code: { zipCode: 'Please enter valid zip code' },
-      address: { stringLength: 'Address should be between 2 and 100 characters' },
       academic_stat: { notEmpty: 'Please select your education status' },
       dob: { notEmpty: 'Please enter your date of birth', invalid: 'Please enter a valid date of birth' },
       national_id: { notEmpty: 'Please enter your National ID', invalidFormat: 'Invalid National ID format for the selected country', noCountry: 'Please select country first', noRule: 'National ID validation is not available for this country' },
       country_id: { notEmpty: 'Please select your country' },
+      state_id: { notEmpty: 'Please select your state' },
+      address: { notEmpty: 'Please enter your address', stringLength: 'Address should be between 2 and 100 characters' },
+      timezone: { notEmpty: 'Please select your timezone' },
       Please_enter_otp: 'Please enter OTP',
       Please_enter_valid_whatsapp_number: 'Please enter a valid WhatsApp number',
     },
@@ -62,11 +64,13 @@
       email: { notEmpty: 'يرجى إدخال بريدك الإلكتروني', emailAddress: 'يرجى إدخال عنوان بريد إلكتروني صالح' },
       title_en: { notEmpty: 'يرجى ادخال المسمى الوظيفي', stringOnly: 'هذا الحقل يقبل الحروف فقط' },
       zip_code: { zipCode: 'يرجى إدخال الرمز البريدي الصحيح' },
-      address: { stringLength: 'يجب أن يكون العنوان بين 2 و 100 حرفًا' },
       academic_stat: { notEmpty: 'يرجى اختيار الحالة الدراسية' },
       dob: { notEmpty: 'يرجى إدخال تاريخ الميلاد', invalid: 'يرجى إدخال تاريخ ميلاد صحيح' },
       national_id: { notEmpty: 'يرجى إدخال الرقم القومي', invalidFormat: 'صيغة رقم الهوية غير صحيحة', noCountry: 'يرجى اختيار الدولة أولاً', noRule: 'التحقق من رقم الهوية غير متاح لهذه الدولة' },
       country_id: { notEmpty: 'يرجى اختيار الدولة' },
+      state_id: { notEmpty: 'يرجى اختيار المنطقة' },
+      address: { notEmpty: 'يرجى إدخال العنوان', stringLength: 'يجب أن يكون العنوان بين 2 و 100 حرفًا' },
+      timezone: { notEmpty: 'يرجى اختيار المنطقة الزمنية' },
       Please_enter_otp: 'يرجى إدخال OTP',
       Please_enter_valid_whatsapp_number: 'يرجى إدخال رقم واتساب صحيح',
     }
@@ -95,7 +99,6 @@
     return {
       callback: function (input) {
         const value = (input.value || '').trim();
-        // The view marks the field `required` when NATIONAL_ID_REQUIRED is on.
         if (value.length === 0) return input.element.required ? { valid: false, message: t('national_id', 'notEmpty') } : { valid: true };
         const iso2 = getSelectedCountryIso2();
         const rule = nationalIdRules[iso2];
@@ -143,21 +146,28 @@
     const $form = $('#account-info-form');
     if (!$form.length) return;
 
+    // The view sets `required` from User::PROFILE_REQUIRED_FIELDS, so the server rules
+    // and this validator always agree on which fields are mandatory.
+    const isRequired = name => !!$form[0].elements[name]?.required;
+    const notEmpty = name => (isRequired(name) ? { notEmpty: { message: t(name, 'notEmpty') } } : {});
+
     const fields = {
-      first_name_en: { validators: { notEmpty: { message: t('first_name_en', 'notEmpty') }, regexp: { regexp: /^[\p{L}\s]+$/u, message: t('first_name_en', 'stringOnly') }, stringLength: { min: 2, max: 50, message: t('first_name_en', 'stringLength') } } },
-      last_name_en: { validators: { notEmpty: { message: t('last_name_en', 'notEmpty') }, regexp: { regexp: /^[\p{L}\s]+$/u, message: t('last_name_en', 'stringOnly') }, stringLength: { min: 2, max: 50, message: t('last_name_en', 'stringLength') } } },
+      first_name_en: { validators: { ...notEmpty('first_name_en'), regexp: { regexp: /^[\p{L}\s]+$/u, message: t('first_name_en', 'stringOnly') }, stringLength: { min: 2, max: 50, message: t('first_name_en', 'stringLength') } } },
+      last_name_en: { validators: { ...notEmpty('last_name_en'), regexp: { regexp: /^[\p{L}\s]+$/u, message: t('last_name_en', 'stringOnly') }, stringLength: { min: 2, max: 50, message: t('last_name_en', 'stringLength') } } },
       email: { validators: { notEmpty: { message: t('email', 'notEmpty') }, regexp: { regexp: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i, message: t('email', 'emailAddress') } } },
-      title_en: { validators: { notEmpty: { message: t('title_en', 'notEmpty') }, regexp: { regexp: /^[\p{L}\s]+$/u, message: t('title_en', 'stringOnly') } } },
-      phone: { validators: { callback: buildPhoneValidator(true) } },
+      title_en: { validators: { ...notEmpty('title_en'), regexp: { regexp: /^[\p{L}\s]+$/u, message: t('title_en', 'stringOnly') } } },
+      phone: { validators: { callback: buildPhoneValidator(isRequired('phone')) } },
       whatsapp: { validators: { callback: buildPhoneValidator(false) } },
       zip_code: { validators: { regexp: { regexp: /^$|^\d{4,10}$/, message: t('zip_code', 'zipCode') } } },
-      address: { validators: { stringLength: { min: 0, max: 100, message: t('address', 'stringLength') } } },
-      country_id: { validators: { notEmpty: { message: t('country_id', 'notEmpty') } } }
+      address: { validators: { ...notEmpty('address'), stringLength: { min: 0, max: 100, message: t('address', 'stringLength') } } },
+      country_id: { validators: { ...notEmpty('country_id') } },
+      state_id: { validators: { ...notEmpty('state_id') } },
+      timezone: { validators: { ...notEmpty('timezone') } }
     };
 
     if (isRegistered()) {
-      fields.academic_stat = { validators: { notEmpty: { message: t('academic_stat', 'notEmpty') } } };
-      fields.dob = { validators: { notEmpty: { message: t('dob', 'notEmpty') }, date: { format: 'YYYY-MM-DD', message: t('dob', 'invalid') } } };
+      fields.academic_stat = { validators: { ...notEmpty('academic_stat') } };
+      fields.dob = { validators: { ...notEmpty('dob'), date: { format: 'YYYY-MM-DD', message: t('dob', 'invalid') } } };
       fields.national_id = { validators: { callback: buildNationalIdValidator() } };
     }
 

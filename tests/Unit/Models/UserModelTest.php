@@ -141,16 +141,36 @@ class UserModelTest extends TestCase
     public function it_can_check_if_user_has_completed_profile()
     {
         $user = User::factory()->create([
+            'title_en' => 'Founder',
             'phone' => '1234567890',
             'country_id' => 1,
+            'state_id' => 1,
             'address' => 'Test Address',
             'timezone' => 'UTC',
         ]);
-        
+
         // Refresh to ensure attributes are loaded
         $user->refresh();
 
         $this->assertTrue($user->hasCompletedProfile());
+    }
+
+    /** @test */
+    public function profile_completeness_follows_the_required_fields_list()
+    {
+        $user = User::factory()->create([
+            'title_en' => 'Founder',
+            'phone' => '1234567890',
+            'country_id' => 1,
+            'state_id' => 1,
+            'address' => null,
+            'timezone' => 'UTC',
+        ]);
+
+        $this->assertSame(User::PROFILE_REQUIRED_FIELDS['address'], $user->isProfileFieldRequired('address'));
+        $this->assertSame(!User::PROFILE_REQUIRED_FIELDS['address'], $user->hasCompletedProfile());
+        // Founder-only fields never apply to other roles.
+        $this->assertFalse($user->isProfileFieldRequired('dob'));
     }
 
     /** @test */

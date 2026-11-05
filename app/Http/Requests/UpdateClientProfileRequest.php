@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Auth;
@@ -25,13 +26,15 @@ class UpdateClientProfileRequest extends FormRequest
      */
     public function rules()
     {
-       $id = Auth::user()->id;
+       $user = Auth::user();
+       $id = $user->id;
 
         $rules = [
-            'first_name_en' => 'required|string|max:255',
-            'last_name_en' => 'required|string|max:255',
+            'first_name_en' => ['string', 'max:255'],
+            'last_name_en' => ['string', 'max:255'],
+            'title_en' => ['string', 'max:255'],
             'img_url' => 'nullable|mimes:jpeg,png,jpg',
-            'phone' => 'required',
+            'phone' => ['string'],
             'email' => [
                             'required',
                             'email',
@@ -42,17 +45,29 @@ class UpdateClientProfileRequest extends FormRequest
                             Rule::unique('users', 'new_email')->ignore($id),
                             'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
                         ],
-            'country_id' => 'required|integer|exists:countries,id',
+            'country_id' => ['integer', 'exists:countries,id'],
+            'state_id' => ['integer', 'exists:states,id'],
+            'address' => ['string', 'max:100'],
+            'timezone' => ['timezone'],
             'HaveCompany' => 'nullable|max:1',
             'technologies_used' => 'nullable|array',
             'technologies_used.*' => 'nullable|string|max:50',
             'should_remove_image' => 'nullable|sometimes|boolean',
         ];
 
-        if (Auth::user()->hasAnyRole(['Registered', 'registered'])) {
-            $rules['academic_stat'] = 'required|in:Graduate,Student';
-            $rules['dob']           = 'required|date|before:today';
-            $rules['national_id']   = (config('app.national_id_required') ? 'required' : 'nullable') . '|alpha_num|max:50';
+        if ($user->hasAnyRole(['Registered', 'registered'])) {
+            $rules['academic_stat'] = ['in:Graduate,Student'];
+            $rules['dob']           = ['date', 'before:today'];
+            $rules['national_id']   = ['alpha_num', 'max:50'];
+        }
+
+        // Required vs optional comes from User::PROFILE_REQUIRED_FIELDS, the same list the
+        // form, the client validator and hasCompletedProfile() read.
+        $required = $user->requiredProfileFields();
+        foreach (array_keys(User::PROFILE_REQUIRED_FIELDS) as $field) {
+            if (isset($rules[$field])) {
+                array_unshift($rules[$field], in_array($field, $required, true) ? 'required' : 'nullable');
+            }
         }
 
         return $rules;
@@ -70,6 +85,22 @@ class UpdateClientProfileRequest extends FormRequest
             'national_id.required'  => __('admin.national_id_is_required'),
             'national_id.alpha_num' => __('admin.invalid_national_id'),
             'national_id.max'       => __('admin.invalid_national_id'),
+        ];
+    }
+
+    /**
+     * Field labels for the default messages, matching what the form shows.
+     */
+    public function attributes()
+    {
+        return [
+            'first_name_en' => __('admin.First Name'),
+            'last_name_en'  => __('admin.Last Name'),
+            'title_en'      => __('admin.JobTitleEn'),
+            'phone'         => __('admin.Phone'),
+            'state_id'      => __('admin.State'),
+            'address'       => __('admin.Address'),
+            'timezone'      => __('admin.Timezone'),
         ];
     }
 }

@@ -1,4 +1,6 @@
 <div id="accountSection">
+  {{-- Required fields come from User::PROFILE_REQUIRED_FIELDS (the server rules read the same list). --}}
+  @php($requiredFields = $client->requiredProfileFields())
   <form 
     id="account-info-form" 
     method="post" 
@@ -45,16 +47,16 @@
 
         <div class="mb-4 col-md-6">
           <label for="first_name_en" class="form-label fs-6 fw-bold">
-            {{ __('admin.First Name') }} <span class="text-danger">*</span>
+            {{ __('admin.First Name') }} @if(in_array('first_name_en', $requiredFields))<span class="text-danger">*</span>@endif
           </label>
-          <input value="{{ $client->first_name_en }}" name="first_name_en" type="text" class="form-control" id="first_name_en" placeholder="{{ __('admin.First Name') }}" required autocomplete="first_name_en" autofocus oninput="this.value = this.value.trimStart()" />
+          <input value="{{ $client->first_name_en }}" name="first_name_en" type="text" class="form-control" id="first_name_en" placeholder="{{ __('admin.First Name') }}" @required(in_array('first_name_en', $requiredFields)) autocomplete="first_name_en" autofocus oninput="this.value = this.value.trimStart()" />
         </div>
 
         <div class="mb-4 col-md-6">
           <label for="last_name_en" class="form-label fs-6 fw-bold">
-            {{ __('admin.Last Name') }} <span class="text-danger">*</span>
+            {{ __('admin.Last Name') }} @if(in_array('last_name_en', $requiredFields))<span class="text-danger">*</span>@endif
           </label>
-          <input value="{{ $client->last_name_en }}" name="last_name_en" type="text" class="form-control" id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" required autocomplete="last_name_en" oninput="this.value = this.value.trimStart()" />
+          <input value="{{ $client->last_name_en }}" name="last_name_en" type="text" class="form-control" id="last_name_en" style="direction: ltr;" placeholder="{{ __('admin.Last Name') }}" @required(in_array('last_name_en', $requiredFields)) autocomplete="last_name_en" oninput="this.value = this.value.trimStart()" />
         </div>
 
         <div class="mb-4 col-md-6">
@@ -97,9 +99,9 @@
 
         <div class="mb-4 col-md-6">
           <label for="title_en" class="form-label fs-6 fw-bold">
-            {{ __('admin.JobTitleEn') }} <span class="text-danger">*</span>
+            {{ __('admin.JobTitleEn') }} @if(in_array('title_en', $requiredFields))<span class="text-danger">*</span>@endif
           </label>
-          <input value="{{ $client->title_en }}" name="title_en" type="text" class="form-control" id="title_en" style="direction: ltr;" placeholder="{{ __('admin.JobTitleEn') }}" required autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
+          <input value="{{ $client->title_en }}" name="title_en" type="text" class="form-control" id="title_en" style="direction: ltr;" placeholder="{{ __('admin.JobTitleEn') }}" @required(in_array('title_en', $requiredFields)) autocomplete="title_en" oninput="this.value = this.value.trimStart()" />
         </div>
 
         <hr class="w-100 my-3" />
@@ -107,7 +109,7 @@
         <!-- Phone -->
         <div class="mb-6 col-12 col-md-6">
           <label class="form-label fs-6 fw-bold" for="phone">
-            {{ __('auth.Phone') }} <span class="text-danger">*</span>
+            {{ __('auth.Phone') }} @if(in_array('phone', $requiredFields))<span class="text-danger">*</span>@endif
           </label>
           <div class="d-flex align-items-center flex-wrap gap-4">
             <input type="hidden" name="country_code" id="country_code" value="{{ $client->country_code ?? '20' }}" />
@@ -119,7 +121,7 @@
               value="{{ $client->phone }}"
               name="phone"
               autocomplete="phone"
-              required
+              @required(in_array('phone', $requiredFields))
             />
           </div>
           <span class="invalid-feedback" id="phone-error" style="display: none;"></span>
@@ -151,8 +153,8 @@
         <hr class="w-100" />
 
         <div class="mb-4 mt-8 col-md-6">
-          <label for="address" class="form-label fs-6 fw-bold">{{ __('admin.Address') }}</label>
-          <input type="text" class="form-control" id="address" name="address" placeholder="{{ __('admin.Address') }}" value="{{ $client->address }}" oninput="this.value = this.value.trimStart()" />
+          <label for="address" class="form-label fs-6 fw-bold">{{ __('admin.Address') }} @if(in_array('address', $requiredFields))<span class="text-danger">*</span>@endif</label>
+          <input type="text" class="form-control" id="address" name="address" placeholder="{{ __('admin.Address') }}" value="{{ $client->address }}" oninput="this.value = this.value.trimStart()" @required(in_array('address', $requiredFields)) />
         </div>
 
         <div class="mb-4 mt-8 col-md-6">
@@ -162,9 +164,9 @@
 
         <div class="mb-4 col-md-6">
           <label for="country_id" class="form-label fs-6 fw-bold">
-            {{ __('admin.Country') }} <span class="text-danger">*</span>
+            {{ __('admin.Country') }} @if(in_array('country_id', $requiredFields))<span class="text-danger">*</span>@endif
           </label>
-          <select id="country_id" name="country_id" class="select2 form-select" required>
+          <select id="country_id" name="country_id" class="select2 form-select" @required(in_array('country_id', $requiredFields))>
             <option value="" disabled {{ !$client->country_id ? 'selected' : '' }}>{{ __('admin.Country') }}</option>
             @foreach ($countries as $country)
             <option value="{{ $country->id }}" {{ $country->id == $client->country_id ? 'selected' : '' }}>
@@ -176,9 +178,9 @@
 
         <div class="mb-4 col-md-6">
           <label for="state_id" class="form-label fs-6 fw-bold">
-            {{ __('admin.State') }} <span class="text-danger">*</span>
+            {{ __('admin.State') }} @if(in_array('state_id', $requiredFields))<span class="text-danger">*</span>@endif
           </label>
-          <select class="select2 form-select" required id="state_id" name="state_id">
+          <select class="select2 form-select" @required(in_array('state_id', $requiredFields)) id="state_id" name="state_id">
             <option value="" disabled>{{ __('admin.State') }}</option>
             @if ($client->state_id)
             <option value="{{ $client->state_id }}" selected>{{ $client->state->{'name_' . $l} }}</option>
@@ -206,8 +208,8 @@
         </div>
         
         <div class="mb-4 col-md-6">
-          <label for="timeZones" class="form-label fs-6 fw-bold">{{ __('admin.Timezone') }}</label>
-          <select id="timeZones" name="timezone" class="select2 form-select">
+          <label for="timeZones" class="form-label fs-6 fw-bold">{{ __('admin.Timezone') }} @if(in_array('timezone', $requiredFields))<span class="text-danger">*</span>@endif</label>
+          <select id="timeZones" name="timezone" class="select2 form-select" @required(in_array('timezone', $requiredFields))>
             <option value="">{{ __('admin.Select Timezone') }}</option>
             @foreach (timezone_identifiers_list() as $timezone)
             <option value="{{ $timezone }}" {{ $client->timezone == $timezone ? 'selected' : '' }}>
@@ -234,9 +236,9 @@
 
           <div class="mb-4 col-md-6">
             <label for="academic_stat" class="form-label fs-6 fw-bold">
-              {{ __('admin.Education_Status') }} <span class="text-danger">*</span>
+              {{ __('admin.Education_Status') }} @if(in_array('academic_stat', $requiredFields))<span class="text-danger">*</span>@endif
             </label>
-            <select name="academic_stat" id="academic_stat" class="select2 form-select" required>
+            <select name="academic_stat" id="academic_stat" class="select2 form-select" @required(in_array('academic_stat', $requiredFields))>
               <option value="" disabled {{ !$client->academic_stat ? 'selected' : '' }}>{{ __('admin.Select_Education_Status') }}</option>
               <option value="Graduate" {{ $client->academic_stat == 'Graduate' ? 'selected' : '' }}>{{ __('admin.Graduate') }}</option>
               <option value="Student" {{ $client->academic_stat == 'Student' ? 'selected' : '' }}>{{ __('admin.Student') }}</option>
@@ -245,16 +247,16 @@
 
           <div class="mb-4 col-md-6">
             <label for="dob" class="form-label fs-6 fw-bold">
-              {{ __('admin.date_of_birth') }} <span class="text-danger">*</span>
+              {{ __('admin.date_of_birth') }} @if(in_array('dob', $requiredFields))<span class="text-danger">*</span>@endif
             </label>
-            <input type="text" class="form-control dob-picker" id="dob" name="dob" value="{{ $client->dob ? \Carbon\Carbon::parse($client->dob)->format('Y-m-d') : '' }}" placeholder="YYYY-MM-DD" required />
+            <input type="text" class="form-control dob-picker" id="dob" name="dob" value="{{ $client->dob ? \Carbon\Carbon::parse($client->dob)->format('Y-m-d') : '' }}" placeholder="YYYY-MM-DD" @required(in_array('dob', $requiredFields)) />
           </div>
 
           <div class="mb-4 col-md-6">
             <label for="national_id" class="form-label fs-6 fw-bold">
-              {{ __('admin.national_id') }} @if(config('app.national_id_required'))<span class="text-danger">*</span>@endif
+              {{ __('admin.national_id') }} @if(in_array('national_id', $requiredFields))<span class="text-danger">*</span>@endif
             </label>
-            <input type="text" class="form-control" id="national_id" name="national_id" placeholder="{{ __('admin.national_id') }}" value="{{ old('national_id', $client->national_id ?? '') }}" oninput="this.value = this.value.trim()" autocomplete="off" @if(config('app.national_id_required')) required @endif />
+            <input type="text" class="form-control" id="national_id" name="national_id" placeholder="{{ __('admin.national_id') }}" value="{{ old('national_id', $client->national_id ?? '') }}" oninput="this.value = this.value.trim()" autocomplete="off" @required(in_array('national_id', $requiredFields)) />
             <span class="invalid-feedback" id="national-id-error" style="display: none;"></span>
           </div>
         @endif
