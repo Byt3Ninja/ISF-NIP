@@ -21,6 +21,7 @@ use App\Services\ProtectedFiles\FileAccess;
 class Cycle extends Model
 {
     public const TITLE_MAX_LENGTH = 50;
+    public const DESCRIPTION_MAX_LENGTH = 750;
 
     use HasFactory, Auditable, HasFileCleanup;
     public static $module = 'Program';

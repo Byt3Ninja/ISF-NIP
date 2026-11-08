@@ -700,7 +700,7 @@
             "Please enter the description",
           ),
         },
-        ...len(0, 100, "The description must be less than 100 characters long"),
+        ...len(0, 750, "The description must be less than 750 characters long"),
       },
     },
     programDescriptionAr: {
@@ -713,8 +713,8 @@
         },
         ...len(
           0,
-          100,
-          "The Arabic description must be less than 100 characters long",
+          750,
+          "The Arabic description must be less than 750 characters long",
         ),
       },
     },

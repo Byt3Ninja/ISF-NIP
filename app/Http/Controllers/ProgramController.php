@@ -39,7 +39,7 @@ class ProgramController extends Controller
 {
   
     // Keep DESCRIPTION_MAX in sync with the blades ($descMax) and app-edit-program.js
-    private const DESCRIPTION_MAX = 100;
+    private const DESCRIPTION_MAX = Cycle::DESCRIPTION_MAX_LENGTH;
     private const LOGO_RULE = 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048';
     private const HEX_COLOR_RULE = 'regex:/^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/';
     // TODO: derive from the organization / logged-in user instead of a hard-coded incubator

@@ -25,7 +25,7 @@
   $orgs = $_user->hasRole('Admin') ? \App\Organization::all() : $_user->organizations;
 
   // Keep these in sync with ProgramController (DESCRIPTION_MAX) and app-edit-program.js
-  $descMax = 100;
+  $descMax = \App\Cycle::DESCRIPTION_MAX_LENGTH;
 
   $wizardSteps = [
     ['step-general',    'ti-building',  'General Info',            'Organization & basics'],
