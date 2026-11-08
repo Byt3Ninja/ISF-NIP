@@ -251,7 +251,6 @@
       ["view", ["fullscreen", "codeview"]],
       ["help", ["help"]],
     ],
-    buttons: { expand: window.SummernoteExpand.button },
     callbacks: {
       // Summernote calls this with the textarea as `this`
       onImageUpload: function (files) {
