@@ -238,6 +238,9 @@
 @section('pagescripts')
   <script>
     const lang = '{{ $l }}';
+    window.EDIT_COMPANY_LABELS = {
+      saveSuccess: @json(__('admin.startup_profile_updated')),
+    };
   </script>
   <script src="/app-assets/js/1.js"></script>
   

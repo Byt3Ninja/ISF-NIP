@@ -60,6 +60,9 @@
                       $translatedRoles = $roles->map(fn($role) => __('admin.' . strtolower($role)))->implode(', ');
                       if(!empty($client->bio->industries)) {
                         $industery = $client->bio->industry($client->bio->industries);
+                      }elseif($client->company){
+                        // Founders keep their industry on the startup (Industry / Sectors tab), not in users_bio.
+                        $industery = $client->company->companyRelations()->with('industry')->get()->pluck('industry')->filter()->unique('id');
                       }else{
                         $industery = [];
                       }

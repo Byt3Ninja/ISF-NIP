@@ -129,7 +129,12 @@
               </div>
               <div class="d-flex justify-content-between align-items-end">
                 <div class="role-heading">
-                  <h5 class="mb-1">{{ $role->name ?? '' }}</h5>
+                  @php
+                    // Translated like the Users page role filter; custom roles without a key keep their name.
+                    $roleLabel = __('admin.' . $role->name);
+                    $roleLabel = is_string($roleLabel) && $roleLabel !== 'admin.' . $role->name ? trim($roleLabel) : $role->name;
+                  @endphp
+                  <h5 class="mb-1">{{ $roleLabel }}</h5>
                   @if($_user->ableToAny(['roles.edit', 'roles.update'], $permissions))
                   <a
                     class="role-edit-modal"

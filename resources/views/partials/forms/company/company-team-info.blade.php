@@ -274,6 +274,19 @@ $foundersCount = count($foundersPayload);
     founders: @json($foundersPayload),
     investors:    @json($investors ?? []),
     shareholders: @json($shareholders ?? []),
+    // Founder wording comes from the lang files so a localization overlay (e.g. ISF "Student") applies.
+    labels: {
+      noFounders: @json(__('admin.No_Founders_Empty')),
+      foundersEmptyDesc: @json(__('admin.team_founders_empty_desc')),
+      addFounder: @json(__('admin.Add_Founder')),
+      editFounder: @json(__('admin.Edit_Founder')),
+      saveFounder: @json(__('admin.Save_Founder')),
+      saveChanges: @json(__('admin.Save_Changes')),
+      founder: @json(__('admin.Founder')),
+      founderType: @json(__('admin.Founder')),
+      cofounderType: @json(__('admin.Co_founder')),
+      founderDeletedToast: @json(__('admin.founder_deleted')),
+    },
     routes: {
       add:    '{{ route('company.profile_teams_add',    ['id' => isset($client) && $client->company ? $client->company->id : auth()->user()->id]) }}',
       edit:   '{{ route('company.profile_teams_edit',   ['id' => isset($client) && $client->company ? $client->company->id : auth()->user()->id]) }}',

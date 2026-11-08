@@ -3901,6 +3901,7 @@ return [
 	'founder_updated' => 'Founder updated successfully.',
 	'founder_deleted' => 'Founder deleted successfully.',
 	'No_Founders_Empty' => 'No founders added yet',
+	'team_founders_empty_desc' => 'Add your founding team to showcase the people behind your startup.',
 	'offline_location_address_max' => 'The offline location address may not be greater than 250 characters.',
 	'offline_location_map_max' => 'The offline location map URL may not be greater than 500 characters.',
   	'view_submission' => 'View Submission',

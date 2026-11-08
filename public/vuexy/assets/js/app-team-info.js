@@ -99,6 +99,9 @@
       noInvestors: "No Investors Listed",
       noShareholders: "No Shareholders",
       addFounder: "Add Founder",
+      editFounder: "Edit Founder",
+      saveFounder: "Save Founder",
+      saveChanges: "Save Changes",
       addInvestor: "Add Investor",
       addShareholder: "Add Shareholder",
       tip: "Tip: Use search above to filter existing members",
@@ -141,6 +144,9 @@
       noInvestors: "لم يتم إضافة مستثمرين",
       noShareholders: "لا يوجد مساهمون",
       addFounder: "إضافة مؤسس",
+      editFounder: "تعديل المؤسس",
+      saveFounder: "حفظ المؤسس",
+      saveChanges: "حفظ التغييرات",
       addInvestor: "إضافة مستثمر",
       addShareholder: "إضافة مساهم",
       tip: "نصيحة: استخدم مربع البحث أعلاه لتصفية الأعضاء",
@@ -177,7 +183,12 @@
     },
   };
 
-  const t = TRANSLATIONS[LANG] || TRANSLATIONS.en;
+  // Server labels (lang files + localization overlay) win over the built-in table.
+  const t = Object.assign(
+    {},
+    TRANSLATIONS[LANG] || TRANSLATIONS.en,
+    TEAM_INFO_CONFIG.labels || {},
+  );
 
   function translateInvestmentType(raw) {
     if (!raw) return "";
@@ -536,10 +547,8 @@
     if (row) {
       console.log("row", row);
       // Edit mode
-      if (titleEl)
-        titleEl.textContent = LANG === "ar" ? "تعديل المؤسس" : "Edit Founder";
-      if (btnSave)
-        btnSave.textContent = LANG === "ar" ? "حفظ التغييرات" : "Save Changes";
+      if (titleEl) titleEl.textContent = t.editFounder;
+      if (btnSave) btnSave.textContent = t.saveChanges;
       const $f = $("#form-founder");
       Object.entries(row).forEach(([k, v]) => {
         if (k === "phone" && itiInstances.founder) {
@@ -552,10 +561,8 @@
       });
     } else {
       // Add mode
-      if (titleEl)
-        titleEl.textContent = LANG === "ar" ? "إضافة مؤسس" : "Add Founder";
-      if (btnSave)
-        btnSave.textContent = LANG === "ar" ? "حفظ المؤسس" : "Save Founder";
+      if (titleEl) titleEl.textContent = t.addFounder;
+      if (btnSave) btnSave.textContent = t.saveFounder;
       $('#form-founder [name="id"]').val("");
     }
 

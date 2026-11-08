@@ -390,6 +390,7 @@ return [
     'founder_updated' => 'Student updated successfully.',
     'founder_deleted' => 'Student deleted successfully.',
     'No_Founders_Empty' => 'No students added yet',
+    'team_founders_empty_desc' => 'Add your team to showcase the students behind your idea.',
     'startups_subtitle' => 'Browse and manage every idea on the platform.',
     'company_assigned_other_panel' => 'This idea is already assigned to another screening panel. Are you sure you want to assign it to this panel as well?',
     'companies_assigned_other_panel' => 'The following idea(s) are already assigned to another screening panel. Are you sure you want to assign them to this panel as well?',

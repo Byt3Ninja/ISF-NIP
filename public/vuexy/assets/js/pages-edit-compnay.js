@@ -132,6 +132,9 @@ const translations = {
   }
 };
 
+// Server labels (lang files + localization overlay) win over the built-in table.
+if (translations[lang]) Object.assign(translations[lang], window.EDIT_COMPANY_LABELS || {});
+
 /* ─── Helpers ───────────────────────────────────────────────────────────── */
 
 function validateFileField(input, fieldName, lang) {
