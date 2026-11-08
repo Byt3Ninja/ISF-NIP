@@ -200,10 +200,17 @@
     ],
   ];
 
+  // GV-10432: ISF does not ask for Financial, Employees, Milestones or Business Model / MVP,
+  // so the widgets fed by those sections are not shown there. Saved data is kept.
+  $isIsf = isIsf();
+
   // GV-2052: Hide description tabs (why_this_startup, mission, achievements,
   // startup_expertise) when their underlying column is empty / whitespace.
   // Legacy tabs are marked 'always' => true and remain visible with N/A fallback.
-  $strategyTabs = array_values(array_filter($strategyTabs, function ($tab) {
+  $strategyTabs = array_values(array_filter($strategyTabs, function ($tab) use ($isIsf) {
+    if ($isIsf && $tab['id'] === 'tab-model') {
+      return false;
+    }
     if (!empty($tab['always'])) {
       return true;
     }
@@ -235,7 +242,7 @@
 <div class="row g-6">
 
   {{-- 1. HERO SUMMARY WIDGET --}}
-  <div class="col-lg-8">
+  <div class="{{ $isIsf ? 'col-12' : 'col-lg-8' }}">
     <div class="card h-100 overflow-hidden border-0 bg-primary bg-gradient shadow-none">
       <div class="card-body d-flex flex-column h-100 p-5">
         <div class="row align-items-center">
@@ -329,6 +336,7 @@
   </div>
 
   {{-- 2. FUNDING PROGRESS WIDGET --}}
+  @unless ($isIsf)
   <div class="col-lg-4 col-md-6">
     <div class="card h-100 border-0 shadow-sm">
       <div class="card-header d-flex align-items-center justify-content-between border-bottom py-4">
@@ -387,6 +395,7 @@
       </div>
     </div>
   </div>
+  @endunless
 
   {{-- 3. STRATEGIC CONTENT TABS --}}
   <div class="col-xl-8 col-12">
@@ -475,6 +484,7 @@
       </div>
       <div class="card-body pt-4">
         <ul class="mb-0 list-unstyled">
+          @unless ($isIsf)
           <li class="mb-4 d-flex align-items-center">
             <div class="badge me-3 rounded bg-label-warning p-2">
               <i class="ti ti-world ti-md"></i>
@@ -503,6 +513,7 @@
               <span class="small fw-bold">{{ $co->business_type ?? __('admin.N/A') }}</span>
             </div>
           </li>
+          @endunless
           <li class="d-flex align-items-center">
             <div class="badge me-3 rounded bg-label-secondary p-2">
               <i class="ti ti-history ti-md"></i>
@@ -512,6 +523,7 @@
               <span class="small fw-bold">{{ $yearsOps }}</span>
             </div>
           </li>
+          @unless ($isIsf)
           <li class="mt-4 d-flex align-items-center">
             <div class="badge me-3 rounded bg-label-success p-2">
               <i class="ti ti-users-group ti-md"></i>
@@ -539,6 +551,7 @@
               <span class="small fw-bold">{{ $femaleEmployees }}</span>
             </div>
           </li>
+          @endunless
         </ul>
       </div>
     </div>
@@ -738,7 +751,7 @@
       <div class="card-body pt-4">
         <div class="row g-6">
           @foreach ($achievements as $key => $item)
-            @if ($loop->index === 1 || $loop->index === 3)
+            @if ($loop->index === 1 || $loop->index === 3 || ($isIsf && $key === 'growth_achiever'))
               @continue
             @endif
             @php
@@ -879,7 +892,7 @@
       <div class="table-responsive">
         <table class="table table-hover">
           <tbody>
-            @foreach (['business_plan', 'financial_plan', 'Commercial_Register', 'Tax_Card'] as $field)
+            @foreach ($isIsf ? ['Commercial_Register', 'Tax_Card'] : ['business_plan', 'financial_plan', 'Commercial_Register', 'Tax_Card'] as $field)
               @if ($co->viewerFileUrl($field))
                 <tr>
                   <td>

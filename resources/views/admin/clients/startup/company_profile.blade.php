@@ -155,6 +155,15 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
   $pills[] = 'startup_growth';
   $pillsIcons[] = 'chart-dots-2';
 }
+
+// GV-10432: ISF does not ask for Milestones, Financial or Customer Growth. Hidden only; saved data is kept.
+if (isIsf()) {
+  foreach (array_keys(array_intersect($pills, ['milestones', 'financial_report', 'startup_growth'])) as $i) {
+    unset($pills[$i], $pillsIcons[$i]);
+  }
+  $pills = array_values($pills);
+  $pillsIcons = array_values($pillsIcons);
+}
 @endphp
 
 @section('content')
@@ -201,7 +210,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
           </button>
         @endif
         @php $mvpLink = trim((string) ($company->mvp_prototype_link ?? '')); @endphp
-        @if ($mvpLink !== '')
+        @if ($mvpLink !== '' && !isIsf())
         <a href="{{ $mvpLink }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary shadow-sm border">
           {{ __('startup.view_prototype') }} <i class="ti ti-eye ms-2"></i>
         </a>
@@ -212,7 +221,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
     @include('admin.clients.startup.partials._startup_info')
 
     @php
-      $activeKey = request()->has('valuation_date') ? 5 : 0;
+      $activeKey = request()->has('valuation_date') && in_array('financial_report', $pills, true) ? 5 : 0;
     @endphp
     
     <nav class="nav-align-top mb-8">
@@ -241,13 +250,16 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         @include('admin.clients.startup.partials._startup_overview')
       </section>
       
+      @unless (isIsf())
       <!-- Milestones Section -->
       <section class="tab-pane fade" id="milestones" role="tabpanel" aria-labelledby="milestones-tab">
         @include('admin.clients.startup.partials._startup_milestones')
       </section>
+      @endunless
 
       <!-- Team Section -->
       <section class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
+        @unless (isIsf())
         <h5 class="mb-4">{{ __('startup.employees_statistics') }}</h5>
         <div class="row g-6 mb-6">
           @foreach ($employeesKpis as $kpi)
@@ -318,6 +330,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
             </div>
           @endforeach
         </div>
+        @endunless
 
         <div class="row">
           @include('admin.clients.startup.partials._startup_founders')
@@ -331,7 +344,7 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         @include('admin.clients.startup.partials._startup_pitch_deck')
       </section>
 
-      @if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) )
+      @if( !isIsf() && ( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('registered') && $company?->id === $_user?->company_id ) ) )
       <!-- Startup growth Section -->
       <section class="tab-pane fade" id="startup_growth" role="tabpanel" aria-labelledby="startup-growth-tab">
         @include('admin.clients.startup.partials._startup_growth')
@@ -343,10 +356,12 @@ if( $_user->hasAnyRole('Admin|organizationManager') || ( $_user->hasRole('regist
         @include('admin.clients.startup.partials._startup_programs')
       </section>
       
+      @unless (isIsf())
       <!-- Financial Section -->
       <section class="tab-pane fade {{ $activeKey == 5 ? 'show active' : '' }}" id="financial_report" role="tabpanel" aria-labelledby="financial-report-tab">
         @include('admin.clients.startup.partials._startup_financial_report')
       </section>
+      @endunless
     </div>
     {{-- <section class="mt-6 px-4">
       <div class="row">

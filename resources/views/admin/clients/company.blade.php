@@ -61,6 +61,13 @@
       $tabs->push(['support_mentorship', 'ti-brand-my-oppo', $l == 'en' ? 'Support & Mentorship' : 'الدعم والمشاركة']);
   }
 
+  // GV-10432: ISF does not ask for these sections. Hidden only; saved data is kept.
+  if (isIsf()) {
+      $isfHiddenTabs = ['company-contact', 'company-financial-info', 'company-financial-projection', 'employees',
+          'company-milestones', 'business_model', 'customer_growth', 'support_mentorship'];
+      $tabs = $tabs->reject(fn ($tab) => in_array($tab[0], $isfHiddenTabs, true))->values();
+  }
+
   $tabs = $tabs->map(function ($tab) {
       return [
           'target' => $tab[0],
@@ -281,9 +288,12 @@
       const requestedIndex = tabsLocked ? -1 : tabTargets.indexOf(requestedTab);
 
       const restoreDisabled = hasCompleteProfile || tabsLocked;
+      const rememberedIndex = restoreDisabled || !activeCompanyTab ? 0 : JSON.parse(activeCompanyTab);
+      // Links elsewhere store a fixed index; when fewer tabs are shown (e.g. ISF, GV-10432)
+      // it can point past the last one and would open with no pane at all.
       const activeIndex = requestedIndex > -1
         ? requestedIndex
-        : (restoreDisabled || !activeCompanyTab ? 0 : JSON.parse(activeCompanyTab));
+        : (rememberedIndex >= 0 && rememberedIndex < tabTargets.length ? rememberedIndex : 0);
       const activePitchIndex = restoreDisabled || !activePitchTab ? 0 : JSON.parse(activePitchTab);
 
       // Initialize pitch tabs (internal tabs within pitch deck)
@@ -561,6 +571,7 @@
       .then(response => response.json())
       .then(data => {
         const select = document.getElementById('country_code');
+        if (!select) return; // Contact Info tab not shown (ISF)
         if (Array.isArray(data)) {
           data.forEach(country => {
             const option = document.createElement('option');

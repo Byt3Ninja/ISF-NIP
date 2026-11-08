@@ -78,6 +78,8 @@
                     @endif
                   </div>
                 </div>
+                {{-- GV-10432: ISF does not ask for Contact Info, so its links are not shown there. --}}
+                @unless (isIsf())
                 <div class="social-links d-flex align-items-center justify-content-start justify-content-md-end">
                   <div class="d-flex flex-wrap flex-md-nowrap align-items-center gap-2">
                     @if ($company->facebook)
@@ -152,6 +154,7 @@
                     @endif
                   </div>
                 </div>
+                @endunless
               </div>
               <!-- Company Details Section -->
               <div class="company-details mt-4">
@@ -218,7 +221,7 @@
                   <div class="mb-3 mb-md-0">
                     <h6 class="mb-1">{{ $l == 'en' ? 'Location' : 'الموقع' }}</h6>
                     <div class="location-info">
-                      @if($company->google_map)
+                      @if($company->google_map && !isIsf())
                         <a href="{{ $company->google_map }}" target="_blank" 
                            class="text-secondary text-decoration-none hover-primary"
                            data-bs-toggle="tooltip" data-bs-placement="top" title="Open in Google Maps">

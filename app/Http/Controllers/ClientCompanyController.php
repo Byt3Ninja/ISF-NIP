@@ -670,62 +670,32 @@ class ClientCompanyController extends Controller
 
         // Padges
         $profile = $company;
-        $profile_page = collect([
-            $profile->name_en,
-            $profile->name_ar,
-            $profile->country_id,
-            $profile->state_id,
-            $profile->business_categories,
-            $profile->est_date,
-            $profile->address_en,
-            $profile->address_ar,
-            $profile->years_of_operations,
-            $profile->info_company,
-            $profile->previous_incubation,
-            $profile->product_or_service,
-            $profile->about_problem,
-            $profile->about_market_opportunity,
-            $profile->about_competitors,
-            $profile->about_monetize,
-            $profile->about_challenges,
-            $profile->business_model,
-            $profile->business_model_description,
-            $profile->company_registration_type,
-            $profile->products_services_description,
-            $profile->phone,
-            $profile->email,
-            $profile->achievements,
-            $profile->mission,
-            $profile->why_this_startup,
-            $profile->startup_expertise,
-            $profile->generate_revenue,
-            $profile->development_stage,
-            $profile->business_type,
-            $profile->pitch_deck,
-            $profile->documents,
-            $profile->total_employees,
-            $profile->male_employees,
-            $profile->female_employees,
-            $profile->mvp_prototype_link,
-            $profile->logo,
-            $profile->Currency,
-            $profile->Pre_money_Valuation,
-            $profile->raised_fund,
-            $profile->Funding_Target,
-            $profile->stage,
-            $profile->website,
-            $profile->facebook,
-            $profile->twitter,
-            $profile->linkedin,
-            $profile->youtube,
-            $profile->instagram,
-            $profile->tiktok,
-            $profile->google_map,
-            $profile->whatsapp,
-            $profile->Commercial_Register,
-            $profile->Tax_Card,
-            $profile->documents,
-        ])->every(fn ($value) => !is_null($value));
+        $profileFields = [
+            'name_en', 'name_ar', 'country_id', 'state_id', 'business_categories',
+            'est_date', 'address_en', 'address_ar', 'years_of_operations', 'info_company',
+            'previous_incubation', 'product_or_service', 'about_problem', 'about_market_opportunity',
+            'about_competitors', 'about_monetize', 'about_challenges', 'business_model',
+            'business_model_description', 'company_registration_type', 'products_services_description',
+            'phone', 'email', 'achievements', 'mission', 'why_this_startup', 'startup_expertise',
+            'generate_revenue', 'development_stage', 'business_type', 'pitch_deck', 'documents',
+            'total_employees', 'male_employees', 'female_employees', 'mvp_prototype_link', 'logo',
+            'Currency', 'Pre_money_Valuation', 'raised_fund', 'Funding_Target', 'stage', 'website',
+            'facebook', 'twitter', 'linkedin', 'youtube', 'instagram', 'tiktok', 'google_map',
+            'whatsapp', 'Commercial_Register', 'Tax_Card',
+        ];
+        // GV-10432: ISF hides Contact, Financial, Employees and Business Model / MVP, so their
+        // fields cannot block the "profile complete" badge there.
+        if (isIsf()) {
+            $profileFields = array_diff($profileFields, [
+                'phone', 'email', 'website', 'facebook', 'twitter', 'linkedin', 'youtube', 'instagram',
+                'tiktok', 'google_map', 'whatsapp',
+                'Currency', 'Pre_money_Valuation', 'raised_fund', 'Funding_Target', 'generate_revenue',
+                'development_stage', 'business_type',
+                'total_employees', 'male_employees', 'female_employees',
+                'business_model', 'business_model_description', 'mvp_prototype_link',
+            ]);
+        }
+        $profile_page = collect($profileFields)->every(fn ($field) => !is_null($profile->{$field}));
         if($profile_page == false){
             $profile_page = true;
         }else{

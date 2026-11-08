@@ -596,3 +596,14 @@ if (! function_exists('brandName')) {
             ?: (optional($setting)->title ?: config('app.name'));
     }
 }
+
+if (! function_exists('isIsf')) {
+    /**
+     * GV-10432: true on the ISF deployment, recognised by its LOCALIZATION_PATH=isf
+     * wording overlay. Use it for ISF-only behaviour, not only wording.
+     */
+    function isIsf(): bool
+    {
+        return config('app.localization_path') === 'isf';
+    }
+}
