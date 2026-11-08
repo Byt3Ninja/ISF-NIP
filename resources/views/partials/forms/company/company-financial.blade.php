@@ -138,22 +138,6 @@
         <div class="row">
 
           <div class="col-md-6 mb-3">
-            <label for="stage" class="form-label fw-medium">{{ __('admin.development_stage') }}</label>
-            @php
-              $hasSelectedStage = !empty($client->company) && $Stages->contains('id', $client->company->stage);
-            @endphp
-            <select class="form-select select2" required id="stage" name="stage">
-              <option value="" disabled {{ !$hasSelectedStage ? 'selected' : '' }}>{{ __('admin.development_stage') }}</option>
-              @foreach ($Stages as $Stage)
-              <option value="{{ $Stage->id }}"
-                {{ !empty($client->company) && $client->company->stage == $Stage->id ? 'selected' : '' }}>
-                {{ $Stage->{'name_' . $l} }}
-              </option>
-              @endforeach
-            </select>
-          </div>
-
-          <div class="col-md-6 mb-3">
             <label for="development_stage" class="form-label fw-medium">{{ __('admin.Funding_Stage') }}</label>
             <select class="form-select select2" required id="development_stage" name="development_stage">
               <option value="" disabled>{{ __('admin.Funding_Stage') }}</option>
@@ -188,7 +172,7 @@
             </select>
           </div>
 
-          <div class="col-md-6 mb-3">
+          <div class="col-12 mb-3">
             <label for="targeted_market" class="form-label fw-medium">{{ __('admin.Targeted_Market') }}</label>
             <select class="form-select select2" id="targeted_market" name="targeted_market[]" multiple autocomplete="targeted_market">
               @foreach($countries as $country)

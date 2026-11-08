@@ -418,4 +418,5 @@ return [
     'viewing_screening_results_for_program' => 'عرض نتائج الفحص للبرنامج الفرعي المحدد',
     'no_founders_listed' => 'لم يتم إدراج أي طلاب',
     'select_organization_first' => 'يرجى اختيار برنامج أولاً',
+    'development_stage_required' => 'مرحلة تطوير الفكرة مطلوبة.',
 ];

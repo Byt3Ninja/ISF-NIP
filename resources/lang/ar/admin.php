@@ -4095,4 +4095,5 @@ return [
   'viewing_screening_results_for_program' => 'عرض نتائج الفحص للبرنامج المحدد',
   'no_founders_listed' => 'لم يتم إدراج أي مؤسسين',
   'select_organization_first' => 'يرجى اختيار منظمة أولاً',
+  'development_stage_required' => 'مرحلة تطوير الشركة الناشئة مطلوبة.',
 ];

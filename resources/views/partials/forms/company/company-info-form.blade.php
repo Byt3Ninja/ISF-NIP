@@ -44,6 +44,25 @@
           </div>
         </div>
 
+        {{-- ── Development Stage (moved from Financial Info, GV-10400) ── --}}
+        @php
+          $hasSelectedStage = !empty($client->company) && $Stages->contains('id', $client->company->stage);
+        @endphp
+        <div class="col-12 mb-3">
+          <div class="form-group">
+            <label class="form-label fs-6 fw-semibold mb-2" for="stage">{{ __('admin.development_stage') }} *</label>
+            <select class="form-select select2" id="stage" name="stage" required
+              data-required-message="{{ __('admin.development_stage_required') }}">
+              <option value="" disabled {{ !$hasSelectedStage ? 'selected' : '' }}>{{ __('admin.development_stage') }}</option>
+              @foreach ($Stages as $Stage)
+                <option value="{{ $Stage->id }}" {{ !empty($client->company) && $client->company->stage == $Stage->id ? 'selected' : '' }}>
+                  {{ $Stage->{'name_' . $l} }}
+                </option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+
         @php
           $stateID = $client->company ? optional($client->company)->state_id : 0;
         @endphp

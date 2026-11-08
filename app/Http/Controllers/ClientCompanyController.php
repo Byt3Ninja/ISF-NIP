@@ -1279,7 +1279,6 @@ class ClientCompanyController extends Controller
      */
     public function updateOrStore(StoreUpdateClientCompanyRequest $request, $id = null)
     {
-        
         try {
             $user = Auth::user();
             if (!is_null($id)) {
@@ -1411,6 +1410,7 @@ class ClientCompanyController extends Controller
                 }
                 $validatedData = $request->validate([
                     'name_en' => 'required|string|max:255',
+                    'stage' => 'required|exists:stages,id',
                     'country_id' => 'required|exists:countries,id',
                     'state_id' => 'required|exists:states,id',
                     'sector' => 'nullable|string|max:255',
@@ -1428,6 +1428,8 @@ class ClientCompanyController extends Controller
                     'products_services_description' => 'nullable|string|max:1000',
                 ], [
                     'name_en.required' => __('admin.Name is required'),
+                    'stage.required' => __('admin.development_stage_required'),
+                    'stage.exists' => __('admin.development_stage_required'),
                     'country_id.required' => __('admin.Country is required'),
                     'country_id.exists' => __('admin.Invalid Country selected'),
                     'state_id.required' => __('admin.State is required'),
@@ -1507,6 +1509,7 @@ class ClientCompanyController extends Controller
                 }
                 $result->name_en = $data['name_en'];
                 $result->name_ar = $data['name_en'];
+                $result->stage = $data['stage'];
                 $result->country_id = $data['country_id'];
                 $result->state_id = $data['state_id'];
                 $result->sector = $data['sector'] ?? null;
@@ -1625,7 +1628,6 @@ class ClientCompanyController extends Controller
                     'financial_plan_description' => 'nullable|max:255',
                     'raised_fund' => 'nullable|numeric|min:0',
                     'Funding_Target' => 'nullable|numeric|min:0',
-                    'stage' => 'nullable',
                     'development_stage' => 'nullable',
                     'targeted_market.*' => 'nullable',
                     'business_type' => 'nullable',
@@ -1675,7 +1677,6 @@ class ClientCompanyController extends Controller
                 $result->Pre_money_Valuation = $data['pre_money_valuation'];
                 $result->raised_fund = $data['raised_fund'];
                 $result->Funding_Target = $data['Funding_Target'];
-                $result->stage = array_key_exists('stage', $data) ? $data['stage'] : null;
                 $result->development_stage = $data['development_stage'];
                 $result->targeted_market = json_encode($data['targeted_market']);
                 $result->business_type = $data['business_type'];

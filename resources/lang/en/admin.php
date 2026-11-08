@@ -4051,4 +4051,5 @@ return [
   'viewing_screening_results_for_program' => 'Viewing screening results for selected program',
   'no_founders_listed' => 'No founders listed',
   'select_organization_first' => 'Please select an organization first',
+  'development_stage_required' => 'Development Stage is required.',
 ];

@@ -141,9 +141,9 @@
                     // Reasons the founder can act on carry a link to the fix.
                     $blockedAction = [
                         // Deep-link to the tab that owns the missing field:
-                        // Development Stage lives on the Financial Info tab.
+                        // Development Stage lives on the Startup Info tab (GV-10400).
                         'no_company' => ['route' => route('company.profile_view_mine', ['tab' => 'company-info']), 'label' => __('admin.GoToMyStartup')],
-                        'no_stage' => ['route' => route('company.profile_view_mine', ['tab' => 'company-financial-info']), 'label' => __('admin.GoToMyStartup')],
+                        'no_stage' => ['route' => route('company.profile_view_mine', ['tab' => 'company-info']), 'label' => __('admin.GoToMyStartup')],
                         'assessment_in_progress' => ['route' => route('assessments.take'), 'label' => __('admin.ContinueAssessment')],
                     ][$blockedReason] ?? null;
                   @endphp

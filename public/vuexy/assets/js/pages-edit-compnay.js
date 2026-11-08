@@ -265,6 +265,11 @@ function buildFVPlugins(rowSelector = '.mb-6, .mb-3, .mb-4, .form-group') {
             }
           }
         },
+        stage: {
+          validators: {
+            notEmpty: { message: $('#stage').data('required-message') || translations[lang].required_field }
+          }
+        },
         product_or_service: { validators: { notEmpty: { message: translations[lang].required_field } } },
         years_of_operations: { validators: { notEmpty: { message: translations[lang].required_field } } },
         country_id: { validators: { notEmpty: { message: translations[lang].required_field } } },
