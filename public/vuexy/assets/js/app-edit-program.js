@@ -182,6 +182,59 @@
   // ------------------------------------------------------------
   // Summernote + Repeater (Custom pages)
   // ------------------------------------------------------------
+  // Mirrors UploadCycleCustomPageImageRequest (image|mimes:jpeg,png,jpg,gif,webp|max:5120)
+  const PAGE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"];
+  const PAGE_IMAGE_MAX = 5 * 1024 * 1024;
+
+  // Upload the picture instead of inlining it as base64. The program id is read at upload
+  // time because in create mode it only exists once step 2 has been saved.
+  const uploadSummernoteImage = (file, $editor) => {
+    if (file.size > PAGE_IMAGE_MAX) {
+      toastr.error(T("Image size must not exceed 5MB"));
+      return;
+    }
+    if (!PAGE_IMAGE_TYPES.includes(file.type)) {
+      toastr.error(T("Please select a valid image (jpeg, png, jpg, gif, webp)"));
+      return;
+    }
+
+    const cycleId = String(wizardEl.dataset.programId || "").trim();
+    if (!cycleId) {
+      toastr.error(T("Image upload failed"));
+      return;
+    }
+
+    const data = new FormData();
+    data.append("image", file);
+    data.append("cycle_id", cycleId);
+    data.append("_token", csrfToken());
+
+    $.ajax({
+      url: wizardEl.dataset.uploadImageUrl.replace("__ID__", encodeURIComponent(cycleId)),
+      method: "POST",
+      data: data,
+      processData: false,
+      contentType: false,
+      headers: { Accept: "application/json" },
+      success: function (response) {
+        if (response.status) {
+          // Fit the image to the page width without stretching smaller pictures
+          $editor.summernote("insertImage", response.url, ($image) => {
+            $image.addClass("img-fluid").css({ maxWidth: "100%", height: "auto" });
+          });
+        } else {
+          toastr.error(response.message || T("Image upload failed"));
+        }
+      },
+      error: function (xhr) {
+        toastr.error(
+          xhr.responseJSON?.message ||
+            T("An error occurred while uploading the image"),
+        );
+      },
+    });
+  };
+
   const summernoteConfig = {
     height: 250,
     // placeholder: T("Page description", "Page description"),
@@ -198,6 +251,13 @@
       ["view", ["fullscreen", "codeview"]],
       ["help", ["help"]],
     ],
+    buttons: { expand: window.SummernoteExpand.button },
+    callbacks: {
+      // Summernote calls this with the textarea as `this`
+      onImageUpload: function (files) {
+        Array.from(files).forEach((file) => uploadSummernoteImage(file, $(this)));
+      },
+    },
   };
 
   const initSummernote = (el) => {

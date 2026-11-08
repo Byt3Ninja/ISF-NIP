@@ -831,4 +831,8 @@ return [
     'program_title_required' => 'عنوان البرنامج مطلوب',
     'program_title_ar_required' => 'عنوان البرنامج باللغة العربية مطلوب.',
     'program_description_ar_required' => 'وصف البرنامج باللغة العربية مطلوب.',
+    'Image size must not exceed 5MB' => 'حجم الصورة يجب أن لا يتجاوز 5 ميجابايت',
+    'Please select a valid image (jpeg, png, jpg, gif, webp)' => 'يرجى اختيار صورة صالحة (jpeg, png, jpg, gif, webp)',
+    'Image upload failed' => 'فشل تحميل الصورة',
+    'An error occurred while uploading the image' => 'حدث خطأ أثناء تحميل الصورة',
 ];

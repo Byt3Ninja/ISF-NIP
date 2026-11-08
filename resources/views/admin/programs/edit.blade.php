@@ -97,7 +97,8 @@ HTML;
 <div id="wizard-program" class="bs-stepper vertical mt-2"
   data-program-id="{{ $ccycle->id }}"
   data-base-url="{{ url('/dashboard/programs') }}"
-  data-list-url="{{ url('/dashboard/programlist') }}">
+  data-list-url="{{ url('/dashboard/programlist') }}"
+  data-upload-image-url="{{ route('cycle.custom_pages.upload_image', ['id' => '__ID__']) }}">
   <div class="bs-stepper-header border-end">
     @foreach ($wizardSteps as [$sid, $icon, $title, $subtitle])
       @if (!$loop->first)<div class="line"></div>@endif

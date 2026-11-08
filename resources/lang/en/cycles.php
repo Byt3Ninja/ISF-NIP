@@ -836,4 +836,8 @@ return [
     'program_title_required' => 'Program title is required',
     'program_title_ar_required' => 'Program Title in Arabic is required.',
     'program_description_ar_required' => 'Description in Arabic is required.',
+    'Image size must not exceed 5MB' => 'Image size must not exceed 5MB',
+    'Please select a valid image (jpeg, png, jpg, gif, webp)' => 'Please select a valid image (jpeg, png, jpg, gif, webp)',
+    'Image upload failed' => 'Image upload failed',
+    'An error occurred while uploading the image' => 'An error occurred while uploading the image',
 ];

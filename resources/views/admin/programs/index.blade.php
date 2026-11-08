@@ -177,7 +177,7 @@
                         <li>
                           <a 
                             class="dropdown-item" 
-                            href="/dashboard/programlist/{{ $cycle->id }}/custom-pages"
+                            href="/dashboard/programlist/edit/{{ $cycle->id }}?tab=pages"
                           >
                             <i class="ti ti-files me-1"></i> {{ __('cycles.Manage Custom Pages') }}
                           </a>
