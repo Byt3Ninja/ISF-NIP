@@ -102,10 +102,10 @@ class ExternalCyclesController extends Controller
 					->where('stype', 1)
 					->orderBy('arr', 'ASC')
 					->first();
-				
+
 				if( !empty( $firstFormStep ) )
 				{
-					if( $firstFormStep?->form_id > 0 ) { $hadForm = true; }
+					if( $firstFormStep?->form_id > 0 || intval( $firstFormStep?->data ) > 0 ) { $hadForm = true; }
 				}
 
 				return view('admin.settings.cycles.public-program-details', compact('program', 'pages', 'org_slug', 'program_slug', 'winnersData', 'currentHackathon', 'hadForm'));
