@@ -282,6 +282,9 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
     Route::post('organizations/reminder-logs/destroy', 'ReminderLogController@destroy')->name('organization.destroyReminderLogs');
 
     Route::resource('organization-types', 'OrganizationTypesController');
+    // GV-10436 (ISF): Entity options for the founder's Education Status
+    Route::resource('education-entities', 'EducationEntitiesController')->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['education-entities' => 'id']);
 
     // Organization Wizard Routes (multi-step creation/editing)
     Route::prefix('organization')->name('organization.wizard.')->group(function () {

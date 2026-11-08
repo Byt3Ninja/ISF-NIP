@@ -6,6 +6,7 @@ $icons = [
   'general' => 'ti-adjustments',
   'roles_permissions' => 'ti-shield-lock',
   'organization_types' => 'ti ti-building' ,
+  'education_entities' => 'ti-school',
   'importer_tool' => 'ti-package-import',
   'currencies' => 'ti-coins',
   'tags' => 'ti-tag',

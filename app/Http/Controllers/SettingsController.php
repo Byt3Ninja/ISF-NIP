@@ -68,6 +68,10 @@ class SettingsController extends Controller
 						['title' => 'notification_triggers', 'route' => 'notification-triggers.index'],
 						['title' => 'license_key', 'route' => 'license.activate_view_form']
 				];
+				// GV-10436: the Entity options of ISF's Education Status
+				if (isIsf()) {
+						array_splice($pages, 4, 0, [['title' => 'education_entities', 'route' => 'education-entities.index']]);
+				}
 
 				return view('admin.settings.index', compact('pages'));
 		}

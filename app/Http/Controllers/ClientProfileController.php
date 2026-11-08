@@ -9,6 +9,7 @@ use App\Currency;
 use App\Cycle;
 use App\CyclesMentors;
 use App\serviceProviders;
+use App\EducationEntity;
 use App\Expertise;
 use App\Http\Requests\UpdateClientProfilePasswordRequest;
 use App\Http\Requests\UpdateClientProfileRequest;
@@ -138,7 +139,9 @@ class ClientProfileController extends Controller
 
             // Fetch activities
             $activities = Activity::where('user_id', $client->id)->orderBy('activity_time', 'desc')->get();
-            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries', 'countriesIso3Map'));
+            // GV-10436 (ISF): statuses, Entity options and referral options for the founder's education fields
+            $educationFields = isIsf() ? EducationEntity::formConfig() : null;
+            return view('admin/clients/profile/editProfile', compact('client', 'Currencies', 'countries', 'states', 'cities', 'expertises', 'data','activities', 'industries', 'countriesIso3Map', 'educationFields'));
         } catch (Exception $e) {
             Log::channel('system_exceptions')->info('Exceptions:', [$e]);
             abort(500);
@@ -275,6 +278,15 @@ class ClientProfileController extends Controller
                 if( $request->has('should_remove_image') && $request->should_remove_image == 1 ) { $img_url = null; }
             }
             $updateArray = $request->except($excludeArray) + ['img_url' => $img_url];
+
+            // GV-10436 (ISF): founders also save their Entity, student code and referral source.
+            // Only the identification field their status asks for is kept; the other is cleared.
+            if (isIsf() && $user->hasRole('registered')) {
+                $updateArray += $request->only(['education_entity_id', 'student_code', 'referral_source']);
+                $idField = EducationEntity::identificationField($request->input('academic_stat'));
+                $updateArray['student_code'] = $idField === 'student_code' ? $request->input('student_code') : null;
+                $updateArray['national_id'] = $idField === 'national_id' ? $request->input('national_id') : null;
+            }
 
             $user->update($updateArray);
             $user->first_name_ar = $first_name_ar;

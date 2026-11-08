@@ -140,6 +140,7 @@ return [
     'categories' => 'Categories',
     'subcategories' => 'Subcategories',
     'stages' => 'Stages',
+    'education_entities' => 'Education Entities',
     'labels' => 'Labels',
     'queue_jobs' => 'Queue Jobs',
     'industry' => 'Industry',

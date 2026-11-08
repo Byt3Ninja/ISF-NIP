@@ -306,7 +306,10 @@
 </script>
 
 <!-- Page JS -->
-<script src="/vuexy/assets/js/app-edit-profile.js"></script>
+@if ($educationFields ?? null)
+<script src="/vuexy/assets/js/isf-education-fields.js?v={{ @filemtime(public_path('vuexy/assets/js/isf-education-fields.js')) ?: 1 }}"></script>
+@endif
+<script src="/vuexy/assets/js/app-edit-profile.js?v={{ @filemtime(public_path('vuexy/assets/js/app-edit-profile.js')) ?: 1 }}"></script>
 <script src="/vuexy/assets/js/pages-account-settings-account.js"></script>
 
 <script>

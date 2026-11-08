@@ -132,6 +132,23 @@
     };
   }
 
+  // Required + pattern check driven by the field's data-required-message / data-pattern /
+  // data-pattern-message (partials/forms/isf-education-fields.blade.php). Disabled = not asked.
+  function buildDatasetValidator() {
+    return {
+      callback: function (input) {
+        const el = input.element;
+        if (el.disabled) return { valid: true };
+        const value = (input.value || '').trim();
+        if (value === '') return el.required ? { valid: false, message: el.dataset.requiredMessage } : { valid: true };
+        if (el.dataset.pattern && !new RegExp(el.dataset.pattern, 'u').test(value)) {
+          return { valid: false, message: el.dataset.patternMessage };
+        }
+        return { valid: true };
+      }
+    };
+  }
+
   function revalidateField(fieldName) {
     const validator = $('#account-info-form').data('formValidation');
     if (validator) validator.revalidateField(fieldName);
@@ -169,6 +186,13 @@
       fields.academic_stat = { validators: { ...notEmpty('academic_stat') } };
       fields.dob = { validators: { ...notEmpty('dob'), date: { format: 'YYYY-MM-DD', message: t('dob', 'invalid') } } };
       fields.national_id = { validators: { callback: buildNationalIdValidator() } };
+
+      // GV-10436 (ISF): the education fields carry their own messages and formats.
+      if ($form.find('[data-isf-education-status]').length) {
+        ['academic_stat', 'education_entity_id', 'national_id', 'student_code'].forEach(name => {
+          fields[name] = { validators: { callback: buildDatasetValidator() } };
+        });
+      }
     }
 
     const validator = FormValidation.formValidation($form[0], {
@@ -288,6 +312,9 @@
   $(function () {
     initPhoneInputs();
     initFormValidation();
+    if (window.IsfEducationFields) {
+      window.IsfEducationFields.init('#account-info-form', names => names.forEach(revalidateField));
+    }
 
     $select2.each(function () {
       const name = $(this).attr('name');

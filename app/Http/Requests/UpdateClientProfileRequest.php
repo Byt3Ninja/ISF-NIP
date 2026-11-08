@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\EducationEntity;
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -70,12 +71,24 @@ class UpdateClientProfileRequest extends FormRequest
             }
         }
 
+        if ($this->isIsfFounder()) {
+            // The status decides which identification field applies, so the generic one goes.
+            unset($rules['national_id']);
+            $rules = array_merge($rules, EducationEntity::validationRules($this->input('academic_stat'), false));
+        }
+
         return $rules;
+    }
+
+    // GV-10436: ISF founders pick an Education Status + Entity and identify by the matching field.
+    private function isIsfFounder(): bool
+    {
+        return isIsf() && Auth::user()->hasAnyRole(['Registered', 'registered']);
     }
 
     public function messages()
     {
-        return [
+        $messages = [
             'country_id.required'   => __('admin.this_field_is_required'),
             'academic_stat.required'=> __('admin.this_field_is_required'),
             'academic_stat.in'      => __('admin.this_field_is_required'),
@@ -86,6 +99,11 @@ class UpdateClientProfileRequest extends FormRequest
             'national_id.alpha_num' => __('admin.invalid_national_id'),
             'national_id.max'       => __('admin.invalid_national_id'),
         ];
+
+        // ISF wording wins over the generic national ID messages above.
+        return $this->isIsfFounder()
+            ? array_merge($messages, EducationEntity::validationMessages('admin.education_institution_required_msg'))
+            : $messages;
     }
 
     /**

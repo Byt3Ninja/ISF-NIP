@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Settings;
+use App\EducationEntity;
 use Illuminate\Support\Str;
 use App\Http\Middleware\Permissions;
 use App\Traits\Auditable;
@@ -42,7 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
      */
     protected $fillable = [
         'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'guardian', 'gender', 'age', 'country_code', 'phone', 'country_code_w_a', 'whatsapp', 'email', 'new_email', 'title_ar', 'title_en', 'HaveCompany', 'company_id','country_id', 'state_id', 'city_id', 'password', 'provider', 'provider_id', 'google_id','email_verified_at','img_url',
-        'PageId','dob','academic_stat','national_id','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'accept_email', 'accept_whatsapp', 'accept_pusher',
+        'PageId','dob','academic_stat','education_entity_id','national_id','student_code','referral_source','university','faculty','employer','expertise', 'language','currency','timezone','houre_rate','zip_code','address', 'accept_email', 'accept_whatsapp', 'accept_pusher',
         'magic_login_sent_at', 'must_change_password'];
     /**
      * The attributes that should be hidden for arrays.
@@ -757,7 +758,7 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
     ];
 
     // Fields the edit-profile form shows to founders only.
-    public const FOUNDER_ONLY_PROFILE_FIELDS = ['academic_stat', 'dob', 'national_id'];
+    public const FOUNDER_ONLY_PROFILE_FIELDS = ['academic_stat', 'dob', 'national_id', 'education_entity_id', 'student_code', 'referral_source'];
 
     /**
      * The profile fields this user must fill in.
@@ -767,6 +768,14 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
         $required = self::PROFILE_REQUIRED_FIELDS;
         $required['national_id'] = $required['national_id'] || config('app.national_id_required');
         $isFounder = $this->hasRole('registered');
+
+        // GV-10436 (ISF): a founder also names their Entity, and identifies with the field their
+        // Education Status asks for (student code for school students, national ID otherwise).
+        if ($isFounder && isIsf()) {
+            unset($required['national_id']);
+            $required['education_entity_id'] = true;
+            $required[EducationEntity::identificationField($this->academic_stat) ?? 'national_id'] = true;
+        }
 
         return array_keys(array_filter($required, function ($isRequired, $field) use ($isFounder) {
             return $isRequired && ($isFounder || !in_array($field, self::FOUNDER_ONLY_PROFILE_FIELDS, true));
@@ -780,6 +789,11 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
 
     public function hasCompletedProfile(): bool
     {
+        // GV-10436: an ISF founder still on a pre-ISF status (Graduate / Student) must pick again.
+        if (isIsf() && $this->hasRole('registered') && !in_array($this->academic_stat, EducationEntity::statuses(), true)) {
+            return false;
+        }
+
         foreach ($this->requiredProfileFields() as $field) {
             if (blank($this->{$field})) {
                 return false;
@@ -796,6 +810,11 @@ class User extends Authenticatable implements MustVerifyEmail, HasLocalePreferen
             && filled($this->company->address_en)
             && filled($this->company->est_date)
             && filled($this->company->stage);
+    }
+
+    public function educationEntity()
+    {
+        return $this->belongsTo(EducationEntity::class, 'education_entity_id');
     }
 
     public function service_provider()

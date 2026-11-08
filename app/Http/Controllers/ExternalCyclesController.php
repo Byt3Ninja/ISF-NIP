@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\{Cycle, User, Step, Company, Formfield, Formdata, TeamFormation, Settings};
+use App\{Cycle, User, Step, Company, Formfield, Formdata, TeamFormation, Settings, EducationEntity};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Events\StartupJoining;
@@ -157,7 +157,9 @@ class ExternalCyclesController extends Controller
 		{
 			$app_settings = Settings::find(1);
 			$VFEmail = $app_settings?->VFEmail ?? 1;
-			return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug', 'VFEmail'));
+			// GV-10440 (ISF): the application also asks for mobile, education and referral source
+			$educationFields = isIsf() ? EducationEntity::formConfig() : null;
+			return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug', 'VFEmail', 'educationFields'));
 		}
 	}
 
@@ -237,11 +239,38 @@ class ExternalCyclesController extends Controller
 		{
 			if( $program->is_public == 1 )
 			{
-				$request->validate([
+				$rules = [
 					'register-email' => 'required|email:dns',
 					'register-first-name' => 'required',
 					'register-last-name' => 'nullable|sometimes',
-				]);
+				];
+				$messages = [];
+
+				// GV-10440 (ISF): the founder's own details are mandatory, with the Founder
+				// Profile's limits; checked in the same pass so every error comes back at once.
+				if (isIsf()) {
+					$name = ['required', 'string', 'min:2', 'max:50', 'regex:/^[\pL\s]+$/u'];
+					$rules = array_merge($rules, [
+						'register-first-name' => $name,
+						'register-last-name' => $name,
+						'phone' => ['required', 'string', 'max:20', 'regex:/^[\d\s\-\(\)]+$/'],
+						'country_code' => ['nullable', 'string', 'max:5'],
+					], EducationEntity::validationRules($request->input('academic_stat'), true));
+					$messages = array_merge([
+						'register-first-name.required' => __('admin.first_name_required_msg'),
+						'register-last-name.required' => __('admin.last_name_required_msg'),
+						'register-first-name.regex' => __('admin.name_letters_only_msg'),
+						'register-last-name.regex' => __('admin.name_letters_only_msg'),
+						'register-first-name.min' => __('admin.name_length_msg'),
+						'register-last-name.min' => __('admin.name_length_msg'),
+						'register-first-name.max' => __('admin.name_length_msg'),
+						'register-last-name.max' => __('admin.name_length_msg'),
+						'phone.required' => __('admin.mobile_required_msg'),
+						'phone.regex' => __('admin.mobile_invalid_msg'),
+						'phone.max' => __('admin.mobile_invalid_msg'),
+					], EducationEntity::validationMessages('admin.entity_required_msg'));
+				}
+				$request->validate($rules, $messages);
 
 				// Validate the dynamic form fields (required/email/number rules) BEFORE
 				// creating any records, so a rejected submission never leaves an
@@ -397,7 +426,20 @@ class ExternalCyclesController extends Controller
 						'password' => Hash::make( $password ),
 						'api_token' => $request_token
 					]);
-					$user->email_verified_at = now();
+					if (isIsf()) {
+						// GV-10440: reflected on the Founder Profile (same columns it edits).
+						$idField = EducationEntity::identificationField($request->input('academic_stat'));
+						$user->forceFill([
+							'phone' => $request->input('phone'),
+							'country_code' => $request->input('country_code') ?: '20',
+							'academic_stat' => $request->input('academic_stat'),
+							'education_entity_id' => (int) $request->input('education_entity_id'),
+							'national_id' => $idField === 'national_id' ? $request->input('national_id') : null,
+							'student_code' => $idField === 'student_code' ? $request->input('student_code') : null,
+							'referral_source' => $request->input('referral_source'),
+						]);
+					}
+					$user->email_verified_at = $require_mail_verification ? null : now();
 					$user->must_change_password = true;
 					$user->accept_email = true;
 					$user->save();

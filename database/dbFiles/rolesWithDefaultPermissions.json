@@ -2193,6 +2193,48 @@
         ]
     },
     {
+        "name": "Education Entities",
+        "description": "GV-10436 (ISF): Entity options for the founder's Education Status",
+        "permissions": [
+            {
+                "name": "education-entities.index",
+                "description": "List Education Entities",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "education-entities.store",
+                "description": "Save New Education Entity",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "education-entities.update",
+                "description": "Save Education Entity Update",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            },
+            {
+                "name": "education-entities.destroy",
+                "description": "Delete Education Entity",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "admin"
+                ]
+            }
+        ]
+    },
+    {
         "name": "Assessments",
         "description": null,
         "permissions": [

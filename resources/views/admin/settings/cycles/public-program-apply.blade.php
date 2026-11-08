@@ -11,6 +11,11 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bs-stepper/dist/css/bs-stepper.min.css" />
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+	@if ($educationFields)
+	{{-- GV-10440 (ISF): mobile number input, same widget as the Founder Profile --}}
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+	<style>.iti { width: 100%; }</style>
+	@endif
 
 	<style>
 		:root {
@@ -407,22 +412,46 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 									<div class="row">
 										<div class="col-md-6 mb-3">
 											<label for="register-email" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
-											<input type="email" class="form-control" id="register-email" name="register-email" placeholder="{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}" disabled>
+											<input type="email" class="form-control" id="register-email" name="register-email" placeholder="{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}" @if ($educationFields) readonly @else disabled @endif>
 											<div id="register-email-feedback" class="invalid-feedback"></div>
 										</div>
 									</div>
 									<div class="row">
 										<div class="col-md-6 mb-3">
 											<label for="register-first-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'الاسم الأول' : 'First Name' }}<span class="text-danger ms-1">*</span></label>
-											<input type="text" class="form-control" id="register-first-name" name="register-first-name" placeholder="{{ $l == 'ar' ? 'أدخل الاسم الأول' : 'Enter first name' }}" required>
+											<input type="text" class="form-control" id="register-first-name" name="register-first-name" placeholder="{{ $l == 'ar' ? 'أدخل الاسم الأول' : 'Enter first name' }}" required
+												@if ($educationFields) maxlength="50" minlength="2" data-pattern="^[\p{L}\s]+$" data-pattern-message="{{ __('admin.name_letters_only_msg') }}" data-length-message="{{ __('admin.name_length_msg') }}" data-required-message="{{ __('admin.first_name_required_msg') }}" @endif>
 											<div id="register-first-name-feedback" class="invalid-feedback">{{ $l == 'ar' ? 'الاسم الأول مطلوب.' : 'First name is required.' }}</div>
 										</div>
 										<div class="col-md-6 mb-3">
-											<label for="register-last-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'اسم العائلة' : 'Last Name' }}</label>
-											<input type="text" class="form-control" id="register-last-name" name="register-last-name" placeholder="{{ $l == 'ar' ? 'أدخل اسم العائلة' : 'Enter last name' }}">
+											<label for="register-last-name" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'اسم العائلة' : 'Last Name' }}@if ($educationFields)<span class="text-danger ms-1">*</span>@endif</label>
+											<input type="text" class="form-control" id="register-last-name" name="register-last-name" placeholder="{{ $l == 'ar' ? 'أدخل اسم العائلة' : 'Enter last name' }}"
+												@if ($educationFields) required maxlength="50" minlength="2" data-pattern="^[\p{L}\s]+$" data-pattern-message="{{ __('admin.name_letters_only_msg') }}" data-length-message="{{ __('admin.name_length_msg') }}" data-required-message="{{ __('admin.last_name_required_msg') }}" @endif>
 											<div id="register-last-name-feedback" class="invalid-feedback"></div>
 										</div>
 									</div>
+									@if ($educationFields)
+									{{-- GV-10440 (ISF): mobile + education fields; they land on the Founder Profile. --}}
+									<div class="row">
+										<div class="col-md-6 mb-3 form-group">
+											<label for="phone" class="form-label fw-bold mb-2">{{ __('auth.Phone') }}<span class="text-danger ms-1">*</span></label>
+											<input type="hidden" name="country_code" id="country_code" value="20">
+											<input type="tel" class="form-control" id="phone" name="phone" maxlength="20" autocomplete="tel" required
+												data-required-message="{{ __('admin.mobile_required_msg') }}" data-invalid-message="{{ __('admin.mobile_invalid_msg') }}">
+											<div class="invalid-feedback"></div>
+										</div>
+										@include('partials.forms.isf-education-fields', [
+											'values' => [],
+											'wrapperClass' => 'col-md-6 mb-3 form-group',
+											'labelClass' => 'form-label fw-bold mb-2',
+											'selectClass' => 'form-select',
+											'entityRequiredKey' => 'admin.entity_required_msg',
+											'withReferral' => true,
+											'referralRequired' => true,
+											'withFeedback' => true,
+										])
+									</div>
+									@endif
 									<hr />
 									<div id="register-fields" class="row"></div>
 								</form>
@@ -1280,8 +1309,17 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			}
 
 			if (!trimmed) {
-				return isRequired ? requiredText : null;
+				return isRequired ? ($field.attr('data-required-message') || requiredText) : null;
 			}
+
+			// GV-10440 (ISF): optional length / format / phone checks, set per field through
+			// minlength, data-pattern(-message), data-length-message and an intl-tel-input instance.
+			const minLength = parseInt($field.attr('minlength'), 10);
+			if (minLength && trimmed.length < minLength) { return $field.attr('data-length-message') || requiredText; }
+			const pattern = $field.attr('data-pattern');
+			if (pattern && !new RegExp(pattern, 'u').test(trimmed)) { return $field.attr('data-pattern-message') || requiredText; }
+			const iti = $field.data('iti');
+			if (iti && !isValidPhone(iti, trimmed)) { return $field.attr('data-invalid-message') || requiredText; }
 
 			if (type === 'number') {
 				const num = Number(trimmed);
@@ -1308,6 +1346,18 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			}
 
 			return null;
+		}
+
+		// Same rule as the Founder Profile (app-edit-profile.js buildPhoneValidator).
+		function isValidPhone(iti, value) {
+			if (!/^[\d\s\-\(\)]+$/.test(value)) { return false; }
+			if (iti.getSelectedCountryData().iso2 === 'eg') {
+				const clean = value.replace(/[\s\-\(\)]/g, '');
+				return clean.startsWith('0')
+					? (clean.length === 11 && /^0(10|11|12|15|2)\d{8}$/.test(clean))
+					: (clean.length === 10 && /^(10|11|12|15|2)\d{8}$/.test(clean));
+			}
+			return iti.isValidNumber();
 		}
 
 		function applyFieldState($field, message) {
@@ -1714,5 +1764,31 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			flatpickr('.timepicker', { enableTime: true, noCalendar: true, dateFormat: 'H:i', allowInput: true });
 		}
 	</script>
+	@if ($educationFields)
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+	<script src="/vuexy/assets/js/isf-education-fields.js?v={{ @filemtime(public_path('vuexy/assets/js/isf-education-fields.js')) ?: 1 }}"></script>
+	<script>
+		// GV-10440 (ISF): mobile number widget (as on the Founder Profile) and the dependent education fields.
+		$(function () {
+			const phone = document.getElementById('phone');
+			const iti = window.intlTelInput(phone, {
+				preferredCountries: ['eg', 'sa', 'ae', 'kw', 'qa'],
+				initialCountry: 'eg',
+				separateDialCode: true,
+				autoPlaceholder: 'polite',
+				utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/18.1.8/js/utils.js',
+			});
+			$(phone).data('iti', iti);
+			const syncDialCode = () => $('#country_code').val(iti.getSelectedCountryData().dialCode || '20');
+			syncDialCode();
+			phone.addEventListener('countrychange', function () {
+				syncDialCode();
+				if ($(phone).hasClass('is-invalid')) { applyFieldState($(phone), validateField($(phone))); }
+			});
+
+			window.IsfEducationFields.init('#register-form');
+		});
+	</script>
+	@endif
 </body>
 </html>

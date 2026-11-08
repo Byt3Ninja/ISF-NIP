@@ -140,6 +140,7 @@ return [
     'categories' => 'الفئات',
     'subcategories' => 'الفئات الفرعية',
     'stages' => 'المراحل',
+    'education_entities' => 'الجهات التعليمية',
     'labels' => 'التسميات',
     'queue_jobs' => 'وظائف الانتظار',
     'industry' => 'الصناعة',

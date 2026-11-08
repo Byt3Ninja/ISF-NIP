@@ -391,6 +391,7 @@ return [
 		'categories' => 'Categories',
 		'subcategories' => 'Subcategories',
 		'stages' => 'Stages',
+		'education_entities' => 'Education Entities',
 		'labels' => 'Labels',
 		'queue_jobs' => 'Queue Jobs',
 		'industry' => 'Industry',
@@ -542,4 +543,7 @@ return [
 	'branding_valid_main_color' => 'Please enter a valid main color',
 	'branding_valid_button_text_color' => 'Please enter a valid button text color',
 	'branding_valid_color' => 'Please enter a valid color',
+	// GV-10436 (ISF)
+	'education_entities' => 'Education Entities',
+	'settings_education_entities_label' => 'Manage the universities, institutes and research centers founders pick from.',
 ];

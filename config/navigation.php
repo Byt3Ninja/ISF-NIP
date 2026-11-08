@@ -228,6 +228,7 @@ return function () {
         ['title' => 'categories', 'route' => 'Category.index', 'menuOnly' => false],
         ['title' => 'subcategories', 'route' => 'subcategories.index', 'menuOnly' => false],
         ['title' => 'stages', 'route' => 'stages.index', 'menuOnly' => false],
+        ['title' => 'education_entities', 'route' => 'education-entities.index', 'menuOnly' => false],
         ['title' => 'labels', 'route' => 'Labels.index', 'menuOnly' => false],
         ['title' => 'queue_jobs', 'route' => 'queue.jobs', 'menuOnly' => false],
         ['title' => 'industry', 'route' => 'settings.industry_view', 'menuOnly' => false],

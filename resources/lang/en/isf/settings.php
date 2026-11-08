@@ -28,4 +28,5 @@ return [
     'org_email_failing' => 'This program\'s email configuration failed and messages are being sent using the platform configuration instead. Please check the settings below.',
     'email_org_note' => 'Your program\'s emails go out through the platform email settings until you connect your own. If your connection stops working, emails switch back to the platform settings automatically.',
     'email_gmail_limit' => 'Personal Gmail accounts can send about 500 emails a day. For sub programs with many applicants, use Resend.',
+    'settings_education_entities_label' => 'Manage the universities, institutes and research centers students pick from.',
 ];

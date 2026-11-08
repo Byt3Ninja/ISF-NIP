@@ -394,6 +394,7 @@ return [
 		'categories' => 'الفئات',
 		'subcategories' => 'الفئات الفرعية',
 		'stages' => 'المراحل',
+		'education_entities' => 'الجهات التعليمية',
 		'labels' => 'الملصقات',
 		'queue_jobs' => 'وظائف التكليف',
 		'industry' => 'الصناعة',
@@ -542,4 +543,7 @@ return [
 	'branding_valid_main_color' => 'يرجى إدخال لون صالح',
 	'branding_valid_button_text_color' => 'يرجى إدخال لون صالح لنص الأزرار',
 	'branding_valid_color' => 'يرجى إدخال لون صالح',
+	// GV-10436 (ISF)
+	'education_entities' => 'الجهات التعليمية',
+	'settings_education_entities_label' => 'إدارة الجامعات والمعاهد ومراكز الأبحاث التي يختار منها رواد الأعمال.',
 ];

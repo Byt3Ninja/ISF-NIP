@@ -234,6 +234,17 @@
         @if(Auth::user()->hasAnyRole(['Registered']))
           <hr class="w-100 my-3" />
 
+          @if ($educationFields ?? null)
+            {{-- GV-10436 (ISF): status, Entity, student code | national ID and referral replace the plain fields. --}}
+            @include('partials.forms.isf-education-fields', [
+              'values' => $client->only(['academic_stat', 'education_entity_id', 'national_id', 'student_code', 'referral_source']),
+              'wrapperClass' => 'mb-4 col-md-6',
+              'labelClass' => 'form-label fs-6 fw-bold',
+              'selectClass' => 'select2 form-select',
+              'entityRequiredKey' => 'admin.education_institution_required_msg',
+              'withReferral' => true,
+            ])
+          @else
           <div class="mb-4 col-md-6">
             <label for="academic_stat" class="form-label fs-6 fw-bold">
               {{ __('admin.Education_Status') }} @if(in_array('academic_stat', $requiredFields))<span class="text-danger">*</span>@endif
@@ -244,6 +255,7 @@
               <option value="Student" {{ $client->academic_stat == 'Student' ? 'selected' : '' }}>{{ __('admin.Student') }}</option>
             </select>
           </div>
+          @endif
 
           <div class="mb-4 col-md-6">
             <label for="dob" class="form-label fs-6 fw-bold">
@@ -252,6 +264,7 @@
             <input type="text" class="form-control dob-picker" id="dob" name="dob" value="{{ $client->dob ? \Carbon\Carbon::parse($client->dob)->format('Y-m-d') : '' }}" placeholder="YYYY-MM-DD" @required(in_array('dob', $requiredFields)) />
           </div>
 
+          @unless ($educationFields ?? null)
           <div class="mb-4 col-md-6">
             <label for="national_id" class="form-label fs-6 fw-bold">
               {{ __('admin.national_id') }} @if(in_array('national_id', $requiredFields))<span class="text-danger">*</span>@endif
@@ -259,6 +272,7 @@
             <input type="text" class="form-control" id="national_id" name="national_id" placeholder="{{ __('admin.national_id') }}" value="{{ old('national_id', $client->national_id ?? '') }}" oninput="this.value = this.value.trim()" autocomplete="off" @required(in_array('national_id', $requiredFields)) />
             <span class="invalid-feedback" id="national-id-error" style="display: none;"></span>
           </div>
+          @endunless
         @endif
 
       </div>
