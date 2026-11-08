@@ -320,7 +320,7 @@ $startDateForCountdown = $program->registration_starts_at?->toIso8601String();
 						</div>
 					</div>
 
-					@if( $program->registration_starts_at && $program->registration_ends_at && now()->gt( $program->registration_starts_at ) && now()->lt( $program->registration_ends_at ) )
+					@if( ( $program->registration_starts_at && $program->registration_ends_at && now()->gt( $program->registration_starts_at ) && now()->lt( $program->registration_ends_at ) ) && $hadForm == true )
 					<div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
 						<a href="{{ URL::to( $org_slug . '/program/' . $program_slug . '/apply') }}" class="btn btn-primary-custom px-5 py-3 fs-5">
 							<i class="ti ti-send me-2"></i>{{ $l == 'en' ? 'Apply Now' : 'تقدم الآن' }}

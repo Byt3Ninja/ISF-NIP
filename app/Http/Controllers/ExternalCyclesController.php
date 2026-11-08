@@ -96,7 +96,19 @@ class ExternalCyclesController extends Controller
 				}
 
 				$currentHackathon = ['announcement' => $program->announced == 1 ? true : false];
-				return view('admin.settings.cycles.public-program-details', compact('program', 'pages', 'org_slug', 'program_slug', 'winnersData', 'currentHackathon'));
+				$hadForm = false;
+				$firstFormStep = DB::table('steps')
+					->where('cycle_id', $program->id)
+					->where('stype', 1)
+					->orderBy('arr', 'ASC')
+					->first();
+				
+				if( !empty( $firstFormStep ) )
+				{
+					if( $firstFormStep?->form_id > 0 ) { $hadForm = true; }
+				}
+
+				return view('admin.settings.cycles.public-program-details', compact('program', 'pages', 'org_slug', 'program_slug', 'winnersData', 'currentHackathon', 'hadForm'));
 			} else { return abort(403, '<a href="/login">Login</a> To show this page'); }
 		}
 	}
