@@ -62,6 +62,7 @@ class CyclesController extends Controller
     use \App\Traits\ManagesStepForm;
 
     protected $whatsAppService;
+    private const DESCRIPTION_MAX = Cycle::DESCRIPTION_MAX_LENGTH;
     public function __construct(WhatsAppService $whatsAppService)
     {
         $this->whatsAppService = $whatsAppService;
@@ -380,8 +381,8 @@ class CyclesController extends Controller
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => ['required', 'string', 'max:' . $title_max_length, Rule::unique('cycles', 'title')->where('organization_id', $request->organization_id2)->ignore($id)],
                 'title_ar' => ['required', 'string', 'max:' . $title_max_length],
-                'description' => 'required|string|max:250',
-                'description_ar' => 'required|string|max:250',
+                'description' => 'required|string|max:' . self::DESCRIPTION_MAX,
+                'description_ar' => 'required|string|max:' . self::DESCRIPTION_MAX,
                 'is_public' => 'required|boolean',
                 // 'public_slug' => 'required_if:is_public,1|unique:cycles,public_slug,' . $id . ',id|regex:/^[a-zA-Z0-9-]+$/',
                 'public_slug' => [
@@ -877,8 +878,8 @@ class CyclesController extends Controller
                 'organization_id2' => 'required|exists:organizations,id',
                 'title' => 'required|string|max:' . $title_max_length,
                 'title_ar' => 'required|string|max:' . $title_max_length,
-                'description' => 'required|string|max:100',
-                'description_ar' => 'required|string|max:250',
+                'description' => 'required|string|max:' . self::DESCRIPTION_MAX,
+                'description_ar' => 'required|string|max:' . self::DESCRIPTION_MAX,
                 'is_public' => 'required|boolean',
                 'public_slug' => 'nullable|required_if:is_public,1|unique:cycles,public_slug,' . $request->id . ',id|regex:/^[a-zA-Z0-9_-]+$/',
                 'start' => 'required|date|before:end',
