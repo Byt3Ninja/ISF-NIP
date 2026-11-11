@@ -371,7 +371,7 @@
 										@else
 										<img src="/images/logo/{{ $setting->Logo }}" alt="avatar" class="logo-img">
 										@endif
-										<span class="mx-3 text-secondary">{{ $organization->name }}</span>
+										<span class="mx-3 text-secondary">{{ $organization->name ?? $setting->Platform_Name ?? '' }}</span>
 									</div>
 								</div>
 								@if(!$_user->hasCompletedStartup())

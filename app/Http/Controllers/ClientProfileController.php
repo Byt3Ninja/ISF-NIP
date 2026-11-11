@@ -947,8 +947,7 @@ class ClientProfileController extends Controller
         $otpsave->save();
 
         $result = $this->whatsAppService->sendOTP($phoneNumber, $otp);
-        dd($result);
-        if ($result) {
+        if (!empty($result['success'])) {
             $otpsave->otp_sent = true;
             $otpsave->save();
             $request->session()->put('otp', $otp);

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Settings;
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
@@ -67,42 +66,18 @@ class WhatsAppService
             ->timeout(30); // Set a reasonable timeout (in seconds)
     }
 
+    /**
+     * Send a one-time verification code over WhatsApp.
+     *
+     * Goes through sendMessage() on the platform session, like every other
+     * platform notification. The old implementation called a getChatId()
+     * helper that was removed, which fatally errored on every request.
+     *
+     * @return array{success: bool}
+     */
     public function sendOTP($phoneNumber, $otp)
     {
-        try {
-            $sessionId = 'ehabwhats';
-            $chatId = $this->getChatId($phoneNumber);
-
-            if (!$chatId) {
-                Log::error("Failed to get chatId for number: {$phoneNumber}");
-                return ['success' => false, 'message' => 'Failed to get chatId'];
-            }
-            $client = new Client();
-            $response = $client->request('GET', 'https://wapi.growthlabs.app');
-            if ($response->getStatusCode() == 200) {
-
-                $sendResponse = Http::withHeaders([
-                    'x-api-key' => env('WAPI_KEY')
-                ])->post("https://wapi.growthlabs.app/client/sendMessage/{$sessionId}", [
-                            'chatId' => $chatId,
-                            'contentType' => 'string',
-                            'content' => "Your OTP is: {$otp}"
-                        ]);
-
-                if ($sendResponse->successful()) {
-                    return ['success' => true];
-                } else {
-                    Log::error("Failed to send message to {$phoneNumber}: " . $sendResponse->body());
-                    return ['success' => false, 'message' => 'Failed to send OTP'];
-                }
-            } else {
-
-                return ['success' => false, 'message' => __("admin.URLNotWorking")];
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to send OTP via WhatsApp: ' . $e->getMessage());
-            return ['success' => false, 'message' => $e->getMessage()];
-        }
+        return $this->sendMessage($phoneNumber, "Your OTP is: {$otp}");
     }
     /**
      * Send a message through WhatsApp.
