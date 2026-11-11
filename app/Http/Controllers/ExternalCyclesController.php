@@ -253,7 +253,14 @@ class ExternalCyclesController extends Controller
 					$rules = array_merge($rules, [
 						'register-first-name' => $name,
 						'register-last-name' => $name,
-						'phone' => ['required', 'string', 'max:20', 'regex:/^[\d\s\-\(\)]+$/'],
+						'phone' => ['required', 'string', 'max:20', 'regex:/^[\d\s\-\(\)]+$/',
+							// Egyptian mobile, same rule as the browser check: 1[0125] + 8 digits, optional leading 0.
+							function ($attribute, $value, $fail) use ($request) {
+								$isEgypt = ($request->input('country_code') ?: '20') === '20';
+								if ($isEgypt && ! preg_match('/^0?1[0125]\d{8}$/', preg_replace('/[\s\-\(\)]/', '', (string) $value))) {
+									$fail(__('admin.mobile_invalid_msg'));
+								}
+							}],
 						'country_code' => ['nullable', 'string', 'max:5'],
 					], EducationEntity::validationRules($request->input('academic_stat'), true));
 					$messages = array_merge([

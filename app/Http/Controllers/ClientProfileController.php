@@ -279,13 +279,17 @@ class ClientProfileController extends Controller
             }
             $updateArray = $request->except($excludeArray) + ['img_url' => $img_url];
 
-            // GV-10436 (ISF): founders also save their Entity, student code and referral source.
-            // Only the identification field their status asks for is kept; the other is cleared.
+            // GV-10436 (ISF): founders also save their Entity, and the identification field their
+            // status asks for. Student code and national ID are separate columns and a founder may
+            // hold both, so the one the status doesn't use is left as stored, never cleared.
+            // The referral source is set by the program application and is not edited here.
             if (isIsf() && $user->hasRole('registered')) {
-                $updateArray += $request->only(['education_entity_id', 'student_code', 'referral_source']);
                 $idField = EducationEntity::identificationField($request->input('academic_stat'));
-                $updateArray['student_code'] = $idField === 'student_code' ? $request->input('student_code') : null;
-                $updateArray['national_id'] = $idField === 'national_id' ? $request->input('national_id') : null;
+                unset($updateArray['national_id']);
+                $updateArray['education_entity_id'] = $request->input('education_entity_id');
+                if ($idField) {
+                    $updateArray[$idField] = $request->input($idField);
+                }
             }
 
             $user->update($updateArray);

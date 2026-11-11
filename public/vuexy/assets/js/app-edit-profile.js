@@ -154,6 +154,12 @@
     if (validator) validator.revalidateField(fieldName);
   }
 
+  // Clears a field's error state but keeps its value; it is checked again on Save.
+  function resetFieldState(fieldName) {
+    const validator = $('#account-info-form').data('formValidation');
+    if (validator) validator.resetField(fieldName, false);
+  }
+
   function isRegistered() {
     return user?.roles?.some(r => r.name?.toLowerCase() === 'registered') || false;
   }
@@ -313,7 +319,8 @@
     initPhoneInputs();
     initFormValidation();
     if (window.IsfEducationFields) {
-      window.IsfEducationFields.init('#account-info-form', names => names.forEach(revalidateField));
+      // GV-10436: switching the status doesn't flag the fields it reveals; Save does.
+      window.IsfEducationFields.init('#account-info-form', names => names.forEach(resetFieldState));
     }
 
     $select2.each(function () {

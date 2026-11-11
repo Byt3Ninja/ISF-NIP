@@ -235,14 +235,14 @@
           <hr class="w-100 my-3" />
 
           @if ($educationFields ?? null)
-            {{-- GV-10436 (ISF): status, Entity, student code | national ID and referral replace the plain fields. --}}
+            {{-- GV-10436 (ISF): status, Entity and student code | national ID replace the plain fields.
+                 "How did you hear about the program?" is asked on the program application only. --}}
             @include('partials.forms.isf-education-fields', [
-              'values' => $client->only(['academic_stat', 'education_entity_id', 'national_id', 'student_code', 'referral_source']),
+              'values' => $client->only(['academic_stat', 'education_entity_id', 'national_id', 'student_code']),
               'wrapperClass' => 'mb-4 col-md-6',
               'labelClass' => 'form-label fs-6 fw-bold',
               'selectClass' => 'select2 form-select',
               'entityRequiredKey' => 'admin.education_institution_required_msg',
-              'withReferral' => true,
             ])
           @else
           <div class="mb-4 col-md-6">

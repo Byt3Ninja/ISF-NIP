@@ -9,9 +9,11 @@
   $labelClass        label classes
   $selectClass       select classes ("select2 form-select" on the profile)
   $entityRequiredKey lang key of the "Entity is missing" message (the two tickets word it differently)
-  $withReferral      show "How did you hear about the program?"
+  $withReferral      show "How did you hear about the program?" (the landing page only)
   $referralRequired  ... and make it mandatory
   $withFeedback      render .invalid-feedback holders (the landing page's validator fills them)
+
+  The placeholder options are disabled, so they can't be picked as a value.
 --}}
 @php
   $v = $values ?? [];
@@ -19,6 +21,10 @@
   $statusValid = in_array($status, $educationFields['statuses'], true);
   $idField = $statusValid ? $educationFields['identification'][$status] : null;
   $entityOptions = $statusValid ? ($educationFields['entities'][$status] ?? []) : [];
+  // A select with no selected option falls back to its first ENABLED one, so the disabled
+  // placeholder is selected explicitly whenever the stored value matches no option.
+  $entityMatched = collect($entityOptions)->contains(fn ($e) => (string) $e['id'] === (string) ($v['education_entity_id'] ?? ''));
+  $referralMatched = in_array($v['referral_source'] ?? null, $educationFields['referral_sources'], true);
   $withFeedback = $withFeedback ?? false;
   $referralRequired = $referralRequired ?? false;
   $required = '<span class="text-danger ms-1">*</span>';
@@ -29,7 +35,7 @@
   <select id="academic_stat" name="academic_stat" class="{{ $selectClass }}" required data-isf-education-status
     data-identification="{{ json_encode($educationFields['identification']) }}"
     data-required-message="{{ __('admin.education_status_required_msg') }}">
-    <option value="">{{ __('admin.Select_Education_Status') }}</option>
+    <option value="" disabled @selected(!$statusValid)>{{ __('admin.Select_Education_Status') }}</option>
     @foreach ($educationFields['statuses'] as $option)
       <option value="{{ $option }}" @selected($status === $option)>{{ __('admin.education_status_' . $option) }}</option>
     @endforeach
@@ -44,7 +50,7 @@
     data-placeholder="{{ __('admin.Select_Entity') }}"
     data-placeholder-disabled="{{ __('admin.Select_Education_Status_First') }}"
     data-required-message="{{ __($entityRequiredKey) }}" @disabled(!$statusValid)>
-    <option value="">{{ $statusValid ? __('admin.Select_Entity') : __('admin.Select_Education_Status_First') }}</option>
+    <option value="" disabled @selected(!$entityMatched)>{{ $statusValid ? __('admin.Select_Entity') : __('admin.Select_Education_Status_First') }}</option>
     @foreach ($entityOptions as $entity)
       <option value="{{ $entity['id'] }}" @selected((string) ($v['education_entity_id'] ?? '') === (string) $entity['id'])>{{ $entity['name'] }}</option>
     @endforeach
@@ -78,7 +84,7 @@
     <label for="referral_source" class="{{ $labelClass }}">{{ __('admin.referral_source') }}@if ($referralRequired){!! $required !!}@endif</label>
     <select id="referral_source" name="referral_source" class="{{ $selectClass }}" @required($referralRequired)
       data-required-message="{{ __('admin.referral_source_required_msg') }}">
-      <option value="">{{ __('admin.Select_Referral_Source') }}</option>
+      <option value="" disabled @selected(!$referralMatched)>{{ __('admin.Select_Referral_Source') }}</option>
       @foreach ($educationFields['referral_sources'] as $source)
         <option value="{{ $source }}" @selected(($v['referral_source'] ?? null) === $source)>{{ __('admin.referral_source_' . $source) }}</option>
       @endforeach

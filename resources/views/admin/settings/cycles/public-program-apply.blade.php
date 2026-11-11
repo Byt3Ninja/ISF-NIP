@@ -14,7 +14,11 @@
 	@if ($educationFields)
 	{{-- GV-10440 (ISF): mobile number input, same widget as the Founder Profile --}}
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
-	<style>.iti { width: 100%; }</style>
+	<style>
+		.iti { width: 100%; }
+		/* intl-tel-input wraps the input, so its .invalid-feedback is no longer the input's sibling. */
+		.iti:has(.is-invalid) ~ .invalid-feedback { display: block; }
+	</style>
 	@endif
 
 	<style>
@@ -392,7 +396,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 						<div class="bs-stepper-content">
 							<div id="initial-step-pane" class="content" role="tabpanel" aria-labelledby="initial-step-trigger">
 								<div class="mb-3">
-									<label for="initial-email" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
+									<label for="initial-email" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}<span class="text-danger ms-1">*</span></label>
 									<input type="email" class="form-control" id="initial-email" name="initial-email" placeholder="{{ $l == 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email' }}" required>
 									<div id="initial-email-feedback" class="invalid-feedback"></div>
 								</div>
@@ -409,9 +413,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 							<div id="application-step-pane" class="content" role="tabpanel" aria-labelledby="application-step-trigger">
 								<form id="register-form" method="post" action="/{{ $org_slug }}/program/{{ $program_slug }}/register" enctype="multipart/form-data">
 									{!! csrf_field() !!}
+									{{-- The applicant's own details sit above every question section; each section's Next validates them too. --}}
+									<div id="applicant-fields">
 									<div class="row">
 										<div class="col-md-6 mb-3">
-											<label for="register-email" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}</label>
+											<label for="register-email" class="form-label fw-bold mb-2">{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}@if ($educationFields)<span class="text-danger ms-1">*</span>@endif</label>
 											<input type="email" class="form-control" id="register-email" name="register-email" placeholder="{{ $l == 'ar' ? 'البريد الإلكتروني' : 'Email' }}" @if ($educationFields) readonly @else disabled @endif>
 											<div id="register-email-feedback" class="invalid-feedback"></div>
 										</div>
@@ -452,6 +458,7 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 										])
 									</div>
 									@endif
+									</div>
 									<hr />
 									<div id="register-fields" class="row"></div>
 								</form>
@@ -716,11 +723,11 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			showApplicationSection(next);
 		}
 
-		// Validates only the fields inside `sectionEl`, using the same
-		// synchronous validators the #join_btn handler already uses (this page
-		// never loads FormValidation.js, unlike the admin builder's preview).
-		function validateApplicationSection(sectionEl) {
-			var $section = $(sectionEl);
+		// Validates the fields inside `container`, using the same synchronous
+		// validators the #join_btn handler already uses (this page never loads
+		// FormValidation.js, unlike the admin builder's preview).
+		function validateFieldsIn(container) {
+			var $section = $(container);
 			var isValid = true;
 
 			$section.find('input, select, textarea').each(function() {
@@ -744,9 +751,18 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 			return isValid;
 		}
 
+		// GV-10440: the applicant's own details (#applicant-fields) sit above every
+		// section, so each Next checks them along with the section's questions —
+		// not only the final Join.
+		function validateApplicationSection(sectionEl) {
+			var applicantValid = validateFieldsIn(document.getElementById('applicant-fields'));
+			var sectionValid = validateFieldsIn(sectionEl);
+			return applicantValid && sectionValid;
+		}
+
 		function navigateApplicationNext(sectionEl) {
 			if (!validateApplicationSection(sectionEl)) {
-				var $firstError = $(sectionEl).find('.is-invalid').first();
+				var $firstError = $('#applicant-fields, #register-fields').find('.is-invalid').filter(':visible').first();
 				if ($firstError.length) { $firstError.trigger('focus'); }
 				return;
 			}
@@ -1719,7 +1735,8 @@ if (preg_match('/[a-zA-Z]+/', $endDatePart)) {
 								var fieldName = field.replace(/\./g, '_');
 								var $input = $(`#${fieldName}`);
 								$input.addClass('is-invalid');
-								$input.next('.invalid-feedback').html(messages[0]);
+								// Not .next(): the phone input is wrapped by intl-tel-input.
+								fieldFeedbackEl($input).html(messages[0]);
 								messagesList.push(messages[0]);
 							});
 						}
