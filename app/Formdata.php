@@ -37,6 +37,7 @@ class Formdata extends Model
         $l = app()->getLocale();
         $forms = DB::table('form_data as FD')
         ->select([
+            'FD.id as FD_id',
             'FD.company_id as FD_company_id',
             'FD.user_id as FD_user_id',
             'FD.step_id as FD_step_id',
@@ -68,8 +69,11 @@ class Formdata extends Model
         ->leftJoin('cycles as CYC', 'CYC.id', '=', 'S.cycle_id')
         ->leftJoin('organizations as O', 'O.id', '=', 'CYC.organization_id')
         ->whereNull('FD.deleted_at')
-        ->when(!$user->hasRole('admin') && !empty($user->organizations_ids), function ($query) use ($user) {
-            return $query->whereIn('CYC.organization_id', $user->organizations_ids);
+        ->when(self::viewerScope($user), function ($query, $scope) {
+            return $query->whereIn($scope[0], $scope[1]);
+        })
+        ->when($request->has('step_id') && trim( $request->step_id ), function ($query) use ($request) {
+            return $query->where('FD.step_id', (int) $request->step_id);
         })
         ->when($request->has('organization') && trim( $request->organization ), function ($query) use ($request) {
             return $query->where('O.name_en', 'LIKE', $request->organization);
@@ -108,6 +112,7 @@ class Formdata extends Model
                 $value = self::fileAnswer($value, $item->FD_company_id) ?? $value;
 
                 $submission = new stdClass;
+                $submission->id = $item->FD_id;
                 $submission->user_id = $item->FD_user_id;
                 $submission->name = $item->{'user_name_' . $l};
                 $submission->label = trim( $item->FD_question );
@@ -133,6 +138,20 @@ class Formdata extends Model
         });
 
         return $data;
+    }
+
+    /**
+     * Which submissions a user may see, as [column, ids] on a query joined to cycles as CYC;
+     * null for an admin (everything); everyone else sees the programs of their organizations.
+     * (On beta there is no Program Manager role yet, so no per-program scope.)
+     */
+    public static function viewerScope(User $user): ?array
+    {
+        if ($user->hasRole('admin')) {
+            return null;
+        }
+
+        return ['CYC.organization_id', $user->organizations_ids];
     }
 
     /**

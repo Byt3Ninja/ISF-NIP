@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\{Validator, DB, Mail};
-use App\Exports\{SubmissionsExport, SubmissionDetailsExport};
+use App\Exports\{IsfApplicationExport, SubmissionsExport, SubmissionDetailsExport};
 use App\{Field, Formdata, BuilderForm, BuilderField, Organization};
 
 class FormController extends Controller
@@ -137,7 +137,9 @@ class FormController extends Controller
 		$data = Formdata::formsData( $request );
 
 		$date = date('Y_m_d_H_i_s');
-		return Excel::download(new SubmissionsExport( $data ), 'form_submissions_' . $date . '.' . $tail);
+		// GV-10452: ISF exports applications in its Form Data Template layout.
+		$export = isIsf() ? new IsfApplicationExport( $data ) : new SubmissionsExport( $data );
+		return Excel::download($export, 'form_submissions_' . $date . '.' . $tail);
 	}
   
 	public function submissionDetails(Request $request, $id)
@@ -190,10 +192,9 @@ class FormController extends Controller
 				FD.deleted_at IS NULL
 				AND FD.step_id = ? 
 		";
-		$orgIds = $user->organizations_ids;
-		if( !$user->hasRole('admin') && !empty($orgIds) )
+		if( $scope = Formdata::viewerScope($user) )
 		{
-			$forms .= " AND CYC.organization_id IN (" . implode(',', array_map('intval', $orgIds)) . ") ";
+			$forms .= " AND {$scope[0]} IN (" . implode(',', array_map('intval', $scope[1] ?: [0])) . ") ";
 		}
 		$forms = DB::select($forms, [$id]);
 
@@ -231,13 +232,29 @@ class FormController extends Controller
 			return $submission;
 		})->values()->all(); // remove collection keys (numeric indexing)
 		
-		$data = array_values($data); 	
+		$data = array_values($data);
+		// A phase with no submission the user may see (or not theirs at all).
+		abort_if(empty($data), 404);
 		// return response()->json(['status' => true, 'message' => 'Data retrieved successfully', 'data' => $data], 200);
 		return view('admin.settings.forms.form-submissions.show', compact('data', 'id'));
 	}
 
 	public function exportSubmissionDetails(Request $request, $id)
 	{
+		$tail = 'xlsx';
+		$type = $request->has('type') ? $request->input('type', 'excel') : 'excel';
+		$type = strtolower( $type );
+		$type = in_array( $type, ['csv', 'excel'] ) ? $type : 'excel';
+		if( $type == 'csv' ) { $tail = 'csv'; } elseif( $type == 'excel' ) { $tail = 'xlsx'; } else { return abort(404); }
+		$date = date('Y_m_d_H_i_s');
+
+		// GV-10452: on ISF the phase export is the Form Data Template, one row per applicant.
+		if( isIsf() )
+		{
+			$data = Formdata::formsData(new Request(['step_id' => $id]));
+			return Excel::download(new IsfApplicationExport( $data ), 'form_submission_details_' . $date . '.' . $tail);
+		}
+
 		$user = Auth::user();
 		$l = app()->getLocale();
 		$forms = DB::table('form_data AS FD')
@@ -286,8 +303,8 @@ class FormController extends Controller
 			->leftJoin('users AS UJ', 'UJ.id', '=', 'JC.user_id')
 			->whereNull('FD.deleted_at')
 			->where('FD.step_id', $id)
-			->when(!$user->hasRole('admin') && !empty($user->organizations_ids), function ($query) use ($user) {
-				return $query->whereIn('CYC.organization_id', $user->organizations_ids);
+			->when(Formdata::viewerScope($user), function ($query, $scope) {
+				return $query->whereIn($scope[0], $scope[1]);
 			})
 		->get();
 
@@ -347,13 +364,6 @@ class FormController extends Controller
 			return $grouped;
 		})->values()->flatten();
 
-		$tail = 'xlsx';
-		$type = $request->has('type') ? $request->input('type', 'excel') : 'excel';
-		$type = strtolower( $type );
-		$type = in_array( $type, ['csv', 'excel'] ) ? $type : 'excel';
-		if( $type == 'csv' ) { $tail = 'csv'; } elseif( $type == 'excel' ) { $tail = 'xlsx'; } else { return abort(404); }
-
-		$date = date('Y_m_d_H_i_s');
 		return Excel::download(new SubmissionDetailsExport( $data ), 'form_submission_details_' . $date . '.' . $tail);
 	}
 

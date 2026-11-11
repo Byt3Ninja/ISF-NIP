@@ -43,4 +43,15 @@ return [
     'preview' => 'معاينة',
     'delete' => 'حذف',
     'edit' => 'تعديل',
+
+    // GV-10452 (ISF): fixed columns of the Application phase export (Form Data Template).
+    'isf_export' => [
+        'timestamp' => 'التاريخ والوقت',
+        'first_name' => 'الاسم الأول',
+        'last_name' => 'اسم العائلة',
+        'email' => 'البريد الإلكتروني',
+        'mobile' => 'رقم الهاتف المحمول',
+        'identification' => 'الرقم القومي / كود الطالب',
+        'entity' => 'الجهة',
+    ],
 ];

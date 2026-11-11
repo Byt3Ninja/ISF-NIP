@@ -207,6 +207,13 @@
 
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <span class="text-muted small">{{ __('cycles.steps') }} {{ $step->arr }}</span>
+                            {{-- GV-10452 (ISF): the phase's submissions and their export, reachable by every role that may export them --}}
+                            @if ($stepsExtra[$step->id]['hasSubmissions'] && $_user->ableTo('form_submission_details.index', $permissions))
+                                <a href="{{ route('form_submission_details.index', ['id' => $step->id]) }}"
+                                   class="btn btn-sm btn-primary">
+                                    <i class="ti ti-send me-1"></i>{{ __('forms.submissions_tab') }}
+                                </a>
+                            @endif
 
                             {{-- Step kebab --}}
                             <div class="dropdown">

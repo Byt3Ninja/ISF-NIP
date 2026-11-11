@@ -97,6 +97,20 @@ document.addEventListener('DOMContentLoaded', function () {
     container.find('.dropdown-item').on('click', function(e) {
       e.preventDefault();
       const type = $(this).data('type');
+@if (isIsf())
+      // GV-10452 (ISF): submissions export the applicants and their answers (Form Data
+      // Template) from the server, for the organization / program / step / search shown.
+      if (id === 'submissions' && type) {
+        const params = new URLSearchParams({
+          organization: $('#orgFilterSubs').val() || '',
+          program: $('#programFilter').val() || '',
+          step: $('#stepFilter').val() || '',
+          search: table.search() || '',
+        });
+        window.open(@json(url('dashboard/forms-submissions/export')) + '/' + type + '?' + params.toString(), '_blank');
+        return;
+      }
+@endif
       if (type === 'csv') table.button('.buttons-csv').trigger();
       if (type === 'excel') table.button('.buttons-excel').trigger();
     });

@@ -9,6 +9,7 @@ use App\Stage;
 use App\Sector;
 use App\Company;
 use App\FinalData;
+use App\Formdata;
 use App\CompanyRelation;
 use App\UserScore;
 use App\Organization;
@@ -374,6 +375,8 @@ class ProgramController extends Controller
                 case 1:
                     $stepsExtra[$step->id] = [
                         'companiesInStep' => Company::where('step', $step->id)->count(),
+                        // GV-10452 (ISF): the phase's Submissions button shows once anyone has applied.
+                        'hasSubmissions' => isIsf() && Formdata::where('step_id', $step->id)->whereNull('deleted_at')->exists(),
                     ];
                     break;
 

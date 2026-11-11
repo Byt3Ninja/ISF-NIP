@@ -6147,7 +6147,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "programManager"
                 ]
             },
             {
@@ -6158,7 +6159,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "programManager"
                 ]
             },
             {
@@ -6169,7 +6171,8 @@
                 "default_for": [
                     "admin",
                     "organizationmanager",
-                    "subadmin"
+                    "subadmin",
+                    "programManager"
                 ]
             },
             {
