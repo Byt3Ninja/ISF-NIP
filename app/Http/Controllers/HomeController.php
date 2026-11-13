@@ -2459,7 +2459,7 @@ class HomeController extends Controller
             'icon' => 'ti-building',
             'text' => 'Founders',
             'permissions' => ['users.index', 'users.view_companies', 'dashboard.widgets_cards_startups_view'],
-            'count' => Role::_users('registered')->count(),
+            'count' => User::whereHas('roles', fn ($q) => $q->where('default_for', 'registered'))->count(),
             'isRating' => false,
         ];
         $data['countCards'][] = [
