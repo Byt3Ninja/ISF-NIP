@@ -45,92 +45,7 @@
               <th>{{ __('admin.Actions') }}</th>
             </tr>
           </thead>
-          <tbody>
-            @foreach ($users as $user)
-            <tr id="row_{{ $user->id }}">
-              <td>
-                <a href="{{ route('users.edit', ['user' => $user->id]) }}">{{ $user->id }}</a>
-              </td>
-              <td>
-                <a href="{{ route('users.edit', ['user' => $user->id]) }}">
-                  <small>{{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}</small>
-                </a>
-              </td>
-              <td style="max-width: 150px;"><small>{{ $user->email }}</small></td>
-              <td><small>{{ $user->phone }}</small></td>
-              <td
-                data-search="{{ $user->gender }}"
-                data-sort="{{ $user->gender }}"
-              >
-                <small>{{ trim($user->gender) ? __('admin.' . $user->gender) : '-' }}</small>
-              </td>
-              @php
-                $roleName = $user->roles->first()?->name ?? 'No Role Assigned';
-                $label = $user->email_verified_at ? $roleName : 'Not Verified';
-
-                // color palette from vuexy/core.css uses --bs-primary etc.
-                // map each known role to a distinct badge color; add new roles here as needed
-                $roleColors = [
-                    'admin'            => 'primary',
-                    'organizationManager'          => 'dark',
-                    'mentor'           => 'info',
-                    'registered'          => 'warning',
-                    'judge'         => 'danger',
-                    'serviceProvider'             => 'success',
-                    'No Role Assigned' => 'light',
-                    // special states below
-                    'Not Verified'     => 'secondary',
-                ];
-
-                $color = $roleColors[$label] ?? 'secondary';
-              @endphp
-              <td data-search="{{ $label }}">
-                <small>
-                  <span class="badge bg-label-{{ $color }}">
-                    {{ __('admin.' . $label) }}
-                  </span>
-                </small>
-              </td>
-              <td data-search="{{ $user->company ? 'Yes' : 'No' }}">
-                <small>{{ $user->company ? __('admin.Yes') : __('admin.No') }}</small>
-              </td>
-              <td style="max-width: 150px;"><small>{{ $user->created_at }}</small></td>
-              <td>
-                <div class="d-flex align-items-center gap-1">
-                  @if($_user->ableTo('users.login_as', $permissions))
-                    <a
-                      href="{{ route('users.login_as', ['id' => $user->id]) }}"
-                      title="{{ __('admin.Login as User') }}"
-                      class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill confirm-login-as"
-                    >
-                      <i class="fa-solid fa-user-secret fs-5"></i>
-                    </a>
-                  @endif
-                  <button
-                    class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill send-message-btn"
-                    data-bs-toggle="modal"
-                    data-bs-target="#MessageModal"
-                    data-user-id="{{ $user->id }}"
-                    data-user-name="{{ $user->{'first_name_' . $l} }} {{ $user->{'last_name_' . $l} }}"
-                  >
-                    <i class="ti ti-message ti-md"></i>
-                  </button>
-                  @if($_user->ableTo('users.destroy', $permissions))
-                    <button
-                      id="deleteAction"
-                      data-id="{{ $user->id }}"
-                      data-url="{{ route('users.destroy', ['user' => $user->id]) }}"
-                      type="button"
-                      class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill"
-                    >
-                      <i class="ti ti-trash ti-md"></i>
-                    </button>
-                  @endif
-                </div>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
@@ -189,52 +104,109 @@
 @endsection
 
 @section('pagescripts')
+@php
+  $roleLabels = collect($roles)->push('Not Verified', 'No Role Assigned')
+    ->mapWithKeys(fn ($role) => [$role => __('admin.' . $role)]);
+@endphp
 <script>
 $(function () {
 
   /* ================================================================
-   * DataTable — custom sort type (role priority)
+   * Rows come from users.index page by page (DataTables server-side):
+   * the search box, column filters and sort run on the server over
+   * every user, and only the visible page is loaded.
    * ============================================================== */
-  $.fn.dataTable.ext.type.order['role-priority-pre'] = function (data) {
-    const div = document.createElement('div');
-    div.innerHTML = data;
-    const s = div.textContent.toLowerCase().trim();
-    if (s.includes('not verified'))  return 4;
-    if (s.includes('admin'))         return 1;
-    if (s.includes('no role'))       return 3;
-    return 2;
+  const initialRole = @json($initialRole);
+  const labels = {
+    roles: @json($roleLabels),
+    genders: { Male: @json(__('admin.Male')), Female: @json(__('admin.Female')) },
+    yes: @json(__('admin.Yes')),
+    no: @json(__('admin.No')),
   };
+  const can = {
+    loginAs: @json($_user->ableTo('users.login_as', $permissions)),
+    edit: @json($_user->ableTo('users.edit', $permissions)),
+    destroy: @json($_user->ableTo('users.destroy', $permissions)),
+  };
+  const urls = {
+    edit: @json(route('users.edit', ['user' => '__ID__'])),
+    loginAs: @json(route('users.login_as', ['id' => '__ID__'])),
+    destroy: @json(route('users.destroy', ['user' => '__ID__'])),
+  };
+  const urlFor = (name, id) => urls[name].replace('__ID__', encodeURIComponent(id));
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
 
-  /* ================================================================
-   * DataTable init
-   * ============================================================== */
+  // map each known role to a distinct badge color; add new roles here as needed.
+  // Keys are lowercase: role names are stored as "Admin", "Registered", "Judger", ...
+  const roleColors = {
+    'admin': 'primary',
+    'organizationmanager': 'dark',
+    'mentor': 'info',
+    'registered': 'warning',
+    'judger': 'danger',
+    'judge': 'danger',
+    'serviceprovider': 'success',
+    'no role assigned': 'light',
+    'not verified': 'secondary',
+  };
+  const roleColor = role => roleColors[String(role ?? '').toLowerCase()] ?? 'secondary';
+
+  const small = value => `<small>${esc(value)}</small>`;
+  const narrow = td => { td.style.maxWidth = '150px'; };
+
   const table = $('#usersTable').DataTable({
     ...getSharedDataTableConfig({ title: 'Users', descIndex: 7, actionsIndex: 8 }),
-    columnDefs: [
+    processing: true,
+    serverSide: true,
+    searchDelay: 400,
+    ajax: { url: @json(route('users.index')) },
+    // The ?role= / ?r= preselection is part of the very first request.
+    searchCols: Array.from({ length: 9 }, (_, i) => (i === 5 && initialRole ? { search: initialRole } : null)),
+    columns: [
+      { data: 'id', render: (id, type) => type === 'display' ? `<a href="${urlFor('edit', id)}">${id}</a>` : id },
+      { data: 'name', render: (name, type, row) => type === 'display' ? `<a href="${urlFor('edit', row.id)}">${small(name)}</a>` : name },
+      { data: 'email', render: small, createdCell: narrow },
+      { data: 'phone', render: small },
+      { data: 'gender', render: gender => small(gender ? (labels.genders[gender] ?? gender) : '-') },
       {
-        // Read sort/filter value from data-search attribute for
-        // Gender (4), Role (5), HaveCompany (6) columns so the
-        // DataTable works with the raw English value, not the
-        // translated display text.
-        targets: [4, 5, 6],
-        render(data, type, row, meta) {
-          if (type === 'filter' || type === 'sort') {
-            // The <td> has a data-search attribute with the raw value.
-            // DataTables passes the HTML string as `data` when orthogonal
-            // data is not configured via columns.data — grab from the DOM.
-            const cell = table
-              ? table.cell(meta.row, meta.col).node()
-              : null;
-            if (cell) {
-              return cell.getAttribute('data-search') || data;
-            }
-          }
-          return data;
-        }
+        data: 'role',
+        render: role => `<small><span class="badge bg-label-${roleColor(role)}">${esc(labels.roles[role] ?? role)}</span></small>`,
       },
-      { targets: 5, type: 'role-priority' },
-      { targets: [8], orderable: false, searchable: false }
+      { data: 'has_company', render: has => small(has ? labels.yes : labels.no) },
+      { data: 'created_at', render: small, createdCell: narrow },
+      {
+        data: null,
+        orderable: false,
+        searchable: false,
+        render: (_, type, row) => {
+          const id = row.id;
+          const name = esc(row.name);
+          return '<div class="d-flex align-items-center gap-1">'
+            + (can.loginAs
+              ? `<a href="${urlFor('loginAs', id)}" title="{{ __('admin.Login as User') }}"
+                   class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill confirm-login-as">
+                   <i class="fa-solid fa-user-secret fs-5"></i></a>`
+              : '')
+            + (can.edit
+              ? `<a href="${urlFor('edit', id)}" title="{{ __('admin.Edit') }}"
+                   class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill">
+                   <i class="ti ti-edit ti-md"></i></a>`
+              : '')
+            + `<button class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill send-message-btn"
+                 data-bs-toggle="modal" data-bs-target="#MessageModal" data-user-id="${id}" data-user-name="${name}">
+                 <i class="ti ti-message ti-md"></i></button>`
+            + (can.destroy
+              ? `<button id="deleteAction" data-id="${id}" data-url="${urlFor('destroy', id)}" type="button"
+                   class="btn btn-icon btn-text-secondary waves-effect waves-light rounded-pill">
+                   <i class="ti ti-trash ti-md"></i></button>`
+              : '')
+            + '</div>';
+        },
+      },
     ],
+    columnDefs: [],
     dom:
       '<"row"' +
       '<"col-12 col-lg-9 d-flex flex-wrap align-items-center ps-0 ps-lg-6 pb-6 pb-lg-0 mb-2"l>' +
@@ -242,6 +214,7 @@ $(function () {
       '>t<"row px-6"<"col-lg-6"i><"col-lg-6 d-flex justify-content-end"p>>',
     initComplete() {
       buildTableFilters(this.api());
+      $('#filterRole').val(initialRole);
       setTimeout(
         () => $('.form-control-sm, .form-select-sm').removeClass('form-control-sm form-select-sm'),
         300
@@ -268,16 +241,12 @@ $(function () {
           });
         }
       });
-
-      @if (request('role') === 'registered')
-        $('#filterRole').val('registered').trigger('change');
-      @endif
     }
   });
 
   /* ================================================================
-   * Column filters — built with DataTable column().search() API
-   * identical pattern to Template A (invitations)
+   * Column filters: each sends its raw value as that column's search,
+   * which the server applies to the whole user list.
    * ============================================================== */
   function buildTableFilters(api) {
     if ($('#filterHaveCompany').length) return; // guard against duplicate build
@@ -285,40 +254,31 @@ $(function () {
     const container = $('<div class="d-flex gap-3 ms-3"></div>').insertAfter('.dataTables_length');
 
     // Helper: create a <select> filter wired to a column
-    function addColumnFilter(colIdx, id, defaultLabel, useExactMatch) {
-      const select = $(
+    function addColumnFilter(colIdx, id, defaultLabel) {
+      return $(
         `<select id="${id}" class="form-select" style="min-width:150px">` +
         `<option value="">${defaultLabel}</option></select>`
       )
         .appendTo(container)
         .on('change', function () {
-          const val = $(this).val();
-          if (useExactMatch && val !== '') {
-            api.column(colIdx)
-               .search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false)
-               .draw();
-          } else {
-            api.column(colIdx).search(val, false, false).draw();
-          }
+          api.column(colIdx).search($(this).val() || '').draw();
         });
-
-      return select;
     }
 
-    // HaveCompany filter (col 6) — exact match on raw data-search value
-    const companyFilter = addColumnFilter(6, 'filterHaveCompany', '{{ __("admin.HaveCompany") }}', true);
+    // HaveCompany filter (col 6)
+    const companyFilter = addColumnFilter(6, 'filterHaveCompany', '{{ __("admin.HaveCompany") }}');
     companyFilter.append('<option value="Yes">{{ __("admin.Yes") }}</option>');
     companyFilter.append('<option value="No">{{ __("admin.No") }}</option>');
 
-    // Role filter (col 5) — partial match sufficient
-    const roleFilter = addColumnFilter(5, 'filterRole', '{{ __("admin.All_Roles") }}', false);
-    @foreach (App\Role::get() as $role)
-      roleFilter.append(`<option value="{{ $role->name }}">{{ __('admin.' . $role->name) }}</option>`);
+    // Role filter (col 5)
+    const roleFilter = addColumnFilter(5, 'filterRole', '{{ __("admin.All_Roles") }}');
+    @foreach ($roles as $roleName)
+      roleFilter.append(`<option value="{{ $roleName }}">{{ __('admin.' . $roleName) }}</option>`);
     @endforeach
     roleFilter.append('<option value="Not Verified">{{ __("admin.NotVerified") }}</option>');
 
-    // Gender filter (col 4) — exact match
-    const genderFilter = addColumnFilter(4, 'filterGender', '{{ __("admin.All_Genders") }}', true);
+    // Gender filter (col 4)
+    const genderFilter = addColumnFilter(4, 'filterGender', '{{ __("admin.All_Genders") }}');
     genderFilter.append('<option value="Male">{{ __("admin.Male") }}</option>');
     genderFilter.append('<option value="Female">{{ __("admin.Female") }}</option>');
 
@@ -334,10 +294,20 @@ $(function () {
   }
 
   /* ================================================================
-   * Export buttons
+   * Export: the table only holds one page, so load every row that
+   * matches the current search/filters, export it, then restore the
+   * page size.
    * ============================================================== */
-  $('#exportCsv').on('click', () => table.button('.buttons-csv').trigger());
-  $('#exportExcel').on('click', () => table.button('.buttons-excel').trigger());
+  function exportAll(button) {
+    const pageLength = table.page.len();
+    table.one('draw', function () {
+      table.button(button).trigger();
+      table.page.len(pageLength).draw(false);
+    });
+    table.page.len(-1).draw(false);
+  }
+  $('#exportCsv').on('click', () => exportAll('.buttons-csv'));
+  $('#exportExcel').on('click', () => exportAll('.buttons-excel'));
 
   /* ================================================================
    * Send Message Modal — populate receiver dynamically
@@ -376,7 +346,7 @@ $(function () {
 
       $.post(url, { _method: 'DELETE', _token: token })
         .done(() => {
-          table.row('#row_' + id).remove().draw();
+          table.draw(false);
           releaseAlert('success', {
             title:   '{{ __("admin.Deleted") }}!',
             message: '{{ __("admin.DeletedSuccessfully") }}.',

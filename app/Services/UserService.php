@@ -73,6 +73,130 @@ class UserService
 
         ];
     }
+
+    /**
+     * One page of the staff users table (DataTables server-side protocol).
+     *
+     * Search, the column filters and the sort run in SQL over every user, so they cover
+     * the whole result set while only the requested page is loaded. Only the columns
+     * the table shows are selected; companies are an EXISTS, not loaded models.
+     *
+     * Column filters (by table column index): 4 gender (Male|Female),
+     * 5 role (a role name, or "Not Verified"), 6 has company (Yes|No).
+     *
+     * @param array $input the DataTables request: draw, start, length, search, order, columns
+     * @return array{draw: int, recordsTotal: int, recordsFiltered: int, data: array}
+     */
+    public function table(array $input): array
+    {
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en'; // also part of column names below
+        $query = $this->userRepository->baseQuery();
+        $total = (clone $query)->count();
+
+        $filtered = false;
+        foreach (preg_split('/\s+/', trim((string) data_get($input, 'search.value', '')), -1, PREG_SPLIT_NO_EMPTY) as $term) {
+            $filtered = true;
+            $like = '%' . addcslashes($term, '%_\\') . '%';
+            $query->where(function (Builder $q) use ($term, $like) {
+                if (ctype_digit($term)) {
+                    $q->orWhere('users.id', (int) $term);
+                }
+                foreach (['first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar', 'email', 'phone'] as $column) {
+                    $q->orWhere("users.$column", 'like', $like);
+                }
+            });
+        }
+
+        $gender = data_get($input, 'columns.4.search.value');
+        if (in_array($gender, ['Male', 'Female'], true)) {
+            $filtered = true;
+            $query->where('users.gender', $gender);
+        }
+
+        $role = trim((string) data_get($input, 'columns.5.search.value', ''));
+        if ($role === 'Not Verified') {
+            $filtered = true;
+            $query->whereNull('users.email_verified_at');
+        } elseif ($role !== '') {
+            $filtered = true;
+            $query->whereNotNull('users.email_verified_at')
+                ->whereHas('roles', fn ($q) => $q->where('roles.name', $role));
+        }
+
+        $hasCompany = data_get($input, 'columns.6.search.value');
+        if ($hasCompany === 'Yes') {
+            $filtered = true;
+            $query->has('company');
+        } elseif ($hasCompany === 'No') {
+            $filtered = true;
+            $query->doesntHave('company');
+        }
+
+        $recordsFiltered = $filtered ? (clone $query)->count() : $total;
+
+        $this->orderTable($query, (int) data_get($input, 'order.0.column', 7), data_get($input, 'order.0.dir'), $locale);
+
+        $length = (int) data_get($input, 'length', 10);
+        if ($length !== -1) { // -1 = every filtered row (the table's export)
+            $query->skip(max(0, (int) data_get($input, 'start', 0)))->take(min(max($length, 1), 100));
+        }
+
+        $users = $query
+            ->select('users.id', 'users.first_name_en', 'users.last_name_en', 'users.first_name_ar', 'users.last_name_ar',
+                'users.email', 'users.phone', 'users.gender', 'users.email_verified_at', 'users.created_at', 'users.company_id')
+            ->withExists('company')
+            ->with(['roles' => fn ($q) => $q->select('roles.id', 'roles.name')])
+            ->get();
+
+        return [
+            'draw' => (int) data_get($input, 'draw', 0),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $users->map(fn (User $user) => [
+                'id' => $user->id,
+                'name' => trim($user->{'first_name_' . $locale} . ' ' . $user->{'last_name_' . $locale}),
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'gender' => trim((string) $user->gender),
+                // Same label the table always showed: the first role, unless the email is unverified.
+                'role' => $user->email_verified_at ? ($user->roles->first()?->name ?? 'No Role Assigned') : 'Not Verified',
+                'has_company' => (bool) $user->company_exists,
+                'created_at' => (string) $user->created_at,
+            ])->all(),
+        ];
+    }
+
+    /**
+     * Sort for table(), by table column index. Role (5) keeps the table's role
+     * priority: admin roles, then other roles, then no role, then unverified.
+     */
+    private function orderTable(Builder $query, int $column, ?string $dir, string $locale): void
+    {
+        $dir = $dir === 'asc' ? 'asc' : 'desc';
+        $morph = (new User)->getMorphClass();
+
+        match ($column) {
+            0 => $query->orderBy('users.id', $dir),
+            1 => $query->orderBy("users.first_name_$locale", $dir)->orderBy("users.last_name_$locale", $dir),
+            2 => $query->orderBy('users.email', $dir),
+            3 => $query->orderBy('users.phone', $dir),
+            4 => $query->orderBy('users.gender', $dir),
+            5 => $query->orderByRaw(
+                "CASE
+                    WHEN users.email_verified_at IS NULL THEN 4
+                    WHEN EXISTS (SELECT 1 FROM model_has_roles mhr JOIN roles r ON r.id = mhr.role_id
+                                 WHERE mhr.model_id = users.id AND mhr.model_type = ? AND r.name LIKE '%admin%') THEN 1
+                    WHEN NOT EXISTS (SELECT 1 FROM model_has_roles mhr
+                                     WHERE mhr.model_id = users.id AND mhr.model_type = ?) THEN 3
+                    ELSE 2
+                END $dir",
+                [$morph, $morph]
+            ),
+            6 => $query->orderByRaw("EXISTS (SELECT 1 FROM companies WHERE companies.id = users.company_id) $dir"),
+            default => $query->orderBy('users.created_at', $dir),
+        };
+        $query->orderBy('users.id', $dir); // stable paging between equal values
+    }
     /**
      * Summary of show
      * @param int $id

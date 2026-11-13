@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateUserApiRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\User\StoreUserRequest;
-use App\Http\Requests\User\UserFilterRequest;
 use App\Services\UserService;
 use App\User;
 use App\Cycle;
@@ -53,16 +52,24 @@ class UserController extends Controller
 	 *
 	 * @return \Illuminate\Http\Response
 	 */
-	public function index(UserFilterRequest $request)
+	public function index(Request $request)
 	{
-
 		$this->authorize('index', Auth::user());
 
+		// The table loads its rows page by page from this same route (DataTables
+		// server-side), so search and filters cover every user while only one page
+		// is loaded.
+		if ($request->ajax()) {
+			return response()->json($this->userService->table($request->query()));
+		}
 
-		$users = $this->userService->index($request->all(),false)['data'];
+		// ?role=registered (Founders card) and ?r=organizationmanager (dashboard links)
+		// preselect the role filter; matched case-insensitively to the real role name.
+		$roles = R::orderBy('id')->pluck('name');
+		$wanted = strtolower((string) ($request->query('role') ?? $request->query('r') ?? ''));
+		$initialRole = $roles->first(fn ($name) => strtolower($name) === $wanted) ?? '';
 
-
-		return view('admin/users/index', compact('users'));
+		return view('admin/users/index', compact('roles', 'initialRole'));
 	}
 
 	public function startImpersonate($id)
