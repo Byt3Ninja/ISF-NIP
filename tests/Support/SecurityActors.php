@@ -129,6 +129,10 @@ trait SecurityActors
             'updated_at' => now(),
         ], $attributes));
 
+        // The row is inserted without model events, so open its enrollment the way the
+        // application would: staff lists and judging read enrollments, not the pointer.
+        \App\CompanyEnrollment::syncFromPointer(\App\Company::findOrFail($companyId), null);
+
         // A founder belongs to a startup through users.company_id (companies has no owner column).
         $founder = $this->actor('registered', ['company_id' => $companyId, 'HaveCompany' => 1]);
 

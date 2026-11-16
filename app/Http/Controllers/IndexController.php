@@ -325,7 +325,7 @@ class IndexController extends Controller
 
     public function sendCustomerEmail($id = 0){
         $cycle = Cycle::find($id);
-        $companies = Company::where('cycle', $id)->get();
+        $companies = Company::enrolledIn($id)->get();
         $users = User::whereIn('company_id', $companies->pluck('id')->toArray())->get();
 
             // $users = User::where('email', 'ehabtarek86@gmail.com')->get(); 

@@ -76,17 +76,16 @@ class MentorsController extends Controller
 				return $q->whereIn('organization_id', $orgIds);
 			})->orderBy('start', 'DESC')->pluck('id')->first();
 		}
-		$companies = Company::where('cycle', $id)->where('step', '>', 0)->get();
+		$companies = Company::enrolledInOnAStep($id)->get();
 		$mentors = CyclesMentors::where('cycle_id', $id)->get();
 		$cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'), function ($q) use ($orgIds) {
 			return $q->whereIn('organization_id', $orgIds);
 		})->get();
 
 		if ($request->step_id != 0) {
-			$companies = Company::where('cycle', $id)
-				->where('step', '>', 0)
+			$companies = Company::enrolledInOnAStep($id)
 				->when($request->has('step_id'), function ($query) use ($request) {
-					return $query->where('step', $request->step_id);
+					return $query->enrolledOnStep($request->step_id);
 				})
 				->get();
 		}

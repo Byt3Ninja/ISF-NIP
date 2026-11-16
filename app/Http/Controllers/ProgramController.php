@@ -306,7 +306,7 @@ class ProgramController extends Controller
         foreach ($steps as $step) {
             $stepsData[] = [
                 'step_id' => $step->id,
-                'total_companies' => Company::where('step', $step->id)->count(),
+                'total_companies' => Company::enrolledOnStep($step->id)->count(),
             ];
         }
 
@@ -320,7 +320,7 @@ class ProgramController extends Controller
                                 : 0;
 
         // --- Company / Mentor aggregates ---
-        $totalCompany = Company::where('cycle', $cycle->id)->count();
+        $totalCompany = Company::enrolledIn($cycle->id)->count();
         $mentors      = $cycle->mentors()->distinct()->get();
 
         // --- Mentorship aggregates ---
@@ -374,7 +374,7 @@ class ProgramController extends Controller
             switch ($step->stype) {
                 case 1:
                     $stepsExtra[$step->id] = [
-                        'companiesInStep' => Company::where('step', $step->id)->count(),
+                        'companiesInStep' => Company::enrolledOnStep($step->id)->count(),
                         // GV-10452 (ISF): the phase's Submissions button shows once anyone has applied.
                         'hasSubmissions' => isIsf() && Formdata::where('step_id', $step->id)->whereNull('deleted_at')->exists(),
                     ];
@@ -382,7 +382,7 @@ class ProgramController extends Controller
 
                 case 2:
                     $scopedJudges      = $judges->whereIn('id', json_decode($step->list, true) ?? []);
-                    $screenCompanies   = Company::where('step', $step->id)->get();
+                    $screenCompanies   = Company::enrolledOnStep($step->id)->get();
                     $totalFiltration   = 0;
                     $filtrationPending = 0;
                     $filtrationDone    = 0;

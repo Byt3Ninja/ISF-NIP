@@ -63,7 +63,7 @@ class MessagingRecipients
             return Company::where('cycle', $company->cycle)->where('id', '!=', $company->id);
         }
 
-        return Company::whereIn('cycle', $this->cycleIds($sender));
+        return Company::enrolledInAny($this->cycleIds($sender));
     }
 
     /** Mentors the sender may message, or null when the compose screen offers none. */

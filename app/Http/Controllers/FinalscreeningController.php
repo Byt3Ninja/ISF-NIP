@@ -137,7 +137,7 @@ class FinalscreeningController extends Controller
 
 		$allAssignedIds = $panelAssignmentsByStep->flatten()->unique()->values()->all();
 		$assignedCompaniesById = !empty($allAssignedIds)
-			? Company::whereIn('id', $allAssignedIds)->get()->keyBy('id')
+			? Company::with('activeEnrollments')->whereIn('id', $allAssignedIds)->get()->keyBy('id')
 			: collect();
 
 		// The list page mirrors the assignment page: it shows startups that are
@@ -148,7 +148,7 @@ class FinalscreeningController extends Controller
 		$companies = $panelAssignmentsByStep->map(function ($ids, $stepId) use ($assignedCompaniesById) {
 			return $ids->map(fn ($id) => $assignedCompaniesById->get($id))
 				->filter()
-				->filter(fn ($c) => (int) $c->step === (int) $stepId)
+				->filter(fn ($c) => $c->isOnStep($stepId))
 				->values();
 		});
 
@@ -343,7 +343,7 @@ class FinalscreeningController extends Controller
 		// current-step test below — rendered a second time as "moved (no longer
 		// at this step)" (GV-9556). Same rule the initial screening already
 		// applies (GV-3237).
-		if( $cstep ) { $companies = Company::where('step', $cstep->id)->get(); } else { $cstep = []; }
+		if( $cstep ) { $companies = Company::enrolledOnStep($cstep->id)->get(); } else { $cstep = []; }
 
 		/** Prepare Judging Panels for View (Clean Code) */
 		$judgingPanels = [];
@@ -774,7 +774,7 @@ class FinalscreeningController extends Controller
 		if ($id) {
 			$this->authorizeStepOrganization($id);
 		}
-		$companies = Company::where('step',$id)->get();
+		$companies = Company::enrolledOnStep($id)->get();
 		$c =  $cj = null;
 		if ($request->c) {
 			$c = Company::findOrFail($request->c);

@@ -126,7 +126,7 @@ class MentorshipTaskController extends Controller
 		];
 		$lang = app()->getLocale();
 
-		$startups = Company::where('cycle', $cycleId)
+		$startups = Company::enrolledIn($cycleId)
 			->select('id', 'name_en', 'name_ar', 'logo')
 			->get()
 			->map(fn($c) => [

@@ -35,7 +35,7 @@ class ExportCycleCompData implements ShouldQueue
         $step = $this->data2['step'];
         $userEmail = $this->data2['userEmail'];
 
-        $companies = Company::where('cycle', $step)->get();
+        $companies = Company::enrolledIn($step)->get();
        
         
 
@@ -57,7 +57,7 @@ class ExportCycleCompData implements ShouldQueue
 
         if(auth()->user()->hasRole('Admin')) {
 
-            Company::where('cycle', $step)->chunk(1000, function($companies) use (&$sheet, &$row) {
+            Company::enrolledIn($step)->chunk(1000, function($companies) use (&$sheet, &$row) {
                 foreach ($companies as $companie) {
                     
                     $sheet->setCellValue('A' . $row, $companie->id);
@@ -76,7 +76,7 @@ class ExportCycleCompData implements ShouldQueue
 
 
         }else{
-        Company::where('cycle', $step)->chunk(1000, function($companies) use (&$sheet, &$row) {
+        Company::enrolledIn($step)->chunk(1000, function($companies) use (&$sheet, &$row) {
         foreach ($companies as $companie) {
             
             $sheet->setCellValue('A' . $row, $companie->id);

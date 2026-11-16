@@ -486,6 +486,54 @@ class Company extends Model
         return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->where('step_id', $stepId));
     }
 
+    /** Companies active in any of the given cycles. Replaces `whereIn('cycle', $ids)`. */
+    public function scopeEnrolledInAny($query, $cycleIds)
+    {
+        return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->whereIn('cycle_id', $cycleIds));
+    }
+
+    /** Companies with an active enrollment on any of the given steps. Replaces `whereIn('step', $ids)`. */
+    public function scopeEnrolledOnAnyStep($query, $stepIds)
+    {
+        return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->whereIn('step_id', $stepIds));
+    }
+
+    /** Companies active in the given cycle that have been placed on a step there. */
+    public function scopeEnrolledInOnAStep($query, $cycleId)
+    {
+        return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->where('cycle_id', $cycleId)->whereNotNull('step_id'));
+    }
+
+    /** In-memory twin of enrolledIn(), for collections that were loaded with `activeEnrollments`. */
+    public function isEnrolledIn($cycleId): bool
+    {
+        return $this->activeEnrollments->contains('cycle_id', (int) $cycleId);
+    }
+
+    /** In-memory twin of enrolledOnStep(). A step belongs to one cycle, so the step id is enough. */
+    public function isOnStep($stepId): bool
+    {
+        return $this->activeEnrollments->contains('step_id', (int) $stepId);
+    }
+
+    /**
+     * Companies on the given steps, keyed by step id. A company active in two cycles
+     * appears under each of its steps. Replaces `whereIn('step', $ids)->get()->groupBy('step')`.
+     *
+     * @return \Illuminate\Support\Collection<int, \Illuminate\Support\Collection<int, self>>
+     */
+    public static function groupedByEnrolledStep($stepIds)
+    {
+        $stepIds = collect($stepIds)->map(fn ($id) => (int) $id)->all();
+
+        return static::enrolledOnAnyStep($stepIds)->with('activeEnrollments')->get()
+            ->flatMap(fn (self $company) => $company->activeEnrollments
+                ->whereIn('step_id', $stepIds)
+                ->map(fn ($enrollment) => ['step' => $enrollment->step_id, 'company' => $company]))
+            ->groupBy('step')
+            ->map(fn ($rows) => $rows->pluck('company')->values());
+    }
+
     /** The step this company is on in the given cycle, or null when it is not active there. */
     public function stepIdIn($cycleId): ?int
     {

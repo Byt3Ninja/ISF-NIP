@@ -113,7 +113,7 @@ class MessengerController extends Controller
         elseif( $user->hasRole('Mentor'))
         {
             $cycles = CyclesMentors::where('user_id', $userId)->get(['cycle_id'])->toArray();
-            $users = Company::whereIn('cycle', array_values($cycles))->get();
+            $users = Company::enrolledInAny(array_values($cycles))->get();
         }
         elseif( $user->company )
         {
@@ -579,7 +579,7 @@ class MessengerController extends Controller
             return response()->json(['users' => []]);
         }
 
-        $users = Company::where('cycle', $cycleId)
+        $users = Company::enrolledIn($cycleId)
             ->whereHas('user', function ($query) {
                 $query->role('Registered');
             })

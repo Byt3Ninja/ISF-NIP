@@ -13,8 +13,7 @@ use Tests\TestCase;
  * P1-01 through the real screens and the scheduler: the places that move a company
  * between steps, reject it or mark it as alumni must leave the right enrollment row.
  *
- * The fixture company is inserted the way old data exists, with no enrollment row,
- * and gets one from the same backfill the migration runs.
+ * The fixture opens the company's enrollment the way the application does.
  */
 class EnrollmentHistoryFlowsTest extends TestCase
 {
@@ -32,7 +31,6 @@ class EnrollmentHistoryFlowsTest extends TestCase
         $this->program = $this->makeFinalScreeningProgram();
         $this->admin = $this->makeUser('admin', null);
 
-        CompanyEnrollment::backfill();
     }
 
     private function enrollment(): CompanyEnrollment
@@ -54,11 +52,10 @@ class EnrollmentHistoryFlowsTest extends TestCase
         ]);
     }
 
-    public function test_backfilled_fixture_starts_active_on_its_step(): void
+    public function test_fixture_starts_active_on_its_step(): void
     {
         $this->assertSame(CompanyEnrollment::STATUS_ACTIVE, $this->enrollment()->status);
         $this->assertSame($this->program['step'], $this->enrollment()->step_id);
-        $this->assertNull($this->enrollment()->joined_at, 'the join date of older data was never stored');
     }
 
     public function test_disapproving_at_screening_records_a_rejection(): void

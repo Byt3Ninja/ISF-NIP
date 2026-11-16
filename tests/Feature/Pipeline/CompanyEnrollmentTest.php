@@ -203,6 +203,7 @@ class CompanyEnrollmentTest extends TestCase
 
         $active = $enrolled->enrollments()->sole();
         $this->assertSame([$current->id, $currentSteps[1]->id, CompanyEnrollment::STATUS_ACTIVE], [$active->cycle_id, $active->step_id, $active->status]);
+        $this->assertNull($active->joined_at, 'the join date of older data was never stored');
 
         $completed = $graduate->enrollments()->sole();
         $this->assertSame([$finished->id, CompanyEnrollment::STATUS_COMPLETED], [$completed->cycle_id, $completed->status]);

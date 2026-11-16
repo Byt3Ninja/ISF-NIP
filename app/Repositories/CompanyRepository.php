@@ -69,7 +69,7 @@ class CompanyRepository
                 });
             } else {
                 $cycleIds = Cycle::where('organization_id', $filters['organization'])->pluck('id');
-                $query->whereIn('cycle', $cycleIds);
+                $query->enrolledInAny($cycleIds);
             }
         }
 
@@ -121,7 +121,7 @@ class CompanyRepository
         }
 
         if (!empty($filters['programId'])) {
-            $query->where('cycle', $filters['programId']);
+            $query->enrolledIn($filters['programId']);
         }
 
         if(!empty($filters['status'])){

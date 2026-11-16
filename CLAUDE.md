@@ -74,7 +74,8 @@ There is no global scope. `$user->organizations_ids` is the source of truth and 
 - `App\CompanyEnrollment` (`company_enrollments`) is the history: one row each time a company enters a cycle. A `saved` hook on `Company` mirrors pointer changes into it. Two rules follow:
   - a bulk `Company::whereIn(...)->update(['step' => ...])` fires no model events, so call `CompanyEnrollment::moveToStep()` beside it;
   - code that ends an enrollment for a known reason calls `CompanyEnrollment::closeActive()` **before** clearing the pointer, otherwise the row closes as `withdrawn`.
-- One company in several cycles at once is decided but not built. Most founder and staff screens still read the single pointer (dashboards, screening lists, mentorship, training, messaging, reports), so do not lift the "already enrolled" guards without moving those readers to enrollments first.
+- One company in several cycles at once is decided but not built. To find who is in a cycle or on a step, use the scopes on `Company` (`enrolledIn`, `enrolledInAny`, `enrolledOnStep`, `enrolledOnAnyStep`, `enrolledInOnAStep`) and, on loaded models, `isEnrolledIn()`, `isOnStep()` and `stepIdIn($cycleId)`. Do not add new `where('cycle', ...)` / `where('step', ...)` queries on companies.
+- Staff lists, screening, judging and exports already read enrollments. Still on the pointer: every founder-facing screen (dashboard, mentorship, training, messaging to peers), the raw-SQL dashboards and reports in `HomeController` / `ReportController`, and every write that moves a company (`saveForm`, `changestep`, `changAll`). Do not lift the "already enrolled" guards until those are moved.
 - `companies.project_code` is assigned once in the `created` hook and never changes.
 
 ### People
@@ -115,4 +116,5 @@ Platform settings are the single `settings` row with id 1 (`Settings::find(1)`),
 - Build actors and data with `tests/Support/SecurityActors` (`actor('admin')`, `organization()`, `program()`, `step()`, `startup()`, `grant()`), and call `FakesOutboundServices::fakeOutboundServices()` so Zoom, Teams, WhatsApp, mail and HTTP are faked. `BuildsScreeningFixtures` builds a final-screening program.
 - Use `config(['app.localization_path' => 'isf'])` to exercise ISF behaviour.
 - Check that a model has the `HasFactory` trait before calling `::factory()` on it.
+- A company inserted with `DB::table('companies')->insert(...)` has no enrollment row, so enrollment-based lists will not see it. Use the `SecurityActors` / `BuildsScreeningFixtures` helpers or `Company::factory()`, or call `CompanyEnrollment::syncFromPointer($company, null)` after the insert.
 - The markdown guides in `tests/` describe an older setup (`RefreshDatabase`, SQLite) that `TestCase` now forbids.

@@ -79,8 +79,8 @@ class ScreeningEvaluationResults extends Model
 			// on, so it stops being "at" this step and is not re-added here — it
 			// stays visible in this step only through its stored results above.
 			$atStep = $preloaded
-				? $preloaded['companies']->where('cycle', $getStep->cycle_id)->where('step', $step_id)
-				: Company::where('cycle', $getStep->cycle_id)->where('step', $step_id)->get(['id']);
+				? $preloaded['companies']->filter(fn ($c) => $c->isOnStep($step_id))
+				: Company::enrolledOnStep($step_id)->get(['id']);
 			$ids = $ids->merge( $atStep->pluck('id') );
 		}
 
@@ -137,14 +137,14 @@ class ScreeningEvaluationResults extends Model
 				$assignedCompanyIds = self::stepCompanyUniverse( $step_id, $getStep, $preloaded );
 
 				$companies = $preloaded
-					? $preloaded['companies']->where('cycle', $getStep->cycle_id)->whereIn('id', $assignedCompanyIds)->values()
-					: Company::with(['users', 'stepdata.cycle'])->where('cycle', $getStep->cycle_id)->whereIn('id', $assignedCompanyIds)->get();
+					? $preloaded['companies']->filter(fn ($c) => $c->isEnrolledIn($getStep->cycle_id))->whereIn('id', $assignedCompanyIds)->values()
+					: Company::with(['users', 'stepdata.cycle', 'activeEnrollments'])->enrolledIn($getStep->cycle_id)->whereIn('id', $assignedCompanyIds)->get();
 			}
 			else
 			{
 				$companies = $preloaded
-					? $preloaded['companies']->where('cycle', $getStep->cycle_id)->where('step', $step_id)->values()
-					: Company::with(['users', 'stepdata.cycle'])->where('cycle', $getStep->cycle_id)->where('step', $step_id)->get();
+					? $preloaded['companies']->filter(fn ($c) => $c->isOnStep($step_id))->values()
+					: Company::with(['users', 'stepdata.cycle', 'activeEnrollments'])->enrolledOnStep($step_id)->get();
 			}
 
 			// Derive the cycle list from the step itself (not the company set) so
@@ -447,8 +447,10 @@ class ScreeningEvaluationResults extends Model
 			// at another; the step badge / step filter must reflect where it
 			// really is. Fall back to the evaluation step for safety when the
 			// company carries no step.
-			$_companies[$companies_index]->company_step_id = $company->step ?? $getStep->id;
-			$_companies[$companies_index]->company_cycle_id = $company->cycle ?? $getStep->cycle_id;
+			// Its step in THIS cycle, from the enrollment history: the companies.step
+			// pointer names one cycle only and may be another one.
+			$_companies[$companies_index]->company_step_id = $company->stepIdIn($getStep->cycle_id) ?? $getStep->id;
+			$_companies[$companies_index]->company_cycle_id = $getStep->cycle_id;
 			// Evaluation step this block belongs to (≠ current step once a startup
 			// advances). Used by the reports to dedup duplicate rows and to point
 			// the "View Complete Evaluation" modal at the step that actually holds
@@ -485,7 +487,7 @@ class ScreeningEvaluationResults extends Model
 		}
 
 		$all_cycles = $steps->pluck('cycle_id')->unique()->toArray();
-		$all_companies = Company::whereIn('cycle', $all_cycles)->get();
+		$all_companies = Company::enrolledInAny($all_cycles)->with('activeEnrollments')->get();
 		$all_steps = Step::whereIn('cycle_id', $all_cycles)->orderBy('arr')->get();
 
 		// Load evaluations through getEvaluationData() so each carries its
@@ -523,7 +525,7 @@ class ScreeningEvaluationResults extends Model
 
 			$comments = $comments_map[$evaluation?->id ?? null] ?? collect();
 
-			$companies = $all_companies->where('cycle', $step->cycle_id);
+			$companies = $all_companies->filter(fn ($c) => $c->isEnrolledIn($step->cycle_id));
 
 		
 			if ($step->stype == 5) {

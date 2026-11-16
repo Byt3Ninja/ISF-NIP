@@ -143,9 +143,7 @@ class ScreeningController extends Controller
 				->get()
 				->groupBy('step_id');
 
-		$companies = Company::whereIn('step', $stepIds)
-				->get()
-				->groupBy('step');
+		$companies = Company::groupedByEnrolledStep($stepIds);
 
 		// Resolve each step's form from its OWN pointer, mirroring show():
 		// form_id is the source of truth, data is a legacy fallback. Preload the
@@ -325,7 +323,7 @@ class ScreeningController extends Controller
 			// Screening phase before they were advanced (GV-3237). A startup must
 			// be moved to the screening step (via "change step") before it can be
 			// assigned to judges.
-			$companies = Company::where('step', $cstep->id)->get();
+			$companies = Company::enrolledOnStep($cstep->id)->get();
 		} else {
 			$cstep = [];
 		}
@@ -1575,7 +1573,7 @@ class ScreeningController extends Controller
 		$fileAccess = app(FileAccess::class);
 		abort_unless(
 			$companyId && $cycleId
-			&& (int) Company::whereKey($companyId)->value('cycle') === (int) $cycleId
+			&& Company::whereKey($companyId)->enrolledIn($cycleId)->exists()
 			&& ($fileAccess->isAssignedJudge($actor, $companyId) || $actor->managesOrganization(Cycle::whereKey($cycleId)->value('organization_id'))),
 			403
 		);
@@ -1619,7 +1617,7 @@ class ScreeningController extends Controller
 		// whereIn('step', [$fid, $sid]) only ever matched Custom Form step
 		// companies by an accidental id collision, pulling startups that had not
 		// yet advanced to the screening phase into the assignment list (GV-3237).
-		foreach (Company::where('step', $sid)->get() as $comp) {
+		foreach (Company::enrolledOnStep($sid)->get() as $comp) {
 			if (in_array($comp->id,  $list['users'] ?? [])) {
 				$selected = " selected ";
 			}

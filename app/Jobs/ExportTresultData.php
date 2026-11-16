@@ -76,7 +76,7 @@ class ExportTresultData implements ShouldQueue
 
         }else{
 
-        Company::where('step', $step)->chunk(1000, function($companies) use (&$sheet, &$row, $location) {
+        Company::enrolledOnStep($step)->chunk(1000, function($companies) use (&$sheet, &$row, $location) {
         foreach ($companies as $companie) {
             
                     $sheet->setCellValue('A' . $row, $companie->id);

@@ -161,8 +161,8 @@ class CyclesController extends Controller
             $user->ableTo('cycles.users_manage')
             && $stepCycleId
             && $user->managesOrganization(Cycle::whereKey($stepCycleId)->value('organization_id'))
-            && Company::whereIn('id', $compid)->where('cycle', '!=', $stepCycleId)->doesntExist()
-            && Company::whereIn('id', $compid)->whereNull('cycle')->doesntExist(),
+            // every selected company must be active in the step's own cycle
+            && Company::whereIn('id', $compid)->whereDoesntHave('enrollments', fn ($e) => $e->active()->where('cycle_id', $stepCycleId))->doesntExist(),
             403
         );
 
