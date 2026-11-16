@@ -11,7 +11,7 @@ cd /var/www/html
 : "${DB_PASSWORD:?DB_PASSWORD is required}"
 : "${APP_KEY:?APP_KEY is required}"
 
-# The same build details the GitLab pipeline writes into .env on the other servers.
+# Build details recorded in .env, the same ones shown in the app's footer.
 export APP_VERSION="${APP_VERSION:-$(cat version.txt 2>/dev/null || echo 0)}"
 export APP_GIT_SHA="${APP_GIT_SHA:-$(printf '%s' "${SOURCE_COMMIT:-}" | cut -c1-8)}"
 
@@ -81,7 +81,7 @@ if [ "$users" = "0" ]; then
     '
     echo "Seeded a fresh database; admin password set from ADMIN_PASSWORD."
 else
-    # Same step the GitLab pipeline runs on every deploy.
+    # Keep roles and permissions up to date on every deploy.
     as_app php artisan db:seed --class=defaultRolesPermissionSeeder --force
 fi
 
