@@ -1,15 +1,18 @@
 name: Promote staging to production
 
 # Auto-promote: every push to `staging` fast-forwards `production` to the same
-# commit. Production deploys from `production` through Coolify, so this ships
-# staging straight to production with no manual step.
+# commit, then triggers a Coolify deploy of the production app. So a change
+# merged to staging ships to production with no manual step.
 #
 # Fast-forward only (force=false): if `production` ever has a commit that
 # `staging` does not (e.g. a direct hotfix), the API refuses the update and
 # this run fails loudly instead of rewriting production history. Resolve by
 # merging production back into staging, then push staging again.
 #
-# Uses the built-in GITHUB_TOKEN only — no secrets to configure.
+# Setup (GitHub → repo → Settings → Secrets and variables → Actions):
+#   secret   COOLIFY_TOKEN  Coolify API token (Keys & Tokens → API tokens; needs deploy)
+#   variable COOLIFY_URL    Coolify base URL, e.g. https://coolify.example.com
+# The production app UUID is not secret and is set below.
 
 on:
   push:
@@ -23,6 +26,9 @@ concurrency:
   group: promote-production
   cancel-in-progress: false
 
+env:
+  PRODUCTION_APP_UUID: 3aygzcakl1culiguoow9d31m
+
 jobs:
   promote:
     runs-on: ubuntu-latest
@@ -33,11 +39,8 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-
-          # Promote staging's current head, whatever triggered this run.
           sha="$(gh api "repos/$REPO/git/refs/heads/staging" --jq '.object.sha')"
           echo "Promoting staging@$sha to production (fast-forward only)"
-
           if gh api -X PATCH "repos/$REPO/git/refs/heads/production" \
                -f sha="$sha" -F force=false >/dev/null; then
             echo "✓ production is now at $sha"
@@ -46,3 +49,27 @@ jobs:
                  "commits staging lacks — merge production into staging, then push staging." >&2
             exit 1
           fi
+
+      - name: Deploy production on Coolify
+        env:
+          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${COOLIFY_URL:-}" ] || [ -z "${COOLIFY_TOKEN:-}" ]; then
+            echo "::error::Auto-deploy needs repo variable COOLIFY_URL and secret COOLIFY_TOKEN." \
+                 "The branch was promoted, but production was not deployed." >&2
+            exit 1
+          fi
+          echo "Triggering Coolify deploy of production app $PRODUCTION_APP_UUID"
+          # Coolify deploy API; force=false does a normal (cached) build.
+          http_code="$(curl -sS -o /tmp/coolify_deploy.out -w '%{http_code}' \
+            -X GET "${COOLIFY_URL%/}/api/v1/deploy?uuid=$PRODUCTION_APP_UUID&force=false" \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            -H "Accept: application/json")"
+          echo "Coolify responded $http_code:"
+          cat /tmp/coolify_deploy.out; echo
+          case "$http_code" in
+            2??) echo "✓ Coolify production deploy queued" ;;
+            *)   echo "::error::Coolify deploy request failed (HTTP $http_code)." >&2; exit 1 ;;
+          esac
