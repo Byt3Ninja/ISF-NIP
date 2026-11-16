@@ -381,6 +381,11 @@ public function updateBio(UpdateBioRequest  $request)
 public function showProfile($id)
 {
     $user = User::with(['country', 'state', 'city', 'company'])->findOrFail($id);
+
+    // The id comes from the URL: only the account's owner, a platform admin or staff
+    // managing its organization may read it (403 otherwise).
+    $this->authorize('viewProfile', $user);
+
     $data = $this->getProfileData($user);
 
     return $this->success($data);
