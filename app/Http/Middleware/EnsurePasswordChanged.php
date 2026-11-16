@@ -18,6 +18,11 @@ class EnsurePasswordChanged
         'user.profile_update_my_password',
         'user.notification_settings_update',
         'logout',
+        // The profile page needs a verified email. Without these an unverified user is sent
+        // from the profile to "verify your email" and straight back, forever.
+        'verification.notice',
+        'verification.verify',
+        'verification.resend',
     ];
 
     private const ALLOWED_PATH_PREFIXES = [

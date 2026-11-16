@@ -6,6 +6,7 @@ use App\EducationEntity;
 use App\Notifications\WelcomeUserNotification;
 use App\Settings;
 use App\User;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -151,6 +152,22 @@ class PublicProgramApplicationTest extends TestCase
         $this->get($link)->assertRedirect(route('user.profile_Edit'));
 
         $this->assertNotNull($applicant->fresh()->email_verified_at);
+    }
+
+    public function test_an_unverified_applicant_who_opens_the_dashboard_is_asked_to_verify_their_email(): void
+    {
+        $this->withMiddleware([EnsureEmailIsVerified::class]); // SecurityActors switches it off
+        $this->platformRequiresEmailVerification(true);
+        $this->apply($this->newEmail())->assertJsonPath('status', true);
+
+        // Until the welcome email is generated the account is also flagged "must change
+        // password", which sends every page to the profile; the profile needs a verified email.
+        $this->asANewRequest();
+        $this->get('/dashboard')->assertRedirect(route('user.profile_Edit'));
+        $this->asANewRequest();
+        $this->get(route('user.profile_Edit'))->assertRedirect(route('verification.notice'));
+        $this->asANewRequest();
+        $this->get(route('verification.notice'))->assertOk()->assertViewIs('auth.verify');
     }
 
     /** @return array<string, array{bool}> */
