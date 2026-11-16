@@ -1,0 +1,14 @@
+.git
+.idea
+.codegpt
+.vscode
+node_modules
+vendor
+docker_volumes
+.env
+.env.*
+storage/logs/*.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/protected
