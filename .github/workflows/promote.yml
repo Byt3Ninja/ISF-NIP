@@ -64,9 +64,9 @@ jobs:
             exit 1
           fi
           echo "Triggering Coolify deploy of production app $PRODUCTION_APP_UUID"
-          # Coolify deploy API; force=false does a normal (cached) build.
+          # Coolify deploy API (POST; force=false does a normal, cached build).
           http_code="$(curl -sS -o /tmp/coolify_deploy.out -w '%{http_code}' \
-            -X GET "${COOLIFY_URL%/}/api/v1/deploy?uuid=$PRODUCTION_APP_UUID&force=false" \
+            -X POST "${COOLIFY_URL%/}/api/v1/deploy?uuid=$PRODUCTION_APP_UUID&force=false" \
             -H "Authorization: Bearer $COOLIFY_TOKEN" \
             -H "Accept: application/json")"
           echo "Coolify responded $http_code:"
