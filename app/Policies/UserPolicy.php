@@ -38,6 +38,23 @@ class UserPolicy
     }
 
     /**
+     * Determine whether the user can read the model's profile through the API (contact
+     * details, address, startup, mentorship sessions): the account's owner, or staff
+     * managing the organization the account belongs to (directly, or through its
+     * startup's program). Platform admins manage every organization.
+     *
+     * Not gated on users.show, so everyone can still read their own profile; and
+     * managesOrganization rather than ownsOrganization, because a founder "owns" their
+     * program's organization but must not read its staff or the program's other founders.
+     */
+    public function viewProfile(User $user, User $model): bool
+    {
+        return $user->id === $model->id
+            || $user->managesOrganization($model->organization_id)
+            || $user->managesOrganization($model->company?->cycledata?->organization_id);
+    }
+
+    /**
      * The target account belongs to the acting user's tenant scope: platform admins
      * reach everyone, others only users of an organization they own (directly, or
      * through the user's company program).
