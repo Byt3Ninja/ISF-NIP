@@ -5180,6 +5180,15 @@
                 ]
             },
             {
+                "name": "company.switch_program",
+                "description": "Switch Between My Programs",
+                "guard_name": "web",
+                "is_core": 0,
+                "default_for": [
+                    "registered"
+                ]
+            },
+            {
                 "name": "company.profile_view_mine",
                 "description": "View My Company Page",
                 "guard_name": "web",

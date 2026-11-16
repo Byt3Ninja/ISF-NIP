@@ -677,4 +677,5 @@ return [
   'rejected' => 'مرفوضة',
   'withdrawn' => 'منسحبة',
   'last_phase_reached' => 'آخر مرحلة تم الوصول إليها',
+  'program_switcher_label' => 'تعمل الآن في',
 ];

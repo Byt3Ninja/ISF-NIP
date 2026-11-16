@@ -837,6 +837,20 @@ class ClientCompanyController extends Controller
         // }
     }
     /**
+     * A founder whose company is active in several cycles picks the one to work in.
+     */
+    public function switchProgram($enrollment)
+    {
+        $target = \App\CompanyEnrollment::query()->active()
+            ->where('company_id', auth()->user()->company_id)
+            ->findOrFail($enrollment);
+
+        $target->company->switchToEnrollment($target);
+
+        return redirect('/dashboard');
+    }
+
+    /**
      * Show the form for editing/Createing the specified resource.
      *
      * @param  \App\Company  $Type
