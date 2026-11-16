@@ -1,0 +1,84 @@
+# Staging stack for Coolify.
+# Application settings in Coolify: build pack "Docker Compose",
+# base directory "/.deploy/coolify", compose file "/compose.yaml",
+# domain attached to the "app" service.
+#
+# Variables written as ${ISF_...} are set in Coolify's environment variables.
+# The ISF_ prefix keeps them apart from the names Laravel reads, because Coolify
+# hands every variable to every service.
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: .deploy/coolify/app.Dockerfile
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_NAME: ${ISF_APP_NAME:-ISF}
+      # "beta" is the pre-production name the menus already recognise: it hides
+      # the same unfinished entries that production hides.
+      APP_ENV: ${ISF_APP_ENV:-beta}
+      APP_DEBUG: ${ISF_APP_DEBUG:-false}
+      APP_KEY: ${ISF_APP_KEY:?}
+      APP_URL: ${ISF_APP_URL:?}
+      APP_TIMEZONE: ${ISF_APP_TIMEZONE:-UTC}
+      # Turns on the ISF wording (Program / Sub Program / Idea) and ISF-only screens.
+      LOCALIZATION_PATH: isf
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: isf
+      DB_USERNAME: isf
+      DB_PASSWORD: ${ISF_DB_PASSWORD:?}
+      # Used once, on the first start, to replace the seeded admin's default password.
+      ADMIN_PASSWORD: ${ISF_ADMIN_PASSWORD:?}
+      QUEUE_CONNECTION: database
+      CACHE_DRIVER: file
+      SESSION_DRIVER: file
+      SESSION_SECURE_COOKIE: "true"
+      BROADCAST_DRIVER: log
+      LOG_CHANNEL: stderr
+      # "log" writes outgoing mail to the container log instead of sending it.
+      MAIL_MAILER: ${ISF_MAIL_MAILER:-log}
+      MAIL_FROM_ADDRESS: ${ISF_MAIL_FROM_ADDRESS:-no-reply@isf.mystartpad.com}
+      MAIL_FROM_NAME: ${ISF_APP_NAME:-ISF}
+    volumes:
+      - storage:/var/www/html/storage
+      - uploads:/var/www/html/uploads-data
+    healthcheck:
+      # Apache only starts after migrations and seeding have finished.
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1/robots.txt"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 900s
+
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_DATABASE: isf
+      MARIADB_USER: isf
+      MARIADB_PASSWORD: ${ISF_DB_PASSWORD:?}
+      MARIADB_ROOT_PASSWORD: ${ISF_DB_ROOT_PASSWORD:?}
+    volumes:
+      - database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  database:
+  storage:
+  uploads:
