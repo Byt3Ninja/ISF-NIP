@@ -1,0 +1,51 @@
+name: Deploy production
+
+# Production-is-integration model: work merges into `production`, and every push
+# to `production` deploys the production app on Coolify. No cross-branch
+# promotion (the old promote.yml is gone).
+#
+# Setup (GitHub → repo → Settings → Secrets and variables → Actions, repo scope):
+#   secret            COOLIFY_TOKEN  Coolify API token with deploy ability
+#   variable OR secret COOLIFY_URL   Coolify base URL, e.g. https://coolify.example.com
+# The production app UUID is not secret and is set below.
+
+on:
+  push:
+    branches: [production]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  PRODUCTION_APP_UUID: 3aygzcakl1culiguoow9d31m
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy production on Coolify
+        env:
+          COOLIFY_URL: ${{ vars.COOLIFY_URL || secrets.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${COOLIFY_URL:-}" ] || [ -z "${COOLIFY_TOKEN:-}" ]; then
+            echo "::error::Needs repo COOLIFY_URL (variable or secret) and secret COOLIFY_TOKEN." >&2
+            exit 1
+          fi
+          echo "Triggering Coolify deploy of production app $PRODUCTION_APP_UUID"
+          http_code="$(curl -sS -o /tmp/coolify_deploy.out -w '%{http_code}' \
+            -X POST "${COOLIFY_URL%/}/api/v1/deploy?uuid=$PRODUCTION_APP_UUID&force=false" \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            -H "Accept: application/json")"
+          echo "Coolify responded $http_code:"
+          cat /tmp/coolify_deploy.out; echo
+          case "$http_code" in
+            2??) echo "✓ Coolify production deploy queued" ;;
+            *)   echo "::error::Coolify deploy request failed (HTTP $http_code)." >&2; exit 1 ;;
+          esac
