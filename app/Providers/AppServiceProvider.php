@@ -45,6 +45,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // doctrine/dbal is installed, and Laravel then sends every ->change() and
+        // renameColumn through it instead of its own SQL. DBAL cannot change an
+        // enum column, which stopped `artisan migrate` on an empty database at
+        // 2024_12_01_212635_add_group_to_questions_bank. Keep these native, as
+        // they were when those migrations were written and first run.
+        Schema::useNativeSchemaOperationsIfPossible();
+
         Broadcast::routes();
 
         $settings = null;
