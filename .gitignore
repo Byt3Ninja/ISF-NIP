@@ -31,8 +31,6 @@ npm-debug.log
 yarn-error.log
 composer.lock
 .codegpt
-# CodeGraph's local index, rebuilt on each machine
-/.codegraph
 .vscode
 .idea
 # dompdf generated font cache (GV-3340)
