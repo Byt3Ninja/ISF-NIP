@@ -52,4 +52,7 @@ uploads under `storage/protected`) and `uploads` (public upload folders).
 
 - Live chat and notifications over websockets (`BROADCAST_DRIVER=log`).
 - A committed `composer.lock`: package versions are resolved when the image is built.
+- A current Composer. The image uses Composer 2.8 because newer releases refuse to
+  install packages with open security advisories, and every Laravel 10 release has
+  some. Run `composer audit` for the list. Upgrading Laravel removes the need for this.
 - Config caching. The code reads `env()` outside `config/`, which a cached config would break.

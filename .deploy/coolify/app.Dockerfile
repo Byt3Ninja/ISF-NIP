@@ -3,7 +3,10 @@
 FROM php:8.3-apache
 
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+# Composer is held at 2.8. From 2.9 it refuses to install any version with an open
+# security advisory, and every Laravel 10 release has some (fixed only in 12+), so
+# the dependencies in composer.json cannot be resolved with a newer Composer.
+COPY --from=composer:2.8 /usr/bin/composer /usr/local/bin/composer
 
 # gd + imagick: images, PDFs and PNG QR codes. zip: Excel import/export.
 # calendar: required by khaled.alshamaa/ar-php (Arabic text in PDFs).
