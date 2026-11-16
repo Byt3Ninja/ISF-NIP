@@ -8,6 +8,7 @@ use stdClass;
 use App\Cycle;
 use App\Almuni;
 use App\Company;
+use App\CompanyEnrollment;
 use App\FinalData;
 use App\Screening;
 use Carbon\Carbon;
@@ -39,11 +40,9 @@ class ReportController extends Controller
         $cycles = Cycle::when(!empty($orgIds) && !$user->hasRole('admin'),function ($q)use($orgIds){
             $q->whereIn('organization_id',$orgIds);
         })->get();
-        $companies = Company::whereHas('cycledata',function ($q)use ($orgIds, $user){
-            $q->when(!empty($orgIds) && !$user->hasRole('admin'),function ($query)use($orgIds){
-                $query->whereIn('organization_id',$orgIds);
-            });
-        })->get();
+        $companies = Company::whereRaw('companies.id IN ' . CompanyEnrollment::activeCompanyIdsSql(
+            !empty($orgIds) && !$user->hasRole('admin') ? $orgIds : null
+        ))->get();
 
         // Only load the default active tab (mentorship) — other tabs load via AJAX
         $mentorshipData = $this->mentorshipReport($orgIds, $user, $program_id, $request);
@@ -405,8 +404,12 @@ class ReportController extends Controller
                 'c.name_ar',
                 'c.name_en',
             ])
-            ->whereIn('c.step', function($q) {
-                return $q->select(['s.id'])->from('steps AS s')->where('s.stype', 5);
+            ->whereIn('c.id', function($q) {
+                // On a final-screening step in any of its programs, from the active enrollments.
+                return $q->select(['ce.company_id'])->from('company_enrollments AS ce')
+                    ->join('steps AS s', 's.id', '=', 'ce.step_id')
+                    ->where('ce.status', CompanyEnrollment::STATUS_ACTIVE)
+                    ->where('s.stype', 5);
             })->get();
 
         $finals_by_evaluation = $finals_by_evaluation->filter(function($evaluation) {
@@ -1127,27 +1130,34 @@ class ReportController extends Controller
             ->get();
         $mentorRequestsByCycle = $allMentorRequestsBatch->groupBy('cycle_id');
 
-        // Batch 2: All screening companies (stype=2) with user, joined through step→cycle
-        $allScreeningCompanies = Company::with(['user', 'stepdata.cycle'])
-            ->whereHas('stepdata', function ($q) use ($orgIds, $user, $cycleIds) {
-                $q->whereIn('cycle_id', $cycleIds)
-                    ->when(!empty($orgIds) && !$user->hasRole('admin'), fn($q) => $q->whereHas('cycle', fn($cq) => $cq->whereIn('organization_id', $orgIds)))
-                    ->where('stype', 2);
-            })
-            ->orderBy('name_en')
-            ->get();
-        $screeningCompaniesByCycle = $allScreeningCompanies->groupBy(fn($c) => $c->stepdata->cycle_id ?? null);
+        // Batches 2 and 3: companies on a screening (stype=2) or final-screening (stype=5) step,
+        // read from active enrollments so a company in two programs is listed under each.
+        $companiesOnStepType = function (int $stype) use ($orgIds, $user, $cycleIds) {
+            $onSuchAStep = fn ($enrollment) => $enrollment->active()
+                ->whereIn('cycle_id', $cycleIds)
+                ->whereHas('step', fn ($step) => $step->where('stype', $stype))
+                ->when(!empty($orgIds) && !$user->hasRole('admin'), fn ($q) => $q->whereHas(
+                    'cycle',
+                    fn ($cycle) => $cycle->whereIn('organization_id', $orgIds)
+                ));
 
-        // Batch 3: All final screening companies (stype=5) with user, joined through step→cycle
-        $allFinalScreeningCompanies = Company::with(['user', 'stepdata.cycle'])
-            ->whereHas('stepdata', function ($q) use ($orgIds, $user, $cycleIds) {
-                $q->whereIn('cycle_id', $cycleIds)
-                    ->when(!empty($orgIds) && !$user->hasRole('admin'), fn($q) => $q->whereHas('cycle', fn($cq) => $cq->whereIn('organization_id', $orgIds)))
-                    ->where('stype', 5);
-            })
-            ->orderBy('name_en')
-            ->get();
-        $finalScreeningCompaniesByCycle = $allFinalScreeningCompanies->groupBy(fn($c) => $c->stepdata->cycle_id ?? null);
+            return Company::with(['user', 'enrollments' => $onSuchAStep])
+                ->whereHas('enrollments', $onSuchAStep)
+                ->orderBy('name_en')
+                ->get();
+        };
+        $byEnrolledCycle = fn ($companies) => $companies
+            ->flatMap(fn ($company) => $company->enrollments->pluck('cycle_id')->unique()->map(
+                fn ($cycleId) => ['cycle_id' => $cycleId, 'company' => $company]
+            ))
+            ->groupBy('cycle_id')
+            ->map(fn ($rows) => $rows->pluck('company'));
+
+        $allScreeningCompanies = $companiesOnStepType(2);
+        $screeningCompaniesByCycle = $byEnrolledCycle($allScreeningCompanies);
+
+        $allFinalScreeningCompanies = $companiesOnStepType(5);
+        $finalScreeningCompaniesByCycle = $byEnrolledCycle($allFinalScreeningCompanies);
 
         // Batch 4: Training sessions with step relationship for per-cycle counts
         $allTrainingSessionsBatch = TrainingSession::with('step')
@@ -1159,12 +1169,13 @@ class ReportController extends Controller
         $trainingSessionsByCycle = $allTrainingSessionsBatch->groupBy(fn($ts) => $ts->step->cycle_id ?? null);
 
         // Batch 5: Startup counts per cycle
-        $startupCountsByCycle = DB::table('companies')
-            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        $startupCountsByCycle = DB::table('company_enrollments')
+            ->join('cycles', 'company_enrollments.cycle_id', '=', 'cycles.id')
+            ->where('company_enrollments.status', CompanyEnrollment::STATUS_ACTIVE)
             ->when(!empty($orgIds) && !$user->hasRole('admin'), fn($q) => $q->whereIn('cycles.organization_id', $orgIds))
-            ->whereIn('companies.cycle', $cycleIds)
-            ->select('companies.cycle as cycle_id', DB::raw('count(*) as cnt'))
-            ->groupBy('companies.cycle')
+            ->whereIn('company_enrollments.cycle_id', $cycleIds)
+            ->select('company_enrollments.cycle_id', DB::raw('count(distinct company_enrollments.company_id) as cnt'))
+            ->groupBy('company_enrollments.cycle_id')
             ->pluck('cnt', 'cycle_id');
 
         // Batch 6: Mentor counts per cycle (distinct mentors from mentorship requests)
