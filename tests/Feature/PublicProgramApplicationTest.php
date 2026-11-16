@@ -1,0 +1,213 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\EducationEntity;
+use App\Notifications\WelcomeUserNotification;
+use App\Settings;
+use App\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
+use Tests\Support\FakesEmailDns;
+use Tests\Support\SecurityActors;
+use Tests\TestCase;
+
+/**
+ * The public "apply to a program" form (/{org}/program/{program}/register). A new applicant
+ * gets an account, a startup enrolled in the program's first step, their answers saved and
+ * the welcome email. Whether that account still has to confirm its email follows the
+ * platform's "verify email" setting, the same one that decides whether the form shows its
+ * Verification step.
+ *
+ * `register-email` is checked with email:dns; the lookup is faked so this runs with no resolver.
+ */
+class PublicProgramApplicationTest extends TestCase
+{
+    use SecurityActors, FakesEmailDns;
+
+    private int $programId;
+
+    private int $stepId;
+
+    private string $programUrl;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->setUpSecurityActors();
+        $this->fakeEmailDns(['gmail.com']);
+
+        $orgSlug = 'apply-org-' . Str::lower(Str::random(8));
+        $programSlug = 'apply-program-' . Str::lower(Str::random(8));
+        $orgId = $this->organization();
+        DB::table('organizations')->where('id', $orgId)->update(['slug' => $orgSlug]);
+        $this->programId = $this->program($orgId, [
+            'is_public' => 1,
+            'public_slug' => $programSlug,
+            'start' => now()->subDay()->toDateString(),
+            'end' => now()->addDays(10)->toDateString(),
+        ]);
+        $this->stepId = $this->step($this->programId, ['stype' => 1, 'arr' => 1]);
+        $this->programUrl = "/{$orgSlug}/program/{$programSlug}";
+    }
+
+    /** Settings > "Verification Email": whether new accounts must confirm their address. */
+    private function platformRequiresEmailVerification(bool $required): void
+    {
+        $settings = Settings::find(1) ?? Settings::factory()->create(['id' => 1]);
+        $settings->forceFill(['VFEmail' => $required ? 1 : 0])->save();
+    }
+
+    /** A real request loads the signed-in account from the database; a test keeps the last one in memory. */
+    private function asANewRequest(): void
+    {
+        auth()->forgetGuards();
+    }
+
+    private function newEmail(): string
+    {
+        return 'applicant.' . Str::lower(Str::random(10)) . '@gmail.com';
+    }
+
+    private function apply(string $email, array $fields = [])
+    {
+        return $this->postJson($this->programUrl . '/register', array_merge([
+            'register-email' => $email,
+            'register-first-name' => 'Nour',
+            'register-last-name' => 'Hassan',
+        ], $fields));
+    }
+
+    public function test_a_new_applicant_gets_an_account_enrolled_in_the_program_and_the_welcome_email(): void
+    {
+        $email = $this->newEmail();
+
+        $this->apply($email)->assertOk()->assertJsonPath('status', true);
+
+        $applicant = User::where('email', $email)->first();
+        $this->assertNotNull($applicant, 'no account was created');
+        $this->assertTrue($applicant->hasRole('registered'));
+        $this->assertSame($this->programId, (int) $applicant->company->cycle);
+        $this->assertSame($this->stepId, (int) $applicant->company->step);
+        Notification::assertSentToTimes($applicant, WelcomeUserNotification::class, 1);
+        $this->assertAuthenticatedAs($applicant);
+    }
+
+    public function test_the_answers_to_the_application_form_are_saved_for_the_new_startup(): void
+    {
+        $fieldId = DB::table('form_fields')->insertGetId([
+            'step_id' => $this->stepId,
+            'field_id' => DB::table('fields')->value('id'),
+            'options' => json_encode(['label' => 'What are you building?', 'type' => 'text', 'validation' => ['required' => 1]]),
+        ]);
+        $email = $this->newEmail();
+
+        $this->apply($email, ['field_' . $fieldId => 'A solar water pump'])->assertJsonPath('status', true);
+
+        $applicant = User::where('email', $email)->firstOrFail();
+        $this->assertDatabaseHas('form_data', [
+            'field_id' => $fieldId,
+            'company_id' => $applicant->company_id,
+            'user_id' => $applicant->id,
+            'step_id' => $this->stepId,
+            'question' => 'What are you building?',
+            'answer' => 'A solar water pump',
+        ]);
+    }
+
+    public function test_the_applicant_is_verified_at_once_when_the_platform_does_not_require_email_verification(): void
+    {
+        $this->platformRequiresEmailVerification(false);
+        $email = $this->newEmail();
+
+        $this->apply($email)->assertJsonPath('status', true);
+
+        $this->assertNotNull(User::where('email', $email)->firstOrFail()->email_verified_at);
+    }
+
+    public function test_the_applicant_is_left_unverified_when_the_platform_requires_email_verification(): void
+    {
+        $this->platformRequiresEmailVerification(true);
+        $email = $this->newEmail();
+
+        $this->apply($email)->assertJsonPath('status', true);
+
+        $applicant = User::where('email', $email)->firstOrFail();
+        $this->assertNull($applicant->email_verified_at);
+        // Still welcomed: that email carries the link that confirms the address.
+        Notification::assertSentToTimes($applicant, WelcomeUserNotification::class, 1);
+    }
+
+    public function test_the_welcome_email_link_verifies_an_applicant_who_was_left_unverified(): void
+    {
+        $this->platformRequiresEmailVerification(true);
+        $email = $this->newEmail();
+        $this->apply($email)->assertJsonPath('status', true);
+        $applicant = User::where('email', $email)->firstOrFail();
+        $link = $applicant->generateMagicLoginUrl(); // what rendering the welcome email does
+        $this->asANewRequest();
+
+        $this->get($link)->assertRedirect(route('user.profile_Edit'));
+
+        $this->assertNotNull($applicant->fresh()->email_verified_at);
+    }
+
+    /** @return array<string, array{bool}> */
+    public static function verificationSettings(): array
+    {
+        return ['verification required' => [true], 'verification not required' => [false]];
+    }
+
+    /**
+     * The form tells the applicant to check their inbox exactly when their account will be
+     * left unverified.
+     *
+     * @dataProvider verificationSettings
+     */
+    public function test_the_application_form_shows_its_verification_step_only_when_verification_is_required(bool $required): void
+    {
+        $this->platformRequiresEmailVerification($required);
+
+        $page = $this->get($this->programUrl . '/apply')->assertOk();
+
+        $required
+            ? $page->assertSee('id="verification-step-pane"', false)
+            : $page->assertDontSee('id="verification-step-pane"', false);
+    }
+
+    public function test_an_address_whose_domain_has_no_mail_server_is_rejected_and_no_account_is_created(): void
+    {
+        $email = 'applicant.' . Str::lower(Str::random(10)) . '@no-mail-server-here.com';
+
+        $this->apply($email)->assertStatus(422)->assertJsonValidationErrors('register-email');
+
+        $this->assertDatabaseMissing('users', ['email' => $email]);
+    }
+
+    public function test_an_isf_applicant_also_has_their_mobile_education_and_referral_details_saved(): void
+    {
+        config(['app.localization_path' => 'isf']);
+        $university = EducationEntity::create(['type' => EducationEntity::TYPE_UNIVERSITY, 'name_en' => 'Apply Test University', 'name_ar' => 'جامعة']);
+        $email = $this->newEmail();
+
+        $this->apply($email, [
+            'phone' => '1012345678',
+            'country_code' => '20',
+            'academic_stat' => EducationEntity::STATUS_UNIVERSITY_STUDENT,
+            'education_entity_id' => $university->id,
+            'national_id' => '29001011234567',
+            'referral_source' => 'linkedin',
+        ])->assertOk()->assertJsonPath('status', true);
+
+        $applicant = User::where('email', $email)->firstOrFail();
+        $this->assertSame('1012345678', $applicant->phone);
+        $this->assertSame('20', $applicant->country_code);
+        $this->assertSame(EducationEntity::STATUS_UNIVERSITY_STUDENT, $applicant->academic_stat);
+        $this->assertSame($university->id, (int) $applicant->education_entity_id);
+        $this->assertSame('29001011234567', $applicant->national_id);
+        $this->assertNull($applicant->student_code);
+        $this->assertSame('linkedin', $applicant->referral_source);
+        Notification::assertSentToTimes($applicant, WelcomeUserNotification::class, 1);
+    }
+}
