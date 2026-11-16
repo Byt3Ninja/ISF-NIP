@@ -262,4 +262,8 @@ return [
 
     // Founders must fill in their National ID on the edit-profile form; off = optional.
     'national_id_required' => env('NATIONAL_ID_REQUIRED', false),
+
+    // First part of every project number (PREFIX-YY-NNNNNN). Numbers already given keep
+    // the prefix they were created with, so set this before the first migration.
+    'project_code_prefix' => env('PROJECT_CODE_PREFIX', env('LOCALIZATION_PATH') === 'isf' ? 'ISF' : 'PRJ'),
 ];

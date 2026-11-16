@@ -14,6 +14,7 @@ use App\State;
 use App\Almuni;
 use App\Sector;
 use App\Company;
+use App\CompanyEnrollment;
 use App\Country;
 use App\Quizzes;
 use App\Service;
@@ -5042,6 +5043,9 @@ class ClientCompanyController extends Controller
                 $almuni->submitted_forms = $formSubmissions;
 
             $almuni->save();
+
+            // Record the outcome before the pointer is cleared; otherwise the history says "withdrawn".
+            CompanyEnrollment::closeActive($company->id, $company->cycle, CompanyEnrollment::STATUS_COMPLETED);
 
             $company->step = null;
             $company->cycle = null;

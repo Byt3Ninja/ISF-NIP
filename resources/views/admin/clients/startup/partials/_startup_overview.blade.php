@@ -249,6 +249,13 @@
           <div class="col-md-8 text-white">
             <div class="mb-2 d-flex align-items-center gap-3">
               <h4 class="mb-0 text-white">{{ $companyName }}</h4>
+              @if ($co->project_code ?? null)
+                <span class="badge border border-white border-opacity-25 bg-card bg-opacity-20 text-primary"
+                  title="{{ __('startup.project_number') }}">
+                  <i class="ti ti-hash ti-xs me-1"></i>
+                  <span dir="ltr">{{ $co->project_code }}</span>
+                </span>
+              @endif
               @if (($co->CreatedTax ?? null) == '1')
                 <span class="badge border border-white border-opacity-25 bg-card bg-opacity-20 text-primary">
                   <i class="ti ti-shield-check ti-xs me-1"></i>
