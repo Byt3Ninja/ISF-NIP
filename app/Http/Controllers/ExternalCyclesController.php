@@ -59,13 +59,8 @@ class ExternalCyclesController extends Controller
 					return redirect()->to("dashboard/cycles/view/$c");
 				}
 			}
-			else
-			{
-				//
-			}
-			dd( $step );
-			// dd( auth()->check() );
-			dd($org_slug, $cycle_slug);
+			// Guests sign in first; the login then brings them back to this link.
+			return redirect()->guest( route('login') );
 		} else { abort(404); }
 	}
 
@@ -147,7 +142,7 @@ class ExternalCyclesController extends Controller
 			{
 				if( $user?->company?->stepdata?->stype == 1 )
 				{
-					return redirect()->to("dashboard/cycles/view/" . $user->company->step );
+					return redirect()->to("dashboard/cycles/view/" . $user->company->cycle );
 				}
 			}
 			return redirect()->to("dashboard/dashboard");
@@ -220,7 +215,7 @@ class ExternalCyclesController extends Controller
 					{
 						if( $user?->company?->stepdata?->stype == 1 )
 						{
-							$url = URL::to("dashboard/cycles/view/" . $user->company->step );
+							$url = URL::to("dashboard/cycles/view/" . $user->company->cycle );
 						}
 					}
 					return response()->json(['status' => true, 'message' => __('cycles.login_success') , 'url' => $url]);

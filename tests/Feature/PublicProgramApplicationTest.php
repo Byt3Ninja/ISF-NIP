@@ -22,6 +22,9 @@ use Tests\TestCase;
  * Verification step.
  *
  * `register-email` is checked with email:dns; the lookup is faked so this runs with no resolver.
+ *
+ * Also where the program's public links send people who should not be filling the form in:
+ * a founder already on the application step, and a guest holding a step's join link.
  */
 class PublicProgramApplicationTest extends TestCase
 {
@@ -200,6 +203,45 @@ class PublicProgramApplicationTest extends TestCase
         $this->apply($email)->assertStatus(422)->assertJsonValidationErrors('register-email');
 
         $this->assertDatabaseMissing('users', ['email' => $email]);
+    }
+
+    /** A founder whose idea is still on the application (form) step of this program. */
+    private function founderOnTheApplicationStep(): User
+    {
+        // The redirects below must carry the program's id, so the step's id has to be a different number.
+        $stepId = $this->stepId !== $this->programId ? $this->stepId : $this->step($this->programId, ['stype' => 1, 'arr' => 2]);
+        [, $founder] = $this->startup($this->programId, ['step' => $stepId]);
+        $founder->forceFill(['email' => $this->newEmail()])->save();
+
+        return $founder;
+    }
+
+    public function test_a_signed_in_founder_on_the_application_step_is_sent_to_their_program_from_the_form(): void
+    {
+        $founder = $this->founderOnTheApplicationStep();
+
+        $this->actingAs($founder)->get($this->programUrl . '/apply')
+            ->assertRedirect(url('dashboard/cycles/view/' . $this->programId));
+    }
+
+    public function test_a_founder_on_the_application_step_who_signs_in_from_the_form_is_sent_to_their_program(): void
+    {
+        $founder = $this->founderOnTheApplicationStep();
+
+        $this->postJson($this->programUrl . '/authenticate', ['email' => $founder->email, 'password' => 'password'])
+            ->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('url', url('dashboard/cycles/view/' . $this->programId));
+    }
+
+    public function test_a_guest_who_opens_a_step_s_public_join_link_is_asked_to_sign_in(): void
+    {
+        $orgCode = Str::lower(Str::random(8));
+        $stepSlug = 'join-step-' . Str::lower(Str::random(8));
+        DB::table('organizations')->where('id', DB::table('cycles')->where('id', $this->programId)->value('organization_id'))->update(['short_code' => $orgCode]);
+        DB::table('steps')->where('id', $this->stepId)->update(['is_public' => 1, 'public_slug' => $stepSlug]);
+
+        $this->get("/{$orgCode}/join/{$stepSlug}")->assertRedirect(route('login'));
     }
 
     public function test_an_isf_applicant_also_has_their_mobile_education_and_referral_details_saved(): void
