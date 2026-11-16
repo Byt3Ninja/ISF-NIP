@@ -67,7 +67,7 @@ done
 
 as_app php artisan package:discover --ansi
 as_app php artisan optimize:clear
-as_app php .deploy/coolify/migrate.php
+as_app php artisan migrate --force
 
 users="$(db_php 'echo (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();')"
 if [ "$users" = "0" ]; then
