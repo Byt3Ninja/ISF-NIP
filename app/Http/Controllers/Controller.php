@@ -14,6 +14,29 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     /**
+     * Abort with 403 unless the current user manages the organization of the cycle
+     * (admins do) and every given company has an active enrollment in that cycle.
+     * A route permission allows the action, not on whose data.
+     *
+     * @param  int|string|null  $cycleId
+     * @param  array<int, int|string>  $companyIds
+     */
+    protected function authorizeCompaniesInCycle($cycleId, array $companyIds): void
+    {
+        $user = auth()->user();
+
+        abort_unless(
+            $user
+            && $cycleId
+            && $user->managesOrganization(\App\Cycle::whereKey($cycleId)->value('organization_id'))
+            && \App\Company::whereIn('id', $companyIds)
+                ->whereDoesntHave('enrollments', fn ($e) => $e->active()->where('cycle_id', $cycleId))
+                ->doesntExist(),
+            403
+        );
+    }
+
+    /**
      * A function to check the user and its permissions.
      *
      * @return 401 or the User.

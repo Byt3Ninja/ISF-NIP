@@ -158,6 +158,13 @@ class TrainingController extends Controller
 
 	public function changAllTL(Request $request)
 	{
+		// The step must be in a program this user manages, and every company moved must
+		// be enrolled in that program. Outside the try so the refusal reaches the caller.
+		$this->authorizeCompaniesInCycle(
+			Step::whereKey($request->input('checkget'))->value('cycle_id'),
+			(array) $request->input('compid')
+		);
+
 		try {
 			$this->validate($request, [
 				'checkget' => 'required|integer',
