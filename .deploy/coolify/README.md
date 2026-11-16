@@ -30,7 +30,7 @@ queue worker and the scheduler under supervisord) and `db` (MariaDB 10.11).
 1. Links the upload folders under `public/` to the `uploads` volume and prepares `storage/`.
 2. Waits for the database, then runs `php artisan migrate --force`.
 3. On an empty database: runs the full seeder and sets the admin password.
-   Otherwise: runs `defaultRolesPermissionSeeder`, as the GitLab pipeline does.
+   Otherwise: runs `defaultRolesPermissionSeeder` to keep roles and permissions current.
 4. Starts Apache, `queue:work` and `schedule:work`.
 
 ## Kept across deploys
