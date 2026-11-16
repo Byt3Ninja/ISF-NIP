@@ -6,10 +6,11 @@ COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /u
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 # gd + imagick: images, PDFs and PNG QR codes. zip: Excel import/export.
+# calendar: required by khaled.alshamaa/ar-php (Arabic text in PDFs).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends git unzip supervisor \
  && rm -rf /var/lib/apt/lists/* \
- && install-php-extensions gd imagick zip intl pdo_mysql mysqli bcmath exif pcntl sockets opcache \
+ && install-php-extensions gd imagick zip intl pdo_mysql mysqli bcmath calendar exif pcntl sockets opcache \
  && a2enmod rewrite headers remoteip \
  && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
