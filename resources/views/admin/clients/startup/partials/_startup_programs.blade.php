@@ -33,7 +33,7 @@
       <div class="small text-secondary">
         <span class="mb-0">{{ count($programs) }} {{ __('admin.Programs') }}</span>
         <i class="ti ti-point-filled text-dark"></i>
-        <span class="mb-0">{{ collect($programs)->where('status', '!=', 'completed')->count() }} {{ __('admin.Active') }}</span>
+        <span class="mb-0">{{ collect($programs)->whereIn('status', ['ongoing', 'upcoming'])->count() }} {{ __('admin.Active') }}</span>
       </div>
     </div>
     <div class="card-body">
@@ -65,6 +65,12 @@
                       <i class="ti ti-building"></i>
                       {{ $program->organization->name ?? 'N/A' }}
                     </p>
+                    @if (!empty($program->last_step))
+                      <p class="mb-0 text-muted small d-flex align-items-center gap-1">
+                        <i class="ti ti-flag"></i>
+                        {{ __('startup.last_phase_reached') }}: {{ $program->last_step }}
+                      </p>
+                    @endif
                   </div>
                 </div>
     
@@ -81,6 +87,8 @@
                   <span class="badge py-2
                     @if($program->status === 'completed') bg-label-success 
                     @elseif($program->status === 'ongoing') bg-label-info 
+                    @elseif($program->status === 'rejected') bg-label-danger
+                    @elseif($program->status === 'withdrawn') bg-label-warning
                     @else bg-label-secondary @endif">
                     {{ __('startup.' . $program->status) }}
                   </span>
@@ -167,7 +175,7 @@
                 </div>
                 
                 <!-- Action -->
-                @if($program->status !== 'upcoming' && $program->program_type == 'alumni')
+                @if($program->status !== 'upcoming' && ($program->program_type ?? null) == 'alumni')
                 <div class="col-6 col-md-2 col-lg-2">
                   <div class="text-end">
                     <a href="{{ route('company.alumni_view', ['id' => $company->id, 'cycle_id' => $program->id]) }}"

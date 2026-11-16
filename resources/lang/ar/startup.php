@@ -674,4 +674,7 @@ return [
   'none' => 'لا يوجد',
   'startup_all_categories' => 'فئات الشركة',
   'project_number' => 'رقم المشروع',
+  'rejected' => 'مرفوضة',
+  'withdrawn' => 'منسحبة',
+  'last_phase_reached' => 'آخر مرحلة تم الوصول إليها',
 ];

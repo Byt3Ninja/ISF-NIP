@@ -471,6 +471,40 @@ class Company extends Model
         return $this->enrollments()->active();
     }
 
+    /**
+     * Programs this company was rejected from or left, shaped like the entries of the
+     * profile's Programs tab. The current program and alumni programs are built
+     * separately there, so only these two outcomes are returned.
+     *
+     * @return \Illuminate\Support\Collection<int, object>
+     */
+    public function endedProgramHistory()
+    {
+        return $this->enrollments()
+            ->whereIn('status', [CompanyEnrollment::STATUS_REJECTED, CompanyEnrollment::STATUS_WITHDRAWN])
+            ->with(['cycle.organization', 'step'])
+            ->orderByDesc('ended_at')
+            ->get()
+            ->filter(fn (CompanyEnrollment $enrollment) => $enrollment->cycle)
+            ->map(fn (CompanyEnrollment $enrollment) => (object) [
+                'id' => $enrollment->cycle->id,
+                'name' => $enrollment->cycle->title,
+                'img_url' => $enrollment->cycle->img_url ?? null,
+                'type' => strtolower($enrollment->cycle->type ?? ''),
+                'organization' => (object) ['name' => $enrollment->cycle->organization?->name],
+                'cohort' => (object) ['name' => $enrollment->cycle->cohort ?? null],
+                'start_date' => $enrollment->joined_at,
+                'completion_date' => $enrollment->ended_at,
+                'screening_score' => null,
+                'rank' => null,
+                'final_screening_score' => null,
+                'status' => $enrollment->status,
+                'program_type' => 'ended',
+                'last_step' => $enrollment->step?->title,
+            ])
+            ->values();
+    }
+
     public static function static_categories()
     {
         $industries = StaticCategory::all();
