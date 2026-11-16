@@ -82,6 +82,28 @@ class CompanyEnrollment extends Model
     }
 
     /**
+     * `(SELECT company_id ...)` of the companies active in a cycle, for `<company id> IN ...`
+     * in dashboards and reports. A company is matched once however many cycles it is in,
+     * so counts built on it do not double.
+     *
+     * @param  array<int, int|string>|null  $organizationIds  null for every organization;
+     *                                                        an array keeps only cycles of those, and an empty one matches nothing
+     */
+    public static function activeCompanyIdsSql(?array $organizationIds = null): string
+    {
+        $sql = 'SELECT ace.company_id FROM company_enrollments ace'
+            . ' INNER JOIN cycles acy ON acy.id = ace.cycle_id'
+            . " WHERE ace.status = '" . self::STATUS_ACTIVE . "'";
+
+        if ($organizationIds !== null) {
+            $ids = array_map('intval', $organizationIds);
+            $sql .= $ids === [] ? ' AND 1 = 0' : ' AND acy.organization_id IN (' . implode(',', $ids) . ')';
+        }
+
+        return '(' . $sql . ')';
+    }
+
+    /**
      * Mirror a change of the company's cycle / step pointer.
      *
      * The pointer holds one cycle, so pointing it somewhere else means the company has
