@@ -97,9 +97,13 @@ class TrainingController extends Controller
 				LEFT JOIN
 					users u ON u.company_id = com.id
 				LEFT JOIN
-					cycles c ON c.id = com.cycle
+					-- Program and step from the active enrollments: companies.cycle / step
+					-- name only one of a company's programs.
+					company_enrollments ce ON ce.company_id = com.id AND ce.status = 'active'
 				LEFT JOIN
-					steps s ON s.id = com.step
+					cycles c ON c.id = ce.cycle_id
+				LEFT JOIN
+					steps s ON s.id = ce.step_id
 				LEFT JOIN
 					training_completed tc ON tc.user_id = u.id AND tc.course_id = ?
 				WHERE
@@ -112,7 +116,7 @@ class TrainingController extends Controller
 
 			$inputs[] = $course_id;
 			if (!$user->hasRole('Admin')) {
-				$query .= " AND com.step = ?";
+				$query .= " AND ce.step_id = ?";
 				$inputs[] = $step_id;
 			}
 
@@ -134,7 +138,8 @@ class TrainingController extends Controller
 					$user->name = trim($u->{'user_first_name_' . $l} . ' ' . $u->{'user_last_name_' . $l});
 					return $user;
 				})->unique('id')->values();
-				$completed = $combinedComanies->whereNotNull('training_completed_id')->count();
+				// A company in two programs has its rows once per enrollment: count each completion once.
+				$completed = $combinedComanies->whereNotNull('training_completed_id')->unique('training_completed_id')->count();
 				$company->program = new stdClass;
 				$company->program->id = $c->cycle_id;
 				$company->program->name = $c->cycle_title;

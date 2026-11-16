@@ -785,12 +785,16 @@ class HackathonController extends Controller
                 com.name_en as 'Com_name_en',
                 com.name_ar as 'Com_name_ar',
                 com.logo as 'Com_logo',
-                com.cycle as 'Com_cycle',
-                com.step as 'Com_step'
+                ce.cycle_id as 'Com_cycle',
+                ce.step_id as 'Com_step'
             FROM 
                 cycles as c
             LEFT JOIN
-                companies as com ON c.id = com.cycle
+                -- Companies in this hackathon and the step each is on here, from active
+                -- enrollments: companies.cycle / step name only one of a company's programs.
+                company_enrollments as ce ON ce.cycle_id = c.id AND ce.status = 'active'
+            LEFT JOIN
+                companies as com ON com.id = ce.company_id
             LEFT JOIN
                 users as u ON u.company_id = com.id
             LEFT JOIN
@@ -2754,9 +2758,18 @@ class HackathonController extends Controller
                 u.title_ar as u_title_ar,
                 u.title_en as u_title_en,
                 c.id as c_id,
-                c.cycle as c_cycle,
-                c.step as c_step,
-                cstep.title as c_step_title
+                ce.cycle_id as c_cycle,
+                ce.step_id as c_step,
+                cstep.title as c_step_title,
+                EXISTS (
+                    SELECT 1 FROM company_enrollments ended
+                    WHERE ended.company_id = c.id AND ended.cycle_id = tf.cycle_id
+                        AND ended.status IN ('rejected', 'withdrawn')
+                ) as c_left_this_cycle,
+                EXISTS (
+                    SELECT 1 FROM company_enrollments anywhere
+                    WHERE anywhere.company_id = c.id AND anywhere.status = 'active'
+                ) as c_active_anywhere
             FROM
                 team_members as tm
             LEFT JOIN
@@ -2766,7 +2779,10 @@ class HackathonController extends Controller
             LEFT JOIN
                 companies as c ON c.id = u.company_id
             LEFT JOIN
-                steps as cstep ON cstep.id = c.step
+                -- The company's place in THIS hackathon, from its active enrollment here.
+                company_enrollments as ce ON ce.company_id = c.id AND ce.cycle_id = tf.cycle_id AND ce.status = 'active'
+            LEFT JOIN
+                steps as cstep ON cstep.id = ce.step_id
             WHERE
                 tf.cycle_id = ?
             AND
@@ -2794,7 +2810,7 @@ class HackathonController extends Controller
             INNER JOIN
                 companies as c ON c.id = u.company_id
             WHERE
-                c.cycle = ?
+                c.id IN (SELECT ce.company_id FROM company_enrollments ce WHERE ce.cycle_id = ? AND ce.status = 'active')
             ", [$id]
         ))->pluck('id');
 
@@ -2823,12 +2839,12 @@ class HackathonController extends Controller
                 $team->desc = $leader->tf_description;
                 $team->cycle_id = $leader->tf_cycle_id;
                 $team->step_id = $leader->tf_step_id;
-                // Where the leader's company currently sits, from companies.step — the
-                // same source the winners/final-screening pages use. When the company
-                // is still attached to this cycle we show its step title. When it is
-                // detached (cycle nulled), the team either graduated (an alumni row
-                // exists for this cycle) or was dismissed by disapproval — so we label
-                // 'alumni' vs 'disapproved' instead of a bare step. 'none' means no
+                // Where the leader's company sits in this hackathon, from its active
+                // enrollment here. When it has none, the team either graduated (an
+                // alumni row exists for this cycle) or was dismissed by disapproval — so
+                // we label 'alumni' vs 'disapproved' instead of a bare step. Disapproved
+                // means its enrollment here ended, or (for companies dismissed before
+                // enrollments were recorded) it is in no program at all. 'none' means no
                 // company/step at all (e.g. a stub that never entered the cycle).
                 if ( $leader->c_cycle == $leader->tf_cycle_id && !empty( $leader->c_step_title ) ) {
                     $team->step_state = 'step';
@@ -2836,7 +2852,7 @@ class HackathonController extends Controller
                 } elseif ( $alumniCompanyIds->has($leader->c_id) || $alumniUserIds->has($leader->u_id) ) {
                     $team->step_state = 'alumni';
                     $team->company_step = null;
-                } elseif ( empty( $leader->c_cycle ) && ( !empty( $leader->c_id ) ) ) {
+                } elseif ( empty( $leader->c_cycle ) && !empty( $leader->c_id ) && ( $leader->c_left_this_cycle || !$leader->c_active_anywhere ) ) {
                     $team->step_state = 'disapproved';
                     $team->company_step = null;
                 } else {
