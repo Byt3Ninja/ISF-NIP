@@ -679,4 +679,7 @@ return [
   'none' => 'None',
   'startup_all_categories' => 'All Categories',
   'project_number' => 'Project number',
+  'rejected' => 'Rejected',
+  'withdrawn' => 'Withdrawn',
+  'last_phase_reached' => 'Last phase reached',
 ];

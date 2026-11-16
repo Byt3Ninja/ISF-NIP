@@ -458,6 +458,8 @@ class ClientCompanyController extends Controller
                 ]);
             }
         }
+        // Programs it was rejected from or left: only the enrollment history remembers these.
+        $programs = $programs->concat($company->endedProgramHistory());
         $programs = $programs->values()->all();
         $curentCycle = $company->cycledata?->mentorshipRequests?->where('user_id', $company?->user?->id)->sum('period');
         
