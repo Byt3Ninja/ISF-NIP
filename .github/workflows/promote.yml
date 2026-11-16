@@ -10,8 +10,9 @@ name: Promote staging to production
 # merging production back into staging, then push staging again.
 #
 # Setup (GitHub → repo → Settings → Secrets and variables → Actions):
-#   secret   COOLIFY_TOKEN  Coolify API token (Keys & Tokens → API tokens; needs deploy)
-#   variable COOLIFY_URL    Coolify base URL, e.g. https://coolify.example.com
+#   secret           COOLIFY_TOKEN  Coolify API token (Keys & Tokens → API tokens; needs deploy)
+#   variable OR secret COOLIFY_URL  Coolify base URL, e.g. https://coolify.example.com
+#                                   (repo-level; an environment-scoped value won't apply here)
 # The production app UUID is not secret and is set below.
 
 on:
@@ -52,7 +53,8 @@ jobs:
 
       - name: Deploy production on Coolify
         env:
-          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          # Accept the URL as a repo Variable or a Secret, whichever was set.
+          COOLIFY_URL: ${{ vars.COOLIFY_URL || secrets.COOLIFY_URL }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
           set -euo pipefail
