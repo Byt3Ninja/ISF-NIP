@@ -78,4 +78,24 @@ class ScreeningListsTest extends TestCase
             $this->assertSame($step->cycle_id, (int) $row->company_cycle_id);
         }
     }
+
+    public function test_staff_side_queries_find_the_company_in_both_programs(): void
+    {
+        // Program report counts, the mentors page and the startups list filter.
+        $this->assertSame(1, Company::enrolledIn($this->first->id)->count());
+        $this->assertSame(1, Company::enrolledInOnAStep($this->first->id)->count());
+        $this->assertSame(1, Company::enrolledOnStep($this->firstScreening->id)->count());
+        $this->assertSame(1, Company::enrolledOnStep($this->secondScreening->id)->count());
+
+        foreach ([$this->first, $this->second] as $cycle) {
+            $ids = Company::query()->enrolledIn($cycle->id)->pluck('id');
+            $this->assertTrue($ids->contains($this->company->id));
+        }
+
+        // A company with no step in the cycle is not "on a step" there.
+        $unplaced = Company::factory()->create(['cycle' => $this->first->id]);
+        $this->assertFalse(Company::enrolledInOnAStep($this->first->id)->whereKey($unplaced->id)->exists());
+        $this->assertTrue(Company::has('activeEnrollments')->whereKey($unplaced->id)->exists());
+        $this->assertFalse(Company::doesntHave('activeEnrollments')->whereKey($unplaced->id)->exists());
+    }
 }

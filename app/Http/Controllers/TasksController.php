@@ -807,7 +807,7 @@ class TasksController extends Controller
     public function getAssignees($programId)
     {
         try {
-            $companies = Company::where('cycle', $programId)
+            $companies = Company::enrolledIn($programId)
                 ->get()
                 ->map(function($company) {
                     return [

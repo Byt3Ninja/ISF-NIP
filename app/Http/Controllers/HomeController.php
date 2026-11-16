@@ -3640,7 +3640,7 @@ class HomeController extends Controller
         $data['development_stages'] = [];
 
         foreach ($cycles->get() as $cycle) {
-            $developmentStages = Company::where('cycle', $cycle->id)
+            $developmentStages = Company::enrolledIn($cycle->id)
                 ->whereNotNull('development_stage')
                 ->select('development_stage', DB::raw('count(*) as total'))
                 ->groupBy('development_stage')

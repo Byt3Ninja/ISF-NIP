@@ -311,7 +311,7 @@ class SlotController extends Controller
 		// If user is admin/subadmin/orgManager, return list of startups in that cycle
 		$startups = [];
 		if ($cycleId && auth()->user()->hasAnyRole(['admin', 'organizationManager', 'subadmin'])) {
-			$startups = \App\Company::where('cycle', $cycleId)
+			$startups = \App\Company::enrolledIn($cycleId)
 				->with('user')
 				->get()
 				->map(function ($c) {

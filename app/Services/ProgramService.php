@@ -158,7 +158,7 @@ public function getProgramStartups($programId, $search = null, $page = 1, $limit
         'teamMembers',
         'cycleRelation.organization' 
     ])
-    ->where('cycle', $programId);
+    ->enrolledIn($programId);
 
     if ($search) {
         // One nested group, so the sector OR cannot escape where('cycle', $programId).

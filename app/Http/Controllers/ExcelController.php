@@ -111,9 +111,9 @@ class ExcelController extends Controller
         if (isset($type))
         {
             if ($type=='new') {
-                $companies = $companies->whereNull('cycle');
+                $companies = $companies->doesntHave('activeEnrollments');
             } elseif ($type=='cycle') {
-                $companies = $companies->whereNotNull('cycle');
+                $companies = $companies->has('activeEnrollments');
             } elseif ($type=='approved') {
                 $companies = $companies->whereNotNull('approved');
             }

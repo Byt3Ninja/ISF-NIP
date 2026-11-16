@@ -498,6 +498,12 @@ class Company extends Model
         return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->whereIn('step_id', $stepIds));
     }
 
+    /** Companies active in the given cycle that have been placed on a step there. */
+    public function scopeEnrolledInOnAStep($query, $cycleId)
+    {
+        return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->where('cycle_id', $cycleId)->whereNotNull('step_id'));
+    }
+
     /** In-memory twin of enrolledIn(), for collections that were loaded with `activeEnrollments`. */
     public function isEnrolledIn($cycleId): bool
     {
