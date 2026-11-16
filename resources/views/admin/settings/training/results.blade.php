@@ -18,7 +18,10 @@ if ($csession) {
         ->toArray();
 
     if (count($companiesCycleIds) > 0) {
-        $companies = \App\Company::whereIn('cycle', $companiesCycleIds)->get();
+        // Active in the session's program, shown on the step they are on there: a company
+        // may have another program selected, so its own `step` is not the one to show.
+        $companies = \App\Company::enrolledInAny($companiesCycleIds)->with('activeEnrollments')->get()
+            ->each(fn ($company) => $company->setAttribute('step', $company->stepIdIn($companiesCycleIds[0])));
     }
 }
 @endphp
@@ -444,7 +447,9 @@ $(function () {
           data: {
             _token: "{{ csrf_token() }}",
             company: companyIds,
-            step: $('#modal_step_select').val()
+            step: $('#modal_step_select').val(),
+            // Names the program a disapproval comes from.
+            cycle: "{{ $companiesCycleIds[0] ?? '' }}"
           },
           success: function () {
             location.reload();

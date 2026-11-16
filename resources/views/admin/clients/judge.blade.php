@@ -223,9 +223,9 @@
                               ->pluck('users');
                             $groups = json_decode('[' . str_replace(['[', ']'], ' ', json_encode($groups)) . ']');
                             if ($mysteps->where('step_id', $step->id)->pluck('panel')->first() == 0) {
-                              $companies = \App\Company::where('step', $step->id)->get();
+                              $companies = \App\Company::enrolledOnStep($step->id)->get();
                             } else {
-                              $companies = \App\Company::where('step', $step->id)
+                              $companies = \App\Company::enrolledOnStep($step->id)
                                 ->whereIN('id', $groups ?? [])
                                 ->get();
                             }

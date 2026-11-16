@@ -6,7 +6,7 @@
     if ($form) {
       $clist = [$form->id, $cstep?->id];
     }
-    $companies = \App\Company::whereIn('step', $clist);
+    $companies = \App\Company::enrolledOnAnyStep(array_filter($clist));
     
     if (request('startup_id') != 0) {
       $companies = $companies->where('id', request('startup_id'));
@@ -1099,6 +1099,8 @@
             data: {
               company: company,
               step: step,
+              // Names the program a disapproval comes from.
+              cycle: '{{ $cstep->cycle_id ?? '' }}',
             },
             success: function (response) {
               console.log(response);
