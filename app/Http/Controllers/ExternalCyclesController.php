@@ -59,13 +59,8 @@ class ExternalCyclesController extends Controller
 					return redirect()->to("dashboard/cycles/view/$c");
 				}
 			}
-			else
-			{
-				//
-			}
-			dd( $step );
-			// dd( auth()->check() );
-			dd($org_slug, $cycle_slug);
+			// Guests sign in first; the login then brings them back to this link.
+			return redirect()->guest( route('login') );
 		} else { abort(404); }
 	}
 
@@ -147,7 +142,7 @@ class ExternalCyclesController extends Controller
 			{
 				if( $user?->company?->stepdata?->stype == 1 )
 				{
-					return redirect()->to("dashboard/cycles/view/" . $user->company->step );
+					return redirect()->to("dashboard/cycles/view/" . $user->company->cycle );
 				}
 			}
 			return redirect()->to("dashboard/dashboard");
@@ -155,8 +150,7 @@ class ExternalCyclesController extends Controller
 		}
 		else
 		{
-			$app_settings = Settings::find(1);
-			$VFEmail = $app_settings?->VFEmail ?? 1;
+			$VFEmail = $this->emailVerificationRequired();
 			// GV-10440 (ISF): the application also asks for mobile, education and referral source
 			$educationFields = isIsf() ? EducationEntity::formConfig() : null;
 			return view('admin.settings.cycles.public-program-apply', compact('program', 'org_slug', 'program_slug', 'VFEmail', 'educationFields'));
@@ -221,7 +215,7 @@ class ExternalCyclesController extends Controller
 					{
 						if( $user?->company?->stepdata?->stype == 1 )
 						{
-							$url = URL::to("dashboard/cycles/view/" . $user->company->step );
+							$url = URL::to("dashboard/cycles/view/" . $user->company->cycle );
 						}
 					}
 					return response()->json(['status' => true, 'message' => __('cycles.login_success') , 'url' => $url]);
@@ -446,7 +440,9 @@ class ExternalCyclesController extends Controller
 							'referral_source' => $request->input('referral_source'),
 						]);
 					}
-					$user->email_verified_at = $require_mail_verification ? null : now();
+					// When the platform requires it, the account stays unverified until the founder
+					// opens the welcome email's link (the form's Verification step says so).
+					$user->email_verified_at = $this->emailVerificationRequired() ? null : now();
 					$user->must_change_password = true;
 					$user->accept_email = true;
 					$user->save();
@@ -595,6 +591,16 @@ class ExternalCyclesController extends Controller
 				}
 			} else { return response()->json(['status' => false, 'message' => __('cycles.program_not_public') ]); }
 		}
+	}
+
+	/**
+	 * Whether new accounts must confirm their email: Settings > "Verification Email" (VFEmail),
+	 * on when the platform has no settings yet. The application form's Verification step and
+	 * the account registerUser creates both read this, so they cannot disagree.
+	 */
+	private function emailVerificationRequired(): bool
+	{
+		return (int) ( Settings::find(1)?->VFEmail ?? 1 ) === 1;
 	}
 
 	private function getProgram( $org_slug, $program_slug )

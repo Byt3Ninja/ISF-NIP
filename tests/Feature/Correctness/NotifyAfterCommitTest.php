@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Tests\Support\FakesEmailDns;
 use Tests\Support\SecurityActors;
 use Tests\TestCase;
 
@@ -32,7 +33,7 @@ use Tests\TestCase;
  */
 class NotifyAfterCommitTest extends TestCase
 {
-    use SecurityActors;
+    use SecurityActors, FakesEmailDns;
 
     protected function setUp(): void
     {
@@ -210,6 +211,7 @@ class NotifyAfterCommitTest extends TestCase
 
     public function test_public_program_registration_sends_welcome_only_after_commit(): void
     {
+        $this->fakeEmailDns(['gmail.com']); // register-email is checked with email:dns
         $orgId = $this->organization();
         DB::table('organizations')->where('id', $orgId)->update(['slug' => 'audit-org-' . uniqid()]);
         $slug = DB::table('organizations')->where('id', $orgId)->value('slug');
