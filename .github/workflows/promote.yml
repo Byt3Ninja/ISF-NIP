@@ -1,0 +1,48 @@
+name: Promote staging to production
+
+# Auto-promote: every push to `staging` fast-forwards `production` to the same
+# commit. Production deploys from `production` through Coolify, so this ships
+# staging straight to production with no manual step.
+#
+# Fast-forward only (force=false): if `production` ever has a commit that
+# `staging` does not (e.g. a direct hotfix), the API refuses the update and
+# this run fails loudly instead of rewriting production history. Resolve by
+# merging production back into staging, then push staging again.
+#
+# Uses the built-in GITHUB_TOKEN only — no secrets to configure.
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-production
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fast-forward production to staging
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Promote staging's current head, whatever triggered this run.
+          sha="$(gh api "repos/$REPO/git/refs/heads/staging" --jq '.object.sha')"
+          echo "Promoting staging@$sha to production (fast-forward only)"
+
+          if gh api -X PATCH "repos/$REPO/git/refs/heads/production" \
+               -f sha="$sha" -F force=false >/dev/null; then
+            echo "✓ production is now at $sha"
+          else
+            echo "::error::Could not fast-forward production to $sha. production has" \
+                 "commits staging lacks — merge production into staging, then push staging." >&2
+            exit 1
+          fi
