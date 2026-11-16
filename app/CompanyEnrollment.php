@@ -34,12 +34,14 @@ class CompanyEnrollment extends Model
     public const STATUS_WITHDRAWN = 'withdrawn';
 
     // company_id and cycle_id are owner foreign keys: never mass-assignable, set them explicitly.
-    protected $fillable = ['step_id', 'status', 'joined_at', 'ended_at'];
+    protected $fillable = ['step_id', 'status', 'approved', 'approved_by', 'joined_at', 'ended_at'];
 
     protected $casts = [
         'company_id' => 'integer',
         'cycle_id' => 'integer',
         'step_id' => 'integer',
+        'approved' => 'integer',
+        'approved_by' => 'integer',
         'joined_at' => 'datetime',
         'ended_at' => 'datetime',
     ];
@@ -57,6 +59,21 @@ class CompanyEnrollment extends Model
     public function step()
     {
         return $this->belongsTo(Step::class, 'step_id');
+    }
+
+    /**
+     * The values `companies` holds while this enrollment is the selected one.
+     *
+     * @return array{cycle: int, step: int|null, approved: int|null, approved_by: int|null}
+     */
+    public function pointerValues(): array
+    {
+        return [
+            'cycle' => $this->cycle_id,
+            'step' => $this->step_id,
+            'approved' => $this->approved,
+            'approved_by' => $this->approved_by,
+        ];
     }
 
     public function scopeActive(Builder $query): Builder
