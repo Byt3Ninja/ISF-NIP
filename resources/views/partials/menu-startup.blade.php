@@ -74,6 +74,10 @@ $navigationIcons = [
 
   <ul class="startup-menu-inner menu-inner pt-2 pb-8">
 
+    @if ($_user->HaveCompany && $_user->company)
+      @include('partials.program-switcher', ['company' => $_user->company])
+    @endif
+
     <li class="w-100 px-3 mb-2 pt-2">
       {{-- Own form so Chrome's password manager doesn't pick this field as the "username" of a formless password field on the page --}}
       <form role="search" onsubmit="return false">

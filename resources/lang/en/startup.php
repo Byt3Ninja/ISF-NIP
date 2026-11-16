@@ -682,4 +682,5 @@ return [
   'rejected' => 'Rejected',
   'withdrawn' => 'Withdrawn',
   'last_phase_reached' => 'Last phase reached',
+  'program_switcher_label' => 'Working in',
 ];
