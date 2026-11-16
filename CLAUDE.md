@@ -44,7 +44,7 @@ php vendor/bin/phpunit --filter test_joining_a_cycle_opens_an_active_enrollment 
 
 Nothing to build on the front end: the Vuexy assets and the old Mix output under `public/` are committed, and Mix is not part of any deploy. There is no linter configuration and indentation is mixed (tabs in some files, four spaces in others): match the file you are editing and do not reformat.
 
-Deployment is the Coolify stack in `.deploy/coolify/` (read its README). There is no CI.
+Deployment has two paths. The ISF staging stack is Coolify, defined in `.deploy/coolify/` (read its README). The older beta, testing and dev servers are updated by `.github/workflows/deploy-legacy.yml` on a push to the branch of the same name: `git pull`, `migrate --force`, then the permission seeder, with no `composer install` and no asset build. No workflow runs the tests.
 
 ### Dependencies
 
