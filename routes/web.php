@@ -456,6 +456,7 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', '2fa
 
     //Company profile
     Route::get('/companyProfile/{id?}', 'ClientCompanyController@show')->name('company.profile_view');
+    Route::post('/myCompany/program/{enrollment}', 'ClientCompanyController@switchProgram')->whereNumber('enrollment')->name('company.switch_program');
     Route::get('/myCompany/{id?}', 'ClientCompanyController@editOrCreate')->name('company.profile_view_mine');
     Route::post('/myCompany/{id?}', 'ClientCompanyController@updateOrStore')->name('company.profile_update_mine');
     Route::post('/AddCompanyTeams/{id?}', 'ClientCompanyController@AddTeams')->name('company.profile_teams_add');

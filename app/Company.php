@@ -157,8 +157,28 @@ class Company extends Model
         // Keep the enrollment history in step with the cycle / step pointer. `saved` runs
         // before the original values are replaced, so the cycle the pointer held is still known.
         static::saved(function (Company $company) {
-            if ($company->isDirty(['cycle', 'step'])) {
+            $pointerMoved = $company->isDirty(['cycle', 'step']);
+
+            if ($pointerMoved) {
                 CompanyEnrollment::syncFromPointer($company, $company->getOriginal('cycle'));
+            }
+
+            // Raw attributes: on a model that was never given a cycle, `$company->cycle`
+            // resolves to the relation of the same name.
+            $attributes = $company->getAttributes();
+            $cycle = $attributes['cycle'] ?? null;
+
+            // The approval flag belongs to the enrollment the pointer is on.
+            if ($cycle && $company->isDirty(['cycle', 'step', 'approved', 'approved_by'])) {
+                CompanyEnrollment::query()->active()
+                    ->where('company_id', $company->id)
+                    ->where('cycle_id', $cycle)
+                    ->update(['approved' => $attributes['approved'] ?? null, 'approved_by' => $attributes['approved_by'] ?? null]);
+            }
+
+            // Left the selected cycle while still active in another: select that one.
+            if ($pointerMoved && ! $cycle) {
+                $company->selectRemainingEnrollment();
             }
         });
     }
@@ -461,6 +481,37 @@ class Company extends Model
     }
 
     /** Every time this company entered a cycle, current and past. See CompanyEnrollment. */
+    /**
+     * Point the company at another of its active enrollments. Founder screens read
+     * `cycle` / `step` / `approved`, so this is how a founder active in several cycles
+     * chooses the one to work in. Nothing is ended: the write skips model events, which
+     * would otherwise close the enrollment the pointer leaves.
+     *
+     * @throws \InvalidArgumentException when the enrollment is not an active one of this company
+     */
+    public function switchToEnrollment(CompanyEnrollment $enrollment): void
+    {
+        if ($enrollment->company_id !== (int) $this->id || $enrollment->status !== CompanyEnrollment::STATUS_ACTIVE) {
+            throw new \InvalidArgumentException('Not an active enrollment of this company.');
+        }
+
+        $this->forceFill($enrollment->pointerValues())->saveQuietly();
+    }
+
+    /**
+     * Called from the `saved` hook when the pointer has just been cleared. The row is
+     * written with a query and the model filled to match, because a save is in progress.
+     */
+    protected function selectRemainingEnrollment(): void
+    {
+        $remaining = $this->activeEnrollments()->latest('id')->first();
+
+        if ($remaining) {
+            static::query()->whereKey($this->id)->update($remaining->pointerValues());
+            $this->forceFill($remaining->pointerValues());
+        }
+    }
+
     public function enrollments()
     {
         return $this->hasMany(CompanyEnrollment::class, 'company_id');
