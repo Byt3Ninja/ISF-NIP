@@ -40,7 +40,7 @@ class ExportResScreenData implements ShouldQueue
     
         
 
-        $companies = Company::where('step', $step)->get();
+        $companies = Company::enrolledOnStep($step)->get();
        
         
 
@@ -62,7 +62,7 @@ class ExportResScreenData implements ShouldQueue
 
         if(Auth()->user()->hasRole('Admin')){
 
-            Company::where('step', $step)->chunk(1000, function($companies) use (&$sheet, &$row, $formid, $exportcstep) {
+            Company::enrolledOnStep($step)->chunk(1000, function($companies) use (&$sheet, &$row, $formid, $exportcstep) {
                 foreach ($companies as $companie) {
                     
                     $sheet->setCellValue('A' . $row, $companie->id);
@@ -86,7 +86,7 @@ class ExportResScreenData implements ShouldQueue
 
         }else{
 
-        Company::where('step', $step)->chunk(1000, function($companies) use (&$sheet, &$row, $formid, $exportcstep) {
+        Company::enrolledOnStep($step)->chunk(1000, function($companies) use (&$sheet, &$row, $formid, $exportcstep) {
         foreach ($companies as $companie) {
             
             $sheet->setCellValue('A' . $row, $companie->id);

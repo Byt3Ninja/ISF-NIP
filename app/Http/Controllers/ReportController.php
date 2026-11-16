@@ -508,8 +508,8 @@ class ReportController extends Controller
             // and shows every startup that belongs to a step's evaluation even
             // after it has advanced to another step. metadata($allCompanies=true)
             // below selects the relevant subset per step from this wider pool.
-            $preloadedCompanies = Company::with(['users', 'stepdata.cycle'])
-                ->whereIn('cycle', $allCycleIds)
+            $preloadedCompanies = Company::with(['users', 'stepdata.cycle', 'activeEnrollments'])
+                ->enrolledInAny($allCycleIds)
                 ->get();
 
             $preloadedAllSteps = Step::whereIn('cycle_id', $allCycleIds)->orderBy('arr')->get();
@@ -806,8 +806,8 @@ class ReportController extends Controller
             // informative and shows every startup that belongs to a step's
             // evaluation even after it has advanced. metadata($allCompanies=true)
             // below selects the relevant subset per step from this wider pool.
-            $preloadedCompanies = Company::with(['users', 'stepdata.cycle'])
-                ->whereIn('cycle', $allCycleIds)
+            $preloadedCompanies = Company::with(['users', 'stepdata.cycle', 'activeEnrollments'])
+                ->enrolledInAny($allCycleIds)
                 ->get();
 
             $preloadedAllSteps = Step::whereIn('cycle_id', $allCycleIds)->orderBy('arr')->get();

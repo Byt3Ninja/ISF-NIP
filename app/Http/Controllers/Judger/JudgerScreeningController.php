@@ -153,7 +153,11 @@ class JudgerScreeningController extends Controller
             // H7: a judge may only evaluate startups assigned to them at their current step.
             abort_unless( $user->hasRole('admin') || $this->assignedCompanies( $user_id )->contains('id', $company->id), 403 );
             $form = Company::form( $company );
-            $evaluationForm = ScreeningEvaluation::getEvaluationData( $company->step );
+            // The evaluation being saved names its step. Use it when the company is on that
+            // step in any of its programs; companies.step names only one of them.
+            $evaluationStepId = ScreeningEvaluation::whereKey( $request->id )->value('step_id');
+            $stepId = $evaluationStepId && $company->isOnStep( $evaluationStepId ) ? $evaluationStepId : $company->step;
+            $evaluationForm = ScreeningEvaluation::getEvaluationData( $stepId );
             if( $evaluationForm->id == $request->id )
             {
                 $evaluation_id = $evaluationForm->id;
@@ -363,10 +367,14 @@ class JudgerScreeningController extends Controller
                     s.stype AS `step_type`
                 FROM
                     companies cm
+                -- One row per active enrollment: a company in two programs is listed
+                -- under each, where companies.cycle / companies.step name only one.
+                JOIN
+                    company_enrollments ce ON ce.company_id = cm.id AND ce.status = 'active'
                 LEFT JOIN
-                    cycles c ON cm.cycle = c.id
+                    cycles c ON ce.cycle_id = c.id
                 LEFT JOIN
-                    steps s ON s.id = cm.step
+                    steps s ON s.id = ce.step_id
                 WHERE
                     cm.deleted_at IS NULL
                     AND cm.id IN ($placeholders)

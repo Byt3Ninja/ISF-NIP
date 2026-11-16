@@ -108,6 +108,9 @@ trait BuildsScreeningFixtures
             'updated_at' => now(),
         ]);
 
+        // Inserted without model events: open its enrollment the way the application would.
+        \App\CompanyEnrollment::syncFromPointer(\App\Company::findOrFail($company), null);
+
         // A complete founder profile, so the dashboard does not redirect to the profile form.
         $founder = $this->makeUser('registered', 'Africa/Cairo', [
             'company_id' => $company,
