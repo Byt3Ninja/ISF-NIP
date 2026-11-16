@@ -302,6 +302,8 @@
           data: {
             "company": company,
             "step": step,
+            // Names the program a disapproval comes from.
+            "cycle": "{{ $data[0]->cycle_id ?? '' }}",
           },
           success: function(response) {
           

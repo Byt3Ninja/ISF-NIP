@@ -1708,7 +1708,18 @@ class ScreeningController extends Controller
 			} else { $currentStep = ''; }
 		}
 
-		$getCompanies = Company::whereIn('id', $companies)->with(['stepdata', 'stepdata.cycle', 'cycledata'])->get();
+		// A disapproval names the program it comes from, so it cannot end the company's
+		// place in another one. Only staff of that program may send it.
+		$rejectedCycleId = $request->filled('cycle') ? (int) $request->input('cycle') : null;
+		if ($rejectedCycleId) {
+			abort_unless(Auth::user()->managesOrganization(Cycle::whereKey($rejectedCycleId)->value('organization_id')), 403);
+		}
+
+		$affectedCycleId = $request->step != "0"
+			? (int) Step::whereKey($request->step)->value('cycle_id')
+			: $rejectedCycleId;
+
+		$getCompanies = Company::whereIn('id', $companies)->with(['stepdata', 'stepdata.cycle', 'cycledata', 'activeEnrollments'])->get();
 		foreach ($companies as $companyId)
 		{
 			$data = [];
@@ -1742,12 +1753,20 @@ class ScreeningController extends Controller
 			}
 			$data['status'] = $status;
 			$data['program'] = $company?->stepdata?->cycle ?? null;
+			// When the change is in a program other than the one the company has selected,
+			// the notice names that program and the step the company was on there.
+			if ($affectedCycleId && (int) $company->cycle !== $affectedCycleId) {
+				$stepThere = Step::find($company->stepIdIn($affectedCycleId));
+				$data['last_step'] = $stepThere?->title ?? '-';
+				$data['program'] = Cycle::find($affectedCycleId);
+			}
 			if ($request->step == "0") {
-				// Record why it left before the pointer is cleared; otherwise the history says "withdrawn".
-				CompanyEnrollment::closeActive($company->id, $company->cycle, CompanyEnrollment::STATUS_REJECTED);
-				$update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
+				// Disapproved from the program whose screen sent this (`cycle`), or from the one
+				// the company has selected when the screen does not say.
+				$update = $company->leaveCycle($rejectedCycleId, CompanyEnrollment::STATUS_REJECTED, $by);
 			} else {
-				$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);
+				// In the step's own program: the company may be working in another one.
+				$update = $company->moveToStepIn((int) $request->step, ['approved' => $approved, 'approved_by' => $by]);
 			}
 
 			if ($update) {

@@ -72,14 +72,17 @@ class changeCycleStep extends Command
         })->values();
         $cycles_ids = $cycles->pluck('id');
 
-        $companies = DB::table('companies AS c')
+        // One row per active enrollment: a company in two time-driven cycles is moved in each.
+        $companies = DB::table('company_enrollments AS ce')
+            ->join('companies AS c', 'c.id', '=', 'ce.company_id')
             ->select([
                 'c.id',
-                'c.cycle',
-                'c.step',
+                'ce.cycle_id AS cycle',
+                'ce.step_id AS step',
             ])
             ->whereNull('c.deleted_at')
-            ->whereIn('c.cycle', $cycles_ids)
+            ->where('ce.status', CompanyEnrollment::STATUS_ACTIVE)
+            ->whereIn('ce.cycle_id', $cycles_ids)
             ->get();
 
         $teams = DB::table('team_formations AS tf')
@@ -132,7 +135,9 @@ class changeCycleStep extends Command
             $grouping = $companiesToUpdate->groupBy('step')->map(function( $step ) { return $step->pluck('id')->toArray(); });
             foreach( $grouping as $step_id => $companies_ids )
             {
-                Company::whereIn('id', $companies_ids)->update(['step' => $step_id]);
+                // The pointer follows only for companies that have this step's cycle selected.
+                $step_cycle_id = $cycles->first(fn ($cycle) => $cycle->steps->contains('id', $step_id))?->id;
+                Company::whereIn('id', $companies_ids)->where('cycle', $step_cycle_id)->update(['step' => $step_id]);
                 // A query update fires no model events, so the enrollment history is moved here.
                 CompanyEnrollment::moveToStep($companies_ids, (int) $step_id);
             }

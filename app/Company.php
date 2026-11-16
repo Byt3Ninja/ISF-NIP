@@ -499,6 +499,78 @@ class Company extends Model
     }
 
     /**
+     * Join a cycle, or move to a step of one the company is already in, and select it.
+     * Unlike writing `cycle` / `step` directly, this never ends the company's enrollment
+     * in the cycle the pointer was on: the company is then active in both.
+     */
+    public function enrollIn(int $cycleId, ?int $stepId): void
+    {
+        $selected = $this->getAttributes()['cycle'] ?? null;
+
+        if (! $selected || (int) $selected === $cycleId) {
+            $this->update(['cycle' => $cycleId, 'step' => $stepId]);
+
+            return;
+        }
+
+        $enrollment = $this->activeEnrollments()->where('cycle_id', $cycleId)->latest('id')->first();
+
+        if (! $enrollment) {
+            $enrollment = new CompanyEnrollment(['status' => CompanyEnrollment::STATUS_ACTIVE, 'joined_at' => now()]);
+            $enrollment->company_id = $this->id;
+            $enrollment->cycle_id = $cycleId;
+        }
+
+        $enrollment->step_id = $stepId;
+        $enrollment->save();
+
+        $this->switchToEnrollment($enrollment);
+    }
+
+    /**
+     * Staff move: put the company on a step, in that step's own cycle. The pointer
+     * follows only when it is on that cycle; otherwise the founder keeps working where
+     * they are and only the enrollment moves.
+     *
+     * @param  array{approved?: int|null, approved_by?: int|null}  $approval
+     * @return bool false when the company is busy in another cycle and not in this one
+     */
+    public function moveToStepIn(int $stepId, array $approval = []): bool
+    {
+        $cycleId = Step::query()->whereKey($stepId)->value('cycle_id');
+        $selected = $this->getAttributes()['cycle'] ?? null;
+
+        if (! $selected || ! $cycleId || (int) $selected === (int) $cycleId) {
+            return $this->update(['step' => $stepId] + $approval);
+        }
+
+        $enrollment = $this->activeEnrollments()->where('cycle_id', $cycleId)->latest('id')->first();
+
+        return $enrollment ? $enrollment->update(['step_id' => $stepId] + $approval) : false;
+    }
+
+    /**
+     * End the company's enrollment in a cycle (the selected one when none is named)
+     * with the given outcome. The pointer is cleared only when it is on that cycle,
+     * and then moves to another active enrollment if there is one.
+     *
+     * @param  int|string|null  $cycleId
+     */
+    public function leaveCycle($cycleId, string $status, ?int $by = null): bool
+    {
+        $selected = $this->getAttributes()['cycle'] ?? null;
+        $cycleId = $cycleId ?: $selected;
+
+        CompanyEnrollment::closeActive($this->id, $cycleId, $status);
+
+        if ($cycleId && $selected && (int) $selected !== (int) $cycleId) {
+            return true;
+        }
+
+        return $this->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
+    }
+
+    /**
      * Called from the `saved` hook when the pointer has just been cleared. The row is
      * written with a query and the model filled to match, because a save is in progress.
      */

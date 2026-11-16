@@ -169,6 +169,9 @@ class TrainingController extends Controller
 			$compid = $request->input('compid');
 			$cstep = Step::with(['cycle'])->findOrFail($checkget) ?? null;
 			$status = $checkget != 0 ? 'in' : 'out';
+			// Both stay empty for a move to a first step, which approves nothing.
+			$approved = null;
+			$by = null;
 			foreach ($compid as $index => $id)
 			{
 				$company = Company::where('id', $id)->first();
@@ -184,7 +187,8 @@ class TrainingController extends Controller
 					}
 					$data['new_step'] = $cstep->title;
 				}
-				$update = $company->update(['step' => $checkget, 'approved' => $approved, 'approved_by' => $by]);
+				// In the step's own program: the company may be working in another one.
+				$update = $company->moveToStepIn((int) $checkget, ['approved' => $approved, 'approved_by' => $by]);
 				// if ($checkget != 0) {
 					/// notify Company Owner via Mail (same job the single-move
 					/// flow uses, so dedupe/claim and content stay in one place)
@@ -568,10 +572,10 @@ class TrainingController extends Controller
 			$companies_cycle_ids = $get_online_session->pluck('cycle_id')->toArray();
 			if( count( $companies_cycle_ids ) > 0 )
 			{
-				$companies = Company::whereIn('cycle', $companies_cycle_ids)->get();
+				$companies = Company::enrolledInAny($companies_cycle_ids)->get();
 			}
 			
-			$uniqueCycleIds = $companies->pluck('cycle')->unique();
+			$uniqueCycleIds = $companies->isEmpty() ? collect() : collect($companies_cycle_ids)->unique();
 			$steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
 
 			return view('admin.settings.training.results', compact('csession', 'sessions', 'id', 'contents', 'steps'));

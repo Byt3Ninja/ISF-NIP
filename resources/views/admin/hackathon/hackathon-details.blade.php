@@ -751,6 +751,8 @@
         data: {
           company: company,
           step: step,
+          // Names the program a disapproval comes from.
+          cycle: "{{ $currentHackathon['cycle_id'] ?? '' }}",
         },
         success: function (response) {
           console.log(response);

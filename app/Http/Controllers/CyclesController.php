@@ -169,8 +169,8 @@ class CyclesController extends Controller
         foreach ($compid as $index => $id) {
             $company = Company::where('id', $id)->first();
             if ($company) {
-                $company->step = $checkget;
-                $company->save();
+                // In the step's own program: the company may be working in another one.
+                $company->moveToStepIn((int) $checkget);
             }
         }
         return response()->json(['state' => 'success'], 200);

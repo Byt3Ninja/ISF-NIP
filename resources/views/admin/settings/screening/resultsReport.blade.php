@@ -897,6 +897,8 @@
             data: {
               company: company,
               step: step,
+              // Names the program a disapproval comes from.
+              cycle: '{{ $cstep->cycle_id ?? '' }}',
             },
             success: function (response) {
               console.log(response);
