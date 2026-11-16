@@ -223,7 +223,7 @@
                         data-company-id="{{ $company->id }}"
                         data-company-name="{{ $company->companyName }}"
                         data-user-name="{{ $company->userName }}"
-                        data-current-step="{{ $company->step }}"
+                        data-current-step="{{ $company->currentStepId }}"
                         data-current-step-title="{{ $company->currentStepTitle }}">
                         <i class="ti ti-pencil ti-16px me-1"></i> {{ __('cycles.change_step') }}
                       </button>
