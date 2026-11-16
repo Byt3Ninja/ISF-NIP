@@ -10,6 +10,7 @@ use stdClass;
 use App\Cycle;
 use App\Sector;
 use App\Company;
+use App\CompanyEnrollment;
 use App\Service;
 use App\ServiceCategory;
 use App\Calendar;
@@ -375,17 +376,15 @@ class HomeController extends Controller
                     $rq->whereIn('default_for', ['admin', 'organizationmanager', 'subadmin']);
                 });
             };
-            if ($organizations_ids != null) {
-                $incubators_company = Company::whereHas('cycle', function ($q) use ($organizations_ids) {
-                    $q->whereIn('organization_id', $organizations_ids);
-                })->whereHas('stepdata', function ($q) {
-                    $q->where('stype', '!=', 1);
-                })->whereHas('user', $registeredUserFilter)->get();
-            } else {
-                $incubators_company = Company::whereNotNull('cycle')->whereHas('stepdata', function ($q) {
-                    $q->where('stype', '!=', 1);
-                })->whereHas('user', $registeredUserFilter)->get();
-            }
+            // Incubated: active in a cycle (of the viewer's organizations) on a step past the application form.
+            $incubators_company = Company::whereHas('enrollments', function ($q) use ($organizations_ids) {
+                $q->active()
+                    ->whereHas('step', fn ($step) => $step->where('stype', '!=', 1))
+                    ->when($organizations_ids != null, fn ($q) => $q->whereHas(
+                        'cycle',
+                        fn ($cycle) => $cycle->whereIn('organization_id', $organizations_ids)
+                    ));
+            })->whereHas('user', $registeredUserFilter)->get();
 
             if ($organizations_ids != null || $user->hasRole('admin')) {
                 // Same query as the /dashboard/companies?status=enrolled list the card links to,
@@ -836,7 +835,14 @@ class HomeController extends Controller
                     )
                 WHERE
                     fs.deleted_at IS NULL
-                    AND c.step = fs.step_id
+                    -- Still on that step: read from the active enrollment, because
+                    -- companies.step names only one of a company's programs.
+                    AND EXISTS (
+                        SELECT 1 FROM company_enrollments ce
+                        WHERE ce.company_id = fs.company_id
+                            AND ce.step_id = fs.step_id
+                            AND ce.status = 'active'
+                    )
             ";
             if (!$user->hasAnyRole(['admin', 'organizationmanager'])) {
                 // judges may be stored either as a JSON array of string IDs (legacy: ["15","16"])
@@ -2620,10 +2626,14 @@ class HomeController extends Controller
             ];
         });
 
-        $conditions = '';
-        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-            $conditions = " WHERE cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-        }
+        // Company charts read active enrollments: `$inACycle` keeps companies active in a cycle
+        // (of the viewer's organizations when the viewer is limited to some), each matched once.
+        // `$inScope` adds that filter only for a limited viewer, where the query used to keep
+        // companies outside any cycle.
+        $scopedOrgIds = ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) ? $organizations_ids : null;
+        $inACycle = 'IN ' . CompanyEnrollment::activeCompanyIdsSql($scopedOrgIds);
+        $inScope = $scopedOrgIds === null ? '' : " AND c.id $inACycle";
+        $conditions = $scopedOrgIds === null ? '' : " WHERE c.id $inACycle";
         $sector_data_q = "SELECT
                 s.id AS `id`,
                 s.name_en AS `sector_name_en`,
@@ -2639,8 +2649,6 @@ class HomeController extends Controller
                 company_relations cr ON cr.sector_id = s.id
             LEFT JOIN
                 companies c ON cr.company_id = c.id
-            LEFT JOIN
-                cycles cy on c.cycle = cy.id
             $conditions
             -- GROUP BY
                 -- s.name_en,
@@ -2668,21 +2676,14 @@ class HomeController extends Controller
         
         $sector_data = $sector_data->sortBy('count')->reverse()->values();
 
-        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-        }
         $project_types_q = "SELECT
                 c.business_type,
                 count(c.id) as total
             FROM
                 companies c
-            INNER JOIN
-                cycles cy on c.cycle = cy.id
-            LEFT JOIN
-                users u on cy.organization_id = u.organization_id
             WHERE
                 business_type is not null
-                $conditions
+                AND c.id $inACycle
             GROUP BY
                 c.business_type
         ";
@@ -2694,20 +2695,15 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-            $conditions = " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-        }
         $developmentStages = collect(DB::select(
             "SELECT 
                 c.development_stage, 
                 COUNT(*) AS count 
             FROM
                 companies c
-            INNER JOIN
-                cycles cy ON c.cycle = cy.id
             WHERE
                 c.development_stage IS NOT NULL 
-            $conditions
+                AND c.id $inACycle
             GROUP BY
                 c.development_stage"
         ));
@@ -2749,10 +2745,8 @@ class HomeController extends Controller
                     CONCAT('\"', c.id, '\"'),
                     \"$\"
                 ) = 1
-            INNER JOIN
-                cycles cy ON com.cycle = cy.id
-            LEFT JOIN
-                users u ON cy.organization_id = u.organization_id
+            WHERE
+                com.id $inACycle
             GROUP BY
                 c.id,
                 c.name_en,
@@ -2799,9 +2793,6 @@ class HomeController extends Controller
             ];
         });
 
-        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-        }
         $company_data_q = "SELECT
                 c.name_en AS `company_name_en`,
                 c.name_ar AS `company_name_ar`,
@@ -2809,13 +2800,9 @@ class HomeController extends Controller
                 c.founder
             FROM
                 companies c
-            INNER JOIN
-                cycles cy on c.cycle = cy.id
-            LEFT JOIN
-                users u on cy.organization_id = u.organization_id
             WHERE
                 c.deleted_at IS NULL
-                $conditions
+                AND c.id $inACycle
         ";
         $company_data = collect(DB::select($company_data_q));
         $total_jobs = $company_data->whereNotNull('team_num')->values();
@@ -2844,17 +2831,13 @@ class HomeController extends Controller
             'companies' => $founders,
         ];
 
-        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-            $conditions = " AND cy.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-        }
         $company_sdg_q = "SELECT
                 c.Sustainable_development
             FROM
                 companies c
-            LEFT JOIN
-                cycles cy ON c.cycle = cy.id $conditions
             WHERE
                 c.Sustainable_development IS NOT NULL
+                $inScope
         ";
         $sdg_data = collect(DB::select($company_sdg_q))->flatMap(function ($item) {
             $sdgs = json_decode($item->Sustainable_development, true);
@@ -2867,9 +2850,6 @@ class HomeController extends Controller
             ];
         })->values();
 
-        if ($has_org && !empty($organizations_ids) && !$user->hasRole('admin')) {
-            $conditions = " AND u.organization_id IN (" . implode(',', array_map('intval', $organizations_ids)) . ")";
-        }
         $sector_distribution_q = "SELECT
             s.id AS sector_id,
             s.name_en,
@@ -2877,17 +2857,13 @@ class HomeController extends Controller
             count(DISTINCT c.id) AS total
         FROM
             companies c
-        LEFT JOIN
-            cycles cy ON c.cycle = cy.id
         INNER JOIN
             company_relations cr ON cr.company_id = c.id
         INNER JOIN
             sectors s ON cr.sector_id = s.id
-        LEFT JOIN 
-            users u ON cy.organization_id = u.organization_id
         WHERE
              c.deleted_at IS NULL
-             $conditions
+             $inScope
         GROUP BY
              s.id, s.name_en, s.name_ar
         ORDER BY
@@ -3465,15 +3441,19 @@ class HomeController extends Controller
 
 
         // Total Startups Per Organization
-        $organizationsData = User::join('organizations', 'users.organization_id', '=', 'organizations.id')
-            ->join('cycles', 'users.organization_id', '=', 'cycles.organization_id')
-            ->join('companies', 'companies.cycle', '=', 'cycles.id')
+        // Counted from active enrollments: a company in two cycles of one organization counts once there.
+        $organizationsData = DB::table('organizations')
+            ->join('cycles', 'cycles.organization_id', '=', 'organizations.id')
+            ->join('company_enrollments', function ($join) {
+                $join->on('company_enrollments.cycle_id', '=', 'cycles.id')
+                    ->where('company_enrollments.status', CompanyEnrollment::STATUS_ACTIVE);
+            })
             ->select(
                 'organizations.name_en as organization_name_en',
                 'organizations.name_ar as organization_name_ar',
-                DB::raw('count(companies.id) as total_startups')
+                DB::raw('count(distinct company_enrollments.company_id) as total_startups')
             )
-            ->groupBy('organizations.name_en', 'organizations.name_ar')
+            ->groupBy('organizations.id', 'organizations.name_en', 'organizations.name_ar')
             ->get();
 
         $data['organization_counts'] = $organizationsData->map(function ($item) {
@@ -3579,9 +3559,9 @@ class HomeController extends Controller
             });
         });
         $messages = Messenger::where('receiver', auth()->id())->whereNull('read');
-        $startups = Company::whereHas('cycledata', function ($q) use ($orgIds) {
-            $q->whereIn('organization_id', $orgIds);
-        });
+        // Companies active in a cycle of these organizations, each matched once.
+        $enrolledHere = 'companies.id IN ' . CompanyEnrollment::activeCompanyIdsSql($orgIds);
+        $startups = Company::whereRaw($enrolledHere);
         $cycles = Cycle::whereIn('organization_id', $orgIds);
 
         // ============> Counts Section <==================
@@ -3672,9 +3652,7 @@ class HomeController extends Controller
         $targetMarket = DB::table('countries')
             ->select('countries.name_en as country_name_en', 'countries.name_ar as country_name_ar', DB::raw('COUNT(companies.id) as company_count'))
             ->leftJoin('companies', DB::raw('JSON_CONTAINS(companies.targeted_market, CONCAT(\'"\', countries.id, \'"\'), "$")'), '=', DB::raw('1'))
-            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+            ->whereRaw($enrolledHere)
             ->groupBy('countries.id', 'countries.name_en', 'countries.name_ar')
             ->orderByDesc('company_count')
             ->get();
@@ -3689,8 +3667,7 @@ class HomeController extends Controller
 
         // Sector Breakdown
         $sectorBreakdown = Sector::join('companies', 'companies.sector', '=', 'sectors.id')
-            ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->where('cycles.organization_id', $organization_id)
+            ->whereRaw($enrolledHere)
             ->select(
                 'sectors.name_en as sector_name_en',
                 'sectors.name_ar as sector_name_ar',
@@ -3708,9 +3685,7 @@ class HomeController extends Controller
         });
 
         // Company By Business Model
-        $projectTypes = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+        $projectTypes = Company::whereRaw($enrolledHere)
             ->select('companies.business_type', DB::raw('count(companies.id) as total'))
             ->whereNotNull('business_type')
             ->groupBy('companies.business_type')
@@ -3725,9 +3700,7 @@ class HomeController extends Controller
 
 
         // Total Jobs Created
-        $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+        $companyData = Company::whereRaw($enrolledHere)
             ->select('companies.name_en as company_name_en', 'companies.name_ar as company_name_ar', 'companies.team_num')
             ->whereNotNull('companies.team_num')
             ->get();
@@ -3748,9 +3721,7 @@ class HomeController extends Controller
         ];
 
         // Total Founders
-        $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+        $companyData = Company::whereRaw($enrolledHere)
             ->whereNotNull('companies.founder')
             ->select('companies.name_en as company_name_en', 'companies.name_ar as company_name_ar', 'companies.founder')
             ->get();
@@ -3772,9 +3743,7 @@ class HomeController extends Controller
 
 
         // Companies by SDG
-        $companySdg = Company::whereHas('cycledata', function ($query) use ($organization_id) {
-            $query->where('organization_id', $organization_id);
-        })
+        $companySdg = Company::whereRaw($enrolledHere)
             ->select('Sustainable_development')
             ->whereNotNull('Sustainable_development')
             ->get();
@@ -3796,17 +3765,12 @@ class HomeController extends Controller
 
         // Total Startups Per Organization
 
-        $organizationStartups = User::join('organizations', 'users.organization_id', '=', 'organizations.id')
-            ->join('cycles', 'users.organization_id', '=', 'cycles.organization_id')
-            ->join('companies', 'companies.cycle', '=', 'cycles.id')
-            ->where('users.organization_id', $organization_id)
-            ->select(
-                'organizations.name_en as organization_name_en',
-                'organizations.name_ar as organization_name_ar',
-                DB::raw('count(companies.id) as total_startups')
-            )
-            ->groupBy('organizations.name_en', 'organizations.name_ar')
+        $organizationStartups = DB::table('organizations')->whereIn('id', $orgIds)->orderBy('id')
+            ->select('name_en as organization_name_en', 'name_ar as organization_name_ar')
             ->first();
+        if ($organizationStartups) {
+            $organizationStartups->total_startups = $data['startups'];
+        }
 
         $data['organization_counts'] = $organizationStartups ? [
             'organization_name_en' => $organizationStartups->organization_name_en,
@@ -3820,14 +3784,10 @@ class HomeController extends Controller
 
         // Total Raised Funds
 
-        $totalRaisedFunds = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+        $totalRaisedFunds = Company::whereRaw($enrolledHere)
             ->sum('companies.raised_fund');
 
-        $companyData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+        $companyData = Company::whereRaw($enrolledHere)
             ->select('companies.name_en as company_name_en', 'companies.name_ar as company_name_ar', 'companies.raised_fund')
             ->whereNotNull('companies.raised_fund')
             ->get();
@@ -3847,7 +3807,7 @@ class HomeController extends Controller
 
         // User Distribution by Country
         $countryData = User::join('countries', 'users.country_id', '=', 'countries.id')
-            ->where('users.organization_id', $organization_id)
+            ->whereIn('users.organization_id', $orgIds)
             ->select(
                 "countries.name_en as country_name_en",
                 "countries.name_ar as country_name_ar",
@@ -3867,7 +3827,7 @@ class HomeController extends Controller
         // Program Status
         $projectStatus = TimeSheet::join('cycles', 'time_sheets.program_id', '=', 'cycles.id')
             ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+            ->whereIn('users.organization_id', $orgIds)
             ->select(
                 'cycles.title as cycle_title',
                 DB::raw('count(time_sheets.program_id) as total_programs'),
@@ -3886,9 +3846,7 @@ class HomeController extends Controller
         });
 
         // Companies By Sector
-        $sectorData = Company::join('cycles', 'companies.cycle', '=', 'cycles.id')
-            ->join('users', 'cycles.organization_id', '=', 'users.organization_id')
-            ->where('users.organization_id', $organization_id)
+        $sectorData = Company::whereRaw($enrolledHere)
             ->select('companies.sector', DB::raw('count(companies.id) as total'))
             ->whereNotNull('companies.sector')
             ->groupBy('companies.sector')

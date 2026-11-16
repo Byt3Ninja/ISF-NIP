@@ -7,6 +7,7 @@ use App\User;
 use stdClass;
 use App\Cycle;
 use App\Company;
+use App\CompanyEnrollment;
 use App\Service;
 use Carbon\Carbon;
 use App\SurveyResponses;
@@ -151,8 +152,11 @@ class DashboardService
 
        $programsProgress[$key] = $progress;
     }
-       $programStartups = DB::table('companies')->join('cycles', 'companies.cycle', '=', 'cycles.id')
-        ->select('cycles.title', DB::raw('COUNT(companies.id) as count'))
+       // Per program, from active enrollments: a company in two programs counts in both.
+       $programStartups = DB::table('company_enrollments')
+        ->join('cycles', 'company_enrollments.cycle_id', '=', 'cycles.id')
+        ->where('company_enrollments.status', CompanyEnrollment::STATUS_ACTIVE)
+        ->select('cycles.title', DB::raw('COUNT(DISTINCT company_enrollments.company_id) as count'))
         ->groupBy('cycles.title')->pluck('count', 'title');
 
        $sectorDistribution = DB::table('companies')
@@ -570,16 +574,20 @@ class DashboardService
 
     $programsProgress[$key] = $progress;
 }
-    $programStartups = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+    // Per program, from active enrollments: a company in two programs counts in both.
+    $programStartups = DB::table('company_enrollments')
+        ->join('cycles', 'company_enrollments.cycle_id', '=', 'cycles.id')
+        ->where('company_enrollments.status', CompanyEnrollment::STATUS_ACTIVE)
         ->where('cycles.organization_id', $organizationId)
-        ->select('cycles.title', DB::raw('COUNT(companies.id) as count'))
+        ->select('cycles.title', DB::raw('COUNT(DISTINCT company_enrollments.company_id) as count'))
         ->groupBy('cycles.title')->pluck('count', 'title');
 
+    // Every other company figure below: companies active in a program of this organization, each counted once.
+    $enrolledHere = 'companies.id IN ' . CompanyEnrollment::activeCompanyIdsSql([$organizationId]);
+
     $sectorDistribution = DB::table('companies')
-    ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+    ->whereRaw($enrolledHere)
     ->join('sectors', 'companies.sector', '=', 'sectors.id')
-    ->where('cycles.organization_id', $organizationId)
     ->select("sectors.{$nameColumn} as sector", DB::raw('COUNT(companies.id) as count'))
     ->groupBy("sectors.{$nameColumn}")
     ->orderByDesc('count')
@@ -600,23 +608,20 @@ class DashboardService
   ]);
 
     $states = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->whereRaw($enrolledHere)
         ->leftJoin('states', 'states.id', '=', 'companies.state_id')
-        ->where('cycles.organization_id', $organizationId)
         ->select("states.{$nameColumn} as state", DB::raw('COUNT(companies.id) as count'))
         ->groupBy("states.{$nameColumn}")->get();
 
     $countries = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->whereRaw($enrolledHere)
         ->leftJoin('countries', 'countries.id', '=', 'companies.country_id')
-        ->where('cycles.organization_id', $organizationId)
         ->select("countries.{$nameColumn} as country", DB::raw('COUNT(companies.id) as count'))
         ->groupBy("countries.{$nameColumn}")->get();
        
        
    $targetMarketCompanies = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-        ->where('cycles.organization_id', $organizationId)
+        ->whereRaw($enrolledHere)
         ->select('companies.targeted_market')
         ->whereNotNull('companies.targeted_market')
         ->get();
@@ -646,9 +651,8 @@ class DashboardService
     })->values();
 
     $devStageStats = DB::table('companies')
-    ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+    ->whereRaw($enrolledHere)
     ->join('stages', 'companies.stage', '=', 'stages.id')
-    ->where('cycles.organization_id', $organizationId)
     ->whereNotNull('companies.stage')
     ->select("stages.{$nameColumn} as stage", DB::raw('COUNT(companies.id) as count'))
     ->groupBy("stages.{$nameColumn}")
@@ -666,15 +670,13 @@ class DashboardService
 
   
     $businessModelDistribution = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-        ->where('cycles.organization_id', $organizationId)
+        ->whereRaw($enrolledHere)
         ->select('companies.business_model', DB::raw('COUNT(*) as count'))
         ->groupBy('companies.business_model')->get();
     $totalBizModels = $businessModelDistribution->sum('count');
 
     $sdgCompanies = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
-        ->where('cycles.organization_id', $organizationId)
+        ->whereRaw($enrolledHere)
         ->select('Sustainable_development')->whereNotNull('Sustainable_development')->get();
     $sdgCounts = [];
     foreach ($sdgCompanies as $company) {
@@ -718,9 +720,8 @@ class DashboardService
     $completedTasksRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
 
     $headquarters = DB::table('companies')
-        ->join('cycles', 'companies.cycle', '=', 'cycles.id')
+        ->whereRaw($enrolledHere)
         ->join('countries', 'companies.country_id', '=', 'countries.id')
-        ->where('cycles.organization_id', $organizationId)
         ->select("countries.{$nameColumn} as country", DB::raw('COUNT(companies.id) as count'))
         ->groupBy("countries.{$nameColumn}")
         ->orderByDesc('count')
