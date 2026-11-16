@@ -40,7 +40,7 @@ php vendor/bin/phpunit --filter test_joining_a_cycle_opens_an_active_enrollment 
 - Tests need a database that is **already migrated and seeded**. `phpunit.xml` sets no database, so they run against whatever the environment points to, inside a transaction per test.
 - `tests/TestCase.php` refuses `RefreshDatabase`, `artisan migrate`, `db:seed` and any DDL inside a test. Run new migrations against the test database yourself before running tests.
 - A large share of the existing suite fails on unchanged code (for example models that have a factory file but no `HasFactory` trait). Do not expect green: run with `--log-junit` before and after a change and compare test by test.
-- Forms that validate `email:dns` need working DNS; those tests fail offline.
+- Forms that validate `email:dns` look the address's domain up in DNS, so their tests fail offline unless the test calls `fakeEmailDns()` (`tests/Support/FakesEmailDns`), which answers that lookup from a fixed list of domains.
 
 Nothing to build on the front end: the Vuexy assets and the old Mix output under `public/` are committed, and Mix is not part of any deploy. There is no linter configuration and indentation is mixed (tabs in some files, four spaces in others): match the file you are editing and do not reformat.
 

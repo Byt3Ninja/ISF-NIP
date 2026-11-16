@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Programs;
 
 use App\EducationEntity;
 use App\Notifications\WelcomeUserNotification;
