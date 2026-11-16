@@ -472,6 +472,27 @@ class Company extends Model
     }
 
     /**
+     * Companies active in the given cycle. Use this instead of `where('cycle', $id)`:
+     * the pointer names one cycle, and a company can be active in several.
+     */
+    public function scopeEnrolledIn($query, $cycleId)
+    {
+        return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->where('cycle_id', $cycleId));
+    }
+
+    /** Companies whose active enrollment sits on the given step. Replaces `where('step', $id)`. */
+    public function scopeEnrolledOnStep($query, $stepId)
+    {
+        return $query->whereHas('enrollments', fn ($enrollment) => $enrollment->active()->where('step_id', $stepId));
+    }
+
+    /** The step this company is on in the given cycle, or null when it is not active there. */
+    public function stepIdIn($cycleId): ?int
+    {
+        return $this->activeEnrollments->firstWhere('cycle_id', (int) $cycleId)?->step_id;
+    }
+
+    /**
      * Programs this company was rejected from or left, shaped like the entries of the
      * profile's Programs tab. The current program and alumni programs are built
      * separately there, so only these two outcomes are returned.

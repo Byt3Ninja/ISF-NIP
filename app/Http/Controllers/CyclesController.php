@@ -82,7 +82,6 @@ class CyclesController extends Controller
             }
         }
 
-        $companies = Company::where('cycle', $cycle)->get();
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         // كتابة رؤوس الأعمدة
@@ -95,9 +94,10 @@ class CyclesController extends Controller
         $sheet->setCellValue('G1', 'Current Step');
         $sheet->setCellValue('H1', 'Created_At');
         $row = 2;
-        $stepsByCycle = \App\Step::whereIn('cycle_id', [$cycle])->orderBy('arr')->get()->groupBy('cycle_id');
+        // Membership and the phase column come from the enrollment history, as in users().
+        $stepTitles = \App\Step::where('cycle_id', $cycle)->pluck('title', 'id');
         if(auth()->user()->hasRole('Admin')) {
-            Company::with('user')->where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row, $stepsByCycle) {
+            Company::with(['user', 'activeEnrollments'])->enrolledIn($cycle)->chunk(1000, function($companies) use (&$sheet, &$row, $stepTitles, $cycle) {
                 foreach ($companies as $companie) {
                     $sheet->setCellValue('A' . $row, $companie?->id);
                     $sheet->setCellValue('B' . $row, $companie?->name);
@@ -105,15 +105,13 @@ class CyclesController extends Controller
                     $sheet->setCellValue('D' . $row, $companie?->user?->name);
                     $sheet->setCellValue('E' . $row, $companie?->user?->phone);
                     $sheet->setCellValue('F' . $row, $companie?->user?->email);
-                    foreach($stepsByCycle->get($companie->cycle, collect()) as $step){
-                        $sheet->setCellValue('G' . $row, $step->title);
-                    }
+                    $sheet->setCellValue('G' . $row, $stepTitles->get($companie->stepIdIn($cycle)));
                     $sheet->setCellValue('H' . $row, $companie->created_at);
                     $row++;
                 }
             });
         }else{
-        Company::with('user')->where('cycle', $cycle)->chunk(1000, function($companies) use (&$sheet, &$row, $stepsByCycle) {
+        Company::with(['user', 'activeEnrollments'])->enrolledIn($cycle)->chunk(1000, function($companies) use (&$sheet, &$row, $stepTitles, $cycle) {
         foreach ($companies as $companie) {
 
             $sheet->setCellValue('A' . $row, $companie?->id);
@@ -122,9 +120,7 @@ class CyclesController extends Controller
             $sheet->setCellValue('D' . $row, $companie?->user?->name);
             $sheet->setCellValue('E' . $row, $companie?->user?->phone);
             $sheet->setCellValue('F' . $row, $companie?->user?->email);
-            foreach($stepsByCycle->get($companie->cycle, collect()) as $step){
-                $sheet->setCellValue('G' . $row, $step->title);
-            }
+            $sheet->setCellValue('G' . $row, $stepTitles->get($companie->stepIdIn($cycle)));
             $sheet->setCellValue('H' . $row, $companie->created_at);
             $row++;
         }
@@ -248,12 +244,13 @@ class CyclesController extends Controller
             })->with(['organization'])->get();
         }
         $alumniCompanyIds = Almuni::where('cycle_id', $id)->pluck('company_id');
-        $companies = Company::where('cycle', $id);
+        // Membership and phase come from the enrollment history, not the cycle / step
+        // pointer: a company can be active in several cycles and the pointer names one.
+        $companies = Company::enrolledIn($id);
         $alumniCompanies = Company::whereIn('id', $alumniCompanyIds)->get();
-        $uniqueCycleIds = $companies->pluck('cycle')->unique();
-        $steps = Step::whereIn('cycle_id', $uniqueCycleIds)->orderBy('arr')->get();
+        $steps = Step::where('cycle_id', $id)->orderBy('arr')->get();
         if ($request->step_id != 0) {
-            $companies = $companies->where('step', $request->step_id);
+            $companies = $companies->enrolledOnStep($request->step_id);
         }
         if ($request->country_id != 0) {
             $companies = $companies->where('country_id', $request->country_id);
@@ -279,24 +276,27 @@ class CyclesController extends Controller
         }
 
         $l = app()->getLocale();
-        $companies = $companies->with(['user', 'cycleData'])->get();
+        $companies = $companies->with(['user', 'cycleData', 'activeEnrollments'])->get();
+        $activeIds = $companies->pluck('id');
         $companies = $companies->merge($alumniCompanies);
-        $getSteps = Step::where('stype', '!=', '7')->get();
-        $companies = $companies->map(function ($company) use ($alumniCompanyIds, $l, $getSteps) {
+        $getSteps = Step::where('cycle_id', $id)->where('stype', '!=', '7')->get();
+        $companies = $companies->map(function ($company) use ($alumniCompanyIds, $activeIds, $l, $getSteps, $id) {
             $company->isAlumni = $alumniCompanyIds->contains($company->id);
-            $finalScreeningSteps = $getSteps->where('cycle_id', $company->cycle)
-                            ->where('stype', '=', '5');
+            // The phase this company is on in the cycle being listed. Alumni have left it.
+            $currentStepId = $activeIds->contains($company->id) ? $company->stepIdIn($id) : null;
+            $finalScreeningSteps = $currentStepId === null && $company->isAlumni
+                            ? collect()
+                            : $getSteps->where('stype', '=', '5');
             $goAlumni = $finalScreeningSteps->sortByDesc('arr')
                             ->first();
 
-            $currentStepTitle = $getSteps->where('cycle_id', $company->cycle)
-                            ->sortBy('arr')
-                            ->where('id', $company->step)
+            $currentStepTitle = $getSteps->where('id', $currentStepId)
                             ->pluck('title')
                             ->implode(', ');
 
+            $company->currentStepId    = $currentStepId;
             $company->goAlumni         = $goAlumni;
-            $company->atAlumniStep     = $finalScreeningSteps->pluck('id')->contains($company->step);
+            $company->atAlumniStep     = $finalScreeningSteps->pluck('id')->contains($currentStepId);
             $company->currentStepTitle = $currentStepTitle;
             $company->userName         = trim(($company->user->{'first_name_'.$l} ?? '').' '.($company->user->{'last_name_'.$l} ?? ''));
             $company->companyName      = $company->{'name_'.$l};
