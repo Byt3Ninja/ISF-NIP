@@ -678,4 +678,6 @@ return [
   'withdrawn' => 'منسحبة',
   'last_phase_reached' => 'آخر مرحلة تم الوصول إليها',
   'program_switcher_label' => 'تعمل الآن في',
+  'other_programs_title' => 'التقديم على برنامج آخر',
+  'other_programs_apply' => 'قدّم الآن',
 ];

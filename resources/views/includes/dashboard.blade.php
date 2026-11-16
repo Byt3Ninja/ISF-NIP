@@ -481,6 +481,7 @@
 									</table>
 								</div>
 							</div>
+							@include('partials.other-programs', ['company' => $_user->company])
 							@else
 							<div class="card mb-6">
 								<div class="card-header border-bottom">

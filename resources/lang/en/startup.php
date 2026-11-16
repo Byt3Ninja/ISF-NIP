@@ -683,4 +683,6 @@ return [
   'withdrawn' => 'Withdrawn',
   'last_phase_reached' => 'Last phase reached',
   'program_switcher_label' => 'Working in',
+  'other_programs_title' => 'Apply to another program',
+  'other_programs_apply' => 'Apply',
 ];

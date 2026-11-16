@@ -25,6 +25,23 @@ class Cycle extends Model
 
     use HasFactory, Auditable, HasFileCleanup;
     public static $module = 'Program';
+
+    /**
+     * Open public programs the company is not active in: what a founder may still apply to.
+     * The same test as the dashboard's programs list (not private, running today).
+     */
+    public static function joinableBy(Company $company)
+    {
+        return static::query()
+            ->whereNull('private')
+            ->where('type', 'General_Program')
+            ->whereDate('start', '<=', \App\Services\TimezoneService::platformToday())
+            ->whereDate('end', '>=', \App\Services\TimezoneService::platformToday())
+            ->whereNotIn('id', $company->activeEnrollments()->select('cycle_id'))
+            ->with('organization')
+            ->orderBy('start')
+            ->get();
+    }
     // Guideline documents (GUIDELINE_FILE_FIELDS) are confidential: they are recorded and
     // retired through protected_files (see booted()), not cleaned up by column path.
     protected array $fileFields = [

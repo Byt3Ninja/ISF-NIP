@@ -82,4 +82,5 @@ return [
     'general_program' => 'General Sub Program',
     'no_programs_joined_yet' => 'No Sub Programs Joined Yet',
     'not_participating_any_program' => 'This idea is not currently participating in any sub programs.',
+    'other_programs_title' => 'Apply to another Sub Program',
 ];

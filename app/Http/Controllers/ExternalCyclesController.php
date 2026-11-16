@@ -50,14 +50,8 @@ class ExternalCyclesController extends Controller
 			{
 				$c = $step->cycle_id;
 				$user = auth()->user();
-				if( $user->company?->cycle && $user->company?->cycle != $c )
-				{
-					return abort(404);
-				}
-				else
-				{
-					return redirect()->to("dashboard/cycles/view/$c");
-				}
+				// Signed in: the application page handles it, also for a company active in another program.
+				return redirect()->to("dashboard/cycles/view/$c");
 			}
 			// Guests sign in first; the login then brings them back to this link.
 			return redirect()->guest( route('login') );

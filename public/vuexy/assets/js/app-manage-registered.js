@@ -324,7 +324,8 @@ function doMarkAlumni(companyIds, companyName, isBulk) {
       $.ajax({
         type: 'POST',
         url: '/dashboard/AddCompanyalumniBulk',
-        data: { company_ids: ids }
+        // `cycle` names the program this page is for: an idea may be active in several.
+        data: { company_ids: ids, cycle: cfg.cycleId }
       }).done(res => {
         releaseSuccess(res.message || i18n.markAlumniSuccess);
         setTimeout(() => location.reload(), 1000);
@@ -339,7 +340,7 @@ function doMarkAlumni(companyIds, companyName, isBulk) {
     }
 
     const requests = ids.map(id =>
-      $.ajax({ type: 'POST', url: `/dashboard/AddCompanyalumni/${id}` })
+      $.ajax({ type: 'POST', url: `/dashboard/AddCompanyalumni/${id}`, data: { cycle: cfg.cycleId } })
         .then(() => ({ id, ok: true }), xhr => ({ id, ok: false, xhr }))
     );
     Promise.all(requests).then(results => {
