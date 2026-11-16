@@ -28,10 +28,20 @@ queue worker and the scheduler under supervisord) and `db` (MariaDB 10.11).
 ## What a start does
 
 1. Links the upload folders under `public/` to the `uploads` volume and prepares `storage/`.
-2. Waits for the database, then runs `migrate --force`.
+2. Waits for the database, then runs the migrations through `migrate.php` (see below).
 3. On an empty database: runs the full seeder and sets the admin password.
    Otherwise: runs `defaultRolesPermissionSeeder`, as the GitLab pipeline does.
 4. Starts Apache, `queue:work` and `schedule:work`.
+
+## Why migrations run through migrate.php
+
+A plain `php artisan migrate` stops on an empty database at
+`2024_12_01_212635_add_group_to_questions_bank` with
+`Unknown column type "enum" requested`. That migration changes an enum column, which
+Laravel only does natively, and with `doctrine/dbal` installed Laravel sends every
+`->change()` through DBAL instead. `migrate.php` runs the same command with
+`Schema::useNativeSchemaOperationsIfPossible()` set for that run. With it, all
+migrations pass on an empty MariaDB 10.11.
 
 ## Kept across deploys
 
