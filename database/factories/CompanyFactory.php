@@ -23,7 +23,7 @@ class CompanyFactory extends Factory
             'info_company' => $this->faker->paragraph,
             'business_phase' => $this->faker->randomElement(['idea', 'startup', 'growth', 'mature']),
             'years_of_operations' => $this->faker->numberBetween(0, 20),
-            'product_or_service' => $this->faker->sentence,
+            'product_or_service' => $this->faker->randomElement(['Product', 'Service']), // varchar(50): a sentence can overflow it
             'annual_revenue' => $this->faker->numberBetween(0, 10000000),
             'website' => $this->faker->url,
             'est_date' => $this->faker->date,
