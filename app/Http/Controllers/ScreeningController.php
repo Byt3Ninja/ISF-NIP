@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Company;
+use App\CompanyEnrollment;
 use App\Cycle;
 use App\Finalscreening;
 use App\Events\ChangeStep;
@@ -1744,6 +1745,8 @@ class ScreeningController extends Controller
 			$data['status'] = $status;
 			$data['program'] = $company?->stepdata?->cycle ?? null;
 			if ($request->step == "0") {
+				// Record why it left before the pointer is cleared; otherwise the history says "withdrawn".
+				CompanyEnrollment::closeActive($company->id, $company->cycle, CompanyEnrollment::STATUS_REJECTED);
 				$update = $company->update(['cycle' => null, 'step' => null, 'approved' => null, 'approved_by' => $by]);
 			} else {
 				$update = $company->update(['step' => $request->step, 'approved' => $approved, 'approved_by' => $by]);

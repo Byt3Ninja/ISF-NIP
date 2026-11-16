@@ -673,4 +673,5 @@ return [
   'all_segments' => 'جميع القطاعات',
   'none' => 'لا يوجد',
   'startup_all_categories' => 'فئات الشركة',
+  'project_number' => 'رقم المشروع',
 ];

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\{Company, TeamFormation};
+use App\{Company, CompanyEnrollment, TeamFormation};
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Services\TimezoneService;
@@ -130,7 +130,12 @@ class changeCycleStep extends Command
         {
             $this->info("Changing Step for: " . $companiesToUpdate->count() . " Companies");
             $grouping = $companiesToUpdate->groupBy('step')->map(function( $step ) { return $step->pluck('id')->toArray(); });
-            foreach( $grouping as $step_id => $companies_ids ) { Company::whereIn('id', $companies_ids)->update(['step' => $step_id]); }
+            foreach( $grouping as $step_id => $companies_ids )
+            {
+                Company::whereIn('id', $companies_ids)->update(['step' => $step_id]);
+                // A query update fires no model events, so the enrollment history is moved here.
+                CompanyEnrollment::moveToStep($companies_ids, (int) $step_id);
+            }
         }
         if( !$teamsToUpdate->isEmpty() )
         {

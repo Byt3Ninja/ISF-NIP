@@ -56,6 +56,7 @@ class CompanyProfileResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'project_code' => $this->project_code,
             'name' => $this->{'name_'.$locale},
             'logo' => $this->logo ? url($this->logo) : null,
             'sector' => is_numeric($this->sector) && $this->sectoR ? [

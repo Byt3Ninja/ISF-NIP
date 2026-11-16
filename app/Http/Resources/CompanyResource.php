@@ -37,6 +37,7 @@ class CompanyResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'project_code' => $this->project_code,
             'logo' => $this->logo ? url($this->logo) : null,
             'name' => $locale === 'ar' ? $this->name_ar : $this->name_en,
             'sector' => is_numeric($this->sector) ? [

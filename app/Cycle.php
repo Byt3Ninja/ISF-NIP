@@ -184,6 +184,12 @@ class Cycle extends Model
         return $this->hasMany(Company::class,'cycle');
     }
 
+    /** Every company that entered this cycle, including those that have since left it. */
+    public function enrollments()
+    {
+        return $this->hasMany(CompanyEnrollment::class, 'cycle_id');
+    }
+
     public function mentors(){
         return $this->belongsToMany(User::class, 'cycles_mentors', 'cycle_id', 'user_id');
     }

@@ -8,6 +8,7 @@ use App\Step;
 use App\Traits\Auditable;
 use App\Traits\HasFileCleanup;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Enums\ProtectedFileSet;
@@ -141,6 +142,71 @@ class Company extends Model
         static::deleting(function (Company $company) {
             app(ProtectedFiles::class)->retireWhere(['company_id' => $company->id]);
         });
+
+        static::created(function (Company $company) {
+            $company->assignProjectCode();
+        });
+
+        // The project number is given once. An edit that carries another value keeps the original.
+        static::updating(function (Company $company) {
+            if ($company->getOriginal('project_code') && $company->isDirty('project_code')) {
+                $company->project_code = $company->getOriginal('project_code');
+            }
+        });
+
+        // Keep the enrollment history in step with the cycle / step pointer. `saved` runs
+        // before the original values are replaced, so the cycle the pointer held is still known.
+        static::saved(function (Company $company) {
+            if ($company->isDirty(['cycle', 'step'])) {
+                CompanyEnrollment::syncFromPointer($company, $company->getOriginal('cycle'));
+            }
+        });
+    }
+
+    /**
+     * Give this company its project number, unless it already has one. Written with a
+     * direct query so it can run inside the `created` hook without a second save.
+     */
+    public function assignProjectCode(): void
+    {
+        if ($this->project_code || ! $this->exists) {
+            return;
+        }
+
+        $code = self::formatProjectCode($this->id, $this->created_at);
+
+        static::query()->toBase()->where('id', $this->id)->update(['project_code' => $code]);
+
+        $this->setAttribute('project_code', $code);
+        $this->syncOriginalAttribute('project_code');
+    }
+
+    /**
+     * PREFIX-YY-NNNNNN: the configured prefix, the two-digit year the company was
+     * created, and its id padded to at least six digits. The id makes it unique.
+     *
+     * @param  \DateTimeInterface|null  $createdAt
+     */
+    public static function formatProjectCode(int $id, $createdAt = null): string
+    {
+        return sprintf(
+            '%s-%s-%s',
+            config('app.project_code_prefix', 'PRJ'),
+            ($createdAt ?? now())->format('y'),
+            str_pad((string) $id, 6, '0', STR_PAD_LEFT)
+        );
+    }
+
+    /** Number every company that has no project number yet. Used by the migration. */
+    public static function backfillProjectCodes(): void
+    {
+        DB::update(
+            "UPDATE companies
+                SET project_code = CONCAT(?, '-', DATE_FORMAT(COALESCE(created_at, NOW()), '%y'), '-',
+                    LPAD(id, GREATEST(6, CHAR_LENGTH(id)), '0'))
+              WHERE project_code IS NULL",
+            [config('app.project_code_prefix', 'PRJ')]
+        );
     }
 
     protected $casts = [
@@ -392,6 +458,17 @@ class Company extends Model
     public function cycleRelation()
     {
         return $this->belongsTo(Cycle::class, 'cycle');
+    }
+
+    /** Every time this company entered a cycle, current and past. See CompanyEnrollment. */
+    public function enrollments()
+    {
+        return $this->hasMany(CompanyEnrollment::class, 'company_id');
+    }
+
+    public function activeEnrollments()
+    {
+        return $this->enrollments()->active();
     }
 
     public static function static_categories()
