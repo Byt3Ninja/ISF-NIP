@@ -4200,7 +4200,49 @@ class ClientCompanyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
+    /**
+     * Alumni marking works on the program a company has selected. When the page names
+     * another program the company is active in (`cycle`), select that one for the
+     * duration of $marking and give the founder their own selection back afterwards.
+     *
+     * @param  array<int, int|string>  $companyIds
+     */
+    private function inRequestedProgram(Request $request, array $companyIds, \Closure $marking)
+    {
+        $cycleId = (int) $request->input('cycle');
+        $restore = [];
+
+        if ($cycleId) {
+            foreach (Company::whereIn('id', $companyIds)->where('cycle', '!=', $cycleId)->get() as $company) {
+                $here = $company->activeEnrollments()->where('cycle_id', $cycleId)->latest('id')->first();
+                $selected = $company->activeEnrollments()->where('cycle_id', $company->cycle)->latest('id')->first();
+
+                if ($here && $selected) {
+                    $company->switchToEnrollment($here);
+                    $restore[] = $selected->id;
+                }
+            }
+        }
+
+        try {
+            return $marking();
+        } finally {
+            foreach (CompanyEnrollment::with('company')->active()->whereIn('id', $restore)->get() as $selected) {
+                $selected->company->switchToEnrollment($selected);
+            }
+        }
+    }
+
     public function addCompanyAlumniBulk(Request $request)
+    {
+        return $this->inRequestedProgram(
+            $request,
+            (array) $request->input('company_ids', []),
+            fn () => $this->markSelectedProgramsAsAlumni($request)
+        );
+    }
+
+    private function markSelectedProgramsAsAlumni(Request $request)
     {
         $request->validate([
             'company_ids' => 'required|array',
@@ -4271,6 +4313,11 @@ class ClientCompanyController extends Controller
     }
 
     public function addCompanyAlumni(Request $request, $id)
+    {
+        return $this->inRequestedProgram($request, [$id], fn () => $this->markSelectedProgramAsAlumni($request, $id));
+    }
+
+    private function markSelectedProgramAsAlumni(Request $request, $id)
     {
         try {
             $company = Company::findOrFail($id);

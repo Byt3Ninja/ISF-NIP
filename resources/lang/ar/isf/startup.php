@@ -88,4 +88,5 @@ return [
     'no_programs_joined_yet' => 'لم يتم الانضمام لأي برامج فرعية بعد',
     'not_participating_any_program' => 'هذه الفكرة لا تشارك حالياً في أي برامج فرعية.',
     'startup_all_categories' => 'فئات الفكرة',
+    'other_programs_title' => 'التقديم على برنامج فرعي آخر',
 ];

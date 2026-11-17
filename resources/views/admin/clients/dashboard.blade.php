@@ -900,6 +900,7 @@
             </table>
           </div>
         </div>
+        @include('partials.other-programs', ['company' => $_user->company])
         @else
 				<section class="mt-10">
 					<div class="row">

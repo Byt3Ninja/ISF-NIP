@@ -1154,10 +1154,7 @@ class CyclesController extends Controller
             return redirect()->route('company.profile_view_mine')->with(['msg' => 'You need to add your company details first', 'class' => 'danger']);
         }
 
-        // Check enrolled in Cycle
-        if( $user->company->cycle && $user->company->cycle != $c ) {
-            return redirect()->route('core.dashboard_view')->with(['msg' => 'You already enrolled in a cycle.', 'class' => 'danger']);
-        }
+        // A company may apply here while active in another program: it joins this one as well.
 
         // Check private
         $private = Cycle::findOrFail($c);
@@ -1168,7 +1165,6 @@ class CyclesController extends Controller
         } */
 
         // Check STEPS
-        if( !$user->company->cycle || $user->company->cycle == $c )
         {
             $step = Step::where('cycle_id', $c)->orderBy('arr')->first();
             if( $step?->stype != 1 ) {
@@ -1418,9 +1414,9 @@ class CyclesController extends Controller
     }
 
     /**
-     * A founder may submit the form of their startup's current step, or the first step of a
-     * program the startup is joining (not enrolled anywhere else) -- the two forms that
-     * view() and my() / the hackathon project tab render.
+     * A founder may submit the form of a step their startup is on, in any program it is
+     * active in, or the first step of a program (joining it, alongside any other) -- the
+     * two forms that view() and my() / the hackathon project tab render.
      */
     private function founderMaySubmitStep(User $user, Step $step): bool
     {
@@ -1429,14 +1425,13 @@ class CyclesController extends Controller
             return false;
         }
 
-        if ((int) $company->step === (int) $step->id) {
+        if ((int) $company->step === (int) $step->id || $company->isOnStep($step->id)) {
             return true;
         }
 
-        $joining = !$company->cycle || (int) $company->cycle === (int) $step->cycle_id;
         $firstStepId = Step::where('cycle_id', $step->cycle_id)->orderBy('arr')->value('id');
 
-        return $joining && (int) $firstStepId === (int) $step->id;
+        return (int) $firstStepId === (int) $step->id;
     }
 
     public function saveForm(Request $request)
@@ -1756,8 +1751,9 @@ class CyclesController extends Controller
         // commit together, so a failure part-way can't leave a half-saved application.
         $toRetire = [];
         DB::transaction(function () use ($request, &$company, $cid, $id, $uid, $active_fields, $my_submissions, $inactive_fields, &$toRetire) {
-            // update cycle & step
-            $company->update(['cycle' => $request->cycle, 'step' => $request->id]);
+            // Join the program (or move within it) and select it; a program the company is
+            // already active in elsewhere stays active.
+            $company->enrollIn((int) $request->cycle, (int) $request->id);
             $company = Company::with(['stepdata', 'cycledata'])->find($cid);
 
             // gather the form data as field_name => [ label, data ]

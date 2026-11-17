@@ -187,4 +187,39 @@ class MultiEnrollmentWritesTest extends TestCase
         $this->assertSame([$this->second->id, $this->secondSteps[0]->id], [$this->company->fresh()->cycle, $this->company->fresh()->step]);
         $this->assertSame($this->secondSteps[0]->id, $this->enrollment($this->second)->step_id);
     }
+
+    public function test_marking_alumni_from_a_programs_page_graduates_that_program_and_keeps_the_selection(): void
+    {
+        $this->joinSecond();
+        // Alumni marking needs a final-screening step and a country.
+        $final = Step::factory()->create(['cycle_id' => $this->first->id, 'stype' => 5]);
+        $this->company->moveToStepIn($final->id);
+        DB::table('companies')->where('id', $this->company->id)->update(['country_id' => DB::table('countries')->value('id')]);
+
+        $this->actingAs($this->actor('admin'))
+            ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+            ->post(route('company.addCompanyAlumni', $this->company->id), ['cycle' => $this->first->id])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertSame(CompanyEnrollment::STATUS_COMPLETED, $this->enrollment($this->first)->status);
+        $this->assertSame(CompanyEnrollment::STATUS_ACTIVE, $this->enrollment($this->second)->status);
+        $this->assertSame([$this->second->id, $this->secondSteps[0]->id], [$this->company->fresh()->cycle, $this->company->fresh()->step]);
+        $this->assertTrue(DB::table('alumni')->where('company_id', $this->company->id)->where('cycle_id', $this->first->id)->exists());
+    }
+
+    public function test_a_refused_alumni_marking_leaves_the_founders_selection_as_it_was(): void
+    {
+        $this->joinSecond();
+        DB::table('companies')->where('id', $this->company->id)->update(['country_id' => DB::table('countries')->value('id')]);
+
+        // Not on a final-screening step in the first program: refused.
+        $this->actingAs($this->actor('admin'))
+            ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+            ->post(route('company.addCompanyAlumni', $this->company->id), ['cycle' => $this->first->id])
+            ->assertStatus(422);
+
+        $this->assertSame(CompanyEnrollment::STATUS_ACTIVE, $this->enrollment($this->first)->status);
+        $this->assertSame([$this->second->id, $this->secondSteps[0]->id], [$this->company->fresh()->cycle, $this->company->fresh()->step]);
+    }
 }

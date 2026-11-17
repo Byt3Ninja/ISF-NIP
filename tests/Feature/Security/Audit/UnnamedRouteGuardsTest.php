@@ -121,20 +121,23 @@ class UnnamedRouteGuardsTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_founder_cannot_move_their_startup_into_another_program(): void
+    public function test_founder_applying_to_another_program_joins_it_without_leaving_their_own(): void
     {
+        // Several programs at once is allowed (P1-03). What must hold is that applying
+        // elsewhere cannot take the startup out of the program it is in.
         $mine = $this->program($this->organization());
         [$myStep] = $this->formStep($mine, 1);
         $other = $this->program($this->organization());
         [$otherFirst, $otherField] = $this->formStep($other, 1);
         [$companyId, $founder] = $this->startup($mine, ['step' => $myStep]);
 
-        $response = $this->actingAs($founder)->post('/dashboard/cycles/save', [
+        $this->actingAs($founder)->post('/dashboard/cycles/save', [
             'id' => $otherFirst, 'cycle' => $other, 'field_ids' => (string) $otherField, 'field_' . $otherField => 'answer',
-        ]);
+        ])->assertRedirect();
 
-        $this->assertSame($mine, (int) Company::find($companyId)->cycle);
-        $response->assertForbidden();
+        $active = DB::table('company_enrollments')->where('company_id', $companyId)->where('status', 'active');
+        $this->assertEqualsCanonicalizing([$mine, $other], $active->pluck('cycle_id')->all());
+        $this->assertSame($myStep, (int) (clone $active)->where('cycle_id', $mine)->value('step_id'));
     }
 
     public function test_founder_can_submit_the_application_step_of_a_program(): void
