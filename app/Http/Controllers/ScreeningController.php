@@ -1709,17 +1709,26 @@ class ScreeningController extends Controller
 		}
 
 		// A disapproval names the program it comes from, so it cannot end the company's
-		// place in another one. Only staff of that program may send it.
+		// place in another one.
 		$rejectedCycleId = $request->filled('cycle') ? (int) $request->input('cycle') : null;
-		if ($rejectedCycleId) {
-			abort_unless(Auth::user()->managesOrganization(Cycle::whereKey($rejectedCycleId)->value('organization_id')), 403);
-		}
 
 		$affectedCycleId = $request->step != "0"
 			? (int) Step::whereKey($request->step)->value('cycle_id')
 			: $rejectedCycleId;
 
 		$getCompanies = Company::whereIn('id', $companies)->with(['stepdata', 'stepdata.cycle', 'cycledata', 'activeEnrollments'])->get();
+
+		// Only staff of the program the change happens in may make it, and only for
+		// companies enrolled there. Checked for the whole selection before anything is
+		// written. A disapproval that names no program applies to the one each company
+		// has selected.
+		if ($request->step != "0" || $affectedCycleId) {
+			$this->authorizeCompaniesInCycle($affectedCycleId, $companies);
+		} else {
+			foreach ($getCompanies->groupBy(fn ($company) => (int) $company->cycle) as $selectedCycleId => $group) {
+				$this->authorizeCompaniesInCycle($selectedCycleId, $group->pluck('id')->all());
+			}
+		}
 		foreach ($companies as $companyId)
 		{
 			$data = [];
